@@ -1,0 +1,27 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  #enable-experiment:
+  errors:
+    invalid_annotation_target: ignore
+  exclude:
+    #- '**.config.dart'
+    #- '**.g.dart'
+    #- '**.freezed.dart'
+  plugins:
+    - custom_lint
+
+linter:
+  rules:
+    - combinators_ordering
+    - directives_ordering
+    - omit_local_variable_types
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_relative_imports
+    - prefer_single_quotes
+    #- always_use_package_imports
+    - require_trailing_commas
+    - avoid_void_async
+    - unawaited_futures

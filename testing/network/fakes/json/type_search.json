@@ -1,0 +1,63 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "page": 1,
+    "pagesize": 20,
+    "numResults": 1000,
+    "numPages": 50,
+    "top_tlist": {
+      "video": 1000,
+      "bangumi": 0,
+      "special": 0,
+      "topic": 0,
+      "upuser": 0,
+      "tv": 0,
+      "movie": 0,
+      "card": 0,
+      "media_bangumi": 9,
+      "media_ft": 98,
+      "pgc": 0,
+      "live": 654,
+      "user": 0,
+      "activity": 0,
+      "operation_card": 0,
+      "live_master": 0,
+      "live_user": 0,
+      "article": 1000,
+      "live_room": 654,
+      "bili_user": 1000,
+      "clustering_card": 0,
+      "related_search": 0
+    },
+    "result": [
+      {
+        "category_id": 26,
+        "category_name": "数码",
+        "comment_url": "",
+        "desc": "",
+        "id": 21014304,
+        "image_urls": [
+          "//i1.hdslb.com/bfs/article/e138e2d536aef424cd939c776e06d46d2a17fbfb.png"
+        ],
+        "is_comment": 0,
+        "is_fold": false,
+        "is_rk1": false,
+        "like": 24,
+        "mid": 29184220,
+        "pub_time": 1672983906,
+        "rank_index": 7,
+        "rank_offset": 6,
+        "reply": 2,
+        "spread_id": 0,
+        "sub_type": 0,
+        "template_id": 4,
+        "title": "在线免费<em class=\"keyword\">看</em>电影的网站哪个好？这两个影视网站绝对是最佳推荐",
+        "type": "article",
+        "version": "",
+        "view": 10167
+      }
+    ]
+  }
+}

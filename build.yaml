@@ -1,0 +1,62 @@
+global_options:
+  freezed:
+    runs_before:
+      - json_serializable
+  json_serializable:
+    runs_before:
+      - retrofit_generator
+
+targets:
+  $default:
+    builders:
+      freezed:
+        generate_for:
+          #- lib/network/model/**.dart
+        options:
+          copyWith: false
+          #equal: false
+          generic_argument_factories: true
+          # Disable legacy (Dart 2 and older) utilites
+          map: false
+          to_json: false
+          #to_string: false
+          union_value_case: snake
+          when:
+            when: false
+            maybe_when: false
+            when_or_null: false
+      
+      go_router_builder:
+        generate_for:
+          include:
+            - lib/routing/router.dart
+      
+      injectable_generator:injectable_config_builder:
+        generate_for:
+          - lib/*.dart
+      injectable_generator:injectable_builder:
+        generate_for:
+          - lib/**.dart
+      
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**.dart
+            #- lib/bili/search_type.dart
+            #- lib/network/retrofit/api_result.dart
+            #- lib/network/model/**.dart
+          exclude:
+            - lib/**.g.dart
+            - lib/**.freezed.dart
+            - lib/**.config.dart
+        options:
+          create_to_json: false
+          checked: true
+          # 序列化嵌套的 Freezed 对象
+          # explicit_to_json: true
+          field_rename: snake
+      
+      retrofit_generator:
+        generate_for:
+          include:
+            #- lib/network/retrofit/retrofit_network.dart
