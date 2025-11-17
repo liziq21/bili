@@ -19,7 +19,4 @@ enum SearchResultType {
       type,
       unknownValue: SearchResultType.unknown,
     );
-    
-  factory SearchResultType.fromJson(Map<String, dynamic> json)
-    => _$SearchResultTypeFromJson(json);
 }
