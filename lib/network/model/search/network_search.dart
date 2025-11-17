@@ -14,11 +14,20 @@ abstract class NetworkSearch with _$NetworkSearch {
     int pagesize,
     int numResults,
     int numPages,
-    @JsonKey(unknownEnumValue: SearchResultType.unknown)
-    Map<SearchResultType, NetworkPageinfo>? networkPageinfo,
+    @JsonKey(fromJson: _pageinfoMapFromJson)
+    Map<SearchResultType, NetworkPageinfo>? pageinfo,
     @JsonKey(fromJson: _resultMapFromJson)
     Map<SearchResultType, List<NetworkSearchResult>?> result,
   ) = _NetworkSearch;
+  
+  static Map<SearchResultType, NetworkPageinfo> _pageinfoMapFromJson(Object json) {
+    return (json as Map<String, dynamic>).entries
+      .map((e) => MapEntry(
+          SearchResultType.parse(e.key),
+          NetworkPageinfo.fromJson(e.value as Map<String, dynamic>)
+      ))
+      .toMap();
+  }
   
   static Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json) {
 
