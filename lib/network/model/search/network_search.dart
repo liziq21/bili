@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:f_biuli/bili/search_result_type.dart';
@@ -20,7 +19,11 @@ abstract class NetworkSearch with _$NetworkSearch {
     Map<SearchResultType, List<NetworkSearchResult>?> result,
   ) = _NetworkSearch;
   
-  static Map<SearchResultType, NetworkPageinfo> _pageinfoMapFromJson(Object json) {
+  factory NetworkSearch.fromJson(Map<String, dynamic> json)
+    => _$NetworkSearchFromJson(json);
+}
+
+  Map<SearchResultType, NetworkPageinfo> _pageinfoMapFromJson(Object json) {
     return (json as Map<String, dynamic>).entries
       .map((e) => MapEntry(
           SearchResultType.parse(e.key),
@@ -29,7 +32,7 @@ abstract class NetworkSearch with _$NetworkSearch {
       .toMap();
   }
   
-  static Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json) {
+  Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json) {
 
     List<NetworkSearchResult>? _resultsFromJson(dynamic results) {
       return (results as List?)
@@ -74,10 +77,7 @@ abstract class NetworkSearch with _$NetworkSearch {
     
     throw ArgumentError.value(json, 'json', 'Cannot convert the provided data.');
   }
-  
-  factory NetworkSearch.fromJson(Map<String, dynamic> json)
-    => _$NetworkSearchFromJson(json);
-}
+
 
 @freezed
 abstract class NetworkPageinfo with _$NetworkPageinfo {
@@ -89,4 +89,8 @@ abstract class NetworkPageinfo with _$NetworkPageinfo {
   
   factory NetworkPageinfo.fromJson(Map<String, dynamic> json)
     => _$NetworkPageinfoFromJson(json);
+}
+
+extension MappableListExtension<K, V> on Iterable<MapEntry<K, V>> {
+  Map<K, V> toMap() => Map.fromEntries(this);
 }
