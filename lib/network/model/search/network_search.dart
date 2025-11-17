@@ -47,7 +47,7 @@ abstract class NetworkSearch with _$NetworkSearch {
         return json
           .map((e) {
             final resultMap = e as Map<String, dynamic>;
-            final type = SearchResultType.parse(resultMap['result_type']);
+            final type = SearchResultType.parse(resultMap['type']);
             final results = resultMap['data'];
             return MapEntry(type, _resultsFromJson(results));
           })

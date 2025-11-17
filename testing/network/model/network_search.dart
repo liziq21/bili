@@ -44,63 +44,18 @@ const networkTypeSearch = NetworkSearch(
 );
 
 const pageinfo = {
-    SearchResultType.parse('article'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('bili_user'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('media_bangumi'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('media_ft'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('live_room'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('live_user'): 
-      NetworkPageinfo(
-        total: 0,
-        numResults: 0,
-        pages: 0
-      ),
-    SearchResultType.parse('video'): 
-      NetworkPageinfo(
-        total: 1000,
-        numResults: 1000,
-        pages: 50
-      ),
+    SearchResultType.parse('article'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('bili_user'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('media_bangumi'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('media_ft'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('live_room'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('live_user'): NetworkPageinfo(0, 0, 0),
+    SearchResultType.parse('video'): NetworkPageinfo(1000, 1000, 50),
 };
 
 const pageinfoByLive = {
-    SearchResultType.parse('live_room'): 
-      NetworkPageinfo(
-        total: 1000,
-        numResults: 1000,
-        pages: 167,
-      ),
-    SearchResultType.parse('live_user'): 
-      NetworkPageinfo(
-        total: 745,
-        numResults: 745,
-        pages: 19,
-      ),
+    SearchResultType.parse('live_room'): NetworkPageinfo(1000, 1000, 167,),
+    SearchResultType.parse('live_user'): NetworkPageinfo(745, 745, 19,),
 };
 
 const networkArticleSearchResult = NetworkArticleSearchResult(
@@ -110,9 +65,7 @@ const networkArticleSearchResult = NetworkArticleSearchResult(
   '',
   '',
   21014304,
-  [
-    '//i1.hdslb.com/bfs/article/e138e2d536aef424cd939c776e06d46d2a17fbfb.png'
-  ],
+  [ '//i1.hdslb.com/bfs/article/e138e2d536aef424cd939c776e06d46d2a17fbfb.png' ],
   0,
   false,
   false,
