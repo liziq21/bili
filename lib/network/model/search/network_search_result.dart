@@ -75,7 +75,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String url,
     String buttonText,
     int isSelection,
-    String cover,
+    String? cover,
     String areas,
     String styles,
     String gotoUrl,
@@ -127,6 +127,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     int rankOffset,
     int roomid,
     int shortId,
+    int style,
     String tags,
     HtmlTitle title,
     String uface,
@@ -190,7 +191,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
 }
 
 class HtmlTitle {
-  HtmlTitle(this._title);
+  constHtmlTitle(this._title);
   
   factory HtmlTitle.fromJson(String title) => HtmlTitle(title);
   

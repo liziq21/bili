@@ -118,7 +118,6 @@ const networkBiliUserSearchResult = NetworkBiliUserSearchResult(
       0,
       0,
       0,
-      '',
     ),
   ],
   NetworkUserOfficialVerify(
@@ -152,8 +151,6 @@ const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
   '新学期，顾得白走进幼儿园，和同学们分享暑假趣事。聊天过程中，他了解到随便打断别人说话是不礼貌的行为。幼儿园的生活总会有小摩擦，顾得白和好朋友球球闹矛盾了，在妈妈的开导下，顾得白懂得了友谊可贵的道理。一...',
   1546272000,
   2,
-  "",
-  NetworkMediaScore(
     0,
     0,
   ),
@@ -229,7 +226,7 @@ const networkLiveUserSearchResult = NetworkLiveUserSearchResult(
   '',
   '//i1.hdslb.com/bfs/face/127e4c355254788f41ce3dd493f1f2925ebd423d.jpg',
   451320374,
-  '央视网快<em class=\'keyword\">看</em>",
+  HtmlTitle('央视网快<em class=\"keyword\">看</em>'),
 );
 
 const networkVideoSearchResult = NetworkVideoSearchResult(

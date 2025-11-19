@@ -1,0 +1,36 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path/path.dart' as path;
+
+import 'package:f_biuli/network/model/search/network_search.dart';
+
+import '../../../testing/network/model/network_search.dart';
+
+void main() {
+  group('User Deserialization Test', () {
+    test('should deserialize a list of NetworkSearch objects from JSON file', () async {
+      final Map<String, dynamic> search = getJsonData('testing/network/fakes', 'search.json');
+      expect(NetworkSearch.fromJson(search), networkSearch);
+      
+      final Map<String, dynamic> typeSearch = getJsonData('testing/network/fakes', 'type_search.json');
+      expect(NetworkSearch.fromJson(typeSearch), networkTypeSearch);
+      
+      final Map<String, dynamic> liveSearch = getJsonData('testing/network/fakes', 'live_search.json');
+      expect(NetworkSearch.fromJson(liveSearch), networkLiveSearch);
+    });
+
+  });
+}
+
+Map<String, dynamic> getJsonData(String path, String name) async {
+  final File jsonFile = File(path.join(
+    Directory.current.path,
+    path,
+    name,
+  ));
+
+  final String jsonString = await jsonFile.readAsString();
+
+  final Map<String, dynamic> json = jsonDecode(jsonString);
+}
