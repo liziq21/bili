@@ -7,7 +7,6 @@ part 'api_result.g.dart';
 
 @Freezed(genericArgumentFactories: true)
 sealed class ApiResult<T> with _$ApiResult<T> {
-  //const factory ApiResult() = 
 
   const factory ApiResult.ok(T data) = ApiResultOk;
   const factory ApiResult.error(

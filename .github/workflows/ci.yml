@@ -51,7 +51,7 @@ jobs:
           fatal-infos: false
           fatal-warnings: false
 
-      - run: flutter test
+      - run: flutter test --verbose
 
   build_iOSApp:
     name: Build Flutter App (iOS)

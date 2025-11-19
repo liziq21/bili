@@ -17,6 +17,7 @@ void main() {
       json,
       (e) => NetworkSearch.fromJson(e as Map<String, dynamic>)
     );
+    
     return (apiResult as ApiResultOk<NetworkSearch>).data;
   }
 
