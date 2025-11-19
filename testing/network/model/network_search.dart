@@ -144,7 +144,6 @@ const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
   'https://www.bilibili.com/bangumi/play/ss38959',
   '立即观看',
   0,
-  null,
   'http://i0.hdslb.com/bfs/bangumi/image/6b3d6a9b53652a28c9f0a0463103ae59cccd6174.png',
   '中国大陆',
   '',
@@ -179,7 +178,8 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
   '从保龄球大小的冰雹到扭曲的龙卷风，地球上的天气可以说是无奇不有，但即使是我们见过的最极端的天气也无法和太阳系其他行星或宇宙中数百万光年以外的行星上的天气相比。通过参观先进的实验室和使用神奇的CGI图像...',
   1451577600,
   1,
-  NetworkMediaScore(0, 0),
+  NetworkMediaScore(0, 0,
+  ),
   '',
 );
 
