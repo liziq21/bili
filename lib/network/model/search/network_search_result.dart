@@ -191,7 +191,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
 }
 
 class HtmlTitle {
-  constHtmlTitle(this._title);
+  const HtmlTitle(this._title);
   
   factory HtmlTitle.fromJson(String title) => HtmlTitle(title);
   
