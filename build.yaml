@@ -11,7 +11,7 @@ targets:
     builders:
       freezed:
         generate_for:
-          #- lib/network/model/**.dart
+          - lib/**.dart
         options:
           copyWith: false
           #equal: false
@@ -59,4 +59,4 @@ targets:
       retrofit_generator:
         generate_for:
           include:
-            #- lib/network/retrofit/retrofit_network.dart
+            - lib/network/retrofit/retrofit_network.dart
