@@ -13,7 +13,8 @@ void main() {
 
   Future<NetworkSearch> _loadAndDeserialize(String fileName) async {
     final json = await getJsonData(jsonDir, fileName);
-    return (ApiResult<NetworkSearch>.fromJson(json) as ApiResultOk<NetworkSearch>).data;
+    final apiResult = ApiResult<NetworkSearch>.fromJson(json, NetworkSearch.fromJson);
+    return (apiResult as ApiResultOk<NetworkSearch>).data;
   }
 
   group('NetworkSearch Deserialization', () {
