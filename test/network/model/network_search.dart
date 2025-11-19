@@ -24,11 +24,13 @@ void main() {
 }
 
 Future<Map<String, dynamic>> getJsonData(String p, String name) {
-  const jsonFile = File(path.join(
+  final jsonFile = File(path.join(
     Directory.current.path,
     p,
     name,
   ));
+  
+  final String jsonString = await jsonFile.readAsString();
 
-  return jsonDecode(await jsonFile.readAsString());
+  return jsonDecode(jsonString);
 }
