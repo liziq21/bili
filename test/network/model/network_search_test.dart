@@ -19,7 +19,6 @@ void main() {
       final liveSearch = await getJsonData('testing/network/fakes', 'live_search.json');
       expect(NetworkSearch.fromJson(liveSearch), networkLiveSearch);
     });
-
   });
 }
 
