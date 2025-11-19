@@ -118,6 +118,7 @@ const networkBiliUserSearchResult = NetworkBiliUserSearchResult(
       0,
       0,
       0,
+      '',
     ),
   ],
   NetworkUserOfficialVerify(
@@ -146,14 +147,12 @@ const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
   null,
   'http://i0.hdslb.com/bfs/bangumi/image/6b3d6a9b53652a28c9f0a0463103ae59cccd6174.png',
   '中国大陆',
-  ',
+  '',
   'https://www.bilibili.com/bangumi/play/ss38959',
   '新学期，顾得白走进幼儿园，和同学们分享暑假趣事。聊天过程中，他了解到随便打断别人说话是不礼貌的行为。幼儿园的生活总会有小摩擦，顾得白和好朋友球球闹矛盾了，在妈妈的开导下，顾得白懂得了友谊可贵的道理。一...',
   1546272000,
   2,
-    0,
-    0,
-  ),
+  NetworkMediaScore(0, 0),
   '全80话',
 );
 
@@ -180,10 +179,7 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
   '从保龄球大小的冰雹到扭曲的龙卷风，地球上的天气可以说是无奇不有，但即使是我们见过的最极端的天气也无法和太阳系其他行星或宇宙中数百万光年以外的行星上的天气相比。通过参观先进的实验室和使用神奇的CGI图像...',
   1451577600,
   1,
-  NetworkMediaScore(
-    0,
-    0,
-  ),
+  NetworkMediaScore(0, 0),
   '',
 );
 

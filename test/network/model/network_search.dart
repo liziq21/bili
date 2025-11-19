@@ -23,10 +23,10 @@ void main() {
   });
 }
 
-Map<String, dynamic> getJsonData(String path, String name) async {
+Future<Map<String, dynamic>> getJsonData(String p, String name) {
   final File jsonFile = File(path.join(
     Directory.current.path,
-    path,
+    p,
     name,
   ));
 
