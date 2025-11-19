@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
+import 'package:f_biuli/network/retrofit/api_result.dart';
 import 'package:f_biuli/network/model/search/network_search.dart';
 
 import '../../../testing/network/model/network_search.dart';
@@ -10,14 +11,17 @@ import '../../../testing/network/model/network_search.dart';
 void main() {
   group('User Deserialization Test', () {
     test('should deserialize a list of NetworkSearch objects from JSON file', () async {
-      final search = await getJsonData('testing/network/fakes', 'search.json');
-      expect(NetworkSearch.fromJson(search), networkSearch);
+      final searchResultJson = await getJsonData('testing/network/fakes', 'search.json');
+      final searchResult = ApiResult<NetworkSearch>.fromJson(searchResultJson).data;
+      expect(searchResult, networkSearch);
       
-      final typeSearch = await getJsonData('testing/network/fakes', 'type_search.json');
-      expect(NetworkSearch.fromJson(typeSearch), networkTypeSearch);
+      final typeSearchResultJson = await getJsonData('testing/network/fakes', 'type_search.json');
+      final typeSearchResult = ApiResult<NetworkSearch>.fromJson(typeSearchResultJson).data;
+      expect(typeSearchResult, networkTypeSearch);
       
-      final liveSearch = await getJsonData('testing/network/fakes', 'live_search.json');
-      expect(NetworkSearch.fromJson(liveSearch), networkLiveSearch);
+      final liveSearchResultJson = await getJsonData('testing/network/fakes', 'live_search.json');
+      final liveSearchResult = ApiResult<NetworkSearch>.fromJson(liveSearchResultJson).data;
+      expect(liveSearchResult, networkLiveSearch);
     });
   });
 }
