@@ -9,18 +9,26 @@ import 'package:f_biuli/network/model/search/network_search.dart';
 import '../../../testing/network/model/network_search.dart';
 
 void main() {
-  group('User Deserialization Test', () {
-    test('should deserialize a list of NetworkSearch objects from JSON file', () async {
-      final searchResultJson = await getJsonData('testing/network/fakes', 'search.json');
-      final searchResult = ApiResult<NetworkSearch>.fromJson(searchResultJson).data;
+  const String jsonDir = 'testing/network/fakes';
+
+  Future<NetworkSearch> _loadAndDeserialize(String fileName) async {
+    final json = await getJsonData(jsonDir, fileName);
+    return (ApiResult<NetworkSearch>.fromJson(json) as ApiResultOk<NetworkSearch>).data;
+  }
+
+  group('NetworkSearch Deserialization', () {
+    test('should deserialize search.json correctly', () async {
+      final NetworkSearch searchResult = await _loadAndDeserialize('search.json');
       expect(searchResult, networkSearch);
-      
-      final typeSearchResultJson = await getJsonData('testing/network/fakes', 'type_search.json');
-      final typeSearchResult = ApiResult<NetworkSearch>.fromJson(typeSearchResultJson).data;
+    });
+
+    test('should deserialize type_search.json correctly', () async {
+      final NetworkSearch typeSearchResult = await _loadAndDeserialize('type_search.json');
       expect(typeSearchResult, networkTypeSearch);
-      
-      final liveSearchResultJson = await getJsonData('testing/network/fakes', 'live_search.json');
-      final liveSearchResult = ApiResult<NetworkSearch>.fromJson(liveSearchResultJson).data;
+    });
+
+    test('should deserialize live_search.json correctly', () async {
+      final NetworkSearch liveSearchResult = await _loadAndDeserialize('live_search.json');
       expect(liveSearchResult, networkLiveSearch);
     });
   });
