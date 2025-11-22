@@ -35,15 +35,17 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
           
-      # - name: Commit changes
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     git config --global user.name 'GitHub Actions Bot'
-      #     git config --global user.email 'actions@github.com'
-      #     git add -f -A -- *.g.dart
-      #     git add -f -A -- *.freezed.dart
-      #     git diff-index --quiet HEAD || (git commit -m "chore: Update generated files [skip ci]" && git push origin HEAD:${GITHUB_REF})
+      - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git fetch origin build_runner || git checkout -b build_runner
+          git checkout build_runner
+          git add -f -A -- *.g.dart
+          git add -f -A -- *.freezed.dart
+          git diff-index --quiet HEAD || (git commit -m "chore: Update generated files [skip ci]" && git push origin build_runner)
 
       - name: Analyzer
         uses: invertase/github-action-dart-analyzer@v3
