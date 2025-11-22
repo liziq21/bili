@@ -47,7 +47,7 @@ jobs:
           # git checkout build_runner
           # git add -f -A -- *.g.dart
           # git add -f -A -- *.freezed.dart
-          git diff-index --quiet HEAD || (git commit -m "chore: Update generated files [skip ci]" && git push origin build_runner)
+          git diff-index --quiet HEAD || (git commit -a -m "chore: Update generated files [skip ci]" && git push origin build_runner)
 
       - name: Analyzer
         uses: invertase/github-action-dart-analyzer@v3
