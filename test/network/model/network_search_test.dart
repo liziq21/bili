@@ -13,12 +13,12 @@ void main() {
 
   Future<NetworkSearch> _loadAndDeserialize(String fileName) async {
     final json = await getJsonData(jsonDir, fileName);
-    final apiResult = ApiResult<NetworkSearch>.fromJson(
+    final apiResult = ApiResult.fromJson(
       json,
       (e) => NetworkSearch.fromJson(e as Map<String, dynamic>)
     );
-    
-    return (apiResult as ApiResultOk<NetworkSearch>).data;
+    if (apiResult.data == null) throw Exception('Not data: $apiResult');
+    return apiResult.data;
   }
 
   group('NetworkSearch Deserialization', () {

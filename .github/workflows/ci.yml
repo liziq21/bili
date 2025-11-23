@@ -46,10 +46,12 @@ jobs:
           git status
           git add .
           git commit -m "chore: Update generated files [skip ci]"
-          git push --force origin HEAD:build_runner
-          # git add -f -A -- *.g.dart
-          # git add -f -A -- *.freezed.dart
-          # git diff-index --quiet HEAD || (git commit -m "chore: Update generated files [skip ci]" && git push origin build_runner)
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: Update generated files [skip ci]"
+            git push --force origin HEAD:build_runner
+          else
+            echo "No changes to commit."
+          fi
 
       - name: Analyzer
         uses: invertase/github-action-dart-analyzer@v3
