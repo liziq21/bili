@@ -21,7 +21,7 @@ void main() {
       },
     );
     if (apiResult.data == null) throw Exception('Not data: $apiResult');
-    return apiResult.data;
+    return apiResult.data!;
   }
 
   group('NetworkSearch Deserialization', () {
