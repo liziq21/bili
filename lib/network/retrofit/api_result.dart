@@ -11,12 +11,12 @@ abstract class ApiResult<T> with _$ApiResult<T> {
     int code,
     String message,
     int ttl,
-    T? data,
+    T data,
   ) = _ApiResult;
   
   factory ApiResult.fromJson(
     Map<String, dynamic> json,
-    T Function(Object) fromJsonT,
+    T Function(Object?) fromJsonT,
   ) =>
     _$ApiResultFromJson(json, fromJsonT);
 }

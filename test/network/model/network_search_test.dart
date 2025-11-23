@@ -15,7 +15,10 @@ void main() {
     final json = await getJsonData(jsonDir, fileName);
     final apiResult = ApiResult.fromJson(
       json,
-      (e) => NetworkSearch.fromJson(e as Map<String, dynamic>)
+      (e) => {
+        if (e == null) return null;
+        return NetworkSearch.fromJson(e as Map<String, dynamic>);
+      }
     );
     if (apiResult.data == null) throw Exception('Not data: $apiResult');
     return apiResult.data;
