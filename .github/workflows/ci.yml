@@ -48,8 +48,9 @@ jobs:
           git fetch origin build_runner || git checkout -b build_runner
           git checkout build_runner
           git stash pop
-          git add -f -A -- *.g.dart
-          git add -f -A -- *.freezed.dart
+          # git add -f -A -- *.g.dart
+          # git add -f -A -- *.freezed.dart
+          git commit -a
           git stash drop
           git diff-index --quiet HEAD || (git commit -m "chore: Update generated files [skip ci]" && git push origin build_runner)
 
