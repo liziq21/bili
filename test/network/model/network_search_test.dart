@@ -15,7 +15,7 @@ void main() {
     final json = await getJsonData(jsonDir, fileName);
     final ApiResult<NetworkSearch?> apiResult = ApiResult.fromJson(
       json,
-      (e) => {
+      (e) {
         if (e == null) return null;
         return NetworkSearch.fromJson(e as Map<String, dynamic>);
       },
