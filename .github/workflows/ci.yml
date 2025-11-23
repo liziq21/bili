@@ -43,6 +43,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
+          git stash save ''
           git fetch origin build_runner || git checkout -b build_runner
           git checkout build_runner
           # git add -f -A -- *.g.dart
