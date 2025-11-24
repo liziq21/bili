@@ -195,7 +195,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
 }
 
 @freezed
-class HtmlTitle with _$HtmlTitle {
+abstract class HtmlTitle with _$HtmlTitle {
   const HtmlTitle._();
 
   const factory HtmlTitle(String text) = _HtmlTitle;
