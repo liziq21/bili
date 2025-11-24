@@ -24,7 +24,7 @@ abstract class NetworkSearch with _$NetworkSearch {
 }
 
 Map<SearchResultType, NetworkPageinfo>? _pageinfoMapFromJson(dynamic json) {
-  if (json = null) return null;
+  if (json == null) return null;
   
   return {
     for (var entry in (json as Map<String, dynamic>).entries)
@@ -54,12 +54,10 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
             );
           }),
         );
-      
-      // 其它类型搜索结果
       }
-      
+      // 其它类型搜索结果
       final results = _resultsFromJson(json);
-      if (results.isNotEmpty) {
+      if (results?.isNotEmpty ?? false) {
         return { results[0].type: results };
       }
     }
