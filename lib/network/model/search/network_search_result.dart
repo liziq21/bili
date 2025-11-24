@@ -195,14 +195,17 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
 }
 
 @freezed
-abstract class HtmlTitle with _$HtmlTitle {
-  const factory HtmlTitle(String text) = _HtmlTitle;
-  
-  factory HtmlTitle.fromJson(String title) => HtmlTitle(title);
-  
-  get title => parse(text).body?.text ?? text;
-}
+class HtmlTitle with _$HtmlTitle {
+  const HtmlTitle._();
 
+  const factory HtmlTitle(String text) = _HtmlTitle;
+
+  factory HtmlTitle.fromJson(dynamic json) => HtmlTitle(json as String);
+
+  String get parsedTitle {
+    return parse(text).body?.text ?? text;
+  }
+}
 @freezed
 abstract class NetworkMediaScore with _$NetworkMediaScore{
   @JsonSerializable(fieldRename: FieldRename.snake)
