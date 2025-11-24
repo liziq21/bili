@@ -201,10 +201,10 @@ class HtmlTitle {
   
   final String text;
 
-  get title => parse(_title).body?.text ?? _title;
+  get title => parse(text).body?.text ?? text;
   
   @override
-  bool operator ==(HtmlTitle other) => other.text == text;
+  bool operator ==(Object other) => other.text == text;
   
   @override
   String toString() => 'HtmlTitle(text: $text)';
