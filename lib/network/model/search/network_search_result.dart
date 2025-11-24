@@ -204,7 +204,10 @@ class HtmlTitle {
   get title => parse(text).body?.text ?? text;
   
   @override
-  bool operator ==(Object other) => other.text == text;
+  bool operator ==(Object other) {
+    return other is HtmlTitle
+        && const DeepCollectionEquality().equals(other.text, text)
+  }
   
   @override
   String toString() => 'HtmlTitle(text: $text)';
