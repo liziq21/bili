@@ -194,23 +194,13 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     => _$NetworkSearchResultFromJson(json);
 }
 
-class HtmlTitle {
-  const HtmlTitle(this.text);
+@freezed
+abstract class HtmlTitle with _$HtmlTitle {
+  const factory HtmlTitle(String text) = _HtmlTitle;
   
   factory HtmlTitle.fromJson(String title) => HtmlTitle(title);
   
-  final String text;
-
   get title => parse(text).body?.text ?? text;
-  
-  @override
-  bool operator ==(Object other) {
-    return other is HtmlTitle
-        && const DeepCollectionEquality().equals(other.text, text);
-  }
-  
-  @override
-  String toString() => 'HtmlTitle(text: $text)';
 }
 
 @freezed
