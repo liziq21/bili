@@ -57,8 +57,8 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
       }
       // 其它类型搜索结果
       final results = _resultsFromJson(json);
-      if (results?.isNotEmpty ?? false) {
-        return { results[0].type: results };
+      if (results != null && results.isNotEmpty) {
+        return { results[0]!.type: results };
       }
     }
     
