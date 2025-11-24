@@ -5,6 +5,8 @@
   "data": {
     "page": 1,
     "pagesize": 20,
+    "numResults": 1000,
+    "numPages": 50,
     "pageinfo": {
       "video": {
         "total": 1000,
@@ -117,8 +119,6 @@
         "pages": 0
       }
     },
-    "numResults": 1000,
-    "numPages": 50,
     "result": [
       {
         "result_type": "article",

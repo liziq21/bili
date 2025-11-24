@@ -8,7 +8,7 @@ import 'package:f_biuli/network/model/user/network_user_official_verify.dart';
 part 'network_search_result.freezed.dart';
 part 'network_search_result.g.dart';
 
-@Freezed(unionValueCase: FreezedUnionCase.snake)
+@Freezed(unionKey: 'type', unionValueCase: FreezedUnionCase.snake)
 sealed class NetworkSearchResult with _$NetworkSearchResult {
 
   const factory NetworkSearchResult(String type) = Unknown;
@@ -200,7 +200,7 @@ class HtmlTitle {
   get text => parse(_title).body?.text ?? _title;
 }
 
-@freezed
+@Freezed(unionValueCase: FreezedUnionCase.snake)
 abstract class NetworkMediaScore with _$NetworkMediaScore{
   const factory NetworkMediaScore(
     int score,
@@ -211,7 +211,7 @@ abstract class NetworkMediaScore with _$NetworkMediaScore{
     => _$NetworkMediaScoreFromJson(json);
 }
 
-@freezed
+@Freezed(unionValueCase: FreezedUnionCase.snake)
 abstract class NetworkBiliUserRes with _$NetworkBiliUserRes {
   const factory NetworkBiliUserRes(
     int aid,
