@@ -23,7 +23,9 @@ abstract class NetworkSearch with _$NetworkSearch {
     => _$NetworkSearchFromJson(json);
 }
 
-Map<SearchResultType, NetworkPageinfo> _pageinfoMapFromJson(Object json) {
+Map<SearchResultType, NetworkPageinfo>? _pageinfoMapFromJson(dynamic json) {
+  if (json = null) return null;
+  
   return {
     for (var entry in (json as Map<String, dynamic>).entries)
       SearchResultType.parse(entry.key): NetworkPageinfo.fromJson(entry.value as Map<String, dynamic>),
@@ -45,18 +47,20 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
       if ((json[0] as Map<String, dynamic>).containsKey('result_type')) {
         return Map.fromEntries(
           json.map((e) {
-            final dataMap = (e as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+            final eMap = e as Map<String, dynamic>;
             return MapEntry(
-              SearchResultType.parse(dataMap['type']),
-              _resultsFromJson(dataMap),
+              SearchResultType.parse(eMap['result_type']),
+              _resultsFromJson(eMap['data']),
             );
           }),
         );
       
       // 其它类型搜索结果
-      } else {
-        final type = (json[0] as Map<String, dynamic>)['type'];
-        return { SearchResultType.parse(type): _resultsFromJson(json) };
+      }
+      
+      final results = _resultsFromJson(json);
+      if (results.isNotEmpty) {
+        return { results[0].type: results };
       }
     }
     
