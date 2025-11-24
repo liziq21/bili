@@ -122,7 +122,7 @@
     "result": [
       {
         "result_type": "article",
-        "data": {
+        "data": [{
           "category_id": 26,
           "category_name": "数码",
           "comment_url": "",
@@ -147,11 +147,11 @@
           "type": "article",
           "version": "",
           "view": 10167
-        }
+        }]
       },
       {
         "result_type": "bili_user",
-        "data": {
+        "data": [{
           "type": "bili_user",
           "mid": 451320374,
           "uname": "央视网快看",
@@ -235,11 +235,11 @@
           },
           "hit_columns": [],
           "is_senior_member": 0
-        }
+        }]
       },
       {
         "result_type": "media_bangumi",
-        "data": {
+        "data": [{
           "type": "media_bangumi",
           "media_id": 28234651,
           "title": "嗨，顾得白之爱<em class=\"keyword\">最</em>珍贵",
@@ -288,11 +288,11 @@
           "pgc_season_id": 38959,
           "corner": 2,
           "index_show": "全80话"
-      }
+      }]
       },
       {
         "result_type": "media_ft",
-        "data": {
+        "data": [{
           "type": "media_ft",
           "media_id": 22663696,
           "title": "地平线：宇宙中的怪异天气",
@@ -352,11 +352,11 @@
           "pgc_season_id": 26798,
           "corner": 13,
           "index_show": ""
-        }
+        }]
       },
       {
         "result_type": "live_room",
-        "data": {
+        "data": [{
           "area": 3,
           "attentions": 240820,
           "cate_name": "守望先锋",
@@ -386,11 +386,11 @@
           "uid": 1779128,
           "uname": "小霜请你吃颗糖",
           "user_cover": "//i0.hdslb.com/bfs/live/new_room_cover/5411343a34b96b91f57aa4d2561301269aa94fa7.jpg"
-        }
+        }]
       },
       {
         "result_type": "live_user",
-        "data": {
+        "data": [{
           "area": 6,
           "area_v2_id": 715,
           "attentions": 2163958,
@@ -410,11 +410,11 @@
           "uface": "//i1.hdslb.com/bfs/face/127e4c355254788f41ce3dd493f1f2925ebd423d.jpg",
           "uid": 451320374,
           "uname": "央视网快<em class=\"keyword\">看</em>"
-        }
+        }]
       },
       {
         "result_type": "video",
-                "data": {
+        "data": [{
           "type": "video",
           "id": 114179860077362,
           "author": "阿周说事",
@@ -482,7 +482,7 @@
           "parent_area_id": 0,
           "parent_area_name": "",
           "watched_show": null
-        }
+        }]
       }
     ]
   }

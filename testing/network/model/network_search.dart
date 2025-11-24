@@ -54,8 +54,8 @@ const pageinfo = {
 };
 
 const pageinfoByLive = {
-    SearchResultType.liveRoom: NetworkPageinfo(1000, 1000, 167),
-    SearchResultType.liveUser: NetworkPageinfo(745, 745, 19),
+    SearchResultType.liveUser: NetworkPageinfo(1000, 1000, 167),
+    SearchResultType.liveRoom: NetworkPageinfo(745, 745, 19),
 };
 
 const networkArticleSearchResult = NetworkArticleSearchResult(

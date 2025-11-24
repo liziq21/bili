@@ -195,13 +195,19 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
 }
 
 class HtmlTitle {
-  const HtmlTitle(this._title);
+  const HtmlTitle(this.text);
   
   factory HtmlTitle.fromJson(String title) => HtmlTitle(title);
   
-  final String _title;
+  final String text;
 
-  get text => parse(_title).body?.text ?? _title;
+  get title => parse(_title).body?.text ?? _title;
+  
+  @override
+  bool operator ==(HtmlTitle other) => other.text == text;
+  
+  @override
+  String toString() => 'HtmlTitle(text: $text)';
 }
 
 @freezed
