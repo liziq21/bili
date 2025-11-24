@@ -8,7 +8,7 @@ import 'package:f_biuli/network/model/user/network_user_official_verify.dart';
 part 'network_search_result.freezed.dart';
 part 'network_search_result.g.dart';
 
-@Freezed(unionKey: 'type')
+@Freezed(unionValueCase: FreezedUnionCase.snake)
 sealed class NetworkSearchResult with _$NetworkSearchResult {
 
   const factory NetworkSearchResult(String type) = Unknown;

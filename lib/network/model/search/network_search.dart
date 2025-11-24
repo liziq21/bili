@@ -6,7 +6,7 @@ import 'network_search_result.dart';
 part 'network_search.freezed.dart';
 part 'network_search.g.dart';
 
-@Freezed(unionValueCase: FreezedUnionCase.none)
+@freezed
 abstract class NetworkSearch with _$NetworkSearch {
   const factory NetworkSearch(
     int page,
@@ -79,7 +79,7 @@ abstract class NetworkSearch with _$NetworkSearch {
   }
 
 
-@Freezed(unionValueCase: FreezedUnionCase.none)
+@freezed
 abstract class NetworkPageinfo with _$NetworkPageinfo {
   const factory NetworkPageinfo(
     int total,

@@ -19,8 +19,8 @@ targets:
           # Disable legacy (Dart 2 and older) utilites
           map: false
           to_json: false
-          #to_string: false
-          union_value_case: snake
+          # to_string: false
+          # union_value_case: snake
           when:
             when: false
             maybe_when: false
@@ -54,7 +54,7 @@ targets:
           checked: true
           # 序列化嵌套的 Freezed 对象
           # explicit_to_json: true
-          field_rename: snake
+          # field_rename: snake
       
       retrofit_generator:
         generate_for:
