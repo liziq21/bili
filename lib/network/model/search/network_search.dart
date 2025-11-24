@@ -24,14 +24,11 @@ abstract class NetworkSearch with _$NetworkSearch {
 }
 
 Map<SearchResultType, NetworkPageinfo> _pageinfoMapFromJson(Object json) {
-    return Map.fromEntries(
-      (json as Map<String, dynamic>).entries
-        .map((e) => MapEntry(
-            SearchResultType.parse(e.key),
-            NetworkPageinfo.fromJson(e.value as Map<String, dynamic>),
-        )),
-    );
-  }
+  return {
+    for (var entry in (json as Map<String, dynamic>).entries)
+      SearchResultType.parse(entry.key): NetworkPageinfo.fromJson(entry.value as Map<String, dynamic>),
+  };
+}
   
 Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json) {
 
@@ -42,42 +39,27 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
     }
     
     if (json is List) {
+      if (json.isEmpty) return {};
       
       // 综合搜索结果
       if ((json[0] as Map<String, dynamic>).containsKey('result_type')) {
-        return Map.fromEntries(
-          json
-            .map((e) {
-              final results = (e as Map<String, dynamic>)['data'];
-              final type = SearchResultType.parse(results['type']);
-              return MapEntry(type, _resultsFromJson(results));
-            }),
-        );
-      
+        return {
+          for (var entry in json)
+            (entry as Map<String, dynamic>)['data'] as Map<String, dynamic> dataMap:
+              SearchResultType.parse(dataMap['type']): _resultsFromJson(dataMap),
+        };
       // 其它类型搜索结果
       } else {
-        return Map.fromEntries(
-          json
-            .map((e) {
-              final results = e as Map<String, dynamic>;
-              final type = SearchResultType.parse(results['type']);
-              return MapEntry(type, _resultsFromJson(results));
-            }),
-        );
+        final type = (json[0] as Map<String, dynamic>)['type'];
+        return { SearchResultType.parse(type): _resultsFromJson(json) };
       }
-    
-    // live 类型搜索结果
-    } else if (json is Map<String, dynamic>) {
-      json.entries
-        .map((entry) {
-          final type = SearchResultType.parse(entry.key);
-          final results = entry.value;
-          return MapEntry(type, _resultsFromJson(results));
-        })
-        .toMap();
     }
     
-    throw ArgumentError.value(json, 'json', 'Cannot convert the provided data.');
+    // live 类型搜索结果
+    return {
+      for (var entry in (json as Map<String, dynamic>).entries)
+        SearchResultType.parse(entry.key): _resultsFromJson(entry.value),
+    };
   }
 
 

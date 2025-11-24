@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:html/parser.dart' show parse;
-//import 'package:json_annotation/json_annotation.dart';
 
 import 'package:f_biuli/bili/search_result_type.dart';
 import 'package:f_biuli/network/model/user/network_user_official_verify.dart';
@@ -11,8 +10,7 @@ part 'network_search_result.g.dart';
 @Freezed(unionKey: 'type', unionValueCase: FreezedUnionCase.snake)
 sealed class NetworkSearchResult with _$NetworkSearchResult {
 
-  const factory NetworkSearchResult(String type) = Unknown;
-  
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.article(
     SearchResultType type,
     int categoryId,
@@ -38,6 +36,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     int view,
   ) = NetworkArticleSearchResult;
   
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.biliUser(
     SearchResultType type,
     int mid,
@@ -59,6 +58,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     int isSeniorMember,
   ) = NetworkBiliUserSearchResult;
 
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.mediaBangumi(
     SearchResultType type,
     int mediaId,
@@ -86,6 +86,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String indexShow,
   ) = NetworkMediaBangumiSearchResult;
   
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.mediaFt(
     SearchResultType type,
     int mediaId,
@@ -113,6 +114,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String indexShow,
   ) = NetworkMediaFtSearchResult;
 
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.liveRoom(
     SearchResultType type,
     int area,
@@ -136,6 +138,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String userCover,
   ) = NetworkLiveRoomSearchResult;
   
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.liveUser(
     SearchResultType type,
     int area,
@@ -155,6 +158,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     HtmlTitle uname,
   ) = NetworkLiveUserSearchResult;
 
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkSearchResult.video(
     SearchResultType type,
     int id,
@@ -200,8 +204,9 @@ class HtmlTitle {
   get text => parse(_title).body?.text ?? _title;
 }
 
-@Freezed(unionValueCase: FreezedUnionCase.snake)
+@freezed
 abstract class NetworkMediaScore with _$NetworkMediaScore{
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkMediaScore(
     int score,
     int userCount,
@@ -211,8 +216,9 @@ abstract class NetworkMediaScore with _$NetworkMediaScore{
     => _$NetworkMediaScoreFromJson(json);
 }
 
-@Freezed(unionValueCase: FreezedUnionCase.snake)
+@freezed
 abstract class NetworkBiliUserRes with _$NetworkBiliUserRes {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkBiliUserRes(
     int aid,
     String bvid,
