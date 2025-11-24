@@ -43,11 +43,16 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
       
       // 综合搜索结果
       if ((json[0] as Map<String, dynamic>).containsKey('result_type')) {
-        return {
-          for (var entry in json)
-            ((entry as Map<String, dynamic>)['data'] as Map<String, dynamic>) dataMap:
-              SearchResultType.parse(dataMap['type']): _resultsFromJson(dataMap),
-        };
+        return Map.fromEntries(
+          json.map((e) {
+            final dataMap = (e as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+            return MapEntry(
+              SearchResultType.parse(dataMap['type']),
+              _resultsFromJson(dataMap),
+            );
+          }),
+        );
+      
       // 其它类型搜索结果
       } else {
         final type = (json[0] as Map<String, dynamic>)['type'];
