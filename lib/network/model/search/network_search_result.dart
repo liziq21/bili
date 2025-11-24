@@ -206,7 +206,7 @@ class HtmlTitle {
   @override
   bool operator ==(Object other) {
     return other is HtmlTitle
-        && const DeepCollectionEquality().equals(other.text, text)
+        && const DeepCollectionEquality().equals(other.text, text);
   }
   
   @override
