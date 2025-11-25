@@ -10,13 +10,13 @@ const networkSearch = NetworkSearch(
   50,
   pageinfo,
   {
-    SearchResultType.article: [networkArticleSearchResult],
-    SearchResultType.biliUser: [networkBiliUserSearchResult],
-    SearchResultType.mediaBangumi: [networkMediaBangumiSearchResult],
-    SearchResultType.mediaFt: [networkMediaFtSearchResult],
-    SearchResultType.liveRoom: [networkLiveRoomSearchResult],
-    SearchResultType.liveUser: [networkLiveUserSearchResult],
-    SearchResultType.video: [networkVideoSearchResult],
+    .article: [networkArticleSearchResult],
+    .biliUser: [networkBiliUserSearchResult],
+    .mediaBangumi: [networkMediaBangumiSearchResult],
+    .mediaFt: [networkMediaFtSearchResult],
+    .liveRoom: [networkLiveRoomSearchResult],
+    .liveUser: [networkLiveUserSearchResult],
+    .video: [networkVideoSearchResult],
   },
 );
 
@@ -27,8 +27,8 @@ const networkLiveSearch = NetworkSearch(
   50,
   pageinfoByLive,
   {
-    SearchResultType.liveRoom: [networkLiveRoomSearchResult],
-    SearchResultType.liveUser: null,
+    .liveRoom: [networkLiveRoomSearchResult],
+    .liveUser: null,
   },
 );
 
@@ -38,23 +38,21 @@ const networkTypeSearch = NetworkSearch(
   1000,
   50,
   null,
-  {
-    SearchResultType.article: [networkArticleSearchResult],
-  },
+  { .article: [networkArticleSearchResult] },
 );
 
 const pageinfo = {
-  SearchResultType.video: NetworkPageinfo(1000, 1000, 50),
-  SearchResultType.mediaBangumi: NetworkPageinfo(9, 9, 1),
+  .video: NetworkPageinfo(1000, 1000, 50),
+  .mediaBangumi: NetworkPageinfo(9, 9, 1),
 };
 
 const pageinfoByLive = {
-  SearchResultType.liveUser: NetworkPageinfo(1000, 1000, 167),
-  SearchResultType.liveRoom: NetworkPageinfo(745, 745, 19),
+  .liveUser: NetworkPageinfo(1000, 1000, 167),
+  .liveRoom: NetworkPageinfo(745, 745, 19),
 };
 
 const networkArticleSearchResult = NetworkArticleSearchResult(
-  SearchResultType.article,
+  .article,
   26,
   '数码',
   '',
@@ -79,7 +77,7 @@ const networkArticleSearchResult = NetworkArticleSearchResult(
 );
 
 const networkBiliUserSearchResult = NetworkBiliUserSearchResult(
-  SearchResultType.biliUser,
+  .biliUser,
   451320374,
   '央视网快看',
   '在这里，看见世界。合作投稿请私信~',
@@ -116,15 +114,12 @@ const networkBiliUserSearchResult = NetworkBiliUserSearchResult(
       '',
     ),
   ],
-  NetworkUserOfficialVerify(
-    1,
-    '央视网新闻频道官方账号',
-  ),
+  NetworkUserOfficialVerify(1, '央视网新闻频道官方账号'),
   0,
 );
 
 const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
-  SearchResultType.mediaBangumi,
+  .mediaBangumi,
   28234651,
   HtmlTitle('嗨，顾得白之爱<em class=\"keyword\">最</em>珍贵'),
   '',
@@ -151,7 +146,7 @@ const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
 );
 
 const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
-  SearchResultType.mediaFt,
+  .mediaFt,
   22663696,
   HtmlTitle('地平线：宇宙中的怪异天气'),
   'Horizon: The Weirdest Weather In The Universe',
@@ -165,7 +160,7 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
   '纪录片',
   'https://www.bilibili.com/bangumi/play/ep265146',
   '立即观看',
-  1,
+  0,
   'http://i0.hdslb.com/bfs/bangumi/285aded5faa04401b8c3135496b84e76d6cb75ca.jpg',
   '英国',
   '宇宙/自然/科技',
@@ -178,7 +173,7 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
 );
 
 const networkLiveRoomSearchResult = NetworkLiveRoomSearchResult(
-  SearchResultType.liveRoom,
+  .liveRoom,
   3,
   240820,
   '守望先锋',
@@ -201,7 +196,7 @@ const networkLiveRoomSearchResult = NetworkLiveRoomSearchResult(
 );
 
 const networkLiveUserSearchResult = NetworkLiveUserSearchResult(
-  SearchResultType.liveUser,
+  .liveUser,
   6,
   715,
   2163958,
@@ -220,7 +215,7 @@ const networkLiveUserSearchResult = NetworkLiveUserSearchResult(
 );
 
 const networkVideoSearchResult = NetworkVideoSearchResult(
-  SearchResultType.video,
+  .video,
   114179860077362,
   '阿周说事',
   215998368,
