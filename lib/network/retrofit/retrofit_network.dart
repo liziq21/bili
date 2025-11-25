@@ -82,7 +82,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     ArticleSearchOrder? order,
   }) async =>
     networkApi.searchByType(
-      SearchType.article,
+      .article,
       keyword,
       page: page,
       order: order,
@@ -97,7 +97,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     UserSearchSort? sort,
     UserType? userType,
   }) async => networkApi.searchByType(
-    SearchType.biliUser,
+    .biliUser,
     keyword,
     page: page,
     order: sort?.order,
@@ -110,7 +110,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
-    SearchType.mediaBangumi,
+    .mediaBangumi,
     keyword,
     page: page,
   );
@@ -120,7 +120,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
-    SearchType.mediaFt,
+    .mediaFt,
     keyword,
     page: page,
   );
@@ -130,7 +130,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
-    SearchType.live,
+    .live,
     keyword,
     page: page,
   );
@@ -141,7 +141,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     int? page,
     LiveRoomSearchOrder? order,
   }) async => networkApi.searchByType(
-    SearchType.liveRoom,
+    .liveRoom,
     keyword,
     page: page,
     order: order,
@@ -152,7 +152,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
-    SearchType.liveUser,
+    .liveUser,
     keyword,
     page: page,
   );
@@ -164,7 +164,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     PhotoCategory? category,
     PhotoOrVideoSearchOrder? order,
   }) async => networkApi.searchByType(
-    SearchType.photo,
+    .photo,
     keyword,
     page: page,
     order: order,
@@ -176,7 +176,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
-    SearchType.topic,
+    .topic,
     keyword,
     page: page,
   );
@@ -190,7 +190,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     int? tids,
     DateRange? dateRange,
   }) async => networkApi.searchByType(
-    SearchType.video,
+    .video,
     keyword,
     page: page,
     order: order,
