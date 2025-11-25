@@ -1,13 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  #enable-experiment:
+  enable-experiment:
+    - dot-shorthands
   errors:
     invalid_annotation_target: ignore
   exclude:
-    #- '**.config.dart'
-    #- '**.g.dart'
-    #- '**.freezed.dart'
   plugins:
     - custom_lint
 
