@@ -138,7 +138,7 @@ const networkMediaBangumiSearchResult = NetworkMediaBangumiSearchResult(
   '国创',
   'https://www.bilibili.com/bangumi/play/ss38959',
   '立即观看',
-  0,
+  1,
   'http://i0.hdslb.com/bfs/bangumi/image/6b3d6a9b53652a28c9f0a0463103ae59cccd6174.png',
   '中国大陆',
   '',

@@ -14,11 +14,4 @@ enum SearchType {
   liveRoom,
   liveUser,
   video;
-  
-  /*static SearchType? parse(String type) =>
-    $enumDecodeNullable(
-      _$SearchTypeEnumMap,
-      type,
-      unknownValue: JsonKey.nullForUndefinedEnumValue,
-    );*/
 }

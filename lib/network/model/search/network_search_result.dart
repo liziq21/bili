@@ -102,7 +102,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String seasonTypeName,
     String url,
     String buttonText,
-    int isFollow,
+    int isSelection,
     String cover,
     String areas,
     String styles,
