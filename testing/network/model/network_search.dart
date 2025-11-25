@@ -44,18 +44,13 @@ const networkTypeSearch = NetworkSearch(
 );
 
 const pageinfo = {
-    SearchResultType.article: NetworkPageinfo(0, 0, 0),
-    SearchResultType.biliUser: NetworkPageinfo(0, 0, 0),
-    SearchResultType.mediaBangumi: NetworkPageinfo(0, 0, 0),
-    SearchResultType.mediaFt: NetworkPageinfo(0, 0, 0),
-    SearchResultType.liveRoom: NetworkPageinfo(0, 0, 0),
-    SearchResultType.liveUser: NetworkPageinfo(0, 0, 0),
-    SearchResultType.video: NetworkPageinfo(1000, 1000, 50),
+  SearchResultType.video: NetworkPageinfo(1000, 1000, 50),
+  SearchResultType.mediaBangumi: NetworkPageinfo(9, 9, 1),
 };
 
 const pageinfoByLive = {
-    SearchResultType.liveUser: NetworkPageinfo(1000, 1000, 167),
-    SearchResultType.liveRoom: NetworkPageinfo(745, 745, 19),
+  SearchResultType.liveUser: NetworkPageinfo(1000, 1000, 167),
+  SearchResultType.liveRoom: NetworkPageinfo(745, 745, 19),
 };
 
 const networkArticleSearchResult = NetworkArticleSearchResult(

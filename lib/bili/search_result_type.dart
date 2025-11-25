@@ -10,13 +10,12 @@ enum SearchResultType {
   mediaFt,
   liveRoom,
   liveUser,
-  video,
-  unknown;
+  video;
   
-  static SearchResultType parse(String type) =>
-    $enumDecode(
+  static SearchResultType? parse(String type) =>
+    $enumDecodeNullable(
       _$SearchResultTypeEnumMap,
       type,
-      unknownValue: SearchResultType.unknown,
+      unknownValue: JsonKey.nullForUndefinedEnumValue,
     );
 }

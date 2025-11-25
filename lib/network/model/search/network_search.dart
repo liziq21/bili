@@ -28,7 +28,12 @@ Map<SearchResultType, NetworkPageinfo>? _pageinfoMapFromJson(dynamic json) {
   
   return {
     for (var entry in (json as Map<String, dynamic>).entries)
-      SearchResultType.parse(entry.key): NetworkPageinfo.fromJson(entry.value as Map<String, dynamic>),
+      ?SearchResultType.parse(
+        entry.key
+      ):
+      NetworkPageinfo.fromJson(
+        entry.value as Map<String, dynamic>
+      ),
   };
 }
   
@@ -43,30 +48,37 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
     if (json is List) {
       if (json.isEmpty) return {};
       
+      final resultItem1 = json[0] as Map<String, dynamic>;
       // 综合搜索结果
-      if ((json[0] as Map<String, dynamic>).containsKey('result_type')) {
-        return Map.fromEntries(
-          json.map((e) {
-            final eMap = e as Map<String, dynamic>;
-            return MapEntry(
-              SearchResultType.parse(eMap['result_type']),
-              _resultsFromJson(eMap['data']),
-            );
-          }),
-        );
+      if (resultItem1.containsKey('result_type')) {
+        return {
+          for (var e in json)
+            ?SearchResultType.parse(
+              (e as Map<String, dynamic>)['result_type'] as String
+            ):
+            _resultsFromJson(
+              (e as Map<String, dynamic>)['data']
+            ),
+        };
       }
+      
       // 其它类型搜索结果
-      final results = _resultsFromJson(json);
-      if (results != null && results.isNotEmpty) {
-        return { results[0]!.type: results };
-      }
-    }
+      return {
+        ?SearchResultType.parse(
+          resultItem1['type'] as String
+        ):
+        _resultsFromJson(json),
+      };
     
     // live 类型搜索结果
-    return {
-      for (var entry in (json as Map<String, dynamic>).entries)
-        SearchResultType.parse(entry.key): _resultsFromJson(entry.value),
-    };
+    } else if (json is Map<String, dynamic>) {
+      return {
+        for (var entry in (json as Map<String, dynamic>).entries)
+          ?SearchResultType.parse(entry.key): _resultsFromJson(entry.value),
+      };
+    }
+    
+    return {};
   }
 
 

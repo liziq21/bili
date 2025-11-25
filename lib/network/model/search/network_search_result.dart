@@ -189,7 +189,7 @@ sealed class NetworkSearchResult with _$NetworkSearchResult {
     String url,
     int danmaku,
   ) = NetworkVideoSearchResult;
-
+  
   factory NetworkSearchResult.fromJson(Map<String, dynamic> json)
     => _$NetworkSearchResultFromJson(json);
 }
@@ -200,12 +200,16 @@ abstract class HtmlTitle with _$HtmlTitle {
 
   const factory HtmlTitle(String text) = _HtmlTitle;
 
-  factory HtmlTitle.fromJson(dynamic json) => HtmlTitle(json as String);
+  // Freezed will only generate a fromJson if the factory is using =>
+  factory HtmlTitle.fromJson(dynamic json) {
+    return HtmlTitle(json as String);
+  }
 
   String get parsedTitle {
     return parse(text).body?.text ?? text;
   }
 }
+
 @freezed
 abstract class NetworkMediaScore with _$NetworkMediaScore{
   @JsonSerializable(fieldRename: FieldRename.snake)
