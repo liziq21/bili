@@ -8,7 +8,10 @@ const networkSearch = NetworkSearch(
   20,
   1000,
   50,
-  pageinfo,
+  {
+    .video: NetworkPageinfo(1000, 1000, 50),
+    .mediaBangumi: NetworkPageinfo(9, 9, 1),
+  },
   {
     .article: [networkArticleSearchResult],
     .biliUser: [networkBiliUserSearchResult],
@@ -25,7 +28,10 @@ const networkLiveSearch = NetworkSearch(
   20,
   1000,
   50,
-  pageinfoByLive,
+  {
+    .liveUser: NetworkPageinfo(1000, 1000, 167),
+    .liveRoom: NetworkPageinfo(745, 745, 19),
+  },
   {
     .liveRoom: [networkLiveRoomSearchResult],
     .liveUser: null,
@@ -41,15 +47,6 @@ const networkTypeSearch = NetworkSearch(
   { .article: [networkArticleSearchResult] },
 );
 
-const pageinfo = {
-  .video: NetworkPageinfo(1000, 1000, 50),
-  .mediaBangumi: NetworkPageinfo(9, 9, 1),
-};
-
-const pageinfoByLive = {
-  .liveUser: NetworkPageinfo(1000, 1000, 167),
-  .liveRoom: NetworkPageinfo(745, 745, 19),
-};
 
 const networkArticleSearchResult = NetworkArticleSearchResult(
   .article,
