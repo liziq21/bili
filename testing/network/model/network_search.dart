@@ -165,7 +165,7 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
   '纪录片',
   'https://www.bilibili.com/bangumi/play/ep265146',
   '立即观看',
-  0,
+  1,
   'http://i0.hdslb.com/bfs/bangumi/285aded5faa04401b8c3135496b84e76d6cb75ca.jpg',
   '英国',
   '宇宙/自然/科技',
@@ -173,8 +173,7 @@ const networkMediaFtSearchResult = NetworkMediaFtSearchResult(
   '从保龄球大小的冰雹到扭曲的龙卷风，地球上的天气可以说是无奇不有，但即使是我们见过的最极端的天气也无法和太阳系其他行星或宇宙中数百万光年以外的行星上的天气相比。通过参观先进的实验室和使用神奇的CGI图像...',
   1451577600,
   1,
-  NetworkMediaScore(0, 0,
-  ),
+  NetworkMediaScore(0, 0),
   '',
 );
 

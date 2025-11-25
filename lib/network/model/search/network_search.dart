@@ -24,17 +24,16 @@ abstract class NetworkSearch with _$NetworkSearch {
 }
 
 Map<SearchResultType, NetworkPageinfo>? _pageinfoMapFromJson(dynamic json) {
-  if (json == null) return null;
-  
-  return {
-    for (var entry in (json as Map<String, dynamic>).entries)
-      ?SearchResultType.parse(
-        entry.key
-      ):
-      NetworkPageinfo.fromJson(
-        entry.value as Map<String, dynamic>
-      ),
-  };
+  return json == null ? null
+    : {
+      for (var entry in (json as Map<String, dynamic>).entries)
+        ?SearchResultType.parse(
+          entry.key
+        ):
+        NetworkPageinfo.fromJson(
+          entry.value as Map<String, dynamic>
+        ),
+    };
 }
   
 Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json) {
