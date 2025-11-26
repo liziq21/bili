@@ -35,9 +35,9 @@ class _SearchScreenState
   @override
   void initState() {
     super.initState();
-    _searchController = SearchController();
-    _searchfFocusNode = FocusNode();
-    _tabController = TabController(length: 3, vsync: this);
+    _searchController = .new();
+    _searchfFocusNode = .new();
+    _tabController = .new(length: 3, vsync: this);
     
     if (widget.initialQuery?.trim().isNotEmpty ?? false) {
       _searchController.text = widget.initialQuery!;
@@ -112,12 +112,12 @@ class _SearchScreenState
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
                   Tab(
-                    icon: Icon(.photo_outlined),
+                    icon: Icon(Icons.photo_outlined),
                     text: 'Photos',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
                   Tab(
-                    icon: Icon(.audiotrack_sharp),
+                    icon: Icon(Icons.audiotrack_sharp),
                     text: 'Audio',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
