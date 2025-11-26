@@ -7,7 +7,7 @@ import 'package:f_biuli/bili/constonts/uris.dart';
 
 @module
 abstract class NetworkModule {
-  @Named("apiBase")
+  @Named('apiBase')
   String get apiBase => ApiUris.base;
   
   @lazySingleton

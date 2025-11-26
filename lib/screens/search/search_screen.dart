@@ -79,14 +79,28 @@ class _SearchScreenState
               titleSpacing: 0.0,
               backgroundColor: Colors.transparent,
               floating: true,
-              //snap: true,
+              snap: true,
               //centerTitle: false,
-              title: Padding(
+              title: /*Padding(
                 padding: const EdgeInsets.all(8),
-                child: SearchAnchor.bar(
+                child: */SearchAnchor.bar(
                   searchController: _searchController,
                   barHintText: '搜索...',
                   suggestionsBuilder: (context, controller) {
+                    if (controller.text.isEmpty) {
+                      /*if (searchHistory.isNotEmpty) {
+                        return getHistoryList(controller);
+                      }*/
+                      return <Widget>[
+                        const Center(
+                          child: Text(
+                            'No search history.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ];
+                    }
+                    //return getSuggestions(controller);
                     return List<Widget>.generate(5, (index) {
                       return ListTile(
                         titleAlignment: ListTileTitleAlignment.center,
@@ -102,7 +116,7 @@ class _SearchScreenState
                   onChanged: (value) {},
                   //onSubmit: (value) => _searchController.closeView(value),
                 ),
-              ),
+              //),
               bottom: TabBar(
                 //controller: _tabController,
                 tabs: const <Widget>[
