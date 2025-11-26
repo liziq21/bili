@@ -19,7 +19,6 @@ linter:
     - prefer_final_locals
     - prefer_relative_imports
     - prefer_single_quotes
-    #- always_use_package_imports
     - require_trailing_commas
     - avoid_void_async
     - unawaited_futures
