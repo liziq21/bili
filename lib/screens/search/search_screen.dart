@@ -24,7 +24,10 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState 
+  extends State<SearchScreen>
+  with SingleTickerProviderStateMixin
+{
   late SearchController _searchController;
   late TabController _tabController;
   late FocusNode _searchfFocusNode;
@@ -32,12 +35,14 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _searchController = SearchController(text: widget.initialQuery);
+    _searchController = SearchController();
     _searchfFocusNode = FocusNode();
     _tabController = TabController(length: 3, vsync: this);
     
-    if (widget.initialQuery?.isEmpry ?? true) {
-      _searchController.openView();
+    if (widget.initialQuery?.trim().isNotEmpry ?? false) {
+      _searchController.text = widget.initialQuery
+    } else {
+      //_searchController.openView();
     }
     
     /*_searchController.addListener(() {
@@ -57,6 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     _searchfFocusNode.dispose();
+    _tabController.dispose();
     super.dispose();
   }
   
@@ -71,14 +77,14 @@ class _SearchScreenState extends State<SearchScreen> {
               shape: const StadiumBorder(),
               scrolledUnderElevation: 0.0,
               titleSpacing: 0.0,
-              backgroundColor: Colors.transparent,
+              backgroundColor: .transparent,
               floating: true,
               snap: true,
               title: Padding(
                 padding: const EdgeInsets.all(8),
                 child: SearchAnchor.bar(
-                  controller: _searchController,
-                  hintText: '搜索...',
+                  searchController: _searchController,
+                  barHintText: '搜索...',
                   suggestionsBuilder: (context, controller) {
                     return List<Widget>.generate(5, (index) {
                       return ListTile(
@@ -88,29 +94,29 @@ class _SearchScreenState extends State<SearchScreen> {
                       );
                     });
                   },
-                  textInputAction: TextInputAction.search,
+                  textInputAction: .search,
                   onTap: () {
                     print('SearchAnchor bar tapped');
                   },
-                  viewOnChanged: (value) {},
-                  viewOnSubmit: (value) => _searchController.closeView(value),
+                  onChanged: (value) {},
+                  //onSubmit: (value) => _searchController.closeView(value),
                 ),
               ),
               bottom: TabBar(
-                controller: _tabController,
+                //controller: _tabController,
                 tabs: const <Widget>[
                   Tab(
-                    icon: Icon(Icons.videocam_outlined),
+                    icon: Icon(.videocam_outlined),
                     text: 'Video',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
                   Tab(
-                    icon: Icon(Icons.photo_outlined),
+                    icon: Icon(.photo_outlined),
                     text: 'Photos',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
                   Tab(
-                    icon: Icon(Icons.audiotrack_sharp),
+                    icon: Icon(.audiotrack_sharp),
                     text: 'Audio',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
