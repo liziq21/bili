@@ -40,7 +40,7 @@ class _SearchScreenState
     _tabController = TabController(length: 3, vsync: this);
     
     if (widget.initialQuery?.trim().isNotEmpry ?? false) {
-      _searchController.text = widget.initialQuery
+      _searchController.text = widget.initialQuery;
     } else {
       //_searchController.openView();
     }
@@ -73,13 +73,14 @@ class _SearchScreenState
         child: CustomScrollView(
           slivers: <Widget>[
             SliverAppBar(
-              clipBehavior: Clip.none,
+              clipBehavior: .none,
               shape: const StadiumBorder(),
               scrolledUnderElevation: 0.0,
               titleSpacing: 0.0,
               backgroundColor: .transparent,
               floating: true,
               snap: true,
+              //centerTitle: false,
               title: Padding(
                 padding: const EdgeInsets.all(8),
                 child: SearchAnchor.bar(
