@@ -79,6 +79,7 @@ class _SearchScreenState
               titleSpacing: 0.0,
               backgroundColor: Colors.transparent,
               floating: true,
+              //pinned: true,
               snap: true,
               //centerTitle: false,
               title: /*Padding(
@@ -118,7 +119,7 @@ class _SearchScreenState
                 ),
               //),
               bottom: TabBar(
-                //controller: _tabController,
+                controller: _tabController,
                 tabs: const <Widget>[
                   Tab(
                     icon: Icon(Icons.videocam_outlined),
