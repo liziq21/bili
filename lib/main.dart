@@ -27,14 +27,13 @@ Future<void> main() async {
   await SentryFlutter.init(
     (options) {
       options
-        ..dsn = String.fromEnvironment('SENTRY_DSN')
+        ..dsn = const String.fromEnvironment('SENTRY_DSN')
         ..sendDefaultPii = true;
     },
     appRunner: () => runApp(
       SentryWidget(
-        child: App(),
+        child: const App(),
       ),
     ),
   );
-
 }

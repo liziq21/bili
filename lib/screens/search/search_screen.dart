@@ -79,7 +79,7 @@ class _SearchScreenState
               titleSpacing: 0.0,
               backgroundColor: Colors.transparent,
               floating: true,
-              snap: true,
+              //snap: true,
               //centerTitle: false,
               title: Padding(
                 padding: const EdgeInsets.all(8),

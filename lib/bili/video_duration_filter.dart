@@ -5,5 +5,6 @@ enum VideoDurationFilter {
   thirtyTo60Minutes,
   above60Minutes;
 
-  String toString() => '${this.index}';
+  @override
+  String toString() => '$index';
 }

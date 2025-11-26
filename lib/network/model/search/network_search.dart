@@ -72,7 +72,7 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
     // live 类型搜索结果
     } else if (json is Map<String, dynamic>) {
       return {
-        for (var entry in json.entries)
+        for (final entry in json.entries)
           ?SearchResultType.parse(entry.key): _resultsFromJson(entry.value),
       };
     }

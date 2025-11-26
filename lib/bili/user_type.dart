@@ -12,5 +12,5 @@ enum UserType {
   verifiedUser;
   
   @override
-  String toString() => '${this.index}';
+  String toString() => '$index';
 }
