@@ -39,8 +39,8 @@ class _SearchScreenState
     _searchfFocusNode = FocusNode();
     _tabController = TabController(length: 3, vsync: this);
     
-    if (widget.initialQuery?.trim().isNotEmpry ?? false) {
-      _searchController.text = widget.initialQuery;
+    if (widget.initialQuery?.trim().isNotEmpty ?? false) {
+      _searchController.text = widget.initialQuery!;
     } else {
       //_searchController.openView();
     }
@@ -77,7 +77,7 @@ class _SearchScreenState
               shape: const StadiumBorder(),
               scrolledUnderElevation: 0.0,
               titleSpacing: 0.0,
-              backgroundColor: .transparent,
+              backgroundColor: Colors.transparent,
               floating: true,
               snap: true,
               //centerTitle: false,
@@ -107,7 +107,7 @@ class _SearchScreenState
                 //controller: _tabController,
                 tabs: const <Widget>[
                   Tab(
-                    icon: Icon(.videocam_outlined),
+                    icon: Icon(Icons.videocam_outlined),
                     text: 'Video',
                     iconMargin: EdgeInsets.only(bottom: 0.0),
                   ),
