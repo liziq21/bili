@@ -29,7 +29,7 @@ enum PhotoCategory implements Category {
   photography;
 
   @override
-  String toString() => '${this.index}';
+  String toString() => '$index';
   
   @override
   String toJson() => toString();

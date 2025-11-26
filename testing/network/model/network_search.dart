@@ -1,4 +1,4 @@
-import 'package:f_biuli/bili/search_result_type.dart';
+//import 'package:f_biuli/bili/search_result_type.dart';
 import 'package:f_biuli/network/model/search/network_search.dart';
 import 'package:f_biuli/network/model/search/network_search_result.dart';
 import 'package:f_biuli/network/model/user/network_user_official_verify.dart';

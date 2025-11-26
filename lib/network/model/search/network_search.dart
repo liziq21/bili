@@ -56,7 +56,7 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
               (e as Map<String, dynamic>)['result_type'] as String
             ):
             _resultsFromJson(
-              (e as Map<String, dynamic>)['data']
+              e['data']
             ),
         };
       }
@@ -72,7 +72,7 @@ Map<SearchResultType, List<NetworkSearchResult>?> _resultMapFromJson(Object json
     // live 类型搜索结果
     } else if (json is Map<String, dynamic>) {
       return {
-        for (final entry in (json as Map<String, dynamic>).entries)
+        for (var entry in json.entries)
           ?SearchResultType.parse(entry.key): _resultsFromJson(entry.value),
       };
     }

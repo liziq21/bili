@@ -1,5 +1,6 @@
-import 'uri_extensions.dart';
 import 'routes.dart';
+import 'uri_extensions.dart';
+
 /*
 class BiliUtils {
   static String? getRoutePath(Uri uri) {
@@ -42,7 +43,7 @@ class BiliUtils {
   static String? getRoutePath(Uri uri) {
     if (uri.host.isEmpty) return null;
     
-    final String? path = _extractPath(uri);
+    final path = _extractPath(uri);
     
     if (path == null) return null;
     

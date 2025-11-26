@@ -6,7 +6,7 @@ import 'package:f_biuli/bili/constonts/uris.dart';
 import 'package:f_biuli/bili/category.dart';
 import 'package:f_biuli/bili/date_range.dart';
 import 'package:f_biuli/bili/search_type.dart';
-import 'package:f_biuli/bili/search_result_type.dart';
+//import 'package:f_biuli/bili/search_result_type.dart';
 import 'package:f_biuli/bili/search_order.dart';
 import 'package:f_biuli/bili/user_type.dart';
 import 'package:f_biuli/bili/video_duration_filter.dart';

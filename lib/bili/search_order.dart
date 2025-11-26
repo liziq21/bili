@@ -52,9 +52,8 @@ enum OrderSort {
   descending, ascending;
   
   @override
-  String toString() => '${this.index}';
+  String toString() => '$index';
   
-  @override
   String toJson() => toString();
 }
 

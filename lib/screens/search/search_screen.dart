@@ -25,14 +25,21 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late TextEditingController _searchController;
+  late SearchController _searchController;
+  late TabController _tabController;
   late FocusNode _searchfFocusNode;
   
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController(text: widget.initialQuery);
+    _searchController = SearchController(text: widget.initialQuery);
     _searchfFocusNode = FocusNode();
+    _tabController = TabController(length: 3, vsync: this);
+    
+    if (widget.initialQuery?.isEmpry ?? true) {
+      _searchController.openView();
+    }
+    
     /*_searchController.addListener(() {
       // 忽略换行符逻辑
       if (_searchController.text.contains('\n')) {
@@ -57,56 +64,86 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                clipBehavior: Clip.none,
-                shape: const StadiumBorder(),
-                scrolledUnderElevation: 0.0,
-                titleSpacing: 0.0,
-                backgroundColor: Colors.transparent,
-                floating:
-                    true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
-                title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    return List<Widget>.generate(5, (int index) {
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              clipBehavior: Clip.none,
+              shape: const StadiumBorder(),
+              scrolledUnderElevation: 0.0,
+              titleSpacing: 0.0,
+              backgroundColor: Colors.transparent,
+              floating: true,
+              snap: true,
+              title: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SearchAnchor.bar(
+                  controller: _searchController,
+                  hintText: '搜索...',
+                  suggestionsBuilder: (context, controller) {
+                    return List<Widget>.generate(5, (index) {
                       return ListTile(
                         titleAlignment: ListTileTitleAlignment.center,
                         title: Text('Initial list item $index'),
+                        onTap: () => controller.closeView('$index'),
                       );
                     });
                   },
+                  textInputAction: TextInputAction.search,
+                  onTap: () {
+                    print('SearchAnchor bar tapped');
+                  },
+                  viewOnChanged: (value) {},
+                  viewOnSubmit: (value) => _searchController.closeView(value),
                 ),
               ),
-              // The listed items below are just for filling the screen
-              // so we can see the scrolling effect.
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    height: 100.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 10,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SizedBox(
-                          width: 100.0,
-                          child: Card(child: Center(child: Text('Card $index'))),
-                        );
-                      },
-                    ),
+              bottom: TabBar(
+                controller: _tabController,
+                tabs: const <Widget>[
+                  Tab(
+                    icon: Icon(Icons.videocam_outlined),
+                    text: 'Video',
+                    iconMargin: EdgeInsets.only(bottom: 0.0),
+                  ),
+                  Tab(
+                    icon: Icon(Icons.photo_outlined),
+                    text: 'Photos',
+                    iconMargin: EdgeInsets.only(bottom: 0.0),
+                  ),
+                  Tab(
+                    icon: Icon(Icons.audiotrack_sharp),
+                    text: 'Audio',
+                    iconMargin: EdgeInsets.only(bottom: 0.0),
+                  ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  height: 100.0,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 10,
+                    itemBuilder: (BuildContext context, int index) {
+                      return SizedBox(
+                        width: 100.0,
+                        child: Card(child: Center(child: Text('Card $index'))),
+                      );
+                    },
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
               ),
-            ],
-          ),
-        ),/*Center(
+            ),
+          ],
+        ),
+      ),/*Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

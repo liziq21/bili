@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:f_biuli/routing/router.dart';
+import 'package:routing/router.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
