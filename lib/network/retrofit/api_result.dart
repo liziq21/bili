@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'api_result.freezed.dart';
 part 'api_result.g.dart';

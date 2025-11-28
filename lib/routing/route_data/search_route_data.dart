@@ -1,20 +1,26 @@
 part of '../router.dart';
 
 extension BuildContextSearch on BuildContext {
-  void pushToSearch(String? query) => SearchRouteData(keyword: query).push(this);
+  void pushToSearch(String? keyword) {
+    final viewModel = SearchViewModel(
+      // searchRepository: context.read(),
+      initialQuery: keyword,
+    );
+    SearchRouteData(viewModel).push(this);
+  }
 }
 
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
 class SearchRouteData extends GoRouteData with $SearchRouteData {
-  final String? keyword;
-  
-  const SearchRouteData({this.keyword});
+  final SearchViewModel viewModel;
+
+  const SearchRouteData(this.viewModel);
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
+  Widget build(context, state) {
     return SearchScreen(
-      initialQuery: keyword,
+      viewModel: viewModel,
       onBackClick: () => context.pop(),
     );
   }

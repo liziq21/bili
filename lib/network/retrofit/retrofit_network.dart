@@ -1,34 +1,27 @@
+import 'dart:io.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'package:f_biuli/bili/constonts/uris.dart';
-import 'package:f_biuli/bili/category.dart';
-import 'package:f_biuli/bili/date_range.dart';
-import 'package:f_biuli/bili/search_type.dart';
-//import 'package:f_biuli/bili/search_result_type.dart';
-import 'package:f_biuli/bili/search_order.dart';
-import 'package:f_biuli/bili/user_type.dart';
-import 'package:f_biuli/bili/video_duration_filter.dart';
-import 'package:f_biuli/utils/result.dart';
-
+import '../../bili/constonts/uris.dart';
+import '../../bili/category.dart';
+import '../../bili/date_range.dart';
+import '../../bili/search_type.dart';
+import '../../bili/search_order.dart';
+import '../../bili/user_type.dart';
+import '../../bili/video_duration_filter.dart';
+import '../../utils/result.dart';
 import '../network_search_data_source.dart';
 import '../model/search/network_search.dart';
 import '../model/search/network_search_suggest.dart';
 import 'api_call_adapter.dart';
-import 'api_result.dart'; // retrofit_network.g.dart 需要
+import 'api_result.dart'; // retrofit_network.g.dart
 
 part 'retrofit_network.g.dart';
 
-@lazySingleton
 @RestApi(callAdapter: ApiCallAdapter)
 abstract class BiliNetworkApi {
   
-  @factoryMethod
-  factory BiliNetworkApi(
-    Dio dio, {
-    @Named("apiBase") String? baseUrl,
-  }) = _BiliNetworkApi;
+  factory BiliNetworkApi(Dio dio, { String? baseUrl }) = _BiliNetworkApi;
   
   @GET(ApiUriPaths.search)
   Future<Result<NetworkSearch>> search(
@@ -59,11 +52,20 @@ abstract class BiliNetworkApi {
   ]);
 }
 
-@lazySingleton
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  const BiliNetworkSearch(this.networkApi);
-  
-  final BiliNetworkApi networkApi;
+
+  final BiliNetworkApi networkApi = BiliNetworkApi(
+    Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
+        headers: {
+          HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
+        },
+      ),
+      ApiUris.base,
+    ),
+  );
   
   @override
   Future<Result<NetworkSearch>> search(

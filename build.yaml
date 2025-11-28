@@ -30,14 +30,7 @@ targets:
         generate_for:
           include:
             - lib/routing/router.dart
-      
-      injectable_generator:injectable_config_builder:
-        generate_for:
-          - lib/*.dart
-      injectable_generator:injectable_builder:
-        generate_for:
-          - lib/**.dart
-      
+
       json_serializable:
         generate_for:
           include:

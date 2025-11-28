@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import 'package:f_biuli/screens/home/home_screen.dart';
-import 'package:f_biuli/screens/live/live_screen.dart';
-import 'package:f_biuli/screens/not_found/not_found_screen.dart';
-import 'package:f_biuli/screens/search/search_screen.dart';
-import 'package:f_biuli/screens/space/space_screen.dart';
-import 'package:f_biuli/screens/video/video_screen.dart';
-
-import 'package:f_biuli/bili/bili_utils.dart';
-import 'package:f_biuli/bili/routes.dart';
+import '../../bili/bili_utils.dart';
+import '../../bili/routes.dart';
+import '../../screens/home/home_screen.dart';
+import '../../screens/home/home_view_model.dart';
+import '../../screens/live/live_screen.dart';
+import '../../screens/live/live_view_model.dart';
+import '../../screens/not_found/not_found_screen.dart';
+import '../../screens/search/search_screen.dart';
+import '../../screens/search/search_view_model.dart';
+import '../../screens/space/space_screen.dart';
+import '../../screens/space/space_view_model.dart';
+import '../../screens/video/video_screen.dart';
+import '../../screens/video/video_view_model.dart';
 
 part 'route_data/home_route_data.dart';
 part 'route_data/live_route_data.dart';
