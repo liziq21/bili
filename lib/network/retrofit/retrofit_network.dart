@@ -1,4 +1,4 @@
-import 'dart:io.dart';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -63,8 +63,8 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
           HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
         },
       ),
-      ApiUris.base,
     ),
+    baseUrl: ApiUris.base,
   );
   
   @override

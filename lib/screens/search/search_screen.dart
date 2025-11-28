@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../bili/search_type.dart';
 import 'search_view_model.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends StatelessWidget {
   const SearchScreen({
     super.key,
     required this.viewModel,
@@ -64,7 +64,7 @@ class SearchScreen extends StatefulWidget {
                       textInputAction: .search,
                       //onTap: () {},
                       onChanged: viewModel.onChanged,
-                      onSubmit: viewModel.onSearchTriggered,
+                      onSubmitted: viewModel.onSearchTriggered,
                     ),
                   ),
                 ),

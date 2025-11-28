@@ -1,6 +1,7 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'network/network_search_data_source.dart';
 import 'network/retrofit/retrofit_network.dart';
 
 /// Shared providers for all configurations.
