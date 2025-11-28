@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../bili/constonts/constonts.dart';
 
 class SearchViewModel extends ChangeNotifier {
-  const SearchViewModel({
+  SearchViewModel({
     String? initialQuery,
   }) {
     _searchController = .new();
@@ -15,7 +15,7 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   late SearchController _searchController;
-  get searchController = _searchController;
+  get searchController => _searchController;
   
   DateTime _startTime = Constonts.minDate;
   DateTime get startTime => _startTime;
@@ -46,7 +46,7 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   void onSearchTriggered(String value) {
-    _searchController.closeView(value)
+    _searchController.closeView(value);
   }
   
   void clearSearch() {

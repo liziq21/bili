@@ -74,7 +74,7 @@ class SearchScreen extends StatefulWidget {
                   tabs: <Widget>[
                     Tab(
                       text: '视频',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      //iconMargin: EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '番剧',
@@ -119,47 +119,37 @@ class SearchScreen extends StatefulWidget {
               ),
               SliverToBoxAdapter(
                 child: TabBarView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
-                  ),
-                ],
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),/*Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Search query: ${initialQuery ?? 'No query'}'),
-              ElevatedButton(
-                onPressed: onBackClick,
-                child: const Text('pop'),
-              ),
-            ],
-          ),
-        ),*/
+        ),
       ),
     ),
   }
