@@ -151,6 +151,6 @@ class SearchScreen extends StatefulWidget {
           ),
         ),
       ),
-    ),
+    );
   }
 }
