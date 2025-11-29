@@ -16,7 +16,7 @@ class SearchRouteData extends GoRouteData with $SearchRouteData {
   @override
   Widget build(context, state) {
     final viewModel = SearchViewModel(
-      // searchRepository: context.read(),
+      netwotkSearchApi: context.read(),
       initialQuery: keyword,
     );
     return SearchScreen(

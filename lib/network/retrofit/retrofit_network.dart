@@ -13,24 +13,24 @@ import '../../utils/result.dart';
 import '../network_search_data_source.dart';
 import '../model/search/network_search.dart';
 import '../model/search/network_search_suggest.dart';
-import 'api_call_adapter.dart';
-import 'api_result.dart'; // retrofit_network.g.dart
+import 'api_result.dart';
+import 'search_api_result.dart';
 
 part 'retrofit_network.g.dart';
 
-@RestApi(callAdapter: ApiCallAdapter)
+@RestApi()
 abstract class BiliNetworkApi {
   
   factory BiliNetworkApi(Dio dio, { String? baseUrl }) = _BiliNetworkApi;
   
   @GET(ApiUriPaths.search)
-  Future<Result<NetworkSearch>> search(
+  Future<ApiResult<NetworkSearchResult>> search(
     @Query('keyword') String keyword, {
     @Query('page') int? page,
   });
   
   @GET(ApiUriPaths.searchType)
-  Future<Result<NetworkSearch>> searchByType(
+  Future<ApiResult<NetworkSearchResult>> searchByType(
     @Query('search_type') SearchType searchType,
     @Query('keyword') String keyword, {
     @Query('page') int? page,
@@ -45,7 +45,7 @@ abstract class BiliNetworkApi {
   });
   
   @GET(SearchUris.suggest)
-  Future<Result<NetworkSearchSuggest>> searchSuggest(
+  Future<SearchApiResult<NetworkSearchSuggest>> searchSuggest(
     @Query('term') String term,
     @Query('highlight') String highlight, [
     @Query('main_ver') String mainVer = 'v1',
@@ -68,7 +68,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> search(
+  Future<ApiResult<NetworkSearchResult>> search(
     String keyword, {
     int? page,
   }) async => networkApi.search(
@@ -77,7 +77,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchArticle(
+  Future<ApiResult<NetworkSearchResult>> searchArticle(
     String keyword, {
     int? page,
     ArticleCategory? category,
@@ -93,7 +93,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     
   
   @override
-  Future<Result<NetworkSearch>> searchBiliUser(
+  Future<ApiResult<NetworkSearchResult>> searchBiliUser(
     String keyword, {
     int? page,
     UserSearchSort? sort,
@@ -108,7 +108,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchMediaBangumi(
+  Future<ApiResult<NetworkSearchResult>> searchMediaBangumi(
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
@@ -118,7 +118,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchMediaFt(
+  Future<ApiResult<NetworkSearchResult>> searchMediaFt(
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
@@ -128,7 +128,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchLive(
+  Future<ApiResult<NetworkSearchResult>> searchLive(
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
@@ -138,7 +138,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchLiveRoom(
+  Future<ApiResult<NetworkSearchResult>> searchLiveRoom(
     String keyword, {
     int? page,
     LiveRoomSearchOrder? order,
@@ -150,7 +150,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchLiveUser(
+  Future<ApiResult<NetworkSearchResult>> searchLiveUser(
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
@@ -160,7 +160,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchPhoto(
+  Future<ApiResult<NetworkSearchResult>> searchPhoto(
     String keyword, {
     int? page,
     PhotoCategory? category,
@@ -174,7 +174,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchTopic(
+  Future<ApiResult<NetworkSearchResult>> searchTopic(
     String keyword, {
     int? page,
   }) async => networkApi.searchByType(
@@ -184,7 +184,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearch>> searchVideo(
+  Future<ApiResult<NetworkSearchResult>> searchVideo(
     String keyword, {
     int? page,
     PhotoOrVideoSearchOrder? order,
@@ -203,7 +203,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<Result<NetworkSearchSuggest>> searchSuggest(String term) async =>
+  Future<SearchApiResult<NetworkSearchSuggest>> searchSuggest(String term) async =>
     networkApi.searchSuggest(term, term);
 }
 

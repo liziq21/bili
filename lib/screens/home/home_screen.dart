@@ -44,8 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text('Live'),
             ),
             ElevatedButton(
-              onPressed: () => widget.onSearch('query'),
+              onPressed: () => widget.onSearch(),
               child: const Text('Search'),
+            ),
+            ElevatedButton(
+              onPressed: () => widget.onSearch('qullll'),
+              child: const Text('Search "qullll"'),
             ),
             ElevatedButton(
               onPressed: () => widget.onSpace('188339'),

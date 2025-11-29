@@ -1,0 +1,44 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../bili/search_result_type.dart';
+import '../common/html_title.dart';
+
+part 'network_video_search_result.freezed.dart';
+part 'network_video_search_result.g.dart';
+
+@Freezed
+@JsonSerializable(fieldRename: FieldRename.snake)
+class NetworkVideoSearchResult with _$NetworkVideoSearchResult {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory NetworkVideoSearchResult({
+    required int id,
+    required String author,
+    required int mid,
+    required String typeid,
+    required String typename,
+    required String arcurl,
+    required int aid,
+    required String bvid,
+    required HtmlTitle title,
+    required String description,
+    required String pic,
+    required int play,
+    required int favorites,
+    required String tag,
+    required int review,
+    required int pubdate,
+    required int senddate,
+    required String duration,
+    required bool badgepay,
+    required int isUnionVideo,
+    required int like,
+    required String upic,
+    required String corner,
+    required String cover,
+    required String desc,
+    required String url,
+    required int danmaku,
+  }) = _NetworkVideoSearchResult;
+
+  factory NetworkVideoSearchResult.fromJson(Map<String, dynamic> json) =>
+      _$NetworkVideoSearchResultFromJson(json);
+}

@@ -27,9 +27,9 @@ class SearchScreen extends StatelessWidget {
                 scrolledUnderElevation: 0.0,
                 titleSpacing: 0.0,
                 //backgroundColor: Colors.transparent,
-                //floating: true,
+                floating: true,
                 //pinned: true,
-                //snap: true,
+                snap: true,
                 //centerTitle: false,
                 title: Padding(
                   padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
@@ -56,8 +56,13 @@ class SearchScreen extends StatelessWidget {
                         return List<Widget>.generate(5, (index) {
                           return ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
+                            leading: const Icon(Icons.history), //Icons.public
                             title: Text('No search suggestion. $index'),
                             onTap: () => viewModel.onSearchTriggered('$index'),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.north_west),
+                              onPressed: () => controller.text = '$index',
+                            ),
                           );
                         });
                       },
