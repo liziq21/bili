@@ -76,6 +76,6 @@ abstract interface class NetworkSearchDataSource {
     DateRange? dateRange
   });
   
-  Future<SearchApiResult<NetworkSearchSuggest>> searchSuggest(String term);
+  Future<SearchApiResult<NetworkSearchSuggest>> getSearchSuggest(String term);
   
 }
