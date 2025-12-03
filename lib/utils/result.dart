@@ -5,6 +5,19 @@ sealed class Result<T> {
   const factory Result.error(Exception error) = Error._;
 }
 
+extension ResultX<T> on Result<T> {
+  Result<R> map<R>(R Function(T value) transform) {
+    return switch (this) {
+      Ok(:value) => Result.ok(transform(value)),
+      Error() => this,
+    };
+  }
+  
+  bool get isOk => this is Ok<T>;
+
+  bool get isError => this is Error<T>;
+}
+
 final class Ok<T> extends Result<T> {
   const Ok._(this.value);
 

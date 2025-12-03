@@ -10,24 +10,19 @@ class ApiCallAdapter<T>
   @override
   Future<Result<T>> adapt(Future<HttpResponse<ApiResult<T>>> Function() call) async {
     try {
-      final HttpResponse(:response, data:apiResult) = await call();
-      if (apiResult.data != null) {
-        return Result.ok(apiResult.data);
+      final HttpResponse(:response, data :apiResult) = await call();
+      return switch (apiResult) {
+        ApiResultOk => .ok(apiResult.data);
+        ApiResultError => .error(Exception('ERROR $response\n$apiResult'));
       }
-      
-      if (apiResult.result != null) {
-        return Result.ok(apiResult.result);
-      }
-      
-      return Result.error(Exception('ERROR $response\n$apiResult'));
     } on DioException catch (e) {
-      final response = e.response;
-      final data = response?.data?.toString();
-      return Result.error(Exception(
-          'ERROR $response\n${data ?? e.message}'
-      ));
+      String? data = null;
+      if (e.response?.statusCode != 404) {
+        data = e.response?.data?.toString();
+      }
+      return .error(Exception('${data ?? e.message}'));
     } on Exception catch (e) {
-      return Result.error(e);
+      return .error(e);
     }
   }
 }

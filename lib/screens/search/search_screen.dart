@@ -39,7 +39,7 @@ class SearchScreen extends StatelessWidget {
                       searchController: viewModel.searchController,
                       barHintText: '搜索...',
                       suggestionsBuilder: (context, controller) {
-                        if (controller.text.isEmpty) {
+                        if (viewModel.controller.text.isEmpty) {
                           /*if (searchHistory.isNotEmpty) {
                             return getHistoryList(controller);
                           }*/
@@ -52,19 +52,23 @@ class SearchScreen extends StatelessWidget {
                             ),
                           ];
                         }
-                        //return getSuggestions(controller);
-                        return List<Widget>.generate(5, (index) {
-                          return ListTile(
+                    
+                        return viewModel.suggests.map((suggest) =>
+                          ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
                             leading: const Icon(Icons.history), //Icons.public
-                            title: Text('No search suggestion. $index'),
-                            onTap: () => viewModel.onSearchTriggered('$index'),
+                            title: Text(suggest),
+                            onTap: () {
+                              viewModel.onSearchTriggered(suggest);
+                              controller.cloer();
+                              controller.text = suggest;
+                            },
                             trailing: IconButton(
                               icon: const Icon(Icons.north_west),
-                              onPressed: () => controller.text = '$index',
+                              onPressed: () => controller.text = suggest,
                             ),
-                          );
-                        });
+                          )
+                        );
                       },
                       textInputAction: .search,
                       //onTap: () {},

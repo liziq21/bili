@@ -3,71 +3,70 @@ import '../../bili/date_range.dart';
 import '../../bili/search_order.dart';
 import '../../bili/user_type.dart';
 import '../../bili/video_duration_filter.dart';
+import '../../utils/reault.dart';
 import 'model/search/network_search_result.dart';
 import 'model/search/network_search_suggest.dart';
-import 'retrofit/api_result.dart';
-import 'retrofit/search_api_result.dart';
 
 abstract interface class NetworkSearchDataSource {
   
-  Future<ApiResult<NetworkSearchResult>> search(
+  Future<Result<NetworkSearchResult>> search(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchArticle(
+  Future<Result<NetworkSearchResult>> searchArticle(
     String keyword, {
     int? page,
     ArticleCategory? category,
     ArticleSearchOrder? order,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchBiliUser(
+  Future<Result<NetworkSearchResult>> searchBiliUser(
     String keyword, {
     int? page,
     UserSearchSort? sort,
     UserType? userType,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchMediaBangumi(
+  Future<Result<NetworkSearchResult>> searchMediaBangumi(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchMediaFt(
+  Future<Result<NetworkSearchResult>> searchMediaFt(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchLive(
+  Future<Result<NetworkSearchResult>> searchLive(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchLiveRoom(
+  Future<Result<NetworkSearchResult>> searchLiveRoom(
     String keyword, {
     int? page,
     LiveRoomSearchOrder? order,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchLiveUser(
+  Future<Result<NetworkSearchResult>> searchLiveUser(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchPhoto(
+  Future<Result<NetworkSearchResult>> searchPhoto(
     String keyword, {
     int? page,
     PhotoCategory? category,
     PhotoOrVideoSearchOrder? order,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchTopic(
+  Future<Result<NetworkSearchResult>> searchTopic(
     String keyword, {
     int? page,
   });
   
-  Future<ApiResult<NetworkSearchResult>> searchVideo(
+  Future<Result<NetworkSearchResult>> searchVideo(
     String keyword, {
     int? page,
     PhotoOrVideoSearchOrder? order,
@@ -76,6 +75,6 @@ abstract interface class NetworkSearchDataSource {
     DateRange? dateRange
   });
   
-  Future<SearchApiResult<NetworkSearchSuggest>> getSearchSuggest(String term);
+  Future<Result<NetworkSearchSuggest>> getSuggests(String term);
   
 }

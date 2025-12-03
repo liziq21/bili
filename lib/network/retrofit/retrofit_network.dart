@@ -15,7 +15,6 @@ import '../model/search/network_search.dart';
 import '../model/search/network_search_suggest.dart';
 import 'api_call_adapter.dart';
 import 'api_result.dart';
-import 'search_api_result.dart';
 
 part 'retrofit_network.g.dart';
 
@@ -46,7 +45,7 @@ abstract class BiliNetworkApi {
   });
   
   @GET(SearchUris.suggest)
-  Future<SearchResult<NetworkSearchSuggest>> searchSuggest(
+  Future<Result<NetworkSearchSuggest>> getSuggests(
     @Query('term') String term,
     @Query('highlight') String highlight, [
     @Query('main_ver') String mainVer = 'v1',
@@ -204,8 +203,8 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   );
   
   @override
-  Future<SearchResult<NetworkSearchSuggest>> getSearchSuggest(String term) async =>
-    networkApi.searchSuggest(term, term);
+  Future<Result<NetworkSearchSuggest>> getSuggests(String term) async =>
+    networkApi.getSuggests(term, term);
 }
 
 extension on int {

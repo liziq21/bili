@@ -1,39 +1,36 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter/foundation.dart';
 
 part 'api_result.freezed.dart';
 part 'api_result.g.dart';
 
 @Freezed(genericArgumentFactories: true)
-sealeed class ApiResult<T> with _$ApiResult<T> {
+ class ApiResult<T> with _$ApiResult<T> {
   const factory ApiResult({
-    required int code,
-    String? message,
-    T? data,
+    required int code
+    T data,
   }) = ApiResultOk;
   
-  factory ApiResult.fromJson(
-    Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
   const factory ApiResult({
     required int code,
-    String? message,
-    T? data,
-  }) = ApiResultOk;
+    String? message
+  }) = ApiResultError;
   
-  factory ApiResult.fromJson(
-    Map<String, dynamic> json,
-    T Function(Object?) fromJsonT,
-  ) {
-    if (json.isEmpty) {
-      json['message']
+  factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) {
+    final {
+      'code': int code,
+      'message': String? message,
+      'data': T? data,
+      'result': T? result,
+    } = json;
+    
+    if(code != 0 && message != null && message.isNotEmpty) {
+      return ApiResultError(code: code, message: json);
     }
-    fromJsonT
+    
+    return ApiResultOk(
+      code: code,
+      data: fromJsonT(data ?? result!),
+    );
   }
 }
-
-
-@Freezed(unionKey: 'type', unionValueCase: FreezedUnionCase.snake)
-sealeed class NetworkSearchResult with _$NetworkSearchResult {
-
-  @JsonSerializable(fieldRename: FieldRename.snake)
-  const factory NetworkSearchResult.article(
