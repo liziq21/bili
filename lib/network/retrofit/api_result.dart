@@ -20,7 +20,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
     final message = json['message'] as String?;
     final rawData = json['data'] ?? json['result'];
 
-    if (code != 0 || code != 3
+    if (code != 0 && code != 3
         ||(message != null && message.isNotEmpty && message != '0')
     ) {
       return ApiResultError(code: code, message: message);
