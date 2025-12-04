@@ -124,12 +124,12 @@ class SearchScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: TabBarView(
                   children: [
-                    const Text('1');
-                    const Text('2');
-                    const Text('3');
-                    const Text('4');
-                    const Text('5');
-                    const Text('6');
+                    const Text('1'),
+                    const Text('2'),
+                    const Text('3'),
+                    const Text('4'),
+                    const Text('5'),
+                    const Text('6'),
                   ],
                 ),
               ),
