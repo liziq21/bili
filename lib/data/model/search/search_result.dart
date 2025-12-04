@@ -1,12 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../bili/search_result_type.dart';
-import '../../../network/model/network_search.dart';
+import '../../../network/model/network_search_result.dart';
 
 part 'search_result.freezed.dart';
 
 @freezed
-class SearchResult with _$SearchResult {
+abstract class SearchResult with _$SearchResult {
   const factory SearchResult({
     required int page,
     required int pagesize,

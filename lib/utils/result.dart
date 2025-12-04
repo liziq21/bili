@@ -8,8 +8,8 @@ sealed class Result<T> {
 extension ResultX<T> on Result<T> {
   Result<R> map<R>(R Function(T value) transform) {
     return switch (this) {
-      Ok(:value) => Result.ok(transform(value)),
-      Error() => this,
+      Ok(:value) => .ok(transform(value)),
+      Error(:error) => .error(error),
     };
   }
   

@@ -30,6 +30,7 @@ jobs:
           cache: true
           channel: stable
           flutter-version-file: pubspec.yaml
+      - run: flutter clean
       - run: flutter pub get
 
       - name: Build_runner

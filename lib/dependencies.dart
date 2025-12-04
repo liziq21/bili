@@ -2,9 +2,9 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'data/repository/search/bili_search_repository.dart';
-import 'data/repository/search/search_suggest_repository.dart';
-import 'data/repository/search/bili_search_suggest_repository.dart';
 import 'data/repository/search/search_repository.dart';
+import 'data/repository/search_suggest/bili_search_suggest_repository.dart';
+import 'data/repository/search_suggest/search_suggest_repository.dart';
 import 'network/network_search_data_source.dart';
 import 'network/retrofit/retrofit_network.dart';
 

@@ -26,18 +26,24 @@ class SearchViewModel extends ChangeNotifier {
   
   final _log = Logger('SearchViewModel');
   String? _currentQuery;
-  String get currentQuery => _currentQuery;
-  
+
   late final SearchRepository _searchRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
   
   final _searchController = SearchController();
   get searchController => _searchController;
   
-  List<String> _suggests = [];
-  get suggests => _suggests;
+  Iterable<String> _suggests = [];
+  Iterable<String> get suggests() {
+    if (_currentQuery != _searchController.text) {
+      return _suggests;
+    }
+    _currentQuery = _searchController.text;
+    _debounceLoadSuggests(_currentQuery);
+    return [];
+  }
   
-  late final _debounceLoadSuggests = _debounce<Iterable<String>?, String>(_loadSuggests);
+  late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
   DateTime _startTime = Constonts.minDate;
   DateTime get startTime => _startTime;
@@ -45,22 +51,18 @@ class SearchViewModel extends ChangeNotifier {
   DateTime _endTime = DateTime.now();
   DateTime get endTime => _endTime;
   
-  void onChanged() {
-    _suggests = [];
-    notifyListeners();
-    _debounceLoadSuggests(_searchController.text);
-  }
+  Iterable<String> getSuggests() 
   
-  void onSearchTriggered() {
+  void onSearchTriggered(String query) {
     
   }
   
   void onSuggestClick(String suggest) {
-    controller.closeView(suggest);
-    onSearchTriggered();
+    onSearchTriggered(suggest);
+    _controller.closeView(suggest);
   }
   
-  Future<Result<void>> _loadSuggests(String query) async {
+  Future<void> _loadSuggests(String query) async {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:value):
@@ -69,10 +71,9 @@ class SearchViewModel extends ChangeNotifier {
           _suggests = value;
           notifyListeners();
         }
-      case Error():
-        _log.warning('Failed to load suggests', result.error);
+      case Error(:error):
+        _log.warning('Failed to load suggests', error);
     }
-    return result;
   }
   
   void setStartTime(DateTime time) {
@@ -93,14 +94,6 @@ class SearchViewModel extends ChangeNotifier {
     
   }
   
-  void onChanged(String value) {
-    
-  }
-  
-  void onSearchTriggered(String value) {
-    _searchController.closeView(value);
-  }
-  
   void clearSearch() {
     _searchController.clear();
   }
@@ -117,6 +110,8 @@ enum DatePickerShowState {
   selectStartDate,
   selectEndDate;
 }
+
+const Duration debounceDuration = Duration(milliseconds: 300);
 
 typedef _Debounceable<S, T> = Future<S?> Function(T parameter);
 

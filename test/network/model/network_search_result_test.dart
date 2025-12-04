@@ -2,9 +2,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
-
-import '../../../network/retrofit/api_result.dart';
-import '../../../network/model/search/network_search_result.dart';
+import 'package:f_biuli/network/retrofit/api_result.dart';
+import 'package:f_biuli/network/model/search/network_search_result.dart';
 import '../../../testing/utils/result.dart';
 
 void main() {
@@ -14,24 +13,24 @@ void main() {
     final json = await getJsonData(jsonDir, fileName);
     final apiResult = ApiResult.fromJson(
       json,
-      NetworkSearchResult.fromJson(json);
+      NetworkSearchResult.fromJson(json),
     ).asOk;
     return apiResult.data;
   }
 
-  group('NetworkSearch Deserialization', () {
+  group('NetworkSearchResult Deserialization', () {
     test('should deserialize search.json correctly', () async {
-      final NetworkSearch searchResult = await _loadAndDeserialize('search.json');
+      final searchResult = await _loadAndDeserialize('search.json');
       expect(searchResult.result.video[0].typename, '数码');
     });
 
     test('should deserialize type_search.json correctly', () async {
-      final NetworkSearch typeSearchResult = await _loadAndDeserialize('type_search.json');
+      final typeSearchResult = await _loadAndDeserialize('type_search.json');
       expect(typeSearchResult.reault.article[0].like, 24);
     });
 
     test('should deserialize live_search.json correctly', () async {
-      final NetworkSearch liveSearchResult = await _loadAndDeserialize('live_search.json');
+      final liveSearchResult = await _loadAndDeserialize('live_search.json');
       expect(liveSearchResult.result.liveRoom[0].area, 3);
     });
   });

@@ -11,10 +11,9 @@ class BiliSearchSuggestRepository implements SearchSuggestRepository {
   final NetworkSearchDataSource _networkApi;
   
   Future<Result<Iterable<String>>> getSuggests(String query) async {
-    final result = await networkApi.getSuggests(query);
-    return switch (result) {
-      Ok(:value) => .ok(value.tag.map((e) => e.term)),
-      Error() => result,
-    };
+    final result = await _networkApi.getSuggests(query);
+    return result.map((value) =>
+      value.tag.map((e) => e.term)
+    );
   }
 }

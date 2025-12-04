@@ -39,7 +39,7 @@ class SearchScreen extends StatelessWidget {
                       searchController: viewModel.searchController,
                       barHintText: '搜索...',
                       suggestionsBuilder: (context, controller) {
-                        if (viewModel.controller.text.isEmpty) {
+                        if (controller.text.isEmpty) {
                           /*if (searchHistory.isNotEmpty) {
                             return getHistoryList(controller);
                           }*/
@@ -58,11 +58,7 @@ class SearchScreen extends StatelessWidget {
                             titleAlignment: ListTileTitleAlignment.center,
                             leading: const Icon(Icons.history), //Icons.public
                             title: Text(suggest),
-                            onTap: () {
-                              viewModel.onSearchTriggered(suggest);
-                              controller.cloer();
-                              controller.text = suggest;
-                            },
+                            onTap: () => viewModel.onSuggestClick(suggest),
                             trailing: IconButton(
                               icon: const Icon(Icons.north_west),
                               onPressed: () => controller.text = suggest,
@@ -72,7 +68,6 @@ class SearchScreen extends StatelessWidget {
                       },
                       textInputAction: .search,
                       //onTap: () {},
-                      onChanged: viewModel.onChanged,
                       onSubmitted: viewModel.onSearchTriggered,
                     ),
                   ),
