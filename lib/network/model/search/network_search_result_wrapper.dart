@@ -13,7 +13,7 @@ part 'network_search_result_wrapper.freezed.dart';
 part 'network_search_result_wrapper.g.dart';
 
 @freezed
-abstract class NetworkSearchResultWrapper with _$NetworkSearchResult {
+abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
   const factory NetworkSearchResultWrapper({
     @Default([]) List<NetworkArticleSearchResult> article,
     @Default([]) List<NetworkBiliUserSearchResult> biliUser,

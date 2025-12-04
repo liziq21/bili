@@ -9,7 +9,7 @@ part 'network_search_result.g.dart';
 
 @freezed
 abstract class NetworkSearchResult with _$NetworkSearchResult {
-  const factory NetworkSearchResult({
+  const NetworkSearchResult({
     required int page,
     required int pagesize,
     required int numResults,
