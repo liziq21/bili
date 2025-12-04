@@ -15,7 +15,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
     String? message,
   }) = ApiResultError;
 
-  factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) {
+  factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
     final code = json['code'] as int? ?? -1;
     final message = json['message'] as String?;
     final rawData = json['data'] ?? json['result'];

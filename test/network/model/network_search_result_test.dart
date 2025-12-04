@@ -11,7 +11,7 @@ void main() {
 
   Future<NetworkSearchResult> _loadAndDeserialize(String fileName) async {
     final json = await getJsonData(jsonDir, fileName);
-    final apiResult = ApiResult.fromJson(
+    final apiResult = ApiResult<NetworkSearchResult>.fromJson(
       json,
       NetworkSearchResult.fromJson,
     );
