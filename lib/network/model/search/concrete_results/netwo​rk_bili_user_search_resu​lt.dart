@@ -8,7 +8,7 @@ part 'network_bili_user_search_result.g.dart';
 
 @freezed
 class NetworkBiliUserSearchResult with _$NetworkBiliUserSearchResult {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkBiliUserSearchResult({
     required int mid,
     required String uname,

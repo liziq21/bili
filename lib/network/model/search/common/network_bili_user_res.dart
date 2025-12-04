@@ -5,7 +5,7 @@ part 'network_bili_user_res.g.dart';
 
 @freezed
 abstract class NetworkBiliUserRes with _$NetworkBiliUserRes {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkBiliUserRes({
     required int aid,
     required String bvid,

@@ -7,8 +7,8 @@ part 'api_result.g.dart';
 @Freezed(genericArgumentFactories: true)
  class ApiResult<T> with _$ApiResult<T> {
   const factory ApiResult({
-    required int code
-    T data,
+    required int code,
+    required T data,
   }) = ApiResultOk;
   
   const factory ApiResult({

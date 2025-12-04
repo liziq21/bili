@@ -5,7 +5,7 @@ import '../../../utils/result.dart';
 import 'search_suggest_repository.dart';
 
 class BiliSearchSuggestRepository implements SearchSuggestRepository {
-  const factory BiliSearchSuggestRepository({required NetworkSearchDataSource networkApi})
+  const BiliSearchSuggestRepository({required NetworkSearchDataSource networkApi})
     : _networkApi = networkApi;
   
   final NetworkSearchDataSource _networkApi;

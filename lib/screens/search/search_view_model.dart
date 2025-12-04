@@ -34,7 +34,7 @@ class SearchViewModel extends ChangeNotifier {
   final _searchController = SearchController();
   get searchController => _searchController;
   
-  <List<String>> _suggests = [];
+  List<String> _suggests = [];
   get suggests => _suggests;
   
   late final _debounceLoadSuggests = _debounce<Iterable<String>?, String>(_loadSuggests);
@@ -112,126 +112,10 @@ class SearchViewModel extends ChangeNotifier {
   }
 }
 
-
 enum DatePickerShowState {
   dismiss,
   selectStartDate,
   selectEndDate;
-}
-
-
-import 'dart:async';
-
-import 'package:flutter/material.dart';
-
-
-const Duration fakeAPIDuration = Duration(seconds: 1);
-const Duration debounceDuration = Duration(milliseconds: 500);
-
-void main() => runApp(const SearchAnchorAsyncExampleApp());
-
-class SearchAnchorAsyncExampleApp extends StatelessWidget {
-  const SearchAnchorAsyncExampleApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SearchAnchor - async and debouncing'),
-        ),
-        body: const Center(child: _AsyncSearchAnchor()),
-      ),
-    );
-  }
-}
-
-class _AsyncSearchAnchor extends StatefulWidget {
-  const _AsyncSearchAnchor();
-
-  @override
-  State<_AsyncSearchAnchor> createState() => _AsyncSearchAnchorState();
-}
-
-class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor> {
-  String? _currentQuery;
-
-  late Iterable<Widget> _lastOptions = <Widget>[];
-
-  late final _Debounceable<Iterable<String>?, String> _debouncedSearch;
-
-  Future<Iterable<String>?> _search(String query) async {
-    _currentQuery = query;
-
-    final Iterable<String> options = await _FakeAPI.search(_currentQuery!);
-
-    if (_currentQuery != query) {
-      return null;
-    }
-    _currentQuery = null;
-
-    return options;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _debouncedSearch = _debounce<Iterable<String>?, String>(_search);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SearchAnchor(
-      builder: (BuildContext context, SearchController controller) {
-        return IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            controller.openView();
-          },
-        );
-      },
-      suggestionsBuilder:
-          (BuildContext context, SearchController controller) async {
-            final List<String>? options = (await _debouncedSearch(
-              controller.text,
-            ))?.toList();
-            if (options == null) {
-              return _lastOptions;
-            }
-            _lastOptions = List<ListTile>.generate(options.length, (int index) {
-              final String item = options[index];
-              return ListTile(
-                title: Text(item),
-                onTap: () {
-                  debugPrint('You just selected $item');
-                },
-              );
-            });
-
-            return _lastOptions;
-          },
-    );
-  }
-}
-
-// Mimics a remote API.
-class _FakeAPI {
-  static const List<String> _kOptions = <String>[
-    'aardvark',
-    'bobcat',
-    'chameleon',
-  ];
-
-  // Searches the options, but injects a fake "network" delay.
-  static Future<Iterable<String>> search(String query) async {
-    await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
-    if (query == '') {
-      return const Iterable<String>.empty();
-    }
-    return _kOptions.where((String option) {
-      return option.contains(query.toLowerCase());
-    });
-  }
 }
 
 typedef _Debounceable<S, T> = Future<S?> Function(T parameter);

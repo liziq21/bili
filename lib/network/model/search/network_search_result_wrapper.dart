@@ -74,7 +74,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResult {
       }
       
       // 其它类型搜索结果
-      _parseAndAssignResults(firstItem['type'] as String, json)
+      _parseAndAssignResults(firstItem['type'] as String, json);
 
     // live 类型搜索结果 Map is {'live_room': data, 'live_user': data}
     } else if (json is Map<String, dynamic>) {

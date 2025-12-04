@@ -14,7 +14,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       showPerformanceOverlay: true,
-      routerConfig: router，
+      routerConfig: router,
     );
   }
 }

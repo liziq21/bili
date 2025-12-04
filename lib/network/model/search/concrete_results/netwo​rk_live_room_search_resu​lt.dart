@@ -5,9 +5,9 @@ import '../common/html_title.dart';
 part 'network_live_room_search_result.freezed.dart';
 part 'network_live_room_search_result.g.dart';
 
-@Freezed
+@freezed
 class NetworkLiveRoomSearchResult with _$NetworkLiveRoomSearchResult {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkLiveRoomSearchResult({
     required int area,
     required int attentions,

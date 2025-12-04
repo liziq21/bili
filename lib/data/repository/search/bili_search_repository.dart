@@ -4,7 +4,7 @@ import '../../model/search/search_result.dart';
 import 'search_epository.dart';
 
 class BiliSearchRepository implements SearchRepository {
-  const factory BiliSearchRepository({required NetworkSearchDataSource networkApi})
+  const BiliSearchRepository({required NetworkSearchDataSource networkApi})
     : _networkApi = networkApi;
   
   final NetworkSearchDataSource _networkApi;

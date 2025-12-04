@@ -8,7 +8,7 @@ part 'network_media_ft_search_result.g.dart';
 
 @freezed
 class NetworkMediaFtSearchResult with _$NetworkMediaFtSearchResult {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkMediaFtSearchResult({
     required int mediaId,
     required HtmlTitle title,

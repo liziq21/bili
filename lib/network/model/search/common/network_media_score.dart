@@ -5,7 +5,7 @@ part 'network_media_score.g.dart';
 
 @freezed
 abstract class NetworkMediaScore with _$NetworkMediaScore{
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkMediaScore({
     required int score,
     required int userCount,

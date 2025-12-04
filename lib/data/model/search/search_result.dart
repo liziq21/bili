@@ -13,5 +13,5 @@ class SearchResult with _$SearchResult {
     required int numResults,
     required int numPages,
     Map<SearchResultType, String>? pageinfo,
-    ) = _SearchResult;
+  }) = _SearchResult;
 }

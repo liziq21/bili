@@ -5,9 +5,9 @@ import '../common/html_title.dart';
 part 'network_live_user_search_result.freezed.dart';
 part 'network_live_user_search_result.g.dart';
 
-@Freezed
+@freezed
 class NetworkLiveUserSearchResult with _$NetworkLiveUserSearchResult {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkLiveUserSearchResult({
     required int area,
     required int areaV2Id,
