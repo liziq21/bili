@@ -10,27 +10,39 @@ sealed class ApiResult<T> with _$ApiResult<T> {
     required int code,
     required T data,
   }) = ApiResultOk;
-  
-  const factory ApiResult({
+
+  const factory ApiResult.error({ // 建议给错误工厂方法一个不同的名称，避免与另一个冲突
     required int code,
-    String? message
+    String? message,
   }) = ApiResultError;
-  
+
   factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) {
-    final {
-      'code': int code,
-      'message': String? message,
-      'data': T? data,
-      'result': T? result,
-    } = json;
-    
-    if(code != 0 && message != null && message.isNotEmpty) {
-      return ApiResultError(code: code, message: json);
+    final code = json['code'] as int? ?? -1;
+    final message = json['message'] as String?;
+    final rawData = json['data'] ?? json['result'];
+
+    if ((code != 0 && code != 3)||(message != null && message.isNotEmpty)) {
+      return ApiResultError(code: code, message: message);
     }
-    
-    return ApiResultOk(
-      code: code,
-      data: fromJsonT(data ?? result!),
-    );
+
+
+    if (rawData == null) {
+      return ApiResultError(
+        code: code,
+        message: 'Data or result field is missing for a successful response.',
+      );
+    }
+
+    try {
+      return ApiResultOk(
+        code: code,
+        data: fromJsonT(rawData),
+      );
+    } catch (e) {
+      return ApiResultError(
+        code: code,
+        message: 'Failed to parse data: $e',
+      );
+    }
   }
 }

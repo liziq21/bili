@@ -9,7 +9,7 @@ part 'network_search_result.g.dart';
 
 @freezed
 abstract class NetworkSearchResult with _$NetworkSearchResult {
-  const NetworkSearchResult({
+  const factory NetworkSearchResult({
     required int page,
     required int pagesize,
     required int numResults,
@@ -19,7 +19,7 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     required NetworkSearchResultWrapper result,
   }) = _NetworkSearchResult;
   
-  Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(dynamic json) {
+  static Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(dynamic json) {
     if (json is Map<String, dynamic>) {
       return {
         for (final MapEntry(:key, :value) in json.entries)
@@ -29,7 +29,7 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     }
     return null;
   }
-  
+
   factory NetworkSearchResult.fromJson(Map<String, dynamic> json)
     => _$NetworkSearchResultFromJson(json);
 }
