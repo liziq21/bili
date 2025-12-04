@@ -5,8 +5,7 @@ part 'network_video_search_result.freezed.dart';
 part 'network_video_search_result.g.dart';
 
 @freezed
-@JsonSerializable(fieldRename: .snake)
-class NetworkVideoSearchResult with _$NetworkVideoSearchResult {
+abstract class NetworkVideoSearchResult with _$NetworkVideoSearchResult {
   @JsonSerializable(fieldRename: .snake)
   const factory NetworkVideoSearchResult({
     required int id,

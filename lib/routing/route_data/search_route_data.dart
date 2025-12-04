@@ -9,7 +9,7 @@ extension BuildContextSearch on BuildContext {
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
 class SearchRouteData extends GoRouteData with $SearchRouteData {
-  const SearchRouteData(this.keyword);
+  const SearchRouteData([this.keyword]);
   
   final String? keyword;
 

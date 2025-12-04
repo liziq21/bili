@@ -5,7 +5,7 @@ part 'network_live_user_search_result.freezed.dart';
 part 'network_live_user_search_result.g.dart';
 
 @freezed
-class NetworkLiveUserSearchResult with _$NetworkLiveUserSearchResult {
+abstract class NetworkLiveUserSearchResult with _$NetworkLiveUserSearchResult {
   @JsonSerializable(fieldRename: .snake)
   const factory NetworkLiveUserSearchResult({
     required int area,

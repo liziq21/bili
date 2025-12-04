@@ -124,30 +124,12 @@ class SearchScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: TabBarView(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
-                    ),
+                    const Text('1');
+                    const Text('2');
+                    const Text('3');
+                    const Text('4');
+                    const Text('5');
+                    const Text('6');
                   ],
                 ),
               ),

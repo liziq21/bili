@@ -5,7 +5,7 @@ part 'network_article_search_result.freezed.dart';
 part 'network_article_search_result.g.dart';
 
 @freezed
-class NetworkArticleSearchResult with _$NetworkArticleSearchResult {
+abstract class NetworkArticleSearchResult with _$NetworkArticleSearchResult {
   @JsonSerializable(fieldRename: .snake)
   const factory NetworkArticleSearchResult({
     required int categoryId,

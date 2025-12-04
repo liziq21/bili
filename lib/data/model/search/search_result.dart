@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../bili/search_result_type.dart';
-import '../../../network/model/network_search_result.dart';
+//import '../../../network/model/search/network_search_result.dart';
 
 part 'search_result.freezed.dart';
 

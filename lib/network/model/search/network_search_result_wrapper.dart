@@ -24,6 +24,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
   }) = _NetworkSearchResultWrapper;
   
   factory NetworkSearchResultWrapper.fromJson(dynamic json) {
+    List<NetworkArticleSearchResult> articleResults = [];
     List<NetworkBiliUserSearchResult> biliUserResults = [];
     List<NetworkMediaBangumiSearchResult> mediaBangumiResults = [];
     List<NetworkMediaFtSearchResult> mediaFtResults = [];

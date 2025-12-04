@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(String roomId) onLive;
-  final Function(String? query) onSearch;
+  final Function([String? query]) onSearch;
   final Function(String mid) onSpace;
   final Function(String id) onVideo;
   

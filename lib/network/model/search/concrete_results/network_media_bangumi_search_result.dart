@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../bili/search_result_type.dart';
 import '../common/html_title.dart';
 import '../common/network_media_score.dart';
 
@@ -6,8 +7,8 @@ part 'network_media_bangumi_search_result.freezed.dart';
 part 'network_media_bangumi_search_result.g.dart';
 
 @freezed
-class NetworkMediaBangumiSearchResult with _$NetworkMediaBangumiSearchResult {
-  @JsonSerializable(fieldRename: .snake)
+abstract class NetworkMediaBangumiSearchResult with _$NetworkMediaBangumiSearchResult {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory NetworkMediaBangumiSearchResult({
     required int mediaId,
     required HtmlTitle title,
