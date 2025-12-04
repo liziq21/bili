@@ -34,14 +34,6 @@ class SearchViewModel extends ChangeNotifier {
   get searchController => _searchController;
   
   Iterable<String> _suggests = [];
-  Iterable<String> get suggests() {
-    if (_currentQuery != _searchController.text) {
-      return _suggests;
-    }
-    _currentQuery = _searchController.text;
-    _debounceLoadSuggests(_currentQuery);
-    return [];
-  }
   
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
@@ -51,7 +43,14 @@ class SearchViewModel extends ChangeNotifier {
   DateTime _endTime = DateTime.now();
   DateTime get endTime => _endTime;
   
-  Iterable<String> getSuggests() 
+  Iterable<String> getSuggests() {
+    if (_currentQuery != _searchController.text) {
+      return _suggests;
+    }
+    _currentQuery = _searchController.text;
+    _debounceLoadSuggests(_currentQuery);
+    return [];
+  }
   
   void onSearchTriggered(String query) {
     

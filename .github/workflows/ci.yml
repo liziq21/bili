@@ -49,12 +49,8 @@ jobs:
           git commit -m "chore: Update generated files [skip ci]"
           git push --force origin HEAD:build_runner
 
-      - name: Analyzer
-        uses: invertase/github-action-dart-analyzer@v3
-        with:
-          fatal-infos: false
-          fatal-warnings: false
-
+      - run: flutter analyze
+      
       - run: flutter test
 
   build_iOSApp:
