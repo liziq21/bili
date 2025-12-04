@@ -15,6 +15,9 @@ void main() {
       json,
       NetworkSearchResult.fromJson,
     );
+    if (apiResult is ApiResultError) {
+      print('$apiResult');
+    }
     return (apiResult as ApiResultOk).data;
   }
 
