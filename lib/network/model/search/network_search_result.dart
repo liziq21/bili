@@ -18,7 +18,11 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     Map<SearchResultType, NetworkPageinfo>? pageinfo,
     required NetworkSearchResultWrapper result,
   }) = _NetworkSearchResult;
-  
+
+  factory NetworkSearchResult.fromJson(Map<String, dynamic> json)
+    => _$NetworkSearchResultFromJson(json);
+}
+
   static Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(dynamic json) {
     if (json is Map<String, dynamic>) {
       return {
@@ -29,8 +33,3 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     }
     return null;
   }
-
-  factory NetworkSearchResult.fromJson(Map<String, dynamic> json)
-    => _$NetworkSearchResultFromJson(json);
-}
-

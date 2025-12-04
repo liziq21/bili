@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 
 
 class HomeScreen extends StatefulWidget {
-  final Function(String roomId) onLive;
-  final Function([String? query]) onSearch;
-  final Function(String mid) onSpace;
-  final Function(String id) onVideo;
-  
   const HomeScreen({
     super.key,
     required this.onLive,
@@ -14,6 +9,11 @@ class HomeScreen extends StatefulWidget {
     required this.onSpace,
     required this.onVideo,
   });
+  
+  final Function(String roomId) onLive;
+  final Function([String? query]) onSearch;
+  final Function(String mid) onSpace;
+  final Function(String id) onVideo;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();

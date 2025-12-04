@@ -12,10 +12,10 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return HomeScreen(
-      onLive: (roomId) => context.pushToLive(roomId),
-      onSearch: (query) => context.pushToSearch(query),
-      onSpace: (mid) => context.pushToSpace(mid),
-      onVideo: (id) => context.pushToVideo(id),
+      onLive: context.pushToLive,
+      onSearch: context.pushToSearch,
+      onSpace: context.pushToSpace,
+      onVideo: context.pushToVideo,
     );
   }
 }

@@ -35,7 +35,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
     try {
       return ApiResultOk(
         code: code,
-        data: fromJsonT(rawData),
+        data: fromJsonT(rawData as Map<String, dynamic>),
       );
     } catch (e) {
       return ApiResultError(

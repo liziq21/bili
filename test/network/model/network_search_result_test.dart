@@ -15,7 +15,7 @@ void main() {
       json,
       NetworkSearchResult.fromJson,
     );
-    return (apiResult as apiResultOk).data;
+    return (apiResult as ApiResultOk).data;
   }
 
   group('NetworkSearchResult Deserialization', () {
