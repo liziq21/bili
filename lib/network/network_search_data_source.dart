@@ -3,9 +3,9 @@ import '../../bili/date_range.dart';
 import '../../bili/search_order.dart';
 import '../../bili/user_type.dart';
 import '../../bili/video_duration_filter.dart';
-import '../../utils/reault.dart';
+import '../../utils/result.dart';
 import 'model/search/network_search_result.dart';
-import 'model/search/network_search_suggest.dart';
+import 'model/search_suggest/network_search_suggest.dart';
 
 abstract interface class NetworkSearchDataSource {
   

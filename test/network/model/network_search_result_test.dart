@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 import 'package:f_biuli/network/retrofit/api_result.dart';
 import 'package:f_biuli/network/model/search/network_search_result.dart';
-import '../../../testing/utils/result.dart';
+//import '../../../testing/utils/result.dart';
 
 void main() {
   const String jsonDir = 'testing/network/fakes';
@@ -13,9 +13,9 @@ void main() {
     final json = await getJsonData(jsonDir, fileName);
     final apiResult = ApiResult.fromJson(
       json,
-      NetworkSearchResult.fromJson(json),
-    ).asOk;
-    return apiResult.data;
+      NetworkSearchResult.fromJson,
+    );
+    return apiResult as apiResultOk).data;
   }
 
   group('NetworkSearchResult Deserialization', () {
@@ -26,7 +26,7 @@ void main() {
 
     test('should deserialize type_search.json correctly', () async {
       final typeSearchResult = await _loadAndDeserialize('type_search.json');
-      expect(typeSearchResult.reault.article[0].like, 24);
+      expect(typeSearchResult.result.article[0].like, 24);
     });
 
     test('should deserialize live_search.json correctly', () async {

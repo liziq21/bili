@@ -10,6 +10,7 @@ class BiliSearchSuggestRepository implements SearchSuggestRepository {
   
   final NetworkSearchDataSource _networkApi;
   
+  @override
   Future<Result<Iterable<String>>> getSuggests(String query) async {
     final result = await _networkApi.getSuggests(query);
     return result.map((value) =>

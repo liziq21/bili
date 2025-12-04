@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
-import '../../utils/result.dart';
 
+import '../../utils/result.dart';
 import 'api_result.dart';
 
 class ApiCallAdapter<T>
@@ -12,11 +12,11 @@ class ApiCallAdapter<T>
     try {
       final HttpResponse(:response, data :apiResult) = await call();
       return switch (apiResult) {
-        ApiResultOk => .ok(apiResult.data),
-        ApiResultError => .error(Exception('ERROR $response\n$apiResult')),
+        ApiResultOk() => .ok(apiResult.data),
+        ApiResultError() => .error(Exception('ERROR $response\n$apiResult')),
       };
     } on DioException catch (e) {
-      String? data = null;
+      String? data;
       if (e.response?.statusCode != 404) {
         data = e.response?.data?.toString();
       }

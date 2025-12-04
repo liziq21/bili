@@ -10,7 +10,6 @@ import 'concrete_results/network_live_user_search_result.dart';
 import 'concrete_results/network_video_search_result.dart';
 
 part 'network_search_result_wrapper.freezed.dart';
-part 'network_search_result_wrapper.g.dart';
 
 @freezed
 abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
@@ -25,20 +24,20 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
   }) = _NetworkSearchResultWrapper;
   
   factory NetworkSearchResultWrapper.fromJson(dynamic json) {
-    List<NetworkBiliUserSearchResult> biliUser = [];
-    List<NetworkMediaBangumiSearchResult> mediaBangumi= [];
-    List<NetworkMediaFtSearchResult> mediaFt= [];
-    List<NetworkLiveRoomSearchResult> liveRoom= [];
-    List<NetworkLiveUserSearchResult> liveUser= [];
-    List<NetworkVideoSearchResult> video= [];
+    List<NetworkBiliUserSearchResult> biliUserResults = [];
+    List<NetworkMediaBangumiSearchResult> mediaBangumiResults = [];
+    List<NetworkMediaFtSearchResult> mediaFtResults = [];
+    List<NetworkLiveRoomSearchResult> liveRoomResults = [];
+    List<NetworkLiveUserSearchResult> liveUserResults = [];
+    List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
       if (results !is List || results.isEmpty) {
         return;
       }
       
-      List<T> _mapAndConvert<T>(T Function(Map<String, dynamic> json) fromJsonFactory) {
-        return data.map((e) => fromJsonFactory(e as Map<String, dynamic>)).toList();
+      List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
+        return results.map((e) => fromJsonFactory(e as Map<String, dynamic>)).toList();
       }
       
       switch (type) {
@@ -66,7 +65,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       }
       
       final firstItem = json.first as Map<String, dynamic>;
-      if (firstItem && firstItem.containsKey('result_type')) {
+      if (firstItem.containsKey('result_type')) {
         // 综合搜索结果
         for (final { 'result_type': String type, 'data': dynamic data } in json) {
           _parseAndAssignResults(type, data);

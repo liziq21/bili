@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../bili/search_result_type.dart';
 import '../../user/common/network_user_official_verify.dart';
 import '../common/network_bili_user_res.dart';
 

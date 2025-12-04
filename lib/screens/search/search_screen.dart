@@ -53,7 +53,7 @@ class SearchScreen extends StatelessWidget {
                           ];
                         }
                     
-                        return viewModel.suggests.map((suggest) =>
+                        return viewModel.getSuggests().map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
                             leading: const Icon(Icons.history), //Icons.public
@@ -72,33 +72,33 @@ class SearchScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                bottom: TabBar(
+                bottom: const TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   tabs: <Widget>[
                     Tab(
                       text: '视频',
-                      //iconMargin: EdgeInsets.only(bottom: 0.0),
+                      //iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '番剧',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '影视',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '直播',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '用户',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '专栏',
-                      iconMargin: EdgeInsets.only(bottom: 0.0),
+                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                   ],
                 ),
@@ -126,27 +126,27 @@ class SearchScreen extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.pinkAccent.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.pinkAccent.withValues(0.5)),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(height: 1000, color: Colors.deepPurple.withOpacity(0.5)),
+                      child: Container(height: 1000, color: Colors.deepPurple.withValues(0.5)),
                     ),
                   ],
                 ),

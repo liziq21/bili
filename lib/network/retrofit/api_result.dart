@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 
 part 'api_result.freezed.dart';
-part 'api_result.g.dart';
 
 @Freezed(genericArgumentFactories: true)
 sealed class ApiResult<T> with _$ApiResult<T> {

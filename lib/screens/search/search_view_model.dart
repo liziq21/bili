@@ -5,7 +5,7 @@ import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/search/search_repository.dart';
-import '../../data/repository/search/search_suggest_repository.dart';
+import '../../data/repository/search_suggest/search_suggest_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
 
@@ -14,7 +14,7 @@ class SearchViewModel extends ChangeNotifier {
     required SearchRepository searchRepository,
     required SearchSuggestRepository searchSuggestRepository,
     String? initialQuery,
-  }) : _searchRepository = searchSuggestRepository,
+  }) : _searchRepository = searchRepository,
        _searchSuggestRepository = searchSuggestRepository {
     if (initialQuery != null && initialQuery.trim().isNotEmpty) {
       _searchController.text = initialQuery;
@@ -25,7 +25,7 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   final _log = Logger('SearchViewModel');
-  String? _currentQuery;
+  String _currentQuery = '';
 
   late final SearchRepository _searchRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
@@ -58,20 +58,20 @@ class SearchViewModel extends ChangeNotifier {
   
   void onSuggestClick(String suggest) {
     onSearchTriggered(suggest);
-    _controller.closeView(suggest);
+    _searchController.closeView(suggest);
   }
   
   Future<void> _loadSuggests(String query) async {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
-      case Ok(:value):
+      case Ok(:final value):
         _log.fine('Suggests (${value.length}) loaded');
         if (query == _searchController.text) {
           _suggests = value;
           notifyListeners();
         }
-      case Error(:error):
-        _log.warning('Failed to load suggests', error);
+      case Error():
+        _log.warning('Failed to load suggests', result.error);
     }
   }
   

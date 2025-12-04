@@ -11,9 +11,9 @@ import '../../bili/user_type.dart';
 import '../../bili/video_duration_filter.dart';
 import '../../utils/result.dart';
 import '../network_search_data_source.dart';
-import '../model/search/network_search.dart';
-import '../model/search/network_search_suggest.dart';
-import 'api_call_adapter.dart';
+import '../model/search/network_search_result.dart';
+import '../model/search/search_suggest/network_search_suggest.dart';
+import 'api_call_adaper.dart';
 import 'api_result.dart';
 
 part 'retrofit_network.g.dart';
