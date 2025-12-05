@@ -16,34 +16,19 @@ sealed class ApiResult<T> with _$ApiResult<T> {
   }) = ApiResultError;
 
   factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
-    final code = json['code'] as int? ?? -1;
+    final code = json['code'] as int;
     final message = json['message'] as String?;
-    final rawData = json['data'] ?? json['result'];
 
     if (code != 0 && code != 3
         ||(message != null && message.isNotEmpty && message != '0')
     ) {
       return ApiResultError(code: code, message: message);
     }
-
-
-    if (rawData == null) {
-      return ApiResultError(
-        code: code,
-        message: 'Data or result field is missing for a successful response.',
-      );
-    }
-
-    try {
-      return ApiResultOk(
-        code: code,
-        data: fromJsonT(rawData as Map<String, dynamic>),
-      );
-    } catch (e) {
-      return ApiResultError(
-        code: code,
-        message: 'Failed to parse data: $e',
-      );
-    }
+    
+    final data = json['data'] as Map<String, dynamic>;
+    return ApiResultOk(
+      code: code,
+      data: fromJsonT(data),
+    );
   }
 }

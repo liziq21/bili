@@ -23,14 +23,9 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     => _$NetworkSearchResultFromJson(json);
 }
 
-Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(dynamic json) {
-  if (json !is Map<String, dynamic>) {
-    return null;
-  }
-  
+Map<SearchResultType, NetworkPageinfo> _pageinfoFromJson(Map<String, dynamic> json) {
   return {
-    for (final MapEntry(:key, :value) in json.entries)
-      if (value is Map<String, dynamic>)
-        ?SearchResultType.parse(key): NetworkPageinfo.fromJson(value),
+    for (final MapEntry(:key, :Map<String, int> value) in json.entries)
+      ?SearchResultType.parse(key): NetworkPageinfo.fromJson(value),
   };
 }

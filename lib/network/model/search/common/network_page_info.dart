@@ -11,10 +11,6 @@ abstract class NetworkPageinfo with _$NetworkPageinfo {
     required int pages,
   }) = _NetworkPageinfo;
   
-  factory NetworkPageinfo.fromJson(Map<String, dynamic> json)
+  factory NetworkPageinfo.fromJson(Map<String, int> json)
     => _$NetworkPageinfoFromJson(json);
-}
-
-extension MappableListExtension<K, V> on Iterable<MapEntry<K, V>> {
-  Map<K, V> toMap() => Map.fromEntries(this);
 }

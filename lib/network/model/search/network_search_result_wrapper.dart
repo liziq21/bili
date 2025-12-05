@@ -32,8 +32,8 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkLiveUserSearchResult> liveUserResults = [];
     List<NetworkVideoSearchResult> videoResults = [];
     
-    void _parseAndAssignResults(String type, dynamic results) {
-      if (results !is List || results.isEmpty) {
+    void _parseAndAssignResults(String type, List results) {
+      if (results.isEmpty) {
         return;
       }
       
@@ -68,7 +68,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
         // 综合搜索结果
-        for (final { 'result_type': String type, 'data': dynamic data } in json) {
+        for (final { 'result_type': String type, 'data':List data } in json) {
           _parseAndAssignResults(type, data);
         }
       }
@@ -78,7 +78,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
 
     // live 类型搜索结果 Map is {'live_room': data, 'live_user': data}
     } else if (json is Map<String, dynamic>) {
-        for (final MapEntry(key: type, value: result) in json.entries) {
+        for (final MapEntry(key: type, value:List result) in json.entries) {
           _parseAndAssignResults(type, result);
         }
     }
