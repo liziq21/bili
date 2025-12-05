@@ -81,11 +81,9 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       }
       
       _parseAndAssignResults(firstItem['type'] as String, json);
-    } else {
-      final entries = (json as Map<String, dynamic>).entries;
-      for (final MapEntry(key: type, value: results) in entries) {
-        if (results != null)
-          _parseAndAssignResults(type, results);
+    } else if (json is Map<String, dynamic>) {
+      for (final MapEntry(key: type, value: results) in json.entries) {
+        _parseAndAssignResults(type, results);
       }
     }
     
