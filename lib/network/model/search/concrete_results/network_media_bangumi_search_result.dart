@@ -8,7 +8,7 @@ part 'network_media_bangumi_search_result.g.dart';
 
 @freezed
 abstract class NetworkMediaBangumiSearchResult with _$NetworkMediaBangumiSearchResult {
-  @JsonSerializable(fieldRename: FieldRename.snake)
+  @JsonSerializable(fieldRename: .snake)
   const factory NetworkMediaBangumiSearchResult({
     required int mediaId,
     required HtmlTitle title,

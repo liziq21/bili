@@ -24,16 +24,19 @@ void main() {
   group('NetworkSearchResult Deserialization', () {
     test('should deserialize search.json correctly', () async {
       final searchResult = await _loadAndDeserialize('search.json');
+      print('$searchResult');
       expect(searchResult.result.video[0].typename, '数码');
     });
 
     test('should deserialize type_search.json correctly', () async {
       final typeSearchResult = await _loadAndDeserialize('type_search.json');
+      print('$typeSearchResult');
       expect(typeSearchResult.result.article[0].like, 24);
     });
 
     test('should deserialize live_search.json correctly', () async {
       final liveSearchResult = await _loadAndDeserialize('live_search.json');
+      print('$liveSearchResult');
       expect(liveSearchResult.result.liveRoom[0].area, 3);
     });
   });

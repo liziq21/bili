@@ -70,7 +70,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
         // 综合搜索结果 [{'result_type': type, 'data': results}]
-        for (final { 'result_type': type, 'data': results } in json) {
+        for (final <String, dynamic>{ 'result_type': type, 'data': results } in json) {
           _parseAndAssignResults(type, results);
         }
       }

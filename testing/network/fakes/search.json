@@ -50,7 +50,7 @@
         }]
       },
       {
-        "result_type": "bili_user",
+        "": "bili_user",
         "data": [{
           "type": "bili_user",
           "mid": 451320374,
