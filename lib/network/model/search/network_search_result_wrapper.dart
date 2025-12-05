@@ -33,12 +33,17 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if ((results as List?)?.isEmpty ?? true) {
+      if (results == null)  {
+        return;
+      }
+      
+      final resultsList = results as List;
+      if (resultsList.isEmpty) {
         return;
       }
       
       List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
-        return results.map((e) => 
+        return resultsList.map((e) => 
           fromJsonFactory(e as Map<String, dynamic>)
         ).toList();
       }
