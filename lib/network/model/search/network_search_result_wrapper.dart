@@ -33,12 +33,14 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if (results !is List<Map<String, dynamic>> || results.isEmpty) {
+      if (results !is List || results.isEmpty) {
         return;
       }
       
       List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
-        return results.map(fromJsonFactory).toList();
+        return results.map((e) => 
+          fromJsonFactory(e as Map<String, dynamic>)
+        ).toList();
       }
       
       switch (type) {
@@ -68,7 +70,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
         // 综合搜索结果 [{'result_type': type, 'data': data}]
-        for (final [{ 'result_type': String type, 'data': data }] in json) {
+        for (final { 'result_type': type, 'data': data } in json) {
           _parseAndAssignResults(type, data);
         }
       }

@@ -15,7 +15,7 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     required int numResults,
     required int numPages,
     @JsonKey(fromJson: _pageinfoFromJson)
-    required Map<SearchResultType, NetworkPageinfo>? pageinfo,
+    Map<SearchResultType, NetworkPageinfo>? pageinfo,
     required NetworkSearchResultWrapper result,
   }) = _NetworkSearchResult;
 
