@@ -81,7 +81,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     } else if (json is Map<String, dynamic>) {
       // live 类型搜索结果 {'live_room': results, 'live_user': results}
       for (final MapEntry(key: type, value: results) in json.entries) {
-        if (result != null)
+        if (results != null)
           _parseAndAssignResults(type, results);
       }
     }
