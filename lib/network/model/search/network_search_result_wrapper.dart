@@ -69,19 +69,20 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
-        // 综合搜索结果 [{'result_type': type, 'data': data}]
-        for (final { 'result_type': type, 'data': data } in json) {
-          _parseAndAssignResults(type, data);
+        // 综合搜索结果 [{'result_type': type, 'data': results}]
+        for (final { 'result_type': type, 'data': results } in json) {
+          _parseAndAssignResults(type, results);
         }
       }
       
-      // 其它类型搜索结果 [data]
+      // 其它类型搜索结果 [result]
       _parseAndAssignResults(firstItem['type'] as String, json);
 
     } else if (json is Map<String, dynamic>) {
-      // live 类型搜索结果 {'live_room': data, 'live_user': data}
-      for (final MapEntry(key: type, value: result) in json.entries) {
-        _parseAndAssignResults(type, result);
+      // live 类型搜索结果 {'live_room': results, 'live_user': results}
+      for (final MapEntry(key: type, value: results) in json.entries) {
+        if (result != null)
+          _parseAndAssignResults(type, results);
       }
     }
     
