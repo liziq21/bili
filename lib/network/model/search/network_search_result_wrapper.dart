@@ -32,13 +32,13 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkLiveUserSearchResult> liveUserResults = [];
     List<NetworkVideoSearchResult> videoResults = [];
     
-    void _parseAndAssignResults(String type, List results) {
-      if (results.isEmpty) {
+    void _parseAndAssignResults(String type, dynamic results) {
+      if (results !is List<Map<String, dynamic>> || results.isEmpty) {
         return;
       }
       
       List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
-        return results.map((e) => fromJsonFactory(e as Map<String, dynamic>)).toList();
+        return results.map(fromJsonFactory).toList();
       }
       
       switch (type) {
@@ -68,7 +68,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
         // 综合搜索结果 [{'result_type': type, 'data': data}]
-        for (final { 'result_type': String type, 'data':List data } in json) {
+        for (final [{ 'result_type': String type, 'data': data }] in json) {
           _parseAndAssignResults(type, data);
         }
       }
@@ -78,7 +78,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
 
     } else if (json is Map<String, dynamic>) {
       // live 类型搜索结果 {'live_room': data, 'live_user': data}
-      for (final MapEntry(key: type, value:List result) in json.entries) {
+      for (final MapEntry(key: type, value: result) in json.entries) {
         _parseAndAssignResults(type, result);
       }
     }
