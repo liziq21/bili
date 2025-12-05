@@ -33,7 +33,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if ((results as List?).?isEmpty ?? true) {
+      if ((results as List?)?.isEmpty ?? true) {
         return;
       }
       
