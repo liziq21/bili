@@ -33,7 +33,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if (results !is List || results.isEmpty) {
+      if ((results as List?).?isEmpty ?? true) {
         return;
       }
       
@@ -43,20 +43,20 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
         ).toList();
       }
       
-      switch (type) {
-        case 'article':
+      switch (SearchResultType.parse(type)) {
+        case .article:
           articleResults = _mapAndConvert(NetworkArticleSearchResult.fromJson);
-        case 'bili_user':
+        case .biliUser:
           biliUserResults = _mapAndConvert(NetworkBiliUserSearchResult.fromJson);
-        case 'media_bangumi':
+        case .mediaBangumi:
           mediaBangumiResults = _mapAndConvert(NetworkMediaBangumiSearchResult.fromJson);
-        case 'media_ft':
+        case .mediaFt:
           mediaFtResults = _mapAndConvert(NetworkMediaFtSearchResult.fromJson);
-        case 'live_room':
+        case .liveRoom:
           liveRoomResults = _mapAndConvert(NetworkLiveRoomSearchResult.fromJson);
-        case 'live_user':
+        case .liveUser:
           liveUserResults = _mapAndConvert(NetworkLiveUserSearchResult.fromJson);
-        case 'video':
+        case .video:
           videoResults = _mapAndConvert(NetworkVideoSearchResult.fromJson);
         default:
       }
@@ -69,18 +69,16 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
-        // 综合搜索结果 [{'result_type': type, 'data': results}]
-        for (final <String, dynamic>{ 'result_type': type, 'data': results } in json) {
+        for (final e in json) {
+          final { 'result_type': type, 'data': results } = e as Map<String, dynamic>;
           _parseAndAssignResults(type, results);
         }
       }
       
-      // 其它类型搜索结果 [result]
       _parseAndAssignResults(firstItem['type'] as String, json);
-
-    } else if (json is Map<String, dynamic>) {
-      // live 类型搜索结果 {'live_room': results, 'live_user': results}
-      for (final MapEntry(key: type, value: results) in json.entries) {
+    } else {
+      final entries = (json as Map<String, dynamic>).entries;
+      for (final MapEntry(key: type, value: results) in entries) {
         if (results != null)
           _parseAndAssignResults(type, results);
       }
