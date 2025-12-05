@@ -11,6 +11,6 @@ abstract class NetworkPageinfo with _$NetworkPageinfo {
     required int pages,
   }) = _NetworkPageinfo;
   
-  factory NetworkPageinfo.fromJson(Map<String, int> json)
+  factory NetworkPageinfo.fromJson(Map<String, dynamic> json)
     => _$NetworkPageinfoFromJson(json);
 }
