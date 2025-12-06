@@ -23,7 +23,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     @Default([]) List<NetworkVideoSearchResult> video,
   }) = _NetworkSearchResultWrapper;
   
-  factory NetworkSearchResultWrapper.fromJson(object json) {
+  factory NetworkSearchResultWrapper.fromJson(dynamic json) {
     List<NetworkArticleSearchResult> articleResults = [];
     List<NetworkBiliUserSearchResult> biliUserResults = [];
     List<NetworkMediaBangumiSearchResult> mediaBangumiResults = [];
