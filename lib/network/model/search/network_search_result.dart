@@ -23,12 +23,12 @@ abstract class NetworkSearchResult with _$NetworkSearchResult {
     => _$NetworkSearchResultFromJson(json);
 }
 
-Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(dynamic json) {
+Map<SearchResultType, NetworkPageinfo>? _pageinfoFromJson(Map<String, dynamic>? json) {
   if (json == null) {
     return null;
   }
   return {
-    for (final MapEntry(:key, :value) in (json as Map<String, dynamic>).entries)
+    for (final MapEntry(:key, :value) in json.entries)
       ?SearchResultType.parse(key): NetworkPageinfo.fromJson(value as Map<String, dynamic>),
   };
 }
