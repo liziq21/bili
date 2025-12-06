@@ -23,7 +23,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     @Default([]) List<NetworkVideoSearchResult> video,
   }) = _NetworkSearchResultWrapper;
   
-  factory NetworkSearchResultWrapper.fromJson(dynamic json) {
+  factory NetworkSearchResultWrapper.fromJson(object json) {
     List<NetworkArticleSearchResult> articleResults = [];
     List<NetworkBiliUserSearchResult> biliUserResults = [];
     List<NetworkMediaBangumiSearchResult> mediaBangumiResults = [];
@@ -33,7 +33,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if (results == null)  {
+      if (results == null) {
         return;
       }
       
@@ -82,8 +82,8 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       
       _parseAndAssignResults(firstItem['type'] as String, json);
     } else if (json is Map<String, dynamic>) {
-      for (final MapEntry(key: type, value: results) in json.entries) {
-        _parseAndAssignResults(type, results);
+      for (final MapEntry(:key, :value) in json.entries) {
+        _parseAndAssignResults(key, value);
       }
     }
     
