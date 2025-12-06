@@ -74,9 +74,14 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       
       final firstItem = json.first as Map<String, dynamic>;
       if (firstItem.containsKey('result_type')) {
-        for (final e in json) {
-          final {'result_type': type, 'data': results} = e as Map<String, dynamic>;
-          _parseAndAssignResults(type as String, results);
+        for (final result in json) {
+          try {
+            final {'result_type': type, 'data': data} = result as Map<String, dynamic>;
+            _parseAndAssignResults(type as String, data);
+          } catch (e) {
+            print('捕获到异常: $e\n$result');
+            rethrow;
+          }
         }
       }
       
