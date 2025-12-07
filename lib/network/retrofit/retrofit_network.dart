@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../app.dart';
@@ -57,15 +55,7 @@ abstract class BiliNetworkApi {
 class BiliNetworkSearch implements NetworkSearchDataSource {
 
   final BiliNetworkApi networkApi = BiliNetworkApi(
-    Dio(
-      BaseOptions(
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
-        headers: {
-          HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
-        },
-      ),
-    )..interceptors.add(DioLogInterceptor(App.httpBucket)),
+    DioDi().dio,
     baseUrl: ApiUris.base,
   );
   
