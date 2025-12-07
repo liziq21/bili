@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../bili/search_type.dart';
 import 'search_view_model.dart';
 
+
 class SearchScreen extends StatelessWidget {
   const SearchScreen({
     super.key,
@@ -14,11 +15,23 @@ class SearchScreen extends StatelessWidget {
   final VoidCallback? onBackClick;
 
   @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    widget.viewModel.init();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 6,
-      child: Scaffold(
-        body: SafeArea(
+    return Scaffold(
+      body: SafeArea(
+        child: DefaultTabController(
+          length: 6,
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -36,29 +49,30 @@ class SearchScreen extends StatelessWidget {
                   child: FocusScope(
                     descendantsAreFocusable: false,
                     child: SearchAnchor.bar(
-                      searchController: viewModel.searchController,
+                      searchController: widget.viewModel.searchController,
                       barHintText: '搜索...',
+                      barElevation: const .all(0.0),
                       suggestionsBuilder: (context, controller) {
                         if (controller.text.isEmpty) {
-                          /*if (searchHistory.isNotEmpty) {
-                            return getHistoryList(controller);
+                          /*if (widget.searchHistory.isNotEmpty) {
+                            return widget.getHistoryList(controller);
                           }*/
                           return <Widget>[
                             const Center(
                               child: Text(
                                 'No search history.',
-                                style: TextStyle(color: Colors.grey),
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ),
                           ];
                         }
                     
-                        return viewModel.getSuggests().map((suggest) =>
+                        return widget.viewModel.getSuggests().map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
                             leading: const Icon(Icons.history), //Icons.public
                             title: Text(suggest),
-                            onTap: () => viewModel.onSuggestClick(suggest),
+                            onTap: () => widget.viewModel.onSearchTriggered(suggest),
                             trailing: IconButton(
                               icon: const Icon(Icons.north_west),
                               onPressed: () => controller.text = suggest,
@@ -68,37 +82,31 @@ class SearchScreen extends StatelessWidget {
                       },
                       textInputAction: .search,
                       //onTap: () {},
-                      onSubmitted: viewModel.onSearchTriggered,
+                      onSubmitted: widget.viewModel.onSearchTriggered,
                     ),
                   ),
                 ),
                 bottom: const TabBar(
                   isScrollable: true,
-                  tabAlignment: TabAlignment.start,
+                  tabAlignment: .start,
                   tabs: <Widget>[
                     Tab(
                       text: '视频',
-                      //iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '番剧',
-                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '影视',
-                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '直播',
-                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '用户',
-                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                     Tab(
                       text: '专栏',
-                      iconMargin: const EdgeInsets.only(bottom: 0.0),
                     ),
                   ],
                 ),

@@ -15,17 +15,13 @@ class SearchViewModel extends ChangeNotifier {
     required SearchSuggestRepository searchSuggestRepository,
     String? initialQuery,
   }) : _searchRepository = searchRepository,
-       _searchSuggestRepository = searchSuggestRepository {
-    if (initialQuery != null && initialQuery.trim().isNotEmpty) {
-      _searchController.text = initialQuery;
-    } else {
-      _searchController.openView();
-    }
-    
-  }
+       _searchSuggestRepository = searchSuggestRepository,
+       _currentQuery = initialQuery?.trim() ?? '';
+
   
   final _log = Logger('SearchViewModel');
-  String _currentQuery = '';
+  late String _currentQuery;
+  String get currentQuery => _currentQuery;
 
   late final SearchRepository _searchRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
@@ -43,6 +39,13 @@ class SearchViewModel extends ChangeNotifier {
   DateTime _endTime = DateTime.now();
   DateTime get endTime => _endTime;
   
+  void init() {
+    if (_currentQuery.isNotEmpty) {
+      _loadSearchResult(_currentQuery);
+      _searchController.text = _currentQuery;
+    }
+  }
+  
   Iterable<String> getSuggests() {
     if (_currentQuery != _searchController.text) {
       return _suggests;
@@ -53,13 +56,17 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   void onSearchTriggered(String query) {
-    
+    if (_searchController.isOpen) {
+      //_loadSearchResult(suggest);
+      _searchController.closeView(query);
+    }
   }
   
   void onSuggestClick(String suggest) {
-    onSearchTriggered(suggest);
-    _searchController.closeView(suggest);
+    
   }
+  
+  Future<void> _loadSearchResult(String query) async {}
   
   Future<void> _loadSuggests(String query) async {
     final result = await _searchSuggestRepository.getSuggests(query);
