@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../../app.dart';
 import '../../bili/constonts/uris.dart';
 import '../../bili/category.dart';
 import '../../bili/date_range.dart';
@@ -63,7 +65,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
           HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
         },
       ),
-    ),
+    )..interceptors.add(DioLogInterceptor(App.httpBucket)),
     baseUrl: ApiUris.base,
   );
   

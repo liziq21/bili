@@ -1,46 +1,53 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
+import 'package:logger/logger.dart' hide LogEvent;
 import 'package:provider/provider.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
 import 'dependencies.dart';
 
 Future<void> main() async {
-
-  // RepaintBoundary
-  // debugRepaintRainbowEnabled = true;
+  // Enables the debug overlay even in release mode.
+  DebugOverlay.enabled = true;
   
-  // https://docs.sentry.io/platforms/flutter/usage/#tips-for-catching-errors
-  // https://docs.flutter.dev/testing/errors#errors-caught-by-flutter
-  FlutterError.onError = (errorDetails) async {
-    Logger().e(errorDetails.exception);
-    await Sentry.captureException(errorDetails.exception, stackTrace: errorDetails.stack);
+  // Uncaught Exceptions.
+  PlatformDispatcher.instance.onError = (exception, stackTrace) {
+    App.logBucket.add(LogEvent(
+      level: LogLevel.fatal,
+      message: "Unhandled Exception",
+      error: exception,
+      stackTrace: stackTrace,
+    ));
+    return false;
   };
 
-  // https://github.com/getsentry/sentry-dart/tree/6.18.1/flutter#usage
-  // https://docs.flutter.dev/testing/errors#errors-not-caught-by-flutter
-  PlatformDispatcher.instance.onError = (error, stack) {
-    Sentry.captureException(error, stackTrace: stack);
-    return true;
+  // Rendering Exceptions.
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    App.logBucket.add(LogEvent(
+      level: LogLevel.fatal,
+      message: details.exceptionAsString(),
+      error: (kDebugMode
+          ? details.toDiagnosticsNode().toStringDeep()
+          : details.exception.toString()),
+      stackTrace: details.stack,
+    ));
   };
+
+  // Connects logger to the overlay.
+  Logger.addOutputListener((event) {
+    LogLevel? level = LogLevel.values
+        .firstWhereOrNull((element) => element.name == event.origin.level.name);
+    if (level == null) return;
+    App.logBucket.add(LogEvent(
+      level: level,
+      message: event.origin.message,
+      error: event.origin.error,
+      stackTrace: event.origin.stackTrace,
+      time: event.origin.time,
+    ));
+  });
   
-  // https://docs.sentry.io/platforms/flutter/#configure
-  // https://pub.dev/documentation/sentry/latest/sentry_io/SentryOptions-class.html
-  await SentryFlutter.init(
-    (options) {
-      options
-        ..dsn = const String.fromEnvironment('SENTRY_DSN')
-        ..sendDefaultPii = true;
-    },
-    appRunner: () => runApp(
-      SentryWidget(
-        child: MultiProvider(
-          providers: providers,
-          child: const App(),
-        ),
-      ),
-    ),
-  );
+  runApp(const App());
 }

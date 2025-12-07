@@ -42,6 +42,7 @@ class SearchViewModel extends ChangeNotifier {
   void init() {
     if (_currentQuery.isNotEmpty) {
       _loadSearchResult(_currentQuery);
+      _searchController.openView();
       _searchController.text = _currentQuery;
     }
   }
@@ -57,13 +58,9 @@ class SearchViewModel extends ChangeNotifier {
   
   void onSearchTriggered(String query) {
     if (_searchController.isOpen) {
-      //_loadSearchResult(suggest);
+      _loadSearchResult(query);
       _searchController.closeView(query);
     }
-  }
-  
-  void onSuggestClick(String suggest) {
-    
   }
   
   Future<void> _loadSearchResult(String query) async {}
