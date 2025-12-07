@@ -51,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: SearchAnchor.bar(
                       searchController: widget.viewModel.searchController,
                       barHintText: '搜索...',
-                      barElevation: const .all(0.0),
+                      barElevation: .all(0.0),
                       suggestionsBuilder: (context, controller) {
                         if (controller.text.isEmpty) {
                           /*if (widget.searchHistory.isNotEmpty) {
