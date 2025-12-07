@@ -4,7 +4,7 @@ import '../../bili/search_type.dart';
 import 'search_view_model.dart';
 
 
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
   const SearchScreen({
     super.key,
     required this.viewModel,
