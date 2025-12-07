@@ -11,5 +11,5 @@ class DioDi {
           HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
         },
       ),
-    )..interceptors.add(DioLogInterceptor(App.httpBucket)),
+    )..interceptors.add(DioLogInterceptor(App.httpBucket));
 }
