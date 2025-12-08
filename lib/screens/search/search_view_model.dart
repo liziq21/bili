@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../app_logger.dart';
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/search/search_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
@@ -72,10 +71,10 @@ class SearchViewModel extends ChangeNotifier {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:final value):
-        appLogger.d('Suggests (${value.length}) loaded');
+        Logger.d('Suggests (${value.length}) loaded');
         _suggests = value;
       case Error():
-        appLogger.w('Failed to load suggests', error: result.error);
+        Logger.w('Failed to load suggests', error: result.error);
         _suggests = [];
     }
   }

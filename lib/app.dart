@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:logger/logger.dart' hide LogEvent;
 
-import 'app_logger.dart';
 import 'routing/router.dart';
 
 class App extends StatefulWidget {
@@ -20,9 +19,6 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       builder: (context, child) => DebugOverlay(
-        options: DebugOverlayOptions(
-          logHistory: debugOverlayLogHistory, // 使用在 app_logger.dart 中创建的实例
-        ),
         //hiddenFields: const [HttpHeaders.authorizationHeader, "Token"],
         logBucket: App.logBucket,
         httpBucket: App.httpBucket,
