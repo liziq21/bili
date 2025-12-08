@@ -48,7 +48,7 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   Iterable<String> getSuggests() {
-    if (_currentQuery != _searchController.text) {
+    if (_currentQuery == _searchController.text) {
       return _suggests;
     }
     _currentQuery = _searchController.text;

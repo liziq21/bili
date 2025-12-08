@@ -23,7 +23,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    widget.viewModel.init();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.viewModel.init();
+    });
   }
 
   @override
