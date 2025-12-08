@@ -22,8 +22,8 @@ class _AppState extends State<App> {
     return MaterialApp.router(
       builder: (context, child) => DebugOverlay(
         //hiddenFields: const [HttpHeaders.authorizationHeader, "Token"],
-        logBucket: widget.logBucket,
-        httpBucket: widget.httpBucket,
+        logBucket: App.logBucket,
+        httpBucket: App.httpBucket,
         //debugEntries: [],
         child: child ?? const SizedBox.shrink(),
       ),
