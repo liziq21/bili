@@ -1,4 +1,3 @@
-//import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:logger/logger.dart' hide LogEvent;
@@ -32,6 +31,9 @@ class _AppState extends State<App> {
       theme: .light(),
       darkTheme: .dark(),
       themeMode: .system,
+      navigatorObservers: [
+        DebugOverlay.createRouterObserver(),
+      ],
       routerConfig: router,
     );
   }

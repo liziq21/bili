@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
+import '../../app_logger.dart';
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/search/search_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
@@ -18,7 +18,6 @@ class SearchViewModel extends ChangeNotifier {
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery;
   
-  final _log = Logger('SearchViewModel');
   String? _currentQuery;
   //String? get currentQuery => _currentQuery;
 
@@ -30,7 +29,6 @@ class SearchViewModel extends ChangeNotifier {
   
   Iterable<String> _suggests = [];
   
-  late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
   DateTime _startTime = Constonts.minDate;
   DateTime get startTime => _startTime;
@@ -52,7 +50,10 @@ class SearchViewModel extends ChangeNotifier {
       return _suggests;
     }
     _currentQuery = _searchController.text;
-    _debounceLoadSuggests(_currentQuery!);
+    _suggests = await _debounceLoadSuggests(_currentQuery!);
+    if (_currentQuery == _searchController.text) {
+      return _suggests;
+    }
     return [];
   }
   
@@ -65,18 +66,18 @@ class SearchViewModel extends ChangeNotifier {
   
   Future<void> _loadSearchResult(String query) async {}
   
-  Future<void> _loadSuggests(String query) async {
+  late final _debounceLoadSuggests = _debounce<Iterable<String>, String>(_loadSuggests);
+
+  Future<Iterable<String>> _loadSuggests(String query) async {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:final value):
-        _log.fine('Suggests (${value.length}) loaded');
-        if (query == _searchController.text) {
-          _suggests = value;
-          notifyListeners();
-        }
+        appLogger.d('Suggests (${value.length}) loaded');
+        return value;
       case Error():
-        _log.warning('Failed to load suggests', result.error);
+        appLogger.w('Failed to load suggests', error: result.error);
     }
+    return [];
   }
   
   void setStartTime(DateTime time) {

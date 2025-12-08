@@ -54,7 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       searchController: widget.viewModel.searchController,
                       barHintText: '搜索...',
                       barElevation: .all(0.0),
-                      suggestionsBuilder: (context, controller) {
+                      suggestionsBuilder: (context, controller) async {
                         if (controller.text.isEmpty) {
                           /*if (widget.searchHistory.isNotEmpty) {
                             return widget.getHistoryList(controller);
