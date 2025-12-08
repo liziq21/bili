@@ -17,12 +17,9 @@ targets:
         options:
           copyWith: false
           #equal: false
-          generic_argument_factories: true
-          # Disable legacy (Dart 2 and older) utilites
           map: false
           to_json: false
           # to_string: false
-          # union_value_case: snake
           when:
             when: false
             maybe_when: false

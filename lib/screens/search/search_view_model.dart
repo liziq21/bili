@@ -45,12 +45,12 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
   
-  Iterable<String> getSuggests() {
+  Iterable<String> getSuggests() async {
     if (_currentQuery == _searchController.text) {
       return _suggests;
     }
     _currentQuery = _searchController.text;
-    _suggests = await _debounceLoadSuggests(_currentQuery!);
+    await _debounceLoadSuggests(_currentQuery!);
     if (_currentQuery == _searchController.text) {
       return _suggests;
     }
@@ -66,18 +66,18 @@ class SearchViewModel extends ChangeNotifier {
   
   Future<void> _loadSearchResult(String query) async {}
   
-  late final _debounceLoadSuggests = _debounce<Iterable<String>, String>(_loadSuggests);
+  late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
-  Future<Iterable<String>> _loadSuggests(String query) async {
+  Future<void> _loadSuggests(String query) async {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:final value):
         appLogger.d('Suggests (${value.length}) loaded');
-        return value;
+        _suggests = value;
       case Error():
         appLogger.w('Failed to load suggests', error: result.error);
+        _suggests = [];
     }
-    return [];
   }
   
   void setStartTime(DateTime time) {

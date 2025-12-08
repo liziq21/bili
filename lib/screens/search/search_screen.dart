@@ -69,7 +69,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           ];
                         }
                     
-                        return widget.viewModel.getSuggests().map((suggest) =>
+                        final suggests = await widget.viewModel.getSuggests();
+                        return suggests.map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
                             leading: const Icon(Icons.history), //Icons.public
