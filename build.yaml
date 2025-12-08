@@ -11,7 +11,9 @@ targets:
     builders:
       freezed:
         generate_for:
-          - lib/**.dart
+          - lib/bili/**.dart
+          - lib/data/**.dart
+          - lib/network/**.dart
         options:
           copyWith: false
           #equal: false
