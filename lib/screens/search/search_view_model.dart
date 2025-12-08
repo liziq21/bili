@@ -18,6 +18,7 @@ class SearchViewModel extends ChangeNotifier {
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery;
   
+  final _logger  = Logger();
   String? _currentQuery;
   //String? get currentQuery => _currentQuery;
 
@@ -72,10 +73,10 @@ class SearchViewModel extends ChangeNotifier {
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:final value):
-        Logger.d('Suggests (${value.length}) loaded');
+        _logger.d('Suggests (${value.length}) loaded');
         _suggests = value;
       case Error():
-        Logger.w('Failed to load suggests', error: result.error);
+        _logger.w('Failed to load suggests', error: result.error);
         _suggests = [];
     }
   }
