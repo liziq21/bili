@@ -20,7 +20,7 @@ class SearchViewModel extends ChangeNotifier {
   
   final _log = Logger('SearchViewModel');
   String? _currentQuery;
-  String get currentQuery => _currentQuery;
+  //String? get currentQuery => _currentQuery;
 
   late final SearchRepository _searchRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
@@ -52,7 +52,7 @@ class SearchViewModel extends ChangeNotifier {
       return _suggests;
     }
     _currentQuery = _searchController.text;
-    _debounceLoadSuggests(_currentQuery);
+    _debounceLoadSuggests(_currentQuery!);
     return [];
   }
   
