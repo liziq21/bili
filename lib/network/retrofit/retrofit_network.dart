@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import '../../app.dart';
 import '../../bili/constonts/uris.dart';
 import '../../bili/category.dart';
 import '../../bili/date_range.dart';
@@ -15,6 +15,7 @@ import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import 'api_call_adapter.dart';
 import 'api_result.dart';
+import 'di/dio.dart';
 
 part 'retrofit_network.g.dart';
 
