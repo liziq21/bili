@@ -10,7 +10,7 @@ class BiliSearchRepository implements SearchRepository {
   final NetworkSearchDataSource _networkApi;
   
   @override
-  Future<Result<List<SearchResult>>>search() async {
+  Future<Result<List<SearchResult>>> search() async {
     return .ok([]);
   }
 }

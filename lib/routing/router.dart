@@ -26,6 +26,7 @@ part 'route_data/video_route_data.dart';
 part 'router.g.dart';
 
 final GoRouter router = GoRouter(
+  debugLogDiagnostics: true,
   onException: (_, GoRouterState state, GoRouter router) {
     final path = BiliUtils.getRoutePath(state.uri);
     if (path == null)  {
