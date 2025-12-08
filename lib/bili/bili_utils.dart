@@ -1,37 +1,6 @@
 import 'routes.dart';
 import 'uri_extensions.dart';
 
-/*
-class BiliUtils {
-  static String? getRoutePath(Uri uri) {
-    if (uri.host.isEmpty) return null;
-    
-    var String path;
-    if (uri.isHTTPScheme) {
-      var secondLevelDomain = uri.secondLevelDomain;
-      switch (secondLevelDomain) {
-        case Routes.liveRelative || Routes.searchRelative || Routes.spaceRelative:
-          path = '/$secondLevelDomain${uri.path}';
-        default:
-          return null;
-      }
-      
-    } else if (uri.isBilibiiScheme && !uri.toString().startsWith('bilibili:///')) {
-      path = '/${uri.host}${uri.path}';
-    } else {
-      throw Exception('uri is $uri: getRoutePath error');
-    }
-    
-    return Uri.decodeComponent(
-      Uri(
-        path: path,
-        queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-        fragment: uri.fragment.isEmpty ? null : uri.fragment,
-      ).toString(),
-    );
-  }
-}
-*/
 class BiliUtils {
   /// 从 URI 中提取并构建路由路径
   /// 

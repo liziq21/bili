@@ -16,11 +16,10 @@ class SearchViewModel extends ChangeNotifier {
     String? initialQuery,
   }) : _searchRepository = searchRepository,
        _searchSuggestRepository = searchSuggestRepository,
-       _currentQuery = initialQuery?.trim() ?? '';
-
+       _currentQuery = initialQuery;
   
   final _log = Logger('SearchViewModel');
-  late String _currentQuery;
+  String? _currentQuery;
   String get currentQuery => _currentQuery;
 
   late final SearchRepository _searchRepository;
@@ -40,10 +39,11 @@ class SearchViewModel extends ChangeNotifier {
   DateTime get endTime => _endTime;
   
   void init() {
-    if (_currentQuery.isNotEmpty) {
-      _loadSearchResult(_currentQuery);
+    if (_currentQuery != null) {
+      _loadSearchResult(_currentQuery!);
+      _searchController.text = _currentQuery!;
+    } else {
       _searchController.openView();
-      _searchController.text = _currentQuery;
     }
   }
   
