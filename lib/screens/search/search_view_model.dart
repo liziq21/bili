@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/search/search_repository.dart';
@@ -44,7 +45,7 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
   
-  Iterable<String> getSuggests() async {
+  Future<Iterable<String>> getSuggests() async {
     if (_currentQuery == _searchController.text) {
       return _suggests;
     }
