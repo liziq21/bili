@@ -8,9 +8,9 @@ import 'package:f_biuli/network/retrofit/api_result.dart';
 extension ApiResultCast<T> on ApiResult<T> {
 
   static Future<ApiResult<T>> fromFile<T>({
-    String jsonDir,
-    String fileName,
-    T Function(Map<String, dynamic>) fromJsonT,
+    required String jsonDir,
+    required String fileName,
+    required T Function(Map<String, dynamic>) fromJsonT,
   }) async {
     final json = await getJsonData(jsonDir, fileName);
     return ApiResult<T>.fromJson(json, fromJsonT);

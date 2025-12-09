@@ -5,17 +5,17 @@ import '../../../testing/network/retrofit/api_result.dart';
 
 void main() {
   
-  Future<ApiResult> _loadAndDeserialize(String fileName) async {
-    return ApiResult.fromFile(
+  Future<ApiResult<NorworkSearchResult>> _loadAndDeserialize(String fileName) async {
+    return ApiResult<NorworkSearchResult>.fromFile(
       fileDir: 'testing/network/fakes/search',
       fileName: fileName,
-      fromJsonT: NorworkSearchResult.fromJson,
+      fromJsonT: NetworkSearchResult.fromJson,
     );
   }
 
   group('NetworkSearchResult Deserialization', () {
     test('should deserialize search.json correctly', () async {
-      final apiResult = await _loadAndDeserialize('search.json')
+      final apiResult = await _loadAndDeserialize('search.json');
       print('apiResult');
       expect(apiResult.asOk.result.video[0].typename, '数码');
     });
