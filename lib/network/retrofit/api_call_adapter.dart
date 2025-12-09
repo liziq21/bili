@@ -13,7 +13,7 @@ class ApiCallAdapter<T>
       final HttpResponse(:response, data :apiResult) = await call();
       return switch (apiResult) {
         ApiResultOk() => .ok(apiResult.data),
-        ApiResultError() => .error(Exception('ApiResultError: $apiResult.error')),
+        ApiResultError() => .error(Exception('$apiResult')),
       };
     } on DioException catch (e) {
       String? data;
@@ -21,7 +21,7 @@ class ApiCallAdapter<T>
         data = e.response?.data?.toString();
       }
       return .error(Exception('${data ?? e.message}'));
-    } on Exception catch (e) {
+    } catch (e) {
       return .error(e);
     }
   }

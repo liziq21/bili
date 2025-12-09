@@ -12,7 +12,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
 
   const factory ApiResult.error({
     required int code,
-    String? message,
+    String message,
   }) = ApiResultError;
 
   factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
@@ -22,7 +22,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
     if (code != 0 && code != 3
         ||(message != null && message.isNotEmpty && message != '0')
     ) {
-      return ApiResultError(code: code, message: message);
+      return ApiResultError(code: code, message: '${message ?? "Not message"}');
     }
     
     final data = (json['data'] ?? json['result']) as Map<String, dynamic>;
