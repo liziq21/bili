@@ -5,31 +5,31 @@ import '../../../testing/network/retrofit/api_result.dart';
 
 void main() {
   
-  Future<ApiResult<NotworkSearchResult>> _loadAndDeserialize(String fileName) async {
-    return ApiResult<NotworkSearchResult>.fromFile(
+  Future<NtworkSearchResult> _loadAndDeserialize(String fileName) async {
+    return ApiResult.fromFile<NetworkSearchResult>(
       fileDir: 'testing/network/fakes/search',
       fileName: fileName,
       fromJsonT: NetworkSearchResult.fromJson,
-    );
+    ).asOk.data;
   }
 
   group('NetworkSearchResult Deserialization', () {
     test('should deserialize search.json correctly', () async {
-      final apiResult = await _loadAndDeserialize('search.json');
-      print('apiResult');
-      expect(apiResult.asOk.result.video[0].typename, '数码');
+      final data = await _loadAndDeserialize('search.json');
+      print('$data');
+      expect(data.result.video[0].typename, '数码');
     });
 
     test('should deserialize type_search.json correctly', () async {
-      final apiResult = await _loadAndDeserialize('type_search.json');
-      print('apiResult');
-      expect(apiResult.asOk.result.article[0].like, 24);
+      final data = await _loadAndDeserialize('type_search.json');
+      print('$data');
+      expect(data.result.article[0].like, 24);
     });
 
     test('should deserialize live_search.json correctly', () async {
-      final apiResult = await _loadAndDeserialize('live_search.json');
-      print('apiResult');
-      expect(apiResult.asOk.result.liveRoom[0].area, 3);
+      final data = await _loadAndDeserialize('live_search.json');
+      print('$data');
+      expect(data.result.liveRoom[0].area, 3);
     });
   });
 }

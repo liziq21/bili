@@ -5,12 +5,12 @@ part 'api_result.freezed.dart';
 
 @Freezed(genericArgumentFactories: true)
 sealed class ApiResult<T> with _$ApiResult<T> {
-  const factory ApiResult({
+  const factory ApiResult.ok({
     required int code,
     required T data,
   }) = ApiResultOk;
 
-  const factory ApiResult.error({ // 建议给错误工厂方法一个不同的名称，避免与另一个冲突
+  const factory ApiResult.error({
     required int code,
     String? message,
   }) = ApiResultError;
