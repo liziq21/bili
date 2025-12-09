@@ -14,11 +14,11 @@ extension ApiResultCast<T> on ApiResult<T> {
 
 class ApiResultUtils {
   static Future<ApiResult<T>> fromFile<T>({
-    required String jsonDir,
+    required String fileDir,
     required String fileName,
     required T Function(Map<String, dynamic>) fromJsonT,
   }) async {
-    final json = await getJsonData(jsonDir, fileName);
+    final json = await getJsonData(fileDir, fileName);
     return ApiResult<T>.fromJson(json, fromJsonT);
   }
 }

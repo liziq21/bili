@@ -6,11 +6,12 @@ import '../../../testing/network/retrofit/api_result.dart';
 void main() {
   
   Future<NetworkSearchResult> _loadAndDeserialize(String fileName) async {
-    return ApiResultUtils.fromFile<NetworkSearchResult>(
+    final result = await ApiResultUtils.fromFile<NetworkSearchResult>(
       fileDir: 'testing/network/fakes/search',
       fileName: fileName,
       fromJsonT: NetworkSearchResult.fromJson,
-    ).asOk.data;
+    );
+    return result.asOk.data;
   }
 
   group('NetworkSearchResult Deserialization', () {
