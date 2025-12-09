@@ -50,6 +50,7 @@ Future<void> main() async {
       Level.WARNING => .warning,
       Level.SEVERE => .error,
       Level.ALL => .all,
+      _ => null,
     };
     
     if (level == null) return;
