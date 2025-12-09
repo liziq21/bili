@@ -46,13 +46,13 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
   
-  Future<Iterable<String>> getSuggests() async {
-    if (_currentQuery == _searchController.text) {
+  Future<Iterable<String>> getSuggests(String query) async {
+    if (_currentQuery == query) {
       return _suggests;
     }
-    _currentQuery = _searchController.text;
+    _currentQuery = query;
     await _debounceLoadSuggests(_currentQuery!);
-    if (_currentQuery == _searchController.text) {
+    if (_currentQuery == query) {
       return _suggests;
     }
     return [];
@@ -73,7 +73,7 @@ class SearchViewModel extends ChangeNotifier {
     _logger.d('Load suggests');
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
-      case final Ok(:value):
+      case Ok(:final value):
         _logger.d('Suggests (${value.length}) loaded');
         _suggests = value;
       case Error():

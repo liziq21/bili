@@ -69,7 +69,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ];
                         }
                     
-                        final suggests = await widget.viewModel.getSuggests();
+                        final suggests = await widget.viewModel.getSuggests(controller.tex);
                         return suggests.map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
