@@ -42,7 +42,7 @@ Future<void> main() async {
   // Connects logger to the overlay.
   Logger.addOutputListener((event) {
     LogLevel? level = LogLevel.values
-        .firstWhereOrNull((element) => element.name == event.origin.level.name);
+        .firstWhereOrNull((element) => element.name == event.level.name);
     if (level == null) return;
     App.logBucket.add(LogEvent(
       level: level,
