@@ -5,7 +5,8 @@ import 'dart:developer';
 import 'package:collection/collection.dart';import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-import 'package:logger/logger.dart' hide LogEvent;
+//import 'package:logger/logger.dart' hide LogEvent;
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
