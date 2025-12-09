@@ -42,7 +42,7 @@ Future<void> main() async {
 
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
-    LogLevel level = switch (record.level) {
+    LogLevel? level = switch (record.level) {
       Level.OFF => .off,
       Level.FINEST || Level.FINER => .trace,
       Level.FINE || Level.SHOUT => .debug,
