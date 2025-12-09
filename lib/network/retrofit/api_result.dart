@@ -25,7 +25,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
       return ApiResultError(code: code, message: message);
     }
     
-    final data = json['data'] as Map<String, dynamic>;
+    final data = (json['data'] ?? json['result']) as Map<String, dynamic>;
     return ApiResultOk(
       code: code,
       data: fromJsonT(data),
