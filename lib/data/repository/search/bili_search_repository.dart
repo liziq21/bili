@@ -11,6 +11,6 @@ class BiliSearchRepository implements SearchRepository {
   
   @override
   Future<Result<List<SearchResult>>> search() async {
-    return .ok([]);
+    return const .ok([]);
   }
 }

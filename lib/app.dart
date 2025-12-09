@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-import 'package:logger/logger.dart' hide LogEvent;
+//import 'package:logger/logger.dart' hide LogEvent;
 
 import 'routing/router.dart';
 

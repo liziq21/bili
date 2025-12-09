@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../bili/search_result_type.dart';
+
 import '../common/html_title.dart';
 import '../common/network_media_score.dart';
 
