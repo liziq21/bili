@@ -6,7 +6,13 @@ import 'package:path/path.dart' as path;
 import 'package:f_biuli/network/retrofit/api_result.dart';
 
 extension ApiResultCast<T> on ApiResult<T> {
+  
+  ApiResultOk<T> get asOk => this as ApiResultOk<T>;
 
+  ApiResultError get asError => this as ApiResultError<T>;
+}
+
+extension ApiResultX on ApiResult {
   static Future<ApiResult<T>> fromFile<T>({
     required String jsonDir,
     required String fileName,
@@ -15,10 +21,6 @@ extension ApiResultCast<T> on ApiResult<T> {
     final json = await getJsonData(jsonDir, fileName);
     return ApiResult<T>.fromJson(json, fromJsonT);
   }
-  
-  ApiResultOk<T> get asOk => this as ApiResultOk<T>;
-
-  ApiResultError get asError => this as ApiResultError<T>;
 }
 
 Future<Map<String, dynamic>> getJsonData(String dirPath, String fileName) async {
