@@ -39,8 +39,29 @@ Future<void> main() async {
     ));
   };
 
-  // Connects logger to the overlay.
-  Logger.addOutputListener((event) {
+  Logger.root.level = Level.ALL; // defaults to Level.INFO
+  Logger.root.onRecord.listen((record) {
+    LogLevel? level = switch (record.level) {
+      .OFF => .off,
+      .FINEST || .FINER => .trace,
+      .FINE || .SHOUT => .debug,
+      .CONFIG || .INFO => .info,
+      .WARNING => .warning,
+      .SEVERE => .error,
+      .ALL => .all,
+      .LEVELS => null,
+    }
+    
+    if (level == null) return;
+    App.logBucket.add(LogEvent(
+      level: level,
+      message: '${record.loggerName} ${record.message}',
+      error: record.error,
+      stackTrace: record.stackTrace,
+      time: record.time,
+    ));
+  });
+  /*Logger.addOutputListener((event) {
     LogLevel? level = LogLevel.values
         .firstWhereOrNull((element) => element.name == event.level.name);
     if (level == null) return;
@@ -51,7 +72,7 @@ Future<void> main() async {
       stackTrace: event.origin.stackTrace,
       time: event.origin.time,
     ));
-  });
+  });*/
   
   runApp(
     MultiProvider(

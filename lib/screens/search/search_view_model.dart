@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+//import 'package:logger/logger.dart';
+import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/search/search_repository.dart';
@@ -18,7 +19,7 @@ class SearchViewModel extends ChangeNotifier {
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery;
   
-  final _logger  = Logger();
+  final _log = Logger('SearchViewModel');
   String? _currentQuery;
   //String? get currentQuery => _currentQuery;
 
@@ -70,14 +71,14 @@ class SearchViewModel extends ChangeNotifier {
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
   Future<void> _loadSuggests(String query) async {
-    _logger.d('Load suggests');
+    _log.fine('Load suggests');
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
       case Ok(:final value):
-        _logger.d('Suggests (${value.length}) loaded');
+        _log.fine('Suggests (${value.length}) loaded');
         _suggests = value;
       case Error():
-        _logger.w('Failed to load suggests', error: result.error);
+        _log.warning('Failed to load suggests', result.error);
         _suggests = [];
     }
   }
