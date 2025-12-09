@@ -51,7 +51,7 @@ Future<void> main() async {
       .SEVERE => .error,
       .ALL => .all,
       .LEVELS => null,
-    }
+    };
     
     if (level == null) return;
     App.logBucket.add(LogEvent(
