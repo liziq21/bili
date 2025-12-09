@@ -70,9 +70,10 @@ class SearchViewModel extends ChangeNotifier {
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
 
   Future<void> _loadSuggests(String query) async {
+    _logger.d('Load suggests');
     final result = await _searchSuggestRepository.getSuggests(query);
     switch (result) {
-      case Ok(:final value):
+      case final Ok(:value):
         _logger.d('Suggests (${value.length}) loaded');
         _suggests = value;
       case Error():
@@ -80,7 +81,7 @@ class SearchViewModel extends ChangeNotifier {
         _suggests = [];
     }
   }
-  
+
   void setStartTime(DateTime time) {
     _startTime = time;
     notifyListeners();
