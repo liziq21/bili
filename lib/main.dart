@@ -42,15 +42,14 @@ Future<void> main() async {
 
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
-    LogLevel? level = switch (record.level) {
-      .OFF => .off,
-      .FINEST || .FINER => .trace,
-      .FINE || .SHOUT => .debug,
-      .CONFIG || .INFO => .info,
-      .WARNING => .warning,
-      .SEVERE => .error,
-      .ALL => .all,
-      .LEVELS => null,
+    LogLevel level = switch (record.level) {
+      Level.OFF => .off,
+      Level.FINEST || Level.FINER => .trace,
+      Level.FINE || Level.SHOUT => .debug,
+      Level.CONFIG || Level.INFO => .info,
+      Level.WARNING => .warning,
+      Level.SEVERE => .error,
+      Level.ALL => .all,
     };
     
     if (level == null) return;
