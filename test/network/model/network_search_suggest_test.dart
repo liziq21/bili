@@ -5,7 +5,7 @@ import '../../../testing/network/retrofit/api_result.dart';
 
 void main() {
   Future<NetworkSearchSuggest> _loadAndDeserialize(String fileName) async {
-    return ApiResult.fromFile<NetworkSearchSuggest>(
+    return ApiResultUtils.fromFile<NetworkSearchSuggest>(
       fileDir: 'testing/network/fakes/search_suggest',
       fileName: fileName,
       fromJsonT: NetworkSearchSuggest.fromJson,

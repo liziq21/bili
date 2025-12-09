@@ -12,7 +12,7 @@ extension ApiResultCast<T> on ApiResult<T> {
   ApiResultError get asError => this as ApiResultError<T>;
 }
 
-extension ApiResultX<T> on ApiResult {
+class ApiResultUtils {
   static Future<ApiResult<T>> fromFile<T>({
     required String jsonDir,
     required String fileName,
@@ -22,6 +22,7 @@ extension ApiResultX<T> on ApiResult {
     return ApiResult<T>.fromJson(json, fromJsonT);
   }
 }
+
 
 Future<Map<String, dynamic>> getJsonData(String dirPath, String fileName) async {
   final String fullPath = path.join(
