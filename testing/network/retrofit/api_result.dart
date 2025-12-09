@@ -12,7 +12,7 @@ extension ApiResultCast<T> on ApiResult<T> {
   ApiResultError get asError => this as ApiResultError<T>;
 }
 
-extension ApiResultX on ApiResult {
+extension ApiResultX<T> on ApiResult {
   static Future<ApiResult<T>> fromFile<T>({
     required String jsonDir,
     required String fileName,
