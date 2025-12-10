@@ -12,7 +12,7 @@ sealed class ApiResult<T> with _$ApiResult<T> {
 
   const factory ApiResult.error({
     required int code,
-    String message,
+    String? message,
   }) = ApiResultError;
 
   factory ApiResult.fromJson(Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJsonT) {
