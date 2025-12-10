@@ -22,7 +22,7 @@ class ApiCallAdapter<T>
       }
       return .error(Exception('${data ?? e.message}'));
     } catch (e) {
-      return .error(e);
+      return .error(Exception('$e'));
     }
   }
 }
