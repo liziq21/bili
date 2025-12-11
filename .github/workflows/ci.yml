@@ -101,4 +101,7 @@ jobs:
         run: |
           RESPONSE=$(curl -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@Payload.ipa" https://litterbox.catbox.moe/resources/internals/api.php)
           echo "Upload response: $RESPONSE"
-          curl https://api.day.app/XSCJ9Sn8V2oSJ8RmAzB69C/biliupdata -d "group=actions&icon=https://avatars.githubusercontent.com/u/65916846?v=4&url=$RESPONSE"
+          curl https://api.day.app/XSCJ9Sn8V2oSJ8RmAzB69C/biliupdata \
+            --data-urlencode "group=actions" \
+            --data-urlencode "icon=https://avatars.githubusercontent.com/u/65916846?v=4" \
+            --data-urlencode "url=apple-magnifier://install?url=$RESPONSE"
