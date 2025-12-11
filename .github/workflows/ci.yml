@@ -103,6 +103,4 @@ jobs:
           echo "Upload response: $RESPONSE"
           
       - name: Bark
-        env:
-          $BARK_KEY: ${{secrets.$BARK_KEY}}
         run: curl https://api.day.app/XSCJ9Sn8V2oSJ8RmAzB69C/biliupdata -d "group=actions&icon=https://avatars.githubusercontent.com/u/65916846?v=4&url=$RESPONSE"
