@@ -9,6 +9,7 @@ class ApiCallAdapter<T>
   extends CallAdapter<Future<HttpResponse<ApiResult<T>>>, Future<Result<T>>>
 {
   final _log = Logger('ApiCallAdapter');
+  
   @override
   Future<Result<T>> adapt(Future<HttpResponse<ApiResult<T>>> Function() call) async {
     try {

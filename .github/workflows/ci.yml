@@ -80,13 +80,10 @@ jobs:
         working-directory: ios
       
       - name: Build IPA
-        env:
-          SENTRY_DSN: ${{secrets.SENTRY_DSN}}
         run: |
           flutter build ios \
             --release \
             --no-codesign \
-            --dart-define=SENTRY_DSN="$SENTRY_DSN" \
             --verbose
           mkdir -p Payload
           mv ./build/ios/iphoneos/Runner.app Payload
@@ -98,3 +95,19 @@ jobs:
         with:
           name: ios-build
           path: Payload.ipa
+          
+      - name: Upload IPA to catbox
+        id: upload-ipa-to-catbox
+        continue-on-error: true
+        run: |
+          RESPONSE=$(curl -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@Payload.ipa" https://litterbox.catbox.moe/resources/internals/api.php)
+          echo "Upload response: $RESPONSE"
+          
+      - name: Bark
+        if: steps.upload-ipa-to-catbox.outcome == 'success'
+        continue-on-error: true
+        env:
+          $BARK_KEY: ${{secrets.$BARK_KEY}}
+        run: |
+          ENCODED_RESPONSE=\((printf '%s' "\)RESPONSE" | jq -sRr @uri)
+          curl https://api.day.app/XSCJ9Sn8V2oSJ8RmAzB69C/biliupdata?url=$ENCODED_RESPONSE
