@@ -11,6 +11,7 @@ class DioDi {
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5),
         headers: {
+          HttpHeaders.acceptHeader: 'application/json',
           HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
         },
       ),
