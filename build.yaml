@@ -9,10 +9,16 @@ global_options:
 targets:
   $default:
     builders:
+      drift_dev:
+        generate_for:
+          - lib/database/**.dart
+        options:
+          store_date_time_values_as_text: true
       freezed:
         generate_for:
           - lib/bili/**.dart
-          - lib/data/**.dart
+          - lib/data/model/**.dart
+          - lib/model/data/**.dart
           - lib/network/**.dart
         options:
           copyWith: false

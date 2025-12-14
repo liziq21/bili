@@ -1,0 +1,13 @@
+import 'dart:async';
+
+import '../../model/user_data.dart';
+
+abstract class UserDataRepository {
+  
+  Future<UserData> get userData;
+
+  Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig);
+
+  Future<void> setDynamicColorPreference(bool useDynamicColor);
+  
+}

@@ -5,14 +5,15 @@ import '../../../utils/result.dart';
 import 'search_suggest_repository.dart';
 
 class BiliSearchSuggestRepository implements SearchSuggestRepository {
-  const BiliSearchSuggestRepository({required NetworkSearchDataSource networkApi})
-    : _networkApi = networkApi;
+  const BiliSearchSuggestRepository({
+    required NetworkSearchDataSource network
+  }) : _network = network;
   
-  final NetworkSearchDataSource _networkApi;
+  final NetworkSearchDataSource _network;
   
   @override
   Future<Result<Iterable<String>>> getSuggests(String query) async {
-    final result = await _networkApi.getSuggests(query);
+    final result = await _network.getSuggests(query);
     return result.map((value) =>
       value.tag.map((e) => e.term)
     );
