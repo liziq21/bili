@@ -55,31 +55,11 @@ abstract class BiliNetworkApi {
 }
 
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  const BiliNetworkSearch({Dio? dio}) :
-    /*if (dio != null) {
-      dio.options.headers = dio.options.headers
-      .copyWith(
-        HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
-      );
-      _networkApi = BiliNetworkApi(dio, baseUrl: ApiUris.base);
-    } else {
-      _networkApi = BiliNetworkApi(
-        Dio(BaseOptions(headers: {
-          HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
-        })),
-        baseUrl: ApiUris.base,
-      );
-    }*/
-    
+  const BiliNetworkSearch(Dio dio) :
     _networkApi = BiliNetworkApi(
-      dio?
-        ..options.headers[HttpHeaders.cookieHeader] = '{"SESSDATA"="xxx"}';
-      ?? Dio(BaseOptions(headers: {
-        HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
-      })),
+      dio,
       baseUrl: ApiUris.base,
     );
-  
   
   late final BiliNetworkApi _networkApi;
   
