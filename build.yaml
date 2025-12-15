@@ -19,7 +19,7 @@ targets:
           - lib/bili/**.dart
           - lib/data/model/**.dart
           - lib/model/data/**.dart
-          - lib/network/**.dart
+          - lib/network/model/**.dart
         options:
           copyWith: false
           #equal: false

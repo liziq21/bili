@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 
 import '../../bili/constonts/uris.dart';
@@ -11,10 +11,10 @@ import '../../bili/user_type.dart';
 import '../../bili/video_duration_filter.dart';
 import '../../utils/result.dart';
 import '../network_search_data_source.dart';
+import '../model/api_result.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import 'api_call_adapter.dart';
-import 'api_result.dart';
 import 'di/dio.dart';
 
 part 'retrofit_network.g.dart';

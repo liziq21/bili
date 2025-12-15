@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../../utils/result.dart';
-import 'api_result.dart';
+import '../model/api_result.dart';
 
 class ApiCallAdapter<T>
   extends CallAdapter<Future<HttpResponse<ApiResult<T>>>, Future<Result<T>>>
