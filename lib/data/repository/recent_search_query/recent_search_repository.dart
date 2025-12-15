@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../../model/recent_search_query.dart'
+import '../../model/recent_search_query.dart';
 
 abstract class RecentSearchRepository {
   

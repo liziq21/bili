@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferencesDataSource {
   const PreferencesDataSource({
-    SharedPreferencesAsync userPreferences = new(),
+    SharedPreferencesAsync userPreferences = .new(),
   }) : _userPreferences = userPreferences;
   
   late final _userPreferences;

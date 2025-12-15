@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../../model/recent_search_query.dart'
-import '../../../database/dao/recent_search_query_dao.dart'
+import '../../model/recent_search_query.dart';
+import '../../../database/dao/recent_search_query_dao.dart';
 
 class DefaultRecentSearchRepository {
   const DefaultRecentSearchRepository({

@@ -15,4 +15,3 @@ class RecentSearchQueryEntity extends Table {
   //@override
   //bool get isStrict => true;
 }
-}

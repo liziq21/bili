@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dao/recent_search_query_dao.dart';
 import 'model/recent_search_query_entity.dart';
 
-part 'database.g.dart';
+part 'bili_database.g.dart';
 
 @DriftDatabase(
   tables: [RecentSearchQueryEntity],

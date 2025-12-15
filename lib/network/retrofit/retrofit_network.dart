@@ -55,7 +55,7 @@ abstract class BiliNetworkApi {
 }
 
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  BiliNetworkSearch({Dio? dio}) {
+  const BiliNetworkSearch({Dio? dio}) :
     /*if (dio != null) {
       dio.options.headers = dio.options.headers
       .copyWith(
@@ -72,14 +72,14 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     }*/
     
     _networkApi = BiliNetworkApi(
-      dio?..options.headers.copyWith(
+      (dio?..options.headers.copyWith(
         HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
-      ) ?? Dio(BaseOptions(headers: {
+      )) ?? Dio(BaseOptions(headers: {
         HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
       })),
       baseUrl: ApiUris.base,
     );
-  };
+  
   
   late final BiliNetworkApi _networkApi;
   
