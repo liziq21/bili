@@ -9,8 +9,8 @@ class DefaultUserDataRepository implements UserDataRepository {
     required PreferencesDataSource preferencesDataSource,
   }) : _preferencesDataSource = preferencesDataSource;
   
-  lata final PreferencesDataSource _preferencesDataSource;
-  lata final _userData = UserData.fromJson(_preferencesDataSource.userData);
+  late final PreferencesDataSource _preferencesDataSource;
+  late final _userData = UserData.fromJson(_preferencesDataSource.userData);
   Future<UserData> get userData => _userData;
 
   Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig) =>
