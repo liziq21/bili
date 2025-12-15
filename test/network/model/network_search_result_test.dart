@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:f_biuli/network/retrofit/api_result.dart';
+import 'package:f_biuli/network/model/api_result.dart';
 import 'package:f_biuli/network/model/search/network_search_result.dart';
-import '../../../testing/network/retrofit/api_result.dart';
+
+import '../../../testing/network/model/api_result.dart';
 
 void main() {
   

@@ -11,19 +11,19 @@ class RecentSearchQueryDao extends DatabaseAccessor<BiliDatabase> with _$RecentS
 
   Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(int limit) {
     return (
-      select(recentSearchQueries)
+      select(recentSearchQueriesEntity)
         ..orderBy([(it) => OrderingTerm(expression: it.queriedDate)])
         ..limit(limit)
     ).watch();
   }
   
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
-    return into(recentSearchQueries).insertOnConflictUpdate(
-      RecentSearchQueriesCompanion(query: Value(searchQuery)),
+    return into(recentSearchQueriesEntity).insertOnConflictUpdate(
+      RecentSearchQueriesEntityCompanion(query: Value(searchQuery)),
     );
   }
   
   Future<void> clearRecentSearchQueries() {
-    return delete(recentSearchQueries).go();
+    return delete(recentSearchQueriesEntity).go();
   }
 }

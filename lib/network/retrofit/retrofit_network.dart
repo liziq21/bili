@@ -15,7 +15,6 @@ import '../model/api_result.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import 'api_call_adapter.dart';
-import 'di/dio.dart';
 
 part 'retrofit_network.g.dart';
 
@@ -55,7 +54,7 @@ abstract class BiliNetworkApi {
 }
 
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  const BiliNetworkSearch(Dio dio) :
+  BiliNetworkSearch(Dio dio) :
     _networkApi = BiliNetworkApi(
       dio,
       baseUrl: ApiUris.base,

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import '../data/model/recent_search_query.dart';
-import '../data/repository/recent_search_repository.dart';
+import '../data/repository/recent_search/recent_search_repository.dart';
 
 class GetRecentSearchQueriesUseCase {
-  const GetRecentSearchQueriesUseCase(
+  GetRecentSearchQueriesUseCase(
     RecentSearchRepository recentSearchRepository,
   ) : _recentSearchRepository = recentSearchRepository;
   

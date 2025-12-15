@@ -40,9 +40,6 @@ targets:
         generate_for:
           include:
             - lib/**.dart
-            #- lib/bili/search_type.dart
-            #- lib/network/retrofit/api_result.dart
-            #- lib/network/model/**.dart
           exclude:
             - lib/**.g.dart
             - lib/**.freezed.dart

@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
-import '../../data/repository/search/search_repository.dart';
+import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
 
 class SearchViewModel extends ChangeNotifier {
   SearchViewModel({
-    required SearchRepository searchRepository,
+    required SearchContentsRepository searchContentsRepository,
     required SearchSuggestRepository searchSuggestRepository,
     String? initialQuery,
-  }) : _searchRepository = searchRepository,
+  }) : _searchContentsRepository = searchContentsRepository,
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery;
   
@@ -23,7 +23,7 @@ class SearchViewModel extends ChangeNotifier {
   String? _currentQuery;
   //String? get currentQuery => _currentQuery;
 
-  late final SearchRepository _searchRepository;
+  late final SearchContentsRepository _searchContentsRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
   
   final _searchController = SearchController();

@@ -7,7 +7,7 @@ List<SingleChildWidget> get domainProviders =>
   [
     Provider(create: (context) =>
       GetRecentSearchQueriesUseCase(
-        recentSearchQueryRepository: context.read(),
+        recentSearchRepository: context.read(),
       ),
     ),
   ];

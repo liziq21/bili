@@ -5,7 +5,7 @@ import 'package:provider/single_child_widget.dart';
 
 import 'app.dart';
 import 'data/dependencies.dart';
-import 'd/dependencies.dart';
+import 'domain/dependencies.dart';
 
 List<SingleChildWidget> get providers =>
   [

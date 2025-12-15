@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:f_biuli/network/retrofit/api_result.dart';
+import 'package:f_biuli/network/model/api_result.dart';
 
 extension ApiResultCast<T> on ApiResult<T> {
   

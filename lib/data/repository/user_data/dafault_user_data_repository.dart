@@ -10,13 +10,14 @@ class DefaultUserDataRepository implements UserDataRepository {
   }) : _preferencesDataSource = preferencesDataSource;
   
   late final PreferencesDataSource _preferencesDataSource;
-  late final _userData = UserData.fromJson(_preferencesDataSource.userData);
-  Future<UserData> get userData => _userData;
+  
+  Future<UserData> getUserData() async =>
+    UserData.fromJson(await _preferencesDataSource.getUserData());
+  
+  Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig) async =>
+    await _preferencesDataSource.setDarkThemeConfig(darkThemeConfig.toString());
 
-  Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig) =>
-    _preferencesDataSource.setDarkThemeConfig(darkThemeConfig.toString);
-
-  Future<void> setDynamicColorPreference(bool useDynamicColor) =>
-    _preferencesDataSource.setDynamicColorPreference(useDynamicColor);
+  Future<void> setDynamicColorPreference(bool useDynamicColor) async =>
+    await _preferencesDataSource.setDynamicColorPreference(useDynamicColor);
   
 }
