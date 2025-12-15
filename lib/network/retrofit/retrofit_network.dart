@@ -72,9 +72,9 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     }*/
     
     _networkApi = BiliNetworkApi(
-      (dio?
-        ..options.headers[HttpHeaders.cookieHeader] = '{"SESSDATA"="xxx"}'
-      ) ?? Dio(BaseOptions(headers: {
+      dio?
+        ..options.headers[HttpHeaders.cookieHeader] = '{"SESSDATA"="xxx"}';
+      ?? Dio(BaseOptions(headers: {
         HttpHeaders.cookieHeader: '{"SESSDATA"="xxx"}',
       })),
       baseUrl: ApiUris.base,
