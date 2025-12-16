@@ -8,6 +8,6 @@ abstract class RecentSearchRepository {
 
   Future<void> insertOrReplaceRecentSearch(String searchQuery);
 
-  Future<void> clearRecentSearches();
+  Future<void> clearRecentSearchQueries();
   
 }

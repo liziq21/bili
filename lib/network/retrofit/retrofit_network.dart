@@ -54,7 +54,7 @@ abstract class BiliNetworkApi {
 }
 
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  BiliNetworkSearch(Dio dio) :
+  BiliNetworkSearch({required Dio dio}) :
     _networkApi = BiliNetworkApi(
       dio,
       baseUrl: ApiUris.base,

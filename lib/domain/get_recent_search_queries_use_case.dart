@@ -4,9 +4,9 @@ import '../data/model/recent_search_query.dart';
 import '../data/repository/recent_search/recent_search_repository.dart';
 
 class GetRecentSearchQueriesUseCase {
-  GetRecentSearchQueriesUseCase(
-    RecentSearchRepository recentSearchRepository,
-  ) : _recentSearchRepository = recentSearchRepository;
+  GetRecentSearchQueriesUseCase({
+    required RecentSearchRepository recentSearchRepository,
+  }) : _recentSearchRepository = recentSearchRepository;
   
   late final RecentSearchRepository _recentSearchRepository;
   

@@ -4,7 +4,7 @@ import '../../model/user_data.dart';
 
 abstract class UserDataRepository {
   
-  Future<UserData> get userData;
+  Future<UserData> getUserData();
 
   Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig);
 

@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../database/model/recent_search_query_entity.dart';
+import '../../database/bili_database.dart';
 
 part 'recent_search_query.freezed.dart';
 
@@ -12,7 +12,7 @@ abstract class RecentSearchQuery with _$RecentSearchQuery {
   }) = _RecentSearchQuery;
 }
 
-extension RecentSearchQueryEntityX on RecentSearchQueryEntity {
+extension RecentSearchQueryEntityX on RecentSearchQueryEntityData {
   RecentSearchQuery asExternalModel() {
     return RecentSearchQuery(
       query: query,
