@@ -19,7 +19,7 @@ class RecentSearchQueryDao extends DatabaseAccessor<BiliDatabase> with _$RecentS
   
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
     return into(recentSearchQueryEntity).insertOnConflictUpdate(
-      RecentSearchQuerEntityCompanion(query: Value(searchQuery)),
+      RecentSearchQueryEntityCompanion(query: Value(searchQuery)),
     );
   }
   

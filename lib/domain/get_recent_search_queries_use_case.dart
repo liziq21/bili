@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import '../data/model/recent_search_query.dart';
-import '../data/repository/recent_search/recent_search_repository.dart';
+import '../data/repository/recent_search_query/recent_search_query_repository.dart';
 
 class GetRecentSearchQueriesUseCase {
   GetRecentSearchQueriesUseCase({
-    required RecentSearchRepository recentSearchRepository,
-  }) : _recentSearchRepository = recentSearchRepository;
+    required RecentSearchQueryRepository recentSearchQueryRepository,
+  }) : _recentSearchQueryRepository = recentSearchQueryRepository;
   
-  late final RecentSearchRepository _recentSearchRepository;
+  late final RecentSearchQueryRepository _recentSearchQueryRepository;
   
   Stream<List<RecentSearchQuery>> invoke([int limit = 10]) =>
-    _recentSearchRepository.getRecentSearchQueries(limit);
+    _recentSearchQueryRepository.getRecentSearchQueries(limit);
 }

@@ -11,7 +11,7 @@ import 'repository/search_contents/search_contents_repository.dart';
 import 'repository/search_suggest/bili_search_suggest_repository.dart';
 import 'repository/search_suggest/search_suggest_repository.dart';
 import 'repository/user_data/user_default_user_data_repository.dart';
-import 'repository/user_data/user_user_data_repository.dart';
+import 'repository/user_data/user_data_repository.dart';
 
 List<SingleChildWidget> get repositoryProviders =>
   [
