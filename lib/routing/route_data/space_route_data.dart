@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextSpace on BuildContext {
-  void pushToSpace(String mid) => SpaceRouteData(mid: mid).push(this);
+  void navigateToSpace(String mid) => SpaceRouteData(mid: mid).push(this);
 }
 
 @TypedGoRoute<SpaceRouteData>(path: '${Routes.space}/:mid')

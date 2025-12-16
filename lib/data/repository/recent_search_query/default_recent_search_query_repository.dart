@@ -3,8 +3,8 @@ import 'dart:async';
 import '../../model/recent_search_query.dart';
 import '../../../database/dao/recent_search_query_dao.dart';
 
-class DefaultRecentSearchRepository {
-  DefaultRecentSearchRepository({
+class DefaultRecentSearchQueryRepository {
+  DefaultRecentSearchQueryRepository({
     required RecentSearchQueryDao recentSearchQueryDao,
   }) : _recentSearchQueryDao = recentSearchQueryDao;
   
