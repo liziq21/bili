@@ -21,7 +21,7 @@ class AppViewModel {
   AppUiState get uiState async {
     if (!isInitialLoading) {
       await _loadUserData();
-    } else if (_uiState is Success()) {
+    } else if (_uiState case Success()) {
       _log.info('Initial loading of AppUiState successful');
       isInitialLoading = false;
     }
