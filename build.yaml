@@ -44,6 +44,7 @@ targets:
             - lib/**.g.dart
             - lib/**.freezed.dart
             - lib/**.config.dart
+            - lib/app_view_model.dart
         options:
           create_to_json: false
           checked: true

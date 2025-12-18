@@ -11,6 +11,7 @@ enum ThemeConfig {
 
 @freezed
 abstract class UserData with _$UserData {
+  @JsonSerializable(fieldRename: .screamingSnake)
   const factory UserData({
     @Default(.followSystem) ThemeConfig themeConfig,
     @Default(true) bool useDynamicColor,

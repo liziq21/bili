@@ -8,7 +8,7 @@ import 'utils/utils.dart';
 
 class AppViewModel {
   AppViewModel({
-    UserDataRepository userDataRepository
+    UserDataRepository userDataRepository,
   }) : _userDataRepository = userDataRepository {
     _loadUserData();
   };
@@ -58,7 +58,7 @@ final class Success extends AppUiState {
   final UserData userData;
   
   @override
-  bool get shouldDisableDynamicTheming = !userData.useDynamicColor;
+  bool get shouldUseDynamicTheming => userData.useDynamicColor;
 
   @override
   ThemeMode get shouldUseDarkTheme =>
