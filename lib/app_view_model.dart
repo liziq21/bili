@@ -48,7 +48,7 @@ sealed class AppUiState {
   
   bool get shouldDisableDynamicTheming => true;
 
-  ThemeMode get shouldUseDarkTheme(isSystemDarkTheme: Boolean) => .system;
+  ThemeMode get shouldUseDarkTheme => .system;
   
 }
 
@@ -61,7 +61,7 @@ final class Success extends AppUiState {
   bool get shouldDisableDynamicTheming = !userData.useDynamicColor;
 
   @override
-  ThemeMode get shouldUseDarkTheme(isSystemDarkTheme: Boolean) =>
+  ThemeMode get shouldUseDarkTheme =>
     switch (userData.darkThemeConfig) {
       .followSystem => .system,
       .light => .light,
