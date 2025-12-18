@@ -1,13 +1,14 @@
-import 'dart:async';
+import 'package:flutter/foundation.dart';
 
+import '../../../utils/result.dart';
 import '../../model/user_data.dart';
 
-abstract class UserDataRepository {
+abstract class UserDataRepository extends ChangeNotifier {
   
-  Future<UserData> getUserData();
+  Future<Result<UserData>> get userData;
 
-  Future<void> setDarkThemeConfig(DarkThemeConfig darkThemeConfig);
+  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig);
 
-  Future<void> setDynamicColorPreference(bool useDynamicColor);
+  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor);
   
 }

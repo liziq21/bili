@@ -3,17 +3,17 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'user_data.freezed.dart';
 part 'user_data.g.dart';
 
-enum DarkThemeConfig {
+enum ThemeConfig {
   followSystem,
   light,
   dark,
 }
 
 @freezed
-class UserData with _$UserData {
+abstract class UserData with _$UserData {
   const factory UserData({
-    required DarkThemeConfig darkThemeConfig,
-    required bool useDynamicColor,
+    @Default(.followSystem) ThemeConfig themeConfig,
+    @Default(true) bool useDynamicColor,
   }) = _UserData;
 
   factory UserData.fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);

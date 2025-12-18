@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../bili/search_result_type.dart';
@@ -43,9 +44,10 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       }
       
       List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
-        return resultsList.map((e) => 
-          fromJsonFactory(e as Map<String, dynamic>)
-        ).toList();
+        return resultsList
+          .whereType<Map<String, Object?>>()
+          .map(fromJsonFactory)
+          .toList();
       }
       
       switch (SearchResultType.parse(type)) {
@@ -67,24 +69,21 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       }
     }
 
-    if (json is List) {
-      if (json.isEmpty) {
-        return const NetworkSearchResultWrapper();
-      }
-      
-      final firstItem = json.first as Map<String, dynamic>;
-      if (firstItem.containsKey('result_type')) {
-        for (final result in json) {
-          final {'result_type': type, 'data': data} = result as Map<String, dynamic>;
-          _parseAndAssignResults(type as String, data);
-        }
-      } else {
-        _parseAndAssignResults(firstItem['type'] as String, json);
-      }
-    } else if (json is Map<String, dynamic>) {
+    if (json is Map<String, dynamic>) {
       for (final MapEntry(:key, :value) in json.entries) {
         _parseAndAssignResults(key, value);
       }
+    } else if (json is List && json.isEmpty) {
+      final list = json.whereType<Map<String, Object?>>();
+      if (list.first.containsKey('result_type')) {
+        for (final {'result_type': String type, 'data': data} in list) {
+          _parseAndAssignResults(type, data);
+        }
+      } else {
+        _parseAndAssignResults(list.first['type'] as String, list);
+      }
+    } else {
+      return const NetworkSearchResultWrapper();
     }
     
     return NetworkSearchResultWrapper(

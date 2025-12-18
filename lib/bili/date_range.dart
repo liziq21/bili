@@ -6,6 +6,18 @@ extension DateTimeExtension on DateTime {
   DateTime get startOfDay => DateTime(year, month, day);
 }
 
+
+// DO follow API design principles
+class TimeSlot {
+  const TimeSlot({
+    required this.start,
+    required this.end,
+  }) : assert(start.isBefore(end), 'Start must be before end');
+  
+  final DateTime start;
+  final DateTime end;
+}
+
 class DateRange {
   static final globalMinDateLimit = DateTime(2009, 6, 26);
   static get globalMaxDateLimit => DateTime.now().toSecondPrecision();
