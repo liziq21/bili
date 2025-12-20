@@ -19,7 +19,7 @@ class DefaultUserDataRepository implements UserDataRepository {
   Future<ValueNotifier<bool>> get dynamicColorPreference async {
     final preference = await _preferencesDataSource.dynamicColorPreference;
     if (preference != null) {
-      _dynamicColorPreference.value = .new(preferencep);
+      _dynamicColorPreference.value = preferencep;
     }
     return _dynamicColorPreference;
   }
@@ -28,9 +28,9 @@ class DefaultUserDataRepository implements UserDataRepository {
   Future<ValueNotifier<ThemeConfig>> get themeConfig async {
     final preference = await _preferencesDataSource.themeConfig;
     if (preference != null) {
-      _themeConfig.value = .new(ThemeConfig.fromJson(preferencep));
+      _themeConfig.value = ThemeConfig.fromJson(preference);
     }
-    return _themeConfig!;
+    return _themeConfig;
   }
 
   @override

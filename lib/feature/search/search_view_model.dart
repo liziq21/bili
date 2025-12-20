@@ -5,38 +5,41 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
+import '../../data/repository/recent_search_qurey/recent_search_qurey_repository.dart';
 import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
+import '../../data/model/recent_search_query.dart';
+import '../../domain/get_recent_search_queries_use_case.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
 
 class SearchViewModel extends ChangeNotifier {
   SearchViewModel({
+    required GetRecentSearchQueriesUseCase getRecentSearchQueriesUseCase,
+    //required GetSearchContentsUseCase getSearchContentsUseCase,
+    required RecentSearchQueryRepository recentSearchQueryRepository,
     required SearchContentsRepository searchContentsRepository,
     required SearchSuggestRepository searchSuggestRepository,
     String? initialQuery,
-  }) : _searchContentsRepository = searchContentsRepository,
+  }) : _recentSearchQueryRepository = recentSearchQueryRepository,
+       _searchContentsRepository = searchContentsRepository,
        _searchSuggestRepository = searchSuggestRepository,
-       _currentQuery = initialQuery;
+       _currentQuery = initialQuery {
+    recentSearchQueries = getRecentSearchQueriesUseCase.invoke;
+  };
   
   final _log = Logger('SearchViewModel');
   String? _currentQuery;
-  //String? get currentQuery => _currentQuery;
 
+  late final RecentSearchQueryRepository _recentSearchQueryRepository;
   late final SearchContentsRepository _searchContentsRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
+  late final Stream<List<RecentSearchQuery>> recentSearchQueries;
   
   final _searchController = SearchController();
   get searchController => _searchController;
   
   Iterable<String> _suggests = [];
-  
-
-  DateTime _startTime = Constonts.minDate;
-  DateTime get startTime => _startTime;
-
-  DateTime _endTime = DateTime.now();
-  DateTime get endTime => _endTime;
   
   void init() {
     if (_currentQuery != null) {
@@ -60,28 +63,19 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   void onSearchTriggered(String query) {
+    if (query.trim().isEmpty) {
+      return;
+    }
+    _recentSearchRepository.insertOrReplaceRecentSearch(query);
     if (_searchController.isOpen) {
-      _loadSearchResult(query);
       _searchController.closeView(query);
     }
+    //_loadSearchResult(query);
   }
   
   Future<void> _loadSearchResult(String query) async {}
   
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
-
-  Future<void> _loadSuggests(String query) async {
-    _log.fine('Load suggests');
-    final result = await _searchSuggestRepository.getSuggests(query);
-    switch (result) {
-      case Ok(:final value):
-        _log.fine('Suggests (${value.length}) loaded');
-        _suggests = value;
-      case Error():
-        _log.warning('Failed to load suggests', result.error);
-        _suggests = [];
-    }
-  }
 
   void setStartTime(DateTime time) {
     _startTime = time;

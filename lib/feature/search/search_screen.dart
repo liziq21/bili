@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../bili/search_type.dart';
+import '../../data/model/recent_search_query.dart';
 import 'search_view_model.dart';
 
 
@@ -56,24 +57,45 @@ class _SearchScreenState extends State<SearchScreen> {
                       barElevation: .all(0.0),
                       suggestionsBuilder: (context, controller) async {
                         if (controller.text.isEmpty) {
-                          /*if (widget.searchHistory.isNotEmpty) {
-                            return widget.getHistoryList(controller);
-                          }*/
-                          return <Widget>[
-                            const Center(
-                              child: Text(
-                                'No search history.',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          ];
+                          StreamBuilder<List<RecentSearchQuery>>(
+                            stream: widget.viewModel.recentSearchQueries,
+                            builder: (context, snapshot) {
+                              return switch (snapshot) {
+                                AsyncSnapshot(hasError: true) => Text(
+                                  snapshot.error.toString(),
+                                ),
+                                AsyncSnapshot(hasData: true) => AsyncSnapshot.data!.isEmpty
+                                  ? <Widget>[
+                                      const Center(
+                                        child: Text(
+                                          'No search history.',
+                                          style: const TextStyle(color: Colors.grey),
+                                        ),
+                                      ),
+                                    ]
+                                  : AsyncSnapshot.data!.map((recentSearchQuery) =>
+                                      ListTile(
+                                        titleAlignment: ListTileTitleAlignment.center,
+                                        leading: const Icon(Icons.history),
+                                        title: Text(recentSearchQuery.query),
+                                        onTap: () => widget.viewModel.onSearchTriggered(recentSearchQuery.query),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.north_west),
+                                          onPressed: () => controller.text = recentSearchQuery.query,
+                                        ),
+                                      )
+                                    ),
+                                _ => Text('No Data', style: textStyle),
+                              };
+                            },
+                          return ;
                         }
                     
                         final suggests = await widget.viewModel.getSuggests(controller.text);
                         return suggests.map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,
-                            leading: const Icon(Icons.history), //Icons.public
+                            leading: const Icon(Icons.public),
                             title: Text(suggest),
                             onTap: () => widget.viewModel.onSearchTriggered(suggest),
                             trailing: IconButton(

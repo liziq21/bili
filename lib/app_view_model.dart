@@ -11,7 +11,7 @@ class AppViewModel {
     required UserDataRepository userDataRepository,
   }) : _userDataRepository = userDataRepository {
     _load = Command0(_loadData)..execute();
-  };
+  }
   
   final _log = Logger('AppViewModel');
   final UserDataRepository _userDataRepository;
