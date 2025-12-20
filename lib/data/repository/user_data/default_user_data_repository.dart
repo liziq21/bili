@@ -19,7 +19,7 @@ class DefaultUserDataRepository implements UserDataRepository {
   Future<ValueNotifier<bool>> get dynamicColorPreference async {
     final preference = await _preferencesDataSource.dynamicColorPreference;
     if (preference != null) {
-      _dynamicColorPreference.value = preferencep;
+      _dynamicColorPreference.value = preference;
     }
     return _dynamicColorPreference;
   }

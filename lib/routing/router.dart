@@ -11,7 +11,7 @@ import '../feature/live/live_screen.dart';
 //import '../feature/live/live_view_model.dart';
 import '../feature/not_found/not_found_screen.dart';
 import '../feature/search/search_screen.dart';
-import '../feature/search/search_view_model.dart';
+//import '../feature/search/search_view_model.dart';
 import '../feature/space/space_screen.dart';
 //import '../feature/space/space_view_model.dart';
 import '../feature/video/video_screen.dart';

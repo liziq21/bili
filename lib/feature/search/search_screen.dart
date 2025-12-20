@@ -61,11 +61,12 @@ class _SearchScreenState extends State<SearchScreen> {
                             stream: widget.viewModel.recentSearchQueries,
                             builder: (context, snapshot) {
                               return switch (snapshot) {
-                                AsyncSnapshot(hasError: true) => Text(
-                                  snapshot.error.toString(),
-                                ),
-                                AsyncSnapshot(hasData: true) => AsyncSnapshot.data!.isEmpty
-                                  ? <Widget>[
+                                AsyncSnapshot(hasError: true) =>
+                                  [
+                                    const Text(snapshot.error.toString()),
+                                  ],
+                                AsyncSnapshot(hasData: true) => snapshot.data!.isEmpty
+                                  ? [
                                       const Center(
                                         child: Text(
                                           'No search history.',
@@ -73,7 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                       ),
                                     ]
-                                  : AsyncSnapshot.data!.map((recentSearchQuery) =>
+                                  : snapshot.data!.map((recentSearchQuery) =>
                                       ListTile(
                                         titleAlignment: ListTileTitleAlignment.center,
                                         leading: const Icon(Icons.history),
@@ -85,10 +86,10 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                       )
                                     ),
-                                _ => Text('No Data', style: textStyle),
+                                _ => const Text('No Data'),
                               };
                             },
-                          );
+                          ).toList();
                         }
                     
                         final suggests = await widget.viewModel.getSuggests(controller.text);

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
-import '../../data/repository/recent_search_qurey/recent_search_qurey_repository.dart';
+import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
 import '../../data/model/recent_search_query.dart';
@@ -25,7 +25,7 @@ class SearchViewModel extends ChangeNotifier {
        _searchContentsRepository = searchContentsRepository,
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery {
-    recentSearchQueries = getRecentSearchQueriesUseCase.invoke;
+    recentSearchQueries = getRecentSearchQueriesUseCase.invoke();
   }
   
   final _log = Logger('SearchViewModel');
