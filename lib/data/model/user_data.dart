@@ -7,9 +7,9 @@ part 'user_data.g.dart';
 enum ThemeConfig {
   followSystem,
   light,
-  dark,
+  dark;
   
-  static String toJson() => _$ThemeConfigTypeEnumMap[this]!;
+  String toJson() => _$ThemeConfigTypeEnumMap[this]!;
   
   static SearchResultType fromJson(String type) =>
     $enumDecode(_$ThemeConfigTypeEnumMap, type);
