@@ -66,7 +66,7 @@ class SearchViewModel extends ChangeNotifier {
     if (query.trim().isEmpty) {
       return;
     }
-    _recentSearchRepository.insertOrReplaceRecentSearch(query);
+    _recentSearchQueryRepository.insertOrReplaceRecentSearch(query);
     if (_searchController.isOpen) {
       _searchController.closeView(query);
     }
@@ -76,25 +76,19 @@ class SearchViewModel extends ChangeNotifier {
   Future<void> _loadSearchResult(String query) async {}
   
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
-
-  void setStartTime(DateTime time) {
-    _startTime = time;
-    notifyListeners();
-  }
-
-  void setEndTime(DateTime time) {
-    _endTime = time;
-    notifyListeners();
-  }
   
-  void selectStartDate() {
-    
+  Future<void> _loadSuggests(String query) async {
+    _log.fine('Load suggests');
+    final result = await _searchSuggestRepository.getSuggests(query);
+    switch (result) {
+      case Ok(:final value):
+        _log.fine('Suggests (${value.length}) loaded');
+        _suggests = value;
+      case Error():
+        _log.warning('Failed to load suggests', result.error);
+        _suggests = [];
+    }
   }
-  
-  void selectEndDate() {
-    
-  }
-  
   void clearSearch() {
     _searchController.clear();
   }
