@@ -13,16 +13,14 @@ class PreferencesDataSource {
   final SharedPreferencesAsync _sharedPreferences;
   final _log = Logger('PreferencesDataSource');
 
-  static const _useDynamicColor = true;
   static const useDynamicColorKey = 'USE_DYNAMIC_COLOR';
-  static const _themeConfig = 'FOLLOW_SYSTEM';
   static const themeConfigKey = 'THEME_CONFIG';
   
-  Future<bool> get dynamicColorPreference async =>
-    await _sharedPreferences.getBool(useDynamicColorKey) ?? _useDynamicColor;
+  Future<bool?> get dynamicColorPreference async =>
+    await _sharedPreferences.getBool(useDynamicColorKey);
   
-  Future<String> get themeConfig async =>
-    await _sharedPreferences.getString(themeConfigKey) ?? _themeConfig;
+  Future<String?> get themeConfig async =>
+    await _sharedPreferences.getString(themeConfigKey);
   
   Future<void> setDynamicColorPreference(bool useDynamicColor) =>
     _sharedPreferences.setBool(useDynamicColorKey, useDynamicColor);

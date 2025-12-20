@@ -18,16 +18,18 @@ class AppViewModel {
   
   late final Command0 _load;
   
-  final useDynamicColor = ValueNotifier(false);
-  final themeConfig = ValueNotifier(ThemeConfig.followSystem);
+  late final ValueNotifier<bool> useDynamicColor;
+  late final ValueNotifier<ThemeConfig> themeConfig;
   
   bool get shouldKeepSplashScreen => _load.running ?? true;
-  bool get shouldUseDynamicTheming => useDynamicColor.value;
-  ThemeMode get themeMode => switch (themeConfig.value) {
-    .followSystem => .system,
-    .light => .light,
-    .dark => .dark,
-  };
+  bool get shouldUseDynamicTheming => _load.running ? false : useDynamicColor.value;
+  ThemeMode get themeMode => _load.running 
+    ? .system
+    : switch (themeConfig.value) {
+        .followSystem => .system,
+        .light => .light,
+        .dark => .dark,
+      };
   
   Future<Result<void>> _loadData() async {
     try {

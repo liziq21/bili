@@ -12,30 +12,36 @@ class DefaultUserDataRepository implements UserDataRepository {
   
   final PreferencesDataSource _preferencesDataSource;
 
-  ValueNotifier<bool>? _dynamicColorPreference;
-  ValueNotifier<ThemeConfig>? _themeConfig;
+  ValueNotifier<bool> _dynamicColorPreference = .new(false);
+  ValueNotifier<ThemeConfig> _themeConfig = .new(.followSystem);
   
   @override
   Future<ValueNotifier<bool>> get dynamicColorPreference async {
-    _dynamicColorPreference ??= .new(await _preferencesDataSource.dynamicColorPreference);
-    return _dynamicColorPreference!;
+    final preference = await _preferencesDataSource.dynamicColorPreference;
+    if (preference != null) {
+      _dynamicColorPreference.value = .new(preferencep);
+    }
+    return _dynamicColorPreference;
   }
 
   @override
   Future<ValueNotifier<ThemeConfig>> get themeConfig async {
-    _themeConfig ??= .new(ThemeConfig.fromJson(await _preferencesDataSource.themeConfig));
+    final preference = await _preferencesDataSource.themeConfig;
+    if (preference != null) {
+      _themeConfig.value = .new(ThemeConfig.fromJson(preferencep));
+    }
     return _themeConfig!;
   }
 
   @override
   Future<void> setDynamicColorPreference(bool useDynamicColor) async {
     _preferencesDataSource.setDynamicColorPreference(useDynamicColor);
-    _dynamicColorPreference?.value = useDynamicColor;
+    _dynamicColorPreference.value = useDynamicColor;
   }
   
   @override
   Future<void> setThemeConfig(ThemeConfig themeConfig) async {
     await _preferencesDataSource.setThemeConfig(themeConfig.toJson());
-    _themeConfig?.value = themeConfig;
+    _themeConfig.value = themeConfig;
   }
 }
