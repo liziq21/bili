@@ -57,7 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       barElevation: .all(0.0),
                       suggestionsBuilder: (context, controller) async {
                         if (controller.text.isEmpty) {
-                          StreamBuilder<List<RecentSearchQuery>>(
+                          return StreamBuilder<List<RecentSearchQuery>>(
                             stream: widget.viewModel.recentSearchQueries,
                             builder: (context, snapshot) {
                               return switch (snapshot) {
@@ -88,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 _ => Text('No Data', style: textStyle),
                               };
                             },
-                          return ;
+                          );
                         }
                     
                         final suggests = await widget.viewModel.getSuggests(controller.text);

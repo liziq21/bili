@@ -26,7 +26,7 @@ class SearchViewModel extends ChangeNotifier {
        _searchSuggestRepository = searchSuggestRepository,
        _currentQuery = initialQuery {
     recentSearchQueries = getRecentSearchQueriesUseCase.invoke;
-  };
+  }
   
   final _log = Logger('SearchViewModel');
   String? _currentQuery;
