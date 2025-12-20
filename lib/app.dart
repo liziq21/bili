@@ -14,11 +14,9 @@ class App extends StatelessWidget {
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
   
-  late final AppViewModel viewModel;
-  
   @override
   Widget build(BuildContext context) {
-    viewModel = context.read();
+    final AppViewModel viewModel = context.read();
     
     return ListenableBuilder(
       listenable: viewModel.useDynamicColor,

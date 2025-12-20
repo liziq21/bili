@@ -22,8 +22,8 @@ class AppViewModel {
   late final ValueNotifier<ThemeConfig> themeConfig;
   
   bool get shouldKeepSplashScreen => _load.running ?? true;
-  bool get shouldUseDynamicTheming => useDynamicColor.value ?? false;
-  ThemeMode get themeMode => switch (themeConfig.value) {
+  bool get shouldUseDynamicTheming => _load.running ?? useDynamicColor.value ?? false;
+  ThemeMode get themeMode => _load.running ? .system : switch (themeConfig.value) {
     .followSystem || null => .system,
     .light => .light,
     .dark => .dark,

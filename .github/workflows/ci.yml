@@ -27,7 +27,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          cache: true
+          #cache: true
           channel: stable
           flutter-version-file: pubspec.yaml
       - run: flutter clean
