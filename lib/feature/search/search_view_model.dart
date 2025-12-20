@@ -89,6 +89,7 @@ class SearchViewModel extends ChangeNotifier {
         _suggests = [];
     }
   }
+  
   void clearSearch() {
     _searchController.clear();
   }
