@@ -4,71 +4,39 @@ import 'package:logging/logging.dart';
 import 'data/model/user_data.dart';
 import 'data/repository/user_data/user_data_repository.dart';
 import 'utils/command.dart';
-import 'utils/utils.dart';
+import 'utils/result.dart';
 
 class AppViewModel {
-  AppViewModel({
-    UserDataRepository userDataRepository,
+  const AppViewModel({
+    required UserDataRepository userDataRepository,
   }) : _userDataRepository = userDataRepository {
-    _loadUserData();
+    _load = Command0(_load)..execute();
   };
   
   final _log = Logger('AppViewModel');
-  late final UserDataRepository _userDataRepository;
-  AppUiState _uiState = .loading();
-  var isInitialLoading = true;
+  final UserDataRepository _userDataRepository;
   
-  AppUiState get uiState async {
-    if (!isInitialLoading) {
-      await _loadUserData();
-    } else if (_uiState case Success()) {
-      _log.info('Initial loading of AppUiState successful');
-      isInitialLoading = false;
+  late final Command0 _load;
+  
+  late final ValueNotifier<bool> useDynamicColor;
+  late final ValueNotifier<ThemeConfig> themeConfig;
+  
+  bool get shouldKeepSplashScreen => _load.running ?? true;
+  bool get shouldUseDynamicTheming => useDynamicColor.value ?? false;
+  ThemeMode get themeMode => switch (themeConfig.value) {
+    .followSystem || null => .system,
+    .light => .light,
+    .dark => .dark,
+  };
+  
+  Future<Result<void>> _load() async {
+    try {
+      useDynamicColor = await _userDataRepository.dynamicColorPreference;
+      themeConfig = await _userDataRepository.themeConfig;
+    } catch (e) {
+      return .error('$e');
     }
-    return _uiState;
+
+    return .ok(null);
   }
-  
-  Future<void> _loadUserData() async {
-    final result = await _userDataRepository.userData;
-    switch (result) {
-      case Ok(:value):
-        _uiState = .success(value);
-      case Error():
-    }
-  }
-}
-
-sealed class AppUiState {
-  
-  const factory AppUiState.loading() = Loading._;
-  
-  const factory AppUiState.success(UserData userData) = Success._;
-  
-  bool get shouldKeepSplashScreen => this is Loading;
-  
-  bool get shouldDisableDynamicTheming => true;
-
-  ThemeMode get shouldUseDarkTheme => .system;
-  
-}
-
-final class Success extends AppUiState {
-  const Success._(this.userData);
-
-  final UserData userData;
-  
-  @override
-  bool get shouldUseDynamicTheming => userData.useDynamicColor;
-
-  @override
-  ThemeMode get shouldUseDarkTheme =>
-    switch (userData.darkThemeConfig) {
-      .followSystem => .system,
-      .light => .light,
-      .dark => .dark,
-    };
-}
-
-final class Loading extends AppUiState {
-  const Loading._();
 }

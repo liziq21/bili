@@ -3,12 +3,13 @@ import 'package:flutter/foundation.dart';
 import '../../../utils/result.dart';
 import '../../model/user_data.dart';
 
-abstract class UserDataRepository extends ChangeNotifier {
+abstract class UserDataRepository {
   
-  Future<Result<UserData>> get userData;
+  Future<ValueNotifier<bool>> get dynamicColorPreference;
+  Future<ValueNotifier<ThemeConfig>> get themeConfig;
 
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig);
+  Future<void> setThemeConfig(ThemeConfig themeConfig);
 
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor);
+  Future<void>> setDynamicColorPreference(bool useDynamicColor);
   
 }

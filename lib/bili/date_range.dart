@@ -1,3 +1,5 @@
+import 'package:basics/basics.dart';
+
 extension DateTimeExtension on DateTime {
   DateTime toSecondPrecision() => DateTime(year, month, day, hour, minute, second);
   DateTime get addOneSecond => add(const Duration(seconds: 1));
@@ -9,7 +11,7 @@ extension DateTimeExtension on DateTime {
 
 // DO follow API design principles
 class TimeSlot {
-  const TimeSlot({
+  TimeSlot({
     required this.start,
     required this.end,
   }) : assert(start.isBefore(end), 'Start must be before end');

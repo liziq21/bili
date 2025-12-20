@@ -74,9 +74,9 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
         _parseAndAssignResults(key, value);
       }
     } else if (json is List && json.isEmpty) {
-      final list = json.whereType<Map<String, Object?>>();
+      final list = json.whereType<Map<String, dynamic>>();
       if (list.first.containsKey('result_type')) {
-        for (final {'result_type': String type, 'data': data} in list) {
+        for (final {'result_type': type, 'data': data} in list) {
           _parseAndAssignResults(type, data);
         }
       } else {

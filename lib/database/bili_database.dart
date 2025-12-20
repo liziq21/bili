@@ -3,12 +3,12 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'dao/recent_search_query_dao.dart';
-import 'model/recent_search_query_entity.dart';
+import 'table/recent_search_query.dart';
 
 part 'bili_database.g.dart';
 
 @DriftDatabase(
-  tables: [RecentSearchQueryEntity],
+  tables: [RecentSearchQuery],
   daos: [RecentSearchQueryDao],
 )
 class BiliDatabase extends _$BiliDatabase {

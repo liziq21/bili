@@ -50,8 +50,7 @@ targets:
           checked: true
           # 序列化嵌套的 Freezed 对象
           # explicit_to_json: true
-          # field_rename: snake
-      
+
       retrofit_generator:
         generate_for:
           include:
