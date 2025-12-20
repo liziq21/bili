@@ -12,7 +12,7 @@ abstract class RecentSearchQuery with _$RecentSearchQuery {
   }) = _RecentSearchQuery;
 }
 
-extension RecentSearchQueryEntityX on RecentSearchQueryEntityData {
+extension RecentSearchQueryEntityX on RecentSearchQueryEntity {
   RecentSearchQuery asExternalModel() {
     return RecentSearchQuery(
       query: query,

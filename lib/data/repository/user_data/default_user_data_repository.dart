@@ -6,14 +6,14 @@ import '../../model/user_data.dart';
 import 'user_data_repository.dart';
 
 class DefaultUserDataRepository implements UserDataRepository {
-  const DefaultUserDataRepository({
+  DefaultUserDataRepository({
     required PreferencesDataSource preferencesDataSource,
   }) : _preferencesDataSource = preferencesDataSource;
   
   final PreferencesDataSource _preferencesDataSource;
 
   ValueNotifier<bool>? _dynamicColorPreference;
-  ValueNotifier<ThemeConfig> _themeConfig;
+  ValueNotifier<ThemeConfig>? _themeConfig;
   
   @override
   Future<ValueNotifier<bool>> get dynamicColorPreference async {

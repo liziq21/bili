@@ -7,10 +7,10 @@ import 'utils/command.dart';
 import 'utils/result.dart';
 
 class AppViewModel {
-  const AppViewModel({
+  AppViewModel({
     required UserDataRepository userDataRepository,
   }) : _userDataRepository = userDataRepository {
-    _load = Command0(_load)..execute();
+    _load = Command0(_loadData)..execute();
   };
   
   final _log = Logger('AppViewModel');
@@ -18,23 +18,23 @@ class AppViewModel {
   
   late final Command0 _load;
   
-  late final ValueNotifier<bool> useDynamicColor;
-  late final ValueNotifier<ThemeConfig> themeConfig;
+  final useDynamicColor = ValueNotifier(false);
+  final themeConfig = ValueNotifier(ThemeConfig.followSystem);
   
   bool get shouldKeepSplashScreen => _load.running ?? true;
-  bool get shouldUseDynamicTheming => _load.running ?? useDynamicColor.value ?? false;
-  ThemeMode get themeMode => _load.running ? .system : switch (themeConfig.value) {
-    .followSystem || null => .system,
+  bool get shouldUseDynamicTheming => useDynamicColor.value;
+  ThemeMode get themeMode => switch (themeConfig.value) {
+    .followSystem => .system,
     .light => .light,
     .dark => .dark,
   };
   
-  Future<Result<void>> _load() async {
+  Future<Result<void>> _loadData() async {
     try {
       useDynamicColor = await _userDataRepository.dynamicColorPreference;
       themeConfig = await _userDataRepository.themeConfig;
     } catch (e) {
-      return .error('$e');
+      return .error(Exception('$e'));
     }
 
     return .ok(null);

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/result.dart';
 
 class PreferencesDataSource {
-  const PreferencesDataSource({
+  PreferencesDataSource({
     required SharedPreferencesAsync sharedPreferences,
   }) : _sharedPreferences = sharedPreferences;
   
@@ -25,7 +25,7 @@ class PreferencesDataSource {
     await _sharedPreferences.getString(themeConfigKey) ?? _themeConfig;
   
   Future<void> setDynamicColorPreference(bool useDynamicColor) =>
-    _sharedPreferences.setbool(useDynamicColorKey, useDynamicColor);
+    _sharedPreferences.setBool(useDynamicColorKey, useDynamicColor);
 
   Future<void> setThemeConfig(String themeConfig) =>
     _sharedPreferences.setString(themeConfigKey, themeConfig);
