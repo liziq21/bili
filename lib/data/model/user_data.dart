@@ -9,7 +9,7 @@ enum ThemeConfig {
   light,
   dark,
   
-  static SearchResultType toJson() => _$ThemeConfigTypeEnumMap[this]!;
+  static String toJson() => _$ThemeConfigTypeEnumMap[this]!;
   
   static SearchResultType fromJson(String type) =>
     $enumDecode(_$ThemeConfigTypeEnumMap, type);

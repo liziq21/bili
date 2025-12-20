@@ -32,7 +32,7 @@ class App extends StatelessWidget {
             theme = theme.copyWith(colorScheme: lightDynamic);
             darkTheme = theme.copyWith(colorScheme: darkDynamic);
           }
-          ListenableBuilder(
+          return ListenableBuilder(
             listenable: viewModel.themeConfig,
             builder: (_, _) => MaterialApp.router(
               builder: (context, child) => DebugOverlay(
@@ -47,7 +47,7 @@ class App extends StatelessWidget {
               themeMode: viewModel.themeMode,
               routerConfig: router,
             ),
-          ),
+          );
         },
       ),
     );

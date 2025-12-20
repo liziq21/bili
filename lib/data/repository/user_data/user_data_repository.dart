@@ -10,6 +10,6 @@ abstract class UserDataRepository {
 
   Future<void> setThemeConfig(ThemeConfig themeConfig);
 
-  Future<void>> setDynamicColorPreference(bool useDynamicColor);
+  Future<void> setDynamicColorPreference(bool useDynamicColor);
   
 }
