@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../bili/search_type.dart';
 import '../../data/model/recent_search_query.dart';
@@ -20,14 +22,33 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-
+  final _log = Logger('_SearchScreenState');
+  List<RecentSearchQuery> _recentSearchQueries = [];
+  StreamSubscription<List<RecentSearchQuery>>? _recentSearchQueriesSubscription;
+  
   @override
   void initState() {
     super.initState();
+    
+    _recentSearchQueriesSubscription = viewModel.recentSearchQueries.listen(
+      (data) {
+        _log.fine('RecentSearchQuery loaded')
+        setState(() => _recentSearchQueries = data);
+      },
+      onError: (e) => _log.warning('Error loading RecentSearchQuery: $e'),
+    );
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.viewModel.init();
     });
   }
+  
+  @override
+  void dispose() {
+    _recentSearchQueriesSubscription?.cancel();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -57,42 +78,32 @@ class _SearchScreenState extends State<SearchScreen> {
                       barElevation: .all(0.0),
                       suggestionsBuilder: (context, controller) async {
                         if (controller.text.isEmpty) {
-                          return StreamBuilder<List<RecentSearchQuery>>(
-                            stream: widget.viewModel.recentSearchQueries,
-                            builder: (context, snapshot) {
-                              return switch (snapshot) {
-                                AsyncSnapshot(hasError: true) =>
-                                  [
-                                    const Text(snapshot.error.toString()),
-                                  ],
-                                AsyncSnapshot(hasData: true) => snapshot.data!.isEmpty
-                                  ? [
-                                      const Center(
-                                        child: Text(
-                                          'No search history.',
-                                          style: const TextStyle(color: Colors.grey),
-                                        ),
-                                      ),
-                                    ]
-                                  : snapshot.data!.map((recentSearchQuery) =>
-                                      ListTile(
-                                        titleAlignment: ListTileTitleAlignment.center,
-                                        leading: const Icon(Icons.history),
-                                        title: Text(recentSearchQuery.query),
-                                        onTap: () => widget.viewModel.onSearchTriggered(recentSearchQuery.query),
-                                        trailing: IconButton(
-                                          icon: const Icon(Icons.north_west),
-                                          onPressed: () => controller.text = recentSearchQuery.query,
-                                        ),
-                                      )
+                          return _recentSearchQueries.isEmpty
+                            ? <Widget>[
+                                const Center(
+                                  child: Text(
+                                    'No search history.',
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                              ]
+                            : <Widget>[
+                                for (RecentSearchQuery(:query) in _recentSearchQueries)
+                                  ListTile(
+                                    titleAlignment: ListTileTitleAlignment.center,
+                                    leading: const Icon(Icons.history),
+                                    title: Text(query),
+                                      onTap: () => widget.viewModel.onSearchTriggered(query),
+                                      trailing: IconButton(
+                                      icon: const Icon(Icons.north_west),
+                                      onPressed: () => controller.text = query,
                                     ),
-                                _ => const Text('No Data'),
-                              };
-                            },
-                          ).toList();
+                                  ),
+                              ];
+                          );
                         }
                     
-                        final suggests = await widget.viewModel.getSuggests(controller.text);
+                        final suggests = await widget.viewModel.suggests;
                         return suggests.map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,

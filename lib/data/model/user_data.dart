@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'user_data.freezed.dart';
 part 'user_data.g.dart';
@@ -11,8 +12,13 @@ enum ThemeConfig {
   
   String toJson() => _$ThemeConfigEnumMap[this]!;
   
-  static ThemeConfig fromJson(String type) =>
-    $enumDecode(_$ThemeConfigEnumMap, type);
+  static ThemeConfig fromJson(String themeConfig) =>
+    $enumDecodeNullable(
+      _$ThemeConfigEnumMap,
+      themeConfig,
+      unknownValue: JsonKey.nullForUndefinedEnumValue,
+    );
+    
 }
 
 @freezed

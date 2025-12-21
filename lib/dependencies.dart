@@ -7,13 +7,14 @@ import 'app.dart';
 import 'app_view_model.dart';
 import 'data/dependencies.dart';
 import 'domain/dependencies.dart';
+import 'feature/view_model/theme_view_model.dart';
 
 List<SingleChildWidget> get providers =>
   [
     ...repositoryProviders,
     ...domainProviders,
     Provider(create: (context) =>
-      AppViewModel(userDataRepository: context.read()),
+      ThemeViewModel(userDataRepository: context.read()),
     ),
     Provider(create: (context) =>
       Dio(

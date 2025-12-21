@@ -29,28 +29,18 @@ class SearchViewModel extends ChangeNotifier {
   }
   
   final _log = Logger('SearchViewModel');
-  String? _currentQuery;
-
   late final RecentSearchQueryRepository _recentSearchQueryRepository;
   late final SearchContentsRepository _searchContentsRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
-  late final Stream<List<RecentSearchQuery>> recentSearchQueries;
-  
-  final _searchController = SearchController();
-  get searchController => _searchController;
-  
+
+  String? _currentQuery;
   Iterable<String> _suggests = [];
   
-  void init() {
-    if (_currentQuery != null) {
-      _loadSearchResult(_currentQuery!);
-      _searchController.text = _currentQuery!;
-    } else {
-      _searchController.openView();
-    }
-  }
-  
-  Future<Iterable<String>> getSuggests(String query) async {
+  late final Stream<List<RecentSearchQuery>> recentSearchQueries;
+  final searchController = SearchController();
+
+  Future<Iterable<String>> get suggests async {
+    final query = searchController.text;
     if (_currentQuery == query) {
       return _suggests;
     }
@@ -62,13 +52,26 @@ class SearchViewModel extends ChangeNotifier {
     return [];
   }
   
+  void init() {
+    if (_currentQuery != null) {
+      _loadSearchResult(_currentQuery!);
+      searchController.text = _currentQuery!;
+    } else {
+      searchController.openView();
+    }
+  }
+  
+  void clearSearch() {
+    searchController.clear();
+  }
+  
   void onSearchTriggered(String query) {
     if (query.trim().isEmpty) {
       return;
     }
     _recentSearchQueryRepository.insertOrReplaceRecentSearch(query);
-    if (_searchController.isOpen) {
-      _searchController.closeView(query);
+    if (searchController.isOpen) {
+      searchController.closeView(query);
     }
     //_loadSearchResult(query);
   }
@@ -90,13 +93,10 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
   
-  void clearSearch() {
-    _searchController.clear();
-  }
-  
   @override
   void dispose() {
-    _searchController.dispose();
+    _recentSearchQuerySubscription.cancel();
+    searchController.dispose();
     super.dispose();
   }
 }
