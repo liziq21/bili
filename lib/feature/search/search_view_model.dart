@@ -39,12 +39,11 @@ class SearchViewModel extends ChangeNotifier {
   late final Stream<List<RecentSearchQuery>> recentSearchQueries;
   final searchController = SearchController();
 
-  FutureOr<Iterable<String>> getSuggests(String query) {
-    if (_currentQuery == query) {
-      return _suggests;
+  FutureOr<Iterable<String>> getSuggests(String query) async {
+    if (_currentQuery != query) {
+      await _debounceLoadSuggests(_currentQuery!);
     }
-    _currentQuery = query;
-    return _debounceLoadSuggests(_currentQuery!);
+    return _suggests;
   }
   
   void init() {
@@ -82,6 +81,7 @@ class SearchViewModel extends ChangeNotifier {
       case Ok(:final value):
         _log.fine('Suggests (${value.length}) loaded');
         _suggests = value;
+        _currentQuery = query;
       case Error():
         _log.warning('Failed to load suggests', result.error);
         _suggests = [];

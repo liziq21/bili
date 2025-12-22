@@ -100,24 +100,27 @@ class _SearchScreenState extends State<SearchScreen> {
                                   ),
                               ];
                         }
-                    
-                        final suggestsOrFuture = widget.viewModel.getSuggests(searchController.text);
-                        final suggests = suggestsOrFuture is Future<List<String>>
-                            ? await suggestsOrFuture
-                            : suggestsOrFuture;
-
-                        return suggests.map((suggest) =>
-                          ListTile(
-                            titleAlignment: ListTileTitleAlignment.center,
-                            leading: const Icon(Icons.public),
-                            title: Text(suggest),
-                            onTap: () => widget.viewModel.onSearchTriggered(suggest),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.north_west),
-                              onPressed: () => controller.text = suggest,
-                            ),
-                          )
-                        );
+                        
+                        final _currentQuery = searchController.text;
+                        final suggests = await widget.viewModel.getSuggests(_currentQuery);
+                            
+                        if (searchController.text == _currentQuery) {
+                          return suggests.map((suggest) =>
+                            ListTile(
+                              titleAlignment: ListTileTitleAlignment.center,
+                              leading: const Icon(Icons.public),
+                              title: Text(suggest),
+                              onTap: () => widget.viewModel.onSearchTriggered(suggest),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.north_west),
+                                onPressed: () => controller.text = suggest,
+                              ),
+                            )
+                          );
+                        }
+                        
+                        return <Widget>[];
+                        
                       },
                       textInputAction: .search,
                       //onTap: () {},
