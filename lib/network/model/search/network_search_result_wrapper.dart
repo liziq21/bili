@@ -73,7 +73,7 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       for (final MapEntry(:key, :value) in json.entries) {
         _parseAndAssignResults(key, value);
       }
-    } else if (json is List && json.isEmpty) {
+    } else if (json is List && json.isNotEmpty) {
       final list = json.whereType<Map<String, dynamic>>();
       if (list.first.containsKey('result_type')) {
         for (final {'result_type': type, 'data': data} in list) {
