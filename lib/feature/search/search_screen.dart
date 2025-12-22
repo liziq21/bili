@@ -24,13 +24,13 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final _log = Logger('_SearchScreenState');
   List<RecentSearchQuery> _recentSearchQueries = [];
-  StreamSubscription<List<RecentSearchQuery>>? _recentSearchQueriesSubscription;
+  StreamSubscription<List<RecentSearchQuery>>? _recentSearchQuerySubscription;
   
   @override
   void initState() {
     super.initState();
     
-    _recentSearchQueriesSubscription = viewModel.recentSearchQueries.listen(
+    _recentSearchQuerySubscription = widget.viewModel.recentSearchQueries.listen(
       (data) {
         _log.fine('RecentSearchQuery loaded');
         setState(() => _recentSearchQueries = data);
@@ -45,11 +45,10 @@ class _SearchScreenState extends State<SearchScreen> {
   
   @override
   void dispose() {
-    _recentSearchQueriesSubscription?.cancel();
+    _recentSearchQuerySubscription?.cancel();
     super.dispose();
   }
-
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

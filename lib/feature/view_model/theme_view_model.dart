@@ -14,8 +14,8 @@ class ThemeViewModel {
     load = Command0(_load)..execute();
     loadThemeConfig = Command0(_loadThemeConfig);
     loadDynamicColor = Command0(_loadDynamicColor);
-    setThemeConfig = Command1(_setThemeConfig);
-    setDynamicColor = Command1(_setDynamicColor);
+    setThemeConfig = Command1<void, ThemeConfig>(_setThemeConfig);
+    setDynamicColor = Command1<void, bool>(_setDynamicColor);
   }
   
   final _log = Logger('ThemeViewModel');
@@ -36,7 +36,7 @@ class ThemeViewModel {
   Future<Result<void>> _setThemeConfig(themeConfig) {
     _log.fine('Setting ThemeConfig');
     return _userDataRepository.setThemeConfig(themeConfig).then(
-      () {
+      (_) {
         _log.fine('ThemeConfig set successfully');
         loadThemeConfig.execute();
         return .ok(null);
@@ -51,7 +51,7 @@ class ThemeViewModel {
   Future<Result<void>> _setDynamicColor(bool useDynamicColor) {
     _log.fine('Setting DynamicColor');
     return _userDataRepository.setDynamicColorPreference(useDynamicColor).then(
-      () {
+      (_) {
         _log.fine('DynamicColor set successfully');
         loadDynamicColor.execute();
         return .ok(null);
@@ -64,7 +64,7 @@ class ThemeViewModel {
   }
   
   Future<Result<void>> _load() async {
-    final results = await Future.wait(_loadThemeConfig, _loadDynamicColor);
+    final results = await Future.wait([_loadThemeConfig, _loadDynamicColor]);
     return const .ok(null);
   }
   
@@ -73,7 +73,7 @@ class ThemeViewModel {
     return _userDataRepository.themeConfig.then(
       (value) {
         if (value != null) {
-          themeConfig = value;
+          _themeConfig = value;
         }
         _log.fine('ThemeConfig loaded');
         return .ok(null);
@@ -90,7 +90,7 @@ class ThemeViewModel {
     return _userDataRepository.dynamicColorPreference.then(
       (value) {
         if (value != null) {
-          useDynamicColor = value;
+          _useDynamicColor = value;
         }
         _log.fine('Dynamic color loaded');
         return .ok(null);

@@ -10,8 +10,8 @@ class DefaultUserDataRepository implements UserDataRepository {
   
   final PreferencesDataSource _preferencesDataSource;
 
-  bool _dynamicColorPreference = .new(false);
-  ThemeConfig _themeConfig = .new(.followSystem);
+  bool _dynamicColorPreference = false;
+  ThemeConfig _themeConfig = .followSystem;
   
   @override
   Future<bool?> get dynamicColorPreference =>
@@ -20,7 +20,7 @@ class DefaultUserDataRepository implements UserDataRepository {
   @override
   Future<ThemeConfig?> get themeConfig async {
     final preference = await _preferencesDataSource.themeConfig;
-    return ThemeConfig.fromJson(preference);
+    return preference != null ? ThemeConfig.fromJson(preference) : null;
   }
 
 

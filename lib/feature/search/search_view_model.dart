@@ -95,7 +95,6 @@ class SearchViewModel extends ChangeNotifier {
   
   @override
   void dispose() {
-    _recentSearchQuerySubscription.cancel();
     searchController.dispose();
     super.dispose();
   }

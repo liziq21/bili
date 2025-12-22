@@ -13,12 +13,11 @@ enum ThemeConfig {
   String toJson() => _$ThemeConfigEnumMap[this]!;
   
   static ThemeConfig fromJson(String themeConfig) =>
-    $enumDecodeNullable(
+    $enumDecode(
       _$ThemeConfigEnumMap,
       themeConfig,
-      unknownValue: JsonKey.nullForUndefinedEnumValue,
     );
-    
+  
 }
 
 @freezed

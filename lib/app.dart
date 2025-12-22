@@ -25,7 +25,7 @@ class App extends StatelessWidget {
           ThemeData theme = .light();
           ThemeData darkTheme = .dark();
           if (
-            viewModel.useDynamicTheme &&
+            viewModel.useDynamicColor &&
             lightDynamic != null &&
             darkDynamic != null
           ) {
