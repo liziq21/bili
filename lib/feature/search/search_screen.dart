@@ -101,10 +101,10 @@ class _SearchScreenState extends State<SearchScreen> {
                               ];
                         }
                         
-                        final _currentQuery = searchController.text;
+                        final _currentQuery = controller.text;
                         final suggests = await widget.viewModel.getSuggests(_currentQuery);
                             
-                        if (searchController.text == _currentQuery) {
+                        if (controller.text == _currentQuery) {
                           return suggests.map((suggest) =>
                             ListTile(
                               titleAlignment: ListTileTitleAlignment.center,
