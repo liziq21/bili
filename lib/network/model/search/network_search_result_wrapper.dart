@@ -34,11 +34,14 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
     List<NetworkVideoSearchResult> videoResults = [];
     
     void _parseAndAssignResults(String type, dynamic results) {
-      if (results == null || results !is Iterable || results.isEmpty) {
+      if (results == null) {
         return;
       }
       
-      final resultsWhereType = results.whereType<Map<String, Object?>>();
+      final resultsWhereType = (results as Iterable).whereType<Map<String, Object?>>();
+      if (resultsWhereType.isEmpty) {
+        return;
+      }
       
       switch (SearchResultType.parse(type)) {
         case .article:
