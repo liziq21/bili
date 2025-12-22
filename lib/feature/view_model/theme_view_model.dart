@@ -95,7 +95,7 @@ class ThemeViewModel {
         _log.fine('Dynamic color loaded');
         return .ok(null);
       },
-      onError: (e) => {
+      onError: (e) {
         _log.warning('Failed to load dynamic color', e);
         return .error(Exception('$e'));
       },

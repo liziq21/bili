@@ -100,7 +100,6 @@ class _SearchScreenState extends State<SearchScreen> {
                                     ),
                                   ),
                               ];
-                          );
                         }
                     
                         final suggests = await widget.viewModel.suggests;
