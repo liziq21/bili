@@ -38,33 +38,33 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
         return;
       }
       
-      final resultsList = results as List;
-      if (resultsList.isEmpty) {
+      final resultsWhereType = results.whereType<Map<String, Object?>>();
+      if (resultsWhereType.isEmpty) {
         return;
-      }
-      
-      List<T> _mapAndConvert<T>(T Function(Map<String, dynamic>) fromJsonFactory) {
-        return resultsList
-          .whereType<Map<String, Object?>>()
-          .map(fromJsonFactory)
-          .toList();
       }
       
       switch (SearchResultType.parse(type)) {
         case .article:
-          articleResults = _mapAndConvert(NetworkArticleSearchResult.fromJson);
+          articleResults = resultsWhereType
+            .map(NetworkArticleSearchResult.fromJson).toList();
         case .biliUser:
-          biliUserResults = _mapAndConvert(NetworkBiliUserSearchResult.fromJson);
+          biliUserResults = resultsWhereType
+            .map(NetworkBiliUserSearchResult.fromJson).toList();
         case .mediaBangumi:
-          mediaBangumiResults = _mapAndConvert(NetworkMediaBangumiSearchResult.fromJson);
+          mediaBangumiResults = resultsWhereType
+            .map(NetworkMediaBangumiSearchResult.fromJson).toList();
         case .mediaFt:
-          mediaFtResults = _mapAndConvert(NetworkMediaFtSearchResult.fromJson);
+          mediaFtResults = resultsWhereType
+            .map(NetworkMediaFtSearchResult.fromJson).toList();
         case .liveRoom:
-          liveRoomResults = _mapAndConvert(NetworkLiveRoomSearchResult.fromJson);
+          liveRoomResults = resultsWhereType
+            .map(NetworkLiveRoomSearchResult.fromJson).toList();
         case .liveUser:
-          liveUserResults = _mapAndConvert(NetworkLiveUserSearchResult.fromJson);
+          liveUserResults = resultsWhereType
+            .map(NetworkLiveUserSearchResult.fromJson).toList();
         case .video:
-          videoResults = _mapAndConvert(NetworkVideoSearchResult.fromJson);
+          videoResults = resultsWhereType
+            .map(NetworkVideoSearchResult.fromJson).toList();
         default:
       }
     }
