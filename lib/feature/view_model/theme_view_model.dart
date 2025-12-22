@@ -65,9 +65,8 @@ class ThemeViewModel {
   
   Future<Result<void>> _load() =>
     Future.wait([_loadThemeConfig(), _loadDynamicColor()])
-      .then((_) => .ok(null))
-      .catchError((e) = > .error(Exception('$e')));
-  
+      .then((_) => .ok(null));
+
   Future<Result<void>> _loadThemeConfig() {
     _log.fine('Loading ThemeConfig');
     return _userDataRepository.themeConfig
@@ -82,7 +81,6 @@ class ThemeViewModel {
         _log.warning('Failed to load ThemeConfig', e);
         return .error(Exception('$e'));
       });
-    );
   }
   
   Future<Result<void>> _loadDynamicColor() {
@@ -99,6 +97,6 @@ class ThemeViewModel {
         _log.warning('Failed to load dynamic color', e);
         return .error(Exception('$e'));
       });
-    );
+    
   }
 }
