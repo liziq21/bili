@@ -101,7 +101,11 @@ class _SearchScreenState extends State<SearchScreen> {
                               ];
                         }
                     
-                        final suggests = await widget.viewModel.suggests;
+                        final suggestsOrFuture = widget.viewModel.getSuggests(searchController.text);
+                        final suggests = suggestsOrFuture is Future<List<String>>
+                            ? await suggestsOrFuture
+                            : suggestsOrFuture;
+
                         return suggests.map((suggest) =>
                           ListTile(
                             titleAlignment: ListTileTitleAlignment.center,

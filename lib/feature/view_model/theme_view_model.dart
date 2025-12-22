@@ -43,7 +43,7 @@ class ThemeViewModel {
       },
       onError: (e) {
         _log.warning('Failed to set ThemeConfig', e);
-        return .error(Exception('$e'));
+        return Result.error(Exception('$e'));
       },
     );
   }
@@ -58,7 +58,7 @@ class ThemeViewModel {
       },
       onError: (e) {
         _log.warning('Failed to set DynamicColor', e);
-        return .error(Exception('$e'));
+        return Result.error(Exception('$e'));
       },
     );
   }
@@ -77,7 +77,7 @@ class ThemeViewModel {
         _log.fine('ThemeConfig loaded');
         return .ok(null);
       })
-      .catchError((e) {
+      .catchError<Result<void>>((e) {
         _log.warning('Failed to load ThemeConfig', e);
         return .error(Exception('$e'));
       });
@@ -86,14 +86,14 @@ class ThemeViewModel {
   Future<Result<void>> _loadDynamicColor() {
     _log.fine('Loading dynamic color');
     return _userDataRepository.dynamicColorPreference
-      .then((value) {
+      .then<Result<void>>((value) {
         if (value != null) {
           _useDynamicColor = value;
         }
         _log.fine('Dynamic color loaded');
         return .ok(null);
       })
-      .catchError((e) {
+      .catchError<Result<void>>((e) {
         _log.warning('Failed to load dynamic color', e);
         return .error(Exception('$e'));
       });
