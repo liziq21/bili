@@ -32,7 +32,7 @@ class _SearchScreenState extends State<SearchScreen> {
     
     _recentSearchQueriesSubscription = viewModel.recentSearchQueries.listen(
       (data) {
-        _log.fine('RecentSearchQuery loaded')
+        _log.fine('RecentSearchQuery loaded');
         setState(() => _recentSearchQueries = data);
       },
       onError: (e) => _log.warning('Error loading RecentSearchQuery: $e'),
@@ -88,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 ),
                               ]
                             : <Widget>[
-                                for (RecentSearchQuery(:query) in _recentSearchQueries)
+                                for (final RecentSearchQuery(:query) in _recentSearchQueries)
                                   ListTile(
                                     titleAlignment: ListTileTitleAlignment.center,
                                     leading: const Icon(Icons.history),

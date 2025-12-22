@@ -39,7 +39,7 @@ class ThemeViewModel {
       () {
         _log.fine('ThemeConfig set successfully');
         loadThemeConfig.execute();
-        return .ok(null)
+        return .ok(null);
       },
       onError: (e) {
         _log.warning('Failed to set ThemeConfig', e);
@@ -54,7 +54,7 @@ class ThemeViewModel {
       () {
         _log.fine('DynamicColor set successfully');
         loadDynamicColor.execute();
-        return .ok(null)
+        return .ok(null);
       },
       onError: (e) {
         _log.warning('Failed to set DynamicColor', e);
@@ -78,7 +78,7 @@ class ThemeViewModel {
         _log.fine('ThemeConfig loaded');
         return .ok(null);
       },
-      onError: (e) => {
+      onError: (e) {
         _log.warning('Failed to load ThemeConfig', e);
         return .error(Exception('$e'));
       },
