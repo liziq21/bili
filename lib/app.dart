@@ -32,6 +32,7 @@ class App extends StatelessWidget {
             theme = theme.copyWith(colorScheme: lightDynamic);
             darkTheme = theme.copyWith(colorScheme: darkDynamic);
           }
+          
           return ListenableBuilder(
             listenable: viewModel.loadThemeConfig,
             builder: (_, _) => MaterialApp.router(
