@@ -54,7 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       body: SafeArea(
         child: DefaultTabController(
-          length: 6,
+          length: 7,
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -77,50 +77,44 @@ class _SearchScreenState extends State<SearchScreen> {
                       barElevation: .all(0.0),
                       suggestionsBuilder: (context, controller) async {
                         if (controller.text.isEmpty) {
-                          return _recentSearchQueries.isEmpty
-                            ? <Widget>[
-                                const Center(
-                                  child: Text(
-                                    'No search history.',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
+                          return <Widget>[
+                            if (_recentSearchQueries.isEmpty)
+                              const Center(
+                                child: Text(
+                                  'No search history.',
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
-                              ]
-                            : <Widget>[
-                                for (final RecentSearchQuery(:query) in _recentSearchQueries)
-                                  ListTile(
-                                    titleAlignment: ListTileTitleAlignment.center,
-                                    leading: const Icon(Icons.history),
-                                    title: Text(query),
-                                      onTap: () => widget.viewModel.onSearchTriggered(query),
-                                      trailing: IconButton(
-                                      icon: const Icon(Icons.north_west),
-                                      onPressed: () => controller.text = query,
-                                    ),
-                                  ),
-                              ];
-                        }
+                              ),
+                            else for (final RecentSearchQuery(:query) in _recentSearchQueries)
+                              ListTile(
+                                titleAlignment: ListTileTitleAlignment.center,
+                                leading: const Icon(Icons.history),
+                                title: Text(query),
+                                  onTap: () => widget.viewModel.onSearchTriggered(query),
+                                  trailing: IconButton(
+                                  icon: const Icon(Icons.north_west),
+                                  onPressed: () => controller.text = query,
+                                ),
+                              ),
+                          ];
                         
                         final _currentQuery = controller.text;
                         final suggests = await widget.viewModel.getSuggests(_currentQuery);
-                            
-                        if (controller.text == _currentQuery) {
-                          return suggests.map((suggest) =>
-                            ListTile(
-                              titleAlignment: ListTileTitleAlignment.center,
-                              leading: const Icon(Icons.public),
-                              title: Text(suggest),
-                              onTap: () => widget.viewModel.onSearchTriggered(suggest),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.north_west),
-                                onPressed: () => controller.text = suggest,
+                        
+                        return <Widget>[
+                          if (_currentQuery == controller.text || suggests.isNotEmpty)
+                            for (final suggest in suggests)
+                              ListTile(
+                                titleAlignment: ListTileTitleAlignment.center,
+                                leading: const Icon(Icons.public),
+                                title: Text(suggest),
+                                onTap: () => widget.viewModel.onSearchTriggered(suggest),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.north_west),
+                                  onPressed: () => controller.text = suggest,
+                                ),
                               ),
-                            )
-                          );
-                        }
-                        
-                        return <Widget>[];
-                        
+                        ];
                       },
                       textInputAction: .search,
                       //onTap: () {},
@@ -132,6 +126,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   isScrollable: true,
                   tabAlignment: .start,
                   tabs: <Widget>[
+                    Tab(
+                      text: '综合',
+                    ),
                     Tab(
                       text: '视频',
                     ),
@@ -180,6 +177,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     const Text('4'),
                     const Text('5'),
                     const Text('6'),
+                    const Text('7'),
                   ],
                 ),
               ),

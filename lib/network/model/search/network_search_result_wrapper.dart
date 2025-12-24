@@ -15,13 +15,13 @@ part 'network_search_result_wrapper.freezed.dart';
 @freezed
 abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
   const factory NetworkSearchResultWrapper({
-    @Default([]) List<NetworkArticleSearchResult> article,
-    @Default([]) List<NetworkBiliUserSearchResult> biliUser,
-    @Default([]) List<NetworkMediaBangumiSearchResult> mediaBangumi,
-    @Default([]) List<NetworkMediaFtSearchResult> mediaFt,
-    @Default([]) List<NetworkLiveRoomSearchResult> liveRoom,
-    @Default([]) List<NetworkLiveUserSearchResult> liveUser,
-    @Default([]) List<NetworkVideoSearchResult> video,
+    List<NetworkArticleSearchResult> article,
+    List<NetworkBiliUserSearchResult> biliUser,
+    List<NetworkMediaBangumiSearchResult> mediaBangumi,
+    List<NetworkMediaFtSearchResult> mediaFt,
+    List<NetworkLiveRoomSearchResult> liveRoom,
+    List<NetworkLiveUserSearchResult> liveUser,
+    List<NetworkVideoSearchResult> video,
   }) = _NetworkSearchResultWrapper;
   
   factory NetworkSearchResultWrapper.fromJson(dynamic json) {

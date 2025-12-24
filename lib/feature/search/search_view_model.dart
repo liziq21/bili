@@ -39,11 +39,16 @@ class SearchViewModel extends ChangeNotifier {
   late final Stream<List<RecentSearchQuery>> recentSearchQueries;
   final searchController = SearchController();
 
-  FutureOr<Iterable<String>> getSuggests(String query) async {
-    if (_currentQuery != query) {
+  Future<Iterable<String>> getSuggests(String query) async {
+    if (_currentQuery == query) {
+      return _suggests;
+    } else {
       await _debounceLoadSuggests(_currentQuery!);
+      if (_currentQuery == query) {
+        return _suggests;
+      }
     }
-    return _suggests;
+    return [];
   }
   
   void init() {

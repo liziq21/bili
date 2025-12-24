@@ -13,7 +13,11 @@ class BiliSearchContentsRepository implements SearchContentsRepository {
   final NetworkSearchDataSource _network;
   
   @override
-  Future<Result<List<SearchResult>>> searchContents(String searchQuery) async {
-    return const .ok([]);
+  Future<Result<SearchResult>> searchContents(
+    String searchQuery, {
+    required int page,
+  }) async {
+    final result = await _network.search(searchQuery);
+    return result.map((it) => it.asModel());
   }
 }
