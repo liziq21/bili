@@ -3,6 +3,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import '../../data/repository/model/concrete_results/bili_user_search_result.dart';
 import '../../data/repository/model/concrete_results/video_search_result.dart';
+import 'video_card.dart';
 
 class SearchRuseltView extends StatelessWidget {
   const SearchRuseltView({
