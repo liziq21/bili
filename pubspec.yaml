@@ -31,7 +31,7 @@ dependencies:
   logging: ^1.3.0
   path_provider: ^2.1.5
   provider: ^6.1.5
-  retrofit: ^4.9.1
+  retrofit: ^4.9.2
   #rxdart: ^0.28.0
   shared_preferences: ^2.5.4
 
@@ -47,7 +47,7 @@ dev_dependencies:
   freezed: ^3.0.6
   go_router_builder: ^4.1.0
   json_serializable: ^6.10.0
-  retrofit_generator: 10.2.0
+  retrofit_generator: ^10.2.1
 
 flutter:
   uses-material-design: true
