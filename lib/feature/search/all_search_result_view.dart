@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-import '../../data/repository/model/concrete_results/bili_user_search_result.dart';
-import '../../data/repository/model/concrete_results/video_search_result.dart';
+import '../../data/model/search/bili_user_search_result.dart';
+import '../../data/model/search/video_info_base.dart';
 import 'video_card.dart';
 
-class SearchRuseltView extends StatelessWidget {
-  const SearchRuseltView({
+class AllSearchRuseltView extends StatelessWidget {
+  const AllSearchRuseltView({
     super.key,
     required this.viewModel,
   });
@@ -34,8 +34,9 @@ class SearchRuseltView extends StatelessWidget {
                     : const SizedBox.shrink();*/
                     return const SizedBox.shrink();
                 },
+              ),
             ),
-            PagedSliverList<int, Photo>(
+            PagedSliverList<int, VideoInfoBase>(
               state: state,
               fetchNextPage: fetchNextPage,
               builderDelegate: PagedChildBuilderDelegate(
@@ -50,6 +51,7 @@ class SearchRuseltView extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

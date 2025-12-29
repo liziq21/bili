@@ -65,7 +65,7 @@ class VideoCard extends StatelessWidget {
           ),
           Positioned(
             left: 6.0,
-            top: 6.0
+            top: 6.0,
             bottom: 6.0,
             child: Column(
               mainAxisSize: .min,
@@ -90,7 +90,6 @@ class VideoCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
     );
   }
 }

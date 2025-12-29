@@ -15,13 +15,13 @@ part 'network_search_result_wrapper.freezed.dart';
 @freezed
 abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
   const factory NetworkSearchResultWrapper({
-    List<NetworkArticleSearchResult> article,
-    List<NetworkBiliUserSearchResult> biliUser,
-    List<NetworkMediaBangumiSearchResult> mediaBangumi,
-    List<NetworkMediaFtSearchResult> mediaFt,
-    List<NetworkLiveRoomSearchResult> liveRoom,
-    List<NetworkLiveUserSearchResult> liveUser,
-    List<NetworkVideoSearchResult> video,
+    required List<NetworkArticleSearchResult> article,
+    required List<NetworkBiliUserSearchResult> biliUser,
+    required List<NetworkMediaBangumiSearchResult> mediaBangumi,
+    required List<NetworkMediaFtSearchResult> mediaFt,
+    required List<NetworkLiveRoomSearchResult> liveRoom,
+    required List<NetworkLiveUserSearchResult> liveUser,
+    required List<NetworkVideoSearchResult> video,
   }) = _NetworkSearchResultWrapper;
   
   factory NetworkSearchResultWrapper.fromJson(dynamic json) {
@@ -75,15 +75,16 @@ abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
       }
     } else if (json is List && json.isNotEmpty) {
       final list = json.whereType<Map<String, dynamic>>();
-      if (list.first.containsKey('result_type')) {
-        for (final {'result_type': type, 'data': data} in list) {
-          _parseAndAssignResults(type, data);
+      final first = list.firstOrNull;
+      if (first != null) {
+        if (first.containsKey('result_type')) {
+          for (final {'result_type': type, 'data': data} in list) {
+            _parseAndAssignResults(type, data);
+          }
+        } else {
+          _parseAndAssignResults(first['type'], list);
         }
-      } else {
-        _parseAndAssignResults(list.first['type'] as String, list);
       }
-    } else {
-      return const NetworkSearchResultWrapper();
     }
     
     return NetworkSearchResultWrapper(

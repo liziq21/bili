@@ -1,44 +1,36 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:logger/logger.dart';
 import 'package:logging/logging.dart';
 
 import '../../bili/constonts/constonts.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
-import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
 import '../../data/model/recent_search_query.dart';
 import '../../domain/get_recent_search_queries_use_case.dart';
-import '../../utils/command.dart';
 import '../../utils/result.dart';
 
-class SearchViewModel extends ChangeNotifier {
-  SearchViewModel({
+class AppSearchAnchorViewModel extends ChangeNotifier {
+  AppSearchAnchorViewModel({
     required GetRecentSearchQueriesUseCase getRecentSearchQueriesUseCase,
-    //required GetSearchContentsUseCase getSearchContentsUseCase,
     required RecentSearchQueryRepository recentSearchQueryRepository,
-    required SearchContentsRepository searchContentsRepository,
     required SearchSuggestRepository searchSuggestRepository,
-    String? initialQuery,
   }) : _recentSearchQueryRepository = recentSearchQueryRepository,
-       _searchContentsRepository = searchContentsRepository,
-       _searchSuggestRepository = searchSuggestRepository,
-       _currentQuery = initialQuery {
+       _searchSuggestRepository = searchSuggestRepository {
     recentSearchQueries = getRecentSearchQueriesUseCase.invoke();
   }
   
-  final _log = Logger('SearchViewModel');
+  final _log = Logger('AppSearchBarViewModel');
   late final RecentSearchQueryRepository _recentSearchQueryRepository;
-  late final SearchContentsRepository _searchContentsRepository;
   late final SearchSuggestRepository _searchSuggestRepository;
 
   String? _currentQuery;
   Iterable<String> _suggests = [];
   
   late final Stream<List<RecentSearchQuery>> recentSearchQueries;
-  final searchController = SearchController();
 
+  //clearRecentSearches
+  
   Future<Iterable<String>> getSuggests(String query) async {
     if (_currentQuery == query) {
       return _suggests;
@@ -50,32 +42,6 @@ class SearchViewModel extends ChangeNotifier {
     }
     return [];
   }
-  
-  void init() {
-    if (_currentQuery != null) {
-      _loadSearchResult(_currentQuery!);
-      searchController.text = _currentQuery!;
-    } else {
-      searchController.openView();
-    }
-  }
-  
-  void clearSearch() {
-    searchController.clear();
-  }
-  
-  void onSearchTriggered(String query) {
-    if (query.trim().isEmpty) {
-      return;
-    }
-    _recentSearchQueryRepository.insertOrReplaceRecentSearch(query);
-    if (searchController.isOpen) {
-      searchController.closeView(query);
-    }
-    //_loadSearchResult(query);
-  }
-  
-  Future<void> _loadSearchResult(String query) async {}
   
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
   
@@ -92,18 +58,6 @@ class SearchViewModel extends ChangeNotifier {
         _suggests = [];
     }
   }
-  
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
-  }
-}
-
-enum DatePickerShowState {
-  dismiss,
-  selectStartDate,
-  selectEndDate;
 }
 
 const Duration debounceDuration = Duration(milliseconds: 300);

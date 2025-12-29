@@ -3,8 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'network_bili_user_res.freezed.dart';
 
 @freezed
-abstract class BiliUserRes with _$BiliUserRes {
-  const factory BiliUserRes({
+abstract class UserRes with _$UserRes {
+  const factory UserRes({
     required int aid,
     required String bvid,
     required String title,
@@ -23,5 +23,5 @@ abstract class BiliUserRes with _$BiliUserRes {
     required int vt,
     required int enableVt,
     required String vtDisplay,
-  }) = _BiliUserRes;
+  }) = UserRes;
 }

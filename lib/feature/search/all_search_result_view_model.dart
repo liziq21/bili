@@ -3,7 +3,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:logging/logging.dart';
 
 import '../../data/repository/model/concrete_results/bili_user_search_result.dart';
-import '../../data/repository/model/concrete_results/video_search_result.dart';
+import '../../data/repository/model/video_info_base.dart';
 import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
@@ -29,15 +29,15 @@ class SearchResultViewModel extends ChangeNotifier {
   PagingController get pagingController => _pagingController;
   UserSearchResult? get userSearchResult => _userSearchResult;
 
-  Future<List<VideoSearchResult>> _search(int pageKey) async {
+  Future<List<VideoInfoBase>> _search(int pageKey) async {
     final result = await _searchContentsRepository.searchContents(searchQuery, page: pageKey);
     switch (result) {
       case Ok(:value):
-        _log.fine('Search video (${value.videoResults.length}) loaded');
-        _biliUserSearchResult = value.biliUserResults.firstOrNull;
+        _log.fine('Search video (${value.videos.length}) loaded');
+        _biliUserSearchResult = value.creatorProfiles;
         _numPages = value.numPages;
         notifyListeners();
-        return value.videoResults;
+        return value.videos;
       case Error(:error):
         _log.warning('Failed to load search contents', error);
         throw error;
