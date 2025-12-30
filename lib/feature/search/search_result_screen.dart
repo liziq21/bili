@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
 import '../../bili/search_type.dart';
 import '../../data/model/recent_search_query.dart';
@@ -23,7 +23,7 @@ class SearchResultScreen extends StatefulWidget {
     return Scaffold(
       body: SafeArea(
         child: DefaultTabController(
-          length: 7,
+          length: 1,
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -53,24 +53,13 @@ class SearchResultScreen extends StatefulWidget {
                     Tab(
                       text: '综合',
                     ),
-                    Tab(
+                    /*Tab(
                       text: '视频',
-                    ),
-                    Tab(
-                      text: '番剧',
-                    ),
-                    Tab(
-                      text: '影视',
                     ),
                     Tab(
                       text: '直播',
                     ),
-                    Tab(
-                      text: '用户',
-                    ),
-                    Tab(
-                      text: '专栏',
-                    ),
+                    Tab(text: '用户',),*/
                   ],
                 ),
               ),
@@ -96,19 +85,20 @@ class SearchResultScreen extends StatefulWidget {
                 child: TabBarView(
                   children: [
                     ChangeNotifierProvider(
-                      create: (context) => TabViewModel(
-                        context.read();
+                      create: (context) => AllSearchRuseltsViewModel(
+                        searchQuery: searchQuery,
+                        searchContentsRepository: context.read();
                       ),
-                      child: const TabContent(tabName: 'Tab 1'),
+                      child: AllSearchRuseltsView(),
                     ),
-                    ChangeNotifierProvider(
+                    /*ChangeNotifierProvider(
                       create: (context) => TabViewModel('Tab 2'),
                       child: const TabContent(tabName: 'Tab 2'),
                     ),
                     ChangeNotifierProvider(
                       create: (context) => TabViewModel('Tab 3'),
                       child: const TabContent(tabName: 'Tab 3'),
-                    ),
+                    ),*/
                   ],
                 ),
               ),
@@ -117,5 +107,9 @@ class SearchResultScreen extends StatefulWidget {
         ),
       ),
     );
+  }
+  
+  List<Widget> get _resultViews {
+    
   }
 }

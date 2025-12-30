@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../network/model/search/concrete_results/network_video_search_result.dart'
-import '../../network/model/search/common/network_bili_user_res.dart'
+import '../../network/model/search/concrete_results/network_video_search_result.dart';
+import '../../network/model/search/common/network_bili_user_res.dart';
 
 part 'video_info_base.freezed.dart';
 

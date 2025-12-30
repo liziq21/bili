@@ -4,30 +4,24 @@ import '../../../network/model/search/network_search_result.dart';
 import 'creator_profile.dart';
 import 'video_info_base.dart';
 
-class AllSearchResults {
-  final int page;
-  final int numPages;
-  final CreatorProfile? creatorProfile;
-  final List<VideoInfoBase>? creatorProfileVideos;
-  final List<VideoInfoBase> videos;
+part 'search_results.freezed.dart'
 
-  const BiliSearchResults({
-    required this.page,
-    required this.numPages,
-    this.creatorProfile,
-    this.creatorProfileVideos,
-    required this.videos,
-  });
+@freezed
+abstract class AllSearchResults with _$AllSearchResults {
+  const factory BiliSearchResults({
+    required int page,
+    required int numPages,
+    required List<VideoInfoBase> videos,
+    CreatorProfile? creatorProfile,
+    List<VideoInfoBase>? creatorProfileVideos,
+  }) = _AllSearchResults;
 }
 
-class SearchResults<T> {
-  final int page;
-  final int numPages;
-  final List<T> results;
-
-  const VideoSearchResults({
-    required this.page,
-    required this.numPages,
-    required this.results,
-  });
+@freezed
+class SearchResults<T> with _$SearchResults<T>{
+  const factory SearchResults({
+    required int page,
+    required int numPages,
+    required List<T> results,
+  }) = _SearchResults;
 }

@@ -49,7 +49,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
   Widget build(BuildContext context) {
     return FocusScope(
       descendantsAreFocusable: false,
-      child: widget.builder == null;
+      child: widget.builder == null
         ? SearchAnchor.bar(
           barHintText: '搜索...',
           barElevation: .all(0.0),

@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:logging/logging.dart';
 
-import '../../data/repository/model/concrete_results/bili_user_search_result.dart';
+import '../../data/repository/model/creator_profile.dart';
 import '../../data/repository/model/video_info_base.dart';
 import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
 
-class SearchResultViewModel extends ChangeNotifier {
-  SearchResultViewModel({
+class AllSearchResultsViewModel extends ChangeNotifier {
+  AllSearchResultsViewModel({
     required SearchContentsRepository searchContentsRepository,
     required this.searchQuery,
   }) : _searchContentsRepository = searchContentsRepository;
@@ -20,27 +20,35 @@ class SearchResultViewModel extends ChangeNotifier {
   final PagingController _pagingController = .new<int, VideoSearchResult>(
     getNextPageKey: (state) =>
       state.lastPageIsEmpty && state.nextIntPageKey > _numPages ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) => _search(pageKey),
+    fetchPage: _search,
   );
 
   int _numPages = 1;
-  UserSearchResult? _userSearchResult;
+  CreatorProfile? _creatorProfile;
   
   PagingController get pagingController => _pagingController;
-  UserSearchResult? get userSearchResult => _userSearchResult;
+  UserSearchResult? get creatorProfile => _creatorProfile;
 
   Future<List<VideoInfoBase>> _search(int pageKey) async {
     final result = await _searchContentsRepository.searchContents(searchQuery, page: pageKey);
     switch (result) {
       case Ok(:value):
         _log.fine('Search video (${value.videos.length}) loaded');
-        _biliUserSearchResult = value.creatorProfiles;
-        _numPages = value.numPages;
-        notifyListeners();
+        if (value.page == 1) {
+          _creatorProfile = value.creatorProfile;
+          _numPages = value.numPages;
+          notifyListeners();
+        }
         return value.videos;
       case Error(:error):
         _log.warning('Failed to load search contents', error);
         throw error;
     }
+  }
+  
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
   }
 }
