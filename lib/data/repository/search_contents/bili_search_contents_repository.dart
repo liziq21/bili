@@ -33,23 +33,7 @@ class BiliSearchContentsRepository implements SearchContentsRepository {
         creatorProfileVideos: biliUser?.res.map((e) => e.asModel()),
         videos: it.videos.map((e) => e.asModel()),
       );
-    );
-  }
-  
-  @override
-  Future<Result<SearchResult<VideoInfoBase>>> searchVideo(
-    String searchQuery, {
-    required int page,
-  }) async {
-    final result = await _network.searchVideo(
-      searchQuery,
-      page: page,
-    );
-    return result.map((it) => SearchResults(
-      page: it.page,
-      numPages: it.numPages,
-      resutls: it.videos.map((e) => e.asModel()),
-    ));
+    });
   }
   
   @override
@@ -81,6 +65,22 @@ class BiliSearchContentsRepository implements SearchContentsRepository {
       page: it.page,
       numPages: it.numPages,
       creatorProfile: it.liveRoom.map((e) => e.asModel()),
+    ));
+  }
+
+  @override
+  Future<Result<SearchResults<VideoInfoBase>>> searchVideo(
+    String searchQuery, {
+    required int page,
+  }) async {
+    final result = await _network.searchVideo(
+      searchQuery,
+      page: page,
+    );
+    return result.map((it) => SearchResults(
+      page: it.page,
+      numPages: it.numPages,
+      resutls: it.videos.map((e) => e.asModel()),
     ));
   }
 }

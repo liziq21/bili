@@ -40,9 +40,9 @@ class SearchResultScreen extends StatefulWidget {
                   padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
                   child: AppSearchAnchor(
                     viewModel: AppSearchAnchorViewModel(
-                      getRecentSearchQueriesUseCase: context.read();
-                      recentSearchQueryRepository: context.read();
-                      searchSuggestRepository: context.read();
+                      getRecentSearchQueriesUseCase: context.read(),
+                      recentSearchQueryRepository: context.read(),
+                      searchSuggestRepository: context.read(),
                     ),
                   ),
                 ),
@@ -87,7 +87,7 @@ class SearchResultScreen extends StatefulWidget {
                     ChangeNotifierProvider(
                       create: (context) => AllSearchRuseltsViewModel(
                         searchQuery: searchQuery,
-                        searchContentsRepository: context.read();
+                        searchContentsRepository: context.read(),
                       ),
                       child: AllSearchRuseltsView(),
                     ),

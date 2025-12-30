@@ -4,7 +4,7 @@ import '../../../network/model/search/network_search_result.dart';
 import 'creator_profile.dart';
 import 'video_info_base.dart';
 
-part 'search_results.freezed.dart'
+part 'search_results.freezed.dart';
 
 @freezed
 abstract class AllSearchResults with _$AllSearchResults {

@@ -73,7 +73,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
             }
           },
         ),
-    ),
+    );
   }
   
   Future<L<Widget>> _getSuggestions(TextEditingController controller) async {
