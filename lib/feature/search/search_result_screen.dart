@@ -23,7 +23,7 @@ class SearchResultScreen extends StatefulWidget {
     return Scaffold(
       body: SafeArea(
         child: DefaultTabController(
-          length: 1,
+          length: _resultViews.length,
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
@@ -83,23 +83,7 @@ class SearchResultScreen extends StatefulWidget {
               ),
               SliverToBoxAdapter(
                 child: TabBarView(
-                  children: [
-                    ChangeNotifierProvider(
-                      create: (context) => AllSearchRuseltsViewModel(
-                        searchQuery: searchQuery,
-                        searchContentsRepository: context.read(),
-                      ),
-                      child: AllSearchRuseltsView(),
-                    ),
-                    /*ChangeNotifierProvider(
-                      create: (context) => TabViewModel('Tab 2'),
-                      child: const TabContent(tabName: 'Tab 2'),
-                    ),
-                    ChangeNotifierProvider(
-                      create: (context) => TabViewModel('Tab 3'),
-                      child: const TabContent(tabName: 'Tab 3'),
-                    ),*/
-                  ],
+                  children: _resultViews,
                 ),
               ),
             ],
@@ -109,7 +93,14 @@ class SearchResultScreen extends StatefulWidget {
     );
   }
   
-  List<Widget> get _resultViews {
-    
-  }
+  final List<Widget> _resultViews = [
+    if (context.maybeRead<AllSearchRuseltsViewModel>() != null)
+    ChangeNotifierProvider(
+      AllSearchRuseltsViewModel(
+        searchQuery: searchQuery,
+        searchContentsRepository: context.read(),
+      ),
+      AllSearchRuseltsView(),
+    ),
+  ];
 }

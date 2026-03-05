@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextSearch on BuildContext {
-  void navigateToSearch([String? keyword]) {
+  void navigateToSearchReault(String keyword) {
     SearchRouteData(keyword).push(this);
   }
 }
@@ -9,19 +9,20 @@ extension BuildContextSearch on BuildContext {
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
 class SearchRouteData extends GoRouteData with $SearchRouteData {
-  const SearchRouteData([this.keyword]);
+  const SearchRouteData(this.keyword);
   
-  final String? keyword;
+  final String keyword;
 
   @override
   Widget build(context, state) {
-    return SearchScreen(
-      viewModel: .new(
+    return SearchResultScreen(
+      /*viewModel: .new(
         getRecentSearchQueriesUseCase: context.read(),
         recentSearchQueryRepository: context.read(),
         searchSuggestRepository: context.read(),
         initialQuery: keyword,
-      ),
+      ),*/
+      searchQuery: keyword,
       onBackClick: () => context.pop(),
     );
   }

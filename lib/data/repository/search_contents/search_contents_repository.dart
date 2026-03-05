@@ -1,17 +1,33 @@
 import 'dart:async';
 
 import '../../../utils/result.dart';
+import '../../../model/data/filter_group.dart';
+import '../../../model/data/sort_option.dart';
 import '../../model/creator_profile.dart';
 import '../../model/live_room.dart';
 import '../../model/search_results.dart';
 import '../../model/video_info_base.dart';
 
+abstract class SearchQuery {
+  const SearchQuery(
+    this.query, {
+    this.page,
+    this.sortOption,
+    this.filter = [],
+  });
+  
+  final String query;
+  final String? page;
+  final SortOption? sortOption;
+  final List<FilterItem> filter;
+}
+
 abstract class SearchContentsRepository {
-  Future<Result<AllSearchResults>> searchContents(String searchQuery, {int? page});
+  Future<Result<AggregateSearchResults>> searchAll(SearchQuery searchQuery);
   
-  Future<Result<SearchResults<CreatorProfile>>> searchCreatorProfile(String searchQuery, {int? page});
+  Future<Result<PagedCreatorProfile>> searchCreatorProfile(SearchQuery searchQuery);
   
-  Future<Result<SearchResults<LiveRoom>>> searchLiveRoom(String searchQuery, {int? page});
+  Future<Result<PagedLiveRooms>> searchLiveRoom(SearchQuery searchQuery);
   
-  Future<Result<SearchResults<VideoInfoBase>>> searchVideo(String searchQuery, {int? page});
+  Future<Result<PagedVideos>> searchVideo(SearchQuery searchQuery);
 }

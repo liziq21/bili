@@ -5,13 +5,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.onLive,
-    required this.onSearch,
+    required this.navigateToSearchReault,
     required this.onSpace,
     required this.onVideo,
   });
   
   final Function(String roomId) onLive;
-  final Function([String? query]) onSearch;
+  final Function(String searchQuery) navigateToSearchReault;
   final Function(String mid) onSpace;
   final Function(String id) onVideo;
 
@@ -44,12 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text('Live'),
             ),
             ElevatedButton(
-              onPressed: () => widget.onSearch(),
-              child: const Text('Search'),
-            ),
-            ElevatedButton(
-              onPressed: () => widget.onSearch('qullll'),
-              child: const Text('Search "qullll"'),
+              onPressed: () => widget.navigateToSearchReault('da'),
+              child: const Text('Search "da"'),
             ),
             ElevatedButton(
               onPressed: () => widget.onSpace('188339'),

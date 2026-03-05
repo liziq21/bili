@@ -22,7 +22,6 @@ enum ArticleCategory implements Category {
   String toJson() => toString();
 }
 
-
 enum PhotoCategory implements Category {
   all,
   artists,

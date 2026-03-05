@@ -2,6 +2,8 @@ import 'dart:async';
 
 import '../../../network/network_search_data_source.dart';
 import '../../../utils/result.dart';
+import '../../../model/data/filter_group.dart';
+import '../../../model/data/sort_option.dart';
 import '../../model/creator_profile.dart';
 import '../../model/live_room.dart';
 import '../../model/search_results.dart';
@@ -15,72 +17,40 @@ class BiliSearchContentsRepository implements SearchContentsRepository {
   
   final NetworkSearchDataSource _network;
   
+  
   @override
-  Future<Result<AllSearchResults>> searchContents(
-    String searchQuery, {
-    required int page,
-  }) async {
-    final result = await _network.search(
-      searchQuery,
-      page: page,
+  Future<Result<AggregateSearchResults>> searchAll(SearchQuery searchQuery) async {
+    final result = await _network.searchAll(
+      searchQuery.query,
+      page: searchQuery.page,
     );
-    return result.map((it) {
-      final biliUser = it.biliUser.firstOrNull;
-      return AllSearchResults(
-        page: it.page,
-        numPages: it.numPages,
-        creatorProfile: biliUser?.asModel(),
-        creatorProfileVideos: biliUser?.res.map((e) => e.asModel()),
-        videos: it.videos.map((e) => e.asModel()),
-      );
-    });
+    return result.map((it) => it.asModel());
   }
   
   @override
-  Future<Result<SearchResults<CreatorProfile>>> searchCreatorProfile(
-    String searchQuery, {
-    required int page,
-  }) async {
+  Future<Result<PagedCreatorProfile>> searchCreatorProfile(SearchQuery searchQuery) async {
     final result = await _network.searchBiliUser(
-      searchQuery,
-      page: page,
+      searchQuery.query,
+      page: searchQuery.page,
     );
-    return result.map((it) => SearchResults(
-      page: it.page,
-      numPages: it.numPages,
-      creatorProfile: it.biliUser.map((e) => e.asModel()),
-    ));
+    return result.map((it) => it.asPagedCreatorProfile());
   }
   
   @override
-  Future<Result<SearchResults<LiveRoom>>> searchLiveRoom(
-    String searchQuery, {
-    required int page,
-  }) async {
+  Future<Result<PagedLiveRooms>> searchLiveRoom(SearchQuery searchQuery) async {
     final result = await _network.searchLiveRoom(
-      searchQuery,
-      page: page,
+      searchQuery.query,
+      page: searchQuery.page,
     );
-    return result.map((it) => SearchResults(
-      page: it.page,
-      numPages: it.numPages,
-      creatorProfile: it.liveRoom.map((e) => e.asModel()),
-    ));
+    return result.map((it) => it.asPagedLiveRooms());
   }
-
+  
   @override
-  Future<Result<SearchResults<VideoInfoBase>>> searchVideo(
-    String searchQuery, {
-    required int page,
-  }) async {
+  Future<Result<PagedVideos>> searchVideo(SearchQuery searchQuery) async {
     final result = await _network.searchVideo(
-      searchQuery,
-      page: page,
+      searchQuery.query,
+      page: searchQuery.page,
     );
-    return result.map((it) => SearchResults(
-      page: it.page,
-      numPages: it.numPages,
-      resutls: it.videos.map((e) => e.asModel()),
-    ));
+    return result.map((it) => it.asPagedVideos());
   }
 }

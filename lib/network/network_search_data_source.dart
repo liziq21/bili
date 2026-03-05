@@ -9,7 +9,7 @@ import 'model/search_suggest/network_search_suggest.dart';
 
 abstract interface class NetworkSearchDataSource {
   
-  Future<Result<NetworkSearchResult>> search(
+  Future<Result<NetworkSearchResult>> searchAll(
     String keyword, {
     int? page,
   });

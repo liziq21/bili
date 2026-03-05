@@ -1,16 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 //import 'package:google_fonts/google_fonts.dart';
-import '../../../domain/models/search/video_search_result.dart';
+import '../../../data/models/video_info_base.dart';
 import '../../../utils/image_error_listener.dart';
 
 class VideoCard extends StatelessWidget {
   const VideoCard({
     super.key,
-    required this.duration,
-    required this.pic,
-    required this.play,
-    required this.senddate,
+    required this.videoInfoBase,
     this.onTap,
   });
 
@@ -34,7 +31,7 @@ class VideoCard extends StatelessWidget {
                   alignment: .center,
                   fit: BoxFit.cover,
                   child: */CachedNetworkImage(
-                    imageUrl: 'https:$pic',
+                    imageUrl: videoInfoBase.picUrl,
                     alignment: .center,
                     fit: .cover,
                     errorWidget: (context, url, error) => const Icon(Icons.error),
@@ -51,7 +48,7 @@ class VideoCard extends StatelessWidget {
                       borderRadius: .circular(4.0),
                     ),
                     child: Text(
-                      duration,
+                      videoInfoBase.duration,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12.0,
@@ -73,13 +70,13 @@ class VideoCard extends StatelessWidget {
               children: [
                 Title(
                   title: Text(
-                    videoInfo.title,
+                    videoInfoBase.title,
                     maxLines: 2,
                     overflow: .fade,
                   )
                 ),
                 Spacer(),
-                Text('$play views • $senddate'),
+                Text('${videoInfoBase.play} views • ${videoInfoBase.pubdate}'),
               ],
             ),
           ),

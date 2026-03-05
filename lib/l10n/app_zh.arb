@@ -1,0 +1,6 @@
+{
+  "appName": "Bitbe",
+  "@appName": {
+    "description": "App name"
+  }
+}

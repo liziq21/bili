@@ -7,6 +7,40 @@ import '../../data/repository/model/video_info_base.dart';
 import '../../data/repository/search_contents/search_contents_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
+import 'base_search_viewmodel.dart';
+
+class AllSearchResultsViewModel extends BaseSearchViewModel<AllSearchItem, AllSortOptions> {
+  AllSearchResultsViewModel({
+    required String searchQuery,
+    required SearchContentsRepository searchContentsRepository,
+  }) : super(
+    searchQuery: searchQuery,
+    searchContentsRepository: searchContentsRepository,
+    initialSortBy: AllSortOptions.relevance, // 默认排序
+    initialFilters: allResultFilters, // 初始过滤器
+  );
+
+  @override
+  get availableSortOptions => [];
+
+  @override
+  get initialFilters => [];
+
+  @override
+  Future<PaginatedResult<AllSearchItem>> performSearch({
+    required String query,
+    required int page,
+    required String sortBy,
+    required List<SearchFilter> filters,
+  }) {
+    return searchContentsRepository.search(
+      query: query,
+      page: page,
+      sortBy: sortBy,
+      filters: filters,
+    );
+  }
+}
 
 class AllSearchResultsViewModel extends ChangeNotifier {
   AllSearchResultsViewModel({

@@ -41,11 +41,8 @@ class AllSearchRuseltsView extends StatelessWidget {
               state: state,
               fetchNextPage: fetchNextPage,
               builderDelegate: PagedChildBuilderDelegate(
-                itemBuilder: (_, item, _) => VideoCard(
-                  duration: item.duration,
-                  pic: item.pic,
-                  play: item.play,
-                  senddate: item.senddate,
+                itemBuilder: (_, videoInfoBase, _) => VideoCard(
+                  videoInfoBase: videoInfoBase,
                   //onTap,
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:logger/logger.dart' hide LogEvent;
 import 'package:provider/provider.dart';
 
@@ -51,6 +52,11 @@ class App extends StatelessWidget {
                 .dark => .dark,
               },
               routerConfig: router,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localeResolutionCallback: (locale, supportedLocales) {
+                return locale;
+              },
             ),
           );
         },

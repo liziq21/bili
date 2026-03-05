@@ -24,13 +24,13 @@ abstract class BiliNetworkApi {
   factory BiliNetworkApi(Dio dio, {String? baseUrl}) = _BiliNetworkApi;
   
   @GET(ApiUriPaths.search)
-  Future<Result<NetworkSearchResult>> search(
+  Future<Result<NetworkSearchResult>> searchAll(
     @Query('keyword') String keyword, {
     @Query('page') int? page,
   });
   
   @GET(ApiUriPaths.searchType)
-  Future<Result<NetworkSearchResult>> searchByType(
+  Future<Result<NetworkSearchResult>> typeSearch(
     @Query('search_type') SearchType searchType,
     @Query('keyword') String keyword, {
     @Query('page') int? page,
@@ -60,10 +60,10 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   final BiliNetworkApi _networkApi;
   
   @override
-  Future<Result<NetworkSearchResult>> search(
+  Future<Result<NetworkSearchResult>> searchAll(
     String keyword, {
     int? page,
-  }) => _networkApi.search(
+  }) => _networkApi.searchAll(
     keyword,
     page: page,
   );
@@ -74,7 +74,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     int? page,
     ArticleCategory? category,
     ArticleSearchOrder? order,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .article,
     keyword,
     page: page,
@@ -89,7 +89,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     int? page,
     UserSearchSort? sort,
     UserType? userType,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .biliUser,
     keyword,
     page: page,
@@ -102,7 +102,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchMediaBangumi(
     String keyword, {
     int? page,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .mediaBangumi,
     keyword,
     page: page,
@@ -112,7 +112,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchMediaFt(
     String keyword, {
     int? page,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .mediaFt,
     keyword,
     page: page,
@@ -122,7 +122,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchLive(
     String keyword, {
     int? page,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .live,
     keyword,
     page: page,
@@ -133,7 +133,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     String keyword, {
     int? page,
     LiveRoomSearchOrder? order,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .liveRoom,
     keyword,
     page: page,
@@ -144,7 +144,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchLiveUser(
     String keyword, {
     int? page,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .liveUser,
     keyword,
     page: page,
@@ -156,7 +156,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     int? page,
     PhotoCategory? category,
     PhotoOrVideoSearchOrder? order,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .photo,
     keyword,
     page: page,
@@ -168,7 +168,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchTopic(
     String keyword, {
     int? page,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .topic,
     keyword,
     page: page,
@@ -182,7 +182,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     VideoDurationFilter? duration,
     int? tids,
     DateRange? dateRange,
-  }) => _networkApi.searchByType(
+  }) => _networkApi.typeSearch(
     .video,
     keyword,
     page: page,
