@@ -3,6 +3,7 @@ import 'dart:async';
 //import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 //import 'package:logger/logger.dart' hide LogEvent;
 import 'package:logging/logging.dart';
@@ -80,4 +81,8 @@ Future<void> main() async {
       child: const App()
     ),
   );
+  
+  if (kIsWeb) {
+    SemanticsBinding.instance.ensureSemantics();
+  }
 }

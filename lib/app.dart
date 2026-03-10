@@ -9,6 +9,28 @@ import 'feature/view_model/theme_view_model.dart';
 
 import 'routing/router.dart';
 
+const double windowWidth = 360;
+const double windowHeight = 640;
+
+void setupWindow() {
+  if (!kIsWeb &&
+      (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    WidgetsFlutterBinding.ensureInitialized();
+    setWindowTitle('');
+    setWindowMinSize(const Size(windowWidth, windowHeight));
+    setWindowMaxSize(const Size(windowWidth, windowHeight));
+    getCurrentScreen().then((screen) {
+      setWindowFrame(
+        Rect.fromCenter(
+          center: screen!.frame.center,
+          width: windowWidth,
+          height: windowHeight,
+        ),
+      );
+    });
+  }
+}
+
 class App extends StatelessWidget {
   const App({super.key});
 

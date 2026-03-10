@@ -3,11 +3,12 @@ import '../../model/user_data.dart';
 
 abstract class UserDataRepository {
   
-  Future<bool?> get dynamicColorPreference;
-  Future<ThemeConfig?> get themeConfig;
+  Future<Result<bool>> dynamicColorPreference();
+  
+  Future<Result<ThemeConfig>> themeConfig();
 
-  Future<void> setThemeConfig(ThemeConfig themeConfig);
+  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig);
 
-  Future<void> setDynamicColorPreference(bool useDynamicColor);
+  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor);
   
 }

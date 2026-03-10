@@ -6,30 +6,41 @@ import 'user_data_repository.dart';
 class DefaultUserDataRepository implements UserDataRepository {
   DefaultUserDataRepository({
     required PreferencesDataSource preferencesDataSource,
-  }) : _preferencesDataSource = preferencesDataSource;
+  }) : _prefDataSource = preferencesDataSource;
   
-  final PreferencesDataSource _preferencesDataSource;
-
-  bool _dynamicColorPreference = false;
-  ThemeConfig _themeConfig = .followSystem;
-  
-  @override
-  Future<bool?> get dynamicColorPreference =>
-    _preferencesDataSource.dynamicColorPreference;
+  final PreferencesDataSource _prefDataSource;
+  final _dynamicColorPreferenceController = StreamController<bool>.broadcast();
+  final _themeConfigController = StreamController<ThemeConfig>.broadcast();
 
   @override
-  Future<ThemeConfig?> get themeConfig async {
-    final preference = await _preferencesDataSource.themeConfig;
-    return preference != null ? ThemeConfig.fromJson(preference) : null;
+  Future<Result<bool>> dynamicColorPreference() {
+    return _prefDataSource.get(PreferencesKey.useDynamicColor);
   }
 
+  @override
+  Future<Result<ThemeConfig>> themeConfig() {
+    final result = _prefDataSource.get(PreferencesKey.themeConfig);
+    return result.map(ThemeConfig.fromJson);
+  }
 
   @override
-  Future<void> setDynamicColorPreference(bool useDynamicColor) =>
-    _preferencesDataSource.setDynamicColorPreference(useDynamicColor);
+  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
+    final result = await _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
+    if (result.isOk) {
+      _dynamicColorPreferenceController.add(result.value);
+    }
+    return result;
+  }
   
   @override
-  Future<void> setThemeConfig(ThemeConfig themeConfig) =>
-    _preferencesDataSource.setThemeConfig(themeConfig.toJson());
-    
+  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
+    final result = await _prefDataSource.set(PreferencesKey.themeConfig, themeConfig.toJson());
+    if (result.isOk) {
+      _themeConfigController.add(result.value);
+    }
+    return result;
+  }
+  
+  Stream<bool> observeDynamicColorPreference() => _dynamicColorPreferenceController.stream;
+  Stream<bool> observeThemeConfig() => _themeConfigController.stream;
 }
