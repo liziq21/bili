@@ -18,24 +18,18 @@ List<SingleChildWidget> get repositoryProviders =>
     ...databaseProviders, 
     ...datastoreProviders, 
     ...networkProviders,
-    Provider(create: (context) =>
-      DefaultUserDataRepository(
-        preferencesDataSource: context.read(),
-      ) as UserDataRepository,
+    Provider<UserDataRepository>(
+      create: (context) =>
+        DefaultUserDataRepository(preferencesDataSource: context.read()),
     ),
-    Provider(create: (context) =>
-      DefaultRecentSearchQueryRepository(
-        recentSearchQueryDao: context.read(),
-      ) as RecentSearchQueryRepository,
+    Provider<RecentSearchQueryRepository>(
+      create: (context) =>
+        DefaultRecentSearchQueryRepository(recentSearchQueryDao: context.read()),
     ),
-    Provider(create: (context) => 
-      BiliSearchContentsRepository(
-        network: context.read(),
-      ) as SearchContentsRepository,
+    Provider<SearchContentsRepository>(
+      create: (context) => BiliSearchContentsRepository(network: context.read()),
     ),
-    Provider(create: (context) => 
-      BiliSearchSuggestRepository(
-        network: context.read(),
-      ) as SearchSuggestRepository,
+    Provider<SearchSuggestRepository>(
+      create: (context) => BiliSearchSuggestRepository(network: context.read()),
     ),
   ];

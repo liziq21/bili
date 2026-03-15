@@ -7,13 +7,11 @@ import '../../data/repository/user_data/user_data_repository.dart';
 import '../../utils/command.dart';
 import '../../utils/result.dart';
 
-class ThemeViewModel {
-  ThemeViewModel({
+class MainViewModel {
+  MainViewModel({
     required UserDataRepository userDataRepository,
   }) : _userDataRepository = userDataRepository {
-    load = Command0(_load)..execute();
-    loadThemeConfig = Command0(_loadThemeConfig);
-    loadDynamicColor = Command0(_loadDynamicColor);
+
     setThemeConfig = Command1<void, ThemeConfig>(_setThemeConfig);
     setDynamicColor = Command1<void, bool>(_setDynamicColor);
   }
@@ -27,9 +25,6 @@ class ThemeViewModel {
   bool get useDynamicColor => _useDynamicColor;
   ThemeConfig get themeConfig => _themeConfig;
   
-  late final Command0 load;
-  late final Command0 loadThemeConfig;
-  late final Command0 loadDynamicColor;
   late final Command1 setThemeConfig;
   late final Command1 setDynamicColor;
   
@@ -58,44 +53,6 @@ class ThemeViewModel {
       },
       onError: (e) {
         _log.warning('Failed to set DynamicColor', e);
-        return Result.error(Exception('$e'));
-      },
-    );
-  }
-  
-  Future<Result<void>> _load() =>
-    Future.wait([_loadThemeConfig(), _loadDynamicColor()])
-      .then((_) => .ok(null));
-
-  Future<Result<void>> _loadThemeConfig() {
-    _log.fine('Loading ThemeConfig');
-    return _userDataRepository.themeConfig.then(
-      (value) {
-        if (value != null) {
-          _themeConfig = value;
-        }
-        _log.fine('ThemeConfig loaded');
-        return .ok(null);
-      },
-      onError: (e) {
-        _log.warning('Failed to load ThemeConfig', e);
-        return Result.error(Exception('$e'));
-      },
-    );
-  }
-  
-  Future<Result<void>> _loadDynamicColor() {
-    _log.fine('Loading dynamic color');
-    return _userDataRepository.dynamicColorPreference.then(
-      (value) {
-        if (value != null) {
-          _useDynamicColor = value;
-        }
-        _log.fine('Dynamic color loaded');
-        return .ok(null);
-      },
-      onError: (e) {
-        _log.warning('Failed to load dynamic color', e);
         return Result.error(Exception('$e'));
       },
     );

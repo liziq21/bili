@@ -6,7 +6,8 @@ import 'preferences_data_source.dart';
 
 List<SingleChildWidget> get datastoreProviders =>
   [
-    Provider(create: (context) =>
-      PreferencesDataSource(sharedPreferences: SharedPreferencesAsync()),
+    Provider<PreferencesDataSource>(
+      create: (_) => .new(sharedPreferences: SharedPreferencesAsync()),
+      dispose: (_, prefDataSource) => prefDataSource.dispose(),
     ),
   ];

@@ -5,8 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:logger/logger.dart' hide LogEvent;
 import 'package:provider/provider.dart';
 
-import 'feature/view_model/theme_view_model.dart';
-
+import 'app_view_model.dart';
 import 'routing/router.dart';
 
 const double windowWidth = 360;
@@ -39,11 +38,45 @@ class App extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final ThemeViewModel viewModel = context.read();
+    final AppViewModel viewModel = context.read();
     
     return ListenableBuilder(
-      listenable: viewModel.loadDynamicColor,
-      builder: (_, _) => DynamicColorBuilder(
+      listenable: viewModel,
+      builder: (_, _) {
+        switch (viewModel.uiState) {
+          .loading() :
+            return const Text('Loading...'),
+          .success(final shouldUseDynamicColor, final themeConfig) :
+            ThemeBuilder(
+              useDynamicColor: shouldUseDynamicColor,
+              builder: (ThemeData theme, ThemeData darkTheme) {
+                return MaterialApp.router(
+                  builder: (context, child) => DebugOverlay(
+                    logBucket: App.logBucket,
+                    httpBucket: App.httpBucket,
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                  debugShowCheckedModeBanner: false,
+                  showPerformanceOverlay: false,
+                  theme: theme,
+                  darkTheme: darkTheme,
+                  themeMode: switch (viewModel.themeConfig) {
+                    .followSystem => .system,
+                    .light => .light,
+                    .dark => .dark,
+                  },
+                  routerConfig: router,
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localeResolutionCallback: (locale, supportedLocales) {
+                    return locale;
+                  },
+                );
+              }
+            )
+        }
+      
+      DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
           ThemeData theme = .light();
           ThemeData darkTheme = .dark();
@@ -58,28 +91,7 @@ class App extends StatelessWidget {
           
           return ListenableBuilder(
             listenable: viewModel.loadThemeConfig,
-            builder: (_, _) => MaterialApp.router(
-              builder: (context, child) => DebugOverlay(
-                logBucket: App.logBucket,
-                httpBucket: App.httpBucket,
-                child: child ?? const SizedBox.shrink(),
-              ),
-              debugShowCheckedModeBanner: false,
-              showPerformanceOverlay: false,
-              theme: theme,
-              darkTheme: darkTheme,
-              themeMode: switch (viewModel.themeConfig) {
-                .followSystem => .system,
-                .light => .light,
-                .dark => .dark,
-              },
-              routerConfig: router,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localeResolutionCallback: (locale, supportedLocales) {
-                return locale;
-              },
-            ),
+            builder: (_, _) => 
           );
         },
       ),

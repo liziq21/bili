@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../datastore/preferences_data_source.dart';
 import '../../../utils/result.dart';
 import '../../model/user_data.dart';
@@ -9,19 +11,8 @@ class DefaultUserDataRepository implements UserDataRepository {
   }) : _prefDataSource = preferencesDataSource;
   
   final PreferencesDataSource _prefDataSource;
-  final _dynamicColorPreferenceController = StreamController<bool>.broadcast();
-  final _themeConfigController = StreamController<ThemeConfig>.broadcast();
 
-  @override
-  Future<Result<bool>> dynamicColorPreference() {
-    return _prefDataSource.get(PreferencesKey.useDynamicColor);
-  }
-
-  @override
-  Future<Result<ThemeConfig>> themeConfig() {
-    final result = _prefDataSource.get(PreferencesKey.themeConfig);
-    return result.map(ThemeConfig.fromJson);
-  }
+  Stream<UserData> get data => _prefDataSource.data;
 
   @override
   Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
@@ -40,7 +31,4 @@ class DefaultUserDataRepository implements UserDataRepository {
     }
     return result;
   }
-  
-  Stream<bool> observeDynamicColorPreference() => _dynamicColorPreferenceController.stream;
-  Stream<bool> observeThemeConfig() => _themeConfigController.stream;
 }

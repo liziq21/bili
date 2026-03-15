@@ -5,9 +5,7 @@ import 'get_recent_search_queries_use_case.dart';
 
 List<SingleChildWidget> get domainProviders =>
   [
-    Provider(create: (context) =>
-      GetRecentSearchQueriesUseCase(
-        recentSearchQueryRepository: context.read(),
-      ),
+    Provider<GetRecentSearchQueriesUseCase>(
+      create: (context) => .new(recentSearchQueryRepository: context.read()),
     ),
   ];

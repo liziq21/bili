@@ -8,7 +8,7 @@ import 'retrofit/retrofit_network.dart';
 
 List<SingleChildWidget> get networkProviders =>
   [
-    Provider(create: (context) {
+    Provider<NetworkSearchDataSource>(create: (context) {
       late final Dio dio;
       try {
         dio = context.read()
@@ -18,6 +18,6 @@ List<SingleChildWidget> get networkProviders =>
           HttpHeaders.cookieHeader: 'SESSDATA=xxx',
         }));
       }
-      return BiliNetworkSearch(dio: dio) as NetworkSearchDataSource;
+      return BiliNetworkSearch(dio: dio);
     }),
   ];

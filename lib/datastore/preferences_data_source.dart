@@ -1,8 +1,9 @@
 import 'dart:async';
 
 //import 'package:logging/logging.dart';
-import 'package:shared_pref/shared_pref.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/model/user_data.dart';
 import '../utils/result.dart';
 
 class PreferencesKey<T> {
@@ -19,16 +20,17 @@ class PreferencesKey<T> {
 class PreferencesDataSource {
   PreferencesDataSource({
     required SharedPreferencesAysnc sharedPreferences,
-  }) : _pref = sharedPreferences;
+  }) : _pref = sharedPreferences {
+    _controller = .broadcast(
+      onListen: () => _readAndEmitData(),
+    );
+  }
   
   final SharedPreferencesAysnc _pref;
+  late final StreamController<UserData> _controller;
   //final _log = Logger('PreferencesDataSource');
   
-  static const _useDynamicColorKey = 'USE_DYNAMIC_COLOR';
-  static const _themeConfigKey = 'THEME_CONFIG';
-  
-  static const _useDynamicColor = true;
-  static const _themeConfig = 'FOLLOW_SYSTEM';
+  Stream<UserData> get data => _controller.stream;
   
   Future<Result<T>> get<T>(PreferencesKey<T> key) {
     try {
@@ -71,19 +73,14 @@ class PreferencesDataSource {
     }
   }
   
-  Future<bool> get dynamicColorPreference async {
-    return (await _pref.getBool(_useDynamicColorKey)) ?? _useDynamicColor;
+  Future<void> _readAndEmitData() async {
+    final data = UserData.fromJson(await UserData_pref.getAll());
+    if (!_controller.isClosed) {
+      _controller.add(data);
+    }
   }
-  
-  Future<String> get themeConfig async {
-    return (await _pref.getString(_themeConfigKey)) ?? _themeConfig;
-  }
-  
-  Future<void> setDynamicColorPreference(bool useDynamicColor) {
-    return _pref.setBool(_useDynamicColorKey, useDynamicColor);
-  }
-  
-  Future<void> setThemeConfig(String themeConfig) {
-    return _pref.setString(_themeConfigKey, themeConfig);
+
+  void dispose() {
+    _controller.close();
   }
 }
