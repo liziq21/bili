@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
 
 import 'app_view_model.dart';
 import 'routing/router.dart';
@@ -30,14 +29,15 @@ void setupWindow() {
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({this.viewModel, super.key});
 
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
   
+  final AppViewModel viewModel;
+  
   @override
   Widget build(BuildContext context) {
-    final AppViewModel viewModel = context.read();
     return ListenableBuilder(
       listenable: viewModel,
       builder: (_, _) {

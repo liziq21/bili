@@ -78,7 +78,9 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: providers,
-      child: const App()
+      child: Builder(
+        builder: (context) => const App(viewModel: context.read())
+      );
     ),
   );
   
