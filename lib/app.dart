@@ -1,12 +1,11 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-//import 'package:logger/logger.dart' hide LogEvent;
 import 'package:provider/provider.dart';
 
 import 'app_view_model.dart';
 import 'routing/router.dart';
+import 'theme/theme_wrapper.dart';
 
 const double windowWidth = 360;
 const double windowHeight = 640;
@@ -39,17 +38,16 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppViewModel viewModel = context.read();
-    
     return ListenableBuilder(
       listenable: viewModel,
       builder: (_, _) {
-        switch (viewModel.uiState) {
-          .loading() :
-            return const Text('Loading...'),
-          .success(final shouldUseDynamicColor, final themeConfig) :
-            ThemeBuilder(
-              useDynamicColor: shouldUseDynamicColor,
-              builder: (ThemeData theme, ThemeData darkTheme) {
+        return switch (viewModel.uiState) {
+          .loading() => const Text('App loading...'),
+          .success(final shouldUseDynamicColor, final themeConfig) =>
+            ThemeWrapper(
+              useDynamicColor: shouldUseDynamicColor
+              themeConfig: themeConfig,
+              builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
                 return MaterialApp.router(
                   builder: (context, child) => DebugOverlay(
                     logBucket: App.logBucket,
@@ -60,41 +58,15 @@ class App extends StatelessWidget {
                   showPerformanceOverlay: false,
                   theme: theme,
                   darkTheme: darkTheme,
-                  themeMode: switch (viewModel.themeConfig) {
-                    .followSystem => .system,
-                    .light => .light,
-                    .dark => .dark,
-                  },
+                  themeMode: themeMode,
                   routerConfig: router,
                   localizationsDelegates: AppLocalizations.localizationsDelegates,
                   supportedLocales: AppLocalizations.supportedLocales,
-                  localeResolutionCallback: (locale, supportedLocales) {
-                    return locale;
-                  },
+                  localeResolutionCallback: (locale, _) => locale,
                 );
               }
-            )
+            ),
         }
-      
-      DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          ThemeData theme = .light();
-          ThemeData darkTheme = .dark();
-          if (
-            viewModel.useDynamicColor &&
-            lightDynamic != null &&
-            darkDynamic != null
-          ) {
-            theme = theme.copyWith(colorScheme: lightDynamic);
-            darkTheme = theme.copyWith(colorScheme: darkDynamic);
-          }
-          
-          return ListenableBuilder(
-            listenable: viewModel.loadThemeConfig,
-            builder: (_, _) => 
-          );
-        },
-      ),
     );
   }
 }
