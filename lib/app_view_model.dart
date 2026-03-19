@@ -2,47 +2,42 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'data/model/user_data.dart';
 import 'data/repository/user_data/user_data_repository.dart';
+import 'utils/result.dart';
 
-class AppViewModel extends ChangeNotifier {
+class AppViewModel {
   AppViewModel({
     required UserDataRepository userDataRepository,
-  }) {
-    Future.sync(() async {
-      final data = userDataRepository.data
-      await data.first;
-      uiState = .success(data);
-      notifyListeners();
-    }).catchError((e) => _log.fine(e.toString()));
+  }) : _userDataRepository = userDataRepository,
+       dynamicColorStream = userDataRepository.data
+         .map((data) => data.shouldUseDynamicColor)
+         .distinct()
+         .shareReplay(maxSize: 1),
+       themeConfigStream = userDataRepository.data
+         .map((data) => data.themeConfig)
+         .distinct()
+         .shareReplay(maxSize: 1) {
+    load = Command0(_load)..execute();
   }
-
-  final _log = Logger('ThemeViewModel');
-  AppUiState uiState = const .loading();
-}
-
-@immutable
-sealed class AppUiState {
-  const AppUiState();
   
-  const factory AppUiState.loading() = Loading._;
-  const factory AppUiState.success(Steram<UserData> userData) = Success._;
+  final _log = Logger('AppViewModel');
+  final UserDataRepository _userDataRepository;
+  final Stream<bool> dynamicColorStream;
+  final Stream<ThemeConfig> themeConfigStream;
+  late final Command0 load;
+  
+  Futrue<Result<void>> _load() async {
+    try {
+      await _userDataRepository.data.first;
+      return .ok();
+    } catch (e) {
+      _log.warning('Failed to init', e);
+      return .error(Exception('Load error'));
+    }
+  }
+  
 }
 
-final class Loading extends AppActivityUiState {
-  const Loading._();
-}
-
-final class Success extends AppActivityUiState {
-  Success._(Steram<UserData> userData)
-    : shouldUseDynamicColor = userData
-        .map((it) => it.useDynamicColor),
-        .distinct(),
-      themeConfig = userData
-        .map((it) => it.themeConfig),
-        .distinct();
-
-  final Steram<bool> shouldUseDynamicColor;
-  final Steram<ThemeConfig> themeConfig;
-}

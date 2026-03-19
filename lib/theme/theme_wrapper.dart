@@ -22,7 +22,7 @@ class ThemeWrapper extends StatelessWidget {
       builder: (_, snapshot) {
         ThemeData theme = const .light();
         ThemeData darkTheme = const .dark();
-        return switch (snapshot.data) {
+        return switch (snapshot.data!) {
           true => DynamicColorBuilder(
             builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               if (lightDynamic != null && darkDynamic != null) {
@@ -43,7 +43,7 @@ class ThemeWrapper extends StatelessWidget {
     return StreamBuilder(
       stream: themeConfig,
       builder: (_, snapshot) {
-        return switch (snapshot.data) {
+        return switch (snapshot.data!) {
           .followSystem => builder(theme, darkTheme, .system),
           .light => builder(theme, darkTheme, .light),
           .dark => builder(theme, darkTheme, .dark),

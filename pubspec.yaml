@@ -37,7 +37,7 @@ dependencies:
   path_provider: ^2.1.5
   provider: ^6.1.5
   retrofit: ^4.9.2
-  #rxdart: ^0.28.0
+  rxdart: ^0.28.0
   shared_preferences: ^2.5.4
 
 dev_dependencies:

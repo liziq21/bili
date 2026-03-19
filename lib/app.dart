@@ -39,14 +39,17 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: viewModel,
-      builder: (_, _) {
-        return switch (viewModel.uiState) {
-          .loading() => const Text('App loading...'),
-          .success(final shouldUseDynamicColor, final themeConfig) =>
-            ThemeWrapper(
-              useDynamicColor: shouldUseDynamicColor
-              themeConfig: themeConfig,
+      listenable: viewModel.load,
+      builder: (_, child) {
+        if (viewModel.load.running) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        //if (viewModel.load.error) 
+        return child!;
+      },
+      child: ThemeWrapper(
+              useDynamicColor: viewModel.shouldUseDynamicColor,
+              themeConfig: viewModel.themeConfig,
               builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
                 return MaterialApp.router(
                   builder: (context, child) => DebugOverlay(
@@ -64,9 +67,8 @@ class App extends StatelessWidget {
                   supportedLocales: AppLocalizations.supportedLocales,
                   localeResolutionCallback: (locale, _) => locale,
                 );
-              }
+              },
             ),
-        }
     );
   }
 }
