@@ -9,18 +9,20 @@ part 'recent_search_query_dao.g.dart';
 class RecentSearchQueryDao extends DatabaseAccessor<BiliDatabase> with _$RecentSearchQueryDaoMixin {
   RecentSearchQueryDao(super.attachedDatabase);
 
-  Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(int limit) =>
-    (select(recentSearchQuery)
+  Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(int limit) {
+    return (select(recentSearchQuery)
       ..orderBy([(it) => OrderingTerm(expression: it.queriedDate)])
       ..limit(limit))
       .watch();
+  }
   
-  Future<void> insertOrReplaceRecentSearch(String searchQuery) =>
-    into(recentSearchQuery).insertOnConflictUpdate(
+  Future<void> insertOrReplaceRecentSearch(String searchQuery) {
+    return into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(query: Value(searchQuery)),
     );
+  }
   
   Future<void> clearRecentSearchQueries() =>
-    delete(recentSearchQuery).go();
+ delete(recentSearchQuery).go();
 
 }

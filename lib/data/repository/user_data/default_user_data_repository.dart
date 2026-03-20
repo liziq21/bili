@@ -12,23 +12,19 @@ class DefaultUserDataRepository implements UserDataRepository {
   
   final PreferencesDataSource _prefDataSource;
 
+  
   Stream<UserData> get data => _prefDataSource.data;
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
-    final result = await _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
-    if (result.isOk) {
-      _dynamicColorPreferenceController.add(result.value);
-    }
-    return result;
-  }
+  Future<Result<void>> setServiceSource(ServiceSource serviceSource) =>
+    _prefDataSource.set(PreferencesKey.serviceSource, serviceSource);
   
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
-    final result = await _prefDataSource.set(PreferencesKey.themeConfig, themeConfig.toJson());
-    if (result.isOk) {
-      _themeConfigController.add(result.value);
-    }
-    return result;
-  }
+  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) =>
+    _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
+  
+  @override
+  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) =>
+    _prefDataSource.set(PreferencesKey.themeConfig, themeConfig.toJson());
+
 }

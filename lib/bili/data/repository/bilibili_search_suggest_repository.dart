@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import '../../../network/network_search_data_source.dart';
+import '../../../search_suggest_repository.dart';
 import '../../../utils/result.dart';
-import 'search_suggest_repository.dart';
+import '../../network/network_search_data_source.dart';
 
-class BiliSearchSuggestRepository implements SearchSuggestRepository {
-  const BiliSearchSuggestRepository({
+class BilibiliSearchSuggestRepository implements SearchSuggestRepository {
+  const BilibiliSearchSuggestRepository({
     required NetworkSearchDataSource network
   }) : _network = network;
   

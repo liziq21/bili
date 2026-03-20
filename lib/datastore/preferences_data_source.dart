@@ -12,9 +12,9 @@ class PreferencesKey<T> {
 
   const PreferencesKey._(this.name, this.defaultValue);
 
+  static const serviceSource = PreferencesKey<String>._('SERVICE_SOURCE', 'BILIBILI');
   static const themeConfig = PreferencesKey<String>._('THEME_CONFIG', 'FOLLOW_SYSTEM');
   static const useDynamicColor = PreferencesKey<bool>._('USE_DYNAMIC_COLOR', true);
-  
 }
 
 class PreferencesDataSource {
