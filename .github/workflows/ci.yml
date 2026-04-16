@@ -5,7 +5,9 @@ on:
     branches:
       - main
   pull_request:
-
+    branches:
+      - main
+      
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -20,20 +22,23 @@ jobs:
     timeout-minutes: 60
     
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       
-      - name: Setup Flutter
+      - name: Install Dart and Flutter
         uses: subosito/flutter-action@v2
         with:
           cache: true
           channel: stable
           flutter-version-file: pubspec.yaml
       - run: flutter clean
-      - run: flutter pub get
+      
+      - name: Install dependencies
+        run: flutter pub get
 
-      - name: Build_runner
+      - name: Run build_runner
         run: dart run build_runner build \
           --delete-conflicting-outputs \
           --verbose
@@ -49,9 +54,11 @@ jobs:
           git commit -m "chore: Update generated files [skip ci]"
           git push --force origin HEAD:build_runner
 
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Run analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
       
-      - run: flutter test
+      - name: Run test
+        run: flutter test
 
   build_iOSApp:
     name: Build Flutter App (iOS)
@@ -97,11 +104,13 @@ jobs:
           path: Payload.ipa
           
       - name: Upload IPA to catbox
+        env:
+           BARK_KEY: ${{ secrets.BARK_KEY }}
         id: upload-ipa-to-catbox
         run: |
           RESPONSE=$(curl -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@Payload.ipa" https://litterbox.catbox.moe/resources/internals/api.php)
           echo "Upload response: $RESPONSE"
-          curl https://api.day.app/XSCJ9Sn8V2oSJ8RmAzB69C/biliupdata \
+          curl "https://api.day.app/${BARK_KEY}/biliupdata" \
             --data-urlencode "group=actions" \
             --data-urlencode "icon=https://avatars.githubusercontent.com/u/65916846?v=4" \
             --data-urlencode "url=apple-magnifier://install?url=$RESPONSE"

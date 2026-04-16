@@ -13,13 +13,13 @@ abstract class SearchQuery {
     this.query, {
     this.page,
     this.sortOption,
-    this.filter = [],
+    this.filter,
   });
   
   final String query;
   final String? page;
   final SortOption? sortOption;
-  final List<FilterItem> filter;
+  final List<FilterGroup>? filters;
 }
 
 abstract class SearchContentsRepository {

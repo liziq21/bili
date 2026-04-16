@@ -3,12 +3,8 @@ import 'creator_profile.dart';
 import 'paged_result.dart';
 import 'video_info_base.dart';
 
-typedef PagedCreatorProfile = PagedResult<CreatorProfile>;
-typedef PagedVideos = PagedResult<VideoInfoBase>;
-typedef PagedLiveRooms = PagedResult<LiveRoomInfoBase>;
-
-class AggregateSearchResults extends PagedResult<VideoInfoBase> {
-  AggregateSearchResults({
+class AggregateSearchPage extends Page<VideoInfoBase> {
+  AggregateSearchPage({
     required super.page,
     required super.totalPages,
     required super.data,
@@ -20,7 +16,7 @@ class AggregateSearchResults extends PagedResult<VideoInfoBase> {
   final List<VideoInfoBase>? creatorProfileVideos;
 }
 
-extension NetworkSearchResultWrapperX on NetworkSearchResult {
+extension NetworkSearchResultWrapperE on NetworkSearchResult {
   AggregateSearchResults asModel() {
     final user = biliUser.firstOrNull;
     return AggregateSearchResults(
@@ -30,7 +26,7 @@ extension NetworkSearchResultWrapperX on NetworkSearchResult {
       creatorProfile: user?.asModel(),
       creatorProfileVideos: user?.res.map((e) => e.asModel()),
     );
-  );
+  }
   
   PagedLiveRooms asPagedLiveRooms() {
     return PagedLiveRooms(
@@ -38,7 +34,7 @@ extension NetworkSearchResultWrapperX on NetworkSearchResult {
       totalPages: result.numPages,
       data: result.liveRoom.map((it) => it.asModel()),
     );
-  );
+  }
   
   PagedCreatorProfile asPagedCreatorProfile() {
     return PagedCreatorProfile(
@@ -46,7 +42,7 @@ extension NetworkSearchResultWrapperX on NetworkSearchResult {
       totalPages: result.numPages,
       data: result.biliUser.map((it) => it.asModel()),
     );
-  );
+  }
   
   PagedVideos asPagedVideos() {
     return PagedLiveRooms(
@@ -54,5 +50,5 @@ extension NetworkSearchResultWrapperX on NetworkSearchResult {
       totalPages: result.numPages,
       data: result.video.map((it) => it.asModel()),
     );
-  );
+  }
 }

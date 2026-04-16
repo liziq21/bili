@@ -46,24 +46,13 @@ class SearchResultScreen extends StatefulWidget {
                     ),
                   ),
                 ),
-                bottom: const TabBar(
+                bottom: TabBar(
                   isScrollable: true,
                   tabAlignment: .start,
-                  tabs: <Widget>[
-                    Tab(
-                      text: '综合',
-                    ),
-                    /*Tab(
-                      text: '视频',
-                    ),
-                    Tab(
-                      text: '直播',
-                    ),
-                    Tab(text: '用户',),*/
-                  ],
+                  tabs: _resultTypeTabs(),
                 ),
               ),
-              SliverToBoxAdapter(
+              /*SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -80,10 +69,10 @@ class SearchResultScreen extends StatefulWidget {
                     ),
                   ),
                 ),
-              ),
+              ),*/
               SliverToBoxAdapter(
                 child: TabBarView(
-                  children: _resultViews,
+                  children: _resultViews(),
                 ),
               ),
             ],
@@ -93,14 +82,22 @@ class SearchResultScreen extends StatefulWidget {
     );
   }
   
-  final List<Widget> _resultViews = [
-    if (context.maybeRead<AllSearchRuseltsViewModel>() != null)
-    ChangeNotifierProvider(
-      AllSearchRuseltsViewModel(
-        searchQuery: searchQuery,
-        searchContentsRepository: context.read(),
-      ),
-      AllSearchRuseltsView(),
-    ),
-  ];
+  List<Widget> _resultTypeTabs() {
+    return viewModel.types.map((it) {
+      return switch (it) {
+        . => const Tab(text: '综合'),
+        . => const Tab(text: '视频'),
+        . => const Tab(text: '直播'),
+        . => const Tab(text: '用户'),
+      };
+    }).toList();
+  }
+  
+  List<Widget> _resultViews() {
+    return viewModel.types.map((it) {
+      return switch (it) {
+        
+      };
+    }).toList();
+  }
 }
