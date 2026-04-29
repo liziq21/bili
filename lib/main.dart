@@ -20,7 +20,7 @@ Future<void> main() async {
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
     App.logBucket.add(LogEvent(
       level: LogLevel.fatal,
-      message: "Unhandled Exception",
+      message: const "Unhandled Exception",
       error: exception,
       stackTrace: stackTrace,
     ));
@@ -42,7 +42,7 @@ Future<void> main() async {
 
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
-    LogLevel? level = switch (record.level) {
+    final level = switch (record.level) {
       Level.OFF => .off,
       Level.FINEST || Level.FINER => .trace,
       Level.FINE || Level.SHOUT => .debug,
@@ -79,8 +79,8 @@ Future<void> main() async {
     MultiProvider(
       providers: providers,
       child: Builder(
-        builder: (context) => const App(viewModel: context.read())
-      );
+        builder: (context) => const App(viewModel: context.read()),
+      ),
     ),
   );
   

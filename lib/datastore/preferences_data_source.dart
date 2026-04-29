@@ -21,9 +21,7 @@ class PreferencesDataSource {
   PreferencesDataSource({
     required SharedPreferencesAysnc sharedPreferences,
   }) : _pref = sharedPreferences {
-    _controller = .broadcast(
-      onListen: () => _readAndEmitData(),
-    );
+    _controller = .broadcast(onListen: _readAndEmitData);
   }
   
   final SharedPreferencesAysnc _pref;
@@ -32,7 +30,7 @@ class PreferencesDataSource {
   
   Stream<UserData> get data => _controller.stream;
   
-  Future<Result<T>> get<T>(PreferencesKey<T> key) {
+  Future<Result<T>> get<T>(PreferencesKey<T> key) async {
     try {
       if (T == String) {
         return .ok(await _pref.getString(key.name) ?? key.defaultValue);
@@ -74,7 +72,7 @@ class PreferencesDataSource {
   }
   
   Future<void> _readAndEmitData() async {
-    final data = UserData.fromJson(await UserData_pref.getAll());
+    final data = UserData.fromJson(await _pref.getAll());
     if (!_controller.isClosed) {
       _controller.add(data);
     }

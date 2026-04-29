@@ -29,7 +29,7 @@ void setupWindow() {
 }
 
 class App extends StatelessWidget {
-  const App({this.viewModel, super.key});
+  const App({super.key, required this.viewModel});
 
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
@@ -48,11 +48,11 @@ class App extends StatelessWidget {
         return child!;
       },
       child: ThemeWrapper(
-              useDynamicColor: viewModel.shouldUseDynamicColor,
-              themeConfig: viewModel.themeConfig,
+              useDynamicColor: viewModel.dynamicColorStream,
+              themeConfig: viewModel.themeConfigStream,
               builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
                 return MaterialApp.router(
-                  builder: (context, child) => DebugOverlay(
+                  builder: (_, child) => DebugOverlay(
                     logBucket: App.logBucket,
                     httpBucket: App.httpBucket,
                     child: child ?? const SizedBox.shrink(),

@@ -2,42 +2,46 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:rxdart/rxdart.dart';
+//import 'package:rxdart/rxdart.dart';
 
 import 'data/model/user_data.dart';
 import 'data/repository/user_data/user_data_repository.dart';
 import 'utils/result.dart';
+import 'utils/command.dart';
 
-class AppViewModel {
+class AppViewModel extends ChangeNotifier {
   AppViewModel({
     required UserDataRepository userDataRepository,
-  }) : _userDataRepository = userDataRepository,
-       dynamicColorStream = userDataRepository.data
-         .map((data) => data.shouldUseDynamicColor)
-         .distinct()
-         .shareReplay(maxSize: 1),
-       themeConfigStream = userDataRepository.data
-         .map((data) => data.themeConfig)
-         .distinct()
-         .shareReplay(maxSize: 1) {
+  }) : _userDataRepository = userDataRepository {
     load = Command0(_load)..execute();
+    _subscription = userDataRepository.data.listen((newUserData) {
+      _userData = newUserData;
+      notifyListeners();
+    });
   }
   
   final _log = Logger('AppViewModel');
-  final UserDataRepository _userDataRepository;
-  final Stream<bool> dynamicColorStream;
-  final Stream<ThemeConfig> themeConfigStream;
-  late final Command0 load;
+  final _userDataRepository;
+  late final Command0<UserData> load;
+  StreamSubscription? _subscription;
+  late UserData _userData;
   
-  Futrue<Result<void>> _load() async {
+  UserData get userData => _userData;
+  
+  Future<Result<UserData>> _load() async {
     try {
-      await _userDataRepository.data.first;
-      return .ok();
+      final data = await _userDataRepository.data.first;
+      return .ok(data);
     } catch (e) {
       _log.warning('Failed to init', e);
       return .error(Exception('Load error'));
     }
   }
   
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 }
 

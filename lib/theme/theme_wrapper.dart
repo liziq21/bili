@@ -1,17 +1,19 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 
+import '../data/model/uesr_data.dart';
+
 typedef ThemeBuilder = Widget Function(ThemeModel theme, ThemeModel darkTheme, bool useDynamicColor);
 
 class ThemeWrapper extends StatelessWidget {
   const ThemeWrapper({
+    super.key,
     required this.useDynamicColor,
     required this.themeConfig,
     required this.builder,
-    super.key,
   });
 
-  final Stream<Bool> useDynamicColor;
+  final Stream<bool> useDynamicColor;
   final Stream<ThemeConfig> themeConfig;
   final ThemeBuilder builder;
 
@@ -34,8 +36,8 @@ class ThemeWrapper extends StatelessWidget {
           ),
           false => _buildThemeModel(theme, darkTheme),
           _ => const Text('dynamic color preference loading...'),
-        }
-      }
+        };
+      },
     )
   }
   
