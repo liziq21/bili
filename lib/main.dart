@@ -1,6 +1,6 @@
 import 'dart:async';
 
-//import 'package:collection/collection.dart';
+// import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -15,75 +15,72 @@ import 'dependencies.dart';
 Future<void> main() async {
   // Enables the debug overlay even in release mode.
   DebugOverlay.enabled = true;
-  
+
   // Uncaught Exceptions.
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
-    App.logBucket.add(LogEvent(
-      level: LogLevel.fatal,
-      message: const "Unhandled Exception",
-      error: exception,
-      stackTrace: stackTrace,
-    ));
+    App.logBucket.add(
+      LogEvent(
+        level: LogLevel.fatal,
+        message: 'Unhandled Exception',
+        error: exception,
+        stackTrace: stackTrace,
+      ),
+    );
     return false;
   };
 
   // Rendering Exceptions.
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    App.logBucket.add(LogEvent(
-      level: LogLevel.fatal,
-      message: details.exceptionAsString(),
-      error: (kDebugMode
-          ? details.toDiagnosticsNode().toStringDeep()
-          : details.exception.toString()),
-      stackTrace: details.stack,
-    ));
+    App.logBucket.add(
+      LogEvent(
+        level: LogLevel.fatal,
+        message: details.exceptionAsString(),
+        error: (kDebugMode
+            ? details.toDiagnosticsNode().toStringDeep()
+            : details.exception.toString()),
+        stackTrace: details.stack,
+      ),
+    );
   };
 
   Logger.root.level = Level.ALL; // defaults to Level.INFO
   Logger.root.onRecord.listen((record) {
-    final level = switch (record.level) {
+    // ignore: omit_local_variable_types
+    final LogLevel? level = switch (record.level) {
       Level.OFF => .off,
-      Level.FINEST || Level.FINER => .trace,
-      Level.FINE || Level.SHOUT => .debug,
-      Level.CONFIG || Level.INFO => .info,
+      Level.FINEST || .FINER => .trace,
+      Level.FINE || .SHOUT => .debug,
+      Level.CONFIG || .INFO => .info,
       Level.WARNING => .warning,
       Level.SEVERE => .error,
       Level.ALL => .all,
       _ => null,
     };
-    
+
     if (level == null) return;
-    App.logBucket.add(LogEvent(
-      level: level,
-      message: '${record.loggerName} ${record.message}',
-      error: record.error,
-      stackTrace: record.stackTrace,
-      time: record.time,
-    ));
+    App.logBucket.add(
+      LogEvent(
+        level: level,
+        message: '${record.loggerName} ${record.message}',
+        error: record.error,
+        stackTrace: record.stackTrace,
+        time: record.time,
+      ),
+    );
   });
-  /*Logger.addOutputListener((event) {
-    LogLevel? level = LogLevel.values
-        .firstWhereOrNull((element) => element.name == event.level.name);
-    if (level == null) return;
-    App.logBucket.add(LogEvent(
-      level: level,
-      message: event.origin.message,
-      error: event.origin.error,
-      stackTrace: event.origin.stackTrace,
-      time: event.origin.time,
-    ));
-  });*/
-  
+
   runApp(
     MultiProvider(
       providers: providers,
       child: Builder(
-        builder: (context) => const App(viewModel: context.read()),
+        builder: (context) {
+          return App(viewModel: context.read());
+        },
       ),
     ),
   );
-  
+
   if (kIsWeb) {
     SemanticsBinding.instance.ensureSemantics();
   }

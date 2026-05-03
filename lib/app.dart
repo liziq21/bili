@@ -1,17 +1,21 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:window_size/window_size.dart';
 
 import 'app_view_model.dart';
+import 'l10n/localization_file/app_localizations.dart';
 import 'routing/router.dart';
-import 'theme/theme_wrapper.dart';
+import 'theme_wrapper.dart';
 
 const double windowWidth = 360;
 const double windowHeight = 640;
 
 void setupWindow() {
-  if (!kIsWeb &&
-      (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     WidgetsFlutterBinding.ensureInitialized();
     setWindowTitle('');
     setWindowMinSize(const Size(windowWidth, windowHeight));
@@ -33,9 +37,9 @@ class App extends StatelessWidget {
 
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
-  
+
   final AppViewModel viewModel;
-  
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -44,32 +48,29 @@ class App extends StatelessWidget {
         if (viewModel.load.running) {
           return const Center(child: CircularProgressIndicator());
         }
-        //if (viewModel.load.error) 
+        //if (viewModel.load.error)
         return child!;
       },
       child: ThemeWrapper(
-              useDynamicColor: viewModel.dynamicColorStream,
-              themeConfig: viewModel.themeConfigStream,
-              builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
-                return MaterialApp.router(
-                  builder: (_, child) => DebugOverlay(
-                    logBucket: App.logBucket,
-                    httpBucket: App.httpBucket,
-                    child: child ?? const SizedBox.shrink(),
-                  ),
-                  debugShowCheckedModeBanner: false,
-                  showPerformanceOverlay: false,
-                  theme: theme,
-                  darkTheme: darkTheme,
-                  themeMode: themeMode,
-                  routerConfig: router,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localeResolutionCallback: (locale, _) => locale,
-                );
-              },
+        builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
+          return MaterialApp.router(
+            builder: (_, child) => DebugOverlay(
+              logBucket: App.logBucket,
+              httpBucket: App.httpBucket,
+              child: child ?? const SizedBox.shrink(),
             ),
+            debugShowCheckedModeBanner: false,
+            showPerformanceOverlay: false,
+            theme: theme,
+            darkTheme: darkTheme,
+            themeMode: themeMode,
+            routerConfig: router,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localeResolutionCallback: (locale, _) => locale,
+          );
+        },
+      ),
     );
   }
 }
-

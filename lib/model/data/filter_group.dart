@@ -5,12 +5,14 @@ abstract interface class FilterOption {
   const FilterOption({required this.label});
 
   final String label;
-  
+
   String get value;
 
   @override
   bool operator ==(Object other) =>
-      other is FilterOption && runtimeType == other.runtimeType && value == other.value;
+      other is FilterOption &&
+      runtimeType == other.runtimeType &&
+      value == other.value;
 
   @override
   int get hashCode => value.hashCode;
@@ -18,16 +20,13 @@ abstract interface class FilterOption {
 
 @immutable
 sealed class FilterGroup {
-  const FilterGroup({
-    required this.key 
-    required this.label 
-  });
-  
+  const FilterGroup({required this.key, required this.label});
+
   final String key;
   final String label;
 
   Map<String, String> toQueryParams();
-  
+
   FilterGroup copyWith();
 }
 
@@ -36,9 +35,9 @@ class SingleFilterGroup extends FilterGroup {
     required super.key,
     required super.label,
     required this.options,
-    this.selection
+    this.selection,
   });
-  
+
   final List<FilterOption> options;
   final FilterOption? selection;
 
@@ -47,12 +46,7 @@ class SingleFilterGroup extends FilterGroup {
 
   @override
   SingleFilterGroup copyWith({FilterOption? selection}) {
-    return .new({
-      key: key,
-      label: label,
-      options: options,
-      selection: selection,
-    });
+    return .new(key: key, label: label, options: options, selection: selection);
   }
 }
 
@@ -61,39 +55,24 @@ abstract class MultiFilterGroup extends FilterGroup {
     required super.key,
     required super.label,
     required this.options,
-    this.selections = const [],
+    this.selections,
   });
-  
-  final List<FilterOption> options;
-  final Set<FilterOption> selections;
 
-  @override
-  MultiFilterGroup copyWith({List<FilterOption>? selections}) {
-    return .new({
-      key: key,
-      label: label,
-      options: options,
-      selections: selections ?? this.selections,
-    });
-  }
+  final List<FilterOption> options;
+  final Set<FilterOption>? selections;
 }
 
 abstract class DateRangeFilterGroup extends FilterGroup {
   const DateRangeFilterGroup({
     required super.key,
     required super.label,
-    this.range
+    this.range,
   });
-  
+
   final ({DateTime start, DateTime end})? range;
 
   @override
   DateRangeFilterGroup copyWith({({DateTime start, DateTime end})? range}) {
-    return .new({
-      key: key,
-      label: label,
-      range: range,
-    });
+    return .new({key: key, label: label, range: range});
   }
 }
-

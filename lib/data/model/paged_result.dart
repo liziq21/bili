@@ -1,13 +1,9 @@
-import '../../utils/result.dart'
+import '../../utils/result.dart';
 
 typedef PagedResult<T> = Result<Page<T>>;
 
 abstract class Page<T> {
-  Page({
-    required this.number,
-    required this.totalPages,
-    required this.data,
-  });
+  Page({required this.number, required this.totalPages, required this.data});
 
   final int number;
   final int totalPages;

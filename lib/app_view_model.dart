@@ -9,25 +9,40 @@ import 'data/repository/user_data/user_data_repository.dart';
 import 'utils/result.dart';
 import 'utils/command.dart';
 
+class ThemeState {
+  const ThemeState(this.useDynamicColor, this.themeConfig);
+
+  final bool useDynamicColor;
+  final ThemeConfig themeConfig;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ThemeState &&
+      other.useDynamicColor == useDynamicColor &&
+      other.themeConfig == themeConfig;
+
+  @override
+  int get hashCode => Object.hash(useDynamicColor, themeConfig);
+}
+
 class AppViewModel extends ChangeNotifier {
-  AppViewModel({
-    required UserDataRepository userDataRepository,
-  }) : _userDataRepository = userDataRepository {
+  AppViewModel({required UserDataRepository userDataRepository})
+    : _userDataRepository = userDataRepository {
     load = Command0(_load)..execute();
     _subscription = userDataRepository.data.listen((newUserData) {
       _userData = newUserData;
       notifyListeners();
     });
   }
-  
+
   final _log = Logger('AppViewModel');
-  final _userDataRepository;
+  final UserDataRepository _userDataRepository;
   late final Command0<UserData> load;
-  StreamSubscription? _subscription;
+  late final StreamSubscription<UserData>? _subscription;
   late UserData _userData;
-  
+
   UserData get userData => _userData;
-  
+
   Future<Result<UserData>> _load() async {
     try {
       final data = await _userDataRepository.data.first;
@@ -37,11 +52,10 @@ class AppViewModel extends ChangeNotifier {
       return .error(Exception('Load error'));
     }
   }
-  
+
   @override
   void dispose() {
     _subscription?.cancel();
     super.dispose();
   }
 }
-

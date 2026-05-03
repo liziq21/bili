@@ -8,11 +8,11 @@ part 'user_data.g.dart';
 enum ServiceSource {
   bilibili,
   youtube;
-  
+
   String toJson() => _$ServiceSourceEnumMap[this]!;
-  
+
   static ServiceSource fromJson(String json) =>
-    $enumDecode(_$ServiceSourceEnumMap, json);
+      $enumDecode(_$ServiceSourceEnumMap, json);
 }
 
 @JsonEnum(alwaysCreate: true, fieldRename: .screamingSnake)
@@ -20,22 +20,22 @@ enum ThemeConfig {
   followSystem,
   light,
   dark;
-  
+
   String toJson() => _$ThemeConfigEnumMap[this]!;
-  
+
   static ThemeConfig fromJson(String json) =>
-    $enumDecode(_$ThemeConfigEnumMap, json);
+      $enumDecode(_$ThemeConfigEnumMap, json);
 }
 
 @freezed
 abstract class UserData with _$UserData {
   @JsonSerializable(fieldRename: .screamingSnake)
   const factory UserData({
-    @Default(.bilibili) ServiceSource serviceSource,
-    @Default(.followSystem) ThemeConfig themeConfig,
+    @Default(ServiceSource.bilibili) ServiceSource serviceSource,
+    @Default(ThemeConfig.followSystem) ThemeConfig themeConfig,
     @Default(true) bool useDynamicColor,
   }) = _UserData;
 
-  factory UserData.fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);
+  factory UserData.fromJson(Map<String, dynamic> json) =>
+      _$UserDataFromJson(json);
 }
-

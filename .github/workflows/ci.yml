@@ -17,8 +17,9 @@ jobs:
     name: Run Flutter Test
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-
+      contents: write # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     timeout-minutes: 60
     
     steps:
@@ -39,7 +40,7 @@ jobs:
         run: flutter pub get
 
       - name: Run build_runner
-        run: dart run build_runner build \
+        run: flutter pub run build_runner build \
           --delete-conflicting-outputs \
           --verbose
           
@@ -55,7 +56,18 @@ jobs:
           git push --force origin HEAD:build_runner
 
       - name: Run analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings > flutter_analyze.txt || true
+      
+      - name: Dart Analyze to SARIF
+        uses: advanced-security/dart-analyzer-sarif@main
+        with:
+          input: flutter_analyze.txt
+          output: flutter_analyze.sarif
+      
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: flutter_analyze.sarif
       
       - name: Run test
         run: flutter test

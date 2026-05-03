@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.onLive,
-    required this.navigateToSearchReault,
+    required this.onSearch,
     required this.onSpace,
     required this.onVideo,
   });
-  
+
   final Function(String roomId) onLive;
-  final Function(String searchQuery) navigateToSearchReault;
+  final Function(String searchQuery) onSearch;
   final Function(String mid) onSpace;
   final Function(String id) onVideo;
 
@@ -20,17 +19,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   @override
   void initState() {
     super.initState();
   }
-  
+
   @override
   void dispose() {
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

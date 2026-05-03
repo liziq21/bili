@@ -9,13 +9,8 @@ import '../../model/search_results.dart';
 import '../../model/video_info_base.dart';
 
 abstract class SearchQuery {
-  const SearchQuery(
-    this.query, {
-    this.page,
-    this.sortOption,
-    this.filter,
-  });
-  
+  const SearchQuery(this.query, {this.page, this.sortOption, this.filters});
+
   final String query;
   final String? page;
   final SortOption? sortOption;
@@ -24,10 +19,13 @@ abstract class SearchQuery {
 
 abstract class SearchContentsRepository {
   Future<Result<AggregateSearchResults>> searchAll(SearchQuery searchQuery);
-  
-  Future<Result<PagedCreatorProfile>> searchCreatorProfile(SearchQuery searchQuery);
-  
+
+  Future<Result<PagedCreatorProfile>> searchCreatorProfile(
+    SearchQuery searchQuery,
+  );
+
   Future<Result<PagedLiveRooms>> searchLiveRoom(SearchQuery searchQuery);
-  
+
   Future<Result<PagedVideos>> searchVideo(SearchQuery searchQuery);
 }
+

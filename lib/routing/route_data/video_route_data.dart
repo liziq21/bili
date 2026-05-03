@@ -9,16 +9,16 @@ extension BuildContextVideo on BuildContext {
 class VideoRouteData extends GoRouteData with $VideoRouteData {
   final String id;
   final String? cid;
-  final String? comment_root_id;
-  final String? comment_secondary_id;
-  final String? dm_progress;
-  
+  final String? commentRootId;
+  final String? commentSecondaryId;
+  final String? dmProgress;
+
   const VideoRouteData({
     required this.id,
     this.cid,
-    this.comment_root_id,
-    this.comment_secondary_id,
-    this.dm_progress,
+    this.commentRootId,
+    this.commentSecondaryId,
+    this.dmProgress,
   });
 
   @override
@@ -28,9 +28,9 @@ class VideoRouteData extends GoRouteData with $VideoRouteData {
       parameters: VideoParameters(
         id: id,
         cid: cid,
-        commentRootId: comment_root_id,
-        commentSecondaryId: comment_secondary_id,
-        dmProgress: dm_progress,
+        commentRootId: commentRootId,
+        commentSecondaryId: commentSecondaryId,
+        dmProgress: dmProgress,
       ),
     );
   }

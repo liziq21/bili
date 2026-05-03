@@ -9,7 +9,7 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
   Widget build(BuildContext context, GoRouterState state) {
     return HomeScreen(
       onLive: context.navigateToLive,
-      onSearchResult: context.navigateToSearchReault,
+      onSearch: context.navigateToSearchReault,
       onSpace: context.navigateToSpace,
       onVideo: context.navigateToVideo,
     );

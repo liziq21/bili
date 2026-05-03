@@ -1,54 +1,25 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+class VideoInfoBase {
+  const VideoInfoBase({
+    required this.arcurl,
+    required this.aid,
+    required this.bvid,
+    required this.title,
+    required this.picUrl,
+    required this.play,
+    required this.pubdate,
+    required this.duration,
+    required this.desc,
+    this.author,
+  });
 
-import '../../network/model/search/concrete_results/network_video_search_result.dart';
-import '../../network/model/search/common/network_bili_user_res.dart';
-
-part 'video_info_base.freezed.dart';
-
-@freezed
-abstract class VideoInfoBase with _$VideoInfoBase {
-  const factory VideoInfoBase({
-    required String arcurl,
-    required int aid,
-    required String bvid,
-    required String title,
-    required String picUrl,
-    required int play,
-    required int pubdate,
-    required String duration,
-    required String desc,
-    required String url,
-    String? author,
-  }) = _VideoInfoBase;
-}
-
-extension NetworkVideoSearchResultX on NetworkVideoSearchResult {
-  VideoInfoBase asModel() => VideoInfoBase(
-    arcurl: arcurl,
-    author: author,
-    aid: aid,
-    bvid: bvid,
-    title: title.parsedTitle(),
-    picUrl: 'https:$pic',
-    play: play,
-    pubdate: pubdate,
-    duration: duration,
-    isUnionVideo: isUnionVideo,
-    desc: desc,
-  );
-}
-
-extension NetworkBiliUserResX on NetworkBiliUserRes {
-  VideoInfoBase asModel() => VideoInfoBase(
-    arcurl: arcurl,
-    aid: aid,
-    bvid: bvid,
-    title: title,
-    picUrl: 'https:$pic',
-    play: play,
-    pubdate: pubdate,
-    duration: duration,
-    isUnionVideo: isUnionVideo,
-    desc: desc,
-  );
+  final String arcurl;
+  final int aid;
+  final String bvid;
+  final String title;
+  final String picUrl;
+  final int play;
+  final int pubdate;
+  final String duration;
+  final String desc;
+  final String? author;
 }
