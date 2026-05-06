@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+//import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app_view_model.dart';
@@ -39,7 +39,6 @@ class App extends StatelessWidget {
   static final HttpBucket httpBucket = HttpBucket();
 
   final AppViewModel viewModel;
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(

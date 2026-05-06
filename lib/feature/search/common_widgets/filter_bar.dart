@@ -5,14 +5,19 @@ import '../../../model/data/filter_group.dart';
 class FilterBar extends StatelessWidget {
   const FilterBar({
     super.key,
-    required this.viewModel,
+    required this.filters,
+    required this.onChanged,
   });
   
-  final List<FilterGroup> viewModel;
+  final List<FilterGroup> filters;
+  final Function (List<FilterGroup>) onChanged; 
 
   @override
   Widget build(BuildContext context) {
-    return ;
+    return IconButton(
+      onPressed: () => _showFilterBottomSheet(context), 
+      icon: const Icon(Icons.filter),
+    );
   }
   
   void _showFilterBottomSheet(BuildContext context) {
@@ -24,7 +29,7 @@ class FilterBar extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            const AppBar(
+            AppBar(
               title: Text('筛选器'),
               automaticallyImplyLeading: false,
             ),

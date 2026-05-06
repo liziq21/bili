@@ -10,23 +10,20 @@ extension BuildContextSearch on BuildContext {
 @immutable
 class SearchRouteData extends GoRouteData with $SearchRouteData {
   const SearchRouteData({
-    /*@TypedQueryParameter(name: 's') */required this.keyword,
+    /*@TypedQueryParameter(name: 's') */ required this.keyword,
   });
-  
+
   final String keyword;
 
   @override
   Widget build(context, _) {
     return SearchResultScreen(
-      /*viewModel: .new(
-        getRecentSearchQueriesUseCase: context.read(),
+      viewModel: .new(
         recentSearchQueryRepository: context.read(),
-        searchSuggestRepository: context.read(),
         initialQuery: keyword,
-      ),*/
+      ),
       searchQuery: keyword,
       onBackClick: () => context.pop(),
     );
   }
 }
-

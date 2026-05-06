@@ -7,7 +7,7 @@ class FilterGroupWidget extends StatelessWidget {
     required this.group,
     required this.onChanged,
   });
-  
+
   final FilterGroup group;
   final ValueChanged<FilterGroup> onChanged;
 
@@ -20,22 +20,24 @@ class FilterGroupWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Text(
             group.label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: .bold),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: .bold),
           ),
         ),
         switch (group) {
           SingleFilterGroup g => _SingleFilterView(
-              group: g,
-              onChanged: onChanged,
-            ),
+            group: g,
+            onChanged: onChanged,
+          ),
           MultiFilterGroup g => _MultiFilterView(
-              group: g,
-              onChanged: onChanged,
-            ),
-          DateRangeFilter g => _DateRangeView(
-              group: g,
-              onChanged: onChanged,
-            ),
+            group: g,
+            onChanged: onChanged,
+          ),
+          DateRangeFilterGroup g => _DateRangeView(
+            group: g,
+            onChanged: onChanged,
+          ),
         },
         const Divider(height: 1),
       ],
@@ -44,10 +46,7 @@ class FilterGroupWidget extends StatelessWidget {
 }
 
 class _SingleFilterView extends StatelessWidget {
-  const _SingleFilterView({
-    required this.group,
-    required this.onChanged,
-  });
+  const _SingleFilterView({required this.group, required this.onChanged});
 
   final SingleFilterGroup group;
   final ValueChanged<FilterGroup> onChanged;
@@ -59,14 +58,14 @@ class _SingleFilterView extends StatelessWidget {
       child: Wrap(
         spacing: 8.0,
         children: group.options.map((option) {
-          final isSelected = group.selectedOption == option;
+          final isSelected = group.selection == option;
           return FilterChipItem(
-            key: option.id,
-            label: label,
+            key: option.value,
+            label: option.label,
             selected: isSelected,
             onSelected: (selected) {
               if (selected) {
-                onChanged(group.copyWith(selectedOption: option));
+                onChanged(group.copyWith(selection: option));
               }
             },
           );
@@ -77,10 +76,7 @@ class _SingleFilterView extends StatelessWidget {
 }
 
 class _MultiFilterView extends StatelessWidget {
-  const _MultiFilterView({
-    required this.group,
-    required this.onChanged,
-  });
+  const _MultiFilterView({required this.group, required this.onChanged});
 
   final MultiFilterGroup group;
   final ValueChanged<FilterGroup> onChanged;
@@ -114,10 +110,7 @@ class _MultiFilterView extends StatelessWidget {
 }
 
 class _DateRangeView extends StatelessWidget {
-  const _DateRangeView({
-    required this.group,
-    required this.onChanged,
-  });
+  const _DateRangeView({required this.group, required this.onChanged});
 
   final DateRangeFilter group;
   final ValueChanged<FilterGroup> onChanged;
@@ -125,8 +118,8 @@ class _DateRangeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final range = group.customDateRange;
-    final label = range == null 
-        ? "选择日期范围" 
+    final label = range == null
+        ? "选择日期范围"
         : "${range.start.year}-${range.end.year}";
 
     return Padding(
@@ -141,9 +134,11 @@ class _DateRangeView extends StatelessWidget {
             lastDate: DateTime.now(),
           );
           if (picked != null) {
-            onChanged(group.copyWith(
-              customDateRange: (start: picked.start, end: picked.end),
-            ));
+            onChanged(
+              group.copyWith(
+                customDateRange: (start: picked.start, end: picked.end),
+              ),
+            );
           }
         },
       ),

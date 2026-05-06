@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../../bili/constonts/constonts.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest/search_suggest_repository.dart';
 import '../../data/model/recent_search_query.dart';
@@ -17,20 +16,39 @@ class AppSearchAnchorViewModel extends ChangeNotifier {
     required SearchSuggestRepository searchSuggestRepository,
   }) : _recentSearchQueryRepository = recentSearchQueryRepository,
        _searchSuggestRepository = searchSuggestRepository {
-    recentSearchQueries = getRecentSearchQueriesUseCase.invoke();
+    _recentSearchQuerySubscription = getRecentSearchQueriesUseCase
+        .invoke()
+        .listen((data) {
+          _log.fine('RecentSearchQuery loaded');
+          _recentSearchQueries = data;
+          notifyListeners();
+        }, onError: (e) => _log.warning('Error loading RecentSearchQuery: $e'));
   }
-  
+
   final _log = Logger('AppSearchBarViewModel');
   late final RecentSearchQueryRepository _recentSearchQueryRepository;
-  late final SearchSuggestRepository _searchSuggestRepository;
-
+  final SearchSuggestRepository _searchSuggestRepository;
+  List<RecentSearchQuery> _recentSearchQueries = <RecentSearchQuery>[];
+  late StreamSubscription<List<RecentSearchQuery>>?
+  _recentSearchQuerySubscription;
   String? _currentQuery;
-  Iterable<String> _suggests = [];
-  
-  late final Stream<List<RecentSearchQuery>> recentSearchQueries;
+  List<String> _suggests = [];
 
-  //clearRecentSearches
-  
+  List<RecentSearchQuery> get recentSearchQueries => _recentSearchQueries;
+  List<String> get suggests => _suggests;
+
+  Future<void> clearRecentSearches() async {
+    await _recentSearchQueryRepository.clearRecentSearchQueries();
+  }
+
+  Future<void> updateRecentSearch(String query) async {
+    if (query.isEmpty) {
+      return;
+    }
+    await _recentSearchQueryRepository.insertOrReplaceRecentSearch(query);
+    _log.info('add recent search: $query');
+  }
+
   Future<Iterable<String>> getSuggests(String query) async {
     if (_currentQuery == query) {
       return _suggests;
@@ -42,9 +60,9 @@ class AppSearchAnchorViewModel extends ChangeNotifier {
     }
     return [];
   }
-  
+
   late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
-  
+
   Future<void> _loadSuggests(String query) async {
     _log.fine('Load suggests');
     final result = await _searchSuggestRepository.getSuggests(query);
@@ -57,6 +75,12 @@ class AppSearchAnchorViewModel extends ChangeNotifier {
         _log.warning('Failed to load suggests', result.error);
         _suggests = [];
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _recentSearchQuerySubscription?.cancel();
   }
 }
 

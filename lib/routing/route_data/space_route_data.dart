@@ -7,16 +7,12 @@ extension BuildContextSpace on BuildContext {
 @TypedGoRoute<SpaceRouteData>(path: '${Routes.space}/:mid')
 @immutable
 class SpaceRouteData extends GoRouteData with $SpaceRouteData {
+  const SpaceRouteData({required this.mid});
+
   final String mid;
-  
-  const SpaceRouteData({ required this.mid });
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SpaceScreen(
-      mid: mid,
-      onBackClick: () => context.pop(),
-    );
+    return SpaceScreen(mid: mid, onBackClick: () => context.pop());
   }
 }
-

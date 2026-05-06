@@ -1,24 +1,22 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../bili/search_type.dart';
 import '../../data/model/recent_search_query.dart';
 import 'search_view_model.dart';
 import 'app_search_anchor_view_model.dart';
 
-class SearchResultScreen extends StatefulWidget {
+class SearchResultScreen extends StatelessWidget {
   const SearchResultScreen({
     super.key,
     required this.viewModel,
     this.onBackClick,
   });
 
-  final SearchViewModel viewModel;
-  final AppSearchAnchorViewModel appSearchAnchorViewModel;
+  //final BaseSearchViewModel viewModel;
+  final AppSearchAnchorViewModel viewModel;
   final VoidCallback? onBackClick;
 
-  @override
+  @override 
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
