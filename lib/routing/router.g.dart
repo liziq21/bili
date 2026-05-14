@@ -154,9 +154,9 @@ mixin $VideoRouteData on GoRouteData {
   static VideoRouteData _fromState(GoRouterState state) => VideoRouteData(
     id: state.pathParameters['id']!,
     cid: state.uri.queryParameters['cid'],
-    comment_root_id: state.uri.queryParameters['comment_root_id'],
-    comment_secondary_id: state.uri.queryParameters['comment_secondary_id'],
-    dm_progress: state.uri.queryParameters['dm_progress'],
+    commentRootId: state.uri.queryParameters['comment-root-id'],
+    commentSecondaryId: state.uri.queryParameters['comment-secondary-id'],
+    dmProgress: state.uri.queryParameters['dm-progress'],
   );
 
   VideoRouteData get _self => this as VideoRouteData;
@@ -166,11 +166,10 @@ mixin $VideoRouteData on GoRouteData {
     '/video/${Uri.encodeComponent(_self.id)}',
     queryParams: {
       if (_self.cid != null) 'cid': _self.cid,
-      if (_self.comment_root_id != null)
-        'comment_root_id': _self.comment_root_id,
-      if (_self.comment_secondary_id != null)
-        'comment_secondary_id': _self.comment_secondary_id,
-      if (_self.dm_progress != null) 'dm_progress': _self.dm_progress,
+      if (_self.commentRootId != null) 'comment-root-id': _self.commentRootId,
+      if (_self.commentSecondaryId != null)
+        'comment-secondary-id': _self.commentSecondaryId,
+      if (_self.dmProgress != null) 'dm-progress': _self.dmProgress,
     },
   );
 

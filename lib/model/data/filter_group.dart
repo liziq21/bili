@@ -24,7 +24,6 @@ sealed class FilterGroup {
 
   final String key;
   final String label;
-
   Map<String, String> toQueryParams();
 
   FilterGroup copyWith();
@@ -66,9 +65,10 @@ class MultiFilterGroup extends FilterGroup {
   final List<FilterOption> options;
   final Set<FilterOption> selections;
 
+  bool isSelected(FilterOption option) => selections.contains(option);
+
   @override
   Map<String, String> toQueryParams() {
-    // 假设多选在 URL 中是 "key=v1,v2"
     return {
       if (selections.isNotEmpty) key: selections.map((e) => e.value).join(','),
     };

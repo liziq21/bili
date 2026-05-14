@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 // ignore: unused_import
 import 'package:provider/provider.dart';
 
+import '../data/repository/search_suggest/search_suggest_repository.dart';
+import '../domain/get_recent_search_queries_use_case.dart';
 import 'routes.dart';
 //import '../network/network_search_data_source.dart';
 import '../feature/home/home_screen.dart';

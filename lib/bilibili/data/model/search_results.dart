@@ -22,25 +22,25 @@ extension NetworkSearchResultWrapperE on NetworkSearchResult {
 
   Page<LiveRoom> asPagedLiveRooms() {
     return .new(
-      page: result.page,
-      totalPages: result.numPages,
-      data: result.liveRoom.map((it) => it.asModel()),
+      number: page,
+      totalPages: numPages,
+      data: result.liveRoom.map((it) => it.asModel()).toList(),
     );
   }
 
-  PagedCreatorProfile asPagedCreatorProfile() {
-    return PagedCreatorProfile(
-      page: result.page,
-      totalPages: result.numPages,
-      data: result.biliUser.map((it) => it.asModel()),
+  Page<CreatorProfile> asPagedCreatorProfile() {
+    return .new(
+      number: page,
+      totalPages: numPages,
+      data: result.biliUser.map((it) => it.asModel()).toList(),
     );
   }
 
-  PagedVideos asPagedVideos() {
-    return PagedLiveRooms(
-      page: result.page,
-      totalPages: result.numPages,
-      data: result.video.map((it) => it.asModel()),
+  Page<VideoInfoBase> asPagedVideos() {
+    return .new(
+      number: page,
+      totalPages: numPages,
+      data: result.video.map((it) => it.asModel()).toList(),
     );
   }
 }

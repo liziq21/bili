@@ -4,13 +4,13 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.onLive,
-    required this.onSearch,
+    required this.navigateToSearchReault,
     required this.onSpace,
     required this.onVideo,
   });
 
   final Function(String roomId) onLive;
-  final Function(String searchQuery) onSearch;
+  final Function(String searchQuery) navigateToSearchReault;
   final Function(String mid) onSpace;
   final Function(String id) onVideo;
 

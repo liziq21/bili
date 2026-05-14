@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'filter_chip_item.dart';
 import '../../../model/data/filter_group.dart';
 
-class FilterGroupWidget extends StatelessWidget {
-  const FilterGroupWidget({
+class FilterGroupSection extends StatelessWidget {
+  const FilterGroupSection({
     super.key,
     required this.group,
     required this.onChanged,
@@ -26,15 +27,15 @@ class FilterGroupWidget extends StatelessWidget {
           ),
         ),
         switch (group) {
-          SingleFilterGroup g => _SingleFilterView(
+          final SingleFilterGroup g => _SingleFilterView(
             group: g,
             onChanged: onChanged,
           ),
-          MultiFilterGroup g => _MultiFilterView(
-            group: g,
+          final MultiFilterGroup g => _MultiFilterView(
+            filter: g,
             onChanged: onChanged,
           ),
-          DateRangeFilterGroup g => _DateRangeView(
+          final DateRangeFilterGroup g => _DateRangeView(
             group: g,
             onChanged: onChanged,
           ),
@@ -60,9 +61,9 @@ class _SingleFilterView extends StatelessWidget {
         children: group.options.map((option) {
           final isSelected = group.selection == option;
           return FilterChipItem(
-            key: option.value,
+            key: ValueKey(option.value),
             label: option.label,
-            selected: isSelected,
+            isSelected: isSelected,
             onSelected: (selected) {
               if (selected) {
                 onChanged(group.copyWith(selection: option));
@@ -76,9 +77,9 @@ class _SingleFilterView extends StatelessWidget {
 }
 
 class _MultiFilterView extends StatelessWidget {
-  const _MultiFilterView({required this.group, required this.onChanged});
+  const _MultiFilterView({required this.filter, required this.onChanged});
 
-  final MultiFilterGroup group;
+  final MultiFilterGroup filter;
   final ValueChanged<FilterGroup> onChanged;
 
   @override
@@ -87,20 +88,20 @@ class _MultiFilterView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Wrap(
         spacing: 8.0,
-        children: group.options.map((option) {
-          final isSelected = group.isSelected(option);
+        children: filter.options.map((option) {
+          final isSelected = filter.isSelected(option);
           return FilterChipItem(
-            key: option.id,
+            key: ValueKey(option.value),
             label: option.label,
-            selected: isSelected,
+            isSelected: isSelected,
             onSelected: (selected) {
-              final newSet = Set<FilterOption>.from(group.selectedOptions);
+              final newSet = Set<FilterOption>.from(filter.selections);
               if (selected) {
                 newSet.add(option);
               } else {
                 newSet.remove(option);
               }
-              onChanged(group.copyWith(selectedOptions: newSet));
+              onChanged(filter.copyWith(selections: newSet));
             },
           );
         }).toList(),
@@ -112,12 +113,12 @@ class _MultiFilterView extends StatelessWidget {
 class _DateRangeView extends StatelessWidget {
   const _DateRangeView({required this.group, required this.onChanged});
 
-  final DateRangeFilter group;
+  final DateRangeFilterGroup group;
   final ValueChanged<FilterGroup> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final range = group.customDateRange;
+    final range = group.range;
     final label = range == null
         ? "选择日期范围"
         : "${range.start.year}-${range.end.year}";
@@ -135,9 +136,7 @@ class _DateRangeView extends StatelessWidget {
           );
           if (picked != null) {
             onChanged(
-              group.copyWith(
-                customDateRange: (start: picked.start, end: picked.end),
-              ),
+              group.copyWith(range: (start: picked.start, end: picked.end)),
             );
           }
         },

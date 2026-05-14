@@ -1,9 +1,4 @@
-import '../category.dart';
-import '../date_range.dart';
-import '../search_order.dart';
-import '../user_type.dart';
-import '../video_duration_filter.dart';
-import '../utils/result.dart';
+import '../../utils/result.dart';
 import 'model/search/network_search_result.dart';
 import 'model/search_suggest/network_search_suggest.dart';
 
@@ -13,15 +8,13 @@ abstract interface class NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchArticle(
     String keyword, {
     int? page,
-    ArticleCategory? category,
-    ArticleSearchOrder? order,
+    Map<String, String>? parameters,
   });
 
   Future<Result<NetworkSearchResult>> searchBiliUser(
     String keyword, {
     int? page,
-    UserSearchSort? sort,
-    UserType? userType,
+    Map<String, String>? parameters,
   });
 
   Future<Result<NetworkSearchResult>> searchMediaBangumi(
@@ -39,7 +32,7 @@ abstract interface class NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchLiveRoom(
     String keyword, {
     int? page,
-    LiveRoomSearchOrder? order,
+    Map<String, String>? parameters,
   });
 
   Future<Result<NetworkSearchResult>> searchLiveUser(
@@ -50,8 +43,7 @@ abstract interface class NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchPhoto(
     String keyword, {
     int? page,
-    PhotoCategory? category,
-    PhotoOrVideoSearchOrder? order,
+    Map<String, String>? parameters,
   });
 
   Future<Result<NetworkSearchResult>> searchTopic(String keyword, {int? page});
@@ -59,10 +51,7 @@ abstract interface class NetworkSearchDataSource {
   Future<Result<NetworkSearchResult>> searchVideo(
     String keyword, {
     int? page,
-    PhotoOrVideoSearchOrder? order,
-    VideoDurationFilter? duration,
-    int? tids,
-    DateRange? dateRange,
+    Map<String, String>? parameters,
   });
 
   Future<Result<NetworkSearchSuggest>> getSuggests(String term);

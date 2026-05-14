@@ -6,26 +6,33 @@ import '../../../model/data/sort_option.dart';
 import '../../model/creator_profile.dart';
 import '../../model/live_room.dart';
 import '../../model/paged_result.dart';
-import '../../model/search_results.dart';
 import '../../model/video_info_base.dart';
 
 class SearchQuery {
-  const SearchQuery(this.query, {this.page, this.sortOption, this.filters});
+  SearchQuery(
+    this.query, {
+    this.page,
+    SortOption? sortOption,
+    List<FilterGroup>? filters,
+  }) : parameters = {
+         ...?sortOption?.toQueryParams(),
+         if (filters != null)
+           for (final filter in filters) ...filter.toQueryParams(),
+       };
 
   final String query;
   final int? page;
-  final SortOption? sortOption;
-  final List<FilterGroup>? filters;
+  final Map<String, String> parameters;
 }
 
-abstract class SearchContentsRepository {
-  Future<Result<AggregateSearchPage>> searchAll(SearchQuery searchQuery);
-
-  Future<Result<Page<CreatorProfile>>> searchCreatorProfile(
-    SearchQuery searchQuery,
-  );
-
-  Future<Result<Page<LiveRoom>>> searchLiveRoom(SearchQuery searchQuery);
-
-  Future<Result<Page<VideoInfoBase>>> searchVideo(SearchQuery searchQuery);
+abstract class SearchContentsRepository<T> {
+  List<SortOption>? get sortOptions => null;
+  List<FilterGroup>? get filters => null;
+  Future<Result<Page<T>>> search(SearchQuery searchQuery);
 }
+
+typedef VideoSearchRepository = SearchContentsRepository<VideoInfoBase>;
+typedef CreatorProfileSearchRepository =
+    SearchContentsRepository<CreatorProfile>;
+typedef LiveRoomSearchRepository = SearchContentsRepository<LiveRoom>;
+typedef AggregateSearchRepository = VideoSearchRepository;

@@ -10,7 +10,7 @@ extension NetworkVideoSearchResultX on NetworkVideoSearchResult {
     bvid: bvid,
     title: title.parsedTitle(),
     picUrl: 'https:$pic',
-    play: play,
+    play: '$play',
     pubdate: pubdate,
     duration: duration,
     desc: desc,

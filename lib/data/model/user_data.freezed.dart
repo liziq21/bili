@@ -80,7 +80,7 @@ as bool,
 
 @JsonSerializable(fieldRename: .screamingSnake)
 class _UserData implements UserData {
-  const _UserData({this.serviceSource = .bilibili, this.themeConfig = .followSystem, this.useDynamicColor = true});
+  const _UserData({this.serviceSource = ServiceSource.bilibili, this.themeConfig = ThemeConfig.followSystem, this.useDynamicColor = true});
   factory _UserData.fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);
 
 @override@JsonKey() final  ServiceSource serviceSource;

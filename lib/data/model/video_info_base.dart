@@ -17,7 +17,7 @@ class VideoInfoBase {
   final String bvid;
   final String title;
   final String picUrl;
-  final int play;
+  final String play;
   final int pubdate;
   final String duration;
   final String desc;

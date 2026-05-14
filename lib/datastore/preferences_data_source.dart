@@ -6,26 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/model/user_data.dart';
 import '../utils/result.dart';
 
-class PreferencesKey<T> {
-  final String name;
-  final T defaultValue;
-
-  const PreferencesKey._(this.name, this.defaultValue);
-
-  static const serviceSource = PreferencesKey<String>._(
-    'SERVICE_SOURCE',
-    'BILIBILI',
-  );
-  static const themeConfig = PreferencesKey<String>._(
-    'THEME_CONFIG',
-    'FOLLOW_SYSTEM',
-  );
-  static const useDynamicColor = PreferencesKey<bool>._(
-    'USE_DYNAMIC_COLOR',
-    true,
-  );
-}
-
 class PreferencesDataSource {
   PreferencesDataSource({required SharedPreferencesAsync sharedPreferences})
     : _pref = sharedPreferences {
@@ -33,25 +13,16 @@ class PreferencesDataSource {
   }
 
   final SharedPreferencesAsync _pref;
-  late final StreamController<UserData> _controller;
   //final _log = Logger('PreferencesDataSource');
+  late final StreamController<UserData> _controller;
 
   Stream<UserData> get data => _controller.stream;
 
+  Future<void> dispose() => _controller.close();
+
   Future<Result<T>> get<T>(PreferencesKey<T> key) async {
     try {
-      if (T == String) {
-        return .ok(await _pref.getString(key.name) ?? key.defaultValue);
-      } else if (T == bool) {
-        return .ok(await _pref.getBool(key.name) ?? key.defaultValue);
-      } else if (T == int) {
-        return .ok(await _pref.getInt(key.name) ?? key.defaultValue);
-      } else if (T == double) {
-        return .ok(await _pref.getDouble(key.name) ?? key.defaultValue);
-      } else if (T == List<String>) {
-        return .ok(await _pref.getStringList(key.name) ?? key.defaultValue);
-      }
-      return .error(Exception('Unsupported type for SharedPreferences: $T'));
+      return .ok(await key.getData(_pref));
     } on Exception catch (e) {
       return .error(e);
     }
@@ -59,27 +30,15 @@ class PreferencesDataSource {
 
   Future<Result<T>> set<T>(PreferencesKey<T> key, T value) async {
     try {
-      switch (value) {
-        case String _:
-        default:
-      }
-      if (value is String) {
-        await _pref.setString(key.name, value);
-      } else if (value is bool) {
-        await _pref.setBool(key.name, value);
-      } else if (value is int) {
-        await _pref.setInt(key.name, value);
-      } else if (value is double) {
-        await _pref.setDouble(key.name, value);
-      } else if (value is List<String>) {
-        await _pref.setStringList(key.name, value);
-      } else {
-        return .error(
-          Exception(
-            'Unsupported type for SharedPreferences: ${value.runtimeType}',
-          ),
-        );
-      }
+      await switch (value) {
+        final String v => _pref.setString(key.name, v),
+        final bool v => _pref.setBool(key.name, v),
+        final int v => _pref.setInt(key.name, v),
+        final double v => _pref.setDouble(key.name, v),
+        final List<String> v => _pref.setStringList(key.name, v),
+        _ => throw Exception('Unsupported type: ${value.runtimeType}'),
+      };
+
       return .ok(value);
     } on Exception catch (e) {
       return .error(e);
@@ -92,9 +51,37 @@ class PreferencesDataSource {
       _controller.add(data);
     }
   }
-
-  void dispose() {
-    _controller.close();
-  }
 }
 
+class PreferencesKey<T> {
+  static const serviceSource = PreferencesKey<String>._(
+    'SERVICE_SOURCE',
+    'BILIBILI',
+  );
+
+  static const themeConfig = PreferencesKey<String>._(
+    'THEME_CONFIG',
+    'FOLLOW_SYSTEM',
+  );
+  static const useDynamicColor = PreferencesKey<bool>._(
+    'USE_DYNAMIC_COLOR',
+    true,
+  );
+
+  final String name;
+  final T defaultValue;
+  const PreferencesKey._(this.name, this.defaultValue);
+
+  Future<T> getData(SharedPreferencesAsync pref) async {
+    final Future<Object?> data = switch (T) {
+      const (String) => pref.getString(name),
+      const (bool) => pref.getBool(name),
+      const (int) => pref.getInt(name),
+      const (double) => pref.getDouble(name),
+      const (List<String>) => pref.getStringList(name),
+      _ => throw UnsupportedError('不支持的类型: $T'),
+    };
+
+    return (await data as T?) ?? defaultValue;
+  }
+}

@@ -1,5 +1,10 @@
 include: package:flutter_lints/flutter.yaml
 
+# cf https://github.com/dart-lang/dart_style/wiki/Configuration
+formatter:
+  #page_width: 100
+  #trailing_commas: preserve
+
 analyzer:
   enable-experiment:
     - dot-shorthands
@@ -18,7 +23,8 @@ analyzer:
 
   exclude:
   plugins:
-    - custom_lint
+    #- custom_lint
+    - dart_code_linter
 
 linter:
   rules:
@@ -30,7 +36,7 @@ linter:
     - close_sinks                       # 检查 Sink 是否关闭
     - combinators_ordering
     #- directives_ordering
-    - omit_local_variable_types
+    #- omit_local_variable_types
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
@@ -40,3 +46,11 @@ linter:
     - avoid_void_async
     - use_key_in_widget_constructors    # 强制 Widget 包含 Key
     - unawaited_futures
+    - sort_constructors_first
+    - sort_unnamed_constructors_first
+
+dart_code_linter:
+  rules-exclude:
+    - test/**
+  extends:
+    - package:dart_code_linter/presets/recommended.yaml

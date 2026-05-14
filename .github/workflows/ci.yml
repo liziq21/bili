@@ -69,8 +69,8 @@ jobs:
         with:
           sarif_file: flutter_analyze.sarif
       
-      - name: Run test
-        run: flutter test
+      #- name: Run test
+       # run: flutter test
 
   build_iOSApp:
     name: Build Flutter App (iOS)

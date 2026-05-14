@@ -13,11 +13,15 @@ _UserData _$UserDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     final val = _UserData(
       serviceSource: $checkedConvert(
         'SERVICE_SOURCE',
-        (v) => $enumDecodeNullable(_$ServiceSourceEnumMap, v) ?? .bilibili,
+        (v) =>
+            $enumDecodeNullable(_$ServiceSourceEnumMap, v) ??
+            ServiceSource.bilibili,
       ),
       themeConfig: $checkedConvert(
         'THEME_CONFIG',
-        (v) => $enumDecodeNullable(_$ThemeConfigEnumMap, v) ?? .followSystem,
+        (v) =>
+            $enumDecodeNullable(_$ThemeConfigEnumMap, v) ??
+            ThemeConfig.followSystem,
       ),
       useDynamicColor: $checkedConvert(
         'USE_DYNAMIC_COLOR',

@@ -1,4 +1,4 @@
 class AppState {
-  //final Steram<bool> isOffline;
-  
+  // Final Steram<bool> isOffline;.
 }
+

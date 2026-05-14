@@ -66,7 +66,7 @@ class VideoCard extends StatelessWidget {
             mainAxisSize: .min,
             crossAxisAlignment: .start,
             children: [
-              Title(title: videoInfoBase.title, color: null, child: null),
+              Text(videoInfoBase.title),
               const Spacer(),
               Text('${videoInfoBase.play} views • ${videoInfoBase.pubdate}'),
             ],
@@ -82,4 +82,3 @@ class VideoCard extends StatelessWidget {
     );
   }
 }
-

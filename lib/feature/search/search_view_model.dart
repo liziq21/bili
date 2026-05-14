@@ -1,128 +1,126 @@
-import 'package:flutter/material.dart' hide Page;
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import '../../data/model/creator_profile.dart';
-import '../../data/model/paged_result.dart';
-import '../../data/model/video_info_base.dart';
-import '../../data/repository/search_contents/search_contents_repository.dart';
-import '../../model/data/filter_group.dart';
-import '../../model/data/sort_option.dart';
+
+import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
+import '../../data/repository/search_suggest/search_suggest_repository.dart';
+import '../../data/model/recent_search_query.dart';
+import '../../domain/get_recent_search_queries_use_case.dart';
 import '../../utils/result.dart';
 
-mixin PagingMixin<T> on ChangeNotifier {
-  final _log = Logger('PagingMixin');
-  late final pagingController = _initController();
-  int _totalPages = 1;
-
-  Future<Result<Page<T>>> fetchPage(int pageKey);
-
-  PagingController<int, T> _initController() {
-    return PagingController<int, T>(
-      getNextPageKey: (state) =>
-          state.nextIntPageKey > _totalPages ? null : state.nextIntPageKey,
-      fetchPage: (key) async {
-        final result = await fetchPage(key);
-        switch (result) {
-          case Ok(:final value):
-            _totalPages = value.totalPages;
-            return value.data;
-          case Error(:final error):
-            _log.warning('$error');
-            throw error;
-        }
-      },
-    );
+class SearchViewModel extends ChangeNotifier {
+  SearchViewModel({
+    required GetRecentSearchQueriesUseCase getRentSearchQueriesUseCase,
+    required RecentSearchQueryRepository recentSearchQueryRepository,
+    required SearchSuggestRepository searchSuggestRepository,
+  }) : _recentSearchQueryRepository = recentSearchQueryRepository,
+       _searchSuggestRepository = searchSuggestRepository {
+    recentSearchQueries = getRentSearchQueriesUseCase.invoke();
   }
 
-  void refreshResults() {
-    pagingController.refresh();
-    notifyListeners();
+  final _log = Logger('AppSearchBarViewModel');
+  late final RecentSearchQueryRepository _recentSearchQueryRepository;
+  final SearchSuggestRepository _searchSuggestRepository;
+  List<RecentSearchQuery> _recentSearchQueries = <RecentSearchQuery>[];
+  late StreamSubscription<List<RecentSearchQuery>>?
+  _recentSearchQuerySubscription;
+  String? _currentQuery;
+  List<String> _suggests = [];
+
+  late Stream<List<RecentSearchQuery>> recentSearchQueries;
+  List<String> get suggests => _suggests;
+
+  Future<void> clearRecentSearches() async {
+    await _recentSearchQueryRepository.clearRecentSearchQueries();
+  }
+
+  Future<void> updateRecentSearch(String query) async {
+    if (query.isEmpty) {
+      return;
+    }
+    await _recentSearchQueryRepository.insertOrReplaceRecentSearch(query);
+    _log.info('add recent search: $query');
+  }
+
+  Future<Iterable<String>> getSuggests(String query) async {
+    if (_currentQuery == query) {
+      return _suggests;
+    } else {
+      await _debounceLoadSuggests(_currentQuery!);
+      if (_currentQuery == query) {
+        return _suggests;
+      }
+    }
+    return [];
+  }
+
+  late final _debounceLoadSuggests = _debounce<void, String>(_loadSuggests);
+
+  Future<void> _loadSuggests(String query) async {
+    _log.fine('Load suggests');
+    final result = await _searchSuggestRepository.getSuggests(query);
+    switch (result) {
+      case Ok(:final value):
+        _log.fine('Suggests (${value.length}) loaded');
+        _suggests = value;
+        _currentQuery = query;
+      case Error():
+        _log.warning('Failed to load suggests', result.error);
+        _suggests = [];
+    }
   }
 
   @override
   void dispose() {
-    pagingController.dispose();
     super.dispose();
+    _recentSearchQuerySubscription?.cancel();
   }
 }
 
-abstract class BaseSearchViewModel<T> extends ChangeNotifier
-    with PagingMixin<T> {
-  BaseSearchViewModel({
-    required String query,
-    required this.searchContentsRepository,
-    required SearchConfig config,
-  }) : _query = query,
-       _sortOptions = config.sortOptions,
-       _currentSort = config.sortOptions.firstOrNull,
-       _filters = config.filters;
+const Duration debounceDuration = Duration(milliseconds: 300);
 
-  final SearchContentsRepository searchContentsRepository;
-  final List<SortOption>? _sortOptions;
+typedef _Debounceable<S, T> = Future<S?> Function(T parameter);
 
-  String _query;
-  SortOption? _currentSort;
-  final List<FilterGroup> _filters;
+_Debounceable<S, T> _debounce<S, T>(_Debounceable<S?, T> function) {
+  _DebounceTimer? debounceTimer;
 
-  List<SortOption>? get sortOptions => _sortOptions;
-  SortOption? get currentSort => _currentSort;
-  List<FilterGroup>? get filters => _filters;
-
-  void setQuery(String query) {
-    _query = query;
-    refreshResults();
-  }
-
-  void onSortChanged(SortOption sortOption) {
-    _currentSort = sortOption;
-    refreshResults();
-  }
-
-  void onFilterChanged(int index, FilterGroup newFilter) {
-    _filters[index] = newFilter;
-    refreshResults();
-  }
-
-  @override
-  Future<Result<Page<T>>> fetchPage(int pageKey) {
-    return search(
-      .new(_query, page: pageKey, sortOption: _currentSort, filters: _filters),
-    );
-  }
-
-  Future<Result<Page<T>>> search(SearchQuery query);
-}
-
-class SearchConfig {
-  const SearchConfig({required this.sortOptions, required this.filters});
-
-  final List<SortOption> sortOptions;
-  final List<FilterGroup> filters;
-}
-
-class AllSearchViewModel<AllSearchItem>
-    extends BaseSearchViewModel<VideoInfoBase> {
-  AllSearchViewModel({
-    required super.query,
-    required super.searchContentsRepository,
-    required super.config,
-  });
-
-  CreatorProfile? creatorProfile;
-  List<VideoInfoBase>? creatorProfileVideos;
-
-  @override
-  Future<Result<Page<VideoInfoBase>>> search(SearchQuery query) async {
-    final result = await searchContentsRepository.searchAll(query);
-
-    if (result case Ok(
-      value: final aggregatePage,
-    ) when aggregatePage.number == 1) {
-      creatorProfile = aggregatePage.creatorProfile;
-      creatorProfileVideos = aggregatePage.creatorProfileVideos;
-      notifyListeners();
+  return (T parameter) async {
+    if (debounceTimer != null && !debounceTimer!.isCompleted) {
+      debounceTimer!.cancel();
     }
+    debounceTimer = _DebounceTimer();
+    try {
+      await debounceTimer!.future;
+    } on _CancelException {
+      return null;
+    }
+    return function(parameter);
+  };
+}
 
-    return result;
+class _DebounceTimer {
+  _DebounceTimer() {
+    _timer = Timer(debounceDuration, _onComplete);
   }
+
+  late final Timer _timer;
+  final Completer<void> _completer = Completer<void>();
+
+  void _onComplete() {
+    _completer.complete();
+  }
+
+  Future<void> get future => _completer.future;
+
+  bool get isCompleted => _completer.isCompleted;
+
+  void cancel() {
+    _timer.cancel();
+    _completer.completeError(const _CancelException());
+  }
+}
+
+class _CancelException implements Exception {
+  const _CancelException();
 }

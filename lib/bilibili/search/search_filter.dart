@@ -8,10 +8,10 @@ enum VideoDurationFilterOption implements FilterOption {
   above60Minutes('above60Minutes');
 
   const VideoDurationFilterOption(this.label);
-  
+
   @override
   final String label;
-  
+
   @override
   String get value => name;
 }
@@ -27,44 +27,26 @@ enum UserType implements FilterOption {
   upMain('upMain'),
   normalUser('normalUser'),
   verifiedUser('verifiedUser');
-  
+
   const UserType(this.label);
-  
+
   @override
   final String label;
-  
+
   @override
-  String get value => index;
+  String get value => '$index';
 }
 
-class BiliVideoDurationFilter implements FilterGroup<VideoDurationFilterOption> {
-  const BiliVideoDurationFilter() : super(
-    label: 'BiliVideoDurationFilter',
-    options: VideoDurationFilterOption.values,
-    allowMultipleSelection: false,
-    selectedOptions : [],
-  );
-  
-  @override
-  DateRangeFilter copyWith({
-    List<DateRangePresetOption>? selectedOptions,
-    ({DateTime start, DateTime end})? customDateRange,
-  }) {
-    return DateRangeFilter(
-      label: label,
-      options: options,
-      allowMultipleSelection: allowMultipleSelection,
-      selectedOptions: selectedOptions ?? this.selectedOptions,
-      customDateRange: customDateRange ?? this.customDateRange,
-    );
-  }
-  
-  @override
-  Map<String, dynamic> toJson() => {
-    
-  }
+class VideoDurationFilter extends SingleFilterGroup {
+  const VideoDurationFilter()
+    : super(
+        key: '',
+        label: '',
+        options: VideoDurationFilterOption.values,
+        selection: VideoDurationFilterOption.allDuration,
+      );
 }
 
-class BiliSearchDateRangeFilter implements DateRangeFilter {
-  
+class BiliDateRangeFilterGroup extends DateRangeFilterGroup {
+  const BiliDateRangeFilterGroup() : super(key: '', label: '');
 }
