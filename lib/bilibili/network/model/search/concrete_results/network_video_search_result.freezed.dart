@@ -50,7 +50,7 @@ $Res call({
 });
 
 
-$HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -95,16 +95,7 @@ as String,danmaku: null == danmaku ? _self.danmaku : danmaku // ignore: cast_nul
 as int,
   ));
 }
-/// Create a copy of NetworkVideoSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 
@@ -178,7 +169,7 @@ $Res call({
 });
 
 
-@override $HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -224,16 +215,7 @@ as int,
   ));
 }
 
-/// Create a copy of NetworkVideoSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 // dart format on

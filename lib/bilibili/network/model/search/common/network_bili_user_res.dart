@@ -26,7 +26,7 @@ abstract class NetworkBiliUserRes with _$NetworkBiliUserRes {
     required int enableVt,
     required String vtDisplay,
   }) = _NetworkBiliUserRes;
-  
-  factory NetworkBiliUserRes.fromJson(Map<String, dynamic> json)
-    => _$NetworkBiliUserResFromJson(json);
+
+  factory NetworkBiliUserRes.fromJson(Map<String, dynamic> json) =>
+      _$NetworkBiliUserResFromJson(json);
 }

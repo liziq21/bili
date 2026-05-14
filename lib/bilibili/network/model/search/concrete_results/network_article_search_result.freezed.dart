@@ -50,7 +50,7 @@ $Res call({
 });
 
 
-$HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -89,16 +89,7 @@ as String,view: null == view ? _self.view : view // ignore: cast_nullable_to_non
 as int,
   ));
 }
-/// Create a copy of NetworkArticleSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 
@@ -172,7 +163,7 @@ $Res call({
 });
 
 
-@override $HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -212,16 +203,7 @@ as int,
   ));
 }
 
-/// Create a copy of NetworkArticleSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 // dart format on

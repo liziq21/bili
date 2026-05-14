@@ -50,7 +50,7 @@ $Res call({
 });
 
 
-$HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -87,16 +87,7 @@ as String,userCover: null == userCover ? _self.userCover : userCover // ignore: 
 as String,
   ));
 }
-/// Create a copy of NetworkLiveRoomSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 
@@ -162,7 +153,7 @@ $Res call({
 });
 
 
-@override $HtmlTitleCopyWith<$Res> get title;
+
 
 }
 /// @nodoc
@@ -200,16 +191,7 @@ as String,
   ));
 }
 
-/// Create a copy of NetworkLiveRoomSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}
+
 }
 
 // dart format on

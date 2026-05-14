@@ -50,7 +50,7 @@ $Res call({
 });
 
 
-$HtmlTitleCopyWith<$Res> get title;$NetworkMediaScoreCopyWith<$Res> get mediaScore;
+$NetworkMediaScoreCopyWith<$Res> get mediaScore;
 
 }
 /// @nodoc
@@ -92,15 +92,6 @@ as String,
   ));
 }
 /// Create a copy of NetworkMediaBangumiSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}/// Create a copy of NetworkMediaBangumiSearchResult
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -179,7 +170,7 @@ $Res call({
 });
 
 
-@override $HtmlTitleCopyWith<$Res> get title;@override $NetworkMediaScoreCopyWith<$Res> get mediaScore;
+@override $NetworkMediaScoreCopyWith<$Res> get mediaScore;
 
 }
 /// @nodoc
@@ -222,15 +213,6 @@ as String,
 }
 
 /// Create a copy of NetworkMediaBangumiSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get title {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.title, (value) {
-    return _then(_self.copyWith(title: value));
-  });
-}/// Create a copy of NetworkMediaBangumiSearchResult
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

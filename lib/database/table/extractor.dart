@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-@DataClassName('RecentSearchQueryEntity')
+@DataClassName('ExtractorEntity')
 class Extractor extends Table {
   TextColumn get name => text()();
   DateTimeColumn get queriedDate => dateTime().withDefault(currentDateAndTime)();

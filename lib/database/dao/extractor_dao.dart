@@ -20,9 +20,8 @@ class ExtractorDao extends DatabaseAccessor<BiliDatabase>
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
     return into(
       extractor,
-    ).insertOnConflictUpdate(ExtractorCompanion(query: Value(searchQuery)));
+    ).insertOnConflictUpdate(ExtractorCompanion(name: Value(searchQuery)));
   }
 
   Future<void> clearRecentSearchQueries() => delete(extractor).go();
 }
-

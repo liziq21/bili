@@ -2,15 +2,8 @@ import 'dart:io';
 import 'package:dio/dio.dart' hide Headers;
 import 'package:retrofit/retrofit.dart';
 
-import '../../../model/data/sort_option.dart';
 import '../../constonts/uris.dart';
-import '../../category.dart';
-import '../../date_range.dart';
 import '../../search_type.dart';
-import '../../search/sort.dart';
-import '../../search/search_filter.dart';
-import '../../user_type.dart';
-import '../../video_duration_filter.dart';
 import '../../../utils/result.dart';
 import '../network_search_data_source.dart';
 import '../model/api_result.dart';
@@ -66,8 +59,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
 
   @override
   Future<Result<NetworkSearchResult>> searchArticle(
-    String keyword,
-    SearchType type, {
+    String keyword, {
     int? page,
     Map<String, String>? parameters,
   }) => _networkApi.typeSearch(

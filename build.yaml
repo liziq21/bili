@@ -10,7 +10,7 @@ targets:
           store_date_time_values_as_text: true
       freezed:
         generate_for:
-          - lib/bili/**.dart
+          - lib/bilibili/**.dart
           - lib/data/model/**.dart
           - lib/model/data/**.dart
           - lib/network/model/**.dart
@@ -48,4 +48,4 @@ targets:
       retrofit_generator:
         generate_for:
           include:
-            - lib/network/retrofit/retrofit_network.dart
+            - lib/bilibili/network/retrofit/retrofit_network.dart

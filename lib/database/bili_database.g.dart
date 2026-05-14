@@ -3,6 +3,225 @@
 part of 'bili_database.dart';
 
 // ignore_for_file: type=lint
+class $ExtractorTable extends Extractor
+    with TableInfo<$ExtractorTable, ExtractorEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExtractorTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _queriedDateMeta = const VerificationMeta(
+    'queriedDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> queriedDate = GeneratedColumn<DateTime>(
+    'queried_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [name, queriedDate];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'extractor';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExtractorEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('queried_date')) {
+      context.handle(
+        _queriedDateMeta,
+        queriedDate.isAcceptableOrUnknown(
+          data['queried_date']!,
+          _queriedDateMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {name};
+  @override
+  ExtractorEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExtractorEntity(
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      queriedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}queried_date'],
+      )!,
+    );
+  }
+
+  @override
+  $ExtractorTable createAlias(String alias) {
+    return $ExtractorTable(attachedDatabase, alias);
+  }
+}
+
+class ExtractorEntity extends DataClass implements Insertable<ExtractorEntity> {
+  final String name;
+  final DateTime queriedDate;
+  const ExtractorEntity({required this.name, required this.queriedDate});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['name'] = Variable<String>(name);
+    map['queried_date'] = Variable<DateTime>(queriedDate);
+    return map;
+  }
+
+  ExtractorCompanion toCompanion(bool nullToAbsent) {
+    return ExtractorCompanion(
+      name: Value(name),
+      queriedDate: Value(queriedDate),
+    );
+  }
+
+  factory ExtractorEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExtractorEntity(
+      name: serializer.fromJson<String>(json['name']),
+      queriedDate: serializer.fromJson<DateTime>(json['queriedDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'name': serializer.toJson<String>(name),
+      'queriedDate': serializer.toJson<DateTime>(queriedDate),
+    };
+  }
+
+  ExtractorEntity copyWith({String? name, DateTime? queriedDate}) =>
+      ExtractorEntity(
+        name: name ?? this.name,
+        queriedDate: queriedDate ?? this.queriedDate,
+      );
+  ExtractorEntity copyWithCompanion(ExtractorCompanion data) {
+    return ExtractorEntity(
+      name: data.name.present ? data.name.value : this.name,
+      queriedDate: data.queriedDate.present
+          ? data.queriedDate.value
+          : this.queriedDate,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtractorEntity(')
+          ..write('name: $name, ')
+          ..write('queriedDate: $queriedDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(name, queriedDate);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExtractorEntity &&
+          other.name == this.name &&
+          other.queriedDate == this.queriedDate);
+}
+
+class ExtractorCompanion extends UpdateCompanion<ExtractorEntity> {
+  final Value<String> name;
+  final Value<DateTime> queriedDate;
+  final Value<int> rowid;
+  const ExtractorCompanion({
+    this.name = const Value.absent(),
+    this.queriedDate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExtractorCompanion.insert({
+    required String name,
+    this.queriedDate = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<ExtractorEntity> custom({
+    Expression<String>? name,
+    Expression<DateTime>? queriedDate,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (name != null) 'name': name,
+      if (queriedDate != null) 'queried_date': queriedDate,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExtractorCompanion copyWith({
+    Value<String>? name,
+    Value<DateTime>? queriedDate,
+    Value<int>? rowid,
+  }) {
+    return ExtractorCompanion(
+      name: name ?? this.name,
+      queriedDate: queriedDate ?? this.queriedDate,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (queriedDate.present) {
+      map['queried_date'] = Variable<DateTime>(queriedDate.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtractorCompanion(')
+          ..write('name: $name, ')
+          ..write('queriedDate: $queriedDate, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $RecentSearchQueryTable extends RecentSearchQuery
     with TableInfo<$RecentSearchQueryTable, RecentSearchQueryEntity> {
   @override
@@ -233,8 +452,10 @@ class RecentSearchQueryCompanion
 abstract class _$BiliDatabase extends GeneratedDatabase {
   _$BiliDatabase(QueryExecutor e) : super(e);
   $BiliDatabaseManager get managers => $BiliDatabaseManager(this);
+  late final $ExtractorTable extractor = $ExtractorTable(this);
   late final $RecentSearchQueryTable recentSearchQuery =
       $RecentSearchQueryTable(this);
+  late final ExtractorDao extractorDao = ExtractorDao(this as BiliDatabase);
   late final RecentSearchQueryDao recentSearchQueryDao = RecentSearchQueryDao(
     this as BiliDatabase,
   );
@@ -242,12 +463,160 @@ abstract class _$BiliDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [recentSearchQuery];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    extractor,
+    recentSearchQuery,
+  ];
   @override
   DriftDatabaseOptions get options =>
       const DriftDatabaseOptions(storeDateTimeAsText: true);
 }
 
+typedef $$ExtractorTableCreateCompanionBuilder =
+    ExtractorCompanion Function({
+      required String name,
+      Value<DateTime> queriedDate,
+      Value<int> rowid,
+    });
+typedef $$ExtractorTableUpdateCompanionBuilder =
+    ExtractorCompanion Function({
+      Value<String> name,
+      Value<DateTime> queriedDate,
+      Value<int> rowid,
+    });
+
+class $$ExtractorTableFilterComposer
+    extends Composer<_$BiliDatabase, $ExtractorTable> {
+  $$ExtractorTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get queriedDate => $composableBuilder(
+    column: $table.queriedDate,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExtractorTableOrderingComposer
+    extends Composer<_$BiliDatabase, $ExtractorTable> {
+  $$ExtractorTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get queriedDate => $composableBuilder(
+    column: $table.queriedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExtractorTableAnnotationComposer
+    extends Composer<_$BiliDatabase, $ExtractorTable> {
+  $$ExtractorTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get queriedDate => $composableBuilder(
+    column: $table.queriedDate,
+    builder: (column) => column,
+  );
+}
+
+class $$ExtractorTableTableManager
+    extends
+        RootTableManager<
+          _$BiliDatabase,
+          $ExtractorTable,
+          ExtractorEntity,
+          $$ExtractorTableFilterComposer,
+          $$ExtractorTableOrderingComposer,
+          $$ExtractorTableAnnotationComposer,
+          $$ExtractorTableCreateCompanionBuilder,
+          $$ExtractorTableUpdateCompanionBuilder,
+          (
+            ExtractorEntity,
+            BaseReferences<_$BiliDatabase, $ExtractorTable, ExtractorEntity>,
+          ),
+          ExtractorEntity,
+          PrefetchHooks Function()
+        > {
+  $$ExtractorTableTableManager(_$BiliDatabase db, $ExtractorTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExtractorTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExtractorTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExtractorTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> name = const Value.absent(),
+                Value<DateTime> queriedDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtractorCompanion(
+                name: name,
+                queriedDate: queriedDate,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String name,
+                Value<DateTime> queriedDate = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtractorCompanion.insert(
+                name: name,
+                queriedDate: queriedDate,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExtractorTableProcessedTableManager =
+    ProcessedTableManager<
+      _$BiliDatabase,
+      $ExtractorTable,
+      ExtractorEntity,
+      $$ExtractorTableFilterComposer,
+      $$ExtractorTableOrderingComposer,
+      $$ExtractorTableAnnotationComposer,
+      $$ExtractorTableCreateCompanionBuilder,
+      $$ExtractorTableUpdateCompanionBuilder,
+      (
+        ExtractorEntity,
+        BaseReferences<_$BiliDatabase, $ExtractorTable, ExtractorEntity>,
+      ),
+      ExtractorEntity,
+      PrefetchHooks Function()
+    >;
 typedef $$RecentSearchQueryTableCreateCompanionBuilder =
     RecentSearchQueryCompanion Function({
       required String query,
@@ -410,6 +779,8 @@ typedef $$RecentSearchQueryTableProcessedTableManager =
 class $BiliDatabaseManager {
   final _$BiliDatabase _db;
   $BiliDatabaseManager(this._db);
+  $$ExtractorTableTableManager get extractor =>
+      $$ExtractorTableTableManager(_db, _db.extractor);
   $$RecentSearchQueryTableTableManager get recentSearchQuery =>
       $$RecentSearchQueryTableTableManager(_db, _db.recentSearchQuery);
 }

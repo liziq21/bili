@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NetworkBiliUserRes {
 
- int get aid; String get bvid; String get title; int get pubdate; String get arcurl; String get pic; String get play; int get dm; int get coin; int get fav; String get desc; String get duration; int get isPay; int get isUnionVideo; int get isChargeVideo; int get vt; int get enableVt; String get vtDisplay;
+ int get aid; String get bvid; String get title; int get pubdate; String get arcurl; String get pic; int get play;//String
+ int get dm; int get coin; int get fav; String get desc; String get duration; int get isPay; int get isUnionVideo; int get isChargeVideo; int get vt; int get enableVt; String get vtDisplay;
 /// Create a copy of NetworkBiliUserRes
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -46,7 +47,7 @@ abstract mixin class $NetworkBiliUserResCopyWith<$Res>  {
   factory $NetworkBiliUserResCopyWith(NetworkBiliUserRes value, $Res Function(NetworkBiliUserRes) _then) = _$NetworkBiliUserResCopyWithImpl;
 @useResult
 $Res call({
- int aid, String bvid, String title, int pubdate, String arcurl, String pic, String play, int dm, int coin, int fav, String desc, String duration, int isPay, int isUnionVideo, int isChargeVideo, int vt, int enableVt, String vtDisplay
+ int aid, String bvid, String title, int pubdate, String arcurl, String pic, int play, int dm, int coin, int fav, String desc, String duration, int isPay, int isUnionVideo, int isChargeVideo, int vt, int enableVt, String vtDisplay
 });
 
 
@@ -72,7 +73,7 @@ as String,pubdate: null == pubdate ? _self.pubdate : pubdate // ignore: cast_nul
 as int,arcurl: null == arcurl ? _self.arcurl : arcurl // ignore: cast_nullable_to_non_nullable
 as String,pic: null == pic ? _self.pic : pic // ignore: cast_nullable_to_non_nullable
 as String,play: null == play ? _self.play : play // ignore: cast_nullable_to_non_nullable
-as String,dm: null == dm ? _self.dm : dm // ignore: cast_nullable_to_non_nullable
+as int,dm: null == dm ? _self.dm : dm // ignore: cast_nullable_to_non_nullable
 as int,coin: null == coin ? _self.coin : coin // ignore: cast_nullable_to_non_nullable
 as int,fav: null == fav ? _self.fav : fav // ignore: cast_nullable_to_non_nullable
 as int,desc: null == desc ? _self.desc : desc // ignore: cast_nullable_to_non_nullable
@@ -104,7 +105,8 @@ class _NetworkBiliUserRes implements NetworkBiliUserRes {
 @override final  int pubdate;
 @override final  String arcurl;
 @override final  String pic;
-@override final  String play;
+@override final  int play;
+//String
 @override final  int dm;
 @override final  int coin;
 @override final  int fav;
@@ -147,7 +149,7 @@ abstract mixin class _$NetworkBiliUserResCopyWith<$Res> implements $NetworkBiliU
   factory _$NetworkBiliUserResCopyWith(_NetworkBiliUserRes value, $Res Function(_NetworkBiliUserRes) _then) = __$NetworkBiliUserResCopyWithImpl;
 @override @useResult
 $Res call({
- int aid, String bvid, String title, int pubdate, String arcurl, String pic, String play, int dm, int coin, int fav, String desc, String duration, int isPay, int isUnionVideo, int isChargeVideo, int vt, int enableVt, String vtDisplay
+ int aid, String bvid, String title, int pubdate, String arcurl, String pic, int play, int dm, int coin, int fav, String desc, String duration, int isPay, int isUnionVideo, int isChargeVideo, int vt, int enableVt, String vtDisplay
 });
 
 
@@ -173,7 +175,7 @@ as String,pubdate: null == pubdate ? _self.pubdate : pubdate // ignore: cast_nul
 as int,arcurl: null == arcurl ? _self.arcurl : arcurl // ignore: cast_nullable_to_non_nullable
 as String,pic: null == pic ? _self.pic : pic // ignore: cast_nullable_to_non_nullable
 as String,play: null == play ? _self.play : play // ignore: cast_nullable_to_non_nullable
-as String,dm: null == dm ? _self.dm : dm // ignore: cast_nullable_to_non_nullable
+as int,dm: null == dm ? _self.dm : dm // ignore: cast_nullable_to_non_nullable
 as int,coin: null == coin ? _self.coin : coin // ignore: cast_nullable_to_non_nullable
 as int,fav: null == fav ? _self.fav : fav // ignore: cast_nullable_to_non_nullable
 as int,desc: null == desc ? _self.desc : desc // ignore: cast_nullable_to_non_nullable

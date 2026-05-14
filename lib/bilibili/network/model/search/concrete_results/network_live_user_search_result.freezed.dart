@@ -50,7 +50,7 @@ $Res call({
 });
 
 
-$HtmlTitleCopyWith<$Res> get uname;
+
 
 }
 /// @nodoc
@@ -83,16 +83,7 @@ as int,uname: null == uname ? _self.uname : uname // ignore: cast_nullable_to_no
 as HtmlTitle,
   ));
 }
-/// Create a copy of NetworkLiveUserSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get uname {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.uname, (value) {
-    return _then(_self.copyWith(uname: value));
-  });
-}
+
 }
 
 
@@ -154,7 +145,7 @@ $Res call({
 });
 
 
-@override $HtmlTitleCopyWith<$Res> get uname;
+
 
 }
 /// @nodoc
@@ -188,16 +179,7 @@ as HtmlTitle,
   ));
 }
 
-/// Create a copy of NetworkLiveUserSearchResult
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$HtmlTitleCopyWith<$Res> get uname {
-  
-  return $HtmlTitleCopyWith<$Res>(_self.uname, (value) {
-    return _then(_self.copyWith(uname: value));
-  });
-}
+
 }
 
 // dart format on
