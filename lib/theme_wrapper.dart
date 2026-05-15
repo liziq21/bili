@@ -8,15 +8,15 @@ typedef ThemeBuilder =
     Widget Function(ThemeData theme, ThemeData darkTheme, ThemeMode themeModel);
 
 class ThemeWrapper extends StatelessWidget {
-  final ThemeBuilder builder;
   const ThemeWrapper({super.key, required this.builder});
+  final ThemeBuilder builder;
 
   @override
   Widget build(BuildContext context) {
     return Selector<AppViewModel, ThemeState>(
-      builder: (_, state, __) => _ThemeCore(state: state, builder: builder),
       selector: (_, vm) =>
           ThemeState(vm.userData.useDynamicColor, vm.userData.themeConfig),
+      builder: (_, state, __) => _ThemeCore(state: state, builder: builder),
     );
   }
 }
@@ -27,11 +27,11 @@ class _ThemeCore extends StatelessWidget {
   final ThemeState state;
   final ThemeBuilder builder;
 
+  static final baseLight = ThemeData.light();
+  static final baseDark = ThemeData.dark();
+
   @override
   Widget build(BuildContext context) {
-    final baseLight = ThemeData.light();
-    final baseDark = ThemeData.dark();
-    // ignore: omit_local_variable_types
     final ThemeMode themeMode = switch (state.themeConfig) {
       .followSystem => .system,
       .light => .light,
@@ -40,19 +40,29 @@ class _ThemeCore extends StatelessWidget {
 
     if (state.useDynamicColor) {
       return DynamicColorBuilder(
-        builder: (lightDynamic, darkDynamic) {
-          final theme = lightDynamic != null
-              ? baseLight.copyWith(colorScheme: lightDynamic)
-              : baseLight;
-          final darkTheme = darkDynamic != null
-              ? baseDark.copyWith(colorScheme: darkDynamic)
-              : baseDark;
-
-          return builder(theme, darkTheme, themeMode);
-        },
+        builder: (lightDynamic, darkDynamic) => _buildWithDynamicColor(
+          lightDynamic: lightDynamic,
+          darkDynamic: darkDynamic,
+          themeMode: themeMode,
+        ),
       );
     }
 
     return builder(baseLight, baseDark, themeMode);
+  }
+
+  Widget _buildWithDynamicColor({
+    required ColorScheme? lightDynamic,
+    required ColorScheme? darkDynamic,
+    required ThemeMode themeMode,
+  }) {
+    final theme = lightDynamic != null
+        ? baseLight.copyWith(colorScheme: lightDynamic)
+        : baseLight;
+    final darkTheme = darkDynamic != null
+        ? baseDark.copyWith(colorScheme: darkDynamic)
+        : baseDark;
+
+    return builder(theme, darkTheme, themeMode);
   }
 }

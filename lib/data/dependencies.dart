@@ -41,7 +41,7 @@ List<SingleChildWidget> get repositoryProviders => [
   ProxyProvider<ServiceSource, SearchContentsRepository?>(
     update: (context, serviceSource, _) {
       return switch (serviceSource) {
-        .bilibili => BilibiliSearchContentsRepository(network: context.read()),
+        .bilibili => BilibiliVideoSearchRepository(network: context.read()),
         .youtube => null,
       };
     },

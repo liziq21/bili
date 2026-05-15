@@ -26,6 +26,7 @@ class SearchQuery {
 }
 
 abstract class SearchContentsRepository<T> {
+  const SearchContentsRepository();
   List<SortOption>? get sortOptions => null;
   List<FilterGroup>? get filters => null;
   Future<Result<Page<T>>> search(SearchQuery searchQuery);

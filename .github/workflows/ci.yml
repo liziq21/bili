@@ -13,9 +13,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pubspec:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - id: pubspec
+      name: Generate matrix from pubspec.yaml
+      uses: flutter-actions/pubspec-matrix-action@v1
+      with:
+        pubspec: 'pubspec.yaml'
+    outputs:
+      matrix: ${{ steps.pubspec.outputs.matrix }}
+
   flutter_test:
     name: Run Flutter Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     permissions:
       contents: write # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -23,21 +38,15 @@ jobs:
     timeout-minutes: 60
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
       
-      - name: Install Dart and Flutter
-        uses: subosito/flutter-action@v2
+      - uses: flutter-actions/setup-flutter@v2
         with:
-          cache: true
+          version: ${{ matrix.release.flutter }}
           channel: stable
-          flutter-version-file: pubspec.yaml
-      - run: flutter clean
-      
-      - name: Install dependencies
-        run: flutter pub get
+          cache: true
+
+      - run: flutter pub get
 
       - name: Run build_runner
         run: flutter pub run build_runner build \
@@ -72,13 +81,47 @@ jobs:
       #- name: Run test
        # run: flutter test
 
+
+  build_androidApp:
+    name: Build Flutter App (android)
+    needs: [flutter_test]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@v6
+      
+      - uses: flutter-actions/setup-flutter@v2
+        with:
+          version: ${{ matrix.release.flutter }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Run build_runner
+        run: flutter pub run build_runner build \
+          --delete-conflicting-outputs \
+          --verbose
+
+      - run: flutter build apk --split-per-abi
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-arm64-v8a-release.apk
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+
   build_iOSApp:
     name: Build Flutter App (iOS)
     needs: [flutter_test]
-    runs-on: macos-latest
+    runs-on: macos-26
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -115,7 +158,7 @@ jobs:
           name: ios-build
           path: Payload.ipa
           
-      - name: Upload IPA to catbox
+      - name: IPA to catbox
         env:
            BARK_KEY: ${{ secrets.BARK_KEY }}
         id: upload-ipa-to-catbox

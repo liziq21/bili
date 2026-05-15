@@ -24,7 +24,7 @@ extension NetworkBiliUserResX on NetworkBiliUserRes {
     bvid: bvid,
     title: title,
     picUrl: 'https:$pic',
-    play: play,
+    play: '$play',
     pubdate: pubdate,
     duration: duration,
     desc: desc,
