@@ -22,25 +22,5 @@
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
     </style>
 
-    <style name="Ucrop.CropTheme" parent="@android:style/Theme.Light.NoTitleBar"/>
-
-    <!-- Allows us to override night specific attributes in the
-         values-night folder. -->
-    <!--style name="NightAdjusted.Theme.App" parent="android:Theme.Material.Light.NoActionBar" /-->
-
-    <!-- The final theme we use -->
-    <!--style name="Theme.App" parent="NightAdjusted.Theme.App">
-        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
-    </style>
-
-    <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
-        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
-    </style>
-
-    <style name="Theme.App.Splash" parent="NightAdjusted.Theme.Splash">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
-        <item name="postSplashScreenTheme">@style/Theme.App</item>
-    </style-->
-
+    <style name="Ucrop.CropTheme" parent="Theme.AppCompat.Light.NoActionBar"/>
 </resources>
