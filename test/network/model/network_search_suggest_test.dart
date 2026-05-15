@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:f_biuli/network/model/api_result.dart';
-import 'package:f_biuli/network/model/search_suggest/network_search_suggest.dart';
+import 'package:f_biuli/bilibili/network/model/search_suggest/network_search_suggest.dart';
 
 import '../../../testing/network/model/api_result.dart';
 

@@ -54,3 +54,5 @@ dart_code_linter:
     - test/**
   extends:
     - package:dart_code_linter/presets/recommended.yaml
+  rules:
+    - newline-before-return: false

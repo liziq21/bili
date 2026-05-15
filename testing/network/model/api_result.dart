@@ -3,10 +3,9 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:f_biuli/network/model/api_result.dart';
+import 'package:f_biuli/bilibili/network/model/api_result.dart';
 
 extension ApiResultCast<T> on ApiResult<T> {
-  
   ApiResultOk<T> get asOk => this as ApiResultOk<T>;
 
   ApiResultError get asError => this as ApiResultError<T>;
@@ -23,13 +22,11 @@ class ApiResultUtils {
   }
 }
 
-
-Future<Map<String, dynamic>> getJsonData(String dirPath, String fileName) async {
-  final String fullPath = path.join(
-    Directory.current.path,
-    dirPath,
-    fileName,
-  );
+Future<Map<String, dynamic>> getJsonData(
+  String dirPath,
+  String fileName,
+) async {
+  final String fullPath = path.join(Directory.current.path, dirPath, fileName);
 
   final File jsonFile = File(fullPath);
 
@@ -39,7 +36,8 @@ Future<Map<String, dynamic>> getJsonData(String dirPath, String fileName) async 
     }
 
     final String jsonString = await jsonFile.readAsString();
-    final Map<String, dynamic> jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
+    final Map<String, dynamic> jsonData =
+        jsonDecode(jsonString) as Map<String, dynamic>;
 
     return jsonData;
   } on PathNotFoundException {
@@ -49,8 +47,13 @@ Future<Map<String, dynamic>> getJsonData(String dirPath, String fileName) async 
   } on FormatException catch (e) {
     throw Exception('Invalid JSON format in file $fullPath: ${e.message}');
   } on TypeError catch (e) {
-    throw Exception('JSON root is not a Map<String, dynamic> in file $fullPath: ${e.toString()}');
+    throw Exception(
+      'JSON root is not a Map<String, dynamic> in file $fullPath: ${e.toString()}',
+    );
   } catch (e) {
-    throw Exception('An unexpected error occurred while loading JSON from $fullPath: $e');
+    throw Exception(
+      'An unexpected error occurred while loading JSON from $fullPath: $e',
+    );
   }
 }
+

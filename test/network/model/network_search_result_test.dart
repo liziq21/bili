@@ -1,11 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:f_biuli/network/model/api_result.dart';
-import 'package:f_biuli/network/model/search/network_search_result.dart';
+import 'package:f_biuli/bilibili/network/model/search/network_search_result.dart';
 
 import '../../../testing/network/model/api_result.dart';
 
 void main() {
-  
   Future<NetworkSearchResult> _loadAndDeserialize(String fileName) async {
     final result = await ApiResultUtils.fromFile<NetworkSearchResult>(
       fileDir: 'testing/network/fakes/search',
