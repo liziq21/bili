@@ -1,4 +1,4 @@
-package com.example.ipa_testing_github_action
+package com.example.bili
 
 import android.app.PendingIntent
 import android.app.PictureInPictureParams
