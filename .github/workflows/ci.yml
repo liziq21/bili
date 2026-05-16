@@ -106,14 +106,17 @@ jobs:
           version: ${{ matrix.release.flutter }}
           channel: stable
           cache: true
-
-      - run: flutter pub get
+      
+      - name: Repair and Get Packages
+        run: |
+          flutter create . --platforms=android
+          flutter pub get
 
       - name: Run build_runner
         run: flutter pub run build_runner build \
           --delete-conflicting-outputs \
           --verbose
-
+      
       - run: flutter build apk --release --split-per-abi --pub
 
       - name: Upload APK as artifact
