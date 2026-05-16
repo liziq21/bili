@@ -87,6 +87,7 @@ jobs:
     name: Build Flutter App (android)
     needs: [pubspec, flutter_test]
     runs-on: ubuntu-latest
+    permissions: write-all
     strategy:
       matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     steps:
