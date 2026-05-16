@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.ipa_testing_github_action"
+    namespace = "com.example.bili"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -18,12 +18,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     defaultConfig {
-        applicationId = "com.example.ipa_testing_github_action"
+        applicationId = "com.example.bili"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -53,12 +55,20 @@ android {
         all {
             signingConfig = config ?: signingConfigs["debug"]
         }
-//        release {
+        release {
+            if (project.hasProperty("dev")) {
+                applicationIdSuffix = ".dev"
+                resValue(
+                    type = "string",
+                    name = "app_name",
+                    value = "Bili dev",
+                )
+            }
 //            proguardFiles(
 //                getDefaultProguardFile("proguard-android-optimize.txt"),
 //                "proguard-rules.pro"
 //            )
-//        }
+        }
         debug {
             applicationIdSuffix = ".debug"
         }
