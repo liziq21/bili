@@ -1,0 +1,21 @@
+import 'dart:async';
+
+import 'package:model/model.dart';
+import 'package:bpi/bpi.dart';
+import 'package:data/data.dart';
+
+class BilibiliSearchSuggestRepository implements SearchSuggestRepository {
+  const BilibiliSearchSuggestRepository({
+    required NetworkSearchDataSource network,
+  }) : _network = network;
+
+  final NetworkSearchDataSource _network;
+
+  @override
+  Future<Result<List<String>>> getSuggests(String query) {
+    return _network
+        .getSuggests(query)
+        .then((value) => value.tag.map((e) => e.term).toList())
+        .toResult();
+  }
+}

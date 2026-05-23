@@ -1,0 +1,37 @@
+name: app
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: 3.41.9
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # path: ^1.9.0
+  data: ^1.0.0
+  model: ^1.0.0
+  database: ^1.0.0
+  datastore: ^1.0.0
+  logging:  ^1.3.0
+  flutter_debug_overlay: ^0.1.10
+  provider: ^6.1.5+1
+  dynamic_color: ^0.0.1
+  go_router: ^17.2.3
+  intl: ^0.20.2
+  infinite_scroll_pagination: ^5.1.1
+  window_size: ^0.1.0
+  cached_network_image: ^3.4.1
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

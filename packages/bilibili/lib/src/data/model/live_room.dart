@@ -1,0 +1,14 @@
+import 'package:bpi/bpi.dart';
+import 'package:data/data.dart';
+
+extension NetworkLiveRoomSearchResultX on NetworkLiveRoomSearchResult {
+  LiveRoom asModel() => LiveRoom(
+    id: roomid,
+    title: title.parsedTitle(),
+    coverUrl: 'https:$cover',
+    isLive: liveStatus == 1,
+    cateName: cateName,
+    uid: uid,
+    uname: uname,
+  );
+}

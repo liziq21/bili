@@ -1,0 +1,33 @@
+global_options:
+
+targets:
+  $default:
+    builders:
+      freezed:
+        generate_for:
+          - lib/src/model/**.dart
+        options:
+          copyWith: false
+          #equal: false
+          map: false
+          to_json: false
+          # to_string: false
+          when:
+            when: false
+            maybe_when: false
+            when_or_null: false
+      
+      json_serializable:
+        generate_for:
+          include:
+            - lib/src/**.dart
+          exclude:
+            - lib/src/**.g.dart
+            - lib/src/**.freezed.dart
+            - lib/src/**.config.dart
+        options:
+          create_to_json: false
+          checked: true
+          # 序列化嵌套的 Freezed 对象
+          # explicit_to_json: true
+

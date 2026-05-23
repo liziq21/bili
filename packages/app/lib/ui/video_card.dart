@@ -1,0 +1,84 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+//import 'package:google_fonts/google_fonts.dart';
+import 'package:data/data.dart';
+import '../utils/image_error_listener.dart';
+
+class VideoCard extends StatelessWidget {
+  const VideoCard({super.key, required this.videoInfoBase, this.onTap});
+
+  final GestureTapCallback? onTap;
+
+  final VideoInfoBase videoInfoBase;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: .expand,
+      children: [
+        ClipRRect(
+          borderRadius: .circular(4.0),
+          child: Stack(
+            alignment: .bottomRight,
+            children: [
+              /*FittedBox(
+                  alignment: .center,
+                  fit: BoxFit.cover,
+                  child: */
+              CachedNetworkImage(
+                imageUrl: videoInfoBase.picUrl,
+                alignment: .center,
+                fit: .cover,
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorListener: imageErrorListener,
+              ),
+              //),
+              Positioned(
+                bottom: 8.0,
+                right: 8.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6.0,
+                    vertical: 2.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: .circular(4.0),
+                  ),
+                  child: Text(
+                    videoInfoBase.duration,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.0,
+                      fontWeight: .bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          left: 6.0,
+          top: 6.0,
+          bottom: 6.0,
+          child: Column(
+            mainAxisSize: .min,
+            crossAxisAlignment: .start,
+            children: [
+              Text(videoInfoBase.title),
+              const Spacer(),
+              Text('${videoInfoBase.play} views • ${videoInfoBase.pubdate}'),
+            ],
+          ),
+        ),
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(onTap: onTap),
+          ),
+        ),
+      ],
+    );
+  }
+}
