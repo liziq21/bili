@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 part 'network_bili_user_res.freezed.dart';
 part 'network_bili_user_res.g.dart';
 

@@ -6,7 +6,7 @@ import 'package:model/model.dart';
 
 import '../model/search_results.dart';
 
-class BilibiliAggregateSearchRepository extends VideoSearchRepository {
+class BilibiliAggregateSearchRepository implements VideoSearchRepository {
   const BilibiliAggregateSearchRepository({
     required NetworkSearchDataSource network,
   }) : _network = network;
@@ -20,9 +20,15 @@ class BilibiliAggregateSearchRepository extends VideoSearchRepository {
         .then((it) => it.asModel())
         .toResult();
   }
+
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliUserSearchRepository extends CreatorProfileSearchRepository {
+class BilibiliUserSearchRepository implements CreatorProfileSearchRepository {
   const BilibiliUserSearchRepository({required NetworkSearchDataSource network})
     : _network = network;
 
@@ -34,9 +40,15 @@ class BilibiliUserSearchRepository extends CreatorProfileSearchRepository {
         .then((it) => it.asPagedCreatorProfile())
         .toResult();
   }
+
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliLiveRoomSearchRepository extends LiveRoomSearchRepository {
+class BilibiliLiveRoomSearchRepository implements LiveRoomSearchRepository {
   const BilibiliLiveRoomSearchRepository({
     required NetworkSearchDataSource network,
   }) : _network = network;
@@ -50,9 +62,15 @@ class BilibiliLiveRoomSearchRepository extends LiveRoomSearchRepository {
         .then((it) => it.asPagedLiveRooms())
         .toResult();
   }
+
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliVideoSearchRepository extends VideoSearchRepository {
+class BilibiliVideoSearchRepository implements VideoSearchRepository {
   const BilibiliVideoSearchRepository({
     required NetworkSearchDataSource network,
   }) : _network = network;
@@ -68,8 +86,8 @@ class BilibiliVideoSearchRepository extends VideoSearchRepository {
   }
 
   @override
-  List<FilterGroup>? get filters => [];
+  List<FilterGroup> get filters => const [];
 
   @override
-  List<SortOption>? get sortOptions => [];
+  List<SortOption> get sortOptions => const [];
 }

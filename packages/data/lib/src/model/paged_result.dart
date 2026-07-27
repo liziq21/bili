@@ -1,4 +1,4 @@
-import '../utils/result.dart';
+import 'package:model/model.dart';
 
 typedef PagedResult<T> = Result<Page<T>>;
 

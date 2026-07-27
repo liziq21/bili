@@ -27,7 +27,7 @@ class PreferencesDataSource {
     }
   }
 
-  Future<Result<T>> set<T>(PreferencesKey<T> key, T value) async {
+  Future<Result<T?>> set<T>(PreferencesKey<T> key, T? value) async {
     try {
       await switch (value) {
         final String v => _pref.setString(key.name, v),
@@ -35,6 +35,7 @@ class PreferencesDataSource {
         final int v => _pref.setInt(key.name, v),
         final double v => _pref.setDouble(key.name, v),
         final List<String> v => _pref.setStringList(key.name, v),
+        null => _pref.remove(key.name),
         _ => throw Exception('Unsupported type: ${value.runtimeType}'),
       };
 

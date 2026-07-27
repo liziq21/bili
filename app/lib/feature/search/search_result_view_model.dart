@@ -50,19 +50,19 @@ class SearchResultViewModel<T> extends ChangeNotifier with PagingMixin<T> {
     required this.searchContentsRepository,
     required SearchConfig config,
   }) : _query = query,
-       _sortOptions = config.sortOptions,
+       _sortOptions = searchContentsRepository.sortOptions,
        _currentSort = config.sortOptions.firstOrNull,
-       _filters = config.filters;
+       _filters = searchContentsRepository.filters;
   final SearchContentsRepository<T> searchContentsRepository;
-  final List<SortOption>? _sortOptions;
+  final List<SortOption> _sortOptions;
 
   String _query;
   SortOption? _currentSort;
   final List<FilterGroup> _filters;
 
-  List<SortOption>? get sortOptions => _sortOptions;
+  List<SortOption> get sortOptions => _sortOptions;
   SortOption? get currentSort => _currentSort;
-  List<FilterGroup>? get filters => _filters;
+  List<FilterGroup> get filters => _filters;
 
   void setQuery(String query) {
     _query = query;

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 // import 'package:collection/collection.dart';
+import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -76,7 +77,10 @@ Future<void> main() async {
       providers: providers,
       child: Builder(
         builder: (context) {
-          return App(viewModel: context.read());
+          return MultiProvider(
+            providers: bilibiliProviders,
+            child: App(viewModel: context.read()),
+          );
         },
       ),
     ),

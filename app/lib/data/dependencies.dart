@@ -1,23 +1,12 @@
-/*import 'package:provider/provider.dart';
+import 'package:data/data.dart';
+import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-import '../../lib/bilibili/dependencies.dart';
-import '../../lib/bilibili/data/repository/bilibili_search_contents_repository.dart';
-import '../../lib/bilibili/data/repository/bilibili_search_suggest_repository.dart';
-import '../../lib/database/dependencies.dart';
-import '../../lib/datastore/dependencies.dart';
-import 'model/user_data.dart';
 import 'repository/recent_search_query/default_recent_search_query_repository.dart';
-import 'repository/recent_search_query/recent_search_query_repository.dart';
-import 'repository/search_contents/search_contents_repository.dart';
-import 'repository/search_suggest/search_suggest_repository.dart';
 import 'repository/user_data/default_user_data_repository.dart';
-import 'repository/user_data/user_data_repository.dart';
 
 List<SingleChildWidget> get repositoryProviders => [
-  ...databaseProviders,
-  ...datastoreProviders,
-
+  Provider<VideoSearchRepository?>(create: (context) => context.read()),
   Provider<UserDataRepository>(
     create: (context) =>
         DefaultUserDataRepository(preferencesDataSource: context.read()),
@@ -29,7 +18,7 @@ List<SingleChildWidget> get repositoryProviders => [
   ),
 
   // https://github.com/rrousselGit/provider/blob/master/packages/provider/lib/src/async_provider.dart
-  StreamProvider<ServiceSource>(
+  /*StreamProvider<ServiceSource>(
     create: (context) => context
         .read<UserDataRepository>()
         .data
@@ -52,6 +41,5 @@ List<SingleChildWidget> get repositoryProviders => [
         .youtube => null,
       };
     },
-  ),
+  ),*/
 ];
-*/

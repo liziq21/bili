@@ -12,7 +12,7 @@ part of 'live_room.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$LiveRoom implements DiagnosticableTreeMixin {
+mixin _$LiveRoom {
 
  int get id; String get title; String get coverUrl; bool get isLive; String get cateName; int get uid; String get uname;
 /// Create a copy of LiveRoom
@@ -22,12 +22,6 @@ mixin _$LiveRoom implements DiagnosticableTreeMixin {
 $LiveRoomCopyWith<LiveRoom> get copyWith => _$LiveRoomCopyWithImpl<LiveRoom>(this as LiveRoom, _$identity);
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'LiveRoom'))
-    ..add(DiagnosticsProperty('id', id))..add(DiagnosticsProperty('title', title))..add(DiagnosticsProperty('coverUrl', coverUrl))..add(DiagnosticsProperty('isLive', isLive))..add(DiagnosticsProperty('cateName', cateName))..add(DiagnosticsProperty('uid', uid))..add(DiagnosticsProperty('uname', uname));
-}
 
 @override
 bool operator ==(Object other) {
@@ -39,7 +33,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,id,title,coverUrl,isLive,cateName,uid,uname);
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'LiveRoom(id: $id, title: $title, coverUrl: $coverUrl, isLive: $isLive, cateName: $cateName, uid: $uid, uname: $uname)';
 }
 
@@ -88,7 +82,7 @@ as String,
 /// @nodoc
 
 
-class _LiveRoom with DiagnosticableTreeMixin implements LiveRoom {
+class _LiveRoom implements LiveRoom {
   const _LiveRoom({required this.id, required this.title, required this.coverUrl, required this.isLive, required this.cateName, required this.uid, required this.uname});
   
 
@@ -107,12 +101,6 @@ class _LiveRoom with DiagnosticableTreeMixin implements LiveRoom {
 _$LiveRoomCopyWith<_LiveRoom> get copyWith => __$LiveRoomCopyWithImpl<_LiveRoom>(this, _$identity);
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'LiveRoom'))
-    ..add(DiagnosticsProperty('id', id))..add(DiagnosticsProperty('title', title))..add(DiagnosticsProperty('coverUrl', coverUrl))..add(DiagnosticsProperty('isLive', isLive))..add(DiagnosticsProperty('cateName', cateName))..add(DiagnosticsProperty('uid', uid))..add(DiagnosticsProperty('uname', uname));
-}
 
 @override
 bool operator ==(Object other) {
@@ -124,7 +112,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,id,title,coverUrl,isLive,cateName,uid,uname);
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'LiveRoom(id: $id, title: $title, coverUrl: $coverUrl, isLive: $isLive, cateName: $cateName, uid: $uid, uname: $uname)';
 }
 

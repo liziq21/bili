@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../utils/result.dart';
+import 'package:model/model.dart';
 import '../model/filter_group.dart';
 import '../model/sort_option.dart';
 import '../model/creator_profile.dart';
@@ -25,10 +25,11 @@ class SearchQuery {
   final Map<String, String> parameters;
 }
 
-abstract class SearchContentsRepository<T> {
-  const SearchContentsRepository();
-  List<SortOption>? get sortOptions => null;
-  List<FilterGroup>? get filters => null;
+abstract interface class SearchContentsRepository<T> {
+  //const SearchContentsRepository();
+  List<SortOption> get sortOptions;
+  List<FilterGroup> get filters;
+
   Future<Result<Page<T>>> search(SearchQuery searchQuery);
 }
 
@@ -36,4 +37,4 @@ typedef VideoSearchRepository = SearchContentsRepository<VideoInfoBase>;
 typedef CreatorProfileSearchRepository =
     SearchContentsRepository<CreatorProfile>;
 typedef LiveRoomSearchRepository = SearchContentsRepository<LiveRoom>;
-typedef AggregateSearchRepository = VideoSearchRepository;
+typedef AggregateSearchRepository = VideoSearchRepository; // 或者是特定的聚合 Model

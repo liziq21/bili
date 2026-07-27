@@ -6,8 +6,6 @@ formatter:
   #trailing_commas: preserve
 
 analyzer:
-  enable-experiment:
-    - dot-shorthands
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false
