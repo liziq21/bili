@@ -1,64 +1,24 @@
 import 'package:flutter/material.dart' hide Page;
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:logging/logging.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
+import 'paging_mixin.dart';
 
-mixin PagingMixin<T> on ChangeNotifier {
-  final _log = Logger('PagingMixin');
-  late final pagingController = _initController();
-  int _totalPages = 1;
-
-  Future<Result<Page<T>>> fetchPage(int pageKey);
-
-  PagingController<int, T> _initController() {
-    return PagingController<int, T>(
-      getNextPageKey: (state) =>
-          state.nextIntPageKey > _totalPages ? null : state.nextIntPageKey,
-      fetchPage: (key) async {
-        final result = await fetchPage(key);
-        switch (result) {
-          case Ok(:final value):
-            _totalPages = value.totalPages;
-            return value.data;
-          case Error(:final error):
-            _log.warning('$error');
-            throw error;
-        }
-      },
-    );
-  }
-
-  void refreshResults() {
-    pagingController.refresh();
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    pagingController.dispose();
-    super.dispose();
-  }
-}
 typedef SearchApi<T> = Future<Result<Page<T>>> Function(SearchQuery query);
 
 enum SearchType { all, video, creatorProfile, liveRoom }
 
-class SearchResultViewModel<T> extends ChangeNotifier with PagingMixin<T> {
-  SearchResultViewModel({
-    required String query,
-    required this.searchContentsRepository,
-    required SearchConfig config,
-  }) : _query = query,
-       _sortOptions = searchContentsRepository.sortOptions,
-       _currentSort = config.sortOptions.firstOrNull,
-       _filters = searchContentsRepository.filters;
-  final SearchContentsRepository<T> searchContentsRepository;
+class SearchResultViewModel<T>({
+  required this._query,
+  required final SearchContentsRepository<T> searchContentsRepository,
+}) extends ChangeNotifier with PagingMixin<T> {
+  this : _sortOptions = searchContentsRepository.sortOptions,
+         _filters = searchContentsRepository.filters;
+  
   final List<SortOption> _sortOptions;
+  final List<FilterGroup> _filters;
 
   String _query;
   SortOption? _currentSort;
-  final List<FilterGroup> _filters;
 
   List<SortOption> get sortOptions => _sortOptions;
   SortOption? get currentSort => _currentSort;
@@ -66,54 +26,54 @@ class SearchResultViewModel<T> extends ChangeNotifier with PagingMixin<T> {
 
   void setQuery(String query) {
     _query = query;
-    refreshResults();
+    notifyListeners();
   }
 
   void onSortChanged(SortOption sortOption) {
     _currentSort = sortOption;
-    refreshResults();
+    notifyListeners();
   }
 
   void onFilterChanged(int index, FilterGroup newFilter) {
     _filters[index] = newFilter;
-    refreshResults();
+    notifyListeners();
   }
 
   @override
   Future<Result<Page<T>>> fetchPage(int pageKey) {
-    return search(
-      .new(_query, page: pageKey, sortOption: _currentSort, filters: _filters),
+    final query = SearchQuery(
+      _query,
+      page: pageKey,
+      sortOption: _currentSort,
+      filters: _filters,
     );
+    return searchContentsRepository.search(query);
   }
-
-  Future<Result<Page<T>>> search(SearchQuery query) =>
-      searchContentsRepository.search(query);
 }
 
-class SearchConfig {
-  const SearchConfig({
-    required this.type,
-    required this.sortOptions,
-    required this.filters,
-  });
-
-  final List<SortOption> sortOptions;
-  final List<FilterGroup> filters;
-  final SearchType type;
-}
+class SearchConfig({
+  required final List<SortOption> sortOptions,
+  required final List<FilterGroup> filters,
+  required final SearchType type,
+});
 
 class AllSearchResultViewModel extends SearchResultViewModel<VideoInfoBase> {
   AllSearchResultViewModel({
     required super.query,
     required super.searchContentsRepository,
-    required super.config,
   });
 
   CreatorProfile? creatorProfile;
   List<VideoInfoBase>? creatorProfileVideos;
 
   @override
-  Future<Result<Page<VideoInfoBase>>> search(SearchQuery query) async {
+  Future<Result<Page<VideoInfoBase>>> fetchPage(int pageKey) async {
+    final query = SearchQuery(
+      _query,
+      page: pageKey,
+      sortOption: _currentSort,
+      filters: _filters,
+    );
     final result = await searchContentsRepository.search(query);
 
     if (result case Ok(

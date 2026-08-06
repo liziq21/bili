@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:model/model.dart';
 
 class PreferencesDataSource {
-  PreferencesDataSource({required SharedPreferencesAsync sharedPreferences})
-    : _pref = sharedPreferences {
+  PreferencesDataSource({SharedPreferencesAsync? sharedPreferences})
+    : _pref = sharedPreferences ?? .new() {
     _controller = .broadcast(onListen: _readAndEmitData);
   }
 

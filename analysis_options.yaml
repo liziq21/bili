@@ -6,6 +6,9 @@ formatter:
   #trailing_commas: preserve
 
 analyzer:
+  enable-experiment:
+    - primary-constructors
+
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false
@@ -22,7 +25,7 @@ analyzer:
   exclude:
   plugins:
     #- custom_lint
-    - dart_code_linter
+    #- dart_code_linter
 
 linter:
   rules:

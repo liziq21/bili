@@ -13,26 +13,19 @@ class VideoSearchResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PagingListener(
-        controller: viewModel.pagingController,
-        builder: (context, state, fetchNextPage) => RefreshIndicator(
-          onRefresh: () =>
-              Future.sync(() => viewModel.pagingController.refresh()),
-          child: CustomScrollView(
-            slivers: [
-              PagedSliverList<int, VideoInfoBase>(
-                state: state,
-                fetchNextPage: fetchNextPage,
-                builderDelegate: PagedChildBuilderDelegate(
-                  itemBuilder: (_, videoInfoBase, _) => VideoCard(
-                    videoInfoBase: videoInfoBase,
-                    //onTap,
-                  ),
-                ),
+      body: CustomScrollView(
+        slivers: [
+          PagedSliverList<int, VideoInfoBase>(
+            state: viewModel.state,
+            fetchNextPage: viewModel.fetchNextPage,
+            builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (_, videoInfoBase, _) => VideoCard(
+                videoInfoBase: videoInfoBase,
+                //onTap,
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

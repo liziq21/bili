@@ -106,6 +106,18 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get navHome;
 
+  /// No description provided for @searchResultTypeAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'All'**
+  String get searchResultTypeAll;
+
+  /// No description provided for @searchResultTypeVideo.
+  ///
+  /// In zh, this message translates to:
+  /// **'Video'**
+  String get searchResultTypeVideo;
+
   /// Bottom navigation - Library tab
   ///
   /// In zh, this message translates to:

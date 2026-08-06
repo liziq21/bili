@@ -15,6 +15,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
+  String get searchResultTypeAll => 'All';
+
+  @override
+  String get searchResultTypeVideo => 'Video';
+
+  @override
   String get navLibrary => 'Library';
 
   @override

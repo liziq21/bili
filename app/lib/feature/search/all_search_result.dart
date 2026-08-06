@@ -13,37 +13,30 @@ class AllSearchResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PagingListener(
-        controller: viewModel.pagingController,
-        builder: (context, state, fetchNextPage) => RefreshIndicator(
-          onRefresh: () =>
-              Future.sync(() => viewModel.pagingController.refresh()),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: ListenableBuilder(
-                  listenable: viewModel,
-                  builder: (_, _) {
-                    final creatorProfile = viewModel.creatorProfile;
-                    return creatorProfile != null
-                        ? Text(creatorProfile.name)
-                        : const SizedBox.shrink();
-                  },
-                ),
-              ),
-              PagedSliverList<int, VideoInfoBase>(
-                state: state,
-                fetchNextPage: fetchNextPage,
-                builderDelegate: PagedChildBuilderDelegate(
-                  itemBuilder: (_, videoInfoBase, _) => VideoCard(
-                    videoInfoBase: videoInfoBase,
-                    //onTap,
-                  ),
-                ),
-              ),
-            ],
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: ListenableBuilder(
+              listenable: viewModel,
+              builder: (_, _) {
+                final creatorProfile = viewModel.creatorProfile;
+                return creatorProfile != null
+                    ? Text(creatorProfile.name)
+                    : const SizedBox.shrink();
+              },
+            ),
           ),
-        ),
+          PagedSliverList<int, VideoInfoBase>(
+            state: viewModel.state,
+            fetchNextPage: viewModel.fetchNextPage,
+            builderDelegate: PagedChildBuilderDelegate(
+              itemBuilder: (_, videoInfoBase, _) => VideoCard(
+                videoInfoBase: videoInfoBase,
+                //onTap,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

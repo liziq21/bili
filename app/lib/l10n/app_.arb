@@ -9,6 +9,8 @@
   "@navHome": {
     "description": "Bottom navigation - Home tab"
   },
+  "searchResultTypeAll": "All",
+  "searchResultTypeVideo": "Video",
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"
