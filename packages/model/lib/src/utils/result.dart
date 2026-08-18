@@ -1,21 +1,16 @@
-sealed class Result<T> {
-  const Result();
-
-  const factory Result.ok(T value) = Ok._;
-  const factory Result.error(Exception error) = Error._;
+final class const Error<T>._(final Exception error) extends Result<T> {
+  @override
+  String toString() => 'Result<$T>.error($error)';
 }
 
-extension ResultX<T> on Result<T> {
-  Result<R> map<R>(R Function(T) transform) {
-    return switch (this) {
-      Ok(:final value) => .ok(transform(value)),
-      Error(:final error) => .error(error),
-    };
-  }
+final class const Ok<T>._(final T value) extends Result<T> {
+  @override
+  String toString() => 'Result<$T>.ok($value)';
+}
 
-  bool get isOk => this is Ok<T>;
-
-  bool get isError => this is Error<T>;
+sealed class const Result<T>() {
+  const factory Result.error(Exception error) = Error._;
+  const factory Result.ok(T value) = Ok._;
 }
 
 extension ResultFutureX<T> on Future<T> {
@@ -29,21 +24,15 @@ extension ResultFutureX<T> on Future<T> {
   }
 }
 
-final class Ok<T> extends Result<T> {
-  const Ok._(this.value);
+extension ResultX<T> on Result<T> {
+  bool get isError => this is Error<T>;
 
-  final T value;
+  bool get isOk => this is Ok<T>;
 
-  @override
-  String toString() => 'Result<$T>.ok($value)';
+  Result<R> map<R>(R Function(T) transform) {
+    return switch (this) {
+      Ok(:final value) => .ok(transform(value)),
+      Error(:final error) => .error(error),
+    };
+  }
 }
-
-final class Error<T> extends Result<T> {
-  const Error._(this.error);
-
-  final Exception error;
-
-  @override
-  String toString() => 'Result<$T>.error($error)';
-}
-

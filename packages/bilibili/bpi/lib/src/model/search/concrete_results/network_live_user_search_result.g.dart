@@ -6,13 +6,13 @@ part of 'network_live_user_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkLiveUserSearchResult _$NetworkLiveUserSearchResultFromJson(
+NetworkLiveUserSearchResult _$NetworkLiveUserSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkLiveUserSearchResult',
+  'NetworkLiveUserSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkLiveUserSearchResult(
+    final val = NetworkLiveUserSearchResult(
       area: $checkedConvert('area', (v) => (v as num).toInt()),
       areaV2Id: $checkedConvert('area_v2_id', (v) => (v as num).toInt()),
       attentions: $checkedConvert('attentions', (v) => (v as num).toInt()),

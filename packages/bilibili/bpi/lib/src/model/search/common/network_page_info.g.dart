@@ -6,9 +6,9 @@ part of 'network_page_info.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkPageinfo _$NetworkPageinfoFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_NetworkPageinfo', json, ($checkedConvert) {
-      final val = _NetworkPageinfo(
+NetworkPageinfo _$NetworkPageinfoFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('NetworkPageinfo', json, ($checkedConvert) {
+      final val = NetworkPageinfo(
         total: $checkedConvert('total', (v) => (v as num).toInt()),
         numResults: $checkedConvert('numResults', (v) => (v as num).toInt()),
         pages: $checkedConvert('pages', (v) => (v as num).toInt()),

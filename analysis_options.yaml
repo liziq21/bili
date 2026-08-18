@@ -6,7 +6,7 @@ formatter:
   #trailing_commas: preserve
 
 analyzer:
-  enable-experiment:
+  #enable-experiment:
 
   strong-mode:
     implicit-casts: false

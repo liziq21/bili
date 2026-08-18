@@ -6,13 +6,13 @@ part of 'network_media_bangumi_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkMediaBangumiSearchResult _$NetworkMediaBangumiSearchResultFromJson(
+NetworkMediaBangumiSearchResult _$NetworkMediaBangumiSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkMediaBangumiSearchResult',
+  'NetworkMediaBangumiSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkMediaBangumiSearchResult(
+    final val = NetworkMediaBangumiSearchResult(
       mediaId: $checkedConvert('media_id', (v) => (v as num).toInt()),
       title: $checkedConvert('title', (v) => HtmlTitle.fromJson(v)),
       orgTitle: $checkedConvert('org_title', (v) => v as String),

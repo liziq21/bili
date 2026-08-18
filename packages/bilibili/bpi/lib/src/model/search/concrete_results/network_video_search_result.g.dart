@@ -6,13 +6,13 @@ part of 'network_video_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkVideoSearchResult _$NetworkVideoSearchResultFromJson(
+NetworkVideoSearchResult _$NetworkVideoSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkVideoSearchResult',
+  'NetworkVideoSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkVideoSearchResult(
+    final val = NetworkVideoSearchResult(
       id: $checkedConvert('id', (v) => (v as num).toInt()),
       author: $checkedConvert('author', (v) => v as String),
       mid: $checkedConvert('mid', (v) => (v as num).toInt()),

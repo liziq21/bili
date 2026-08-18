@@ -6,9 +6,9 @@ part of 'network_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkSearchResult _$NetworkSearchResultFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_NetworkSearchResult', json, ($checkedConvert) {
-      final val = _NetworkSearchResult(
+NetworkSearchResult _$NetworkSearchResultFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('NetworkSearchResult', json, ($checkedConvert) {
+      final val = NetworkSearchResult(
         page: $checkedConvert('page', (v) => (v as num).toInt()),
         pagesize: $checkedConvert('pagesize', (v) => (v as num).toInt()),
         numResults: $checkedConvert('numResults', (v) => (v as num).toInt()),

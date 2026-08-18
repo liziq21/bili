@@ -6,13 +6,13 @@ part of 'network_article_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkArticleSearchResult _$NetworkArticleSearchResultFromJson(
+NetworkArticleSearchResult _$NetworkArticleSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkArticleSearchResult',
+  'NetworkArticleSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkArticleSearchResult(
+    final val = NetworkArticleSearchResult(
       categoryId: $checkedConvert('category_id', (v) => (v as num).toInt()),
       categoryName: $checkedConvert('category_name', (v) => v as String),
       commentUrl: $checkedConvert('comment_url', (v) => v as String),

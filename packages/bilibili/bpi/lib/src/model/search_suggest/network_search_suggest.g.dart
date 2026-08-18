@@ -6,10 +6,10 @@ part of 'network_search_suggest.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkSearchSuggest _$NetworkSearchSuggestFromJson(
+NetworkSearchSuggest _$NetworkSearchSuggestFromJson(
   Map<String, dynamic> json,
-) => $checkedCreate('_NetworkSearchSuggest', json, ($checkedConvert) {
-  final val = _NetworkSearchSuggest(
+) => $checkedCreate('NetworkSearchSuggest', json, ($checkedConvert) {
+  final val = NetworkSearchSuggest(
     tag: $checkedConvert(
       'tag',
       (v) => (v as List<dynamic>)
@@ -22,10 +22,10 @@ _NetworkSearchSuggest _$NetworkSearchSuggestFromJson(
   return val;
 });
 
-_NetworkSearchSuggestItem _$NetworkSearchSuggestItemFromJson(
+NetworkSearchSuggestItem _$NetworkSearchSuggestItemFromJson(
   Map<String, dynamic> json,
-) => $checkedCreate('_NetworkSearchSuggestItem', json, ($checkedConvert) {
-  final val = _NetworkSearchSuggestItem(
+) => $checkedCreate('NetworkSearchSuggestItem', json, ($checkedConvert) {
+  final val = NetworkSearchSuggestItem(
     term: $checkedConvert('term', (v) => v as String),
     name: $checkedConvert('name', (v) => v as String),
   );

@@ -1,4 +1,4 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+//import 'package:freezed_annotation/freezed_annotation.dart';
 import 'concrete_results/network_article_search_result.dart';
 import 'concrete_results/network_bili_user_search_result.dart';
 import 'concrete_results/network_live_room_search_result.dart';
@@ -8,20 +8,17 @@ import 'concrete_results/network_media_ft_search_result.dart';
 import 'concrete_results/network_video_search_result.dart';
 import '../../search_result_type.dart';
 
-part 'network_search_result_wrapper.freezed.dart';
+//part 'network_search_result_wrapper.freezed.dart';
 
-@freezed
-abstract class NetworkSearchResultWrapper with _$NetworkSearchResultWrapper {
-  const factory NetworkSearchResultWrapper({
-    required List<NetworkArticleSearchResult> article,
-    required List<NetworkBiliUserSearchResult> biliUser,
-    required List<NetworkMediaBangumiSearchResult> mediaBangumi,
-    required List<NetworkMediaFtSearchResult> mediaFt,
-    required List<NetworkLiveRoomSearchResult> liveRoom,
-    required List<NetworkLiveUserSearchResult> liveUser,
-    required List<NetworkVideoSearchResult> video,
-  }) = _NetworkSearchResultWrapper;
-
+class const NetworkSearchResultWrapper({
+  required final List<NetworkArticleSearchResult> article,
+  required final List<NetworkBiliUserSearchResult> biliUser,
+  required final List<NetworkMediaBangumiSearchResult> mediaBangumi,
+  required final List<NetworkMediaFtSearchResult> mediaFt,
+  required final List<NetworkLiveRoomSearchResult> liveRoom,
+  required final List<NetworkLiveUserSearchResult> liveUser,
+  required final List<NetworkVideoSearchResult> video,
+}) {
   factory NetworkSearchResultWrapper.fromJson(dynamic json) {
     List<NetworkArticleSearchResult> articleResults = [];
     List<NetworkBiliUserSearchResult> biliUserResults = [];

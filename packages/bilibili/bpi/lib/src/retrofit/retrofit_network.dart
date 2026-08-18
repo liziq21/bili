@@ -55,10 +55,8 @@ abstract class BiliNetworkApi extends ChopperService {
   );
 }
 
-class BiliNetworkSearch implements NetworkSearchDataSource {
-  final BiliNetworkApi _networkApi;
-
-  BiliNetworkSearch() : _networkApi = BiliNetworkApi.create();
+class BiliNetworkSearch() implements NetworkSearchDataSource {
+  final BiliNetworkApi _networkApi = BiliNetworkApi.create();
 
   @override
   Future<NetworkSearchSuggest> getSuggests(String term) =>

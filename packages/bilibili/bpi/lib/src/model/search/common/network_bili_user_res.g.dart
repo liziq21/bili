@@ -6,12 +6,12 @@ part of 'network_bili_user_res.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkBiliUserRes _$NetworkBiliUserResFromJson(Map<String, dynamic> json) =>
+NetworkBiliUserRes _$NetworkBiliUserResFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
-      '_NetworkBiliUserRes',
+      'NetworkBiliUserRes',
       json,
       ($checkedConvert) {
-        final val = _NetworkBiliUserRes(
+        final val = NetworkBiliUserRes(
           aid: $checkedConvert('aid', (v) => (v as num).toInt()),
           bvid: $checkedConvert('bvid', (v) => v as String),
           title: $checkedConvert('title', (v) => v as String),

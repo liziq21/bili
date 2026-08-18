@@ -6,13 +6,13 @@ part of 'network_bili_user_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkBiliUserSearchResult _$NetworkBiliUserSearchResultFromJson(
+NetworkBiliUserSearchResult _$NetworkBiliUserSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkBiliUserSearchResult',
+  'NetworkBiliUserSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkBiliUserSearchResult(
+    final val = NetworkBiliUserSearchResult(
       mid: $checkedConvert('mid', (v) => (v as num).toInt()),
       uname: $checkedConvert('uname', (v) => v as String),
       usign: $checkedConvert('usign', (v) => v as String),

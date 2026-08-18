@@ -4,11 +4,8 @@ import 'package:model/model.dart';
 import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 
-class BilibiliSearchSuggestRepository implements SearchSuggestRepository {
-  const BilibiliSearchSuggestRepository({
-    required NetworkSearchDataSource network,
-  }) : _network = network;
-
+class const BilibiliSearchSuggestRepository({required this._network})
+    implements SearchSuggestRepository {
   final NetworkSearchDataSource _network;
 
   @override

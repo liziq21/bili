@@ -6,13 +6,13 @@ part of 'network_media_ft_search_result.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_NetworkMediaFtSearchResult _$NetworkMediaFtSearchResultFromJson(
+NetworkMediaFtSearchResult _$NetworkMediaFtSearchResultFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
-  '_NetworkMediaFtSearchResult',
+  'NetworkMediaFtSearchResult',
   json,
   ($checkedConvert) {
-    final val = _NetworkMediaFtSearchResult(
+    final val = NetworkMediaFtSearchResult(
       mediaId: $checkedConvert('media_id', (v) => (v as num).toInt()),
       title: $checkedConvert('title', (v) => HtmlTitle.fromJson(v)),
       orgTitle: $checkedConvert('org_title', (v) => v as String),

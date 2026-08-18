@@ -1,15 +1,13 @@
 import 'dart:async';
 
 import 'package:chopper/chopper.dart';
+
 import '../model/api_result.dart';
 
 typedef JsonFactory<T> = T Function(Map<String, dynamic> json);
 
-class JsonSerializableConverter extends JsonConverter {
-  final Map<Type, JsonFactory> factories;
-
-  const JsonSerializableConverter(this.factories);
-
+class const JsonSerializableConverter(final Map<Type, JsonFactory> factories)
+    extends JsonConverter {
   T? _decodeMap<T>(Map<String, dynamic> values) {
     /// Get jsonFactory using Type parameters
     /// if not found or invalid, throw error or return null
@@ -45,7 +43,7 @@ class JsonSerializableConverter extends JsonConverter {
     }
     final apiResult = ApiResult<ResultType>.fromJson(jsonRes.body, jsonFactory);
     return switch (apiResult) {
-      ApiResultOk(:final data) => jsonRes.copyWith<ResultType>(body: data),
+      Ok(:final data) => jsonRes.copyWith<ResultType>(body: data),
       _ => throw apiResult,
     };
     // return jsonRes.copyWith<ResultType>(body: _decode<Item>(jsonRes.body));
