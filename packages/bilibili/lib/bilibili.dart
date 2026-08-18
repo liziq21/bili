@@ -3,4 +3,4 @@
 /// More dartdocs go here.
 library;
 
-export 'src/dependencies.dart';
+export 'src/bili.dart';

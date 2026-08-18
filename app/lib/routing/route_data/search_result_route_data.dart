@@ -17,14 +17,6 @@ class SearchRouteData extends GoRouteData with $SearchRouteData {
 
   @override
   Widget build(context, _) {
-    return SearchResultScreen(
-      viewModel: .new(
-        searchSuggestRepository: context.read(),
-        recentSearchQueryRepository: context.read(),
-        getRentSearchQueriesUseCase: context.read(),
-      ),
-      searchQuery: keyword,
-      onBackClick: () => context.pop(),
-    );
+    return SearchResultScreen(query: keyword, onBackClick: () => context.pop());
   }
 }

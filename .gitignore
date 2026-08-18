@@ -102,3 +102,5 @@ logs/
 # Coverage test report
 coverage/
 
+# Widget Preview related
+.widget_preview/

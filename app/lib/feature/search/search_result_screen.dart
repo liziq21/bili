@@ -1,70 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:data/data.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../ui/search/creator_profile_item.dart';
+import '../../ui/video_card.dart';
 import 'app_search_anchor.dart';
-import 'search_result_view_model.dart';
-import 'search_view_model.dart';
-import 'all_search_result.dart';
-import 'video_search_result.dart';
+import 'search_result.dart';
+import 'bloc/search_result_bloc.dart';
 
-class SearchResultScreen extends StatefulWidget {
-  const SearchResultScreen({
-    super.key,
-    required this.viewModel,
-    this.searchQuery,
-    this.onBackClick,
-  });
-
-  final SearchViewModel viewModel;
-  final VoidCallback? onBackClick;
-
-  final String? searchQuery;
-
-  @override
-  State<SearchResultScreen> createState() => _SearchResultScreenState();
-}
-
-class _SearchResultScreenState extends State<SearchResultScreen>
-    with TickerProviderStateMixin {
-  late TabController _tabController;
-  List<Widget> _activeTabs = [];
-  List<Widget> _activeViews = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final List<Widget> tabs = [];
-    final List<Widget> views = [];
-
-    if (context.read<AllSearchResultViewModel?>()
-        case final AllSearchResultViewModel viewModel) {
-      tabs.add(Tab(text: 'All'));
-      views.add(AllSearchResult(viewModel: viewModel));
-    }
-
-    if (context.read<SearchResultViewModel<VideoInfoBase>?>()
-        case final SearchResultViewModel<VideoInfoBase> viewModel) {
-      tabs.add(Tab(text: 'Video'));
-      views.add(VideoSearchResult(viewModel: viewModel));
-    }
-
-    setState(() {
-      _activeTabs = tabs;
-      _activeViews = views;
-      _tabController = TabController(length: _activeTabs.length, vsync: this);
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class const SearchResultScreen({
+  super.key,
+  required String query,
+  required final VoidCallback? onBackClick,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final videoResultView = _videoResultView(context);
+    final creatorProfileResultView = _creatorProfileResultView(context);
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -81,18 +34,15 @@ class _SearchResultScreenState extends State<SearchResultScreen>
               //centerTitle: false,
               title: Padding(
                 padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
-                child: AppSearchAnchor(
-                  recentSearchStream: widget.viewModel.recentSearchQueries,
-                  fetchSuggests: widget.viewModel.getSuggests,
-                  onSearch: (String query) {
-                    widget.viewModel.updateRecentSearch(query);
-                  },
-                ),
+                child: AppSearchAnchor(onSearch: (String query) {}),
               ),
               bottom: TabBar(
                 isScrollable: true,
                 tabAlignment: .start,
-                tabs: _activeTabs,
+                tabs: [
+                  if (videoResultView != null) Text('video'),
+                  if (creatorProfileResultView != null) Text('creatorProfile'),
+                ],
               ),
             ),
             /*SliverToBoxAdapter(
@@ -113,28 +63,32 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                   ),
                 ),
               ),*/
-            SliverToBoxAdapter(child: TabBarView(children: _activeViews)),
+            SliverToBoxAdapter(
+              child: TabBarView(
+                children: [?videoResultView, ?creatorProfileResultView],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-}
 
-extension ProviderCheck on BuildContext {
-  /// 检查是否存在类型为 T 的 Provider，且绝不触发对象实例化
-  bool hasProvider<T>() {
-    bool found = false;
-    // visitAncestorElements 是最底层的方法，不会触发 InheritedWidget 的 get 逻辑
-    this.visitAncestorElements((element) {
-      final widget = element.widget;
-      // 检查 Widget 是否是 InheritedProvider 且管理的类型匹配
-      if (widget is InheritedProvider<T>) {
-        found = true;
-        return false; // 找到即停止遍历
-      }
-      return true; // 继续向上找
-    });
-    return found;
+  Widget? _videoResultView(BuildContext context) {
+    final bloc = context.read<SearchResultBloc<VideoInfoBase>?>();
+    if (bloc == null) return null;
+    return SearchResult<VideoInfoBase>(
+      itemBuilder: (_, videoInfoBase, _) =>
+          VideoCard(videoInfoBase: videoInfoBase),
+    );
+  }
+
+  Widget? _creatorProfileResultView(BuildContext context) {
+    final bloc = context.read<SearchResultBloc<CreatorProfile>?>();
+    if (bloc == null) return null;
+    return SearchResult<CreatorProfile>(
+      itemBuilder: (_, creatorProfile, _) =>
+          CreatorProfileItem(creatorProfile: creatorProfile),
+    );
   }
 }

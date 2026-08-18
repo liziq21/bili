@@ -5,25 +5,22 @@ part 'network_search_suggest.g.dart';
 
 @freezed
 abstract class NetworkSearchSuggest with _$NetworkSearchSuggest {
-
   const factory NetworkSearchSuggest({
     required List<NetworkSearchSuggestItem> tag,
   }) = _NetworkSearchSuggest;
 
-  factory NetworkSearchSuggest.fromJson(Map<String, dynamic> json)
-    => _$NetworkSearchSuggestFromJson(json);
-    
+  factory NetworkSearchSuggest.fromJson(Map<String, dynamic> json) =>
+      _$NetworkSearchSuggestFromJson(json);
 }
 
+//js
 @freezed
 abstract class NetworkSearchSuggestItem with _$NetworkSearchSuggestItem {
-
   const factory NetworkSearchSuggestItem({
     required String term,
     required String name,
   }) = _NetworkSearchSuggestItem;
-  
-  factory NetworkSearchSuggestItem.fromJson(Map<String, dynamic> json)
-    => _$NetworkSearchSuggestItemFromJson(json);
 
+  factory NetworkSearchSuggestItem.fromJson(Map<String, dynamic> json) =>
+      _$NetworkSearchSuggestItemFromJson(json);
 }

@@ -6,17 +6,13 @@ import 'package:model/model.dart';
 
 import '../model/search_results.dart';
 
-class BilibiliAggregateSearchRepository implements VideoSearchRepository {
-  const BilibiliAggregateSearchRepository({
-    required NetworkSearchDataSource network,
-  }) : _network = network;
-
-  final NetworkSearchDataSource _network;
-
+class const BilibiliAggregateSearchRepository({
+  required final NetworkSearchDataSource _network,
+}) implements VideoSearchRepository {
   @override
   Future<Result<AggregateSearchPage>> search(SearchQuery searchQuery) {
     return _network
-        .searchAll(searchQuery.query, page: searchQuery.page)
+        .searchAll(searchQuery.query, page: searchQuery.pageKey)
         .then((it) => it.asModel())
         .toResult();
   }
@@ -28,15 +24,13 @@ class BilibiliAggregateSearchRepository implements VideoSearchRepository {
   List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliUserSearchRepository implements CreatorProfileSearchRepository {
-  const BilibiliUserSearchRepository({required NetworkSearchDataSource network})
-    : _network = network;
-
-  final NetworkSearchDataSource _network;
+class const BilibiliUserSearchRepository({
+  required final NetworkSearchDataSource _network,
+}) implements CreatorProfileSearchRepository {
   @override
   Future<Result<Page<CreatorProfile>>> search(SearchQuery searchQuery) {
     return _network
-        .searchBiliUser(searchQuery.query, page: searchQuery.page)
+        .searchBiliUser(searchQuery.query, page: searchQuery.pageKey)
         .then((it) => it.asPagedCreatorProfile())
         .toResult();
   }
@@ -48,17 +42,13 @@ class BilibiliUserSearchRepository implements CreatorProfileSearchRepository {
   List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliLiveRoomSearchRepository implements LiveRoomSearchRepository {
-  const BilibiliLiveRoomSearchRepository({
-    required NetworkSearchDataSource network,
-  }) : _network = network;
-
-  final NetworkSearchDataSource _network;
-
+class const BilibiliLiveRoomSearchRepository({
+  required final NetworkSearchDataSource _network,
+}) implements LiveRoomSearchRepository {
   @override
   Future<Result<Page<LiveRoom>>> search(SearchQuery searchQuery) {
     return _network
-        .searchLiveRoom(searchQuery.query, page: searchQuery.page)
+        .searchLiveRoom(searchQuery.query, page: searchQuery.pageKey)
         .then((it) => it.asPagedLiveRooms())
         .toResult();
   }
@@ -70,17 +60,13 @@ class BilibiliLiveRoomSearchRepository implements LiveRoomSearchRepository {
   List<SortOption> get sortOptions => const [];
 }
 
-class BilibiliVideoSearchRepository implements VideoSearchRepository {
-  const BilibiliVideoSearchRepository({
-    required NetworkSearchDataSource network,
-  }) : _network = network;
-
-  final NetworkSearchDataSource _network;
-
+class const BilibiliVideoSearchRepository({
+  required final NetworkSearchDataSource _network,
+}) implements VideoSearchRepository {
   @override
   Future<Result<Page<VideoInfoBase>>> search(SearchQuery searchQuery) {
     return _network
-        .searchVideo(searchQuery.query, page: searchQuery.page)
+        .searchVideo(searchQuery.query, page: searchQuery.pageKey)
         .then((it) => it.asPagedVideos())
         .toResult();
   }

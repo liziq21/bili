@@ -8,21 +8,33 @@ import '../model/live_room.dart';
 import '../model/paged_result.dart';
 import '../model/video_info_base.dart';
 
-class SearchQuery {
-  SearchQuery(
-    this.query, {
-    this.page,
+import 'package:meta/meta.dart';
+
+@immutable
+class const SearchQuery({
+  required final String query,
+  final int pageKey = 1,
+  final SortOption? sortOption,
+  final List<FilterGroup> filters = const [],
+}) {
+  Map<String, String> get parameters => <String, String>{
+    ...?sortOption?.toQueryParams(),
+    for (final filter in filters) ...filter.toQueryParams(),
+  };
+
+  SearchQuery copyWith({
+    String? query,
+    int? pageKey,
     SortOption? sortOption,
     List<FilterGroup>? filters,
-  }) : parameters = {
-         ...?sortOption?.toQueryParams(),
-         if (filters != null)
-           for (final filter in filters) ...filter.toQueryParams(),
-       };
-
-  final String query;
-  final int? page;
-  final Map<String, String> parameters;
+  }) {
+    return SearchQuery(
+      query: query ?? this.query,
+      pageKey: pageKey ?? this.pageKey,
+      sortOption: sortOption ?? this.sortOption,
+      filters: filters ?? this.filters,
+    );
+  }
 }
 
 abstract interface class SearchContentsRepository<T> {

@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class VideoParameters {
-  final String id;
-  final String? cid;
-  final String? commentRootId;
-  final String? commentSecondaryId;
-  final String? dmProgress;
   
   const VideoParameters({
     required this.id,
@@ -14,17 +9,22 @@ class VideoParameters {
     this.commentSecondaryId,
     this.dmProgress,
   });
+  final String id;
+  final String? cid;
+  final String? commentRootId;
+  final String? commentSecondaryId;
+  final String? dmProgress;
 }
 
 class VideoScreen extends StatefulWidget {
-  final VoidCallback? onBackClick;
-  final VideoParameters parameters;
   
   const VideoScreen({
     super.key,
     this.onBackClick,
     required this.parameters,
   });
+  final VoidCallback? onBackClick;
+  final VideoParameters parameters;
 
   @override
   State<VideoScreen> createState() => _VideoScreenState();

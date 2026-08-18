@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:data/data.dart';
-import 'package:database/database.dart';
+import '../../../database/dao/recent_search_query_dao.dart';
+import '../../model/recent_search_query.dart';
+import 'recent_search_query_repository.dart';
 
 class DefaultRecentSearchQueryRepository
     implements RecentSearchQueryRepository {
-  DefaultRecentSearchQueryRepository({
-    required RecentSearchQueryDao recentSearchQueryDao,
-  }) : _recentSearchQueryDao = recentSearchQueryDao;
+  DefaultRecentSearchQueryRepository({required this._recentSearchQueryDao});
 
   late final RecentSearchQueryDao _recentSearchQueryDao;
 

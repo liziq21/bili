@@ -10,7 +10,7 @@ class SortBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<SortOption>(
-      value: sortOptions.first!,
+      value: sortOptions.first,
       onChanged: onChanged,
       items: sortOptions.map((option) {
         return DropdownMenuItem<SortOption>(

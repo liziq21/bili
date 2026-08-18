@@ -1,22 +1,23 @@
 import 'dart:async';
 
 // import 'package:collection/collection.dart';
-import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 //import 'package:logger/logger.dart' hide LogEvent;
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 
+import 'providers/bloc_providers.dart';
+import 'providers/repo_providers.dart';
 import 'app.dart';
-import 'dependencies.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<void> main() async {
   // Enables the debug overlay even in release mode.
   DebugOverlay.enabled = true;
-  Provider.debugCheckInvalidValueType = null;
+  //Provider.debugCheckInvalidValueType = null;
 
   // Uncaught Exceptions.
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
@@ -73,16 +74,9 @@ Future<void> main() async {
   });
 
   runApp(
-    MultiProvider(
-      providers: providers,
-      child: Builder(
-        builder: (context) {
-          return MultiProvider(
-            providers: bilibiliProviders,
-            child: App(viewModel: context.read()),
-          );
-        },
-      ),
+    MultiRepositoryProvider(
+      providers: repoProviders,
+      child: MultiBlocProvider(providers: blocProviders, child: App()),
     ),
   );
 

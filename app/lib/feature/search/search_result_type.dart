@@ -1,4 +1,4 @@
-import 'package:app/l10n/localization_file/app_localizations.dart';
+import '../../l10n/localization_file/app_localizations.dart';
 
 enum SearchResultType {
   all,

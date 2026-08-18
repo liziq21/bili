@@ -2,15 +2,14 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 //import 'package:google_fonts/google_fonts.dart';
 import 'package:data/data.dart';
+
 import '../utils/image_error_listener.dart';
 
-class VideoCard extends StatelessWidget {
-  const VideoCard({super.key, required this.videoInfoBase, this.onTap});
-
-  final GestureTapCallback? onTap;
-
-  final VideoInfoBase videoInfoBase;
-
+class const VideoCard({
+  super.key,
+  required final VideoInfoBase videoInfoBase,
+  final GestureTapCallback? onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -29,7 +28,7 @@ class VideoCard extends StatelessWidget {
                 imageUrl: videoInfoBase.picUrl,
                 alignment: .center,
                 fit: .cover,
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorBuilder: (context, url, error) => const Icon(Icons.error),
                 errorListener: imageErrorListener,
               ),
               //),
@@ -42,7 +41,7 @@ class VideoCard extends StatelessWidget {
                     vertical: 2.0,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
+                    color: Colors.black.withValues(alpha: 0.7),
                     borderRadius: .circular(4.0),
                   ),
                   child: Text(

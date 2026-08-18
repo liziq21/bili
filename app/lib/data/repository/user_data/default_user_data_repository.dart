@@ -3,8 +3,9 @@
 import 'dart:async';
 
 import 'package:model/model.dart';
-import 'package:data/data.dart';
-import 'package:datastore/datastore.dart';
+
+import '../../../datastore/preferences_data_source.dart';
+import 'user_data_repository.dart';
 
 class DefaultUserDataRepository implements UserDataRepository {
   const DefaultUserDataRepository({

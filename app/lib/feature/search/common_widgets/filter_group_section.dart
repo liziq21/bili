@@ -120,8 +120,8 @@ class _DateRangeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final range = group.range;
     final label = range == null
-        ? "选择日期范围"
-        : "${range.start.year}-${range.end.year}";
+        ? '选择日期范围'
+        : '${range.start.year}-${range.end.year}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),

@@ -15,8 +15,11 @@ List<RouteBase> get $appRoutes => [
   $videoRouteData,
 ];
 
-RouteBase get $homeRouteData =>
-    GoRouteData.$route(path: '/', factory: $HomeRouteData._fromState);
+RouteBase get $homeRouteData => GoRouteData.$route(
+  path: '/',
+  hasOverriddenOnExit: false,
+  factory: $HomeRouteData._fromState,
+);
 
 mixin $HomeRouteData on GoRouteData {
   static HomeRouteData _fromState(GoRouterState state) => const HomeRouteData();
@@ -40,6 +43,7 @@ mixin $HomeRouteData on GoRouteData {
 
 RouteBase get $liveRouteData => GoRouteData.$route(
   path: '/live/:roomId',
+  hasOverriddenOnExit: false,
   factory: $LiveRouteData._fromState,
 );
 
@@ -67,8 +71,11 @@ mixin $LiveRouteData on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $notFoundRouteData =>
-    GoRouteData.$route(path: '/404', factory: $NotFoundRouteData._fromState);
+RouteBase get $notFoundRouteData => GoRouteData.$route(
+  path: '/404',
+  hasOverriddenOnExit: false,
+  factory: $NotFoundRouteData._fromState,
+);
 
 mixin $NotFoundRouteData on GoRouteData {
   static NotFoundRouteData _fromState(GoRouterState state) =>
@@ -91,8 +98,11 @@ mixin $NotFoundRouteData on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $searchRouteData =>
-    GoRouteData.$route(path: '/search', factory: $SearchRouteData._fromState);
+RouteBase get $searchRouteData => GoRouteData.$route(
+  path: '/search',
+  hasOverriddenOnExit: false,
+  factory: $SearchRouteData._fromState,
+);
 
 mixin $SearchRouteData on GoRouteData {
   static SearchRouteData _fromState(GoRouterState state) =>
@@ -120,6 +130,7 @@ mixin $SearchRouteData on GoRouteData {
 
 RouteBase get $spaceRouteData => GoRouteData.$route(
   path: '/space/:mid',
+  hasOverriddenOnExit: false,
   factory: $SpaceRouteData._fromState,
 );
 
@@ -147,8 +158,11 @@ mixin $SpaceRouteData on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $videoRouteData =>
-    GoRouteData.$route(path: '/video/:id', factory: $VideoRouteData._fromState);
+RouteBase get $videoRouteData => GoRouteData.$route(
+  path: '/video/:id',
+  hasOverriddenOnExit: false,
+  factory: $VideoRouteData._fromState,
+);
 
 mixin $VideoRouteData on GoRouteData {
   static VideoRouteData _fromState(GoRouterState state) => VideoRouteData(

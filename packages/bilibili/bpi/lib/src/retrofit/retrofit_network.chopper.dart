@@ -19,6 +19,31 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   final Type definitionType = BiliNetworkApi;
 
   @override
+  Future<NetworkSearchSuggest> getSuggests(
+    String term,
+    String highlight, [
+    String mainVer = 'v1',
+  ]) async {
+    final Uri $url = Uri.parse('https://s.search.bilibili.com/main/suggest');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'term': term,
+      'highlight': highlight,
+      'main_ver': mainVer,
+    };
+    final Map<String, String> $headers = {'content-type': 'application/json'};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+    );
+    final Response $response = await client
+        .send<NetworkSearchSuggest, NetworkSearchSuggest>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
   Future<NetworkSearchResult> searchAll(String keyword, {int? page}) async {
     final Uri $url = Uri.parse(
       'https://api.bilibili.com/x/web-interface/search/all/v2',
@@ -76,31 +101,6 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
     );
     final Response $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
-    return $response.bodyOrThrow;
-  }
-
-  @override
-  Future<NetworkSearchSuggest> getSuggests(
-    String term,
-    String highlight, [
-    String mainVer = 'v1',
-  ]) async {
-    final Uri $url = Uri.parse('https://s.search.bilibili.com/main/suggest');
-    final Map<String, dynamic> $params = <String, dynamic>{
-      'term': term,
-      'highlight': highlight,
-      'main_ver': mainVer,
-    };
-    final Map<String, String> $headers = {'content-type': 'application/json'};
-    final Request $request = Request(
-      'GET',
-      $url,
-      client.baseUrl,
-      parameters: $params,
-      headers: $headers,
-    );
-    final Response $response = await client
-        .send<NetworkSearchSuggest, NetworkSearchSuggest>($request);
     return $response.bodyOrThrow;
   }
 }

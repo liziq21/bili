@@ -1,10 +1,15 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'app_view_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-typedef ThemeBuilder =
-    Widget Function(ThemeData theme, ThemeData darkTheme, ThemeMode themeModel);
+import 'app_bloc.dart';
+import 'feature/theme/bloc/theme_state.dart';
+
+typedef ThemeBuilder = Widget Function(
+  ThemeData theme,
+  ThemeData darkTheme,
+  ThemeMode themeModel,
+);
 
 class ThemeWrapper extends StatelessWidget {
   const ThemeWrapper({super.key, required this.builder});
@@ -12,10 +17,15 @@ class ThemeWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<AppViewModel, ThemeState>(
-      selector: (_, vm) =>
-          ThemeState(vm.userData.useDynamicColor, vm.userData.themeConfig),
-      builder: (_, state, __) => _ThemeCore(state: state, builder: builder),
+    return BlocSelector<AppBloc, AppState, ThemeState>(
+      selector: (state) {
+        state as LoadSuccess;
+        return ThemeState(
+          state.userData.useDynamicColor,
+          state.userData.themeConfig,
+        );
+      },
+      builder: (_, state) => _ThemeCore(state: state, builder: builder),
     );
   }
 }
