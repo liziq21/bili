@@ -18,34 +18,37 @@ class const SearchResultScreen({
   Widget build(BuildContext context) {
     final videoResultView = _videoResultView(context);
     final creatorProfileResultView = _creatorProfileResultView(context);
-    return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverAppBar(
-              clipBehavior: .none,
-              shape: const StadiumBorder(),
-              scrolledUnderElevation: 0.0,
-              titleSpacing: 0.0,
-              //backgroundColor: Colors.transparent,
-              floating: true,
-              //pinned: true,
-              snap: true,
-              //centerTitle: false,
-              title: Padding(
-                padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
-                child: AppSearchAnchor(onSearch: (String query) {}),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                clipBehavior: .none,
+                shape: const StadiumBorder(),
+                scrolledUnderElevation: 0.0,
+                titleSpacing: 0.0,
+                //backgroundColor: Colors.transparent,
+                floating: true,
+                //pinned: true,
+                snap: true,
+                //centerTitle: false,
+                title: Padding(
+                  padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
+                  child: AppSearchAnchor(onSearch: (String query) {}),
+                ),
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabAlignment: .start,
+                  tabs: [
+                    if (videoResultView != null) Text('video'),
+                    if (creatorProfileResultView != null)
+                      Text('creatorProfile'),
+                  ],
+                ),
               ),
-              bottom: TabBar(
-                isScrollable: true,
-                tabAlignment: .start,
-                tabs: [
-                  if (videoResultView != null) Text('video'),
-                  if (creatorProfileResultView != null) Text('creatorProfile'),
-                ],
-              ),
-            ),
-            /*SliverToBoxAdapter(
+              /*SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -63,12 +66,13 @@ class const SearchResultScreen({
                   ),
                 ),
               ),*/
-            SliverToBoxAdapter(
-              child: TabBarView(
-                children: [?videoResultView, ?creatorProfileResultView],
+              SliverToBoxAdapter(
+                child: TabBarView(
+                  children: [?videoResultView, ?creatorProfileResultView],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
