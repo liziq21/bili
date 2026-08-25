@@ -33,7 +33,7 @@ class NetworkSearchResult({
   required final Map<SearchResultType, NetworkPageinfo>? pageinfo,
   required final NetworkSearchResultWrapper result,
 }) {
-  factory NetworkSearchResult.fromJson(Map<String, dynamic> json) =>
+  factory fromJson(Map<String, dynamic> json) =>
       _$NetworkSearchResultFromJson(json);
 }
 

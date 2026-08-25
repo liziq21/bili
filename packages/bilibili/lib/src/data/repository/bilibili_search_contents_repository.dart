@@ -8,7 +8,7 @@ import '../model/search_results.dart';
 
 class const BilibiliAggregateSearchRepository({
   required final NetworkSearchDataSource _network,
-}) implements VideoSearchRepository {
+}) implements AggregateSearchRepository {
   @override
   Future<Result<AggregateSearchPage>> search(SearchQuery searchQuery) {
     return _network

@@ -1,62 +1,91 @@
 import 'dart:io';
 
 import 'package:chopper/chopper.dart';
+import 'package:http/http.dart' as http;
 
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
+import '../model/video/video_detail_data.dart';
 import '../network_search_data_source.dart';
 import '../search_type.dart';
-import '../uris.dart';
+import '../api.dart';
+import 'api_interceptor.dart';
+import 'chopper_wbi_interceptor.dart';
 import 'json_serializable_converter.dart';
+import 'token_storage.dart';
 
 part 'retrofit_network.chopper.dart';
 
-@ChopperApi(baseUrl: ApiUris.base)
+@ChopperApi(baseUrl: Api.base)
 abstract class BiliNetworkApi extends ChopperService {
   @GET(
-    path: SearchUris.suggest,
+    path: SearchApi.suggest,
     headers: {HttpHeaders.contentTypeHeader: 'application/json'},
   )
   Future<NetworkSearchSuggest> getSuggests(
-    @Query('term') String term,
-    @Query('highlight') String highlight, [
+    @query String term,
+    @query String highlight, [
     @Query('main_ver') String mainVer = 'v1',
   ]);
 
-  @GET(path: ApiUriPaths.search)
+  @GET(path: WbiApiPath.searchAll)
   Future<NetworkSearchResult> searchAll(
-    @Query('keyword') String keyword, {
-    @Query('page') int? page,
+    @query String keyword, {
+    @query int? page,
+    @tag String tag = 'WBI',
   });
 
-  @GET(path: ApiUriPaths.searchType)
+  // static Request convertRequest(Request request) {
+  //   final {'search_type': searchType, 'keyword': keyword} = request.parameters;
+  //   return applyHeaders(request, {
+  //     'origin': 'https://search.bilibili.com',
+  //     HttpHeaders.refererHeader:
+  //         'https://search.bilibili.com/$searchType?keyword=${Uri.encodeFull(keyword)}',
+  //   });
+  // }
+  //
+  // @FactoryConverter(request: convertRequest)
+  @GET(path: WbiApiPath.searchByType)
   Future<NetworkSearchResult> typeSearch(
     @Query('search_type') SearchType searchType,
-    @Query('keyword') String keyword, {
-    @Query('page') int? page,
-    @Query('order') String? order,
-    @Query('duration') String? duration,
-    @Query('tids') String? tids,
+    @query String keyword, {
+    @query int? page,
+    @query String? order,
+    @query String? duration,
+    @query String? tids,
     @Query('order_sort') String? orderSort,
     @Query('user_type') String? userType,
     @Query('category_id') String? categoryId,
     @Query('pubtime_begin_s') String? pubTimeBeginS,
     @Query('pubtime_end_s') String? pubTimeEndS,
+    @tag String tag = 'WBI',
   });
 
-  static BiliNetworkApi create([ChopperClient? client]) => _$BiliNetworkApi(
-    client ??
-        .new(
-          converter: JsonSerializableConverter({
-            NetworkSearchResult: NetworkSearchResult.fromJson,
-            NetworkSearchSuggest: NetworkSearchSuggest.fromJson,
-          }),
-        ),
-  );
+  @GET(path: ApiPath.videoIntro)
+  Future<VideoDetailData> videoIntro({@query required String bvid});
+
+  static BiliNetworkApi create([ChopperClient? client]) =>
+      _$BiliNetworkApi(client ?? .new());
 }
 
-class BiliNetworkSearch() implements NetworkSearchDataSource {
-  final BiliNetworkApi _networkApi = BiliNetworkApi.create();
+class BiliNetworkSearch({http.Client? client, final TokenStorage? storage})
+    implements NetworkSearchDataSource {
+  final BiliNetworkApi _networkApi = BiliNetworkApi.create(
+    .new(
+      client: client,
+      converter: JsonSerializableConverter({
+        NetworkSearchResult: NetworkSearchResult.fromJson,
+        NetworkSearchSuggest: NetworkSearchSuggest.fromJson,
+      }),
+      interceptors: [
+        ApiInterceptor(),
+        ChooperWbiInterceptor(
+          tokenManager: .new(storage: storage),
+          client: client ?? .new(),
+        ),
+      ],
+    ),
+  );
 
   @override
   Future<NetworkSearchSuggest> getSuggests(String term) =>

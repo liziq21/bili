@@ -10,7 +10,7 @@ class const NetworkBiliUserRes({
   required final int pubdate,
   required final String arcurl,
   required final String pic,
-  required final int play, //String
+  required final String play, //String
   required final int dm,
   required final int coin,
   required final int fav,

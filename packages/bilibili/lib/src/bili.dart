@@ -1,11 +1,12 @@
 import 'package:bpi/bpi.dart';
+import 'package:http/http.dart';
 
 import 'data/repository/bilibili_search_contents_repository.dart';
 import 'data/repository/bilibili_search_suggest_repository.dart';
 
 class Bili() {
-  late final NetworkSearchDataSource _bpi = BiliNetworkSearch();
-
+  static Client? client;
+  late final NetworkSearchDataSource _bpi = BiliNetworkSearch(client: client);
   BilibiliVideoSearchRepository videoSearchRepository() => .new(network: _bpi);
 
   BilibiliUserSearchRepository userSearchRepository() => .new(network: _bpi);

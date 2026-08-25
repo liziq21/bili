@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 //import 'package:google_fonts/google_fonts.dart';
 import 'package:data/data.dart';
 
-import '../utils/image_error_listener.dart';
+//import '../utils/image_error_listener.dart';
 
 class const VideoCard({
   super.key,
@@ -12,72 +12,69 @@ class const VideoCard({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: .expand,
-      children: [
-        ClipRRect(
-          borderRadius: .circular(4.0),
-          child: Stack(
-            alignment: .bottomRight,
-            children: [
-              /*FittedBox(
-                  alignment: .center,
-                  fit: BoxFit.cover,
-                  child: */
-              CachedNetworkImage(
-                imageUrl: videoInfoBase.picUrl,
-                alignment: .center,
-                fit: .cover,
-                errorBuilder: (context, url, error) => const Icon(Icons.error),
-                errorListener: imageErrorListener,
-              ),
-              //),
-              Positioned(
-                bottom: 8.0,
-                right: 8.0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6.0,
-                    vertical: 2.0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Card(
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 封面图区域
+                AspectRatio(
+                  aspectRatio: 16 / 9, // 固定的 16:9
+                  child: CachedNetworkImage(
+                    imageUrl: videoInfoBase.picUrl,
+                    fit: BoxFit.cover,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: .circular(4.0),
-                  ),
-                  child: Text(
-                    videoInfoBase.duration,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.0,
-                      fontWeight: .bold,
+                ),
+                // 文字区域：用 Expanded 承接剩下的所有空间
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween, // 自动把标题和播放量推到两头
+                      children: [
+                        Text(
+                          videoInfoBase.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '${videoInfoBase.play} 观看 • ${videoInfoBase.pubdate}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          left: 6.0,
-          top: 6.0,
-          bottom: 6.0,
-          child: Column(
-            mainAxisSize: .min,
-            crossAxisAlignment: .start,
-            children: [
-              Text(videoInfoBase.title),
-              const Spacer(),
-              Text('${videoInfoBase.play} views • ${videoInfoBase.pubdate}'),
-            ],
-          ),
-        ),
-        Positioned.fill(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(onTap: onTap),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
+
+// 💡 顺手写一个播放量格式化的小工具（可选，让界面更清爽）
+// String _formatPlayCount(dynamic play) {
+//   if (play == null) return '0';
+//   final count = int.tryParse(play.toString()) ?? 0;
+//   if (count >= 10000) {
+//     return '${(count / 10000).toStringAsFixed(1)}万';
+//   }
+//   return count.toString();
+// }

@@ -8,7 +8,7 @@ part of 'search_result_bloc.dart';
 // final class SearchResultStateInitial extends SearchResultState;
 
 final class const SearchResultState<T>({
-  final String query = '',
+  final String query = 'vtuber',
   final List<FilterGroup> filters = const [],
   final List<SortOption> sortOption = const [],
   final SortOption? currentSort,

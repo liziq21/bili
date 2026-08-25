@@ -69,9 +69,9 @@ List<RepositoryProvider> get repoProviders => [
   RepositoryProvider<LiveRoomSearchRepository>(
     create: (context) => context.read<Bili>().liveRoomSearchRepository(),
   ),
-  RepositoryProvider<AggregateSearchRepository>(
-    create: (context) => context.read<Bili>().aggregateSearchRepository(),
-  ),
+  // RepositoryProvider<AggregateSearchRepository>(
+  //   create: (context) => context.read<Bili>().aggregateSearchRepository(),
+  // ),
   RepositoryProvider<SearchSuggestRepository>(
     create: (context) => context.read<Bili>().searchSuggestRepository(),
   ),

@@ -8,15 +8,38 @@ extension BuildContextSearch on BuildContext {
 
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
-class SearchRouteData extends GoRouteData with $SearchRouteData {
-  const SearchRouteData({
-    /*@TypedQueryParameter(name: 's') */ required this.keyword,
-  });
-
-  final String keyword;
-
+class const SearchRouteData({
+  /*@TypedQueryParameter(name: 's') */ required final String keyword,
+}) extends GoRouteData with $SearchRouteData {
   @override
   Widget build(context, _) {
-    return SearchResultScreen(query: keyword, onBackClick: () => context.pop());
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<SearchBloc>(
+          create: (context) => .new(
+            searchSuggestRepository: context.read(),
+            recentSearchQueryRepository: context.read(),
+            getRentSearchQueriesUseCase: context.read(),
+            initQuery: keyword,
+          ),
+        ),
+        if (context.read<VideoSearchRepository?>()
+            case final searchContentsRepo?)
+          BlocProvider<SearchResultBloc<VideoInfoBase>>(
+            create: (context) =>
+                .new(searchContentsRepository: searchContentsRepo),
+          ),
+        if (context.read<CreatorProfileSearchRepository?>()
+            case final searchContentsRepo?)
+          BlocProvider<SearchResultBloc<CreatorProfile>>(
+            create: (context) =>
+                .new(searchContentsRepository: searchContentsRepo),
+          ),
+      ],
+      child: SearchResultScreen(
+        query: keyword,
+        onBackClick: () => context.pop(),
+      ),
+    );
   }
 }

@@ -1,24 +1,17 @@
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-// ignore: unused_import
-import 'package:provider/provider.dart';
 
-//import '../data/repository/search_suggest/search_suggest_repository.dart';
-//:w
-//import '../domain/get_recent_search_queries_use_case.dart';
+import '../feature/search/bloc/search_bloc.dart';
+import '../feature/search/bloc/search_result_bloc.dart';
 import 'routes.dart';
-//import '../network/network_search_data_source.dart';
 import '../feature/home/home_screen.dart';
-//import '../feature/home/home_view_model.dart';
 import '../feature/live/live_screen.dart';
-//import '../feature/live/live_view_model.dart';
 import '../feature/not_found/not_found_screen.dart';
 import '../feature/search/search_result_screen.dart';
-//import '../feature/search/search_view_model.dart';
 import '../feature/space/space_screen.dart';
-//import '../feature/space/space_view_model.dart';
 import '../feature/video/video_screen.dart';
-//import '../feature/video/video_view_model.dart';
 
 part 'route_data/home_route_data.dart';
 part 'route_data/live_route_data.dart';

@@ -1,7 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/widget_previews.dart';
 
 class const CreatorProfileItem({
   super.key,
@@ -10,52 +9,49 @@ class const CreatorProfileItem({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: .transparency,
+    return Card(
       child: InkWell(
         onTap: onTap,
-        child: Row(
-          children: [
-            const SizedBox(width: 15),
-            CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(
-                creatorProfile.thumbnailUrl,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22, // 固定头像大小
+                backgroundImage: CachedNetworkImageProvider(
+                  creatorProfile.thumbnailUrl,
+                ),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisSize: .max,
-                crossAxisAlignment: .start,
-                mainAxisAlignment: .center,
-                children: [
-                  Text(
-                    creatorProfile.name,
-                    style: const TextStyle(fontSize: 14),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text('${creatorProfile.id}  Live：${creatorProfile.isLive}'),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center, // 垂直完美居中
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      creatorProfile.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '@${creatorProfile.id}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-@Preview()
-Widget previewCreatorProfileItem() {
-  return CreatorProfileItem(
-    creatorProfile: .new(
-      id: 12234553,
-      name: 'name',
-      thumbnailUrl: 'https://i0.hdslb.com/bfs/face/9327344f6bbcd32bdd940dad3418df2f77223605.jpg',
-      isLive: true,
-      roomId: 320032,
-    ),
-  );
 }

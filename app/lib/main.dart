@@ -1,25 +1,39 @@
-import 'dart:async';
-
-// import 'package:collection/collection.dart';
+import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-//import 'package:logger/logger.dart' hide LogEvent;
+import 'package:http/io_client.dart' as http;
 import 'package:logging/logging.dart';
 
+import 'app.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/repo_providers.dart';
-import 'app.dart';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+void main() {
+  initDebugOverlayBridge();
 
-Future<void> main() async {
-  // Enables the debug overlay even in release mode.
+  runApp(
+    MultiRepositoryProvider(
+      providers: repoProviders,
+      child: Builder(
+        builder: (context) => MultiBlocProvider(
+          providers: getBlocProviders(context),
+          child: App(),
+        ),
+      ),
+    ),
+  );
+
+  if (kIsWeb) {
+    SemanticsBinding.instance.ensureSemantics();
+  }
+}
+
+void initDebugOverlayBridge() {
   DebugOverlay.enabled = true;
-  //Provider.debugCheckInvalidValueType = null;
 
-  // Uncaught Exceptions.
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
     App.logBucket.add(
       LogEvent(
@@ -72,15 +86,12 @@ Future<void> main() async {
       ),
     );
   });
-
-  runApp(
-    MultiRepositoryProvider(
-      providers: repoProviders,
-      child: MultiBlocProvider(providers: blocProviders, child: App()),
+  Bili.client = HttpLogClient(
+    App.httpBucket,
+    http.IOClient(
+      .new()
+        //..findProxy = ((_) => 'PROXY 127.0.0.1:9000')
+        ..badCertificateCallback = (_, _, _) => true,
     ),
   );
-
-  if (kIsWeb) {
-    SemanticsBinding.instance.ensureSemantics();
-  }
 }

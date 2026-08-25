@@ -16,23 +16,16 @@ class SearchBloc({
   required final GetRecentSearchQueriesUseCase _getRentSearchQueriesUseCase,
   required final RecentSearchQueryRepository _recentSearchQueryRepository,
   required final SearchSuggestRepository _searchSuggestRepository,
+  String initQuery = '',
 }) extends Bloc<SearchEvent, SearchState> {
-  this : super(SearchState()) {
-    // 💡 最新规范：使用 `this { ... }` 块编写主构造函数的初始化逻辑
-    // 监听最近搜索记录流
+  this : super(SearchState(currentQuery: initQuery)) {
     on<MonitorRecentSearches>(_onMonitorRecentSearches);
-
-    // 监听输入框变化并提供 300 毫秒防抖
     on<SearchQueryChanged>(
       _onSearchQueryChanged,
       transformer: (events, mapper) =>
           events.debounce(const Duration(milliseconds: 300)).switchMap(mapper),
     );
-
-    // 监听清除历史记录
     on<ClearRecentSearchesPressed>(_onClearRecentSearchesPressed);
-
-    // 监听添加历史记录
     on<RecentSearchUpdated>(_onRecentSearchUpdated);
   }
 

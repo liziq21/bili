@@ -16,62 +16,28 @@ class const SearchResultScreen({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final videoResultView = _videoResultView(context);
-    final creatorProfileResultView = _creatorProfileResultView(context);
+    final Map<Widget, Widget> tabAndView = {
+      Tab(text: 'creatorProfile'): ?_creatorProfileResultView(context),
+      Tab(text: 'video'): ?_videoResultView(context),
+    };
     return DefaultTabController(
-      length: 2,
+      length: tabAndView.length,
       child: Scaffold(
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                clipBehavior: .none,
-                shape: const StadiumBorder(),
-                scrolledUnderElevation: 0.0,
-                titleSpacing: 0.0,
-                //backgroundColor: Colors.transparent,
-                floating: true,
-                //pinned: true,
-                snap: true,
-                //centerTitle: false,
-                title: Padding(
-                  padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
-                  child: AppSearchAnchor(onSearch: (String query) {}),
-                ),
-                bottom: TabBar(
-                  isScrollable: true,
-                  tabAlignment: .start,
-                  tabs: [
-                    if (videoResultView != null) Text('video'),
-                    if (creatorProfileResultView != null)
-                      Text('creatorProfile'),
-                  ],
-                ),
-              ),
-              /*SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    height: 100.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 10,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SizedBox(
-                          width: 100.0,
-                          child: Card(child: Center(child: Text('Card $index'))),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),*/
-              SliverToBoxAdapter(
-                child: TabBarView(
-                  children: [?videoResultView, ?creatorProfileResultView],
-                ),
-              ),
-            ],
+        appBar: AppBar(
+          title: Padding(
+            padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
+            child: AppSearchAnchor(onSearch: (String query) {}),
+          ),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: .start,
+            tabs: tabAndView.keys.toList(),
+          ),
+        ),
+        body: Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: TabBarView(children: tabAndView.values.toList()),
           ),
         ),
       ),
@@ -82,6 +48,8 @@ class const SearchResultScreen({
     final bloc = context.read<SearchResultBloc<VideoInfoBase>?>();
     if (bloc == null) return null;
     return SearchResult<VideoInfoBase>(
+      maxCrossAxisExtent: 200.0,
+      itemAspectRatio: 0.8,
       itemBuilder: (_, videoInfoBase, _) =>
           VideoCard(videoInfoBase: videoInfoBase),
     );
@@ -91,6 +59,8 @@ class const SearchResultScreen({
     final bloc = context.read<SearchResultBloc<CreatorProfile>?>();
     if (bloc == null) return null;
     return SearchResult<CreatorProfile>(
+      maxCrossAxisExtent: 400.0,
+      itemAspectRatio: 3.5,
       itemBuilder: (_, creatorProfile, _) =>
           CreatorProfileItem(creatorProfile: creatorProfile),
     );

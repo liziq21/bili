@@ -18,8 +18,8 @@ extension ResultFutureX<T> on Future<T> {
     try {
       final value = await this;
       return Result.ok(value);
-    } catch (e) {
-      return Result.error(Exception('$e'));
+    } catch (e, s) {
+      return Result.error(Exception('$e\n$s'));
     }
   }
 }

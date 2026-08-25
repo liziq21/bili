@@ -44,9 +44,13 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
-  Future<NetworkSearchResult> searchAll(String keyword, {int? page}) async {
+  Future<NetworkSearchResult> searchAll(
+    String keyword, {
+    int? page,
+    String tag = 'WBI',
+  }) async {
     final Uri $url = Uri.parse(
-      'https://api.bilibili.com/x/web-interface/search/all/v2',
+      'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
     );
     final Map<String, dynamic> $params = <String, dynamic>{
       'keyword': keyword,
@@ -57,6 +61,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       $url,
       client.baseUrl,
       parameters: $params,
+      tag: tag,
     );
     final Response $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
@@ -76,9 +81,10 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
     String? categoryId,
     String? pubTimeBeginS,
     String? pubTimeEndS,
+    String tag = 'WBI',
   }) async {
     final Uri $url = Uri.parse(
-      'https://api.bilibili.com/x/web-interface/search/type',
+      'https://api.bilibili.com/x/web-interface/wbi/search/type',
     );
     final Map<String, dynamic> $params = <String, dynamic>{
       'search_type': searchType,
@@ -98,9 +104,25 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       $url,
       client.baseUrl,
       parameters: $params,
+      tag: tag,
     );
     final Response $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<VideoDetailData> videoIntro({required String bvid}) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/web-interface/view');
+    final Map<String, dynamic> $params = <String, dynamic>{'bvid': bvid};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response $response = await client
+        .send<VideoDetailData, VideoDetailData>($request);
     return $response.bodyOrThrow;
   }
 }

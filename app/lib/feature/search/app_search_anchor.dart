@@ -74,7 +74,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
     // }
 
     final bloc = context.read<SearchBloc>()
-      ..add(FetchSuggests(_searchingWithQuery!));
+      ..add(SearchQueryChanged(_searchingWithQuery!));
 
     final options = (await bloc.stream.first).suggests;
 

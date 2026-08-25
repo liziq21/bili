@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:model/model.dart';
+
 import '../model/filter_group.dart';
 import '../model/sort_option.dart';
 import '../model/creator_profile.dart';
@@ -38,7 +39,6 @@ class const SearchQuery({
 }
 
 abstract interface class SearchContentsRepository<T> {
-  //const SearchContentsRepository();
   List<SortOption> get sortOptions;
   List<FilterGroup> get filters;
 

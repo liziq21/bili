@@ -10,7 +10,10 @@ sealed class const ApiResult<T>() {
     final message = json['message'] as String?;
 
     if (code != 0 && code != 3 ||
-        (message != null && message.isNotEmpty && message != '0')) {
+        (message != null &&
+            message.isNotEmpty &&
+            message != '0' &&
+            message != 'OK')) {
       return .error(code: code, message: message ?? 'Not message');
     }
 
@@ -20,9 +23,16 @@ sealed class const ApiResult<T>() {
 }
 
 final class const Error<T>._({required final int code, final String? message})
-    extends ApiResult<T>;
+    extends ApiResult<T> {
+  @override
+  String toString() => 'ApiResult<$T>.error(code: $code, message : $message)';
+}
+
 final class const Ok<T>._({required final int code, required final T data})
-    extends ApiResult<T>;
+    extends ApiResult<T> {
+  @override
+  String toString() => 'ApiResult<$T>.ok($data)';
+}
 
 // sealed class const ApiResult<T>() {
 //   const factory ApiResult.ok({required int code, required T data}) = Ok._;
