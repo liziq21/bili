@@ -1,0 +1,61 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "page": 1,
+    "pagesize": 20,
+    "numResults": 1000,
+    "numPages": 50,
+    "pageinfo": {
+      "live_user": {
+        "total": 1000,
+        "numResults": 1000,
+        "pages": 167,
+        "numPages": 167
+      },
+      "live_room": {
+        "total": 745,
+        "numResults": 745,
+        "pages": 19,
+        "numPages": 19
+      }
+    },
+    "result": {
+      "live_room": [
+        {
+          "area": 3,
+          "attentions": 240820,
+          "cate_name": "守望先锋",
+          "cover": "//i0.hdslb.com/bfs/live-key-frame/keyframe1012190100002128102089i7ja.jpg",
+          "hit_columns": [
+            "title"
+          ],
+          "id": 21281020,
+          "inline_title_style": 0,
+          "is_fold": false,
+          "is_live_room_inline": 0,
+          "is_rk1": false,
+          "live_status": 1,
+          "live_time": "2025-10-12 15:32:24",
+          "online": 15658,
+          "pic": "//i0.hdslb.com/bfs/live-key-frame/keyframe1012190100002128102089i7ja.jpg",
+          "rank_index": 1,
+          "rank_offset": 0,
+          "roomid": 21281020,
+          "short_id": 0,
+          "spread_id": 0,
+          "style": 1,
+          "tags": "守望先锋,美少女,解说,小姐姐",
+          "title": "先<em class=\"keyword\">看</em>韩再<em class=\"keyword\">看</em>中",
+          "type": "live_room",
+          "uface": "//i1.hdslb.com/bfs/face/48a292a34f391b935bd76c69761e17ed9d019d68.jpg",
+          "uid": 1779128,
+          "uname": "小霜请你吃颗糖",
+          "user_cover": "//i0.hdslb.com/bfs/live/new_room_cover/5411343a34b96b91f57aa4d2561301269aa94fa7.jpg"
+        }
+      ],
+      "live_user": null
+    }
+  }
+}

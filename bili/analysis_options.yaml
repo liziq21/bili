@@ -1,0 +1,65 @@
+include: package:flutter_lints/flutter.yaml
+
+# cf https://github.com/dart-lang/dart_style/wiki/Configuration
+formatter:
+  #page_width: 100
+  #trailing_commas: preserve
+
+analyzer:
+  #enable-experiment:
+
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    invalid_annotation_target: ignore
+    todo: ignore
+    unused_local_variable: error
+    unused_import: error
+    dead_code: error
+    # 拼写/命名相关的警告（虽然 Dart 没有原生 spell_check，但可以强化命名检查）
+    non_constant_identifier_names: error
+    camel_case_types: error
+
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+  plugins:
+    #- custom_lint
+    #- dart_code_linter
+
+linter:
+  rules:
+    - always_declare_return_types       # 强制声明返回类型
+    - annotate_overrides                # 强制 @override 标注
+    - avoid_print                       # 禁止 print
+    - avoid_unnecessary_containers      # 减少冗余的 Container
+    - cancel_subscriptions              # 检查 Stream 订阅是否关闭
+    - close_sinks                       # 检查 Sink 是否关闭
+    - combinators_ordering
+    #- directives_ordering
+    #- omit_local_variable_types
+    - prefer_final_fields
+    - prefer_final_in_for_each
+    - prefer_final_locals
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - require_trailing_commas
+    - avoid_void_async
+    - use_key_in_widget_constructors    # 强制 Widget 包含 Key
+    - unawaited_futures
+    - sort_constructors_first
+    - sort_unnamed_constructors_first
+
+dart_code_linter:
+  rules-exclude:
+    - test/**
+  extends:
+    - package:dart_code_linter/presets/recommended.yaml
+  rules:
+    - newline-before-return: false

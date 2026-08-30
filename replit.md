@@ -1,6 +1,6 @@
-# [Project name]
+# bili Flutter
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+从 GitHub 导入的 bili Flutter 多包项目，应用源码位于 `bili/app`，共享 Dart/Flutter 包位于 `bili/packages`。
 
 ## Run & Operate
 
@@ -10,6 +10,9 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Flutter source: `bili/`
+- Flutter app entry: `bili/app/lib/main.dart`
+- Flutter workspace dependencies: run `flutter pub get` from `bili/` after installing Flutter 3.47 / Dart 3.13 or newer
 
 ## Stack
 
@@ -22,7 +25,9 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `bili/app` — Flutter application, routing, UI, database and tests
+- `bili/packages` — shared `bilibili`, `components`, `data` and `model` packages
+- `lib/api-spec/openapi.yaml` — API contract for the workspace template
 
 ## Architecture decisions
 
@@ -30,7 +35,7 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+`bili` is the imported Flutter application. The current workspace keeps the upstream source intact so feature work can continue from the `main` branch snapshot.
 
 ## User preferences
 
@@ -38,7 +43,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The imported Flutter workspace requires Dart `^3.13.0` and Flutter `3.47.0`; do not lower these constraints just to accommodate an older local SDK.
 
 ## Pointers
 

@@ -1,0 +1,54 @@
+import 'package:data/data.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../app_scaffold.dart';
+import '../feature/search/bloc/search_bloc.dart';
+import '../feature/search/bloc/search_result_bloc.dart';
+import 'routes.dart';
+import '../feature/home/home_screen.dart';
+import '../feature/live/live_screen.dart';
+import '../feature/not_found/not_found_screen.dart';
+import '../feature/search/search_result_screen.dart';
+import '../feature/space/space_screen.dart';
+import '../feature/video/video_screen.dart';
+
+part 'route_data/home_route_data.dart';
+part 'route_data/live_route_data.dart';
+part 'route_data/not_found_route_data.dart';
+part 'route_data/search_result_route_data.dart';
+part 'route_data/space_route_data.dart';
+part 'route_data/video_route_data.dart';
+part 'router.g.dart';
+
+final GoRouter router = GoRouter(
+  debugLogDiagnostics: true,
+  onException: (_, GoRouterState state, GoRouter router) {
+    /*final path = BiliUtils.getRoutePath(state.uri);
+    if (path == null)  {
+      router.go(Routes.notFound, extra: state.uri);
+    } else {
+      router.go(path);
+      final uri = state.uri;
+      router.go(
+        Routes.notFound,
+        extra: Uri(
+          path: '/${uri.host}${uri.path}',
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ),
+      );
+    }*/
+  },
+  routes: [
+    ShellRoute(
+      builder: (_, _, navigator) {
+        return AppScaffold(child: navigator);
+      },
+      routes: $appRoutes,
+    ),
+  ],
+  initialLocation: Routes.home,
+  //redirect: (context, state) => BiliUtils.httpToRoutePath(state.uri),
+);

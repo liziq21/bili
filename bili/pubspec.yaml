@@ -1,0 +1,17 @@
+name: f_biuli
+description: A new Flutter project.
+publish_to: 'none'
+
+environment:
+  sdk: "^3.13.0"
+
+workspace:
+  - app
+  - packages/*
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+

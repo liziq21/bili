@@ -1,0 +1,51 @@
+global_options:
+
+targets:
+  $default:
+    builders:
+      drift_dev:
+        generate_for:
+          - lib/database/**.dart
+        options:
+          store_date_time_values_as_text: true
+      freezed:
+        generate_for:
+          - lib/bilibili/**.dart
+          - lib/data/model/**.dart
+          - lib/model/data/**.dart
+          - lib/network/model/**.dart
+        options:
+          copyWith: false
+          #equal: false
+          map: false
+          to_json: false
+          # to_string: false
+          when:
+            when: false
+            maybe_when: false
+            when_or_null: false
+      
+      go_router_builder:
+        generate_for:
+          include:
+            - lib/routing/router.dart
+
+      json_serializable:
+        generate_for:
+          include:
+            - lib/**.dart
+          exclude:
+            - lib/**.g.dart
+            - lib/**.freezed.dart
+            - lib/**.config.dart
+            - lib/app_view_model.dart
+        options:
+          create_to_json: false
+          checked: true
+          # 序列化嵌套的 Freezed 对象
+          # explicit_to_json: true
+
+      retrofit_generator:
+        generate_for:
+          include:
+            - lib/bilibili/network/retrofit/retrofit_network.dart

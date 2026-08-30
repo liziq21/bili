@@ -1,0 +1,1 @@
+- [Flutter toolchain compatibility](flutter-toolchain-compatibility.md) — check SDK constraints before dependency resolution; never lower upstream requirements to fit an older environment.
