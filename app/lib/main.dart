@@ -8,8 +8,10 @@ import 'package:http/io_client.dart' as http;
 import 'package:logging/logging.dart';
 
 import 'app.dart';
+import 'app_scaffold.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/repo_providers.dart';
+import 'styles/styles.dart';
 
 void main() {
   initDebugOverlayBridge();
@@ -95,3 +97,5 @@ void initDebugOverlayBridge() {
     ),
   );
 }
+
+AppStyle get $styles => AppScaffold.style;

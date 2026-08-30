@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_scaffold.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';
 import 'routes.dart';
@@ -40,7 +41,14 @@ final GoRouter router = GoRouter(
       );
     }*/
   },
-  routes: $appRoutes,
+  routes: [
+    ShellRoute(
+      builder: (_, _, navigator) {
+        return AppScaffold(child: navigator);
+      },
+      routes: $appRoutes,
+    ),
+  ],
   initialLocation: Routes.home,
   //redirect: (context, state) => BiliUtils.httpToRoutePath(state.uri),
 );
