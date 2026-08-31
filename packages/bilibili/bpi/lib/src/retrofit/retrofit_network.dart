@@ -12,6 +12,7 @@ import '../api.dart';
 import 'api_interceptor.dart';
 import 'chopper_wbi_interceptor.dart';
 import 'json_serializable_converter.dart';
+import 'token_manager.dart';
 import 'token_storage.dart';
 
 part 'retrofit_network.chopper.dart';
@@ -35,16 +36,6 @@ abstract class BiliNetworkApi extends ChopperService {
     @tag String tag = 'WBI',
   });
 
-  // static Request convertRequest(Request request) {
-  //   final {'search_type': searchType, 'keyword': keyword} = request.parameters;
-  //   return applyHeaders(request, {
-  //     'origin': 'https://search.bilibili.com',
-  //     HttpHeaders.refererHeader:
-  //         'https://search.bilibili.com/$searchType?keyword=${Uri.encodeFull(keyword)}',
-  //   });
-  // }
-  //
-  // @FactoryConverter(request: convertRequest)
   @GET(path: WbiApiPath.searchByType)
   Future<NetworkSearchResult> typeSearch(
     @Query('search_type') SearchType searchType,
@@ -69,11 +60,9 @@ abstract class BiliNetworkApi extends ChopperService {
 }
 
 class BiliNetworkSearch implements NetworkSearchDataSource {
-  BiliNetworkSearch({
-    http.Client? client,
-    TokenStorage? storage,
-  }) : _httpClient = client ?? http.Client(),
-       _ownsHttpClient = client == null {
+  BiliNetworkSearch({http.Client? client, TokenStorage? storage})
+    : _httpClient = client ?? http.Client(),
+      _ownsHttpClient = client == null {
     _chopperClient = ChopperClient(
       client: _httpClient,
       converter: JsonSerializableConverter({

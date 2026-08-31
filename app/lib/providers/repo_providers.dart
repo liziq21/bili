@@ -59,7 +59,10 @@ List<RepositoryProvider> get repoProviders => [
   RepositoryProvider<GetRecentSearchQueriesUseCase>(
     create: (context) => .new(recentSearchQueryRepository: context.read()),
   ),
-  RepositoryProvider<Bili>(create: (_) => .new()),
+  RepositoryProvider<Bili>(
+    create: (_) => .new(),
+    dispose: (bili) => bili.close(),
+  ),
   RepositoryProvider<VideoSearchRepository>(
     create: (context) => context.read<Bili>().videoSearchRepository(),
   ),

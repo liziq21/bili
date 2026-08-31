@@ -6,7 +6,13 @@ import 'data/repository/bilibili_search_suggest_repository.dart';
 
 class Bili() {
   static Client? client;
-  late final NetworkSearchDataSource _bpi = BiliNetworkSearch(client: client);
+  BiliNetworkSearch? _networkSearch;
+  NetworkSearchDataSource get _bpi {
+    _networkSearch ??= BiliNetworkSearch(client: client);
+    return _networkSearch!;
+  }
+
+  Future<void> close() async => _networkSearch?.close();
   BilibiliVideoSearchRepository videoSearchRepository() => .new(network: _bpi);
 
   BilibiliUserSearchRepository userSearchRepository() => .new(network: _bpi);
