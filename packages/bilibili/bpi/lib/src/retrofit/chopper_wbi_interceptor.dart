@@ -6,36 +6,39 @@ import 'package:http/http.dart' as http;
 import '../utils/wbi_utils.dart';
 import 'token_manager.dart';
 
-import 'package:logging/logging.dart';
+class BiliWbiInterceptor implements Interceptor {
+  const BiliWbiInterceptor({required this.tokenManager, required this.client});
 
-class ChooperWbiInterceptor({
-  required final TokenManager tokenManager,
-  required final http.Client client,
-}) implements Interceptor {
+  final TokenManager tokenManager;
+  final http.Client client;
   static const String wbiStorageKey = 'BILIBILI_MiXIN_KEY';
-  final _log = Logger('ChooperWbiInterceptor');
+
   @override
   Future<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
-    if (chain.request.tag == 'WBI') {
-      var request = chain.request;
-
-      final mixinKey = await tokenManager.getOrRefreshWbiKey(
-        key: wbiStorageKey,
-        fetcher: () => WbiUtils.fetchMixinKey(client),
-      );
-      _log.info('mixinKey: $mixinKey');
-      request = request.copyWith(
-        parameters: WbiUtils.encWbi(request.parameters, mixinKey),
-      );
-
-      final response = await chain.proceed(request);
-
-      if (response.statusCode == 401) {
-        await tokenManager.deleteToken(wbiStorageKey);
-      }
-
-      return response;
+    final originalRequest = chain.request;
+    if (originalRequest.tag != 'WBI') {
+      return chain.proceed(originalRequest);
     }
-    return chain.proceed(chain.request);
+
+    final firstResponse = await chain.proceed(await _sign(originalRequest));
+    if (firstResponse.statusCode != 401) {
+      return firstResponse;
+    }
+
+    await tokenManager.deleteToken(wbiStorageKey);
+    return chain.proceed(await _sign(originalRequest));
+  }
+
+  Future<Request> _sign(Request request) async {
+    final mixinKey = await tokenManager.getOrRefreshWbiKey(
+      key: wbiStorageKey,
+      fetcher: () => WbiUtils.fetchMixinKey(client),
+    );
+    return request.copyWith(
+      parameters: WbiUtils.encWbi(request.parameters, mixinKey),
+    );
   }
 }
+
+/// Deprecated spelling kept as a source-compatible alias.
+typedef ChooperWbiInterceptor = BiliWbiInterceptor;

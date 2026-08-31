@@ -2,51 +2,51 @@ import 'dart:async';
 
 import 'package:chopper/chopper.dart';
 
+import '../error/bpi_exception.dart';
 import '../model/api_result.dart';
 
 typedef JsonFactory<T> = T Function(Map<String, dynamic> json);
 
 class const JsonSerializableConverter(final Map<Type, JsonFactory> factories)
     extends JsonConverter {
-  T? _decodeMap<T>(Map<String, dynamic> values) {
-    /// Get jsonFactory using Type parameters
-    /// if not found or invalid, throw error or return null
-    final jsonFactory = factories[T];
-    if (jsonFactory == null || jsonFactory is! JsonFactory<T>) {
-      /// throw serializer not found error;
-      return null;
-    }
-
-    return jsonFactory(values);
-  }
-
-  List<T> _decodeList<T>(Iterable values) =>
-      values.where((v) => v != null).map<T>((v) => _decode<T>(v)).toList();
-
-  dynamic _decode<T>(dynamic entity) {
-    if (entity is Iterable) return _decodeList<T>(entity as List);
-
-    if (entity is Map) return _decodeMap<T>(entity as Map<String, dynamic>);
-
-    return entity;
-  }
-
   @override
   FutureOr<Response<ResultType>> convertResponse<ResultType, Item>(
     Response response,
   ) async {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw BpiHttpException(
+        'Bilibili request failed.',
+        statusCode: response.statusCode,
+      );
+    }
+
     // use [JsonConverter] to decode json
     final jsonRes = await super.convertResponse(response);
     final jsonFactory = factories[ResultType];
     if (jsonFactory == null || jsonFactory is! JsonFactory<ResultType>) {
-      throw 'serializer not found error;';
+      throw BpiSerializationException(
+        'No JSON factory is registered for $ResultType.',
+      );
     }
-    final apiResult = ApiResult<ResultType>.fromJson(jsonRes.body, jsonFactory);
+    if (jsonRes.body is! Map) {
+      throw BpiSerializationException(
+        'Expected a JSON object for $ResultType but received '
+        '${jsonRes.body.runtimeType}.',
+      );
+    }
+
+    final apiResult = ApiResult<ResultType>.fromJson(
+      Map<String, dynamic>.from(jsonRes.body as Map),
+      jsonFactory,
+    );
     return switch (apiResult) {
       Ok(:final data) => jsonRes.copyWith<ResultType>(body: data),
-      _ => throw apiResult,
+      Error(:final code, :final message) => throw BiliApiException(
+        message ?? 'Bilibili API request failed.',
+        biliCode: code,
+        statusCode: response.statusCode,
+      ),
     };
-    // return jsonRes.copyWith<ResultType>(body: _decode<Item>(jsonRes.body));
   }
 
   @override

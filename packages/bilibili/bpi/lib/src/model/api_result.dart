@@ -1,3 +1,5 @@
+import '../error/bpi_exception.dart';
+
 sealed class const ApiResult<T>() {
   const factory ApiResult.error({required int code, String? message}) = Error._;
   const factory ApiResult.ok({required int code, required T data}) = Ok._;
@@ -6,19 +8,44 @@ sealed class const ApiResult<T>() {
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
   ) {
-    final code = json['code'] as int;
-    final message = json['message'] as String?;
-
-    if (code != 0 && code != 3 ||
-        (message != null &&
-            message.isNotEmpty &&
-            message != '0' &&
-            message != 'OK')) {
-      return .error(code: code, message: message ?? 'Not message');
+    final code = switch (json['code']) {
+      num value => value.toInt(),
+      String value => int.tryParse(value),
+      _ => null,
+    };
+    if (code == null) {
+      throw const BpiSerializationException(
+        'Bilibili response is missing a numeric code.',
+      );
     }
 
-    final data = (json['data'] ?? json['result']) as Map<String, dynamic>;
-    return .ok(code: code, data: fromJsonT(data));
+    final message = json['message']?.toString();
+    if (code != 0) {
+      return .error(code: code, message: message);
+    }
+
+    final rawData = json['data'] ?? json['result'];
+    if (rawData is! Map) {
+      throw BpiSerializationException(
+        'Successful Bilibili response is missing an object data/result field.',
+        biliCode: code,
+      );
+    }
+
+    try {
+      return .ok(
+        code: code,
+        data: fromJsonT(Map<String, dynamic>.from(rawData)),
+      );
+    } on BpiException {
+      rethrow;
+    } on Object catch (error) {
+      throw BpiSerializationException(
+        'Failed to decode Bilibili response data.',
+        biliCode: code,
+        cause: error,
+      );
+    }
   }
 }
 
@@ -33,27 +60,3 @@ final class const Ok<T>._({required final int code, required final T data})
   @override
   String toString() => 'ApiResult<$T>.ok($data)';
 }
-
-// sealed class const ApiResult<T>() {
-//   const factory ApiResult.ok({required int code, required T data}) = Ok._;
-//
-//   const factory ApiResult.error({required int code, String? message}) = Error._;
-//
-//   factory ApiResult.fromJson(
-//     Map<String, dynamic> json,
-//     T Function(Map<String, dynamic>) fromJsonT,
-//   ) {
-//     final code = json['code'] as int;
-//     final message = json['message'] as String?;
-//
-//     if (code != 0 && code != 3 ||
-//         (message != null && message.isNotEmpty && message != '0')) {
-//       return ApiResultError(code: code, message: message ?? 'Not message');
-//     }
-//
-//     final data = (json['data'] ?? json['result']) as Map<String, dynamic>;
-//     return ApiResultOk(code: code, data: fromJsonT(data));
-//   }
-// }
-//
-// class const OK<T>._({required final int code, required final T data}) extends ApiResult<T>;

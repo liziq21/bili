@@ -2,16 +2,21 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../model/token_model.dart';
+import '../error/bpi_exception.dart';
 import 'token_storage.dart';
 
-class TokenManager({final TokenStorage? storage}) {
+class TokenManager {
+  TokenManager({this.storage, DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now;
+
+  final TokenStorage? storage;
+  final DateTime Function() _clock;
   final Map<String, ApiToken> _memoryTokens = {};
   final Map<String, Completer<String>> _refreshLocks = {};
 
   String? getRefreshToken(String key) => _memoryTokens[key]?.refreshToken;
   Future<void> deleteToken(String key) async {
     _memoryTokens.remove(key);
-    _refreshLocks.remove(key);
     await storage?.deleteToken(key);
   }
 
@@ -19,15 +24,27 @@ class TokenManager({final TokenStorage? storage}) {
     var token = _memoryTokens[key];
 
     if (token == null && storage != null) {
-      final apiTokenStr = await storage!.loadToken(key);
+      late final String? apiTokenStr;
+      try {
+        apiTokenStr = await storage!.loadToken(key);
+      } on Object catch (error) {
+        throw TokenException('Failed to load token "$key".', cause: error);
+      }
       if (apiTokenStr != null) {
-        final jsonMap = json.decode(apiTokenStr) as Map<String, dynamic>;
-        token = ApiToken.fromJson(jsonMap);
+        try {
+          final decoded = json.decode(apiTokenStr);
+          if (decoded is! Map) {
+            throw const FormatException('Token JSON must be an object.');
+          }
+          token = ApiToken.fromJson(Map<String, dynamic>.from(decoded));
+        } on Object catch (error) {
+          throw TokenException('Stored token "$key" is invalid.', cause: error);
+        }
         _memoryTokens[key] = token;
       }
     }
 
-    if (token != null && !token.isExpired) {
+    if (token != null && !token.isExpiredAt(_clock())) {
       return token.accessToken;
     }
     return null;
@@ -36,7 +53,11 @@ class TokenManager({final TokenStorage? storage}) {
   Future<void> updateToken(String key, ApiToken newToken) async {
     _memoryTokens[key] = newToken;
     if (storage != null) {
-      await storage!.saveToken(key, json.encode(newToken.toJson()));
+      try {
+        await storage!.saveToken(key, json.encode(newToken.toJson()));
+      } on Object catch (error) {
+        throw TokenException('Failed to save token "$key".', cause: error);
+      }
     }
   }
 
@@ -61,7 +82,7 @@ class TokenManager({final TokenStorage? storage}) {
         key,
         ApiToken(
           accessToken: freshKey,
-          expiresAt: DateTime.now().add(const Duration(days: 1)),
+          expiresAt: _clock().add(const Duration(days: 1)),
         ),
       );
       completer.complete(freshKey);
@@ -70,7 +91,9 @@ class TokenManager({final TokenStorage? storage}) {
       completer.completeError(e);
       rethrow;
     } finally {
-      _refreshLocks.remove(key);
+      if (identical(_refreshLocks[key], completer)) {
+        _refreshLocks.remove(key);
+      }
     }
   }
 }

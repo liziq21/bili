@@ -68,24 +68,41 @@ abstract class BiliNetworkApi extends ChopperService {
       _$BiliNetworkApi(client ?? .new());
 }
 
-class BiliNetworkSearch({http.Client? client, final TokenStorage? storage})
-    implements NetworkSearchDataSource {
-  final BiliNetworkApi _networkApi = BiliNetworkApi.create(
-    .new(
-      client: client,
+class BiliNetworkSearch implements NetworkSearchDataSource {
+  BiliNetworkSearch({
+    http.Client? client,
+    TokenStorage? storage,
+  }) : _httpClient = client ?? http.Client(),
+       _ownsHttpClient = client == null {
+    _chopperClient = ChopperClient(
+      client: _httpClient,
       converter: JsonSerializableConverter({
         NetworkSearchResult: NetworkSearchResult.fromJson,
         NetworkSearchSuggest: NetworkSearchSuggest.fromJson,
+        VideoDetailData: VideoDetailData.fromJson,
       }),
       interceptors: [
         ApiInterceptor(),
-        ChooperWbiInterceptor(
-          tokenManager: .new(storage: storage),
-          client: client ?? .new(),
+        BiliWbiInterceptor(
+          tokenManager: TokenManager(storage: storage),
+          client: _httpClient,
         ),
       ],
-    ),
-  );
+    );
+    _networkApi = BiliNetworkApi.create(_chopperClient);
+  }
+
+  final http.Client _httpClient;
+  final bool _ownsHttpClient;
+  late final ChopperClient _chopperClient;
+  late final BiliNetworkApi _networkApi;
+
+  Future<void> close() async {
+    _chopperClient.dispose();
+    if (_ownsHttpClient) {
+      _httpClient.close();
+    }
+  }
 
   @override
   Future<NetworkSearchSuggest> getSuggests(String term) =>

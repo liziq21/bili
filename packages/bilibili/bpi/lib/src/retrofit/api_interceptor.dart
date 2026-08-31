@@ -9,7 +9,7 @@ class const ApiInterceptor({final bool? _enableHttp2}) implements Interceptor {
     Chain<BodyType> chain,
   ) async {
     final request = applyHeaders(chain.request, {
-      HttpHeaders.userAgentHeader: 'Dart/3.6 (dart:io)', // Http2Adapter不会自动添加标头
+      HttpHeaders.userAgentHeader: 'Mozilla/5.0',
       if (_enableHttp2 != null && !_enableHttp2) 'connection': 'keep-alive',
       //HttpHeaders.acceptEncodingHeader: 'br,gzip',
 
