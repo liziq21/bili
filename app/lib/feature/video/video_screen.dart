@@ -1,6 +1,5 @@
 import 'dart:math';
 
-//import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:sized_context/sized_context.dart';
@@ -9,26 +8,9 @@ import '../../main.dart';
 import '../../ui/common/centered_box.dart';
 import '../../utils/platfrom_info.dart';
 
-class VideoParameters {
-  const VideoParameters({
-    required this.id,
-    this.cid,
-    this.commentRootId,
-    this.commentSecondaryId,
-    this.dmProgress,
-  });
-  final String id;
-  final String? cid;
-  final String? commentRootId;
-  final String? commentSecondaryId;
-  final String? dmProgress;
-}
+class VideoScreen extends StatelessWidget {
+  const VideoScreen({super.key});
 
-class const VideoScreen({
-  super.key,
-  final VoidCallback? onBackClick,
-  final EdgeInsets contentPadding = .zero,
-}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Main view content switches between 1 and 2 column layouts
@@ -42,7 +24,7 @@ class const VideoScreen({
         builder: (_, _) {
           return SafeArea(
             child: Padding(
-              padding: contentPadding,
+              padding: EdgeInsets.zero,
               child: Column(
                 children: [
                   videoPlayer(),
@@ -59,9 +41,7 @@ class const VideoScreen({
     );
   }
 
-  Widget videoPlayer() {
-    return Text('videoPlayer');
-  }
+  Widget videoPlayer() => const Text('videoPlayer');
 
   Widget _buildTwoColumn(BuildContext context) {
     final bool smallMode = context.heightPx < 550;
@@ -85,14 +65,13 @@ class const VideoScreen({
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _WonderImageWithTimeline(
-                      data: _data,
+                      _WonderImageWithTimeline(
                       height: timelineImageSize,
                     ),
                     Gap(smallMode ? $styles.insets.md : $styles.insets.lg),
                     SizedBox(
                       width: 400,
-                      child: _TimelineBtn(type: widget.type),
+                      child: const _TimelineBtn(),
                     ),
                   ],
                 ),
@@ -105,12 +84,8 @@ class const VideoScreen({
             child: CenteredBox(
               width: $styles.sizes.maxContentWidth2,
               child: _EventsList(
-                key: _eventsListKey,
-                data: _data,
                 topHeight: 100,
                 blurOnScroll: false,
-                onScroll: _handleScroll,
-                initialScrollOffset: _scrollPos,
               ),
             ),
           ),
@@ -129,7 +104,7 @@ class const VideoScreen({
           child: Stack(
             children: [
               /// Top content, sits underneath scrolling list
-              _WonderImageWithTimeline(height: topHeight, data: _data),
+              _WonderImageWithTimeline(height: topHeight),
 
               /// EventsList + TimelineBtn
               Column(
@@ -137,20 +112,14 @@ class const VideoScreen({
                   Expanded(
                     /// EventsList
                     child: _EventsList(
-                      key: _eventsListKey,
-                      data: _data,
                       topHeight: topHeight,
                       blurOnScroll: true,
-                      showTopGradient: false,
-                      onScroll: _handleScroll,
-                      initialScrollOffset: _scrollPos,
                     ),
                   ),
                   Gap($styles.insets.lg),
 
                   /// TimelineBtn
                   _TimelineBtn(
-                    type: _data.type,
                     width: $styles.sizes.maxContentWidth2,
                   ),
                   Gap($styles.insets.lg),
@@ -164,46 +133,25 @@ class const VideoScreen({
   }
 }
 
-class const _VideoReplyPanel({super.key}) extends StatelessWidget {
+class _WonderImageWithTimeline extends StatelessWidget {
+  const _WonderImageWithTimeline({required this.height});
+  final double height;
   @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      // key: const PageStorageKey(_VideoReplyPanelState),
-      slivers: [
-        SliverAppBar(
-          pinned: true, // 吸顶效果
-          toolbarHeight: 40,
-          automaticallyImplyLeading: false,
-          // backgroundColor: colorScheme.surface,
-          title: Padding(
-            padding: const .fromLTRB(12, 2.5, 6, 2.5),
-            child: Row(
-              mainAxisAlignment: .spaceBetween,
-              children: [
-                Text('sortType.desc', style: const TextStyle(fontSize: 13)),
-                TextButton.icon(
-                  // style: Style.buttonStyle,
-                  onPressed: () {}, //_videoReplyController.queryBySort,
-                  icon: Icon(
-                    Icons.sort,
-                    size: 16,
-                    // color: colorScheme.secondary,
-                  ),
-                  label: Text(
-                    'sortType.descShort',
-                    style: TextStyle(
-                      fontSize: 13,
-                      // color: colorScheme.secondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        //_buildBody(_videoReplyController.loadingState.value),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => SizedBox(height: height, child: const Text('WonderImage placeholder'));
 }
+
+class _TimelineBtn extends StatelessWidget {
+  const _TimelineBtn({this.width});
+  final double? width;
+  @override
+  Widget build(BuildContext context) => SizedBox(width: width, child: const Text('TimelineBtn placeholder'));
+}
+
+class _EventsList extends StatelessWidget {
+  const _EventsList({required this.topHeight, this.blurOnScroll = false});
+  final double topHeight;
+  final bool blurOnScroll;
+  @override
+  Widget build(BuildContext context) => const Text('EventsList placeholder');
+}
+

@@ -19,7 +19,7 @@ class const CreatorProfileItem({
               CircleAvatar(
                 radius: 22, // 固定头像大小
                 backgroundImage: CachedNetworkImageProvider(
-                  creatorProfile.thumbnailUrl,
+                  creatorProfile.thumbnailUrl ?? '',
                 ),
               ),
               const SizedBox(width: 12),

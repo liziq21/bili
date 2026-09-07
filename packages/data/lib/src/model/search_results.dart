@@ -1,16 +1,11 @@
-import 'creator_profile.dart';
+import 'creator_profile_model.dart';
 import 'paged_result.dart';
-import 'video_info_base.dart';
+import 'video_model.dart';
 
-class AggregateSearchPage extends Page<VideoInfoBase> {
-  AggregateSearchPage({
-    required super.number,
-    required super.totalPages,
-    required super.data,
-    this.creatorProfile,
-    this.creatorProfileVideos,
-  });
-
-  final CreatorProfile? creatorProfile;
-  final List<VideoInfoBase>? creatorProfileVideos;
-}
+class AggregateSearchPage({
+  required super.number,
+  required super.totalPages,
+  required super.data,
+  final CreatorProfile? creatorProfile,
+  final List<VideoModel>? creatorProfileVideos,
+}) extends Page<VideoModel>;

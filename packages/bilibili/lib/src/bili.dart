@@ -1,10 +1,12 @@
 import 'package:bpi/bpi.dart';
 import 'package:http/http.dart';
 
-import 'data/repository/bilibili_search_contents_repository.dart';
-import 'data/repository/bilibili_search_suggest_repository.dart';
+import 'data/source/bilibili_search_remote_data_source.dart';
 
-class Bili() {
+// App-layer repository types are imported via the app's own modules.
+// This file intentionally does not import app repository classes to keep
+// the bilibili package free of app-layer dependencies.
+class Bili {
   static Client? client;
   BiliNetworkSearch? _networkSearch;
   NetworkSearchDataSource get _bpi {
@@ -13,16 +15,7 @@ class Bili() {
   }
 
   Future<void> close() async => _networkSearch?.close();
-  BilibiliVideoSearchRepository videoSearchRepository() => .new(network: _bpi);
 
-  BilibiliUserSearchRepository userSearchRepository() => .new(network: _bpi);
-
-  BilibiliLiveRoomSearchRepository liveRoomSearchRepository() =>
-      .new(network: _bpi);
-
-  BilibiliAggregateSearchRepository aggregateSearchRepository() =>
-      .new(network: _bpi);
-
-  BilibiliSearchSuggestRepository searchSuggestRepository() =>
-      .new(network: _bpi);
+  BilibiliSearchRemoteDataSource searchRemoteDataSource() =>
+      BilibiliSearchRemoteDataSource(network: _bpi);
 }

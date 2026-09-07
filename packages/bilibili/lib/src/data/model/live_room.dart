@@ -2,13 +2,13 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 
 extension NetworkLiveRoomSearchResultX on NetworkLiveRoomSearchResult {
-  LiveRoom asModel() => LiveRoom(
+  LiveRoomModel asModel() => LiveRoomModel(
     id: roomid,
     title: title.parsedTitle(),
-    coverUrl: 'https:$cover',
+    url: 'https://live.bilibili.com/$roomid',
     isLive: liveStatus == 1,
-    cateName: cateName,
-    uid: uid,
-    uname: uname,
+    thumbnailUrl: 'https:$cover',
+    creatorProfileName: uname,
+    creatorProfileId: '$uid',
   );
 }

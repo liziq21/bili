@@ -1,18 +1,22 @@
 import 'package:bilibili/bilibili.dart';
-import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../data/repository/recent_search_query/default_recent_search_query_repository.dart';
-import '../data/repository/recent_search_query/recent_search_query_repository.dart';
-import '../data/repository/user_data/default_user_data_repository.dart';
-import '../data/repository/user_data/user_data_repository.dart';
-import '../database/app_database.dart';
-import '../database/dao/recent_search_query_dao.dart';
-import '../datastore/preferences_data_source.dart';
+import '../../data/repository/recent_search_query/default_recent_search_query_repository.dart';
+import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
+import '../../data/repository/search/app_live_room_search_repository.dart';
+import '../../data/repository/search/app_user_search_repository.dart';
+import '../../data/repository/search/app_video_search_repository.dart';
+import '../../data/repository/search_contents_repository.dart';
+import '../../data/repository/search_suggest_repository.dart';
+import '../../data/repository/user_data/default_user_data_repository.dart';
+import '../../data/repository/user_data/user_data_repository.dart';
+import '../../database/app_database.dart';
+import '../../database/dao/recent_search_query_dao.dart';
+import '../../datastore/preferences_data_source.dart';
 
 import 'package:logging/logging.dart';
 
-import '../domain/get_recent_search_queries_use_case.dart';
+import '../../domain/get_recent_search_queries_use_case.dart';
 
 final _log = Logger('DatabaseProviders');
 
@@ -64,18 +68,28 @@ List<RepositoryProvider> get repoProviders => [
     dispose: (bili) => bili.close(),
   ),
   RepositoryProvider<VideoSearchRepository>(
-    create: (context) => context.read<Bili>().videoSearchRepository(),
+    create: (context) => AppVideoSearchRepository(
+      context.read<Bili>().searchRemoteDataSource(),
+    ),
   ),
   RepositoryProvider<CreatorProfileSearchRepository>(
-    create: (context) => context.read<Bili>().userSearchRepository(),
+    create: (context) => AppUserSearchRepository(
+      context.read<Bili>().searchRemoteDataSource(),
+    ),
   ),
   RepositoryProvider<LiveRoomSearchRepository>(
-    create: (context) => context.read<Bili>().liveRoomSearchRepository(),
+    create: (context) => AppLiveRoomSearchRepository(
+      context.read<Bili>().searchRemoteDataSource(),
+    ),
   ),
   // RepositoryProvider<AggregateSearchRepository>(
-  //   create: (context) => context.read<Bili>().aggregateSearchRepository(),
+  //   create: (context) => AppAggregateSearchRepository(
+  //     context.read<Bili>().searchRemoteDataSource(),
+  //   ),
   // ),
   RepositoryProvider<SearchSuggestRepository>(
-    create: (context) => context.read<Bili>().searchSuggestRepository(),
+    create: (context) => AppUserSearchRepository(
+      context.read<Bili>().searchRemoteDataSource(),
+    ),
   ),
 ];

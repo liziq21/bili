@@ -7,7 +7,7 @@ import 'package:data/data.dart';
 
 class const VideoCard({
   super.key,
-  required final VideoInfoBase videoInfoBase,
+  required final VideoModel videoInfoBase,
   final GestureTapCallback? onTap,
 }) extends StatelessWidget {
   @override
@@ -25,7 +25,7 @@ class const VideoCard({
                 AspectRatio(
                   aspectRatio: 16 / 9, // 固定的 16:9
                   child: CachedNetworkImage(
-                    imageUrl: videoInfoBase.picUrl,
+                    imageUrl: videoInfoBase.thumbnailUrl ?? '',
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -48,7 +48,7 @@ class const VideoCard({
                           ),
                         ),
                         Text(
-                          '${videoInfoBase.play} 观看 • ${videoInfoBase.pubdate}',
+                          '${videoInfoBase.viewCount} 观看 • ${videoInfoBase.uploadDate}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(

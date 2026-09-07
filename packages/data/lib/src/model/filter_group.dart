@@ -1,11 +1,4 @@
-import 'package:meta/meta.dart';
-
-@immutable
-abstract interface class FilterOption {
-  const FilterOption({required this.label});
-
-  final String label;
-
+abstract interface class const FilterOption({required final String label}) {
   String get value;
 
   @override
@@ -18,12 +11,10 @@ abstract interface class FilterOption {
   int get hashCode => value.hashCode;
 }
 
-@immutable
-sealed class FilterGroup {
-  const FilterGroup({required this.key, required this.label});
-
-  final String key;
-  final String label;
+sealed class const FilterGroup({
+  required final String key,
+  required final String label,
+}) {
   Map<String, String> toQueryParams();
 
   FilterGroup copyWith();

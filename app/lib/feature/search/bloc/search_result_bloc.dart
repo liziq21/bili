@@ -5,6 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:model/model.dart';
 
+import '../../../data/repository/search_contents_repository.dart';
+
 part 'search_result_event.dart';
 part 'search_result_state.dart';
 

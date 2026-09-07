@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "google-developer-knowledge": {
+      "url": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "AIzaSyD03C3vFVImvC8AdDVEdFg6CQydglY4qJM"
+      },
+      "directTools": [
+        "search_documents",
+        "get_documents"
+      ]
+    },
+    "dart": {
+      "command": "dart",
+      "args": ["mcp-server"]
+    }
+  }
+}

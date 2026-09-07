@@ -11,14 +11,17 @@ class RecentSearchQueryDao extends DatabaseAccessor<AppDatabase> with _$RecentSe
 
   Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(int limit) {
     return (select(recentSearchQuery)
-      ..orderBy([(it) => OrderingTerm(expression: it.queriedDate)])
+      ..orderBy([(it) => OrderingTerm.desc(it.queriedDate)])
       ..limit(limit))
       .watch();
   }
   
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
     return into(recentSearchQuery).insertOnConflictUpdate(
-      RecentSearchQueryCompanion(query: Value(searchQuery)),
+      RecentSearchQueryCompanion(
+        query: Value(searchQuery),
+        queriedDate: Value(DateTime.now()),
+      ),
     );
   }
   

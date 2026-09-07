@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:data/data.dart';
 import 'package:model/model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
@@ -8,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../../data/model/recent_search_query.dart';
 import '../../../data/repository/recent_search_query/recent_search_query_repository.dart';
+import '../../../data/repository/search_suggest_repository.dart';
 import '../../../domain/get_recent_search_queries_use_case.dart';
 part 'search_state.dart';
 part 'search_event.dart';

@@ -8,9 +8,10 @@ extension BuildContextSearch on BuildContext {
 
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
-class const SearchRouteData({
-  /*@TypedQueryParameter(name: 's') */ required final String keyword,
-}) extends GoRouteData with $SearchRouteData {
+class SearchRouteData extends GoRouteData with $SearchRouteData {
+  /*@TypedQueryParameter(name: 's') */ const SearchRouteData({required this.keyword});
+
+  final String keyword;
   @override
   Widget build(context, _) {
     return MultiBlocProvider(
@@ -25,7 +26,7 @@ class const SearchRouteData({
         ),
         if (context.read<VideoSearchRepository?>()
             case final searchContentsRepo?)
-          BlocProvider<SearchResultBloc<VideoInfoBase>>(
+          BlocProvider<SearchResultBloc<VideoModel>>(
             create: (context) =>
                 .new(searchContentsRepository: searchContentsRepo),
           ),

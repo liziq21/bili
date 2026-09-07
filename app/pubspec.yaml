@@ -53,7 +53,10 @@ dev_dependencies:
   test: ^1.25.6
   drift_dev: ^2.30.0
   build_runner: ^2.15.1
-  go_router_builder: ^4.4.0
+  # 4.4.0 and below don't support Dart 3.13. Do not override analyzer to ^14.0.0
+  # (would break drift_dev 2.34.0). Route data classes must use named constructors
+  # instead of primary constructor syntax (class const Foo({...}) extends ...).
+  go_router_builder: ^4.5.0
 
 flutter:
   generate: true

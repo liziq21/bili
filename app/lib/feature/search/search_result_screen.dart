@@ -45,9 +45,9 @@ class const SearchResultScreen({
   }
 
   Widget? _videoResultView(BuildContext context) {
-    final bloc = context.read<SearchResultBloc<VideoInfoBase>?>();
+    final bloc = context.read<SearchResultBloc<VideoModel>?>();
     if (bloc == null) return null;
-    return SearchResult<VideoInfoBase>(
+    return SearchResult<VideoModel>(
       maxCrossAxisExtent: 200.0,
       itemAspectRatio: 0.8,
       itemBuilder: (_, videoInfoBase, _) =>
