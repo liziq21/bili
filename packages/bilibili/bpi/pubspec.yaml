@@ -22,11 +22,11 @@ dependencies:
 
 dev_dependencies:
   lints: ^6.1.0
-  test: ^1.31.1
+  test: any
    # https://github.com/flutter/flutter/issues/175071
   build_runner: any
   build_test: any
   build_web_compilers: any
   chopper_generator: ^8.6.2
-  freezed: ^3.2.5
+  freezed: any
   json_serializable: ^6.14.0

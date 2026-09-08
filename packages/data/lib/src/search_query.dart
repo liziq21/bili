@@ -4,12 +4,19 @@ import 'model/filter_group.dart';
 import 'model/sort_option.dart';
 
 @immutable
-class SearchQuery({
-  required final String query,
-  final int pageKey = 1,
-  final SortOption? sortOption,
-  final List<FilterGroup> filters = const [],
-}) {
+class SearchQuery {
+  const SearchQuery({
+    required this.query,
+    this.pageKey = 1,
+    this.sortOption,
+    this.filters = const [],
+  });
+
+  final String query;
+  final int pageKey;
+  final SortOption? sortOption;
+  final List<FilterGroup> filters;
+
   Map<String, String> get parameters => <String, String>{
     ...?sortOption?.toQueryParams(),
     for (final filter in filters) ...filter.toQueryParams(),
