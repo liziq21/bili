@@ -159,11 +159,8 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
 
-      - name: Setup CocoaPods
+      - run: pod repo update
         working-directory: app/ios
-        run: |
-          pod repo update
-          pod install
       
       - name: Build IPA
         working-directory: app
