@@ -5,8 +5,8 @@ publish_to: 'none'
 # Flutter and Dart SDK version constraints for the project and CI workflow matrix generation.
 # flutter-actions/pubspec-matrix-action and subosito/flutter-action parse this file to determine Flutter version.
 environment:
-  sdk: "^3.11.0"
-  flutter: "3.41.2"
+  sdk: "^3.13.2"
+  flutter: "3.47.2"
 
 workspace:
   - app
