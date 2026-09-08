@@ -131,64 +131,64 @@ jobs:
           path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
 
-  build_iOSApp:
-    name: Build Flutter App (iOS)
-    needs: [pubspec, flutter_test]
-    runs-on: macos-26
-    strategy:
-      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+#  build_iOSApp:
+#    name: Build Flutter App (iOS)
+#    needs: [pubspec, flutter_test]
+#    runs-on: macos-26
+#    strategy:
+#      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v6
+#        with:
+#          fetch-depth: 0
 
-      - uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          channel: stable
-          flutter-version-file: pubspec.yaml
+#      - uses: subosito/flutter-action@v2
+#        with:
+#          cache: true
+#          channel: stable
+#          flutter-version-file: pubspec.yaml
 
-      - name: Get packages
-        working-directory: app
-        run: flutter pub get
+#      - name: Get packages
+#        working-directory: app
+#        run: flutter pub get
 
-      - name: Run build_runner
-        working-directory: app
-        run: dart run build_runner build \
-          --delete-conflicting-outputs \
-          --verbose
+#      - name: Run build_runner
+#        working-directory: app
+#        run: dart run build_runner build \
+#          --delete-conflicting-outputs \
+#          --verbose
 
-      - run: pod repo update
-        working-directory: app/ios
+#      - run: pod repo update
+#        working-directory: app/ios
       
-      - name: Build IPA
-        working-directory: app
-        run: |
-          flutter build ios \
-            --release \
-            --no-codesign \
-            --verbose
-          mkdir -p Payload
-          mv build/ios/iphoneos/Runner.app Payload
-          zip -r -y Payload.zip Payload/Runner.app
-          mv Payload.zip Payload.ipa
+#      - name: Build IPA
+#        working-directory: app
+#        run: |
+#          flutter build ios \
+#            --release \
+#            --no-codesign \
+#            --verbose
+#          mkdir -p Payload
+#          mv build/ios/iphoneos/Runner.app Payload
+#          zip -r -y Payload.zip Payload/Runner.app
+#          mv Payload.zip Payload.ipa
 
-      - name: Upload IPA as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build
-          path: app/Payload.ipa
+#      - name: Upload IPA as artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ios-build
+#          path: app/Payload.ipa
           
-      - name: IPA to catbox
-        working-directory: app
-        env:
-           BARK_KEY: ${{ secrets.BARK_KEY }}
-        id: upload-ipa-to-catbox
-        run: |
-          RESPONSE=$(curl -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@Payload.ipa" https://litterbox.catbox.moe/resources/internals/api.php)
-          echo "Upload response: $RESPONSE"
-          curl "https://api.day.app/${BARK_KEY}/biliupdata" \
-            --data-urlencode "group=actions" \
-            --data-urlencode "icon=https://avatars.githubusercontent.com/u/65916846?v=4" \
-            --data-urlencode "url=apple-magnifier://install?url=$RESPONSE"
+#      - name: IPA to catbox
+#        working-directory: app
+#        env:
+#           BARK_KEY: ${{ secrets.BARK_KEY }}
+#        id: upload-ipa-to-catbox
+#        run: |
+#          RESPONSE=$(curl -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@Payload.ipa" https://litterbox.catbox.moe/resources/internals/api.php)
+#          echo "Upload response: $RESPONSE"
+#          curl "https://api.day.app/${BARK_KEY}/biliupdata" \
+#            --data-urlencode "group=actions" \
+#            --data-urlencode "icon=https://avatars.githubusercontent.com/u/65916846?v=4" \
+#            --data-urlencode "url=apple-magnifier://install?url=$RESPONSE"
