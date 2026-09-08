@@ -103,8 +103,8 @@ jobs:
           java-version: "17"
           cache: "gradle"
           cache-dependency-path: |
-            android/*.gradle*
-            android/**/gradle-wrapper.properties
+            app/android/*.gradle*
+            app/android/**/gradle-wrapper.properties
       
       - uses: flutter-actions/setup-flutter@v2
         with:
@@ -157,7 +157,7 @@ jobs:
           --verbose
 
       - run: pod repo update
-        working-directory: ios
+        working-directory: app/ios
       
       - name: Build IPA
         run: |
@@ -166,7 +166,7 @@ jobs:
             --no-codesign \
             --verbose
           mkdir -p Payload
-          mv ./build/ios/iphoneos/Runner.app Payload
+          mv ./app/build/ios/iphoneos/Runner.app Payload
           zip -r -y Payload.zip Payload/Runner.app
           mv Payload.zip Payload.ipa
 
