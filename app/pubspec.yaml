@@ -5,8 +5,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: "^3.13.0"
-  flutter: "3.47.0"
+  sdk: "^3.11.0"
+  flutter: "3.41.2"
 resolution: workspace
 
 # Add regular dependencies here.
@@ -24,7 +24,7 @@ dependencies:
   dynamic_color: ^1.9.0
   flutter_bloc: ^9.1.1
   flutter_debug_overlay: ^0.1.11
-  flutter_riverpod: ^3.4.2
+  flutter_riverpod: ^2.5.1
   go_router: ^17.4.0
   infinite_scroll_pagination: ^5.1.1
   intl: any
@@ -35,7 +35,7 @@ dependencies:
   provider: ^6.1.5+1
   window_size: ^0.1.0
   stream_transform: ^2.1.1
-  material_ui: ^1.0.0
+  material_ui: any
   shared_preferences: ^2.5.4
   equatable: any
   drift: ^2.30.0
@@ -50,7 +50,7 @@ dependencies:
   
 dev_dependencies:
   lints: ^6.0.0
-  test: ^1.25.6
+  test: any
   drift_dev: ^2.30.0
   build_runner: ^2.15.1
   # 4.4.0 and below don't support Dart 3.13. Do not override analyzer to ^14.0.0
