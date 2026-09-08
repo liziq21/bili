@@ -7,4 +7,6 @@ sealed class SearchResultEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class const FetchNextPage() extends SearchResultEvent;
+final class FetchNextPage extends SearchResultEvent {
+  const FetchNextPage();
+}

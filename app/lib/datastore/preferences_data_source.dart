@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:model/model.dart';
-//import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'preferences_key_set.dart';
 
-class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
-  this : _pref = sharedPreferences ?? .new();
+class PreferencesDataSource {
+  PreferencesDataSource({SharedPreferencesAsync? sharedPreferences})
+      : _pref = sharedPreferences ?? SharedPreferencesAsync();
 
   final SharedPreferencesAsync _pref;
-  //final _log = Logger('PreferencesDataSource');
   StreamController<UserData>? _controller;
 
   final Map<PreferencesKey, StreamController<Object?>> _keyControllers = {};
@@ -19,7 +18,7 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
       {};
 
   Stream<UserData> get data {
-    _controller ??= .broadcast(onListen: _readAndEmitData);
+    _controller ??= StreamController.broadcast(onListen: _readAndEmitData);
     return _controller!.stream;
   }
 
@@ -34,9 +33,9 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
 
   Future<Result<T>> get<T>(PreferencesKey<T> key) async {
     try {
-      return .ok(await key._getData(_pref));
+      return Result.ok(await key._getData(_pref));
     } on Exception catch (e) {
-      return .error(e);
+      return Result.error(e);
     }
   }
 
@@ -61,9 +60,9 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
           value.add(updatedSetData);
         }
       }
-      return .ok(null);
+      return Result.ok(null);
     } on Exception catch (e) {
-      return .error(e);
+      return Result.error(e);
     }
   }
 
@@ -76,7 +75,6 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
       return cacheMap[cacheKey]!.stream as Stream<R>;
     }
 
-    // ignore: close_sinks
     final controller = StreamController<R>.broadcast(
       onListen: () async {
         final initialData = await fetchInitialData();
@@ -120,7 +118,9 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
   }
 }
 
-class const PreferencesKey<T>._(this.name, this.defaultValue) {
+class PreferencesKey<T> {
+  const PreferencesKey._(this.name, this.defaultValue);
+
   static const serviceSource = PreferencesKey<String>._(
     'SERVICE_SOURCE',
     'BILIBILI',

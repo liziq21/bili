@@ -22,7 +22,7 @@ final _log = Logger('DatabaseProviders');
 
 List<RepositoryProvider> get databaseProviders => [
   RepositoryProvider<AppDatabase>(
-    create: (_) => .new(),
+    create: (_) => AppDatabase(),
     dispose: (database) {
       _log.fine('Provider dispose called for BiliDatabase');
       database
@@ -43,7 +43,7 @@ List<RepositoryProvider> get databaseProviders => [
 
 List<RepositoryProvider> get preferencesProviders => [
   RepositoryProvider<PreferencesDataSource>(
-    create: (_) => .new(),
+    create: (_) => PreferencesDataSource(),
     dispose: (pref) => pref.dispose(),
   ),
 ];
@@ -61,10 +61,10 @@ List<RepositoryProvider> get repoProviders => [
     )),
   ),
   RepositoryProvider<GetRecentSearchQueriesUseCase>(
-    create: (context) => .new(recentSearchQueryRepository: context.read()),
+    create: (context) => GetRecentSearchQueriesUseCase(recentSearchQueryRepository: context.read()),
   ),
   RepositoryProvider<Bili>(
-    create: (_) => .new(),
+    create: (_) => Bili(),
     dispose: (bili) => bili.close(),
   ),
   RepositoryProvider<VideoSearchRepository>(
@@ -82,11 +82,6 @@ List<RepositoryProvider> get repoProviders => [
       context.read<Bili>().searchRemoteDataSource(),
     ),
   ),
-  // RepositoryProvider<AggregateSearchRepository>(
-  //   create: (context) => AppAggregateSearchRepository(
-  //     context.read<Bili>().searchRemoteDataSource(),
-  //   ),
-  // ),
   RepositoryProvider<SearchSuggestRepository>(
     create: (context) => AppUserSearchRepository(
       context.read<Bili>().searchRemoteDataSource(),

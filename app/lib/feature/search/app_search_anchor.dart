@@ -7,13 +7,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/model/recent_search_query.dart';
 import 'bloc/search_bloc.dart';
 
-class const AppSearchAnchor({
-  super.key,
-  required final void Function(String query) onSearch, // 执行搜索（通常用于插入数据库）
-  final List<RecentSearchQuery> recentSearchQuery = const [],
-  final Function(String)? navigateToSearchResult,
-  final SearchAnchorChildBuilder? builder,
-}) extends StatefulWidget {
+class AppSearchAnchor extends StatefulWidget {
+  const AppSearchAnchor({
+    super.key,
+    required this.onSearch,
+    this.recentSearchQuery = const [],
+    this.navigateToSearchResult,
+    this.builder,
+  });
+
+  final void Function(String query) onSearch;
+  final List<RecentSearchQuery> recentSearchQuery;
+  final Function(String)? navigateToSearchResult;
+  final SearchAnchorChildBuilder? builder;
+
   @override
   State<AppSearchAnchor> createState() => _AppSearchAnchorState();
 }
@@ -22,6 +29,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
   final SearchController _controller = SearchController();
   String? _searchingWithQuery;
   late Iterable<Widget> _lastOptions = <Widget>[];
+
   @override
   void dispose() {
     _controller.dispose();
@@ -32,7 +40,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
     if (query.isEmpty) return;
     widget.onSearch(query);
     widget.navigateToSearchResult?.call(query);
-    _controller.closeView(query); // 搜索后关闭建议视图
+    _controller.closeView(query);
   }
 
   @override
@@ -48,14 +56,14 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
                   barHintText: '搜索...',
                   barElevation: const WidgetStatePropertyAll(0.0),
                   suggestionsBuilder: _getSuggestions,
-                  textInputAction: .search,
+                  textInputAction: TextInputAction.search,
                   onSubmitted: _handleSearch,
                 )
               : SearchAnchor(
                   searchController: _controller,
                   builder: widget.builder!,
                   suggestionsBuilder: _getSuggestions,
-                  textInputAction: .search,
+                  textInputAction: TextInputAction.search,
                   viewOnSubmitted: _handleSearch,
                 );
         },
@@ -69,10 +77,6 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
   ) async {
     _searchingWithQuery = controller.text;
 
-    // if (_searchingWithQuery!.isEmpty) {
-    //   return _buildHistoryList(widget.recentSearchQuery);
-    // }
-
     final bloc = context.read<SearchBloc>()
       ..add(SearchQueryChanged(_searchingWithQuery!));
 
@@ -80,7 +84,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
 
     if (_searchingWithQuery != controller.text) return _lastOptions;
 
-    _lastOptions = List.generate(options.length, ((index) {
+    _lastOptions = List.generate(options.length, (index) {
       final item = options[index];
 
       return ListTile(
@@ -92,34 +96,7 @@ class _AppSearchAnchorState extends State<AppSearchAnchor> {
           onPressed: () => _controller.text = item,
         ),
       );
-    }));
+    });
     return _lastOptions;
   }
-
-  // Iterable<Widget> _buildHistoryList(List<RecentSearchQuery> queries) {
-  //   if (queries.isEmpty) {
-  //     return const [
-  //       Center(
-  //         child: Padding(
-  //           padding: EdgeInsets.all(24.0),
-  //           child: Text(
-  //             'No search history.',
-  //             style: TextStyle(color: Colors.grey),
-  //           ),
-  //         ),
-  //       ),
-  //     ];
-  //   }
-  //   return queries.map(
-  //     (item) => ListTile(
-  //       leading: const Icon(Icons.history),
-  //       title: Text(item.query),
-  //       onTap: () => _handleSearch(item.query),
-  //       trailing: IconButton(
-  //         icon: const Icon(Icons.north_west),
-  //         onPressed: () => _controller.text = item.query,
-  //       ),
-  //     ),
-  //   );
-  // }
 }

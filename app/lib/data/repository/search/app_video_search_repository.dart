@@ -4,9 +4,11 @@ import 'package:model/model.dart';
 
 import '../search_contents_repository.dart';
 
-class const AppVideoSearchRepository(
-  final BilibiliSearchRemoteDataSource _remoteDataSource,
-) implements VideoSearchRepository {
+class AppVideoSearchRepository implements VideoSearchRepository {
+  const AppVideoSearchRepository(this._remoteDataSource);
+
+  final BilibiliSearchRemoteDataSource _remoteDataSource;
+
   @override
   List<FilterGroup> get filters => const [];
 

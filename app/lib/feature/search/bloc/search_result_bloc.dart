@@ -10,16 +10,19 @@ import '../../../data/repository/search_contents_repository.dart';
 part 'search_result_event.dart';
 part 'search_result_state.dart';
 
-class SearchResultBloc<T>({
-  required final SearchContentsRepository<T> searchContentsRepository,
-}) extends Bloc<SearchResultEvent, SearchResultState<T>> {
-  this : super(SearchResultState(pagingState: .new())) {
+class SearchResultBloc<T> extends Bloc<SearchResultEvent, SearchResultState<T>> {
+  SearchResultBloc({
+    required SearchContentsRepository<T> searchContentsRepository,
+  })  : _searchContentsRepository = searchContentsRepository,
+        super(SearchResultState(pagingState: PagingState())) {
     on<FetchNextPage>(_fetchNextPage);
   }
 
+  final SearchContentsRepository<T> _searchContentsRepository;
+
   Future<void> _fetchNextPage(
     FetchNextPage event,
-    Emitter<SearchResultState> emit,
+    Emitter<SearchResultState<T>> emit,
   ) async {
     if (state.pagingState.isLoading) return;
 
@@ -30,7 +33,7 @@ class SearchResultBloc<T>({
     );
 
     final searchQuery = state.searchQuery;
-    final result = await searchContentsRepository.search(searchQuery);
+    final result = await _searchContentsRepository.search(searchQuery);
 
     emit(
       state.updatePagingStete(

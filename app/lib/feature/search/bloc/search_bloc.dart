@@ -12,13 +12,16 @@ import '../../../domain/get_recent_search_queries_use_case.dart';
 part 'search_state.dart';
 part 'search_event.dart';
 
-class SearchBloc({
-  required final GetRecentSearchQueriesUseCase _getRentSearchQueriesUseCase,
-  required final RecentSearchQueryRepository _recentSearchQueryRepository,
-  required final SearchSuggestRepository _searchSuggestRepository,
-  String initQuery = '',
-}) extends Bloc<SearchEvent, SearchState> {
-  this : super(SearchState(currentQuery: initQuery)) {
+class SearchBloc extends Bloc<SearchEvent, SearchState> {
+  SearchBloc({
+    required GetRecentSearchQueriesUseCase getRentSearchQueriesUseCase,
+    required RecentSearchQueryRepository recentSearchQueryRepository,
+    required SearchSuggestRepository searchSuggestRepository,
+    String initQuery = '',
+  })  : _getRentSearchQueriesUseCase = getRentSearchQueriesUseCase,
+        _recentSearchQueryRepository = recentSearchQueryRepository,
+        _searchSuggestRepository = searchSuggestRepository,
+        super(SearchState(currentQuery: initQuery)) {
     on<MonitorRecentSearches>(_onMonitorRecentSearches);
     on<SearchQueryChanged>(
       _onSearchQueryChanged,
@@ -29,7 +32,11 @@ class SearchBloc({
     on<RecentSearchUpdated>(_onRecentSearchUpdated);
   }
 
+  final GetRecentSearchQueriesUseCase _getRentSearchQueriesUseCase;
+  final RecentSearchQueryRepository _recentSearchQueryRepository;
+  final SearchSuggestRepository _searchSuggestRepository;
   final _log = Logger('AppSearchBarBloc');
+
   // 处理最近搜索流：emit.forEach 自动接管生命周期，销毁时自动注销
   Future<void> _onMonitorRecentSearches(
     MonitorRecentSearches event,

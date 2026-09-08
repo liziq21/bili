@@ -4,13 +4,18 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'bloc/search_result_bloc.dart';
 
-class const SearchResult<T>({
-  super.key,
-  required final ItemWidgetBuilder<T> itemBuilder,
+class SearchResult<T> extends StatelessWidget {
+  const SearchResult({
+    super.key,
+    required this.itemBuilder,
+    this.itemAspectRatio = 1.0,
+    this.maxCrossAxisExtent = 200.0,
+  });
 
-  final double itemAspectRatio = 1.0,
-  final double maxCrossAxisExtent = 200.0,
-}) extends StatelessWidget {
+  final ItemWidgetBuilder<T> itemBuilder;
+  final double itemAspectRatio;
+  final double maxCrossAxisExtent;
+
   @override
   Widget build(BuildContext context) {
     return BlocSelector<
@@ -25,17 +30,17 @@ class const SearchResult<T>({
             PagedSliverGrid<int, T>(
               state: state,
               fetchNextPage: () =>
-                  context.read<SearchResultBloc<T>>().add(FetchNextPage()),
+                  context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
                 firstPageErrorIndicatorBuilder: (context) {
                   final error = state.error;
-                  debugPrint("👉 第一页加载失败原因: $error");
+                  debugPrint('👉 第一页加载失败原因: $error');
                   return Center(child: Text('加载失败: $error'));
                 },
                 newPageErrorIndicatorBuilder: (context) {
                   final error = state.error;
-                  debugPrint("👉 后续页加载失败原因: $error");
+                  debugPrint('👉 后续页加载失败原因: $error');
                   return Center(child: Text('更多数据加载失败: $error'));
                 },
               ),
@@ -43,7 +48,6 @@ class const SearchResult<T>({
                 maxCrossAxisExtent: maxCrossAxisExtent,
                 mainAxisSpacing: 10.0,
                 crossAxisSpacing: 10.0,
-                // 💡 放弃固定 mainAxisExtent，改用自适应比例
                 childAspectRatio: itemAspectRatio,
               ),
             ),

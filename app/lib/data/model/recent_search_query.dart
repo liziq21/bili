@@ -1,12 +1,9 @@
-import '../../database/app_database.dart';
+class RecentSearchQuery {
+  const RecentSearchQuery({
+    required this.query,
+    required this.time,
+  });
 
-class const RecentSearchQuery({
-  required final String query,
-  required final DateTime queriedDate,
-});
-
-extension RecentSearchQueryEntityX on RecentSearchQueryEntity {
-  RecentSearchQuery asExternalModel() {
-    return RecentSearchQuery(query: query, queriedDate: queriedDate);
-  }
+  final String query;
+  final DateTime time;
 }

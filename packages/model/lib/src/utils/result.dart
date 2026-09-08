@@ -1,14 +1,21 @@
-final class const Error<T>._(final Exception error) extends Result<T> {
+final class Error<T> extends Result<T> {
+  const Error._(this.error) : super._();
+  final Exception error;
+
   @override
   String toString() => 'Result<$T>.error($error)';
 }
 
-final class const Ok<T>._(final T value) extends Result<T> {
+final class Ok<T> extends Result<T> {
+  const Ok._(this.value) : super._();
+  final T value;
+
   @override
   String toString() => 'Result<$T>.ok($value)';
 }
 
-sealed class const Result<T>() {
+sealed class Result<T> {
+  const Result._();
   const factory Result.error(Exception error) = Error._;
   const factory Result.ok(T value) = Ok._;
 }
@@ -31,8 +38,8 @@ extension ResultX<T> on Result<T> {
 
   Result<R> map<R>(R Function(T) transform) {
     return switch (this) {
-      Ok(:final value) => .ok(transform(value)),
-      Error(:final error) => .error(error),
+      Ok(:final value) => Result.ok(transform(value)),
+      Error(:final error) => Result.error(error),
     };
   }
 }

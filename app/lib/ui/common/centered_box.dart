@@ -1,12 +1,19 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
-class const CenteredBox({
-  super.key,
-  required final Widget child,
-  final double? width,
-  final double? height,
-  final EdgeInsets? padding,
-}) extends StatelessWidget {
+class CenteredBox extends StatelessWidget {
+  const CenteredBox({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.padding,
+  });
+
+  final Widget child;
+  final double? width;
+  final double? height;
+  final EdgeInsets? padding;
+
   @override
   Widget build(BuildContext context) => Padding(
     padding: padding ?? EdgeInsets.zero,

@@ -15,7 +15,7 @@ class FilterGroupSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -23,7 +23,7 @@ class FilterGroupSection extends StatelessWidget {
             group.label,
             style: Theme.of(
               context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: .bold),
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         switch (group) {
@@ -136,7 +136,7 @@ class _DateRangeView extends StatelessWidget {
           );
           if (picked != null) {
             onChanged(
-              group.copyWith(range: (start: picked.start, end: picked.end)),
+              group.copyWith((start: picked.start, end: picked.end)),
             );
           }
         },

@@ -6,7 +6,7 @@ import '../app_bloc.dart';
 List<BlocProvider> getBlocProviders(BuildContext context) => [
   BlocProvider<AppBloc>(
     create: ((context) {
-      return .new(userDataRepository: context.read());
+      return AppBloc(userDataRepository: context.read());
     }),
   ),
 ];

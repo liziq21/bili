@@ -4,9 +4,11 @@ import 'package:model/model.dart';
 
 import '../search_contents_repository.dart';
 
-class const AppLiveRoomSearchRepository(
-  final BilibiliSearchRemoteDataSource _remoteDataSource,
-) implements LiveRoomSearchRepository {
+class AppLiveRoomSearchRepository implements LiveRoomSearchRepository {
+  const AppLiveRoomSearchRepository(this._remoteDataSource);
+
+  final BilibiliSearchRemoteDataSource _remoteDataSource;
+
   @override
   List<FilterGroup> get filters => const [];
 

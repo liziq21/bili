@@ -1,20 +1,21 @@
 part of 'search_result_bloc.dart';
 
-// sealed class SearchResultState<T> extends Equatable {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// final class SearchResultStateInitial extends SearchResultState;
+final class SearchResultState<T> extends Equatable {
+  const SearchResultState({
+    this.query = 'vtuber',
+    this.filters = const [],
+    this.sortOption = const [],
+    this.currentSort,
+    required this.pagingState,
+  });
 
-final class const SearchResultState<T>({
-  final String query = 'vtuber',
-  final List<FilterGroup> filters = const [],
-  final List<SortOption> sortOption = const [],
-  final SortOption? currentSort,
-  required final PagingState<int, T> pagingState,
-}) extends Equatable {
-  SearchQuery get searchQuery => .new(
+  final String query;
+  final List<FilterGroup> filters;
+  final List<SortOption> sortOption;
+  final SortOption? currentSort;
+  final PagingState<int, T> pagingState;
+
+  SearchQuery get searchQuery => SearchQuery(
     query: query,
     sortOption: currentSort,
     filters: filters,

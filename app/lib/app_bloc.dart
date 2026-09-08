@@ -6,15 +6,18 @@ import 'package:model/model.dart';
 
 import 'data/repository/user_data/user_data_repository.dart';
 
-class AppBloc({required final UserDataRepository _userDataRepository})
-    extends Bloc<AppEvent, AppState> {
-  this : super(Loading()) {
+class AppBloc extends Bloc<AppEvent, AppState> {
+  AppBloc({
+    required UserDataRepository userDataRepository,
+  })  : _userDataRepository = userDataRepository,
+        super(Loading()) {
     on<AppStarted>(_onStarted);
-
     add(AppStarted());
   }
 
+  final UserDataRepository _userDataRepository;
   final _log = Logger('AppBloc');
+
   Future<void> _onStarted(AppStarted event, Emitter<AppState> emit) async {
     await emit.forEach<UserData>(
       _userDataRepository.data,
@@ -31,10 +34,16 @@ sealed class AppEvent {}
 
 class AppStarted extends AppEvent {}
 
-sealed class AppState;
+sealed class AppState {}
 
-class LoadFailure(final Object error) extends AppState;
+class LoadFailure extends AppState {
+  LoadFailure(this.error);
+  final Object error;
+}
 
-class Loading extends AppState;
+class Loading extends AppState {}
 
-class LoadSuccess(final UserData userData) extends AppState;
+class LoadSuccess extends AppState {
+  LoadSuccess(this.userData);
+  final UserData userData;
+}

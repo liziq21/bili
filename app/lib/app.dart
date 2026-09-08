@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-//import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app_bloc.dart';
@@ -22,18 +21,22 @@ void setupWindow() {
     setWindowMinSize(const Size(windowWidth, windowHeight));
     setWindowMaxSize(const Size(windowWidth, windowHeight));
     getCurrentScreen().then((screen) {
-      setWindowFrame(
-        Rect.fromCenter(
-          center: screen!.frame.center,
-          width: windowWidth,
-          height: windowHeight,
-        ),
-      );
+      if (screen != null) {
+        setWindowFrame(
+          Rect.fromCenter(
+            center: screen.frame.center,
+            width: windowWidth,
+            height: windowHeight,
+          ),
+        );
+      }
     });
   }
 }
 
-class const App({super.key}) extends StatelessWidget {
+class App extends StatelessWidget {
+  const App({super.key});
+
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
 

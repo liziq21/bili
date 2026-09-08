@@ -6,16 +6,20 @@ import 'recent_search_query_repository.dart';
 
 class DefaultRecentSearchQueryRepository
     implements RecentSearchQueryRepository {
-  DefaultRecentSearchQueryRepository({required this._recentSearchQueryDao});
+  DefaultRecentSearchQueryRepository({
+    required RecentSearchQueryDao recentSearchQueryDao,
+  }) : _recentSearchQueryDao = recentSearchQueryDao;
 
-  late final RecentSearchQueryDao _recentSearchQueryDao;
+  final RecentSearchQueryDao _recentSearchQueryDao;
 
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       _recentSearchQueryDao
           .getRecentSearchQueryEntities(limit)
           .map(
-            (entities) => entities.map((it) => it.asExternalModel()).toList(),
+            (entities) => entities
+                .map((it) => RecentSearchQuery(query: it.query, time: it.queriedDate))
+                .toList(),
           );
 
   @override

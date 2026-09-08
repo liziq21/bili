@@ -9,17 +9,23 @@ import 'app_search_anchor.dart';
 import 'search_result.dart';
 import 'bloc/search_result_bloc.dart';
 
-class const SearchResultScreen({
-  super.key,
-  required String query,
-  required final VoidCallback? onBackClick,
-}) extends StatelessWidget {
+class SearchResultScreen extends StatelessWidget {
+  const SearchResultScreen({
+    super.key,
+    required this.query,
+    this.onBackClick,
+  });
+
+  final String query;
+  final VoidCallback? onBackClick;
+
   @override
   Widget build(BuildContext context) {
     final Map<Widget, Widget> tabAndView = {
-      Tab(text: 'creatorProfile'): ?_creatorProfileResultView(context),
-      Tab(text: 'video'): ?_videoResultView(context),
+      const Tab(text: 'UP 主'): _creatorProfileResultView(context) ?? const SizedBox.shrink(),
+      const Tab(text: '视频'): _videoResultView(context) ?? const SizedBox.shrink(),
     };
+
     return DefaultTabController(
       length: tabAndView.length,
       child: Scaffold(
@@ -30,15 +36,13 @@ class const SearchResultScreen({
           ),
           bottom: TabBar(
             isScrollable: true,
-            tabAlignment: .start,
+            tabAlignment: TabAlignment.start,
             tabs: tabAndView.keys.toList(),
           ),
         ),
-        body: Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: TabBarView(children: tabAndView.values.toList()),
-          ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TabBarView(children: tabAndView.values.toList()),
         ),
       ),
     );

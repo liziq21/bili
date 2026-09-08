@@ -1,11 +1,28 @@
 part of 'search_bloc.dart';
 
-sealed class SearchEvent {}
+sealed class SearchEvent {
+  const SearchEvent();
+}
 
-class MonitorRecentSearches extends SearchEvent {}
+class MonitorRecentSearches extends SearchEvent {
+  const MonitorRecentSearches();
+}
 
-class ClearRecentSearchesPressed extends SearchEvent {}
+class ClearRecentSearchesPressed extends SearchEvent {
+  const ClearRecentSearchesPressed();
+}
 
-class SearchQueryChanged(final String query) extends SearchEvent;
-class FetchSuggests(final String query) extends SearchEvent;
-class RecentSearchUpdated(final String query) extends SearchEvent;
+class SearchQueryChanged extends SearchEvent {
+  const SearchQueryChanged(this.query);
+  final String query;
+}
+
+class FetchSuggests extends SearchEvent {
+  const FetchSuggests(this.query);
+  final String query;
+}
+
+class RecentSearchUpdated extends SearchEvent {
+  const RecentSearchUpdated(this.query);
+  final String query;
+}

@@ -1,99 +1,95 @@
-abstract interface class const FilterOption({required final String label}) {
-  String get value;
-
-  @override
-  bool operator ==(Object other) =>
-      other is FilterOption &&
-      runtimeType == other.runtimeType &&
-      value == other.value;
-
-  @override
-  int get hashCode => value.hashCode;
+abstract interface class FilterOption {
+  const FilterOption({required this.label, required this.value});
+  final String label;
+  final String value;
 }
 
-sealed class const FilterGroup({
-  required final String key,
-  required final String label,
-}) {
-  Map<String, String> toQueryParams();
+class DefaultFilterOption implements FilterOption {
+  const DefaultFilterOption({required this.label, required this.value});
+  @override
+  final String label;
+  @override
+  final String value;
+}
 
-  FilterGroup copyWith();
+sealed class FilterGroup {
+  const FilterGroup({
+    required this.id,
+    required this.title,
+    required this.options,
+  });
+
+  final String id;
+  final String title;
+  final List<FilterOption> options;
+
+  String get label => title;
 }
 
 class SingleFilterGroup extends FilterGroup {
   const SingleFilterGroup({
-    required super.key,
-    required super.label,
-    required this.options,
+    required super.id,
+    required super.title,
+    required super.options,
     this.selection,
   });
 
-  final List<FilterOption> options;
   final FilterOption? selection;
 
-  @override
-  Map<String, String> toQueryParams() => {key: ?selection?.value};
-
-  @override
-  SingleFilterGroup copyWith({FilterOption? selection, bool clear = false}) {
+  SingleFilterGroup copyWith({FilterOption? selection}) {
     return SingleFilterGroup(
-      key: key,
-      label: label,
+      id: id,
+      title: title,
       options: options,
-      selection: clear ? null : (selection ?? this.selection),
+      selection: selection ?? this.selection,
     );
   }
 }
 
 class MultiFilterGroup extends FilterGroup {
   const MultiFilterGroup({
-    required super.key,
-    required super.label,
-    required this.options,
+    required super.id,
+    required super.title,
+    required super.options,
     this.selections = const {},
   });
 
-  final List<FilterOption> options;
   final Set<FilterOption> selections;
 
   bool isSelected(FilterOption option) => selections.contains(option);
 
-  @override
-  Map<String, String> toQueryParams() {
-    return {
-      if (selections.isNotEmpty) key: selections.map((e) => e.value).join(','),
-    };
-  }
-
-  @override
   MultiFilterGroup copyWith({Set<FilterOption>? selections}) {
     return MultiFilterGroup(
-      key: key,
-      label: label,
+      id: id,
+      title: title,
       options: options,
       selections: selections ?? this.selections,
     );
   }
 }
 
-typedef DateRange = ({DateTime start, DateTime end});
-
 class DateRangeFilterGroup extends FilterGroup {
   const DateRangeFilterGroup({
-    required super.key,
-    required super.label,
+    required super.id,
+    required super.title,
+    super.options = const [],
     this.range,
   });
 
-  final DateRange? range;
+  final ({DateTime start, DateTime end})? range;
 
-  @override
-  DateRangeFilterGroup copyWith({DateRange? range}) {
-    return .new(key: key, label: label, range: range);
+  DateRangeFilterGroup copyWith(({DateTime start, DateTime end})? range) {
+    return DateRangeFilterGroup(
+      id: id,
+      title: title,
+      options: options,
+      range: range ?? this.range,
+    );
   }
+}
 
-  @override
+extension FilterGroupQueryParams on FilterGroup {
   Map<String, String> toQueryParams() {
-    return {key: range.toString()};
+    return {};
   }
 }

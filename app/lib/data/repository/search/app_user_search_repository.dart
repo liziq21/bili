@@ -5,9 +5,11 @@ import 'package:model/model.dart';
 import '../search_contents_repository.dart';
 import '../search_suggest_repository.dart';
 
-class const AppUserSearchRepository(
-  final BilibiliSearchRemoteDataSource _remoteDataSource,
-) implements CreatorProfileSearchRepository, SearchSuggestRepository {
+class AppUserSearchRepository implements CreatorProfileSearchRepository, SearchSuggestRepository {
+  const AppUserSearchRepository(this._remoteDataSource);
+
+  final BilibiliSearchRemoteDataSource _remoteDataSource;
+
   @override
   List<FilterGroup> get filters => const [];
 
