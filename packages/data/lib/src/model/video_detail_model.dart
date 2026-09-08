@@ -1,29 +1,17 @@
 import 'creator_profile_model.dart';
 import 'video_model.dart';
 
-final class VideoDetail {
-  const VideoDetail({
-    required this.video,
-    this.creator,
-    this.likeCount = 0,
-    this.favoriteCount = 0,
-    this.shareCount = 0,
-    this.isLiked = false,
-    this.isFavorited = false,
-    this.isSubscribed = false,
-    this.relatedVideos = const [],
-  });
-
-  final VideoModel video;
-  final CreatorProfile? creator;
-  final int likeCount;
-  final int favoriteCount;
-  final int shareCount;
-  final bool isLiked;
-  final bool isFavorited;
-  final bool isSubscribed;
-  final List<VideoModel> relatedVideos;
-
+final class const VideoDetail({
+  required final VideoModel video,
+  final CreatorProfile? creator,
+  final int likeCount = 0,
+  final int favoriteCount = 0,
+  final int shareCount = 0,
+  final bool isLiked = false,
+  final bool isFavorited = false,
+  final bool isSubscribed = false,
+  final List<VideoModel> relatedVideos = const [],
+}) {
   VideoDetail copyWith({
     VideoModel? video,
     CreatorProfile? creator,
