@@ -61,9 +61,13 @@ jobs:
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
           git status
-          git add .
-          git commit -m "chore: Update generated files [skip ci]"
-          git push --force origin HEAD:build_runner
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: Update generated files [skip ci]"
+            git push --force origin HEAD:build_runner
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Run analyze
         run: flutter analyze --no-fatal-infos --no-fatal-warnings > flutter_analyze.txt || true
@@ -99,8 +103,8 @@ jobs:
           java-version: "17"
           cache: "gradle"
           cache-dependency-path: |
-            android/*.gradle*
-            android/**/gradle-wrapper.properties
+            app/android/*.gradle*
+            app/android/**/gradle-wrapper.properties
       
       - uses: flutter-actions/setup-flutter@v2
         with:
@@ -153,7 +157,7 @@ jobs:
           --verbose
 
       - run: pod repo update
-        working-directory: ios
+        working-directory: app/ios
       
       - name: Build IPA
         run: |
@@ -162,7 +166,7 @@ jobs:
             --no-codesign \
             --verbose
           mkdir -p Payload
-          mv ./build/ios/iphoneos/Runner.app Payload
+          mv ./app/build/ios/iphoneos/Runner.app Payload
           zip -r -y Payload.zip Payload/Runner.app
           mv Payload.zip Payload.ipa
 
