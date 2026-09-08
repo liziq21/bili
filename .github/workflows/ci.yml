@@ -160,13 +160,14 @@ jobs:
         working-directory: app/ios
       
       - name: Build IPA
+        working-directory: app
         run: |
           flutter build ios \
             --release \
             --no-codesign \
             --verbose
           mkdir -p Payload
-          mv ./app/build/ios/iphoneos/Runner.app Payload
+          mv build/ios/iphoneos/Runner.app Payload
           zip -r -y Payload.zip Payload/Runner.app
           mv Payload.zip Payload.ipa
 
@@ -174,9 +175,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: Payload.ipa
+          path: app/Payload.ipa
           
       - name: IPA to catbox
+        working-directory: app
         env:
            BARK_KEY: ${{ secrets.BARK_KEY }}
         id: upload-ipa-to-catbox
