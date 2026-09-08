@@ -148,16 +148,22 @@ jobs:
           cache: true
           channel: stable
           flutter-version-file: pubspec.yaml
-      - run: flutter pub get
-      #- run: flutter doctor
-      
+
+      - name: Get packages
+        working-directory: app
+        run: flutter pub get
+
       - name: Run build_runner
+        working-directory: app
         run: dart run build_runner build \
           --delete-conflicting-outputs \
           --verbose
 
-      - run: pod repo update
+      - name: Setup CocoaPods
         working-directory: app/ios
+        run: |
+          pod repo update
+          pod install
       
       - name: Build IPA
         working-directory: app
