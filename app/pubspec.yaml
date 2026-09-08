@@ -49,6 +49,8 @@ dependencies:
   gap: ^3.0.1
   
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   lints: ^6.0.0
   test: any
   drift_dev: ^2.30.0
@@ -61,4 +63,3 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
-
