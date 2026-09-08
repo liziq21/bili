@@ -122,7 +122,7 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
       
-      - run: flutter build apk --release --split-per-abi --pub
+      - run: cd app && flutter build apk --release --split-per-abi --pub
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
