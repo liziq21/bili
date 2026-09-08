@@ -61,9 +61,13 @@ jobs:
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
           git status
-          git add .
-          git commit -m "chore: Update generated files [skip ci]"
-          git push --force origin HEAD:build_runner
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: Update generated files [skip ci]"
+            git push --force origin HEAD:build_runner
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Run analyze
         run: flutter analyze --no-fatal-infos --no-fatal-warnings > flutter_analyze.txt || true
