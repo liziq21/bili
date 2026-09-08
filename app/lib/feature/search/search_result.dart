@@ -30,12 +30,12 @@ class const SearchResult<T>({
                 itemBuilder: itemBuilder,
                 firstPageErrorIndicatorBuilder: (context) {
                   final error = state.error;
-                  debugPrint("👉 第一页加载失败原因: $error");
+                  debugPrint('👉 第一页加载失败原因: $error');
                   return Center(child: Text('加载失败: $error'));
                 },
                 newPageErrorIndicatorBuilder: (context) {
                   final error = state.error;
-                  debugPrint("👉 后续页加载失败原因: $error");
+                  debugPrint('👉 后续页加载失败原因: $error');
                   return Center(child: Text('更多数据加载失败: $error'));
                 },
               ),

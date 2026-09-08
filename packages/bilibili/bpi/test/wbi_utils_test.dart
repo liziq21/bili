@@ -33,7 +33,7 @@ void main() {
       'w_rid': 'stale-signature',
       'wts': 1,
     });
-    expect(signed['keyword'], 'hello');
+    expect(signed['keyword'], "hello!'()*");
     expect(signed.containsKey('page'), isFalse);
     expect(signed['wts'], 1702204169);
     expect(signed['w_rid'], '2dc666fc9c54ab6569b18dbda63b33d1');
