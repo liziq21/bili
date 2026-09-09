@@ -112,10 +112,8 @@ jobs:
           channel: stable
           cache: true
       
-      - name: Repair and Get Packages
-        run: |
-          flutter create . --platforms=android
-          flutter pub get
+      - name: Get Packages
+        run: flutter pub get
 
       - name: Run build_runner
         run: flutter pub run build_runner build \
@@ -128,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-arm64-v8a-release.apk
-          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
 
 #  build_iOSApp:
