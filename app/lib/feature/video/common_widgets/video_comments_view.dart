@@ -1,9 +1,10 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:data/data.dart';
 
+import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
 class VideoCommentsView extends StatelessWidget {
@@ -21,10 +22,10 @@ class VideoCommentsView extends StatelessWidget {
     return BlocBuilder<VideoCommentBloc, VideoCommentState>(
       builder: (context, state) {
         if (state.isLoading) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(32.0),
-              child: CircularProgressIndicator(),
+              padding: EdgeInsets.all($styles.insets.lg),
+              child: CircularProgressIndicator(color: $styles.colors.accent1),
             ),
           );
         }
@@ -32,20 +33,25 @@ class VideoCommentsView extends StatelessWidget {
         if (state.error != null) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.all(32.0),
+              padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
                 '评论加载失败: ${state.error}',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                style: $styles.text.body.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           );
         }
 
         if (state.comments.isEmpty) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(32.0),
-              child: Text('暂无评论'),
+              padding: EdgeInsets.all($styles.insets.lg),
+              child: Text(
+                '暂无评论',
+                style: $styles.text.body.copyWith(color: $styles.colors.caption),
+              ),
             ),
           );
         }
@@ -59,15 +65,20 @@ class VideoCommentsView extends StatelessWidget {
             return false;
           },
           child: ListView.separated(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all($styles.insets.sm),
             itemCount: state.comments.length + (state.hasMore ? 1 : 0),
-            separatorBuilder: (_, _) => const Divider(height: 24),
+            separatorBuilder: (_, _) => Divider(
+              height: 20,
+              color: $styles.colors.greyMedium.withValues(alpha: 0.15),
+            ),
             itemBuilder: (context, index) {
               if (index >= state.comments.length) {
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: CircularProgressIndicator(),
+                    padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
+                    child: CircularProgressIndicator(
+                      color: $styles.colors.accent1,
+                    ),
                   ),
                 );
               }
@@ -101,12 +112,15 @@ class _CommentItem extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
+          backgroundColor: $styles.colors.greyStrong,
           backgroundImage: comment.authorAvatar != null
               ? CachedNetworkImageProvider(comment.authorAvatar!)
               : null,
-          child: comment.authorAvatar == null ? const Icon(Icons.person) : null,
+          child: comment.authorAvatar == null
+              ? Icon(Icons.person, color: $styles.colors.white, size: 20)
+              : null,
         ),
-        const Gap(12),
+        Gap($styles.insets.xs),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,17 +130,17 @@ class _CommentItem extends StatelessWidget {
                 children: [
                   Text(
                     comment.authorName,
-                    style: const TextStyle(
+                    style: $styles.text.bodyBold.copyWith(
+                      color: $styles.colors.black,
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   if (comment.createdAt != null)
                     Text(
                       '${comment.createdAt!.hour.toString().padLeft(2, '0')}:${comment.createdAt!.minute.toString().padLeft(2, '0')}',
-                      style: TextStyle(
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.caption,
                         fontSize: 11,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                     ),
                 ],
@@ -134,9 +148,13 @@ class _CommentItem extends StatelessWidget {
               const Gap(4),
               Text(
                 comment.content,
-                style: const TextStyle(fontSize: 14, height: 1.35),
+                style: $styles.text.body.copyWith(
+                  color: $styles.colors.body,
+                  fontSize: 13,
+                  height: 1.35,
+                ),
               ),
-              const Gap(8),
+              const Gap(6),
               Row(
                 children: [
                   InkWell(
@@ -145,7 +163,7 @@ class _CommentItem extends StatelessWidget {
                           .read<VideoCommentBloc>()
                           .add(ToggleCommentLike(comment.id));
                     },
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular($styles.corners.sm),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
@@ -157,17 +175,17 @@ class _CommentItem extends StatelessWidget {
                                 : Icons.thumb_up_outlined,
                             size: 14,
                             color: comment.isLiked
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).textTheme.bodySmall?.color,
+                                ? $styles.colors.accent1
+                                : $styles.colors.caption,
                           ),
                           const Gap(4),
                           Text(
                             formatCount(comment.likeCount),
-                            style: TextStyle(
-                              fontSize: 12,
+                            style: $styles.text.bodySmall.copyWith(
+                              fontSize: 11,
                               color: comment.isLiked
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).textTheme.bodySmall?.color,
+                                  ? $styles.colors.accent1
+                                  : $styles.colors.caption,
                             ),
                           ),
                         ],
@@ -176,17 +194,17 @@ class _CommentItem extends StatelessWidget {
                   ),
                 ],
               ),
-              // 二级回复列表
+              // Threaded Sub-replies
               if (comment.replies.isNotEmpty) ...[
                 const Gap(8),
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all($styles.insets.xs),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest
-                        .withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
+                    color: $styles.colors.offWhite,
+                    borderRadius: BorderRadius.circular($styles.corners.sm),
+                    border: Border.all(
+                      color: $styles.colors.greyMedium.withValues(alpha: 0.15),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,14 +216,17 @@ class _CommentItem extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: '${reply.authorName}: ',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                style: $styles.text.bodyBold.copyWith(
+                                  color: $styles.colors.black,
                                   fontSize: 12,
                                 ),
                               ),
                               TextSpan(
                                 text: reply.content,
-                                style: const TextStyle(fontSize: 12),
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.body,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
