@@ -18,12 +18,12 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.view.WindowManager.LayoutParams
 import androidx.core.net.toUri
-import com.ryanheise.audioservice.AudioServiceActivity
+import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlin.math.roundToInt
 
-class MainActivity : AudioServiceActivity() {
+class MainActivity : FlutterActivity() {
     private lateinit var methodChannel: MethodChannel
     private var isFoldable = false
 
@@ -75,7 +75,7 @@ class MainActivity : AudioServiceActivity() {
                 }
 
                 "linkVerifySettings" -> {
-                    val uri = ("package:" + context.packageName).toUri()
+                    val uri = ("package:" + packageName).toUri()
                     try {
                         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, uri)
@@ -85,10 +85,10 @@ class MainActivity : AudioServiceActivity() {
                                 "com.android.settings.applications.InstalledAppOpenByDefaultActivity"
                             )
                         }
-                        context.startActivity(intent)
+                        startActivity(intent)
                     } catch (_: Throwable) {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri)
-                        context.startActivity(intent)
+                        startActivity(intent)
                     }
                 }
 
@@ -145,7 +145,7 @@ class MainActivity : AudioServiceActivity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         try {
                             val shortcutManager =
-                                context.getSystemService(ShortcutManager::class.java)
+                                getSystemService(ShortcutManager::class.java)
                             if (shortcutManager.isRequestPinShortcutSupported) {
                                 val id = call.argument<String>("id")!!
                                 val uri = call.argument<String>("uri")!!
@@ -153,7 +153,7 @@ class MainActivity : AudioServiceActivity() {
                                 val icon = call.argument<String>("icon")!!
                                 val bitmap = BitmapFactory.decodeFile(icon)
                                 val shortcut =
-                                    ShortcutInfo.Builder(context, id)
+                                    ShortcutInfo.Builder(this@MainActivity, id)
                                         .setShortLabel(label)
                                         .setIcon(Icon.createWithAdaptiveBitmap(bitmap))
                                         .setIntent(Intent(Intent.ACTION_VIEW, uri.toUri()))
@@ -161,7 +161,7 @@ class MainActivity : AudioServiceActivity() {
                                 val pinIntent =
                                     shortcutManager.createShortcutResultIntent(shortcut)
                                 val pendingIntent = PendingIntent.getBroadcast(
-                                    context, 0, pinIntent, PendingIntent.FLAG_IMMUTABLE
+                                    this@MainActivity, 0, pinIntent, PendingIntent.FLAG_IMMUTABLE
                                 )
                                 shortcutManager.requestPinShortcut(
                                     shortcut,
@@ -244,11 +244,6 @@ class MainActivity : AudioServiceActivity() {
             } catch (_: Exception) {
             }
         }
-    }
-
-    override fun onDestroy() {
-        stopService(Intent(this, com.ryanheise.audioservice.AudioService::class.java))
-        super.onDestroy()
     }
 
     override fun onUserLeaveHint() {
