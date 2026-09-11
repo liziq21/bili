@@ -2,10 +2,10 @@ import 'package:data/data.dart';
 
 enum VideoDurationFilterOption implements FilterOption {
   allDuration('不限'),
-  below10Minutes('below10Minutes'),
-  tenTo30Minutes('tenTo30Minutes'),
-  thirtyTo60Minutes('thirtyTo60Minutes'),
-  above60Minutes('above60Minutes');
+  below10Minutes('10分钟以下'),
+  tenTo30Minutes('10-30分钟'),
+  thirtyTo60Minutes('30-60分钟'),
+  above60Minutes('60分钟以上');
 
   const VideoDurationFilterOption(this.label);
 
@@ -16,17 +16,11 @@ enum VideoDurationFilterOption implements FilterOption {
   String get value => name;
 }
 
-/*
-全部用户(默认)：0
-up主：1
-普通用户：2
-认证用户：3
-*/
 enum UserType implements FilterOption {
-  allUsers('allUsers'),
-  upMain('upMain'),
-  normalUser('normalUser'),
-  verifiedUser('verifiedUser');
+  allUsers('全部用户'),
+  upMain('UP主'),
+  normalUser('普通用户'),
+  verifiedUser('认证用户');
 
   const UserType(this.label);
 
@@ -40,13 +34,13 @@ enum UserType implements FilterOption {
 class VideoDurationFilter extends SingleFilterGroup {
   const VideoDurationFilter()
     : super(
-        key: '',
-        label: '',
+        key: 'duration',
+        label: '时长',
         options: VideoDurationFilterOption.values,
         selection: VideoDurationFilterOption.allDuration,
       );
 }
 
 class BiliDateRangeFilterGroup extends DateRangeFilterGroup {
-  const BiliDateRangeFilterGroup() : super(key: '', label: '');
+  const BiliDateRangeFilterGroup() : super(key: 'pubdate', label: '发布时间');
 }

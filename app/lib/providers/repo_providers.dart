@@ -69,27 +69,24 @@ List<RepositoryProvider> get repoProviders => [
   ),
   RepositoryProvider<VideoSearchRepository>(
     create: (context) => AppVideoSearchRepository(
-      context.read<Bili>().searchRemoteDataSource(),
+      context.read<Bili>().videoSearchDataSource(),
     ),
   ),
   RepositoryProvider<CreatorProfileSearchRepository>(
     create: (context) => AppUserSearchRepository(
-      context.read<Bili>().searchRemoteDataSource(),
+      context.read<Bili>().creatorProfileSearchDataSource(),
+      context.read<Bili>().searchSuggestDataSource(),
     ),
   ),
   RepositoryProvider<LiveRoomSearchRepository>(
     create: (context) => AppLiveRoomSearchRepository(
-      context.read<Bili>().searchRemoteDataSource(),
+      context.read<Bili>().liveRoomSearchDataSource(),
     ),
   ),
-  // RepositoryProvider<AggregateSearchRepository>(
-  //   create: (context) => AppAggregateSearchRepository(
-  //     context.read<Bili>().searchRemoteDataSource(),
-  //   ),
-  // ),
   RepositoryProvider<SearchSuggestRepository>(
     create: (context) => AppUserSearchRepository(
-      context.read<Bili>().searchRemoteDataSource(),
+      context.read<Bili>().creatorProfileSearchDataSource(),
+      context.read<Bili>().searchSuggestDataSource(),
     ),
   ),
 ];
