@@ -36,7 +36,7 @@ dependencies:
   provider: ^6.1.5+1
   window_size: ^0.1.0
   stream_transform: ^2.1.1
-  material_ui: any
+  material_ui: 1.0.0
   shared_preferences: ^2.5.4
   equatable: any
   drift: ^2.30.0

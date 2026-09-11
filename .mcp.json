@@ -1,18 +1,15 @@
 {
   "mcpServers": {
-    "google-developer-knowledge": {
-      "url": "https://developerknowledge.googleapis.com/mcp",
-      "headers": {
-        "X-Goog-Api-Key": "AIzaSyD03C3vFVImvC8AdDVEdFg6CQydglY4qJM"
-      },
-      "directTools": [
-        "search_documents",
-        "get_documents"
-      ]
-    },
     "dart": {
       "command": "dart",
       "args": ["mcp-server"]
+    },
+    "context7": {
+      "httpUrl": "https://mcp.context7.com/mcp",
+      "headers": {
+        "Authorization": "ctx7sk-28607165-deb3-49cf-b54f-72c183eff828",
+        "Accept": "application/json, text/event-stream"
+      }
     }
   }
 }

@@ -13,9 +13,8 @@ part 'video_state.dart';
 
 class VideoBloc extends Bloc<VideoEvent, VideoState> {
   VideoBloc({
-    required VideoDetailRepository repository,
-  })  : _repository = repository,
-        super(const VideoState()) {
+    required this._repository,
+  })  : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
     on<ToggleVideoLike>(_onToggleVideoLike);
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);

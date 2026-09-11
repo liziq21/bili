@@ -16,7 +16,10 @@ class const AppUserSearchRepository(
 
   @override
   Future<Result<Page<CreatorProfile>>> search(SearchQuery query) {
-    return _remoteDataSource.searchBiliUser(query.query, pageKey: query.pageKey);
+    return _remoteDataSource.searchCreatorProfile(
+      query.query,
+      pageKey: query.pageKey,
+    );
   }
 
   @override
