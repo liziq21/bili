@@ -1,25 +1,33 @@
 name: bilibili
-description: A starting point for Dart libraries or applications.
+description: Bilibili API wrapper and remote data source.
 version: 1.0.0
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-# repository: https://github.com/my_org/my_repo
+publish_to: 'none'
 
 environment:
   sdk: "^3.13.2"
+  flutter: ">=3.47.2"
+
 resolution: workspace
 
 workspace:
   - bpi
 
-# Add regular dependencies here.
 dependencies:
-  # path: ^1.9.0
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   data: ^1.0.0
   bpi: ^1.0.0
-  
   model: ^1.0.0
   http: ^1.6.0
+  intl: any
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   lints: ^6.0.0
   test: any
+
+flutter:
+  generate: true

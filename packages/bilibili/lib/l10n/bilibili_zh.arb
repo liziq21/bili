@@ -1,0 +1,143 @@
+{
+  "@@locale": "zh",
+  "sourceName": "哔哩哔哩",
+  "@sourceName": {
+    "description": "Bilibili source name"
+  },
+  "videoDurationAll": "不限",
+  "@videoDurationAll": {
+    "description": "Video duration filter - all"
+  },
+  "videoDurationUnder10Min": "10分钟以下",
+  "@videoDurationUnder10Min": {
+    "description": "Video duration filter - under 10 minutes"
+  },
+  "videoDuration10To30Min": "10-30分钟",
+  "@videoDuration10To30Min": {
+    "description": "Video duration filter - 10 to 30 minutes"
+  },
+  "videoDuration30To60Min": "30-60分钟",
+  "@videoDuration30To60Min": {
+    "description": "Video duration filter - 30 to 60 minutes"
+  },
+  "videoDurationOver60Min": "60分钟以上",
+  "@videoDurationOver60Min": {
+    "description": "Video duration filter - over 60 minutes"
+  },
+  "userTypeAll": "全部用户",
+  "@userTypeAll": {
+    "description": "User type filter - all users"
+  },
+  "userTypeUp": "UP主",
+  "@userTypeUp": {
+    "description": "User type filter - UP host"
+  },
+  "userTypeNormal": "普通用户",
+  "@userTypeNormal": {
+    "description": "User type filter - normal user"
+  },
+  "userTypeVerified": "认证用户",
+  "@userTypeVerified": {
+    "description": "User type filter - verified user"
+  },
+  "articleCategoryAll": "全部",
+  "@articleCategoryAll": {
+    "description": "Article category - all"
+  },
+  "articleCategoryAnimation": "动画",
+  "@articleCategoryAnimation": {
+    "description": "Article category - animation"
+  },
+  "articleCategoryGames": "游戏",
+  "@articleCategoryGames": {
+    "description": "Article category - games"
+  },
+  "articleCategoryMovies": "影视",
+  "@articleCategoryMovies": {
+    "description": "Article category - movies and shows"
+  },
+  "articleCategoryLife": "生活",
+  "@articleCategoryLife": {
+    "description": "Article category - life"
+  },
+  "articleCategoryInterests": "兴趣",
+  "@articleCategoryInterests": {
+    "description": "Article category - interests"
+  },
+  "articleCategoryLightNovels": "轻小说",
+  "@articleCategoryLightNovels": {
+    "description": "Article category - light novels"
+  },
+  "articleCategoryTechnology": "科技",
+  "@articleCategoryTechnology": {
+    "description": "Article category - technology"
+  },
+  "photoCategoryAll": "全部",
+  "@photoCategoryAll": {
+    "description": "Photo category - all"
+  },
+  "photoCategoryArtists": "画师",
+  "@photoCategoryArtists": {
+    "description": "Photo category - artists"
+  },
+  "photoCategoryPhotography": "摄影",
+  "@photoCategoryPhotography": {
+    "description": "Photo category - photography"
+  },
+  "sortTotalRank": "综合排序",
+  "@sortTotalRank": {
+    "description": "Search sort option - total rank / default"
+  },
+  "sortAttention": "最多关注",
+  "@sortAttention": {
+    "description": "Search sort option - attention"
+  },
+  "sortClick": "最多点击",
+  "@sortClick": {
+    "description": "Search sort option - click count"
+  },
+  "sortDm": "最多弹幕",
+  "@sortDm": {
+    "description": "Search sort option - bullet comment count"
+  },
+  "sortPubDate": "最新发布",
+  "@sortPubDate": {
+    "description": "Search sort option - publish date"
+  },
+  "sortScores": "最多评论",
+  "@sortScores": {
+    "description": "Search sort option - scores / comments"
+  },
+  "sortStow": "最多收藏",
+  "@sortStow": {
+    "description": "Search sort option - stows / favorites"
+  },
+  "sortOnline": "人气排序",
+  "@sortOnline": {
+    "description": "Live search sort option - online popularity"
+  },
+  "sortLiveTime": "开播时间",
+  "@sortLiveTime": {
+    "description": "Live search sort option - live start time"
+  },
+  "sortDefault": "默认排序",
+  "@sortDefault": {
+    "description": "User search sort option - default"
+  },
+  "sortFansDesc": "粉丝数从高到低",
+  "@sortFansDesc": {
+    "description": "User search sort option - fans descending"
+  },
+  "sortFansAsc": "粉丝数从低到高",
+  "@sortFansAsc": {
+    "description": "User search sort option - fans ascending"
+  },
+  "sortLevelDesc": "等级从高到低",
+  "@sortLevelDesc": {
+    "description": "User search sort option - level descending"
+  },
+  "sortLevelAsc": "等级从低到高",
+  "@sortLevelAsc": {
+    "description": "User search sort option - level ascending"
+  }
+}

@@ -1,4 +1,7 @@
-abstract class const SortOption({required final String label}) {
+abstract class SortOption {
+  const SortOption(this.label);
+  final String label;
+
   String get value;
 
   Map<String, String> toQueryParams();

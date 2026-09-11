@@ -1,3 +1,4 @@
+import 'package:data/data.dart';
 
 enum ArticleSearchSort implements SortOption {
   totalrank('totalrank'),
@@ -7,14 +8,17 @@ enum ArticleSearchSort implements SortOption {
   pubdate('pubdate'),
   scores('scores'),
   stow('stow');
-  
-  const ArticleSearchSort(super.label);
-  
+
+  const ArticleSearchSort(this.label);
+
+  @override
+  final String label;
+
   @override
   String get value => name;
-  
+
   @override
-  Map<String, String> toQueryParams() => { 'order': name };
+  Map<String, String> toQueryParams() => {'order': name};
 }
 
 enum PhotoOrVideoSearchSort implements SortOption {
@@ -24,27 +28,34 @@ enum PhotoOrVideoSearchSort implements SortOption {
   pubdate('pubdate'),
   scores('scores'),
   stow('stow');
-  
-  const PhotoOrVideoSearchSort(super.label);
-  
+
+  const PhotoOrVideoSearchSort(this.label);
+
+  @override
+  final String label;
+
   @override
   String get value => name;
-  
+
   @override
-  Map<String, String> toQueryParams() => { 'order': name };
+  Map<String, String> toQueryParams() => {'order': name};
 }
 
 enum LiveRoomSearchSort implements SortOption {
-  online('online'), liveTime('liveTime');
-  
-  const LiveRoomSearchSort(super.label);
-  
+  online('online'),
+  liveTime('liveTime');
+
+  const LiveRoomSearchSort(this.label);
+
+  @override
+  final String label;
+
   @override
   String get value => name;
-  
+
   @override
-  Map<String, String> toQueryParams() => { 
-    'order': switch(this) {
+  Map<String, String> toQueryParams() => {
+    'order': switch (this) {
       liveTime => 'live_time',
       _ => name,
     },
@@ -53,23 +64,29 @@ enum LiveRoomSearchSort implements SortOption {
 
 enum UserSearchSort implements SortOption {
   defaultSort('defaultSort', null, null),
-  fonsDescending('fonsDescending', .fons, .descending),
-  fonsAscending('fonsAscending', .fons, .ascending),
-  levelDescending('levelDescending', .level, .descending),
-  levelAscending('levelAscending', .level, .ascending);
-  
+  fonsDescending('fonsDescending', UserSearchOrder.fons, OrderSort.descending),
+  fonsAscending('fonsAscending', UserSearchOrder.fons, OrderSort.ascending),
+  levelDescending(
+    'levelDescending',
+    UserSearchOrder.level,
+    OrderSort.descending,
+  ),
+  levelAscending('levelAscending', UserSearchOrder.level, OrderSort.ascending);
+
   const UserSearchSort(
-    super.label,
+    this.label,
     this.order,
     this.orderSort,
   );
-  
-  final UserSearchSort? order;
+
+  @override
+  final String label;
+  final UserSearchOrder? order;
   final OrderSort? orderSort;
-  
+
   @override
   String get value => name;
-  
+
   @override
   Map<String, String> toQueryParams() => {
     ...?order?.toQueryParams(),
@@ -77,11 +94,13 @@ enum UserSearchSort implements SortOption {
   };
 }
 
-enum UserSearchSort {
-  defaultOrder, fons, level;
-  
+enum UserSearchOrder {
+  defaultOrder,
+  fons,
+  level;
+
   Map<String, String> toQueryParams() => {
-    'order': switch(this) {
+    'order': switch (this) {
       defaultOrder => '0',
       _ => name,
     },
@@ -89,7 +108,8 @@ enum UserSearchSort {
 }
 
 enum OrderSort {
-  descending, ascending;
-  
-  Map<String, String> toQueryParams() => { 'order_sort': '$index' };
+  descending,
+  ascending;
+
+  Map<String, String> toQueryParams() => {'order_sort': '$index'};
 }
