@@ -1,0 +1,19 @@
+name: youtube
+description: YouTube API and data sources powered by youtube_explode_dart.
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: "^3.13.2"
+resolution: workspace
+
+dependencies:
+  data: ^1.0.0
+  model: ^1.0.0
+  meta: ^1.12.0
+  equatable: ^2.0.7
+  youtube_explode_dart: ^2.3.4
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: any

@@ -19,6 +19,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   bilibili: ^1.0.0
+  youtube: ^1.0.0
   bloc: ^9.2.1
   cached_network_image_ce: ^4.10.0
   data: ^1.0.0

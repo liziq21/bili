@@ -6,36 +6,21 @@ part of 'user_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_UserData _$UserDataFromJson(Map<String, dynamic> json) => $checkedCreate(
-  '_UserData',
-  json,
-  ($checkedConvert) {
-    final val = _UserData(
-      serviceSource: $checkedConvert(
-        'SERVICE_SOURCE',
-        (v) =>
-            $enumDecodeNullable(_$ServiceSourceEnumMap, v) ??
-            ServiceSource.bilibili,
-      ),
-      themeConfig: $checkedConvert(
-        'THEME_CONFIG',
-        (v) =>
-            $enumDecodeNullable(_$ThemeConfigEnumMap, v) ??
-            ThemeConfig.followSystem,
-      ),
-      useDynamicColor: $checkedConvert(
-        'USE_DYNAMIC_COLOR',
-        (v) => v as bool? ?? true,
-      ),
-    );
-    return val;
-  },
-  fieldKeyMap: const {
-    'serviceSource': 'SERVICE_SOURCE',
-    'themeConfig': 'THEME_CONFIG',
-    'useDynamicColor': 'USE_DYNAMIC_COLOR',
-  },
+UserData _$UserDataFromJson(Map<String, dynamic> json) => UserData(
+  serviceSource:
+      $enumDecodeNullable(_$ServiceSourceEnumMap, json['SERVICE_SOURCE']) ??
+      ServiceSource.bilibili,
+  themeConfig:
+      $enumDecodeNullable(_$ThemeConfigEnumMap, json['THEME_CONFIG']) ??
+      ThemeConfig.followSystem,
+  useDynamicColor: json['USE_DYNAMIC_COLOR'] as bool? ?? true,
 );
+
+Map<String, dynamic> _$UserDataToJson(UserData instance) => <String, dynamic>{
+  'SERVICE_SOURCE': instance.serviceSource.toJson(),
+  'THEME_CONFIG': instance.themeConfig.toJson(),
+  'USE_DYNAMIC_COLOR': instance.useDynamicColor,
+};
 
 const _$ServiceSourceEnumMap = {
   ServiceSource.bilibili: 'BILIBILI',

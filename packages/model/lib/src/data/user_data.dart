@@ -1,7 +1,8 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
+
 import 'theme_config.dart';
 
-part 'user_data.freezed.dart';
 part 'user_data.g.dart';
 
 @JsonEnum(alwaysCreate: true, fieldRename: .screamingSnake)
@@ -15,16 +16,35 @@ enum ServiceSource {
       $enumDecode(_$ServiceSourceEnumMap, json);
 }
 
-@freezed
-abstract class UserData with _$UserData {
-  // ignore: invalid_annotation_target
-  @JsonSerializable(fieldRename: .screamingSnake)
-  const factory UserData({
-    @Default(ServiceSource.bilibili) ServiceSource serviceSource,
-    @Default(ThemeConfig.followSystem) ThemeConfig themeConfig,
-    @Default(true) bool useDynamicColor,
-  }) = _UserData;
+@JsonSerializable(fieldRename: .screamingSnake)
+class UserData extends Equatable {
+  const UserData({
+    this.serviceSource = ServiceSource.bilibili,
+    this.themeConfig = ThemeConfig.followSystem,
+    this.useDynamicColor = true,
+  });
 
   factory UserData.fromJson(Map<String, dynamic> json) =>
       _$UserDataFromJson(json);
+
+  final ServiceSource serviceSource;
+  final ThemeConfig themeConfig;
+  final bool useDynamicColor;
+
+  Map<String, dynamic> toJson() => _$UserDataToJson(this);
+
+  UserData copyWith({
+    ServiceSource? serviceSource,
+    ThemeConfig? themeConfig,
+    bool? useDynamicColor,
+  }) {
+    return UserData(
+      serviceSource: serviceSource ?? this.serviceSource,
+      themeConfig: themeConfig ?? this.themeConfig,
+      useDynamicColor: useDynamicColor ?? this.useDynamicColor,
+    );
+  }
+
+  @override
+  List<Object?> get props => [serviceSource, themeConfig, useDynamicColor];
 }
