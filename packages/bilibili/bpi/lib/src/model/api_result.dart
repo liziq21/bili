@@ -25,7 +25,12 @@ sealed class const ApiResult<T>() {
     }
 
     final rawData = json['data'] ?? json['result'];
-    if (rawData is! Map) {
+    final Map<String, dynamic> dataMap;
+    if (rawData is Map) {
+      dataMap = Map<String, dynamic>.from(rawData);
+    } else if (rawData is List) {
+      dataMap = {'items': rawData, 'list': rawData};
+    } else {
       throw BpiSerializationException(
         'Successful Bilibili response is missing an object data/result field.',
         biliCode: code,
@@ -35,7 +40,7 @@ sealed class const ApiResult<T>() {
     try {
       return .ok(
         code: code,
-        data: fromJsonT(Map<String, dynamic>.from(rawData)),
+        data: fromJsonT(dataMap),
       );
     } on BpiException {
       rethrow;

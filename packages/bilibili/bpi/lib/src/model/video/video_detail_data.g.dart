@@ -20,74 +20,84 @@ BaseResponse _$BaseResponseFromJson(Map<String, dynamic> json) =>
       return val;
     });
 
-VideoDetailData _$VideoDetailDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      'VideoDetailData',
-      json,
-      ($checkedConvert) {
-        final val = VideoDetailData(
-          bvid: $checkedConvert('bvid', (v) => v as String),
-          aid: $checkedConvert('aid', (v) => (v as num).toInt()),
-          videos: $checkedConvert('videos', (v) => (v as num).toInt()),
-          copyright: $checkedConvert('copyright', (v) => (v as num).toInt()),
-          pic: $checkedConvert('pic', (v) => v as String),
-          title: $checkedConvert('title', (v) => v as String),
-          pubdate: $checkedConvert('pubdate', (v) => (v as num).toInt()),
-          ctime: $checkedConvert('ctime', (v) => (v as num).toInt()),
-          desc: $checkedConvert('desc', (v) => v as String),
-          descV2: $checkedConvert(
-            'desc_v2',
-            (v) => (v as List<dynamic>)
-                .map((e) => DescV2.fromJson(e as Map<String, dynamic>))
-                .toList(),
-          ),
-          duration: $checkedConvert('duration', (v) => (v as num).toInt()),
-          rights: $checkedConvert(
-            'rights',
-            (v) => Rights.fromJson(v as Map<String, dynamic>),
-          ),
-          owner: $checkedConvert(
-            'owner',
-            (v) => Owner.fromJson(v as Map<String, dynamic>),
-          ),
-          stat: $checkedConvert(
-            'stat',
-            (v) => VideoStat.fromJson(v as Map<String, dynamic>),
-          ),
-          argueInfo: $checkedConvert(
-            'argue_info',
-            (v) => ArgueInfo.fromJson(v as Map<String, dynamic>),
-          ),
-          cid: $checkedConvert('cid', (v) => (v as num).toInt()),
-          dimension: $checkedConvert(
-            'dimension',
-            (v) => Dimension.fromJson(v as Map<String, dynamic>),
-          ),
-          seasonId: $checkedConvert('season_id', (v) => (v as num).toInt()),
-          isUpowerExclusive: $checkedConvert(
-            'is_upower_exclusive',
-            (v) => v as bool,
-          ),
-          ugcSeason: $checkedConvert(
-            'ugc_season',
-            (v) => UgcSeason.fromJson(v as Map<String, dynamic>),
-          ),
-        );
-        $checkedConvert(
-          'is_page_reversed',
-          (v) => val.isPageReversed = v as bool,
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'descV2': 'desc_v2',
-        'argueInfo': 'argue_info',
-        'seasonId': 'season_id',
-        'isUpowerExclusive': 'is_upower_exclusive',
-        'ugcSeason': 'ugc_season',
-        'isPageReversed': 'is_page_reversed',
-      },
+VideoDetailData _$VideoDetailDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'VideoDetailData',
+  json,
+  ($checkedConvert) {
+    final val = VideoDetailData(
+      bvid: $checkedConvert('bvid', (v) => v as String),
+      aid: $checkedConvert('aid', (v) => (v as num).toInt()),
+      videos: $checkedConvert('videos', (v) => (v as num).toInt()),
+      copyright: $checkedConvert('copyright', (v) => (v as num).toInt()),
+      pic: $checkedConvert('pic', (v) => v as String),
+      title: $checkedConvert('title', (v) => v as String),
+      pubdate: $checkedConvert('pubdate', (v) => (v as num).toInt()),
+      ctime: $checkedConvert('ctime', (v) => (v as num).toInt()),
+      desc: $checkedConvert('desc', (v) => v as String),
+      descV2: $checkedConvert(
+        'desc_v2',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => DescV2.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      duration: $checkedConvert('duration', (v) => (v as num).toInt()),
+      rights: $checkedConvert(
+        'rights',
+        (v) => v == null ? null : Rights.fromJson(v as Map<String, dynamic>),
+      ),
+      owner: $checkedConvert(
+        'owner',
+        (v) => v == null ? null : Owner.fromJson(v as Map<String, dynamic>),
+      ),
+      stat: $checkedConvert(
+        'stat',
+        (v) => v == null ? null : VideoStat.fromJson(v as Map<String, dynamic>),
+      ),
+      argueInfo: $checkedConvert(
+        'argue_info',
+        (v) => v == null ? null : ArgueInfo.fromJson(v as Map<String, dynamic>),
+      ),
+      cid: $checkedConvert('cid', (v) => (v as num).toInt()),
+      dimension: $checkedConvert(
+        'dimension',
+        (v) => v == null ? null : Dimension.fromJson(v as Map<String, dynamic>),
+      ),
+      seasonId: $checkedConvert('season_id', (v) => (v as num?)?.toInt()),
+      isUpowerExclusive: $checkedConvert(
+        'is_upower_exclusive',
+        (v) => v as bool?,
+      ),
+      ugcSeason: $checkedConvert(
+        'ugc_season',
+        (v) => v == null ? null : UgcSeason.fromJson(v as Map<String, dynamic>),
+      ),
+      pages: $checkedConvert(
+        'pages',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => VideoPart.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      staff: $checkedConvert(
+        'staff',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => Staff.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      redirectUrl: $checkedConvert('redirect_url', (v) => v as String?),
     );
+    return val;
+  },
+  fieldKeyMap: const {
+    'descV2': 'desc_v2',
+    'argueInfo': 'argue_info',
+    'seasonId': 'season_id',
+    'isUpowerExclusive': 'is_upower_exclusive',
+    'ugcSeason': 'ugc_season',
+    'redirectUrl': 'redirect_url',
+  },
+);
 
 DescV2 _$DescV2FromJson(Map<String, dynamic> json) =>
     $checkedCreate('DescV2', json, ($checkedConvert) {
@@ -209,6 +219,40 @@ Episode _$EpisodeFromJson(Map<String, dynamic> json) =>
         cid: $checkedConvert('cid', (v) => (v as num).toInt()),
         title: $checkedConvert('title', (v) => v as String),
         bvid: $checkedConvert('bvid', (v) => v as String),
+      );
+      return val;
+    });
+
+VideoPart _$VideoPartFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('VideoPart', json, ($checkedConvert) {
+      final val = VideoPart(
+        cid: $checkedConvert('cid', (v) => (v as num).toInt()),
+        page: $checkedConvert('page', (v) => (v as num).toInt()),
+        from: $checkedConvert('from', (v) => v as String),
+        part: $checkedConvert('part', (v) => v as String),
+        duration: $checkedConvert('duration', (v) => (v as num).toInt()),
+        vid: $checkedConvert('vid', (v) => v as String?),
+        dimension: $checkedConvert(
+          'dimension',
+          (v) =>
+              v == null ? null : Dimension.fromJson(v as Map<String, dynamic>),
+        ),
+        ctime: $checkedConvert('ctime', (v) => (v as num?)?.toInt()),
+        firstFrame: $checkedConvert('first_frame', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'firstFrame': 'first_frame'});
+
+Staff _$StaffFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('Staff', json, ($checkedConvert) {
+      final val = Staff(
+        mid: $checkedConvert('mid', (v) => (v as num).toInt()),
+        title: $checkedConvert('title', (v) => v as String),
+        name: $checkedConvert('name', (v) => v as String),
+        face: $checkedConvert('face', (v) => v as String),
+        vip: $checkedConvert('vip', (v) => (v as num).toInt()),
+        official: $checkedConvert('official', (v) => (v as num).toInt()),
+        follower: $checkedConvert('follower', (v) => (v as num).toInt()),
       );
       return val;
     });

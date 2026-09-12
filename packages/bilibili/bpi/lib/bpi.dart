@@ -1,6 +1,8 @@
 library;
 
 export 'src/error/bpi_exception.dart';
+export 'src/model/reply/network_reply_data.dart';
+export 'src/model/reply/network_reply_reply_data.dart';
 export 'src/model/search/common/network_bili_user_res.dart';
 export 'src/model/search/concrete_results/network_article_search_result.dart';
 export 'src/model/search/concrete_results/network_bili_user_search_result.dart';
@@ -11,7 +13,11 @@ export 'src/model/search/concrete_results/network_media_ft_search_result.dart';
 export 'src/model/search/concrete_results/network_video_search_result.dart';
 export 'src/model/search/network_search_result.dart';
 export 'src/model/search_suggest/network_search_suggest.dart';
+export 'src/model/video/network_play_url.dart';
+export 'src/model/video/network_related_video.dart';
+export 'src/model/video/network_video_relation.dart';
 export 'src/model/video/video_detail_data.dart';
 export 'src/network_search_data_source.dart';
+export 'src/network_video_data_source.dart';
 export 'src/retrofit/retrofit_network.dart';
 export 'src/retrofit/token_storage.dart';
