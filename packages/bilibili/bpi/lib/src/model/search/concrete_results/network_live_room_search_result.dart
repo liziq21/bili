@@ -58,4 +58,3 @@ class const NetworkLiveRoomSearchResult({
 //   factory NetworkLiveRoomSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkLiveRoomSearchResultFromJson(json);
 // }
-

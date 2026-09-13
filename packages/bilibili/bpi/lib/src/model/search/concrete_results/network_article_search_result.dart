@@ -62,4 +62,3 @@ class const NetworkArticleSearchResult({
 //   factory NetworkArticleSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkArticleSearchResultFromJson(json);
 // }
-

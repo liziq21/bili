@@ -74,4 +74,3 @@ class const NetworkVideoSearchResult({
 //   factory NetworkVideoSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkVideoSearchResultFromJson(json);
 // }
-
