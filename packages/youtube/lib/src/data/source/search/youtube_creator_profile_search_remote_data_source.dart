@@ -2,18 +2,17 @@ import 'dart:async';
 
 import 'package:data/data.dart';
 import 'package:model/model.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
+import '../../../service/youtube_service.dart';
 import '../youtube_remote_data_source.dart';
 
 final class const YouTubeCreatorProfileSearchRemoteDataSource({
-  required final YoutubeExplode _youtubeExplode,
+  required final YoutubeService _youtubeService,
 }) extends CreatorProfileSearchRemoteDataSource with YouTubeRemoteDataSource {
-  //@override
-  //List<FilterGroup> get filters => const [];
-
   @override
   List<SortOption> get sortOptions => const [];
+
+  static final Map<String, String> _continuationTokens = {};
 
   @override
   Future<Result<Page<CreatorProfile>>> searchCreatorProfile(
@@ -22,35 +21,24 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource({
   }) async {
     try {
       final targetPage = pageKey ?? 1;
-      final searchList = await _youtubeExplode.search.searchContent(
+      final continuationKey = '$query:$targetPage';
+      final prevContinuationKey = '$query:${targetPage - 1}';
+
+      final continuationToken =
+          targetPage > 1 ? _continuationTokens[prevContinuationKey] : null;
+
+      final (profiles, nextToken) = await _youtubeService.searchChannels(
         query,
-        filter: TypeFilters.channel,
+        continuation: continuationToken,
       );
 
-      SearchList currentList = searchList;
-      for (int i = 1; i < targetPage; i++) {
-        final nextPage = await currentList.nextPage();
-        if (nextPage == null) {
-          return Result.ok(
-            Page<CreatorProfile>(
-              number: targetPage,
-              totalPages: targetPage,
-              data: const [],
-            ),
-          );
-        }
-        currentList = nextPage;
+      if (nextToken != null && nextToken.isNotEmpty) {
+        _continuationTokens[continuationKey] = nextToken;
       }
 
-      final profiles = currentList.whereType<SearchChannel>().map((channel) {
-        return CreatorProfile(
-          id: channel.id.value,
-          name: channel.name,
-          videos: channel.videoCount,
-        );
-      }).toList();
-
-      final totalPages = currentList.isNotEmpty ? targetPage + 1 : targetPage;
+      final totalPages = (nextToken != null && nextToken.isNotEmpty)
+          ? targetPage + 1
+          : targetPage;
 
       return Result.ok(
         Page<CreatorProfile>(

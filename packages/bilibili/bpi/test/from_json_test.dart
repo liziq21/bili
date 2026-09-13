@@ -113,16 +113,15 @@ void main() {
 
       expect(baseRes.code, equals(0));
       expect(baseRes.message, equals('OK'));
-      expect(baseRes.data, isNotNull);
 
       final video = baseRes.data;
       expect(video.bvid, equals('BV1GJ411x7vy'));
       expect(video.aid, equals(80431228));
       expect(video.title, equals('教科书上的道具操作都有'));
-      expect(video.owner.name, equals('风悄笔落'));
-      expect(video.stat.view, greaterThan(0));
-      expect(video.dimension.width, equals(1280));
-      expect(video.dimension.height, equals(720));
+      expect(video.owner!.name, equals('风悄笔落'));
+      expect(video.stat!.view, greaterThan(0));
+      expect(video.dimension!.width, equals(1280));
+      expect(video.dimension!.height, equals(720));
       expect(video.isPageReversed, isFalse);
     });
   });
