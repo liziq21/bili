@@ -3,12 +3,18 @@ import 'dart:io';
 import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 
+import '../api.dart';
+import '../model/reply/network_reply_data.dart';
+import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
+import '../model/video/network_play_url.dart';
+import '../model/video/network_related_video.dart';
+import '../model/video/network_video_relation.dart';
 import '../model/video/video_detail_data.dart';
 import '../network_search_data_source.dart';
+import '../network_video_data_source.dart';
 import '../search_type.dart';
-import '../api.dart';
 import 'api_interceptor.dart';
 import 'chopper_wbi_interceptor.dart';
 import 'json_serializable_converter.dart';
@@ -55,11 +61,52 @@ abstract class BiliNetworkApi extends ChopperService {
   @GET(path: ApiPath.videoIntro)
   Future<VideoDetailData> videoIntro({@query required String bvid});
 
+  @GET(path: ApiPath.videoRelation)
+  Future<NetworkVideoRelation> getVideoRelation({@query required String bvid});
+
+  @GET(path: ApiPath.relatedList)
+  Future<NetworkRelatedVideosList> getRelatedVideos({@query required String bvid});
+
+  @GET(path: ApiPath.replyListMain)
+  Future<NetworkReplyData> getReplyListMain({
+    @query required int oid,
+    @query required int type,
+    @Query('pagination_str') String? paginationStr,
+    @query int? mode,
+  });
+
+  @GET(path: ApiPath.replyList)
+  Future<NetworkReplyData> getReplyList({
+    @query required int oid,
+    @query required int type,
+    @Query('pn') int? page,
+    @query int? sort,
+  });
+
+  @GET(path: ApiPath.replyReplyList)
+  Future<NetworkReplyReplyData> getReplyReplyList({
+    @query required int oid,
+    @query required int root,
+    @query required int type,
+    @Query('pn') int? page,
+    @query int? sort,
+  });
+
+  @GET(path: WbiApiPath.playUrl)
+  Future<NetworkPlayUrl> getPlayUrl(
+    @query String bvid,
+    @query int cid, {
+    @query int qn = 80,
+    @query int fnval = 4048,
+    @query int fourk = 1,
+    @tag String tag = 'WBI',
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
 
-class BiliNetworkSearch implements NetworkSearchDataSource {
+class BiliNetworkSearch implements NetworkSearchDataSource, NetworkVideoDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null {
@@ -69,6 +116,11 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
         NetworkSearchResult: NetworkSearchResult.fromJson,
         NetworkSearchSuggest: NetworkSearchSuggest.fromJson,
         VideoDetailData: VideoDetailData.fromJson,
+        NetworkVideoRelation: NetworkVideoRelation.fromJson,
+        NetworkRelatedVideosList: NetworkRelatedVideosList.fromJson,
+        NetworkReplyData: NetworkReplyData.fromJson,
+        NetworkReplyReplyData: NetworkReplyReplyData.fromJson,
+        NetworkPlayUrl: NetworkPlayUrl.fromJson,
       }),
       interceptors: [
         ApiInterceptor(),
@@ -100,6 +152,7 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
   @override
   Future<NetworkSearchResult> searchAll(String keyword, {int? page}) =>
       _networkApi.searchAll(keyword, page: page);
+
   @override
   Future<NetworkSearchResult> searchArticle(
     String keyword, {
@@ -189,5 +242,73 @@ class BiliNetworkSearch implements NetworkSearchDataSource {
     tids: tids,
     pubTimeBeginS: pubTimeBeginS,
     pubTimeEndS: pubTimeEndS,
+  );
+
+  @override
+  Future<VideoDetailData> getVideoDetail({required String bvid}) =>
+      _networkApi.videoIntro(bvid: bvid);
+
+  @override
+  Future<NetworkVideoRelation> getVideoRelation({required String bvid}) =>
+      _networkApi.getVideoRelation(bvid: bvid);
+
+  @override
+  Future<List<NetworkRelatedVideo>> getRelatedVideos({required String bvid}) async {
+    final response = await _networkApi.getRelatedVideos(bvid: bvid);
+    return response.items;
+  }
+
+  @override
+  Future<NetworkReplyData> getReplyList({
+    required int oid,
+    required int type,
+    int page = 1,
+    int sort = 1,
+    String? nextOffset,
+  }) {
+    if (nextOffset != null && nextOffset.isNotEmpty) {
+      final paginationStr = '{"offset":"${nextOffset.replaceAll('"', '\\"')}"}';
+      return _networkApi.getReplyListMain(
+        oid: oid,
+        type: type,
+        paginationStr: paginationStr,
+        mode: sort + 2,
+      );
+    }
+    return _networkApi.getReplyList(
+      oid: oid,
+      type: type,
+      page: page,
+      sort: sort,
+    );
+  }
+
+  @override
+  Future<NetworkReplyReplyData> getReplyReplyList({
+    required int oid,
+    required int root,
+    required int type,
+    int page = 1,
+  }) => _networkApi.getReplyReplyList(
+    oid: oid,
+    root: root,
+    type: type,
+    page: page,
+    sort: 1,
+  );
+
+  @override
+  Future<NetworkPlayUrl> getPlayUrl({
+    required String bvid,
+    required int cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) => _networkApi.getPlayUrl(
+    bvid,
+    cid,
+    qn: qn,
+    fnval: fnval,
+    fourk: fourk,
   );
 }
