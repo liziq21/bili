@@ -73,11 +73,7 @@ enum UserSearchSort implements SortOption {
   ),
   levelAscending('levelAscending', UserSearchOrder.level, OrderSort.ascending);
 
-  const UserSearchSort(
-    this.label,
-    this.order,
-    this.orderSort,
-  );
+  const UserSearchSort(this.label, this.order, this.orderSort);
 
   @override
   final String label;

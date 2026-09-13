@@ -54,4 +54,3 @@ class const NetworkBiliUserSearchResult({
 //   factory NetworkBiliUserSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkBiliUserSearchResultFromJson(json);
 // }
-

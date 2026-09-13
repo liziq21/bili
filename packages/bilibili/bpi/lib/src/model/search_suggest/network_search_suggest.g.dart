@@ -12,11 +12,15 @@ NetworkSearchSuggest _$NetworkSearchSuggestFromJson(
   final val = NetworkSearchSuggest(
     tag: $checkedConvert(
       'tag',
-      (v) => (v as List<dynamic>)
-          .map(
-            (e) => NetworkSearchSuggestItem.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map(
+                (e) => NetworkSearchSuggestItem.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          [],
     ),
   );
   return val;

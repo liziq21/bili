@@ -14,10 +14,10 @@ enum ArticleCategory implements Category {
 
   const ArticleCategory(this.id);
   final int id;
-  
+
   @override
   String toString() => '$id';
-  
+
   @override
   String toJson() => toString();
 }
@@ -29,7 +29,7 @@ enum PhotoCategory implements Category {
 
   @override
   String toString() => '$index';
-  
+
   @override
   String toJson() => toString();
 }

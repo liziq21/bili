@@ -1,6 +1,5 @@
 //import 'package:dio/dio.dart';
 
-
 extension UriExtensions on Uri {
   /*Future<Uri> getFinalUrl() async {
     var finalUri = this;
@@ -18,16 +17,14 @@ extension UriExtensions on Uri {
     }
     throw Exception('getFinalUrl ${toString()}: 重定向过多');
   }*/
-  
-  String get lastSegdment => pathSegments.isNotEmpty ? pathSegments.last : '';
-  
-  List<String> get hostParts => host.split('.');
-  
-  String? get secondLevelDomain => hostParts.length >= 2 ? hostParts[0] : null;
-  
-  bool get isBilibiiScheme => isScheme('bilibili');
-  
-  bool get isHTTPScheme => isScheme('http') || isScheme('https');
-  
-}
 
+  String get lastSegdment => pathSegments.isNotEmpty ? pathSegments.last : '';
+
+  List<String> get hostParts => host.split('.');
+
+  String? get secondLevelDomain => hostParts.length >= 2 ? hostParts[0] : null;
+
+  bool get isBilibiiScheme => isScheme('bilibili');
+
+  bool get isHTTPScheme => isScheme('http') || isScheme('https');
+}

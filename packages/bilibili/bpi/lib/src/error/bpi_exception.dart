@@ -47,27 +47,21 @@ final class BpiSerializationException extends BpiException {
 
 final class BiliApiException extends BpiException {
   const BiliApiException(
-    String message, {
-    required int biliCode,
-    Uri? uri,
-    int? statusCode,
-    Object? cause,
-  }) : super(
-         message,
-         biliCode: biliCode,
-         uri: uri,
-         statusCode: statusCode,
-         cause: cause,
-       );
+    super.message, {
+    required super.biliCode,
+    super.uri,
+    super.statusCode,
+    super.cause,
+  });
 }
 
 final class BpiHttpException extends BpiException {
   const BpiHttpException(
-    String message, {
-    required int statusCode,
-    Uri? uri,
-    Object? cause,
-  }) : super(message, statusCode: statusCode, uri: uri, cause: cause);
+    super.message, {
+    required super.statusCode,
+    super.uri,
+    super.cause,
+  });
 }
 
 final class TokenException extends BpiException {

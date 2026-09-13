@@ -21,4 +21,3 @@ class const NetworkUserOfficialVerify({
 //   factory NetworkUserOfficialVerify.fromJson(Map<String, dynamic> json)
 //     => _$NetworkUserOfficialVerifyFromJson(json);
 // }
-
