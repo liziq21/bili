@@ -38,7 +38,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       headers: $headers,
     );
-    final Response $response = await client
+    final Response<NetworkSearchSuggest> $response = await client
         .send<NetworkSearchSuggest, NetworkSearchSuggest>($request);
     return $response.bodyOrThrow;
   }
@@ -63,7 +63,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       tag: tag,
     );
-    final Response $response = await client
+    final Response<NetworkSearchResult> $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
     return $response.bodyOrThrow;
   }
@@ -106,7 +106,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       tag: tag,
     );
-    final Response $response = await client
+    final Response<NetworkSearchResult> $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
     return $response.bodyOrThrow;
   }
@@ -121,8 +121,150 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       client.baseUrl,
       parameters: $params,
     );
-    final Response $response = await client
+    final Response<VideoDetailData> $response = await client
         .send<VideoDetailData, VideoDetailData>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkVideoRelation> getVideoRelation({required String bvid}) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/web-interface/archive/relation',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'bvid': bvid};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkVideoRelation> $response = await client
+        .send<NetworkVideoRelation, NetworkVideoRelation>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkRelatedVideosList> getRelatedVideos({
+    required String bvid,
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/web-interface/archive/related',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'bvid': bvid};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkRelatedVideosList> $response = await client
+        .send<NetworkRelatedVideosList, NetworkRelatedVideosList>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkReplyData> getReplyListMain({
+    required int oid,
+    required int type,
+    String? paginationStr,
+    int? mode,
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/v2/reply/main');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'oid': oid,
+      'type': type,
+      'pagination_str': paginationStr,
+      'mode': mode,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkReplyData> $response = await client
+        .send<NetworkReplyData, NetworkReplyData>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkReplyData> getReplyList({
+    required int oid,
+    required int type,
+    int? page,
+    int? sort,
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/v2/reply');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'oid': oid,
+      'type': type,
+      'pn': page,
+      'sort': sort,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkReplyData> $response = await client
+        .send<NetworkReplyData, NetworkReplyData>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkReplyReplyData> getReplyReplyList({
+    required int oid,
+    required int root,
+    required int type,
+    int? page,
+    int? sort,
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/v2/reply/reply');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'oid': oid,
+      'root': root,
+      'type': type,
+      'pn': page,
+      'sort': sort,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkReplyReplyData> $response = await client
+        .send<NetworkReplyReplyData, NetworkReplyReplyData>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
+  Future<NetworkPlayUrl> getPlayUrl(
+    String bvid,
+    int cid, {
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+    String tag = 'WBI',
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/player/wbi/playurl');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'bvid': bvid,
+      'cid': cid,
+      'qn': qn,
+      'fnval': fnval,
+      'fourk': fourk,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: tag,
+    );
+    final Response<NetworkPlayUrl> $response = await client
+        .send<NetworkPlayUrl, NetworkPlayUrl>($request);
     return $response.bodyOrThrow;
   }
 }
