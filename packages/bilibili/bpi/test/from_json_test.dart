@@ -6,11 +6,11 @@ import 'package:test/test.dart';
 
 void main() {
   Map<String, dynamic> loadFixture(String name) {
-    final file = File('test/fixtures/$name');
+    final file = File('testing/$name');
     expect(
       file.existsSync(),
       isTrue,
-      reason: 'Fixture file test/fixtures/$name should exist',
+      reason: 'Fixture file testing/$name should exist',
     );
     final content = file.readAsStringSync();
     return jsonDecode(content) as Map<String, dynamic>;
@@ -69,6 +69,23 @@ void main() {
       final data = json['data'] as Map<String, dynamic>;
       final result = NetworkSearchResult.fromJson(data);
 
+      expect(result.numResults, greaterThanOrEqualTo(0));
+    });
+
+    test('parses real search_live_room.json correctly', () {
+      final json = loadFixture('search_live_room.json');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+
+      expect(result.page, equals(1));
+    });
+
+    test('parses real search_live_user.json correctly', () {
+      final json = loadFixture('search_live_user.json');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+
+      expect(result.page, equals(1));
       expect(result.result.liveUser, isNotEmpty);
       final liveUser = result.result.liveUser.first;
       expect(liveUser.uname.text, isNotEmpty);
@@ -104,26 +121,29 @@ void main() {
 
       expect(result.page, equals(1));
     });
-  });
 
-  group('VideoDetailData fromJson tests', () {
-    test('parses real video_detail.json correctly', () {
-      final json = loadFixture('video_detail.json');
-      final baseRes = BaseResponse.fromJson(json);
+    test('handles search_photo.json correctly', () {
+      final json = loadFixture('search_photo.json');
+      if (json['data'] is Map<String, dynamic>) {
+        final result = NetworkSearchResult.fromJson(
+          json['data'] as Map<String, dynamic>,
+        );
+        expect(result.page, greaterThanOrEqualTo(1));
+      } else {
+        expect(json['code'], isNot(equals(0)));
+      }
+    });
 
-      expect(baseRes.code, equals(0));
-      expect(baseRes.message, equals('OK'));
-      expect(baseRes.data, isNotNull);
-
-      final video = baseRes.data;
-      expect(video.bvid, equals('BV1GJ411x7vy'));
-      expect(video.aid, equals(80431228));
-      expect(video.title, equals('教科书上的道具操作都有'));
-      expect(video.owner.name, equals('风悄笔落'));
-      expect(video.stat.view, greaterThan(0));
-      expect(video.dimension.width, equals(1280));
-      expect(video.dimension.height, equals(720));
-      expect(video.isPageReversed, isFalse);
+    test('handles search_topic.json correctly', () {
+      final json = loadFixture('search_topic.json');
+      if (json['data'] is Map<String, dynamic>) {
+        final result = NetworkSearchResult.fromJson(
+          json['data'] as Map<String, dynamic>,
+        );
+        expect(result.page, greaterThanOrEqualTo(1));
+      } else {
+        expect(json['code'], isNot(equals(0)));
+      }
     });
   });
 }

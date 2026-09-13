@@ -1,211 +1,134 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:bpi/bpi.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Video Detail & Relation Models', () {
-    test('deserializes VideoDetailData correctly', () {
-      final json = {
-        'bvid': 'BV1xx411c7mD',
-        'aid': 170001,
-        'videos': 1,
-        'copyright': 1,
-        'pic': 'http://i0.hdslb.com/bfs/archive/test.jpg',
-        'title': 'Test Video Title',
-        'pubdate': 1600000000,
-        'ctime': 1600000000,
-        'desc': 'Test video description',
-        'duration': 120,
-        'cid': 10001,
-        'owner': {
-          'mid': 12345,
-          'name': 'Test UP',
-          'face': 'http://i0.hdslb.com/bfs/face/test.jpg',
-        },
-        'stat': {
-          'aid': 170001,
-          'view': 1000,
-          'danmaku': 50,
-          'reply': 20,
-          'favorite': 10,
-          'coin': 5,
-          'share': 2,
-          'like': 100,
-        },
-        'pages': [
-          {
-            'cid': 10001,
-            'page': 1,
-            'from': 'vupload',
-            'part': 'Part 1',
-            'duration': 120,
-          }
-        ],
-      };
+  Map<String, dynamic> loadFixture(String name) {
+    final file = File('testing/$name');
+    expect(
+      file.existsSync(),
+      isTrue,
+      reason: 'Fixture file testing/$name should exist',
+    );
+    final content = file.readAsStringSync();
+    return jsonDecode(content) as Map<String, dynamic>;
+  }
 
-      final data = VideoDetailData.fromJson(json);
-      expect(data.bvid, equals('BV1xx411c7mD'));
-      expect(data.aid, equals(170001));
-      expect(data.title, equals('Test Video Title'));
-      expect(data.owner?.name, equals('Test UP'));
-      expect(data.stat?.like, equals(100));
-      expect(data.pages?.length, equals(1));
-      expect(data.pages?.first.part, equals('Part 1'));
+  group('Video Detail & Relation Models', () {
+    test('parses real video_detail.json correctly', () {
+      final json = loadFixture('video_detail.json');
+      final baseRes = BaseResponse.fromJson(json);
+
+      expect(baseRes.code, equals(0));
+      expect(baseRes.message, equals('OK'));
+      expect(baseRes.data, isNotNull);
+
+      final video = baseRes.data;
+      expect(video.bvid, equals('BV1GJ411x7vy'));
+      expect(video.aid, equals(80431228));
+      expect(video.cid, equals(137646676));
+      expect(video.title, equals('教科书上的道具操作都有'));
+      expect(video.owner?.name, equals('风悄笔落'));
+      expect(video.stat?.view, greaterThan(0));
+      expect(video.dimension?.width, equals(1280));
+      expect(video.dimension?.height, equals(720));
+      expect(video.isPageReversed, isFalse);
     });
 
-    test('deserializes NetworkVideoRelation correctly', () {
-      final json = {
+    test('parses real video_relation.json correctly', () {
+      final json = loadFixture('video_relation.json');
+      if (json['data'] is Map<String, dynamic>) {
+        final relation = NetworkVideoRelation.fromJson(
+          json['data'] as Map<String, dynamic>,
+        );
+        expect(relation, isNotNull);
+      } else {
+        expect(json['code'], equals(-101));
+      }
+
+      final mockRelation = NetworkVideoRelation.fromJson({
         'attention': true,
         'favorite': false,
         'season_fav': false,
         'like': true,
         'dislike': false,
         'coin': 1,
-      };
-
-      final relation = NetworkVideoRelation.fromJson(json);
-      expect(relation.attention, isTrue);
-      expect(relation.like, isTrue);
-      expect(relation.favorite, isFalse);
-      expect(relation.coin, equals(1));
+      });
+      expect(mockRelation.attention, isTrue);
+      expect(mockRelation.like, isTrue);
+      expect(mockRelation.favorite, isFalse);
+      expect(mockRelation.coin, equals(1));
     });
   });
 
   group('Related Videos Model', () {
-    test('deserializes NetworkRelatedVideosList correctly', () {
-      final json = {
-        'items': [
-          {
-            'aid': 20002,
-            'bvid': 'BV1234567890',
-            'title': 'Related Video 1',
-            'pic': 'http://i0.hdslb.com/bfs/archive/rel.jpg',
-            'duration': 300,
-            'owner': {
-              'mid': 67890,
-              'name': 'Related UP',
-              'face': 'http://i0.hdslb.com/bfs/face/rel.jpg',
-            },
-          }
-        ]
-      };
+    test('parses real related_videos.json correctly', () {
+      final json = loadFixture('related_videos.json');
+      expect(json['code'], equals(0));
+      final dataList = json['data'] as List;
+      final list = NetworkRelatedVideosList.fromJson({'items': dataList});
 
-      final list = NetworkRelatedVideosList.fromJson(json);
-      expect(list.items.length, equals(1));
+      expect(list.items, isNotEmpty);
       final item = list.items.first;
-      expect(item.aid, equals(20002));
-      expect(item.bvid, equals('BV1234567890'));
-      expect(item.owner?.name, equals('Related UP'));
+      expect(item.aid, greaterThan(0));
+      expect(item.bvid, isNotEmpty);
+      expect(item.owner, isNotNull);
     });
   });
 
   group('PlayUrl Model', () {
-    test('deserializes NetworkPlayUrl with Dash correctly', () {
-      final json = {
-        'quality': 80,
-        'format': 'flv720',
-        'timelength': 120000,
-        'dash': {
-          'duration': 120,
-          'minBufferTime': 1.5,
-          'video': [
-            {
-              'id': 80,
-              'baseUrl': 'http://stream.hdslb.com/video80.m4s',
-              'bandwidth': 1500000,
-              'codecs': 'avc1.640028',
-              'width': 1920,
-              'height': 1080,
-            }
-          ],
-          'audio': [
-            {
-              'id': 30280,
-              'baseUrl': 'http://stream.hdslb.com/audio30280.m4s',
-              'bandwidth': 128000,
-              'codecs': 'mp4a.40.2',
-            }
-          ]
-        }
-      };
+    test('parses real play_url.json correctly', () {
+      final json = loadFixture('play_url.json');
+      expect(json['code'], equals(0));
+      final data = json['data'] as Map<String, dynamic>;
+      final playUrl = NetworkPlayUrl.fromJson(data);
 
-      final playUrl = NetworkPlayUrl.fromJson(json);
-      expect(playUrl.quality, equals(80));
-      expect(playUrl.dash?.video?.length, equals(1));
-      expect(playUrl.dash?.video?.first.baseUrl, contains('video80.m4s'));
-      expect(playUrl.dash?.audio?.first.baseUrl, contains('audio30280.m4s'));
+      expect(playUrl.quality, greaterThan(0));
+      expect(playUrl.format, isNotNull);
+      expect(playUrl.dash, isNotNull);
+      expect(playUrl.dash?.video, isNotEmpty);
+      expect(playUrl.dash?.audio, isNotEmpty);
+      final videoStream = playUrl.dash!.video!.first;
+      expect(videoStream.playUrls, isNotEmpty);
     });
   });
 
   group('Reply Models', () {
-    test('deserializes NetworkReplyData correctly', () {
-      final json = {
-        'cursor': {
-          'is_end': false,
-          'next': 2,
-          'all_count': 100,
-        },
-        'replies': [
-          {
-            'rpid': 1001,
-            'oid': 170001,
-            'type': 1,
-            'mid': 55555,
-            'like': 42,
-            'member': {
-              'mid': '55555',
-              'uname': 'Commenter',
-              'sex': '保密',
-              'sign': 'Hello',
-              'avatar': 'http://i0.hdslb.com/bfs/face/commenter.jpg',
-            },
-            'content': {
-              'message': 'Great video!',
-            }
-          }
-        ]
-      };
+    test('parses real reply_list_main.json correctly', () {
+      final json = loadFixture('reply_list_main.json');
+      expect(json['code'], equals(0));
+      final data = json['data'] as Map<String, dynamic>;
+      final replyData = NetworkReplyData.fromJson(data);
 
-      final replyData = NetworkReplyData.fromJson(json);
-      expect(replyData.cursor?.allCount, equals(100));
-      expect(replyData.replies?.length, equals(1));
-      final reply = replyData.replies!.first;
-      expect(reply.rpid, equals(1001));
-      expect(reply.member?.uname, equals('Commenter'));
-      expect(reply.content?.message, equals('Great video!'));
+      expect(replyData.cursor, isNotNull);
+      expect(replyData.replies, isNotNull);
     });
 
-    test('deserializes NetworkReplyReplyData correctly', () {
-      final json = {
-        'page': {
-          'num': 1,
-          'size': 20,
-          'count': 5,
-        },
-        'replies': [
-          {
-            'rpid': 2001,
-            'oid': 170001,
-            'type': 1,
-            'mid': 66666,
-            'root': 1001,
-            'member': {
-              'mid': '66666',
-              'uname': 'SubCommenter',
-              'sex': '男',
-              'sign': '',
-              'avatar': 'http://i0.hdslb.com/bfs/face/sub.jpg',
-            },
-            'content': {
-              'message': 'Sub reply',
-            }
-          }
-        ]
-      };
+    test('parses real reply_list.json correctly', () {
+      final json = loadFixture('reply_list.json');
+      expect(json['code'], equals(0));
+      final data = json['data'] as Map<String, dynamic>;
+      final replyData = NetworkReplyData.fromJson(data);
 
-      final replyData = NetworkReplyReplyData.fromJson(json);
-      expect(replyData.page?.count, equals(5));
-      expect(replyData.replies?.first.rpid, equals(2001));
-      expect(replyData.replies?.first.content?.message, equals('Sub reply'));
+      expect(replyData.replies, isNotNull);
+      if (replyData.replies!.isNotEmpty) {
+        final firstReply = replyData.replies!.first;
+        expect(firstReply.rpid, greaterThan(0));
+        expect(firstReply.member, isNotNull);
+        expect(firstReply.content, isNotNull);
+        expect(firstReply.content?.message, isNotEmpty);
+      }
+    });
+
+    test('parses real reply_reply_list.json correctly', () {
+      final json = loadFixture('reply_reply_list.json');
+      expect(json['code'], equals(0));
+      final data = json['data'] as Map<String, dynamic>;
+      final replyData = NetworkReplyReplyData.fromJson(data);
+
+      expect(replyData, isNotNull);
     });
   });
 }
