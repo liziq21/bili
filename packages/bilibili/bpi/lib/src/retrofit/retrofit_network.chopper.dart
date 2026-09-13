@@ -38,7 +38,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       headers: $headers,
     );
-    final Response $response = await client
+    final Response<NetworkSearchSuggest> $response = await client
         .send<NetworkSearchSuggest, NetworkSearchSuggest>($request);
     return $response.bodyOrThrow;
   }
@@ -63,7 +63,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       tag: tag,
     );
-    final Response $response = await client
+    final Response<NetworkSearchResult> $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
     return $response.bodyOrThrow;
   }
@@ -106,7 +106,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       tag: tag,
     );
-    final Response $response = await client
+    final Response<NetworkSearchResult> $response = await client
         .send<NetworkSearchResult, NetworkSearchResult>($request);
     return $response.bodyOrThrow;
   }
@@ -121,7 +121,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       client.baseUrl,
       parameters: $params,
     );
-    final Response $response = await client
+    final Response<VideoDetailData> $response = await client
         .send<VideoDetailData, VideoDetailData>($request);
     return $response.bodyOrThrow;
   }

@@ -66,4 +66,3 @@ class const NetworkMediaBangumiSearchResult({
 //   factory NetworkMediaBangumiSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkMediaBangumiSearchResultFromJson(json);
 // }
-

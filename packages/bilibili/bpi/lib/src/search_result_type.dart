@@ -11,11 +11,10 @@ enum SearchResultType {
   liveRoom,
   liveUser,
   video;
-  
-  static SearchResultType? parse(String type) =>
-    $enumDecodeNullable(
-      _$SearchResultTypeEnumMap,
-      type,
-      unknownValue: JsonKey.nullForUndefinedEnumValue,
-    );
+
+  static SearchResultType? parse(String type) => $enumDecodeNullable(
+    _$SearchResultTypeEnumMap,
+    type,
+    unknownValue: JsonKey.nullForUndefinedEnumValue,
+  );
 }

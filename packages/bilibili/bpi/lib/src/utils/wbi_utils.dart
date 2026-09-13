@@ -117,21 +117,21 @@ abstract final class WbiUtils {
     }
 
     final json = Map<String, dynamic>.from(decoded);
-    final code = _parseInt(json['code']);
-    if (code != 0) {
-      throw BiliApiException(
-        (json['message'] ?? 'The WBI key endpoint returned an error.')
-            .toString(),
-        biliCode: code ?? -1,
-        uri: uri,
-      );
-    }
-
     final data = json['data'];
     final wbiImg = data is Map ? data['wbi_img'] : null;
     final imgUrl = wbiImg is Map ? wbiImg['img_url'] : null;
     final subUrl = wbiImg is Map ? wbiImg['sub_url'] : null;
+
     if (imgUrl is! String || subUrl is! String) {
+      final code = _parseInt(json['code']);
+      if (code != 0) {
+        throw BiliApiException(
+          (json['message'] ?? 'The WBI key endpoint returned an error.')
+              .toString(),
+          biliCode: code ?? -1,
+          uri: uri,
+        );
+      }
       throw WbiException(
         'The WBI key response is missing img_url or sub_url.',
         uri: uri,

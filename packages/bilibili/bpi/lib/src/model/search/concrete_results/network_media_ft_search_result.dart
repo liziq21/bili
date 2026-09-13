@@ -67,4 +67,3 @@ class const NetworkMediaFtSearchResult({
 //   factory NetworkMediaFtSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkMediaFtSearchResultFromJson(json);
 // }
-

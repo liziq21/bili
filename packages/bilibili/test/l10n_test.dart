@@ -56,10 +56,16 @@ void main() {
       expect(ArticleSearchSort.click.labelWithL10n(enL10n), 'Most Viewed');
 
       expect(LiveRoomSearchSort.liveTime.labelWithL10n(zhL10n), '开播时间');
-      expect(LiveRoomSearchSort.liveTime.labelWithL10n(enL10n), 'Live Start Time');
+      expect(
+        LiveRoomSearchSort.liveTime.labelWithL10n(enL10n),
+        'Live Start Time',
+      );
 
       expect(UserSearchSort.levelDescending.labelWithL10n(zhL10n), '等级从高到低');
-      expect(UserSearchSort.levelDescending.labelWithL10n(enL10n), 'Level (High to Low)');
+      expect(
+        UserSearchSort.levelDescending.labelWithL10n(enL10n),
+        'Level (High to Low)',
+      );
     });
   });
 }

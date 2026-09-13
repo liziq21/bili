@@ -50,4 +50,3 @@ class const NetworkLiveUserSearchResult({
 //   factory NetworkLiveUserSearchResult.fromJson(Map<String, dynamic> json) =>
 //       _$NetworkLiveUserSearchResultFromJson(json);
 // }
-

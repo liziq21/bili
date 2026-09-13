@@ -25,18 +25,19 @@ class VideoDetailData({
   required final int pubdate,
   required final int ctime,
   required final String desc,
-  required final List<DescV2> descV2,
+  final List<DescV2>? descV2,
   required final int duration,
   required final Rights rights,
   required final Owner owner,
   required final VideoStat stat,
-  required final ArgueInfo argueInfo,
+  final ArgueInfo? argueInfo,
   required final int cid,
   required final Dimension dimension,
-  required final int seasonId,
+  final int? seasonId,
   required final bool isUpowerExclusive,
-  required final UgcSeason ugcSeason,
+  final UgcSeason? ugcSeason,
 }) {
+  @JsonKey(includeFromJson: false, includeToJson: false)
   bool isPageReversed = false;
 
   factory fromJson(Map<String, dynamic> json) =>

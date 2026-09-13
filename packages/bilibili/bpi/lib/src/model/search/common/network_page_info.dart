@@ -23,4 +23,3 @@ class const NetworkPageinfo({
 //   factory NetworkPageinfo.fromJson(Map<String, dynamic> json)
 //     => _$NetworkPageinfoFromJson(json);
 // }
-
