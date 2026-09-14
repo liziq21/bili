@@ -1,9 +1,9 @@
 import 'package:http/http.dart' as http;
+import 'package:ypi/ypi.dart';
 
 import 'data/source/search/youtube_creator_profile_search_remote_data_source.dart';
 import 'data/source/search/youtube_search_suggest_remote_data_source.dart';
 import 'data/source/search/youtube_video_search_remote_data_source.dart';
-import 'service/youtube_service.dart';
 
 class YouTube {
   YouTube({YoutubeService? youtubeService, http.Client? httpClient})

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
-import 'package:youtube/youtube.dart';
+import 'package:ypi/ypi.dart';
 
 void main() {
   group('YoutubeService Tests', () {

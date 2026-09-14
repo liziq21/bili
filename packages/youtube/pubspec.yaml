@@ -5,20 +5,21 @@ publish_to: 'none'
 
 environment:
   sdk: "^3.13.2"
+
 resolution: workspace
+
+workspace:
+  - ypi
 
 dependencies:
   data: ^1.0.0
   model: ^1.0.0
+  ypi: ^1.0.0
   meta: ^1.12.0
   equatable: ^2.0.7
-  chopper: ^8.7.0
-  json_annotation: ^4.12.0
   http: ^1.6.0
 
 dev_dependencies:
   lints: ^6.0.0
   test: any
   build_runner: ^2.15.1
-  chopper_generator: ^8.6.2
-  json_serializable: ^6.14.0

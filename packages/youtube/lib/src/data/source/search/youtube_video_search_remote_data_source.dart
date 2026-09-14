@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:data/data.dart';
 import 'package:model/model.dart';
+import 'package:ypi/ypi.dart';
 
-import '../../../model/yt_search_filter.dart';
-import '../../../model/yt_search_sort.dart';
-import '../../../service/youtube_service.dart';
 import '../youtube_remote_data_source.dart';
 
 final class YoutubeSortOption extends SortOption {
