@@ -6,6 +6,8 @@ import 'model/live_room_model.dart';
 import 'model/paged_result.dart';
 import 'model/search_results.dart';
 import 'model/sort_option.dart';
+import 'model/video_comment_model.dart';
+import 'model/video_detail_model.dart';
 import 'model/video_model.dart';
 
 abstract class const RemoteDataSource() {
@@ -45,4 +47,22 @@ abstract class const VideoSearchRemoteDataSource()
 
 abstract class const SearchSuggestRemoteDataSource() extends RemoteDataSource {
   Future<Result<List<String>>> getSuggests(String query);
+}
+
+abstract class const VideoDetailRemoteDataSource() extends RemoteDataSource {
+  Future<Result<VideoDetail>> getVideoDetail(String id);
+  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+      Result.ok(!isLiked);
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.ok(!isFavorited);
+  Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed) async =>
+      Result.ok(!isSubscribed);
+}
+
+abstract class const VideoCommentRemoteDataSource() extends RemoteDataSource {
+  Future<Result<Page<VideoComment>>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  });
 }
