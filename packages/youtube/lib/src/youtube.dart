@@ -1,27 +1,32 @@
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:http/http.dart' as http;
 
 import 'data/source/search/youtube_creator_profile_search_remote_data_source.dart';
 import 'data/source/search/youtube_search_suggest_remote_data_source.dart';
 import 'data/source/search/youtube_video_search_remote_data_source.dart';
+import 'service/youtube_service.dart';
 
 class YouTube {
-  YouTube({YoutubeExplode? youtubeExplode})
-    : _youtubeExplode = youtubeExplode ?? YoutubeExplode();
+  YouTube({YoutubeService? youtubeService, http.Client? httpClient})
+      : _youtubeService = youtubeService ??
+            YoutubeService(httpClient: httpClient);
 
-  final YoutubeExplode _youtubeExplode;
+  final YoutubeService _youtubeService;
 
-  YoutubeExplode get youtubeExplode => _youtubeExplode;
+  YoutubeService get youtubeService => _youtubeService;
 
   YouTubeVideoSearchRemoteDataSource videoSearchDataSource() =>
-      YouTubeVideoSearchRemoteDataSource(youtubeExplode: _youtubeExplode);
+      YouTubeVideoSearchRemoteDataSource(youtubeService: _youtubeService);
 
   YouTubeCreatorProfileSearchRemoteDataSource
-  creatorProfileSearchDataSource() => YouTubeCreatorProfileSearchRemoteDataSource(youtubeExplode: _youtubeExplode);
+      creatorProfileSearchDataSource() =>
+          YouTubeCreatorProfileSearchRemoteDataSource(
+            youtubeService: _youtubeService,
+          );
 
   YouTubeSearchSuggestRemoteDataSource searchSuggestDataSource() =>
-      YouTubeSearchSuggestRemoteDataSource(youtubeExplode: _youtubeExplode);
+      YouTubeSearchSuggestRemoteDataSource(youtubeService: _youtubeService);
 
   void close() {
-    _youtubeExplode.close();
+    _youtubeService.close();
   }
 }

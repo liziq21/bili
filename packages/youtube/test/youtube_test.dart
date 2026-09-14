@@ -5,7 +5,7 @@ import 'package:youtube/youtube.dart';
 void main() {
   group('YouTube Package Initializer Tests', () {
     test(
-      'YouTube facade creates RemoteDataSources with sourceId "youtube"',
+      'YouTube facade creates RemoteDataSources with sourceId "youtube" and exposes sort & filter options',
       () {
         final youtube = YouTube();
 
@@ -20,6 +20,12 @@ void main() {
         expect(videoDS.sourceId, equals('youtube'));
         expect(creatorDS.sourceId, equals('youtube'));
         expect(suggestDS.sourceId, equals('youtube'));
+
+        expect(videoDS.sortOptions, isNotEmpty);
+        expect(videoDS.sortOptions.length, equals(4));
+
+        expect(videoDS.filters, isNotEmpty);
+        expect(videoDS.filters.length, equals(3));
 
         youtube.close();
       },
