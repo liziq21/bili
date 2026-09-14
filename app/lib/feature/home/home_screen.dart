@@ -1,4 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:model/model.dart';
+
+import 'bloc/home_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -20,19 +24,36 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            return DropdownButton<ServiceSource>(
+              value: state.serviceSource,
+              underline: const SizedBox.shrink(),
+              items: ServiceSource.values.map((source) {
+                final label = switch (source) {
+                  ServiceSource.bilibili => 'Bilibili',
+                  ServiceSource.youtube => 'YouTube',
+                };
+                return DropdownMenuItem<ServiceSource>(
+                  value: source,
+                  child: Text(
+                    label,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                );
+              }).toList(),
+              onChanged: (ServiceSource? newSource) {
+                if (newSource != null) {
+                  context.read<HomeBloc>().add(ServiceSourceChanged(newSource));
+                }
+              },
+            );
+          },
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
