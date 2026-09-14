@@ -7,6 +7,7 @@ import 'package:model/model.dart';
 import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
+import '../data/repository/video_detail_repository.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';

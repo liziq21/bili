@@ -10,6 +10,8 @@ import '../data/repository/search/app_video_search_repository.dart';
 import '../data/repository/search/app_youtube_video_search_repository.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
+import '../data/repository/video_comment_repository.dart';
+import '../data/repository/video_detail_repository.dart';
 
 class ServiceSourceProviders extends StatelessWidget {
   const ServiceSourceProviders({
@@ -60,6 +62,16 @@ class ServiceSourceProviders extends StatelessWidget {
                 create: (context) => AppUserSearchRepository(
                   context.read<Bili>().creatorProfileSearchDataSource(),
                   context.read<Bili>().searchSuggestDataSource(),
+                ),
+              ),
+              RepositoryProvider<VideoDetailRepository>(
+                create: (context) => AppVideoDetailRepository(
+                  context.read<Bili>().videoDetailDataSource(),
+                ),
+              ),
+              RepositoryProvider<VideoCommentRepository>(
+                create: (context) => AppVideoCommentRepository(
+                  context.read<Bili>().videoCommentDataSource(),
                 ),
               ),
             ],

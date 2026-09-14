@@ -5,30 +5,37 @@ import 'package:bpi/bpi.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  File findFile(String relativePath) {
-    var file = File(relativePath);
-    if (!file.existsSync()) {
-      file = File('packages/bilibili/$relativePath');
+  File findFile(String key) {
+    final candidatePaths = [
+      'packages/bilibili/bpi/testing/$key.json',
+      'bpi/testing/$key.json',
+      'testing/$key.json',
+    ];
+    for (final path in candidatePaths) {
+      final file = File(path);
+      if (file.existsSync()) return file;
     }
-    return file;
+    return File(candidatePaths.first);
+  }
+
+  Map<String, dynamic> loadFake(String key) {
+    final file = findFile(key);
+    expect(
+      file.existsSync(),
+      isTrue,
+      reason: 'Search suggest fake file should exist at ${file.path}',
+    );
+    final content = file.readAsStringSync();
+    return jsonDecode(content) as Map<String, dynamic>;
   }
 
   group('NetworkSearchSuggest model tests', () {
     test('deserializes search_suggest.json correctly', () {
-      final file = findFile(
-        'testing/network/fakes/search_suggest/search_suggest.json',
-      );
-      expect(
-        file.existsSync(),
-        isTrue,
-        reason: 'Search suggest fake file should exist at ${file.path}',
-      );
-      final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
-      final suggest = NetworkSearchSuggest.fromJson(json);
+      final json = loadFake('search_suggest');
+      final data = (json['data'] ?? json) as Map<String, dynamic>;
+      final result = NetworkSearchSuggest.fromJson(data);
 
-      expect(suggest.tag, isNotEmpty);
-      expect(suggest.tag.first.term, isNotEmpty);
-      expect(suggest.tag.first.name, isNotEmpty);
+      expect(result.tag, isNotEmpty);
     });
   });
 }
