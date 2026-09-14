@@ -59,7 +59,16 @@ class const App({super.key}) extends StatelessWidget {
               routerConfig: router,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
-              localeResolutionCallback: (locale, _) => locale,
+              localeResolutionCallback: (locale, supportedLocales) {
+                if (locale != null) {
+                  for (final supportedLocale in supportedLocales) {
+                    if (supportedLocale.languageCode == locale.languageCode) {
+                      return supportedLocale;
+                    }
+                  }
+                }
+                return AppLocalizations.supportedLocales.first;
+              },
             );
           },
         ),

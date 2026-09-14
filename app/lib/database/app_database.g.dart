@@ -2667,7 +2667,18 @@ class $$RecentSearchQueryTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$RecentSearchQueryTable, RecentSearchQueryEntity>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $RecentSearchQueryTable,
+                    RecentSearchQueryEntity
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2695,32 +2706,30 @@ typedef $$RecentSearchQueryTableProcessedTableManager =
       RecentSearchQueryEntity,
       PrefetchHooks Function()
     >;
-typedef $$MediaTableCreateCompanionBuilder =
-    MediaCompanion Function({
-      Value<int> internalId,
-      required String sourceId,
-      required String originalId,
-      required String title,
-      required String url,
-      Value<String?> thumbnailUrl,
-      Value<String?> creatorProfileName,
-      Value<String?> creatorProfileId,
-      Value<DateTime?> uploadDate,
-      required String type,
-    });
-typedef $$MediaTableUpdateCompanionBuilder =
-    MediaCompanion Function({
-      Value<int> internalId,
-      Value<String> sourceId,
-      Value<String> originalId,
-      Value<String> title,
-      Value<String> url,
-      Value<String?> thumbnailUrl,
-      Value<String?> creatorProfileName,
-      Value<String?> creatorProfileId,
-      Value<DateTime?> uploadDate,
-      Value<String> type,
-    });
+typedef $$MediaTableCreateCompanionBuilder = MediaCompanion Function({
+  Value<int> internalId,
+  required String sourceId,
+  required String originalId,
+  required String title,
+  required String url,
+  Value<String?> thumbnailUrl,
+  Value<String?> creatorProfileName,
+  Value<String?> creatorProfileId,
+  Value<DateTime?> uploadDate,
+  required String type,
+});
+typedef $$MediaTableUpdateCompanionBuilder = MediaCompanion Function({
+  Value<int> internalId,
+  Value<String> sourceId,
+  Value<String> originalId,
+  Value<String> title,
+  Value<String> url,
+  Value<String?> thumbnailUrl,
+  Value<String?> creatorProfileName,
+  Value<String?> creatorProfileId,
+  Value<DateTime?> uploadDate,
+  Value<String> type,
+});
 
 final class $$MediaTableReferences
     extends BaseReferences<_$AppDatabase, $MediaTable, MediaEntity> {
@@ -3251,8 +3260,10 @@ class $$MediaTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$MediaTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$MediaTable, MediaEntity>(table),
+                  $$MediaTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback:
@@ -3626,7 +3637,7 @@ class $$MediaHistoryTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$MediaHistoryTable, MediaHistoryEntity>(table),
                   $$MediaHistoryTableReferences(db, table, e),
                 ),
               )
@@ -3652,17 +3663,15 @@ class $$MediaHistoryTableTableManager
                     >
                   >(state) {
                     if (mediaId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.mediaId,
-                                referencedTable: $$MediaHistoryTableReferences
-                                    ._mediaIdTable(db),
-                                referencedColumn: $$MediaHistoryTableReferences
-                                    ._mediaIdTable(db)
-                                    .internalId,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.mediaId,
+                        referencedTable: $$MediaHistoryTableReferences
+                            ._mediaIdTable(db),
+                        referencedColumn: $$MediaHistoryTableReferences
+                            ._mediaIdTable(db)
+                            .internalId,
+                      ) as T;
                     }
 
                     return state;
@@ -3690,18 +3699,16 @@ typedef $$MediaHistoryTableProcessedTableManager =
       MediaHistoryEntity,
       PrefetchHooks Function({bool mediaId})
     >;
-typedef $$VideoTableCreateCompanionBuilder =
-    VideoCompanion Function({
-      Value<int> mediaId,
-      required BigInt duration,
-      Value<BigInt?> viewCount,
-    });
-typedef $$VideoTableUpdateCompanionBuilder =
-    VideoCompanion Function({
-      Value<int> mediaId,
-      Value<BigInt> duration,
-      Value<BigInt?> viewCount,
-    });
+typedef $$VideoTableCreateCompanionBuilder = VideoCompanion Function({
+  Value<int> mediaId,
+  required BigInt duration,
+  Value<BigInt?> viewCount,
+});
+typedef $$VideoTableUpdateCompanionBuilder = VideoCompanion Function({
+  Value<int> mediaId,
+  Value<BigInt> duration,
+  Value<BigInt?> viewCount,
+});
 
 final class $$VideoTableReferences
     extends BaseReferences<_$AppDatabase, $VideoTable, VideoEntity> {
@@ -3897,8 +3904,10 @@ class $$VideoTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$VideoTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$VideoTable, VideoEntity>(table),
+                  $$VideoTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({mediaId = false}) {
@@ -3922,17 +3931,16 @@ class $$VideoTableTableManager
                     >
                   >(state) {
                     if (mediaId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.mediaId,
-                                referencedTable: $$VideoTableReferences
-                                    ._mediaIdTable(db),
-                                referencedColumn: $$VideoTableReferences
-                                    ._mediaIdTable(db)
-                                    .internalId,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.mediaId,
+                        referencedTable: $$VideoTableReferences._mediaIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$VideoTableReferences
+                            ._mediaIdTable(db)
+                            .internalId,
+                      ) as T;
                     }
 
                     return state;
@@ -4159,7 +4167,18 @@ class $$CreatorProfileTableTableManager
                 thumbnailUrl: thumbnailUrl,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CreatorProfileTable, CreatorProfileEntity>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CreatorProfileTable,
+                    CreatorProfileEntity
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -4187,20 +4206,18 @@ typedef $$CreatorProfileTableProcessedTableManager =
       CreatorProfileEntity,
       PrefetchHooks Function()
     >;
-typedef $$ArticleTableCreateCompanionBuilder =
-    ArticleCompanion Function({
-      Value<int> mediaId,
-      required String content,
-      Value<String?> author,
-      Value<BigInt?> wordCount,
-    });
-typedef $$ArticleTableUpdateCompanionBuilder =
-    ArticleCompanion Function({
-      Value<int> mediaId,
-      Value<String> content,
-      Value<String?> author,
-      Value<BigInt?> wordCount,
-    });
+typedef $$ArticleTableCreateCompanionBuilder = ArticleCompanion Function({
+  Value<int> mediaId,
+  required String content,
+  Value<String?> author,
+  Value<BigInt?> wordCount,
+});
+typedef $$ArticleTableUpdateCompanionBuilder = ArticleCompanion Function({
+  Value<int> mediaId,
+  Value<String> content,
+  Value<String?> author,
+  Value<BigInt?> wordCount,
+});
 
 final class $$ArticleTableReferences
     extends BaseReferences<_$AppDatabase, $ArticleTable, ArticleEntity> {
@@ -4415,7 +4432,7 @@ class $$ArticleTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<$ArticleTable, ArticleEntity>(table),
                   $$ArticleTableReferences(db, table, e),
                 ),
               )
@@ -4441,17 +4458,16 @@ class $$ArticleTableTableManager
                     >
                   >(state) {
                     if (mediaId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.mediaId,
-                                referencedTable: $$ArticleTableReferences
-                                    ._mediaIdTable(db),
-                                referencedColumn: $$ArticleTableReferences
-                                    ._mediaIdTable(db)
-                                    .internalId,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.mediaId,
+                        referencedTable: $$ArticleTableReferences._mediaIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$ArticleTableReferences
+                            ._mediaIdTable(db)
+                            .internalId,
+                      ) as T;
                     }
 
                     return state;
@@ -4479,18 +4495,16 @@ typedef $$ArticleTableProcessedTableManager =
       ArticleEntity,
       PrefetchHooks Function({bool mediaId})
     >;
-typedef $$PostTableCreateCompanionBuilder =
-    PostCompanion Function({
-      Value<int> mediaId,
-      required String content,
-      required String imageUrlsJson,
-    });
-typedef $$PostTableUpdateCompanionBuilder =
-    PostCompanion Function({
-      Value<int> mediaId,
-      Value<String> content,
-      Value<String> imageUrlsJson,
-    });
+typedef $$PostTableCreateCompanionBuilder = PostCompanion Function({
+  Value<int> mediaId,
+  required String content,
+  required String imageUrlsJson,
+});
+typedef $$PostTableUpdateCompanionBuilder = PostCompanion Function({
+  Value<int> mediaId,
+  Value<String> content,
+  Value<String> imageUrlsJson,
+});
 
 final class $$PostTableReferences
     extends BaseReferences<_$AppDatabase, $PostTable, PostEntity> {
@@ -4687,8 +4701,10 @@ class $$PostTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$PostTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable<$PostTable, PostEntity>(table),
+                  $$PostTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({mediaId = false}) {
@@ -4712,17 +4728,16 @@ class $$PostTableTableManager
                     >
                   >(state) {
                     if (mediaId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.mediaId,
-                                referencedTable: $$PostTableReferences
-                                    ._mediaIdTable(db),
-                                referencedColumn: $$PostTableReferences
-                                    ._mediaIdTable(db)
-                                    .internalId,
-                              )
-                              as T;
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.mediaId,
+                        referencedTable: $$PostTableReferences._mediaIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$PostTableReferences
+                            ._mediaIdTable(db)
+                            .internalId,
+                      ) as T;
                     }
 
                     return state;
