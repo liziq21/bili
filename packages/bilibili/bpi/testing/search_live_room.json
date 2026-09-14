@@ -1,0 +1,24 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "seid": "4823548524597890099",
+    "page": 1,
+    "pagesize": 40,
+    "numResults": 0,
+    "numPages": 0,
+    "suggest_keyword": "",
+    "rqt_type": "search",
+    "exp_list": {
+      "100010": true,
+      "5500": true,
+      "6699": true
+    },
+    "egg_hit": 0,
+    "result": [],
+    "show_column": 0,
+    "in_black_key": 0,
+    "in_white_key": 0
+  }
+}
