@@ -7,11 +7,28 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return HomeScreen(
-      onLive: context.navigateToLive,
-      navigateToSearchReault: context.navigateToSearchReault,
-      onSpace: context.navigateToSpace,
-      onVideo: context.navigateToVideo,
+    return BlocProvider<HomeBloc>(
+      create: (context) => HomeBloc(userDataRepository: context.read()),
+      child: Builder(
+        builder: (context) => HomeScreen(
+          onLive: (roomId) {
+            final source = context.read<HomeBloc>().state.serviceSource;
+            context.navigateToLive(roomId, source: source);
+          },
+          navigateToSearchReault: (keyword) {
+            final source = context.read<HomeBloc>().state.serviceSource;
+            context.navigateToSearchReault(keyword, source: source);
+          },
+          onSpace: (mid) {
+            final source = context.read<HomeBloc>().state.serviceSource;
+            context.navigateToSpace(mid, source: source);
+          },
+          onVideo: (id) {
+            final source = context.read<HomeBloc>().state.serviceSource;
+            context.navigateToVideo(id, source: source);
+          },
+        ),
+      ),
     );
   }
 }
