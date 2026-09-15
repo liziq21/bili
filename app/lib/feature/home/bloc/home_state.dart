@@ -3,20 +3,20 @@ part of 'home_bloc.dart';
 @immutable
 class HomeState extends Equatable {
   const HomeState({
-    this.serviceSource = ServiceSource.bilibili,
+    this.sourceId = 'bilibili',
     this.isLoading = false,
   });
 
-  final ServiceSource serviceSource;
+  final String sourceId;
   final bool isLoading;
 
-  HomeState copyWith({ServiceSource? serviceSource, bool? isLoading}) {
+  HomeState copyWith({String? sourceId, bool? isLoading}) {
     return HomeState(
-      serviceSource: serviceSource ?? this.serviceSource,
+      sourceId: sourceId ?? this.sourceId,
       isLoading: isLoading ?? this.isLoading,
     );
   }
 
   @override
-  List<Object?> get props => [serviceSource, isLoading];
+  List<Object?> get props => [sourceId, isLoading];
 }

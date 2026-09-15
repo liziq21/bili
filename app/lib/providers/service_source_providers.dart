@@ -1,7 +1,6 @@
 import 'package:bilibili/bilibili.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:model/model.dart';
 import 'package:youtube/youtube.dart';
 
 import '../data/repository/search/app_live_room_search_repository.dart';
@@ -20,23 +19,22 @@ class ServiceSourceProviders extends StatelessWidget {
     required this.child,
   });
 
-  final ServiceSource source;
+  final String source;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     try {
-      final currentSource = context.read<ServiceSource?>();
-      if (currentSource == source) {
+      final currentSource = context.read<String?>();
+      if (currentSource?.toLowerCase() == source.toLowerCase()) {
         return child;
       }
-    } catch (_) {
-    }
+    } catch (_) {}
 
-    return RepositoryProvider<ServiceSource>.value(
+    return RepositoryProvider<String>.value(
       value: source,
-      child: switch (source) {
-        ServiceSource.bilibili => MultiRepositoryProvider(
+      child: switch (source.toLowerCase()) {
+        'bilibili' => MultiRepositoryProvider(
             providers: [
               RepositoryProvider<Bili>(
                 create: (_) => Bili(),
@@ -77,7 +75,7 @@ class ServiceSourceProviders extends StatelessWidget {
             ],
             child: child,
           ),
-        ServiceSource.youtube => MultiRepositoryProvider(
+        'youtube' => MultiRepositoryProvider(
             providers: [
               RepositoryProvider<YouTube>(
                 create: (_) => YouTube(),
@@ -91,6 +89,7 @@ class ServiceSourceProviders extends StatelessWidget {
             ],
             child: child,
           ),
+        _ => child,
       },
     );
   }

@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextSearch on BuildContext {
-  void navigateToSearchReault(String keyword, {ServiceSource? source}) {
+  void navigateToSearchReault(String keyword, {String? source}) {
     SearchRouteData(keyword: keyword, source: source).push(this);
   }
 }
@@ -12,7 +12,7 @@ class SearchRouteData extends GoRouteData with $SearchRouteData {
   const SearchRouteData({required this.keyword, this.source});
 
   final String keyword;
-  final ServiceSource? source;
+  final String? source;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

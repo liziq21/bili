@@ -4,4 +4,4 @@ sealed class HomeEvent {}
 
 class MonitorUserData extends HomeEvent {}
 
-class ServiceSourceChanged(final ServiceSource serviceSource) extends HomeEvent;
+class ServiceSourceChanged(final String sourceId) extends HomeEvent;

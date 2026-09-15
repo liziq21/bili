@@ -30,7 +30,7 @@ class HomeBloc({required final UserDataRepository userDataRepository})
     await emit.forEach<UserData>(
       _userDataRepository.data,
       onData: (userData) =>
-          state.copyWith(serviceSource: userData.serviceSource),
+          state.copyWith(sourceId: userData.sourceId),
       onError: (error, stackTrace) {
         _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
         return state;
@@ -42,8 +42,8 @@ class HomeBloc({required final UserDataRepository userDataRepository})
     ServiceSourceChanged event,
     Emitter<HomeState> emit,
   ) async {
-    if (event.serviceSource == state.serviceSource) return;
-    _log.info('Changing service source to: ${event.serviceSource}');
-    await _userDataRepository.setServiceSource(event.serviceSource);
+    if (event.sourceId == state.sourceId) return;
+    _log.info('Changing service source to: ${event.sourceId}');
+    await _userDataRepository.setSourceId(event.sourceId);
   }
 }

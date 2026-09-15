@@ -50,11 +50,7 @@ RouteBase get $liveRouteData => GoRouteData.$route(
 mixin $LiveRouteData on GoRouteData {
   static LiveRouteData _fromState(GoRouterState state) => LiveRouteData(
     roomId: state.pathParameters['roomId']!,
-    source: _$convertMapValue(
-      'source',
-      state.uri.queryParameters,
-      _$ServiceSourceEnumMap._$fromName,
-    ),
+    source: state.uri.queryParameters['source'],
   );
 
   LiveRouteData get _self => this as LiveRouteData;
@@ -62,9 +58,7 @@ mixin $LiveRouteData on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/live/${Uri.encodeComponent(_self.roomId)}',
-    queryParams: {
-      if (_self.source != null) 'source': _$ServiceSourceEnumMap[_self.source!],
-    },
+    queryParams: {if (_self.source != null) 'source': _self.source},
   );
 
   @override
@@ -79,25 +73,6 @@ mixin $LiveRouteData on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
-}
-
-const _$ServiceSourceEnumMap = {
-  ServiceSource.bilibili: 'bilibili',
-  ServiceSource.youtube: 'youtube',
-};
-
-T? _$convertMapValue<T>(
-  String key,
-  Map<String, String> map,
-  T? Function(String) converter,
-) {
-  final value = map[key];
-  return value == null ? null : converter(value);
-}
-
-extension<T extends Enum> on Map<T, String> {
-  T? _$fromName(String? value) =>
-      entries.where((element) => element.value == value).firstOrNull?.key;
 }
 
 RouteBase get $notFoundRouteData => GoRouteData.$route(
@@ -136,11 +111,7 @@ RouteBase get $searchRouteData => GoRouteData.$route(
 mixin $SearchRouteData on GoRouteData {
   static SearchRouteData _fromState(GoRouterState state) => SearchRouteData(
     keyword: state.uri.queryParameters['keyword']!,
-    source: _$convertMapValue(
-      'source',
-      state.uri.queryParameters,
-      _$ServiceSourceEnumMap._$fromName,
-    ),
+    source: state.uri.queryParameters['source'],
   );
 
   SearchRouteData get _self => this as SearchRouteData;
@@ -150,7 +121,7 @@ mixin $SearchRouteData on GoRouteData {
     '/search',
     queryParams: {
       'keyword': _self.keyword,
-      if (_self.source != null) 'source': _$ServiceSourceEnumMap[_self.source!],
+      if (_self.source != null) 'source': _self.source,
     },
   );
 
@@ -177,11 +148,7 @@ RouteBase get $spaceRouteData => GoRouteData.$route(
 mixin $SpaceRouteData on GoRouteData {
   static SpaceRouteData _fromState(GoRouterState state) => SpaceRouteData(
     mid: state.pathParameters['mid']!,
-    source: _$convertMapValue(
-      'source',
-      state.uri.queryParameters,
-      _$ServiceSourceEnumMap._$fromName,
-    ),
+    source: state.uri.queryParameters['source'],
   );
 
   SpaceRouteData get _self => this as SpaceRouteData;
@@ -189,9 +156,7 @@ mixin $SpaceRouteData on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/space/${Uri.encodeComponent(_self.mid)}',
-    queryParams: {
-      if (_self.source != null) 'source': _$ServiceSourceEnumMap[_self.source!],
-    },
+    queryParams: {if (_self.source != null) 'source': _self.source},
   );
 
   @override
@@ -217,11 +182,7 @@ RouteBase get $videoRouteData => GoRouteData.$route(
 mixin $VideoRouteData on GoRouteData {
   static VideoRouteData _fromState(GoRouterState state) => VideoRouteData(
     id: state.pathParameters['id']!,
-    source: _$convertMapValue(
-      'source',
-      state.uri.queryParameters,
-      _$ServiceSourceEnumMap._$fromName,
-    ),
+    source: state.uri.queryParameters['source'],
     cid: state.uri.queryParameters['cid'],
     commentRootId: state.uri.queryParameters['comment-root-id'],
     commentSecondaryId: state.uri.queryParameters['comment-secondary-id'],
@@ -234,7 +195,7 @@ mixin $VideoRouteData on GoRouteData {
   String get location => GoRouteData.$location(
     '/video/${Uri.encodeComponent(_self.id)}',
     queryParams: {
-      if (_self.source != null) 'source': _$ServiceSourceEnumMap[_self.source!],
+      if (_self.source != null) 'source': _self.source,
       if (_self.cid != null) 'cid': _self.cid,
       if (_self.commentRootId != null) 'comment-root-id': _self.commentRootId,
       if (_self.commentSecondaryId != null)

@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextLive on BuildContext {
-  void navigateToLive(String roomId, {ServiceSource? source}) =>
+  void navigateToLive(String roomId, {String? source}) =>
       LiveRouteData(roomId: roomId, source: source).push(this);
 }
 
@@ -11,7 +11,7 @@ class LiveRouteData extends GoRouteData with $LiveRouteData {
   const LiveRouteData({required this.roomId, this.source});
 
   final String roomId;
-  final ServiceSource? source;
+  final String? source;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

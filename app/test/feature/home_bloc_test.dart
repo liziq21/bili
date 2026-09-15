@@ -22,8 +22,8 @@ class MockUserDataRepository implements UserDataRepository {
   }
 
   @override
-  Future<Result<void>> setServiceSource(ServiceSource serviceSource) async {
-    _currentData = _currentData.copyWith(serviceSource: serviceSource);
+  Future<Result<void>> setSourceId(String sourceId) async {
+    _currentData = _currentData.copyWith(sourceId: sourceId);
     _controller.add(_currentData);
     return const Result.ok(null);
   }
@@ -61,29 +61,29 @@ void main() {
     test('Initial state is default HomeState', () {
       expect(
         homeBloc.state,
-        const HomeState(serviceSource: ServiceSource.bilibili),
+        const HomeState(sourceId: 'bilibili'),
       );
     });
 
-    test('Emits updated ServiceSource when UserData changes', () async {
+    test('Emits updated sourceId when UserData changes', () async {
       mockUserDataRepository.emitData(
-        const UserData(serviceSource: ServiceSource.youtube),
+        const UserData(sourceId: 'youtube'),
       );
 
       await expectLater(
         homeBloc.stream,
-        emits(const HomeState(serviceSource: ServiceSource.youtube)),
+        emits(const HomeState(sourceId: 'youtube')),
       );
     });
 
     test(
-      'ServiceSourceChanged event triggers repository setServiceSource',
+      'ServiceSourceChanged event triggers repository setSourceId',
       () async {
-        homeBloc.add(ServiceSourceChanged(ServiceSource.youtube));
+        homeBloc.add(ServiceSourceChanged('youtube'));
 
         await expectLater(
           homeBloc.stream,
-          emits(const HomeState(serviceSource: ServiceSource.youtube)),
+          emits(const HomeState(sourceId: 'youtube')),
         );
       },
     );
