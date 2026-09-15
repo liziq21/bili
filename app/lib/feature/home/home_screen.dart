@@ -1,6 +1,7 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart';
 
+import '../../providers/media_sources_provider.dart';
 import 'bloc/home_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,27 +23,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _availableSources = ['bilibili', 'youtube'];
-
   @override
   Widget build(BuildContext context) {
+    final sources = context.mediaSources;
+
     return Scaffold(
       appBar: AppBar(
         title: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
+            final effectiveSourceId =
+                sources.any((s) => s.id == state.sourceId)
+                    ? state.sourceId
+                    : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+
             return DropdownButton<String>(
-              value: state.sourceId,
+              value: effectiveSourceId,
               underline: const SizedBox.shrink(),
-              items: _availableSources.map((source) {
-                final label = switch (source.toLowerCase()) {
-                  'bilibili' => 'Bilibili',
-                  'youtube' => 'YouTube',
-                  _ => source,
-                };
+              items: sources.map((source) {
                 return DropdownMenuItem<String>(
-                  value: source,
+                  value: source.id,
                   child: Text(
-                    label,
+                    source.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );

@@ -1,4 +1,5 @@
 import 'package:bilibili/bilibili.dart';
+import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -6,10 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:http/io_client.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'app_scaffold.dart';
 import 'providers/bloc_providers.dart';
+import 'providers/media_sources_provider.dart';
 import 'providers/repo_providers.dart';
 import 'styles/styles.dart';
 
@@ -22,7 +25,10 @@ void main() {
       child: Builder(
         builder: (context) => MultiBlocProvider(
           providers: getBlocProviders(context),
-          child: App(),
+          child: Provider<List<MediaSource>>.value(
+            value: defaultMediaSources,
+            child: const App(),
+          ),
         ),
       ),
     ),

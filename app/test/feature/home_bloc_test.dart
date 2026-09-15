@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/providers/media_sources_provider.dart';
+import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:provider/provider.dart';
 
 class MockUserDataRepository implements UserDataRepository {
   final StreamController<UserData> _controller =
@@ -107,14 +110,17 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<HomeBloc>.value(
-            value: homeBloc,
-            child: HomeScreen(
-              onLive: (_) {},
-              navigateToSearchReault: (_) {},
-              onSpace: (_) {},
-              onVideo: (_) {},
+        Provider<List<MediaSource>>.value(
+          value: defaultMediaSources,
+          child: MaterialApp(
+            home: BlocProvider<HomeBloc>.value(
+              value: homeBloc,
+              child: HomeScreen(
+                onLive: (_) {},
+                navigateToSearchReault: (_) {},
+                onSpace: (_) {},
+                onVideo: (_) {},
+              ),
             ),
           ),
         ),
