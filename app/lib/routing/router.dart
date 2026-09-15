@@ -2,7 +2,6 @@ import 'package:data/data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:model/model.dart';
 
 import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
@@ -28,12 +27,12 @@ part 'route_data/space_route_data.dart';
 part 'route_data/video_route_data.dart';
 part 'router.g.dart';
 
-ServiceSource _resolveSource(BuildContext context) {
+String _resolveSource(BuildContext context) {
   try {
-    final s = context.read<ServiceSource?>();
+    final s = context.read<String?>();
     if (s != null) return s;
   } catch (_) {}
-  return ServiceSource.bilibili;
+  return 'bilibili';
 }
 
 final GoRouter router = GoRouter(

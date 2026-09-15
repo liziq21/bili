@@ -45,7 +45,7 @@ List<RepositoryProvider> get repoProviders => [
   ...preferencesProviders,
   RepositoryProvider<UserDataRepository>(
     create: ((context) =>
-        DefaultUserDataRepository(preferencesDataSource: context.read())),
+        DefaultUserDataRepository(context.read())),
   ),
   RepositoryProvider<RecentSearchQueryRepository>(
     create: ((context) => DefaultRecentSearchQueryRepository(

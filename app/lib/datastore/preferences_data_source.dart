@@ -121,9 +121,9 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
 }
 
 class const PreferencesKey<T>._(this.name, this.defaultValue) {
-  static const serviceSource = PreferencesKey<String>._(
-    'SERVICE_SOURCE',
-    'BILIBILI',
+  static const sourceId = PreferencesKey<String>._(
+    'SOURCE_ID',
+    'bilibili',
   );
   static const themeConfig = PreferencesKey<String>._(
     'THEME_CONFIG',

@@ -5,21 +5,10 @@ import 'theme_config.dart';
 
 part 'user_data.g.dart';
 
-@JsonEnum(alwaysCreate: true, fieldRename: .screamingSnake)
-enum ServiceSource {
-  bilibili,
-  youtube;
-
-  String toJson() => _$ServiceSourceEnumMap[this]!;
-
-  static ServiceSource fromJson(String json) =>
-      $enumDecode(_$ServiceSourceEnumMap, json);
-}
-
-@JsonSerializable(fieldRename: .screamingSnake)
+@JsonSerializable(fieldRename: .screamingSnake, createToJson: true)
 class UserData extends Equatable {
   const UserData({
-    this.serviceSource = ServiceSource.bilibili,
+    this.sourceId = 'bilibili',
     this.themeConfig = ThemeConfig.followSystem,
     this.useDynamicColor = true,
   });
@@ -27,24 +16,24 @@ class UserData extends Equatable {
   factory UserData.fromJson(Map<String, dynamic> json) =>
       _$UserDataFromJson(json);
 
-  final ServiceSource serviceSource;
+  final String sourceId;
   final ThemeConfig themeConfig;
   final bool useDynamicColor;
 
   Map<String, dynamic> toJson() => _$UserDataToJson(this);
 
   UserData copyWith({
-    ServiceSource? serviceSource,
+    String? sourceId,
     ThemeConfig? themeConfig,
     bool? useDynamicColor,
   }) {
     return UserData(
-      serviceSource: serviceSource ?? this.serviceSource,
+      sourceId: sourceId ?? this.sourceId,
       themeConfig: themeConfig ?? this.themeConfig,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
     );
   }
 
   @override
-  List<Object?> get props => [serviceSource, themeConfig, useDynamicColor];
+  List<Object?> get props => [sourceId, themeConfig, useDynamicColor];
 }

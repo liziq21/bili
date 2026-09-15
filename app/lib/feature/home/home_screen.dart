@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:model/model.dart';
 
 import 'bloc/home_bloc.dart';
 
@@ -23,21 +22,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const _availableSources = ['bilibili', 'youtube'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            return DropdownButton<ServiceSource>(
-              value: state.serviceSource,
+            return DropdownButton<String>(
+              value: state.sourceId,
               underline: const SizedBox.shrink(),
-              items: ServiceSource.values.map((source) {
-                final label = switch (source) {
-                  ServiceSource.bilibili => 'Bilibili',
-                  ServiceSource.youtube => 'YouTube',
+              items: _availableSources.map((source) {
+                final label = switch (source.toLowerCase()) {
+                  'bilibili' => 'Bilibili',
+                  'youtube' => 'YouTube',
+                  _ => source,
                 };
-                return DropdownMenuItem<ServiceSource>(
+                return DropdownMenuItem<String>(
                   value: source,
                   child: Text(
                     label,
@@ -45,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }).toList(),
-              onChanged: (ServiceSource? newSource) {
+              onChanged: (String? newSource) {
                 if (newSource != null) {
                   context.read<HomeBloc>().add(ServiceSourceChanged(newSource));
                 }

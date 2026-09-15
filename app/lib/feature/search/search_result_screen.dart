@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,11 +34,9 @@ class const SearchResultScreen({
             tabs: tabAndView.keys.toList(),
           ),
         ),
-        body: Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: TabBarView(children: tabAndView.values.toList()),
-          ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TabBarView(children: tabAndView.values.toList()),
         ),
       ),
     );

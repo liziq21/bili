@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextSpace on BuildContext {
-  void navigateToSpace(String mid, {ServiceSource? source}) =>
+  void navigateToSpace(String mid, {String? source}) =>
       SpaceRouteData(mid: mid, source: source).push(this);
 }
 
@@ -11,7 +11,7 @@ class SpaceRouteData extends GoRouteData with $SpaceRouteData {
   const SpaceRouteData({required this.mid, this.source});
 
   final String mid;
-  final ServiceSource? source;
+  final String? source;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

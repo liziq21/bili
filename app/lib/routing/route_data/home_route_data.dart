@@ -12,19 +12,19 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
       child: Builder(
         builder: (context) => HomeScreen(
           onLive: (roomId) {
-            final source = context.read<HomeBloc>().state.serviceSource;
+            final source = context.read<HomeBloc>().state.sourceId;
             context.navigateToLive(roomId, source: source);
           },
           navigateToSearchReault: (keyword) {
-            final source = context.read<HomeBloc>().state.serviceSource;
+            final source = context.read<HomeBloc>().state.sourceId;
             context.navigateToSearchReault(keyword, source: source);
           },
           onSpace: (mid) {
-            final source = context.read<HomeBloc>().state.serviceSource;
+            final source = context.read<HomeBloc>().state.sourceId;
             context.navigateToSpace(mid, source: source);
           },
           onVideo: (id) {
-            final source = context.read<HomeBloc>().state.serviceSource;
+            final source = context.read<HomeBloc>().state.sourceId;
             context.navigateToVideo(id, source: source);
           },
         ),

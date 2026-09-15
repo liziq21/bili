@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextVideo on BuildContext {
-  void navigateToVideo(String id, {ServiceSource? source}) {
+  void navigateToVideo(String id, {String? source}) {
     VideoDetailRepository? repo;
     try {
       repo = read<VideoDetailRepository?>();
@@ -34,7 +34,7 @@ class VideoRouteData extends GoRouteData with $VideoRouteData {
   });
 
   final String id;
-  final ServiceSource? source;
+  final String? source;
   final String? cid;
   final String? commentRootId;
   final String? commentSecondaryId;

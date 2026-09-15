@@ -7,10 +7,10 @@ import 'package:model/model.dart';
 import '../../../datastore/preferences_data_source.dart';
 import 'user_data_repository.dart';
 
-class DefaultUserDataRepository implements UserDataRepository {
-  const DefaultUserDataRepository({
-    required PreferencesDataSource preferencesDataSource,
-  }) : _prefDataSource = preferencesDataSource;
+class const DefaultUserDataRepository(
+  final PreferencesDataSource preferencesDataSource,
+) implements UserDataRepository {
+  this : _prefDataSource = preferencesDataSource;
 
   final PreferencesDataSource _prefDataSource;
 
@@ -18,8 +18,8 @@ class DefaultUserDataRepository implements UserDataRepository {
   Stream<UserData> get data => _prefDataSource.data;
 
   @override
-  Future<Result<void>> setServiceSource(ServiceSource serviceSource) =>
-      _prefDataSource.set(PreferencesKey.serviceSource, serviceSource);
+  Future<Result<void>> setSourceId(String sourceId) =>
+      _prefDataSource.set(PreferencesKey.sourceId, sourceId);
 
   @override
   Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) =>
