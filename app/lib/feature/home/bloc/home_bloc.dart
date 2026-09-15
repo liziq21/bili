@@ -29,8 +29,7 @@ class HomeBloc({required final UserDataRepository userDataRepository})
   ) async {
     await emit.forEach<UserData>(
       _userDataRepository.data,
-      onData: (userData) =>
-          state.copyWith(sourceId: userData.sourceId),
+      onData: (userData) => state.copyWith(sourceId: userData.sourceId),
       onError: (error, stackTrace) {
         _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
         return state;
