@@ -44,12 +44,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: $styles.text.h3),
+        title: Text(
+          title,
+          style: $styles.text.h3.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(labelText, style: $styles.text.bodySmall),
+            Text(
+              labelText,
+              style: $styles.text.bodySmall.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             SizedBox(height: $styles.insets.xs),
             TextField(
               controller: controller,
@@ -82,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final sources = context.mediaSources;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -98,68 +109,84 @@ class _HomeScreenState extends State<HomeScreen> {
               orElse: () => sources.first,
             );
 
-            return Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: $styles.insets.xs,
-                    vertical: $styles.insets.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular($styles.corners.md),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: effectiveSourceId,
-                      isDense: true,
-                      items: sources.map((source) {
-                        return DropdownMenuItem<String>(
-                          value: source.id,
-                          child: Text(
-                            source.name,
-                            style: $styles.text.title2.copyWith(
-                              fontWeight: FontWeight.bold,
+            return Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular($styles.corners.lg),
+              ),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: $styles.insets.xs),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: effectiveSourceId,
+                        isDense: true,
+                        icon: Icon(
+                          Icons.arrow_drop_down,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        items: sources.map((source) {
+                          return DropdownMenuItem<String>(
+                            value: source.id,
+                            child: Text(
+                              source.name,
+                              style: $styles.text.title2.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
                             ),
+                          );
+                        }).toList(),
+                        onChanged: (String? newSource) {
+                          if (newSource != null) {
+                            context
+                                .read<HomeBloc>()
+                                .add(ServiceSourceChanged(newSource));
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  VerticalDivider(
+                    indent: 10,
+                    endIndent: 10,
+                    width: $styles.insets.sm,
+                    color: colorScheme.outlineVariant,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onSubmitted: _onSearchSubmitted,
+                      textInputAction: TextInputAction.search,
+                      textAlignVertical: TextAlignVertical.center,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '搜索 ${activeSource.name} 内容...',
+                        hintStyle: $styles.text.bodySmall.copyWith(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        ),
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: $styles.insets.xs,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.search_rounded,
+                            size: 22,
+                            color: colorScheme.onSurfaceVariant,
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newSource) {
-                        if (newSource != null) {
-                          context
-                              .read<HomeBloc>()
-                              .add(ServiceSourceChanged(newSource));
-                        }
-                      },
+                          onPressed: () => _onSearchSubmitted(_searchController.text),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: $styles.insets.sm),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    onSubmitted: _onSearchSubmitted,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: '搜索 ${activeSource.name} 内容...',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: $styles.insets.sm,
-                        vertical: $styles.insets.xs,
-                      ),
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular($styles.corners.lg),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -253,13 +280,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       '${activeSource.name} 功能导航',
-                      style: $styles.text.h3,
+                      style: $styles.text.h3.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                     SizedBox(height: $styles.insets.xs),
                     Text(
                       '根据当前服务源可用能力动态展示可用功能',
                       style: $styles.text.bodySmall.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     SizedBox(height: $styles.insets.sm),
@@ -268,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 110.0,
+                        mainAxisExtent: 104.0,
                         crossAxisSpacing: $styles.insets.sm,
                         mainAxisSpacing: $styles.insets.sm,
                       ),
@@ -294,13 +323,15 @@ class const _FeatureCard({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular($styles.corners.md),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: InkWell(
@@ -316,12 +347,12 @@ class const _FeatureCard({
               Container(
                 padding: EdgeInsets.all($styles.insets.xs),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular($styles.corners.sm),
                 ),
                 child: Icon(
                   icon,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  color: colorScheme.onPrimaryContainer,
                   size: 24,
                 ),
               ),
@@ -334,7 +365,9 @@ class const _FeatureCard({
                   children: [
                     Text(
                       title,
-                      style: $styles.text.bodyBold,
+                      style: $styles.text.bodyBold.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -342,7 +375,7 @@ class const _FeatureCard({
                     Text(
                       subtitle,
                       style: $styles.text.bodySmall.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -352,7 +385,7 @@ class const _FeatureCard({
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.outline,
+                color: colorScheme.onSurfaceVariant,
               ),
             ],
           ),
