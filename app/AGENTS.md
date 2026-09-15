@@ -22,16 +22,31 @@ This directory contains the main Flutter application (`app/`).
 - Platform code: `android/`, `ios/`, `linux/`, `web/`.
 - `test/`: Unit and widget tests mirroring `lib/`.
 
+## Core Principles & Design Patterns
+
+### Extensible Data Sources & Local-Only Personalization
+- The application relies on third-party extensible data sources without platform login, online commenting, or platform-specific coin features.
+- Personalization features such as subscriptions, favorites, and watch history are strictly managed in local storage (Drift SQLite / SharedPreferences).
+
+### Global Style Access (`$styles`)
+- Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
+- Access the live singleton directly (`$styles.colors`, `$styles.corners`, `$styles.insets`, `$styles.text`, etc.) — do not create local copies.
+- **Strict Rule**: When writing or updating UI components (including Stitch designs), strictly map visual elements to `$styles` design tokens. Never hardcode colors or stitch-specific style constants.
+
+### Dependency Injection & Source Providers (`ServiceSourceProviders`)
+- Inject screen-level BlocProviders (such as `HomeBloc`) inside route data (`GoRouteData`).
+- When navigating to pages requiring a fixed or specific data source, wrap source-dependent RepositoryProviders using `ServiceSourceProviders`.
+
+### Optional Capability Interfaces & Route Validation
+- Data source features (such as `VideoDetailRemoteDataSource` or `VideoCommentRemoteDataSource`) are designed as optional capability interfaces.
+- `ServiceSourceProviders` conditionally injects repositories only when the active data source implements the required capability interface.
+- Navigation logic must verify the availability of context repositories (or capabilities) before pushing routes.
+
 ## Data & Caching Strategy
 
-- **Single Source of Truth (SSOT)**: `app/lib/data` acts as coordinator between remote sources (`packages/bilibili`) and local cache (`app/lib/database`).
+- **Single Source of Truth (SSOT)**: `app/lib/data` acts as coordinator between remote sources (`packages/bilibili`, `packages/youtube`) and local cache (`app/lib/database`).
 - **Offline-First**: For persistent lists (history, followed creators). Listen to local database streams; background fetches upsert into SQLite.
 - **Network-First (Cache Fallback)**: For time-sensitive data (e.g. Trending). Fetch network first; upsert on success or fallback to cached database rows on error.
-
-## Global Style Access (`$styles`)
-
-- Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
-- Access the live singleton directly — do not create local copies. Reference: `lib/styles/styles.dart`.
 
 ## Database Layer Conventions (Drift / SQLite)
 
