@@ -53,8 +53,14 @@ linter:
     - avoid_void_async
     - use_key_in_widget_constructors    # 强制 Widget 包含 Key
     - unawaited_futures
+    - use_super_parameters
     - sort_constructors_first
     - sort_unnamed_constructors_first
+    - use_primary_constructors
+    - use_declaring_parameters
+    
+    avoid_final_parameters: false 
+    parameter_assignments: true
 
 dart_code_linter:
   rules-exclude:
