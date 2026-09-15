@@ -62,16 +62,11 @@ void main() {
     });
 
     test('Initial state is default HomeState', () {
-      expect(
-        homeBloc.state,
-        const HomeState(sourceId: 'bilibili'),
-      );
+      expect(homeBloc.state, const HomeState(sourceId: 'bilibili'));
     });
 
     test('Emits updated sourceId when UserData changes', () async {
-      mockUserDataRepository.emitData(
-        const UserData(sourceId: 'youtube'),
-      );
+      mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
 
       await expectLater(
         homeBloc.stream,
@@ -106,27 +101,60 @@ void main() {
       mockUserDataRepository.dispose();
     });
 
-    testWidgets('Renders DropdownButton with Bilibili initially', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        Provider<List<MediaSource>>.value(
-          value: defaultMediaSources,
-          child: MaterialApp(
-            home: BlocProvider<HomeBloc>.value(
-              value: homeBloc,
-              child: HomeScreen(
-                onLive: (_) {},
-                navigateToSearchReault: (_) {},
-                onSpace: (_) {},
-                onVideo: (_) {},
+    testWidgets(
+      'Renders DropdownButton with Bilibili initially and shows live/video entries',
+      (tester) async {
+        await tester.pumpWidget(
+          Provider<List<MediaSource>>.value(
+            value: defaultMediaSources,
+            child: MaterialApp(
+              home: BlocProvider<HomeBloc>.value(
+                value: homeBloc,
+                child: HomeScreen(
+                  onLive: (_) {},
+                  navigateToSearchReault: (_) {},
+                  onSpace: (_) {},
+                  onVideo: (_) {},
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Bilibili'), findsOneWidget);
-    });
+        expect(find.text('Bilibili'), findsOneWidget);
+        expect(find.text('直播大厅'), findsOneWidget);
+        expect(find.text('UP主空间'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Renders YouTube source and dynamically hides unsupported LiveRoom entry',
+      (tester) async {
+        mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
+
+        await tester.pumpWidget(
+          Provider<List<MediaSource>>.value(
+            value: defaultMediaSources,
+            child: MaterialApp(
+              home: BlocProvider<HomeBloc>.value(
+                value: homeBloc,
+                child: HomeScreen(
+                  onLive: (_) {},
+                  navigateToSearchReault: (_) {},
+                  onSpace: (_) {},
+                  onVideo: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('YouTube'), findsWidgets);
+        expect(find.text('创作者频道'), findsOneWidget);
+        // YouTube does not support LiveRoomSearch or VideoDetail, so '直播大厅' should not be present
+        expect(find.text('直播大厅'), findsNothing);
+      },
+    );
   });
 }
