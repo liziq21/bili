@@ -1,4 +1,5 @@
 import 'package:bilibili/bilibili.dart';
+import 'package:data/data.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:youtube/youtube.dart';
@@ -22,6 +23,13 @@ class ServiceSourceProviders extends StatelessWidget {
   final String source;
   final Widget child;
 
+  MediaSource? _createMediaSource(String sourceName) =>
+      switch (sourceName.toLowerCase()) {
+        'bilibili' => Bili(),
+        'youtube' => YouTube(),
+        _ => null,
+      };
+
   @override
   Widget build(BuildContext context) {
     try {
@@ -31,66 +39,74 @@ class ServiceSourceProviders extends StatelessWidget {
       }
     } catch (_) {}
 
+    final mediaSource = _createMediaSource(source);
+    if (mediaSource == null) {
+      return child;
+    }
+
     return RepositoryProvider<String>.value(
       value: source,
-      child: switch (source.toLowerCase()) {
-        'bilibili' => MultiRepositoryProvider(
-            providers: [
-              RepositoryProvider<Bili>(
-                create: (_) => Bili(),
-                dispose: (bili) => bili.close(),
-              ),
-              RepositoryProvider<VideoSearchRepository>(
-                create: (context) => AppVideoSearchRepository(
-                  context.read<Bili>().videoSearchDataSource(),
+      child: RepositoryProvider<MediaSource>.value(
+        value: mediaSource,
+        child: switch (source.toLowerCase()) {
+          'bilibili' => MultiRepositoryProvider(
+              providers: [
+                RepositoryProvider<Bili>(
+                  create: (_) => mediaSource as Bili,
+                  dispose: (bili) => bili.close(),
                 ),
-              ),
-              RepositoryProvider<CreatorProfileSearchRepository>(
-                create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource(),
-                  context.read<Bili>().searchSuggestDataSource(),
+                RepositoryProvider<VideoSearchRepository>(
+                  create: (context) => AppVideoSearchRepository(
+                    context.read<Bili>().videoSearchDataSource()!,
+                  ),
                 ),
-              ),
-              RepositoryProvider<LiveRoomSearchRepository>(
-                create: (context) => AppLiveRoomSearchRepository(
-                  context.read<Bili>().liveRoomSearchDataSource(),
+                RepositoryProvider<CreatorProfileSearchRepository>(
+                  create: (context) => AppUserSearchRepository(
+                    context.read<Bili>().creatorProfileSearchDataSource()!,
+                    context.read<Bili>().searchSuggestDataSource()!,
+                  ),
                 ),
-              ),
-              RepositoryProvider<SearchSuggestRepository>(
-                create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource(),
-                  context.read<Bili>().searchSuggestDataSource(),
+                RepositoryProvider<LiveRoomSearchRepository>(
+                  create: (context) => AppLiveRoomSearchRepository(
+                    context.read<Bili>().liveRoomSearchDataSource()!,
+                  ),
                 ),
-              ),
-              RepositoryProvider<VideoDetailRepository>(
-                create: (context) => AppVideoDetailRepository(
-                  context.read<Bili>().videoDetailDataSource(),
+                RepositoryProvider<SearchSuggestRepository>(
+                  create: (context) => AppUserSearchRepository(
+                    context.read<Bili>().creatorProfileSearchDataSource()!,
+                    context.read<Bili>().searchSuggestDataSource()!,
+                  ),
                 ),
-              ),
-              RepositoryProvider<VideoCommentRepository>(
-                create: (context) => AppVideoCommentRepository(
-                  context.read<Bili>().videoCommentDataSource(),
+                RepositoryProvider<VideoDetailRepository>(
+                  create: (context) => AppVideoDetailRepository(
+                    context.read<Bili>().videoDetailDataSource(),
+                  ),
                 ),
-              ),
-            ],
-            child: child,
-          ),
-        'youtube' => MultiRepositoryProvider(
-            providers: [
-              RepositoryProvider<YouTube>(
-                create: (_) => YouTube(),
-                dispose: (yt) => yt.close(),
-              ),
-              RepositoryProvider<VideoSearchRepository>(
-                create: (context) => AppYouTubeVideoSearchRepository(
-                  context.read<YouTube>().videoSearchDataSource(),
+                RepositoryProvider<VideoCommentRepository>(
+                  create: (context) => AppVideoCommentRepository(
+                    context.read<Bili>().videoCommentDataSource(),
+                  ),
                 ),
-              ),
-            ],
-            child: child,
-          ),
-        _ => child,
-      },
+              ],
+              child: child,
+            ),
+          'youtube' => MultiRepositoryProvider(
+              providers: [
+                RepositoryProvider<YouTube>(
+                  create: (_) => mediaSource as YouTube,
+                  dispose: (yt) => yt.close(),
+                ),
+                RepositoryProvider<VideoSearchRepository>(
+                  create: (context) => AppYouTubeVideoSearchRepository(
+                    context.read<YouTube>().videoSearchDataSource()!,
+                  ),
+                ),
+              ],
+              child: child,
+            ),
+          _ => child,
+        },
+      ),
     );
   }
 }
