@@ -22,18 +22,18 @@ class YouTube implements MediaSource {
   String get name => 'YouTube';
 
   @override
-  YouTubeVideoSearchRemoteDataSource videoSearchDataSource() =>
+  YouTubeVideoSearchRemoteDataSource get videoSearchDataSource =>
       YouTubeVideoSearchRemoteDataSource(youtubeService: _youtubeService);
 
   @override
   YouTubeCreatorProfileSearchRemoteDataSource
-      creatorProfileSearchDataSource() =>
+      get creatorProfileSearchDataSource =>
           YouTubeCreatorProfileSearchRemoteDataSource(
             youtubeService: _youtubeService,
           );
 
   @override
-  YouTubeSearchSuggestRemoteDataSource searchSuggestDataSource() =>
+  YouTubeSearchSuggestRemoteDataSource get searchSuggestDataSource =>
       YouTubeSearchSuggestRemoteDataSource(youtubeService: _youtubeService);
 
   @override

@@ -34,30 +34,30 @@ class Bili implements MediaSource {
   Future<void> close() async => _networkSearch?.close();
 
   @override
-  BiliAggregateSearchRemoteDataSource aggregateSearchDataSource() =>
+  BiliAggregateSearchRemoteDataSource get aggregateSearchDataSource =>
       .new(network: _searchApi);
 
   @override
-  BiliCreatorProfileSearchRemoteDataSource creatorProfileSearchDataSource() =>
+  BiliCreatorProfileSearchRemoteDataSource get creatorProfileSearchDataSource =>
       .new(network: _searchApi);
 
   @override
-  BiliLiveRoomSearchRemoteDataSource liveRoomSearchDataSource() =>
+  BiliLiveRoomSearchRemoteDataSource get liveRoomSearchDataSource =>
       .new(network: _searchApi);
 
   @override
-  BiliVideoSearchRemoteDataSource videoSearchDataSource() =>
+  BiliVideoSearchRemoteDataSource get videoSearchDataSource =>
       .new(network: _searchApi);
 
   @override
-  BiliSearchSuggestRemoteDataSource searchSuggestDataSource() =>
+  BiliSearchSuggestRemoteDataSource get searchSuggestDataSource =>
       .new(network: _searchApi);
 
   @override
-  BiliVideoDetailRemoteDataSource videoDetailDataSource() =>
+  BiliVideoDetailRemoteDataSource get videoDetailDataSource =>
       .new(network: _videoApi);
 
   @override
-  BiliVideoCommentRemoteDataSource videoCommentDataSource() =>
+  BiliVideoCommentRemoteDataSource get videoCommentDataSource =>
       .new(network: _videoApi);
 }
