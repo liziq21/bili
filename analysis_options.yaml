@@ -51,7 +51,7 @@ linter:
     - prefer_single_quotes
     - require_trailing_commas
     - avoid_void_async
-    - use_key_in_widget_constructors    # 强制 Widget 包含 Key
+    - use_key_in_widget_constructors
     - unawaited_futures
     - use_super_parameters
     - sort_constructors_first
