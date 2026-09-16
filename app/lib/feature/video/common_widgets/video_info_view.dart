@@ -628,37 +628,48 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular($styles.corners.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? color.withValues(alpha: 0.15)
-                  : $styles.colors.greyMedium.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isActive ? activeIcon : icon,
-              size: 20,
-              color: isActive ? color : $styles.colors.caption,
-            ),
+    return Semantics(
+      button: true,
+      enabled: true,
+      selected: isActive,
+      excludeSemantics: true,
+      label: label,
+      tooltip: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular($styles.corners.lg),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? color.withValues(alpha: 0.15)
+                      : $styles.colors.greyMedium.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isActive ? activeIcon : icon,
+                  size: 20,
+                  color: isActive ? color : $styles.colors.caption,
+                ),
+              ),
+              const Gap(4),
+              Text(
+                label,
+                style: $styles.text.bodySmall.copyWith(
+                  color: isActive ? color : $styles.colors.caption,
+                  fontSize: 11,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
           ),
-          const Gap(4),
-          Text(
-            label,
-            style: $styles.text.bodySmall.copyWith(
-              color: isActive ? color : $styles.colors.caption,
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
