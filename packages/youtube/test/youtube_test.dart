@@ -9,9 +9,9 @@ void main() {
       () {
         final youtube = YouTube();
 
-        final videoDS = youtube.videoSearchDataSource();
-        final creatorDS = youtube.creatorProfileSearchDataSource();
-        final suggestDS = youtube.searchSuggestDataSource();
+        final videoDS = youtube.videoSearchDataSource;
+        final creatorDS = youtube.creatorProfileSearchDataSource;
+        final suggestDS = youtube.searchSuggestDataSource;
 
         expect(videoDS, isA<VideoSearchRemoteDataSource>());
         expect(creatorDS, isA<CreatorProfileSearchRemoteDataSource>());

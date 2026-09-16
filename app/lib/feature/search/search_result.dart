@@ -29,14 +29,10 @@ class const SearchResult<T>({
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
                 firstPageErrorIndicatorBuilder: (context) {
-                  final error = state.error;
-                  debugPrint('👉 第一页加载失败原因: $error');
-                  return Center(child: Text('加载失败: $error'));
+                  return const Center(child: Text('加载失败，请稍后重试'));
                 },
                 newPageErrorIndicatorBuilder: (context) {
-                  final error = state.error;
-                  debugPrint('👉 后续页加载失败原因: $error');
-                  return Center(child: Text('更多数据加载失败: $error'));
+                  return const Center(child: Text('更多数据加载失败，请稍后重试'));
                 },
               ),
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
