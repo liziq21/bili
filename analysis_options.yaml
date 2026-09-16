@@ -58,7 +58,8 @@ linter:
     - sort_unnamed_constructors_first
     - use_primary_constructors
     - use_declaring_parameters
-    - parameter_assignments
+    - avoid_final_parameters: false
+    - parameter_assignments: true
 
 dart_code_linter:
   rules-exclude:
