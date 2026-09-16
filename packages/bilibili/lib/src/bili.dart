@@ -10,7 +10,7 @@ import 'data/source/search/bili_live_room_search_remote_data_source.dart';
 import 'data/source/search/bili_search_suggest_remote_data_source.dart';
 import 'data/source/search/bili_video_search_remote_data_source.dart';
 
-class Bili implements MediaSource {
+class Bili() implements MediaSource {
   static Client? client;
   BiliNetworkSearch? _networkSearch;
 
