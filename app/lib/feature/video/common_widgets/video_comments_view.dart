@@ -157,38 +157,46 @@ class _CommentItem extends StatelessWidget {
               const Gap(6),
               Row(
                 children: [
-                  InkWell(
-                    onTap: () {
-                      context
-                          .read<VideoCommentBloc>()
-                          .add(ToggleCommentLike(comment.id));
-                    },
-                    borderRadius: BorderRadius.circular($styles.corners.sm),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      child: Row(
-                        children: [
-                          Icon(
-                            comment.isLiked
-                                ? Icons.thumb_up
-                                : Icons.thumb_up_outlined,
-                            size: 14,
-                            color: comment.isLiked
-                                ? $styles.colors.accent1
-                                : $styles.colors.caption,
-                          ),
-                          const Gap(4),
-                          Text(
-                            formatCount(comment.likeCount),
-                            style: $styles.text.bodySmall.copyWith(
-                              fontSize: 11,
+                  Semantics(
+                    button: true,
+                    enabled: true,
+                    selected: comment.isLiked,
+                    excludeSemantics: true,
+                    label: '点赞评论 ${formatCount(comment.likeCount)}',
+                    tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
+                    child: InkWell(
+                      onTap: () {
+                        context
+                            .read<VideoCommentBloc>()
+                            .add(ToggleCommentLike(comment.id));
+                      },
+                      borderRadius: BorderRadius.circular($styles.corners.sm),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        child: Row(
+                          children: [
+                            Icon(
+                              comment.isLiked
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_up_outlined,
+                              size: 14,
                               color: comment.isLiked
                                   ? $styles.colors.accent1
                                   : $styles.colors.caption,
                             ),
-                          ),
-                        ],
+                            const Gap(4),
+                            Text(
+                              formatCount(comment.likeCount),
+                              style: $styles.text.bodySmall.copyWith(
+                                fontSize: 11,
+                                color: comment.isLiked
+                                    ? $styles.colors.accent1
+                                    : $styles.colors.caption,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
