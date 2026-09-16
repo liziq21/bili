@@ -632,6 +632,7 @@ class _ActionButton extends StatelessWidget {
       button: true,
       enabled: true,
       selected: isActive,
+      excludeSemantics: true,
       label: label,
       tooltip: label,
       child: InkWell(

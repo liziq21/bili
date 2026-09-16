@@ -161,6 +161,7 @@ class _CommentItem extends StatelessWidget {
                     button: true,
                     enabled: true,
                     selected: comment.isLiked,
+                    excludeSemantics: true,
                     label: '点赞评论 ${formatCount(comment.likeCount)}',
                     tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
                     child: InkWell(
