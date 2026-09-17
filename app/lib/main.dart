@@ -94,13 +94,10 @@ void initDebugOverlayBridge() {
       ),
     );
   });
+  // Enforce strict TLS/SSL certificate validation to protect against MitM attacks.
   Bili.client = HttpLogClient(
     App.httpBucket,
-    http.IOClient(
-      .new()
-        //..findProxy = ((_) => 'PROXY 127.0.0.1:9000')
-        ..badCertificateCallback = (_, _, _) => true,
-    ),
+    http.IOClient(),
   );
 }
 
