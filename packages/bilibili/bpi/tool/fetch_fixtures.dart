@@ -23,8 +23,7 @@ Future<void> main() async {
     final response = await client.get(
       uri,
       headers: const {
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': 'https://www.bilibili.com/',
       },
     );
@@ -121,9 +120,7 @@ Future<void> main() async {
     final videoDetailJson = await getJson(videoDetailUri);
     BaseResponse.fromJson(videoDetailJson);
     if (videoDetailJson['data'] is Map<String, dynamic>) {
-      VideoDetailData.fromJson(
-        videoDetailJson['data'] as Map<String, dynamic>,
-      );
+      VideoDetailData.fromJson(videoDetailJson['data'] as Map<String, dynamic>);
     }
     saveJson('testing/video_detail.json', videoDetailJson);
 
@@ -155,9 +152,7 @@ Future<void> main() async {
     );
     final replyMainJson = await getJson(replyMainUri);
     if (replyMainJson['data'] is Map<String, dynamic>) {
-      NetworkReplyData.fromJson(
-        replyMainJson['data'] as Map<String, dynamic>,
-      );
+      NetworkReplyData.fromJson(replyMainJson['data'] as Map<String, dynamic>);
     }
     saveJson('testing/reply_list_main.json', replyMainJson);
 
@@ -201,9 +196,7 @@ Future<void> main() async {
       },
     );
     if (playUrlJson['data'] is Map<String, dynamic>) {
-      NetworkPlayUrl.fromJson(
-        playUrlJson['data'] as Map<String, dynamic>,
-      );
+      NetworkPlayUrl.fromJson(playUrlJson['data'] as Map<String, dynamic>);
     }
     saveJson('testing/play_url.json', playUrlJson);
 

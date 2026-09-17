@@ -37,8 +37,7 @@ String _resolveSource(BuildContext context) {
 
 final GoRouter router = GoRouter(
   debugLogDiagnostics: true,
-  onException: (_, GoRouterState state, GoRouter router) {
-  },
+  onException: (_, GoRouterState state, GoRouter router) {},
   routes: [
     ShellRoute(
       builder: (_, _, navigator) {

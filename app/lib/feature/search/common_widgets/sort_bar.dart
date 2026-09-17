@@ -21,4 +21,3 @@ class SortBar extends StatelessWidget {
     );
   }
 }
-

@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+
 import 'filter_group_section.dart';
 
 typedef FilterChangedCallback = void Function(List<FilterGroup> updatedFilters);

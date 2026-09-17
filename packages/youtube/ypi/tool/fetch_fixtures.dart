@@ -26,8 +26,7 @@ Future<void> main() async {
       Uri.parse('https://www.youtube.com/youtubei/v1/search'),
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'X-YouTube-Client-Name': '1',
         'X-YouTube-Client-Version': '2.20230818.00.00',
       },
@@ -59,8 +58,7 @@ Future<void> main() async {
       Uri.parse('https://www.youtube.com/youtubei/v1/search'),
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'X-YouTube-Client-Name': '1',
         'X-YouTube-Client-Version': '2.20230818.00.00',
       },

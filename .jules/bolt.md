@@ -5,3 +5,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-15 - Reject RepaintBoundary on simple list items
 **Learning:** Adding `RepaintBoundary` to simple `_CommentItem` list widgets in `ListView.separated` over-allocates compositing layers, ballooning GPU memory footprint without providing measurable paint time improvements.
 **Action:** Profile actual render layers in DevTools before introducing `RepaintBoundary`, and avoid wrapping lightweight static/semi-static list items in dedicated paint boundaries.
+
+## 2026-09-17 - Avoid LayoutBuilder inside list/grid item widgets
+**Learning:** Wrapping item widgets (like `VideoCard`) in an unused `LayoutBuilder` defers child widget construction to Flutter's layout phase during list/grid scroll rendering, adding unnecessary layout callbacks and delay. Additionally, unbounded `CachedNetworkImage` thumbnail decodes consume excessive GPU RAM on scroll.
+**Action:** Ensure item widgets in grids/lists build directly without superfluous `LayoutBuilder` wrappers, and specify `memCacheWidth` on `CachedNetworkImage` to bound thumbnail memory footprint.

@@ -10,7 +10,8 @@ class NotFoundRouteData extends GoRouteData with $NotFoundRouteData {
     final uri = state.extra as Uri?;
     return NotFoundScreen(
       uri: uri.toString(),
-      path: "${uri?.path ?? ''}\nHost: ${uri?.host ?? ''}\nScheme: ${uri?.scheme ?? ''}"
+      path:
+          "${uri?.path ?? ''}\nHost: ${uri?.host ?? ''}\nScheme: ${uri?.scheme ?? ''}",
     );
   }
 }

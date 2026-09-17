@@ -45,13 +45,13 @@ class VideoCommentState extends Equatable {
 
   @override
   List<Object?> get props => [
-        isLoading,
-        isLoadingMore,
-        error,
-        comments,
-        currentPage,
-        totalPages,
-        hasMore,
-        videoId,
-      ];
+    isLoading,
+    isLoadingMore,
+    error,
+    comments,
+    currentPage,
+    totalPages,
+    hasMore,
+    videoId,
+  ];
 }

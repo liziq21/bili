@@ -103,10 +103,7 @@ class NetworkReplyContent({
 
 /// UP主的互动状态 (例如 UP主点赞/回复标志)
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
-class NetworkUpAction({
-  final bool? like,
-  final bool? reply,
-}) {
+class NetworkUpAction({final bool? like, final bool? reply}) {
   factory NetworkUpAction.fromJson(Map<String, dynamic> json) =>
       _$NetworkUpActionFromJson(json);
 }

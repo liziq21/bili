@@ -24,8 +24,9 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource({
       final continuationKey = '$query:$targetPage';
       final prevContinuationKey = '$query:${targetPage - 1}';
 
-      final continuationToken =
-          targetPage > 1 ? _continuationTokens[prevContinuationKey] : null;
+      final continuationToken = targetPage > 1
+          ? _continuationTokens[prevContinuationKey]
+          : null;
 
       final (profiles, nextToken) = await _youtubeService.searchChannels(
         query,

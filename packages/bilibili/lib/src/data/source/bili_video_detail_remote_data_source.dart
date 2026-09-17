@@ -34,8 +34,9 @@ final class BiliVideoDetailRemoteDataSource({
         url: 'https://www.bilibili.com/video/${detailData.bvid}',
         thumbnailUrl: _formatUrl(detailData.pic),
         viewCount: detailData.stat?.view ?? 0,
-        uploadDate:
-            DateTime.fromMillisecondsSinceEpoch(detailData.pubdate * 1000),
+        uploadDate: DateTime.fromMillisecondsSinceEpoch(
+          detailData.pubdate * 1000,
+        ),
         duration: detailData.duration,
         desc: detailData.desc,
         creatorProfileName: detailData.owner?.name,

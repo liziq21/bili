@@ -65,7 +65,9 @@ abstract class BiliNetworkApi extends ChopperService {
   Future<NetworkVideoRelation> getVideoRelation({@query required String bvid});
 
   @GET(path: ApiPath.relatedList)
-  Future<NetworkRelatedVideosList> getRelatedVideos({@query required String bvid});
+  Future<NetworkRelatedVideosList> getRelatedVideos({
+    @query required String bvid,
+  });
 
   @GET(path: ApiPath.replyListMain)
   Future<NetworkReplyData> getReplyListMain({
@@ -106,7 +108,8 @@ abstract class BiliNetworkApi extends ChopperService {
       _$BiliNetworkApi(client ?? .new());
 }
 
-class BiliNetworkSearch implements NetworkSearchDataSource, NetworkVideoDataSource {
+class BiliNetworkSearch
+    implements NetworkSearchDataSource, NetworkVideoDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null {
@@ -253,7 +256,9 @@ class BiliNetworkSearch implements NetworkSearchDataSource, NetworkVideoDataSour
       _networkApi.getVideoRelation(bvid: bvid);
 
   @override
-  Future<List<NetworkRelatedVideo>> getRelatedVideos({required String bvid}) async {
+  Future<List<NetworkRelatedVideo>> getRelatedVideos({
+    required String bvid,
+  }) async {
     final response = await _networkApi.getRelatedVideos(bvid: bvid);
     return response.items;
   }
@@ -304,11 +309,5 @@ class BiliNetworkSearch implements NetworkSearchDataSource, NetworkVideoDataSour
     int qn = 80,
     int fnval = 4048,
     int fourk = 1,
-  }) => _networkApi.getPlayUrl(
-    bvid,
-    cid,
-    qn: qn,
-    fnval: fnval,
-    fourk: fourk,
-  );
+  }) => _networkApi.getPlayUrl(bvid, cid, qn: qn, fnval: fnval, fourk: fourk);
 }

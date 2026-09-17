@@ -50,7 +50,9 @@ class VideoCommentsView extends StatelessWidget {
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
                 '暂无评论',
-                style: $styles.text.body.copyWith(color: $styles.colors.caption),
+                style: $styles.text.body.copyWith(
+                  color: $styles.colors.caption,
+                ),
               ),
             ),
           );
@@ -60,7 +62,9 @@ class VideoCommentsView extends StatelessWidget {
           onNotification: (ScrollNotification scrollInfo) {
             if (scrollInfo.metrics.pixels >=
                 scrollInfo.metrics.maxScrollExtent - 200) {
-              context.read<VideoCommentBloc>().add(const FetchNextCommentPage());
+              context.read<VideoCommentBloc>().add(
+                const FetchNextCommentPage(),
+              );
             }
             return false;
           },
@@ -84,10 +88,7 @@ class VideoCommentsView extends StatelessWidget {
               }
 
               final comment = state.comments[index];
-              return _CommentItem(
-                comment: comment,
-                formatCount: _formatCount,
-              );
+              return _CommentItem(comment: comment, formatCount: _formatCount);
             },
           ),
         );
@@ -97,10 +98,7 @@ class VideoCommentsView extends StatelessWidget {
 }
 
 class _CommentItem extends StatelessWidget {
-  const _CommentItem({
-    required this.comment,
-    required this.formatCount,
-  });
+  const _CommentItem({required this.comment, required this.formatCount});
 
   final VideoComment comment;
   final String Function(int) formatCount;
@@ -166,14 +164,16 @@ class _CommentItem extends StatelessWidget {
                     tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
                     child: InkWell(
                       onTap: () {
-                        context
-                            .read<VideoCommentBloc>()
-                            .add(ToggleCommentLike(comment.id));
+                        context.read<VideoCommentBloc>().add(
+                          ToggleCommentLike(comment.id),
+                        );
                       },
                       borderRadius: BorderRadius.circular($styles.corners.sm),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         child: Row(
                           children: [
                             Icon(

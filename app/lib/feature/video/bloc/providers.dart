@@ -12,19 +12,22 @@ List<BlocProvider> getVideoBlocProviders(
   VideoDetailRepository? customDetailRepo,
   VideoCommentRepository? customCommentRepo,
 }) {
-  final detailRepo = customDetailRepo ??
+  final detailRepo =
+      customDetailRepo ??
       (context.read<VideoDetailRepository?>() ?? AppVideoDetailRepository());
-  final commentRepo = customCommentRepo ??
+  final commentRepo =
+      customCommentRepo ??
       (context.read<VideoCommentRepository?>() ?? AppVideoCommentRepository());
 
   return [
     BlocProvider<VideoBloc>(
-      create: (_) => VideoBloc(repository: detailRepo)
-        ..add(LoadVideoDetail(videoId)),
+      create: (_) =>
+          VideoBloc(repository: detailRepo)..add(LoadVideoDetail(videoId)),
     ),
     BlocProvider<VideoCommentBloc>(
-      create: (_) => VideoCommentBloc(repository: commentRepo)
-        ..add(LoadVideoComments(videoId)),
+      create: (_) =>
+          VideoCommentBloc(repository: commentRepo)
+            ..add(LoadVideoComments(videoId)),
     ),
   ];
 }

@@ -12,15 +12,14 @@ import '../protobuf/yt_protobuf_encoder.dart';
 
 class YoutubeService {
   YoutubeService({http.Client? httpClient, ChopperClient? chopperClient})
-      : _ownsHttpClient = httpClient == null && chopperClient == null,
-        _httpClient = httpClient ?? http.Client() {
-    _chopperClient = chopperClient ??
+    : _ownsHttpClient = httpClient == null && chopperClient == null,
+      _httpClient = httpClient ?? http.Client() {
+    _chopperClient =
+        chopperClient ??
         ChopperClient(
           client: _httpClient,
           converter: const YoutubeRequestConverter(),
-          interceptors: [
-            const YoutubeInnerTubeInterceptor(),
-          ],
+          interceptors: [const YoutubeInnerTubeInterceptor()],
         );
     _api = YoutubeApi.create(_chopperClient);
   }
@@ -72,7 +71,7 @@ class YoutubeService {
   }
 
   Future<(List<CreatorProfile> profiles, String? continuationToken)>
-      searchChannels(
+  searchChannels(
     String query, {
     YoutubeSearchSort sort = YoutubeSearchSort.relevance,
     String? continuation,
@@ -129,17 +128,19 @@ class YoutubeService {
   }
 
   (List<VideoModel> videos, String? continuationToken)
-      _parseVideoSearchResponse(Map<String, dynamic> data) {
+  _parseVideoSearchResponse(Map<String, dynamic> data) {
     final videos = <VideoModel>[];
     String? continuationToken;
 
     final items = [];
 
-    final contents = data['contents']?['twoColumnSearchResultsRenderer']
-        ?['primaryContents']?['sectionListRenderer']?['contents'] as List?;
+    final contents =
+        data['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
+            as List?;
     if (contents != null) {
       for (final section in contents) {
-        final itemSection = section['itemSectionRenderer']?['contents'] as List?;
+        final itemSection =
+            section['itemSectionRenderer']?['contents'] as List?;
         if (itemSection != null) {
           items.addAll(itemSection);
         }
@@ -150,23 +151,25 @@ class YoutubeService {
       }
     }
 
-    final continuationContents =
-        data['onResponseReceivedCommands'] as List?;
+    final continuationContents = data['onResponseReceivedCommands'] as List?;
     if (continuationContents != null) {
       for (final command in continuationContents) {
-        final appendContinuationItems = command['appendContinuationItemsAction']
-            ?['continuationItems'] as List?;
+        final appendContinuationItems =
+            command['appendContinuationItemsAction']?['continuationItems']
+                as List?;
         if (appendContinuationItems != null) {
           for (final item in appendContinuationItems) {
-            final itemSection = item['itemSectionRenderer']?['contents'] as List?;
+            final itemSection =
+                item['itemSectionRenderer']?['contents'] as List?;
             if (itemSection != null) {
               items.addAll(itemSection);
             } else {
               items.add(item);
             }
             if (item.containsKey('continuationItemRenderer')) {
-              continuationToken =
-                  _extractContinuationToken(item['continuationItemRenderer']);
+              continuationToken = _extractContinuationToken(
+                item['continuationItemRenderer'],
+              );
             }
           }
         }
@@ -181,8 +184,9 @@ class YoutubeService {
         }
       } else if (item is Map<String, dynamic> &&
           item.containsKey('continuationItemRenderer')) {
-        continuationToken =
-            _extractContinuationToken(item['continuationItemRenderer']);
+        continuationToken = _extractContinuationToken(
+          item['continuationItemRenderer'],
+        );
       }
     }
 
@@ -190,17 +194,19 @@ class YoutubeService {
   }
 
   (List<CreatorProfile> profiles, String? continuationToken)
-      _parseChannelSearchResponse(Map<String, dynamic> data) {
+  _parseChannelSearchResponse(Map<String, dynamic> data) {
     final profiles = <CreatorProfile>[];
     String? continuationToken;
 
     final items = [];
 
-    final contents = data['contents']?['twoColumnSearchResultsRenderer']
-        ?['primaryContents']?['sectionListRenderer']?['contents'] as List?;
+    final contents =
+        data['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
+            as List?;
     if (contents != null) {
       for (final section in contents) {
-        final itemSection = section['itemSectionRenderer']?['contents'] as List?;
+        final itemSection =
+            section['itemSectionRenderer']?['contents'] as List?;
         if (itemSection != null) {
           items.addAll(itemSection);
         }
@@ -211,23 +217,25 @@ class YoutubeService {
       }
     }
 
-    final continuationContents =
-        data['onResponseReceivedCommands'] as List?;
+    final continuationContents = data['onResponseReceivedCommands'] as List?;
     if (continuationContents != null) {
       for (final command in continuationContents) {
-        final appendContinuationItems = command['appendContinuationItemsAction']
-            ?['continuationItems'] as List?;
+        final appendContinuationItems =
+            command['appendContinuationItemsAction']?['continuationItems']
+                as List?;
         if (appendContinuationItems != null) {
           for (final item in appendContinuationItems) {
-            final itemSection = item['itemSectionRenderer']?['contents'] as List?;
+            final itemSection =
+                item['itemSectionRenderer']?['contents'] as List?;
             if (itemSection != null) {
               items.addAll(itemSection);
             } else {
               items.add(item);
             }
             if (item.containsKey('continuationItemRenderer')) {
-              continuationToken =
-                  _extractContinuationToken(item['continuationItemRenderer']);
+              continuationToken = _extractContinuationToken(
+                item['continuationItemRenderer'],
+              );
             }
           }
         }
@@ -242,8 +250,9 @@ class YoutubeService {
         }
       } else if (item is Map<String, dynamic> &&
           item.containsKey('continuationItemRenderer')) {
-        continuationToken =
-            _extractContinuationToken(item['continuationItemRenderer']);
+        continuationToken = _extractContinuationToken(
+          item['continuationItemRenderer'],
+        );
       }
     }
 
@@ -316,7 +325,8 @@ class YoutubeService {
       final title = _extractText(json['title']);
 
       final avatarThumbnails = json['thumbnail']?['thumbnails'] as List?;
-      final thumbnailUrl = (avatarThumbnails != null && avatarThumbnails.isNotEmpty)
+      final thumbnailUrl =
+          (avatarThumbnails != null && avatarThumbnails.isNotEmpty)
           ? (avatarThumbnails.last['url'] as String?) ?? ''
           : null;
 

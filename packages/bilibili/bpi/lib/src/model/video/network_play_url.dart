@@ -2,8 +2,10 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'network_play_url.g.dart';
 
-Object? _readBaseUrl(Map json, String key) => json['baseUrl'] ?? json['base_url'];
-Object? _readBackupUrl(Map json, String key) => json['backupUrl'] ?? json['backup_url'];
+Object? _readBaseUrl(Map json, String key) =>
+    json['baseUrl'] ?? json['base_url'];
+Object? _readBackupUrl(Map json, String key) =>
+    json['backupUrl'] ?? json['backup_url'];
 
 /// 视频播放地址详情模型 (/x/player/wbi/playurl)
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)

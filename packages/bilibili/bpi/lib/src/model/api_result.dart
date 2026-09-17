@@ -38,10 +38,7 @@ sealed class const ApiResult<T>() {
     }
 
     try {
-      return .ok(
-        code: code,
-        data: fromJsonT(dataMap),
-      );
+      return .ok(code: code, data: fromJsonT(dataMap));
     } on BpiException {
       rethrow;
     } on Object catch (error) {

@@ -4,10 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube/youtube.dart';
 
-final List<MediaSource> defaultMediaSources = [
-  Bili(),
-  YouTube(),
-];
+final List<MediaSource> defaultMediaSources = [Bili(), YouTube()];
 
 extension MediaSourcesContextX on BuildContext {
   List<MediaSource> get mediaSources => watch<List<MediaSource>>();

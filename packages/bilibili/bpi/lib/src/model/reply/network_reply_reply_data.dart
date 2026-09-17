@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import 'network_reply_data.dart';
 
 part 'network_reply_reply_data.g.dart';
@@ -17,11 +18,7 @@ class NetworkReplyReplyData({
 
 /// 简单的分页信息模型
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
-class NetworkReplyPage({
-  final int? num,
-  final int? size,
-  final int? count,
-}) {
+class NetworkReplyPage({final int? num, final int? size, final int? count}) {
   factory NetworkReplyPage.fromJson(Map<String, dynamic> json) =>
       _$NetworkReplyPageFromJson(json);
 }

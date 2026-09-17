@@ -99,10 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
         titleSpacing: $styles.insets.sm,
         title: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            final effectiveSourceId =
-                sources.any((s) => s.id == state.sourceId)
-                    ? state.sourceId
-                    : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+            final effectiveSourceId = sources.any((s) => s.id == state.sourceId)
+                ? state.sourceId
+                : (sources.isNotEmpty ? sources.first.id : state.sourceId);
 
             final activeSource = sources.firstWhere(
               (s) => s.id == effectiveSourceId,
@@ -141,9 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         }).toList(),
                         onChanged: (String? newSource) {
                           if (newSource != null) {
-                            context
-                                .read<HomeBloc>()
-                                .add(ServiceSourceChanged(newSource));
+                            context.read<HomeBloc>().add(
+                              ServiceSourceChanged(newSource),
+                            );
                           }
                         },
                       ),
@@ -167,7 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: InputDecoration(
                         hintText: '搜索 ${activeSource.name} 内容...',
                         hintStyle: $styles.text.bodySmall.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                         isDense: true,
                         border: InputBorder.none,
@@ -180,7 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             size: 22,
                             color: colorScheme.onSurfaceVariant,
                           ),
-                          onPressed: () => _onSearchSubmitted(_searchController.text),
+                          onPressed: () =>
+                              _onSearchSubmitted(_searchController.text),
                         ),
                       ),
                     ),
@@ -193,10 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          final effectiveSourceId =
-              sources.any((s) => s.id == state.sourceId)
-                  ? state.sourceId
-                  : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+          final effectiveSourceId = sources.any((s) => s.id == state.sourceId)
+              ? state.sourceId
+              : (sources.isNotEmpty ? sources.first.id : state.sourceId);
 
           final activeSource = sources.firstWhere(
             (s) => s.id == effectiveSourceId,
@@ -206,7 +207,8 @@ class _HomeScreenState extends State<HomeScreen> {
           final hasSearch =
               activeSource.videoSearchDataSource != null ||
               activeSource.aggregateSearchDataSource != null;
-          final hasCreator = activeSource.creatorProfileSearchDataSource != null;
+          final hasCreator =
+              activeSource.creatorProfileSearchDataSource != null;
           final hasLive = activeSource.liveRoomSearchDataSource != null;
           final hasVideoDetail = activeSource.videoDetailDataSource != null;
 
@@ -226,9 +228,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   _showIdInputDialog(
                     context: context,
-                    title: activeSource.id == 'bilibili' ? '访问 UP主空间' : '访问创作者频道',
+                    title: activeSource.id == 'bilibili'
+                        ? '访问 UP主空间'
+                        : '访问创作者频道',
                     labelText: '请输入 MID 或频道 ID：',
-                    hintText: activeSource.id == 'bilibili' ? '例如 188339' : '频道 ID',
+                    hintText: activeSource.id == 'bilibili'
+                        ? '例如 188339'
+                        : '频道 ID',
                     defaultId: activeSource.id == 'bilibili' ? '188339' : '',
                     onSubmit: (id) => widget.onSpace(id),
                   );
@@ -271,7 +277,9 @@ class _HomeScreenState extends State<HomeScreen> {
           return LayoutBuilder(
             builder: (context, constraints) {
               final double width = constraints.maxWidth;
-              final int crossAxisCount = width > 900 ? 3 : (width > 600 ? 2 : 1);
+              final int crossAxisCount = width > 900
+                  ? 3
+                  : (width > 600 ? 2 : 1);
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all($styles.insets.sm),

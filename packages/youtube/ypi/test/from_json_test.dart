@@ -33,8 +33,9 @@ void main() {
       expect(json, isNotNull);
       expect(json.containsKey('contents'), isTrue);
 
-      final contents = json['contents']?['twoColumnSearchResultsRenderer']
-          ?['primaryContents']?['sectionListRenderer']?['contents'] as List?;
+      final contents =
+          json['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
+              as List?;
       expect(contents, isNotNull);
       expect(contents, isNotEmpty);
     });
@@ -45,8 +46,9 @@ void main() {
       expect(json, isNotNull);
       expect(json.containsKey('contents'), isTrue);
 
-      final contents = json['contents']?['twoColumnSearchResultsRenderer']
-          ?['primaryContents']?['sectionListRenderer']?['contents'] as List?;
+      final contents =
+          json['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
+              as List?;
       expect(contents, isNotNull);
       expect(contents, isNotEmpty);
     });

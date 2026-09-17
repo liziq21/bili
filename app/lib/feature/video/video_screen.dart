@@ -10,10 +10,7 @@ import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player_placeholder.dart';
 
 class VideoScreen extends StatelessWidget {
-  const VideoScreen({
-    super.key,
-    this.videoId = 'demo_video',
-  });
+  const VideoScreen({super.key, this.videoId = 'demo_video'});
 
   final String videoId;
 
@@ -23,9 +20,7 @@ class VideoScreen extends StatelessWidget {
       providers: getVideoBlocProviders(context, videoId: videoId),
       child: Scaffold(
         backgroundColor: $styles.colors.offWhite,
-        body: SafeArea(
-          child: _VideoContent(videoId: videoId),
-        ),
+        body: SafeArea(child: _VideoContent(videoId: videoId)),
       ),
     );
   }
@@ -41,7 +36,7 @@ class _VideoContent extends StatelessWidget {
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
     final bool useTwoColumnLayout =
         MediaQuery.of(context).size.aspectRatio > twoColumnAspect ||
-            MediaQuery.of(context).size.width >= 800;
+        MediaQuery.of(context).size.width >= 800;
 
     return BlocBuilder<VideoBloc, VideoState>(
       builder: (context, state) {
@@ -68,16 +63,12 @@ class _VideoContent extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Expanded(
-          child: VideoInfoView(),
-        ),
+        const Expanded(child: VideoInfoView()),
         VerticalDivider(
           width: 1,
           color: $styles.colors.greyMedium.withValues(alpha: 0.2),
         ),
-        const Expanded(
-          child: VideoCommentsView(),
-        ),
+        const Expanded(child: VideoCommentsView()),
       ],
     );
   }
@@ -94,7 +85,9 @@ class _VideoContent extends StatelessWidget {
               unselectedLabelColor: $styles.colors.caption,
               indicatorColor: $styles.colors.accent1,
               indicatorWeight: 3,
-              labelStyle: $styles.text.btn.copyWith(fontWeight: FontWeight.bold),
+              labelStyle: $styles.text.btn.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               unselectedLabelStyle: $styles.text.btn,
               tabs: const [
                 Tab(text: '简介与相关'),

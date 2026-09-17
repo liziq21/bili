@@ -32,9 +32,7 @@ class _VideoInfoViewState extends State<VideoInfoView> {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: CircularProgressIndicator(
-                color: $styles.colors.accent1,
-              ),
+              child: CircularProgressIndicator(color: $styles.colors.accent1),
             ),
           );
         }
@@ -103,11 +101,7 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.forum,
-                      size: 14,
-                      color: $styles.colors.accent2,
-                    ),
+                    Icon(Icons.forum, size: 14, color: $styles.colors.accent2),
                     const Gap(2),
                     Text(
                       '2.4万 弹幕',
@@ -128,7 +122,10 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                 ),
                 Text('·', style: TextStyle(color: $styles.colors.greyMedium)),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: $styles.colors.greyStrong.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
@@ -142,7 +139,10 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: $styles.colors.greyStrong.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
@@ -178,7 +178,9 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                         CircleAvatar(
                           radius: 20,
                           backgroundImage: creator.thumbnailUrl != null
-                              ? CachedNetworkImageProvider(creator.thumbnailUrl!)
+                              ? CachedNetworkImageProvider(
+                                  creator.thumbnailUrl!,
+                                )
                               : null,
                           child: creator.thumbnailUrl == null
                               ? const Icon(Icons.person)
@@ -272,13 +274,15 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                           vertical: $styles.insets.xxs,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular($styles.corners.lg),
+                          borderRadius: BorderRadius.circular(
+                            $styles.corners.lg,
+                          ),
                         ),
                       ),
                       onPressed: () {
-                        context
-                            .read<VideoBloc>()
-                            .add(const ToggleCreatorSubscribe());
+                        context.read<VideoBloc>().add(
+                          const ToggleCreatorSubscribe(),
+                        );
                       },
                       icon: Icon(
                         detail.isSubscribed ? Icons.check : Icons.add,
@@ -286,9 +290,7 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                       ),
                       label: Text(
                         detail.isSubscribed ? '已关注' : '关注',
-                        style: $styles.text.btn.copyWith(
-                          fontSize: 12,
-                        ),
+                        style: $styles.text.btn.copyWith(fontSize: 12),
                       ),
                     ),
                   ],
@@ -319,7 +321,9 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                     isActive: detail.isFavorited,
                     color: $styles.colors.accent3,
                     onTap: () {
-                      context.read<VideoBloc>().add(const ToggleVideoFavorite());
+                      context.read<VideoBloc>().add(
+                        const ToggleVideoFavorite(),
+                      );
                     },
                   ),
                   _ActionButton(
@@ -409,12 +413,11 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                   ),
                   const Gap(6),
                   Text(
-                    video.desc != null && video.desc!.isNotEmpty
-                        ? video.desc!
-                        : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+                    video.desc != null && video.desc!.isNotEmpty ? video.desc! : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
                     maxLines: _isDescExpanded ? null : 2,
-                    overflow:
-                        _isDescExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    overflow: _isDescExpanded
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
                     style: $styles.text.bodySmall.copyWith(
                       color: $styles.colors.body,
                       height: 1.4,
@@ -528,7 +531,10 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                     right: 4,
                     bottom: 4,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: $styles.colors.black.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(4),
@@ -575,9 +581,13 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 1),
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
-                          color: (item['badgeColor'] as Color).withValues(alpha: 0.15),
+                          color: (item['badgeColor'] as Color).withValues(
+                            alpha: 0.15,
+                          ),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(

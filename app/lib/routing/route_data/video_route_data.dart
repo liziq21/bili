@@ -12,11 +12,8 @@ extension BuildContextVideo on BuildContext {
     if (repo != null) {
       VideoRouteData(id: id, source: source).push(this);
     } else {
-      ScaffoldMessenger.of(this).showSnackBar(
-        const SnackBar(
-          content: Text('当前数据源暂不支持查看视频详情'),
-        ),
-      );
+      ScaffoldMessenger.of(this)
+          .showSnackBar(const SnackBar(content: Text('当前数据源暂不支持查看视频详情')));
     }
   }
 }

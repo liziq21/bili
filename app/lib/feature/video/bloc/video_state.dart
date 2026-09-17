@@ -1,11 +1,7 @@
 part of 'video_bloc.dart';
 
 class VideoState extends Equatable {
-  const VideoState({
-    this.isLoading = false,
-    this.error,
-    this.videoDetail,
-  });
+  const VideoState({this.isLoading = false, this.error, this.videoDetail});
 
   final bool isLoading;
   final String? error;

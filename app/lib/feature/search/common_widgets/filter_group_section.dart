@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
+
 import 'filter_chip_item.dart';
 
 class FilterGroupSection extends StatelessWidget {
@@ -21,9 +22,8 @@ class FilterGroupSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Text(
             group.label,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: .bold),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: .bold),
           ),
         ),
         switch (group) {

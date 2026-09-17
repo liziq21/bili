@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LiveScreen extends StatefulWidget {
-  
-  const LiveScreen({
-    super.key,
-    this.onBackClick,
-    required this.roomId,
-  });
+  const LiveScreen({super.key, this.onBackClick, required this.roomId});
   final VoidCallback? onBackClick;
   final String roomId;
 
@@ -15,17 +10,16 @@ class LiveScreen extends StatefulWidget {
 }
 
 class _LiveScreenState extends State<LiveScreen> {
-
   @override
   void initState() {
     super.initState();
   }
-  
+
   @override
   void dispose() {
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

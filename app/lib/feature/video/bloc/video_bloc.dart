@@ -12,9 +12,7 @@ part 'video_event.dart';
 part 'video_state.dart';
 
 class VideoBloc extends Bloc<VideoEvent, VideoState> {
-  VideoBloc({
-    required this._repository,
-  })  : super(const VideoState()) {
+  VideoBloc({required this._repository}) : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
     on<ToggleVideoLike>(_onToggleVideoLike);
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
@@ -34,16 +32,10 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     final result = await _repository.getVideoDetail(event.id);
     switch (result) {
       case Ok(:final value):
-        emit(state.copyWith(
-          isLoading: false,
-          videoDetail: value,
-        ));
+        emit(state.copyWith(isLoading: false, videoDetail: value));
       case Error(:final error):
         _log.warning('Failed to load video detail', error);
-        emit(state.copyWith(
-          isLoading: false,
-          error: error.toString(),
-        ));
+        emit(state.copyWith(isLoading: false, error: error.toString()));
     }
   }
 
@@ -73,7 +65,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     if (detail == null) return;
 
     final newIsFavorited = !detail.isFavorited;
-    final newCount = newIsFavorited ? detail.favoriteCount + 1 : detail.favoriteCount - 1;
+    final newCount = newIsFavorited
+        ? detail.favoriteCount + 1
+        : detail.favoriteCount - 1;
     final updatedDetail = detail.copyWith(
       isFavorited: newIsFavorited,
       favoriteCount: newCount < 0 ? 0 : newCount,

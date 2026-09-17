@@ -77,10 +77,10 @@ final class const YouTubeVideoSearchRemoteDataSource({
 
   @override
   List<FilterGroup> get filters => const [
-        _uploadDateFilterGroup,
-        _durationFilterGroup,
-        _featureFilterGroup,
-      ];
+    _uploadDateFilterGroup,
+    _durationFilterGroup,
+    _featureFilterGroup,
+  ];
 
   @override
   List<SortOption> get sortOptions => _sortOptionsList;
@@ -140,8 +140,9 @@ final class const YouTubeVideoSearchRemoteDataSource({
       final continuationKey = '$query:$targetPage';
       final prevContinuationKey = '$query:${targetPage - 1}';
 
-      final continuationToken =
-          targetPage > 1 ? _continuationTokens[prevContinuationKey] : null;
+      final continuationToken = targetPage > 1
+          ? _continuationTokens[prevContinuationKey]
+          : null;
 
       final (videos, nextToken) = await _youtubeService.searchVideos(
         query,

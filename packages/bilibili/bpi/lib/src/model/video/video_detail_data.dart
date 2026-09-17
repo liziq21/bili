@@ -96,7 +96,8 @@ class VideoStat({
   required final int share,
   required final int like,
 }) {
-  factory VideoStat.fromJson(Map<String, dynamic> json) => _$VideoStatFromJson(json);
+  factory VideoStat.fromJson(Map<String, dynamic> json) =>
+      _$VideoStatFromJson(json);
 }
 
 /// 7. 争议信息辅助模型
@@ -142,7 +143,8 @@ class Section({
   required final int id,
   required final List<Episode> episodes,
 }) {
-  factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
+  factory Section.fromJson(Map<String, dynamic> json) =>
+      _$SectionFromJson(json);
 }
 
 /// 11. 单集/单视频辅助模型
@@ -154,7 +156,8 @@ class Episode({
   required final String title,
   required final String bvid,
 }) {
-  factory Episode.fromJson(Map<String, dynamic> json) => _$EpisodeFromJson(json);
+  factory Episode.fromJson(Map<String, dynamic> json) =>
+      _$EpisodeFromJson(json);
 }
 
 /// 12. 分P页面辅助模型

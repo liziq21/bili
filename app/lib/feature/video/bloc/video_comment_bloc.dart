@@ -12,9 +12,8 @@ part 'video_comment_event.dart';
 part 'video_comment_state.dart';
 
 class VideoCommentBloc extends Bloc<VideoCommentEvent, VideoCommentState> {
-  VideoCommentBloc({
-    required this._repository,
-  })  : super(const VideoCommentState()) {
+  VideoCommentBloc({required this._repository})
+    : super(const VideoCommentState()) {
     on<LoadVideoComments>(_onLoadVideoComments);
     on<FetchNextCommentPage>(_onFetchNextCommentPage);
     on<ToggleCommentLike>(_onToggleCommentLike);
@@ -27,32 +26,33 @@ class VideoCommentBloc extends Bloc<VideoCommentEvent, VideoCommentState> {
     LoadVideoComments event,
     Emitter<VideoCommentState> emit,
   ) async {
-    emit(state.copyWith(
-      isLoading: true,
-      error: null,
-      videoId: event.videoId,
-      currentPage: 1,
-      comments: const [],
-    ));
+    emit(
+      state.copyWith(
+        isLoading: true,
+        error: null,
+        videoId: event.videoId,
+        currentPage: 1,
+        comments: const [],
+      ),
+    );
 
     _log.info('Loading comments for videoId: ${event.videoId}');
     final result = await _repository.getVideoComments(event.videoId, page: 1);
 
     switch (result) {
       case Ok(:final value):
-        emit(state.copyWith(
-          isLoading: false,
-          comments: value.data,
-          currentPage: 1,
-          totalPages: value.totalPages,
-          hasMore: 1 < value.totalPages,
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            comments: value.data,
+            currentPage: 1,
+            totalPages: value.totalPages,
+            hasMore: 1 < value.totalPages,
+          ),
+        );
       case Error(:final error):
         _log.warning('Failed to load comments', error);
-        emit(state.copyWith(
-          isLoading: false,
-          error: error.toString(),
-        ));
+        emit(state.copyWith(isLoading: false, error: error.toString()));
     }
   }
 
@@ -65,17 +65,22 @@ class VideoCommentBloc extends Bloc<VideoCommentEvent, VideoCommentState> {
     final nextPage = state.currentPage + 1;
     emit(state.copyWith(isLoadingMore: true));
 
-    final result = await _repository.getVideoComments(state.videoId, page: nextPage);
+    final result = await _repository.getVideoComments(
+      state.videoId,
+      page: nextPage,
+    );
 
     switch (result) {
       case Ok(:final value):
-        emit(state.copyWith(
-          isLoadingMore: false,
-          comments: [...state.comments, ...value.data],
-          currentPage: nextPage,
-          totalPages: value.totalPages,
-          hasMore: nextPage < value.totalPages,
-        ));
+        emit(
+          state.copyWith(
+            isLoadingMore: false,
+            comments: [...state.comments, ...value.data],
+            currentPage: nextPage,
+            totalPages: value.totalPages,
+            hasMore: nextPage < value.totalPages,
+          ),
+        );
       case Error(:final error):
         _log.warning('Failed to fetch next comment page', error);
         emit(state.copyWith(isLoadingMore: false));
@@ -89,7 +94,9 @@ class VideoCommentBloc extends Bloc<VideoCommentEvent, VideoCommentState> {
     final updatedComments = state.comments.map((comment) {
       if (comment.id == event.commentId) {
         final newIsLiked = !comment.isLiked;
-        final newCount = newIsLiked ? comment.likeCount + 1 : comment.likeCount - 1;
+        final newCount = newIsLiked
+            ? comment.likeCount + 1
+            : comment.likeCount - 1;
         return comment.copyWith(
           isLiked: newIsLiked,
           likeCount: newCount < 0 ? 0 : newCount,

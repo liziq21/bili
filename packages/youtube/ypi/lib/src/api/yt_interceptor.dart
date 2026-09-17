@@ -4,9 +4,7 @@ import 'dart:io';
 import 'package:chopper/chopper.dart';
 
 final class YoutubeInnerTubeInterceptor implements Interceptor {
-  const YoutubeInnerTubeInterceptor({
-    this.clientVersion = '2.20230818.00.00',
-  });
+  const YoutubeInnerTubeInterceptor({this.clientVersion = '2.20230818.00.00'});
 
   final String clientVersion;
 
@@ -43,15 +41,15 @@ final class YoutubeRequestConverter extends JsonConverter {
   final String gl;
 
   Map<String, dynamic> get clientContext => {
-        'context': {
-          'client': {
-            'clientName': clientName,
-            'clientVersion': clientVersion,
-            'hl': hl,
-            'gl': gl,
-          },
-        },
-      };
+    'context': {
+      'client': {
+        'clientName': clientName,
+        'clientVersion': clientVersion,
+        'hl': hl,
+        'gl': gl,
+      },
+    },
+  };
 
   @override
   Request convertRequest(Request request) {

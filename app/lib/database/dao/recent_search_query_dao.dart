@@ -6,16 +6,19 @@ import '../table/recent_search_query.dart';
 part 'recent_search_query_dao.g.dart';
 
 @DriftAccessor(tables: [RecentSearchQuery])
-class RecentSearchQueryDao extends DatabaseAccessor<AppDatabase> with _$RecentSearchQueryDaoMixin {
+class RecentSearchQueryDao extends DatabaseAccessor<AppDatabase>
+    with _$RecentSearchQueryDaoMixin {
   RecentSearchQueryDao(super.attachedDatabase);
 
-  Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(int limit) {
+  Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(
+    int limit,
+  ) {
     return (select(recentSearchQuery)
-      ..orderBy([(it) => OrderingTerm.desc(it.queriedDate)])
-      ..limit(limit))
-      .watch();
+          ..orderBy([(it) => OrderingTerm.desc(it.queriedDate)])
+          ..limit(limit))
+        .watch();
   }
-  
+
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
     return into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
@@ -24,8 +27,6 @@ class RecentSearchQueryDao extends DatabaseAccessor<AppDatabase> with _$RecentSe
       ),
     );
   }
-  
-  Future<void> clearRecentSearchQueries() =>
- delete(recentSearchQuery).go();
 
+  Future<void> clearRecentSearchQueries() => delete(recentSearchQuery).go();
 }
