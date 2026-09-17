@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NotFoundScreen extends StatelessWidget {
-  const NotFoundScreen({
-    super.key,
-    required this.uri,
-    required this.path,
-  });
+  const NotFoundScreen({super.key, required this.uri, required this.path});
 
   final String uri;
   final String path;

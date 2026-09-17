@@ -20,11 +20,10 @@ class const SearchQuery({
     int? pageKey,
     SortOption? sortOption,
     List<FilterGroup>? filters,
-  }) =>
-      SearchQuery(
-        query: query ?? this.query,
-        pageKey: pageKey ?? this.pageKey,
-        sortOption: sortOption ?? this.sortOption,
-        filters: filters ?? this.filters,
-      );
+  }) => SearchQuery(
+    query: query ?? this.query,
+    pageKey: pageKey ?? this.pageKey,
+    sortOption: sortOption ?? this.sortOption,
+    filters: filters ?? this.filters,
+  );
 }

@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SpaceScreen extends StatefulWidget {
-  
-  const SpaceScreen({
-    super.key,
-    this.onBackClick,
-    required this.mid,
-  });
+  const SpaceScreen({super.key, this.onBackClick, required this.mid});
   final VoidCallback? onBackClick;
   final String mid;
 
@@ -15,17 +10,16 @@ class SpaceScreen extends StatefulWidget {
 }
 
 class _SpaceScreenState extends State<SpaceScreen> {
-
   @override
   void initState() {
     super.initState();
   }
-  
+
   @override
   void dispose() {
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

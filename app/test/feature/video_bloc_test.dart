@@ -17,10 +17,7 @@ class FakeVideoDetailRemoteDataSource extends VideoDetailRemoteDataSource {
       title: 'Test Video Title $id',
       url: 'https://example.com/$id',
     );
-    final detail = VideoDetail(
-      video: video,
-      likeCount: 10,
-    );
+    final detail = VideoDetail(video: video, likeCount: 10);
     return Result.ok(detail);
   }
 }
@@ -41,11 +38,7 @@ class FakeVideoCommentRemoteDataSource extends VideoCommentRemoteDataSource {
       content: 'Comment 1',
     );
     return Result.ok(
-      Page<VideoComment>(
-        number: page,
-        totalPages: 2,
-        data: [comment],
-      ),
+      Page<VideoComment>(number: page, totalPages: 2, data: [comment]),
     );
   }
 }
@@ -56,8 +49,7 @@ void main() {
     late VideoBloc videoBloc;
 
     setUp(() {
-      detailRepo =
-          AppVideoDetailRepository(FakeVideoDetailRemoteDataSource());
+      detailRepo = AppVideoDetailRepository(FakeVideoDetailRemoteDataSource());
       videoBloc = VideoBloc(repository: detailRepo);
     });
 
@@ -94,19 +86,23 @@ void main() {
 
       await expectLater(
         videoBloc.stream,
-        emits(predicate<VideoState>((state) {
-          return state.videoDetail!.isLiked == true &&
-              state.videoDetail!.likeCount == initialLikeCount + 1;
-        })),
+        emits(
+          predicate<VideoState>((state) {
+            return state.videoDetail!.isLiked == true &&
+                state.videoDetail!.likeCount == initialLikeCount + 1;
+          }),
+        ),
       );
     });
 
-    test('AppVideoDetailRepository returns error when no remote data source',
-        () async {
-      final repoWithoutSource = AppVideoDetailRepository();
-      final result = await repoWithoutSource.getVideoDetail('test_id');
-      expect(result.isError, isTrue);
-    });
+    test(
+      'AppVideoDetailRepository returns error when no remote data source',
+      () async {
+        final repoWithoutSource = AppVideoDetailRepository();
+        final result = await repoWithoutSource.getVideoDetail('test_id');
+        expect(result.isError, isTrue);
+      },
+    );
   });
 
   group('VideoCommentBloc Tests', () {
@@ -114,8 +110,9 @@ void main() {
     late VideoCommentBloc commentBloc;
 
     setUp(() {
-      commentRepo =
-          AppVideoCommentRepository(FakeVideoCommentRemoteDataSource());
+      commentRepo = AppVideoCommentRepository(
+        FakeVideoCommentRemoteDataSource(),
+      );
       commentBloc = VideoCommentBloc(repository: commentRepo);
     });
 
@@ -134,7 +131,8 @@ void main() {
         commentBloc.stream,
         emitsInOrder([
           predicate<VideoCommentState>(
-              (s) => s.isLoading && s.videoId == 'test_id'),
+            (s) => s.isLoading && s.videoId == 'test_id',
+          ),
           predicate<VideoCommentState>((s) {
             return !s.isLoading &&
                 s.comments.isNotEmpty &&
@@ -154,18 +152,24 @@ void main() {
 
       await expectLater(
         commentBloc.stream,
-        emits(predicate<VideoCommentState>((s) {
-          final target = s.comments.firstWhere((c) => c.id == targetCommentId);
-          return target.isLiked == true;
-        })),
+        emits(
+          predicate<VideoCommentState>((s) {
+            final target = s.comments.firstWhere(
+              (c) => c.id == targetCommentId,
+            );
+            return target.isLiked == true;
+          }),
+        ),
       );
     });
 
-    test('AppVideoCommentRepository returns error when no remote data source',
-        () async {
-      final repoWithoutSource = AppVideoCommentRepository();
-      final result = await repoWithoutSource.getVideoComments('test_id');
-      expect(result.isError, isTrue);
-    });
+    test(
+      'AppVideoCommentRepository returns error when no remote data source',
+      () async {
+        final repoWithoutSource = AppVideoCommentRepository();
+        final result = await repoWithoutSource.getVideoComments('test_id');
+        expect(result.isError, isTrue);
+      },
+    );
   });
 }

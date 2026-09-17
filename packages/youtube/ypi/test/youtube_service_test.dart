@@ -22,13 +22,13 @@ void main() {
                             'videoId': 'test_id_123',
                             'title': {
                               'runs': [
-                                {'text': 'Test Flutter Video'}
-                              ]
+                                {'text': 'Test Flutter Video'},
+                              ],
                             },
                             'thumbnail': {
                               'thumbnails': [
-                                {'url': 'https://img.youtube.com/thumb.jpg'}
-                              ]
+                                {'url': 'https://img.youtube.com/thumb.jpg'},
+                              ],
                             },
                             'viewCountText': {'simpleText': '1,234 views'},
                             'publishedTimeText': {'simpleText': '2 days ago'},
@@ -38,26 +38,26 @@ void main() {
                                 {
                                   'text': 'Flutter Creator',
                                   'navigationEndpoint': {
-                                    'browseEndpoint': {'browseId': 'UC12345'}
-                                  }
-                                }
-                              ]
+                                    'browseEndpoint': {'browseId': 'UC12345'},
+                                  },
+                                },
+                              ],
                             },
                             'descriptionSnippet': {
                               'runs': [
-                                {'text': 'A video description'}
-                              ]
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        }
+                                {'text': 'A video description'},
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
       };
 
       final mockClient = MockClient((request) async {
@@ -67,9 +67,11 @@ void main() {
           expect(body['context'], isNotNull); // Injected by interceptor
           expect(body['query'], equals('flutter'));
 
-          return http.Response(json.encode(mockJsonResponse), 200, headers: {
-            'content-type': 'application/json',
-          });
+          return http.Response(
+            json.encode(mockJsonResponse),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
         }
         return http.Response('Not found', 404);
       });
@@ -106,26 +108,28 @@ void main() {
                             'title': {'simpleText': 'Channel Title'},
                             'thumbnail': {
                               'thumbnails': [
-                                {'url': 'https://img.youtube.com/avatar.jpg'}
-                              ]
+                                {'url': 'https://img.youtube.com/avatar.jpg'},
+                              ],
                             },
-                            'videoCountText': {'simpleText': '100 videos'}
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        }
+                            'videoCountText': {'simpleText': '100 videos'},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
       };
 
       final mockClient = MockClient((request) async {
-        return http.Response(json.encode(mockJsonResponse), 200, headers: {
-          'content-type': 'application/json',
-        });
+        return http.Response(
+          json.encode(mockJsonResponse),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
       });
 
       final service = YoutubeService(httpClient: mockClient);

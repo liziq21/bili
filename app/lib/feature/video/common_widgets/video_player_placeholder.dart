@@ -51,16 +51,13 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                 child: CachedNetworkImage(
                   imageUrl: widget.thumbnailUrl!,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, url, error) => Container(
-                    color: $styles.colors.greyStrong,
-                  ),
+                  errorBuilder: (context, url, error) =>
+                      Container(color: $styles.colors.greyStrong),
                 ),
               )
             else
               Positioned.fill(
-                child: Container(
-                  color: $styles.colors.greyStrong,
-                ),
+                child: Container(color: $styles.colors.greyStrong),
               ),
 
             // Subtle Ambient Overlay
@@ -122,7 +119,9 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                         vertical: $styles.insets.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: $styles.colors.greyStrong.withValues(alpha: 0.85),
+                        color: $styles.colors.greyStrong.withValues(
+                          alpha: 0.85,
+                        ),
                         borderRadius: BorderRadius.circular($styles.corners.lg),
                         border: Border.all(
                           color: $styles.colors.accent1.withValues(alpha: 0.5),
@@ -234,14 +233,17 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                                 _showSourcePopover = false;
                               });
                             },
-                            borderRadius: BorderRadius.circular($styles.corners.sm),
+                            borderRadius: BorderRadius.circular(
+                              $styles.corners.sm,
+                            ),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal: $styles.insets.xxs,
                                 vertical: $styles.insets.xxs,
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Row(
@@ -261,15 +263,16 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                                             src['name']!,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: $styles.text.bodySmall.copyWith(
-                                              color: isSelected
-                                                  ? $styles.colors.accent1
-                                                  : $styles.colors.white,
-                                              fontSize: 11,
-                                              fontWeight: isSelected
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                            ),
+                                            style: $styles.text.bodySmall
+                                                .copyWith(
+                                                  color: isSelected
+                                                      ? $styles.colors.accent1
+                                                      : $styles.colors.white,
+                                                  fontSize: 11,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                ),
                                           ),
                                         ),
                                       ],
@@ -307,7 +310,10 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                 ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.transparent, $styles.colors.black.withValues(alpha: 0.9)],
+                    colors: [
+                      Colors.transparent,
+                      $styles.colors.black.withValues(alpha: 0.9),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -336,10 +342,14 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                     Expanded(
                       child: SliderTheme(
                         data: SliderThemeData(
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 5,
+                          ),
                           trackHeight: 3,
                           activeTrackColor: $styles.colors.accent1,
-                          inactiveTrackColor: $styles.colors.white.withValues(alpha: 0.3),
+                          inactiveTrackColor: $styles.colors.white.withValues(
+                            alpha: 0.3,
+                          ),
                           thumbColor: $styles.colors.accent1,
                         ),
                         child: Slider(
@@ -375,10 +385,15 @@ class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
                           )
                           .toList(),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: $styles.colors.accent2),
-                          borderRadius: BorderRadius.circular($styles.corners.sm),
+                          borderRadius: BorderRadius.circular(
+                            $styles.corners.sm,
+                          ),
                         ),
                         child: Text(
                           _selectedQuality,

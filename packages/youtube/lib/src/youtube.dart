@@ -8,8 +8,8 @@ import 'data/source/search/youtube_video_search_remote_data_source.dart';
 
 class YouTube implements MediaSource {
   YouTube({YoutubeService? youtubeService, http.Client? httpClient})
-      : _youtubeService = youtubeService ??
-            YoutubeService(httpClient: httpClient);
+    : _youtubeService =
+          youtubeService ?? YoutubeService(httpClient: httpClient);
 
   final YoutubeService _youtubeService;
 
@@ -27,10 +27,10 @@ class YouTube implements MediaSource {
 
   @override
   YouTubeCreatorProfileSearchRemoteDataSource
-      get creatorProfileSearchDataSource =>
-          YouTubeCreatorProfileSearchRemoteDataSource(
-            youtubeService: _youtubeService,
-          );
+  get creatorProfileSearchDataSource =>
+      YouTubeCreatorProfileSearchRemoteDataSource(
+        youtubeService: _youtubeService,
+      );
 
   @override
   YouTubeSearchSuggestRemoteDataSource get searchSuggestDataSource =>

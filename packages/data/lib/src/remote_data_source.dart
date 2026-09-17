@@ -55,8 +55,10 @@ abstract class const VideoDetailRemoteDataSource() extends RemoteDataSource {
       Result.ok(!isLiked);
   Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
       Result.ok(!isFavorited);
-  Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed) async =>
-      Result.ok(!isSubscribed);
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.ok(!isSubscribed);
 }
 
 abstract class const VideoCommentRemoteDataSource() extends RemoteDataSource {

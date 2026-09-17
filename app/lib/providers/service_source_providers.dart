@@ -50,60 +50,60 @@ class ServiceSourceProviders extends StatelessWidget {
         value: mediaSource,
         child: switch (source.toLowerCase()) {
           'bilibili' => MultiRepositoryProvider(
-              providers: [
-                RepositoryProvider<Bili>(
-                  create: (_) => mediaSource as Bili,
-                  dispose: (bili) => bili.close(),
+            providers: [
+              RepositoryProvider<Bili>(
+                create: (_) => mediaSource as Bili,
+                dispose: (bili) => bili.close(),
+              ),
+              RepositoryProvider<VideoSearchRepository>(
+                create: (context) => AppVideoSearchRepository(
+                  context.read<Bili>().videoSearchDataSource!,
                 ),
-                RepositoryProvider<VideoSearchRepository>(
-                  create: (context) => AppVideoSearchRepository(
-                    context.read<Bili>().videoSearchDataSource!,
-                  ),
+              ),
+              RepositoryProvider<CreatorProfileSearchRepository>(
+                create: (context) => AppUserSearchRepository(
+                  context.read<Bili>().creatorProfileSearchDataSource!,
+                  context.read<Bili>().searchSuggestDataSource!,
                 ),
-                RepositoryProvider<CreatorProfileSearchRepository>(
-                  create: (context) => AppUserSearchRepository(
-                    context.read<Bili>().creatorProfileSearchDataSource!,
-                    context.read<Bili>().searchSuggestDataSource!,
-                  ),
+              ),
+              RepositoryProvider<LiveRoomSearchRepository>(
+                create: (context) => AppLiveRoomSearchRepository(
+                  context.read<Bili>().liveRoomSearchDataSource!,
                 ),
-                RepositoryProvider<LiveRoomSearchRepository>(
-                  create: (context) => AppLiveRoomSearchRepository(
-                    context.read<Bili>().liveRoomSearchDataSource!,
-                  ),
+              ),
+              RepositoryProvider<SearchSuggestRepository>(
+                create: (context) => AppUserSearchRepository(
+                  context.read<Bili>().creatorProfileSearchDataSource!,
+                  context.read<Bili>().searchSuggestDataSource!,
                 ),
-                RepositoryProvider<SearchSuggestRepository>(
-                  create: (context) => AppUserSearchRepository(
-                    context.read<Bili>().creatorProfileSearchDataSource!,
-                    context.read<Bili>().searchSuggestDataSource!,
-                  ),
+              ),
+              RepositoryProvider<VideoDetailRepository>(
+                create: (context) => AppVideoDetailRepository(
+                  context.read<Bili>().videoDetailDataSource,
                 ),
-                RepositoryProvider<VideoDetailRepository>(
-                  create: (context) => AppVideoDetailRepository(
-                    context.read<Bili>().videoDetailDataSource,
-                  ),
+              ),
+              RepositoryProvider<VideoCommentRepository>(
+                create: (context) => AppVideoCommentRepository(
+                  context.read<Bili>().videoCommentDataSource,
                 ),
-                RepositoryProvider<VideoCommentRepository>(
-                  create: (context) => AppVideoCommentRepository(
-                    context.read<Bili>().videoCommentDataSource,
-                  ),
-                ),
-              ],
-              child: child,
-            ),
+              ),
+            ],
+            child: child,
+          ),
           'youtube' => MultiRepositoryProvider(
-              providers: [
-                RepositoryProvider<YouTube>(
-                  create: (_) => mediaSource as YouTube,
-                  dispose: (yt) => yt.close(),
+            providers: [
+              RepositoryProvider<YouTube>(
+                create: (_) => mediaSource as YouTube,
+                dispose: (yt) => yt.close(),
+              ),
+              RepositoryProvider<VideoSearchRepository>(
+                create: (context) => AppYouTubeVideoSearchRepository(
+                  context.read<YouTube>().videoSearchDataSource!,
                 ),
-                RepositoryProvider<VideoSearchRepository>(
-                  create: (context) => AppYouTubeVideoSearchRepository(
-                    context.read<YouTube>().videoSearchDataSource!,
-                  ),
-                ),
-              ],
-              child: child,
-            ),
+              ),
+            ],
+            child: child,
+          ),
           _ => child,
         },
       ),

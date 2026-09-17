@@ -40,7 +40,10 @@ class AppVideoDetailRepository implements VideoDetailRepository {
   }
 
   @override
-  Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed) async {
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async {
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleSubscribe(creatorId, isSubscribed);
     }

@@ -14,4 +14,5 @@ typedef VideoSearchRepository = SearchContentsRepository<VideoModel>;
 typedef CreatorProfileSearchRepository =
     SearchContentsRepository<CreatorProfile>;
 typedef LiveRoomSearchRepository = SearchContentsRepository<LiveRoomModel>;
-typedef AggregateSearchRepository = SearchContentsRepository<AggregateSearchPage>;
+typedef AggregateSearchRepository =
+    SearchContentsRepository<AggregateSearchPage>;
