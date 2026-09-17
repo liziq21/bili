@@ -5,8 +5,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: "^3.13.2"
-  flutter: ">=3.47.2"
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.0"
 resolution: workspace
 
 # Add regular dependencies here.
@@ -37,7 +37,7 @@ dependencies:
   provider: ^6.1.5+1
   window_size: ^0.1.0
   stream_transform: ^2.1.1
-  material_ui: 1.0.0
+  material_ui: ^0.0.1
   shared_preferences: ^2.5.4
   equatable: any
   drift: ^2.30.0

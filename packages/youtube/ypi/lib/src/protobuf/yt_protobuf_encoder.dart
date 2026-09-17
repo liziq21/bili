@@ -1,36 +1,33 @@
 import 'dart:convert';
 
-import '../model/yt_search_filter.dart';
-import '../model/yt_search_sort.dart';
-
 abstract final class YoutubeProtobufEncoder {
   static String encodeSearchParams({
-    YoutubeSearchSort sort = YoutubeSearchSort.relevance,
-    YoutubeUploadDateFilter? uploadDate,
-    YoutubeContentTypeFilter? contentType,
-    YoutubeDurationFilter? duration,
-    Set<YoutubeFeatureFilter> features = const {},
+    int? sort,
+    int? uploadDate,
+    int? contentType,
+    int? duration,
+    Set<int> features = const {},
   }) {
     final rootBuffer = <int>[];
 
     // Field 2: Sort (Varint)
-    if (sort != YoutubeSearchSort.relevance) {
-      _writeVarintField(rootBuffer, 2, sort.value);
+    if (sort != null && sort != 0) {
+      _writeVarintField(rootBuffer, 2, sort);
     }
 
     // Field 8: Filter options submessage
     final filterBuffer = <int>[];
     if (uploadDate != null) {
-      _writeVarintField(filterBuffer, 1, uploadDate.value);
+      _writeVarintField(filterBuffer, 1, uploadDate);
     }
     if (contentType != null) {
-      _writeVarintField(filterBuffer, 2, contentType.value);
+      _writeVarintField(filterBuffer, 2, contentType);
     }
     if (duration != null) {
-      _writeVarintField(filterBuffer, 3, duration.value);
+      _writeVarintField(filterBuffer, 3, duration);
     }
-    for (final feature in features) {
-      _writeVarintField(filterBuffer, feature.fieldTag, 1);
+    for (final featureFieldTag in features) {
+      _writeVarintField(filterBuffer, featureFieldTag, 1);
     }
 
     if (filterBuffer.isNotEmpty) {

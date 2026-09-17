@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'youtube_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -11,6 +10,15 @@ class YoutubeLocalizationsEn extends YoutubeLocalizations {
 
   @override
   String get sourceName => 'YouTube';
+
+  @override
+  String get filterGroupUploadDate => 'Upload date';
+
+  @override
+  String get filterGroupDuration => 'Duration';
+
+  @override
+  String get filterGroupFeature => 'Features';
 
   @override
   String get sortRelevance => 'Relevance';

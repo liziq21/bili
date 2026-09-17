@@ -8,4 +8,6 @@ export 'src/data/source/search/youtube_search_suggest_remote_data_source.dart';
 export 'src/data/source/search/youtube_video_search_remote_data_source.dart';
 export 'src/data/source/youtube_remote_data_source.dart';
 export 'src/extensions/youtube_localizations_extensions.dart';
+export 'src/search/search_filter.dart';
+export 'src/search/sort.dart';
 export 'src/youtube.dart';

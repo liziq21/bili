@@ -1,9 +1,20 @@
-
 {
   "@@locale": "zh",
   "sourceName": "YouTube",
   "@sourceName": {
     "description": "YouTube source name"
+  },
+  "filterGroupUploadDate": "上传时间",
+  "@filterGroupUploadDate": {
+    "description": "Filter group title - upload date"
+  },
+  "filterGroupDuration": "视频时长",
+  "@filterGroupDuration": {
+    "description": "Filter group title - video duration"
+  },
+  "filterGroupFeature": "功能特性",
+  "@filterGroupFeature": {
+    "description": "Filter group title - features"
   },
   "sortRelevance": "相关性",
   "@sortRelevance": {

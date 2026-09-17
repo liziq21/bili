@@ -1,7 +1,9 @@
-
 {
   "@@locale": "en",
   "sourceName": "YouTube",
+  "filterGroupUploadDate": "Upload date",
+  "filterGroupDuration": "Duration",
+  "filterGroupFeature": "Features",
   "sortRelevance": "Relevance",
   "sortUploadDate": "Upload date",
   "sortViewCount": "View count",
