@@ -12,7 +12,7 @@ void main() {
 
     test('Sort by upload date generates valid Protobuf Base64', () {
       final params = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: YoutubeSearchSort.uploadDate,
+        sort: 1, // uploadDate = 1
       );
       expect(params, isNotEmpty);
 
@@ -24,7 +24,7 @@ void main() {
 
     test('Sort by view count generates valid Protobuf Base64', () {
       final params = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: YoutubeSearchSort.viewCount,
+        sort: 2, // viewCount = 2
       );
       expect(params, isNotEmpty);
 
@@ -35,7 +35,7 @@ void main() {
 
     test('Single filter (UploadDate: Today) produces length-delimited submessage at field 8', () {
       final params = YoutubeProtobufEncoder.encodeSearchParams(
-        uploadDate: YoutubeUploadDateFilter.today,
+        uploadDate: 2, // today = 2
       );
       expect(params, isNotEmpty);
 
@@ -50,15 +50,15 @@ void main() {
 
     test('YoutubeParamsBuilder fluent API builds identical params', () {
       final builderParams = YoutubeParamsBuilder()
-          .setSort(YoutubeSearchSort.rating)
-          .setDuration(YoutubeDurationFilter.under4Minutes)
-          .addFeature(YoutubeFeatureFilter.fourK)
+          .setSort(3) // rating = 3
+          .setDuration(1) // under4Minutes = 1
+          .addFeature(5) // fourK fieldTag = 5
           .build();
 
       final directParams = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: YoutubeSearchSort.rating,
-        duration: YoutubeDurationFilter.under4Minutes,
-        features: {YoutubeFeatureFilter.fourK},
+        sort: 3,
+        duration: 1,
+        features: {5},
       );
 
       expect(builderParams, equals(directParams));

@@ -23,18 +23,16 @@ class YouTube implements MediaSource {
 
   @override
   YouTubeVideoSearchRemoteDataSource get videoSearchDataSource =>
-      YouTubeVideoSearchRemoteDataSource(youtubeService: _youtubeService);
+      YouTubeVideoSearchRemoteDataSource(_youtubeService);
 
   @override
   YouTubeCreatorProfileSearchRemoteDataSource
   get creatorProfileSearchDataSource =>
-      YouTubeCreatorProfileSearchRemoteDataSource(
-        youtubeService: _youtubeService,
-      );
+      YouTubeCreatorProfileSearchRemoteDataSource(_youtubeService);
 
   @override
   YouTubeSearchSuggestRemoteDataSource get searchSuggestDataSource =>
-      YouTubeSearchSuggestRemoteDataSource(youtubeService: _youtubeService);
+      YouTubeSearchSuggestRemoteDataSource(_youtubeService);
 
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;

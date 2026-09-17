@@ -6,14 +6,14 @@ import 'package:ypi/ypi.dart';
 
 import '../youtube_remote_data_source.dart';
 
-final class const YouTubeSearchSuggestRemoteDataSource({
-  required final YoutubeService _youtubeService,
-}) extends SearchSuggestRemoteDataSource with YouTubeRemoteDataSource {
+final class const YouTubeSearchSuggestRemoteDataSource(
+  final YoutubeService _youtubeService,
+) extends SearchSuggestRemoteDataSource with YouTubeRemoteDataSource {
   @override
   Future<Result<List<String>>> getSuggests(String query) async {
     try {
-      final suggestions = await _youtubeService.getSearchSuggestions(query);
-      return Result.ok(suggestions);
+      final suggests = await _youtubeService.getSearchSuggestions(query);
+      return Result.ok(suggests);
     } catch (e, st) {
       return Result.error(Exception('$e\n$st'));
     }

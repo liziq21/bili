@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'youtube_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -11,6 +10,15 @@ class YoutubeLocalizationsZh extends YoutubeLocalizations {
 
   @override
   String get sourceName => 'YouTube';
+
+  @override
+  String get filterGroupUploadDate => '上传时间';
+
+  @override
+  String get filterGroupDuration => '视频时长';
+
+  @override
+  String get filterGroupFeature => '功能特性';
 
   @override
   String get sortRelevance => '相关性';

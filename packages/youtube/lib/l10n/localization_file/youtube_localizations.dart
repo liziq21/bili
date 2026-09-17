@@ -107,6 +107,24 @@ abstract class YoutubeLocalizations {
   /// **'YouTube'**
   String get sourceName;
 
+  /// Filter group title - upload date
+  ///
+  /// In zh, this message translates to:
+  /// **'上传时间'**
+  String get filterGroupUploadDate;
+
+  /// Filter group title - video duration
+  ///
+  /// In zh, this message translates to:
+  /// **'视频时长'**
+  String get filterGroupDuration;
+
+  /// Filter group title - features
+  ///
+  /// In zh, this message translates to:
+  /// **'功能特性'**
+  String get filterGroupFeature;
+
   /// Search sort option - relevance
   ///
   /// In zh, this message translates to:

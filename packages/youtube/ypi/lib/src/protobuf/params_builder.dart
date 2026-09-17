@@ -1,49 +1,47 @@
-import '../model/yt_search_filter.dart';
-import '../model/yt_search_sort.dart';
 import 'yt_protobuf_encoder.dart';
 
 final class YoutubeParamsBuilder {
   YoutubeParamsBuilder({
-    this.sort = YoutubeSearchSort.relevance,
+    this.sort,
     this.uploadDate,
     this.contentType,
     this.duration,
-    Set<YoutubeFeatureFilter>? features,
+    Set<int>? features,
   }) : features = features ?? {};
 
-  YoutubeSearchSort sort;
-  YoutubeUploadDateFilter? uploadDate;
-  YoutubeContentTypeFilter? contentType;
-  YoutubeDurationFilter? duration;
-  Set<YoutubeFeatureFilter> features;
+  int? sort;
+  int? uploadDate;
+  int? contentType;
+  int? duration;
+  Set<int> features;
 
-  YoutubeParamsBuilder setSort(YoutubeSearchSort sort) {
+  YoutubeParamsBuilder setSort(int? sort) {
     this.sort = sort;
     return this;
   }
 
-  YoutubeParamsBuilder setUploadDate(YoutubeUploadDateFilter? uploadDate) {
+  YoutubeParamsBuilder setUploadDate(int? uploadDate) {
     this.uploadDate = uploadDate;
     return this;
   }
 
-  YoutubeParamsBuilder setContentType(YoutubeContentTypeFilter? contentType) {
+  YoutubeParamsBuilder setContentType(int? contentType) {
     this.contentType = contentType;
     return this;
   }
 
-  YoutubeParamsBuilder setDuration(YoutubeDurationFilter? duration) {
+  YoutubeParamsBuilder setDuration(int? duration) {
     this.duration = duration;
     return this;
   }
 
-  YoutubeParamsBuilder addFeature(YoutubeFeatureFilter feature) {
-    features.add(feature);
+  YoutubeParamsBuilder addFeature(int featureFieldTag) {
+    features.add(featureFieldTag);
     return this;
   }
 
-  YoutubeParamsBuilder removeFeature(YoutubeFeatureFilter feature) {
-    features.remove(feature);
+  YoutubeParamsBuilder removeFeature(int featureFieldTag) {
+    features.remove(featureFieldTag);
     return this;
   }
 

@@ -6,9 +6,9 @@ import 'package:ypi/ypi.dart';
 
 import '../youtube_remote_data_source.dart';
 
-final class const YouTubeCreatorProfileSearchRemoteDataSource({
-  required final YoutubeService _youtubeService,
-}) extends CreatorProfileSearchRemoteDataSource with YouTubeRemoteDataSource {
+final class const YouTubeCreatorProfileSearchRemoteDataSource(
+  final YoutubeService _youtubeService,
+) extends CreatorProfileSearchRemoteDataSource with YouTubeRemoteDataSource {
   @override
   List<SortOption> get sortOptions => const [];
 

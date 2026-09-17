@@ -6,8 +6,6 @@ import 'package:http/http.dart' as http;
 
 import '../api/yt_api.dart';
 import '../api/yt_interceptor.dart';
-import '../model/yt_search_filter.dart';
-import '../model/yt_search_sort.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
 class YoutubeService {
@@ -38,10 +36,10 @@ class YoutubeService {
 
   Future<(List<VideoModel> videos, String? continuationToken)> searchVideos(
     String query, {
-    YoutubeSearchSort sort = YoutubeSearchSort.relevance,
-    YoutubeUploadDateFilter? uploadDate,
-    YoutubeDurationFilter? duration,
-    Set<YoutubeFeatureFilter> features = const {},
+    int? sort,
+    int? uploadDate,
+    int? duration,
+    Set<int> features = const {},
     String? continuation,
   }) async {
     final body = <String, dynamic>{};
@@ -52,7 +50,7 @@ class YoutubeService {
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
         uploadDate: uploadDate,
-        contentType: YoutubeContentTypeFilter.video,
+        contentType: 1, // Video contentType = 1
         duration: duration,
         features: features,
       );
@@ -73,7 +71,7 @@ class YoutubeService {
   Future<(List<CreatorProfile> profiles, String? continuationToken)>
   searchChannels(
     String query, {
-    YoutubeSearchSort sort = YoutubeSearchSort.relevance,
+    int? sort,
     String? continuation,
   }) async {
     final body = <String, dynamic>{};
@@ -83,7 +81,7 @@ class YoutubeService {
       body['query'] = query;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
-        contentType: YoutubeContentTypeFilter.channel,
+        contentType: 2, // Channel contentType = 2
       );
       if (params.isNotEmpty) {
         body['params'] = params;
