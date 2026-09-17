@@ -1,0 +1,7 @@
+
+arb-dir: lib/l10n
+template-arb-file: youtube_zh.arb
+output-localization-file: youtube_localizations.dart
+output-class: YoutubeLocalizations
+output-dir: lib/l10n/localization_file
+#nullable-getter: false

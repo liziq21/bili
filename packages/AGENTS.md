@@ -7,7 +7,7 @@ This directory contains shared packages and modules (`packages/*`).
 ## Packages Overview
 
 - `bilibili/`: Bilibili API wrapper (`bpi`), remote data sources (`BiliVideoSearchRemoteDataSource`, etc.), models, and `BilibiliLocalizations` (l10n).
-- `youtube/`: YouTube API wrapper (`ypi`), remote data sources (`YouTubeVideoSearchRemoteDataSource`, etc.), Chopper REST client, and custom pure Dart Protobuf encoders (`YoutubeProtobufEncoder` / `YoutubeParamsBuilder`) for InnerTube endpoints.
+- `youtube/`: YouTube API wrapper (`ypi`), remote data sources (`YouTubeVideoSearchRemoteDataSource`, etc.), Chopper REST client, custom pure Dart Protobuf encoders (`YoutubeProtobufEncoder` / `YoutubeParamsBuilder`) for InnerTube endpoints, and `YoutubeLocalizations` (l10n).
 - `components/`: Reusable UI widgets and Flutter components.
 - `data/`: Core canonical models (`VideoModel`, `LiveRoomModel`, `CreatorProfile`, etc.), abstract `RemoteDataSource`, `SearchQuery`, filter/pagination primitives, and optional capability interfaces.
 - `model/`: Shared domain models (`UserData` with `ServiceSource` & `ThemeConfig`, `Result<T>`).
@@ -17,12 +17,12 @@ This directory contains shared packages and modules (`packages/*`).
 | Package | Type | Analysis Command | Test Command | Notes |
 |---------|------|------------------|--------------|-------|
 | `packages/bilibili` | Flutter | `flutter analyze` | `flutter test` | API client & l10n (imports Flutter SDK) |
-| `packages/youtube` | Dart-only | `dart analyze` | `dart test` | API client (`ypi`), Chopper & Protobuf encoder |
+| `packages/youtube` | Flutter | `flutter analyze` | `flutter test` | API client (`ypi`), l10n, Chopper & Protobuf encoder |
 | `packages/components` | Flutter | `flutter analyze` | `flutter test` | UI component library (imports Flutter SDK) |
 | `packages/data` | Dart-only | `dart analyze` | `dart test` | Shared models & RemoteDataSource abstraction |
 | `packages/model` | Dart-only | `dart analyze` | `dart test` | Shared models (`UserData`, `Result<T>`) |
 
-**Rule**: For Dart-only packages, use `dart` commands from the package directory. For Flutter packages (`bilibili`, `components`), use `flutter` commands.
+**Rule**: For Dart-only packages, use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`, `components`), use `flutter` commands.
 
 ## Data Layer & Remote Data Source Conventions
 

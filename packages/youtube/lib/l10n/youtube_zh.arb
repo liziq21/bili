@@ -1,0 +1,104 @@
+
+{
+  "@@locale": "zh",
+  "sourceName": "YouTube",
+  "@sourceName": {
+    "description": "YouTube source name"
+  },
+  "sortRelevance": "相关性",
+  "@sortRelevance": {
+    "description": "Search sort option - relevance"
+  },
+  "sortUploadDate": "上传时间",
+  "@sortUploadDate": {
+    "description": "Search sort option - upload date"
+  },
+  "sortViewCount": "播放量",
+  "@sortViewCount": {
+    "description": "Search sort option - view count"
+  },
+  "sortRating": "评分",
+  "@sortRating": {
+    "description": "Search sort option - rating"
+  },
+  "uploadDateLastHour": "1小时内",
+  "@uploadDateLastHour": {
+    "description": "Upload date filter - last hour"
+  },
+  "uploadDateToday": "今天",
+  "@uploadDateToday": {
+    "description": "Upload date filter - today"
+  },
+  "uploadDateThisWeek": "本周",
+  "@uploadDateThisWeek": {
+    "description": "Upload date filter - this week"
+  },
+  "uploadDateThisMonth": "本月",
+  "@uploadDateThisMonth": {
+    "description": "Upload date filter - this month"
+  },
+  "uploadDateThisYear": "本年",
+  "@uploadDateThisYear": {
+    "description": "Upload date filter - this year"
+  },
+  "durationUnder4Minutes": "4分钟以下",
+  "@durationUnder4Minutes": {
+    "description": "Duration filter - under 4 minutes"
+  },
+  "duration4To20Minutes": "4-20分钟",
+  "@duration4To20Minutes": {
+    "description": "Duration filter - 4 to 20 minutes"
+  },
+  "durationOver20Minutes": "20分钟以上",
+  "@durationOver20Minutes": {
+    "description": "Duration filter - over 20 minutes"
+  },
+  "featureLive": "直播",
+  "@featureLive": {
+    "description": "Feature filter - live"
+  },
+  "feature4K": "4K",
+  "@feature4K": {
+    "description": "Feature filter - 4K"
+  },
+  "featureHD": "高清",
+  "@featureHD": {
+    "description": "Feature filter - HD"
+  },
+  "featureSubtitles": "字幕/CC",
+  "@featureSubtitles": {
+    "description": "Feature filter - subtitles/CC"
+  },
+  "featureCreativeCommons": "知识共享",
+  "@featureCreativeCommons": {
+    "description": "Feature filter - Creative Commons"
+  },
+  "feature3D": "3D",
+  "@feature3D": {
+    "description": "Feature filter - 3D"
+  },
+  "feature360": "360°",
+  "@feature360": {
+    "description": "Feature filter - 360 degrees"
+  },
+  "featureHDR": "HDR",
+  "@featureHDR": {
+    "description": "Feature filter - HDR"
+  },
+  "contentTypeVideo": "视频",
+  "@contentTypeVideo": {
+    "description": "Content type filter - video"
+  },
+  "contentTypeChannel": "频道",
+  "@contentTypeChannel": {
+    "description": "Content type filter - channel"
+  },
+  "contentTypePlaylist": "播放列表",
+  "@contentTypePlaylist": {
+    "description": "Content type filter - playlist"
+  },
+  "contentTypeMovie": "电影",
+  "@contentTypeMovie": {
+    "description": "Content type filter - movie"
+  }
+}

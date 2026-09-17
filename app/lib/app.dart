@@ -1,11 +1,12 @@
 import 'dart:io';
 
+import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
-//import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_size/window_size.dart';
+import 'package:youtube/youtube.dart';
 
 import 'app_bloc.dart';
 import 'l10n/localization_file/app_localizations.dart';
@@ -57,7 +58,11 @@ class const App({super.key}) extends StatelessWidget {
               darkTheme: darkTheme,
               themeMode: themeMode,
               routerConfig: router,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                BilibiliLocalizations.delegate,
+                YoutubeLocalizations.delegate,
+              ],
               supportedLocales: AppLocalizations.supportedLocales,
               localeResolutionCallback: (locale, supportedLocales) {
                 if (locale != null) {
