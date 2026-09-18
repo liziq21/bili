@@ -40,6 +40,16 @@ void main() {
 }
 
 void initDebugOverlayBridge() {
+  // Security Hardening: Ensure DebugOverlay and HttpLogClient interceptors are
+  // disabled in production release builds to prevent exposing internal logs,
+  // stack traces, and network request/response payloads to end users or
+  // background screen recordings.
+  if (kReleaseMode) {
+    DebugOverlay.enabled = false;
+    Bili.client = http.IOClient();
+    return;
+  }
+
   DebugOverlay.enabled = true;
 
   PlatformDispatcher.instance.onError = (exception, stackTrace) {
