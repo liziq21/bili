@@ -34,8 +34,12 @@ void main() {
         ),
       );
 
-      expect(find.text('Test Video Card Title'), findsOneWidget);
-      expect(find.textContaining('100000 观看'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          RegExp(r'Test Video Card Title.*100000 观看'),
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byType(VideoCard));
       expect(tapped, isTrue);
