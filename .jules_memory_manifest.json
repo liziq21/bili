@@ -1,0 +1,106 @@
+
+{
+  "version": "1.0.0",
+  "skills": [
+    {
+      "name": "dart-add-unit-test",
+      "rule": "Write isolated, deterministic unit tests for business logic using package:test, arranging prerequisites, acting on target behavior, and asserting outputs with clear group/test hierarchy."
+    },
+    {
+      "name": "dart-build-cli-app",
+      "rule": "Architect CLI tools using package:args with structured exit codes, stream routing (stdout vs stderr), and subprocess management while avoiding premature exit(N) calls to allow standard cleanup."
+    },
+    {
+      "name": "dart-collect-coverage",
+      "rule": "Collect code coverage with test execution and format LCOV reports using package:coverage while properly ignoring generated and macro code using coverage directives."
+    },
+    {
+      "name": "dart-fix-runtime-errors",
+      "rule": "Diagnose runtime stack traces and static analysis warnings systematically using strong typing, soundness rules, and null-safety principles before verifying fixes via hot reload or targeted test runs."
+    },
+    {
+      "name": "dart-generate-test-mocks",
+      "rule": "Decouple external dependencies in unit tests by generating type-safe mock objects via package:mockito annotations (@GenerateMocks) and build_runner."
+    },
+    {
+      "name": "dart-migrate-to-checks-package",
+      "rule": "Migrate legacy package:matcher assertions (expect) to expressive, type-safe, fluent assertions using package:checks (check())."
+    },
+    {
+      "name": "dart-resolve-package-conflicts",
+      "rule": "Resolve pub dependency graph conflicts systematically using dependency overrides, semantic version alignment, and auditing without arbitrarily weakening required version bounds."
+    },
+    {
+      "name": "dart-run-static-analysis",
+      "rule": "Enforce strict zero-warning policy across the codebase by running dart analyze and applying mechanical fixes with dart fix --apply before committing."
+    },
+    {
+      "name": "dart-setup-ffi-assets",
+      "rule": "Compile and package C/C++ dynamic or static libraries into Dart Code Assets using Native Assets hook scripts (hook/build.dart and hook/link.dart) via package:hooks and package:native_toolchain_c."
+    },
+    {
+      "name": "dart-use-doc-examples",
+      "rule": "Maintain verified API documentation code examples by referencing external testable Dart files using {@example} directives paired with #region and #hide tags."
+    },
+    {
+      "name": "dart-use-ffigen",
+      "rule": "Generate robust, type-safe C/Objective-C FFI bindings automatically using package:ffigen configuration instead of writing manual dart:ffi boilerplate."
+    },
+    {
+      "name": "dart-use-path-package",
+      "rule": "Manipulate file and directory paths exclusively using package:path functions (p.join, p.normalize, p.split) rather than raw string concatenation to ensure cross-platform compatibility."
+    },
+    {
+      "name": "dart-use-pattern-matching",
+      "rule": "Utilize Dart 3 patterns, switch expressions, and destructuring for exhaustive algebraic type checking, polymorphic JSON parsing, and concise control flow."
+    },
+    {
+      "name": "dart-use-primary-constructors",
+      "rule": "Adopt Dart 3.13+ concise primary constructors in class headers (with field parameter modifier declarations) and abbreviated class-body constructors for modern, concise class declarations."
+    },
+    {
+      "name": "dart-write-documentation",
+      "rule": "Write concise, third-person active doc comments (///) summarizing behavior in the first sentence according to Effective Dart documentation guidelines without redundant type descriptions or conversational filler."
+    },
+    {
+      "name": "flutter-add-integration-test",
+      "rule": "Automate end-to-end user workflows using package:integration_test and WidgetTester driver logic to verify whole-app behavior across realistic device environments."
+    },
+    {
+      "name": "flutter-add-widget-preview",
+      "rule": "Provide fast UI component design feedback by creating widget preview instances using package:previews/previews.dart for isolated UI state inspection."
+    },
+    {
+      "name": "flutter-add-widget-test",
+      "rule": "Verify UI component rendering, state changes, and user gesture interactions (tapping, scrolling, typing) in isolation using WidgetTester and finder assertions."
+    },
+    {
+      "name": "flutter-apply-architecture-best-practices",
+      "rule": "Maintain clean separation of concerns by partitioning code into presentation (UI), state/logic, data repositories, and remote/local data sources."
+    },
+    {
+      "name": "flutter-build-responsive-layout",
+      "rule": "Design responsive interfaces that adapt seamlessly to varying viewport sizes using layout constraints (LayoutBuilder, MediaQuery, Expanded, Flexible) rather than hardcoded pixel dimensions."
+    },
+    {
+      "name": "flutter-fix-layout-issues",
+      "rule": "Diagnose and resolve layout overflow and unbounded constraint errors systematically using Flutter Inspector diagnostics, flexible sizing, and scrollable containers."
+    },
+    {
+      "name": "flutter-implement-json-serialization",
+      "rule": "Implement type-safe manual JSON serialization using dart:convert with explicit type casting in fromJson and toJson model methods."
+    },
+    {
+      "name": "flutter-setup-declarative-routing",
+      "rule": "Configure declarative, URL-driven app navigation with deep linking support using go_router integrated into MaterialApp.router."
+    },
+    {
+      "name": "flutter-setup-localization",
+      "rule": "Internationalize Flutter applications by defining translation keys in ARB files, configuring l10n.yaml, and generating strongly typed AppLocalizations delegates."
+    },
+    {
+      "name": "flutter-use-http-package",
+      "rule": "Execute REST network requests using package:http with typed Uri parsing, explicit header injection, status code validation, and isolate-offloaded background JSON parsing."
+    }
+  ]
+}
