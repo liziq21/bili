@@ -13,10 +13,10 @@ final class const YouTubeVideoSearchRemoteDataSource(
 ) extends VideoSearchRemoteDataSource with YouTubeRemoteDataSource {
   @override
   List<FilterGroup> get filters => const [
-        YoutubeUploadDateFilterGroup(),
-        YoutubeDurationFilterGroup(),
-        YoutubeFeatureFilterGroup(),
-      ];
+    YoutubeUploadDateFilterGroup(),
+    YoutubeDurationFilterGroup(),
+    YoutubeFeatureFilterGroup(),
+  ];
 
   @override
   List<SortOption> get sortOptions => YoutubeSearchSort.values;

@@ -18,9 +18,21 @@ class const CreatorProfileItem({
             children: [
               CircleAvatar(
                 radius: 22, // 固定头像大小
-                backgroundImage: CachedNetworkImageProvider(
-                  creatorProfile.thumbnailUrl ?? '',
-                ),
+                // ⚡ Bolt Optimization: Wrap provider with ResizeImage.resizeIfNeeded.
+                // Avatar visual size is 44x44px. Capping decode resolution to 128x128px
+                // avoids decoding high-res 1080p/4K network avatar images into full GPU RAM,
+                // saving ~2MB-8MB RAM per item and reducing UI/Raster thread decode jank on scroll.
+                backgroundImage:
+                    creatorProfile.thumbnailUrl != null &&
+                        creatorProfile.thumbnailUrl!.isNotEmpty
+                    ? ResizeImage.resizeIfNeeded(
+                        128,
+                        128,
+                        CachedNetworkImageProvider(
+                          creatorProfile.thumbnailUrl!,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(

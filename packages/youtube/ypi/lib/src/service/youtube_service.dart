@@ -69,11 +69,7 @@ class YoutubeService {
   }
 
   Future<(List<CreatorProfile> profiles, String? continuationToken)>
-  searchChannels(
-    String query, {
-    int? sort,
-    String? continuation,
-  }) async {
+  searchChannels(String query, {int? sort, String? continuation}) async {
     final body = <String, dynamic>{};
     if (continuation != null && continuation.isNotEmpty) {
       body['continuation'] = continuation;
