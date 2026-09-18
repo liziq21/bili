@@ -73,25 +73,20 @@ enum YoutubeFeatureFilterOption implements FilterOption {
 }
 
 class YoutubeUploadDateFilterGroup extends SingleFilterGroup {
-  const YoutubeUploadDateFilterGroup({super.selection, super.label = 'upload_date'})
-    : super(
-        key: 'upload_date',
-        options: YoutubeUploadDateFilterOption.values,
-      );
+  const YoutubeUploadDateFilterGroup({
+    super.selection,
+    super.label = 'upload_date',
+  }) : super(key: 'upload_date', options: YoutubeUploadDateFilterOption.values);
 }
 
 class YoutubeDurationFilterGroup extends SingleFilterGroup {
   const YoutubeDurationFilterGroup({super.selection, super.label = 'duration'})
-    : super(
-        key: 'duration',
-        options: YoutubeDurationFilterOption.values,
-      );
+    : super(key: 'duration', options: YoutubeDurationFilterOption.values);
 }
 
 class YoutubeFeatureFilterGroup extends MultiFilterGroup {
-  const YoutubeFeatureFilterGroup({super.selections = const {}, super.label = 'feature'})
-    : super(
-        key: 'feature',
-        options: YoutubeFeatureFilterOption.values,
-      );
+  const YoutubeFeatureFilterGroup({
+    super.selections = const {},
+    super.label = 'feature',
+  }) : super(key: 'feature', options: YoutubeFeatureFilterOption.values);
 }

@@ -95,10 +95,7 @@ void initDebugOverlayBridge() {
     );
   });
   // Enforce strict TLS/SSL certificate validation to protect against MitM attacks.
-  Bili.client = HttpLogClient(
-    App.httpBucket,
-    http.IOClient(),
-  );
+  Bili.client = HttpLogClient(App.httpBucket, http.IOClient());
 }
 
 AppStyle get $styles => AppScaffold.style;
