@@ -9,3 +9,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-17 - Avoid LayoutBuilder inside list/grid item widgets
 **Learning:** Wrapping item widgets (like `VideoCard`) in an unused `LayoutBuilder` defers child widget construction to Flutter's layout phase during list/grid scroll rendering, adding unnecessary layout callbacks and delay. Additionally, unbounded `CachedNetworkImage` thumbnail decodes consume excessive GPU RAM on scroll.
 **Action:** Ensure item widgets in grids/lists build directly without superfluous `LayoutBuilder` wrappers, and specify `memCacheWidth` on `CachedNetworkImage` to bound thumbnail memory footprint.
+
+## 2026-09-18 - Isolate BLoC state rebuilding above TabControllers
+**Learning:** Wrapping a screen's root layout in a broad `BlocBuilder` re-instantiates descendant `DefaultTabController`, `TabBar`, and `TabBarView` subtrees on every BLoC state change (e.g., like/favorite toggles), resetting tab states and causing unnecessary rebuild passes across the screen.
+**Action:** Use targeted `BlocSelector` (or `context.select`) scoped tightly to only the widgets consuming specific state fields, keeping `DefaultTabController` and lower tab content outside reactive rebuild boundaries.
