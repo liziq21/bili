@@ -44,7 +44,9 @@ class const App({super.key}) extends StatelessWidget {
       builder: (_, state) => switch (state) {
         Loading() => const Center(child: CircularProgressIndicator()),
         LoadFailure() => Text('${state.error}'),
-        LoadSuccess() => ThemeWrapper(
+        LoadSuccess(:final userData) => ThemeWrapper(
+          useDynamicColor: userData.useDynamicColor,
+          themeConfig: userData.themeConfig,
           builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
             return MaterialApp.router(
               builder: (_, child) => DebugOverlay(

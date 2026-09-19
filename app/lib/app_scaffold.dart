@@ -6,9 +6,8 @@ import 'main.dart';
 import 'styles/styles.dart';
 import 'ui/common/app_scroll_behavior.dart';
 
-class AppScaffold extends StatelessWidget {
-  const AppScaffold({super.key, required this.child});
-  final Widget child;
+class const AppScaffold({super.key, required final Widget child})
+    extends StatelessWidget {
   static AppStyle get style => _style;
   static AppStyle _style = AppStyle();
 
@@ -27,18 +26,15 @@ class AppScaffold extends StatelessWidget {
     );
     return KeyedSubtree(
       key: ValueKey($styles.scale),
-      child: Theme(
+      child: /*Theme(
         data: $styles.colors.toThemeData(),
         // Provide a default texts style to allow Hero's to render text properly
-        child: DefaultTextStyle(
-          style: $styles.text.body,
-          // Use a custom scroll behavior across entire app
-          child: ScrollConfiguration(
-            behavior: AppScrollBehavior(),
-            child: child,
-          ),
-        ),
+        child: */ DefaultTextStyle(
+        style: $styles.text.body,
+        // Use a custom scroll behavior across entire app
+        child: ScrollConfiguration(behavior: AppScrollBehavior(), child: child),
       ),
+      //),
     );
   }
 }
