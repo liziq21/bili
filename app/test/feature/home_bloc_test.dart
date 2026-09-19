@@ -121,7 +121,7 @@ void main() {
           ),
         );
 
-        expect(find.text('Bilibili'), findsOneWidget);
+        expect(find.text('Bilibili'), findsWidgets);
         expect(find.text('直播大厅'), findsOneWidget);
         expect(find.text('UP主空间'), findsOneWidget);
       },

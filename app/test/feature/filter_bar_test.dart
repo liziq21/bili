@@ -9,11 +9,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: FilterBar(
-            filters: const [],
-            onChanged: (_) {},
-            title: '筛选条件',
-          ),
+          body: FilterBar(filters: const [], onChanged: (_) {}, title: '筛选条件'),
         ),
       ),
     );
