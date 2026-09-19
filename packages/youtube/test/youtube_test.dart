@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' hide Page;
+import 'package:model/model.dart';
 import 'package:test/test.dart';
 import 'package:youtube/youtube.dart';
 
@@ -25,6 +26,32 @@ void main() {
 
       expect(videoDS.filters, isNotEmpty);
       expect(videoDS.filters.length, equals(3));
+
+      youtube.close();
+    });
+
+    test('Remote data sources sanitize error handling and do not leak stack traces into Result.error', () async {
+      final youtube = YouTube();
+
+      final ds = youtube.videoSearchDataSource as YouTubeVideoSearchRemoteDataSource;
+      final videoRes = await ds.searchVideoWithOptions(
+        SearchQuery(
+          query: 'test',
+          pageKey: 1,
+          filters: const [
+            SingleFilterGroup(
+              key: 'upload_date',
+              label: 'invalid',
+              options: [YoutubeUploadDateFilterOption.today],
+              selection: YoutubeUploadDateFilterOption.today,
+            ),
+          ],
+        ),
+      );
+      expect(videoRes, isA<Result<Page<VideoModel>>>());
+      if (videoRes is Error) {
+        expect(videoRes.toString(), isNot(contains('\n#0')));
+      }
 
       youtube.close();
     });
