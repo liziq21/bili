@@ -48,8 +48,8 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
           data: profiles,
         ),
       );
-    } catch (e, st) {
-      return Result.error(Exception('$e\n$st'));
+    } catch (e) {
+      return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
 }
