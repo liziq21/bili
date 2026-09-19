@@ -1,8 +1,11 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../../ui/video_card.dart';
 import 'bloc/home_bloc.dart';
 
 class const HomeScreen({
@@ -18,6 +21,21 @@ class const HomeScreen({
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  String _activeFilterId = 'all';
+
+  final List<Map<String, dynamic>> _filterChips = [
+    {'id': 'all', 'label': '全部推荐', 'icon': Icons.auto_awesome_rounded},
+    {
+      'id': 'top100',
+      'label': '前 100 榜单',
+      'icon': Icons.local_fire_department_rounded,
+    },
+    {'id': 'live', 'label': '推荐直播', 'icon': Icons.sensors_rounded},
+    {'id': 'sub', 'label': '订阅更新', 'icon': Icons.rss_feed_rounded},
+    {'id': 'bookmarks', 'label': '我的收藏', 'icon': Icons.bookmark_border_rounded},
+    {'id': 'downloaded', 'label': '已下载', 'icon': Icons.download_done_rounded},
+    {'id': 'history', 'label': '观看历史', 'icon': Icons.history_rounded},
+  ];
 
   @override
   void dispose() {
@@ -29,6 +47,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final trimmed = query.trim();
     if (trimmed.isNotEmpty) {
       widget.navigateToSearchReault(trimmed);
+    }
+  }
+
+  void _onFilterSelected(String filterId, String label) {
+    setState(() {
+      _activeFilterId = filterId;
+    });
+
+    if (filterId == 'bookmarks' ||
+        filterId == 'downloaded' ||
+        filterId == 'history' ||
+        filterId == 'sub') {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$label 功能为本地功能占位符'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -89,6 +126,102 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  List<VideoModel> _getRecommendedVideos(String sourceId) {
+    if (sourceId == 'bilibili') {
+      return [
+        VideoModel(
+          id: 'BV1xx411c7mD',
+          title: '【午餐盒子】生命会卡住生命',
+          url: 'https://www.bilibili.com/video/BV1xx411c7mD',
+          thumbnailUrl: 'https://picsum.photos/seed/bili1/640/360',
+          viewCount: 79000,
+          duration: 557,
+          creatorProfileName: '五盒ll十箱',
+          uploadDate: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+        VideoModel(
+          id: 'BV1aK4y1P7qG',
+          title: 'ドリームコア / john feat.初音未来',
+          url: 'https://www.bilibili.com/video/BV1aK4y1P7qG',
+          thumbnailUrl: 'https://picsum.photos/seed/bili2/640/360',
+          viewCount: 47000,
+          duration: 127,
+          creatorProfileName: '初音未来_Crypton',
+          uploadDate: DateTime.now().subtract(const Duration(days: 1)),
+        ),
+        VideoModel(
+          id: 'BV14z4y1m7S7',
+          title: '【完全测评】传奇起点！真骨雕空我全形态回顾解析',
+          url: 'https://www.bilibili.com/video/BV14z4y1m7S7',
+          thumbnailUrl: 'https://picsum.photos/seed/bili3/640/360',
+          viewCount: 182000,
+          duration: 1601,
+          creatorProfileName: '模玩档案馆',
+          uploadDate: DateTime.now().subtract(const Duration(days: 3)),
+        ),
+        VideoModel(
+          id: 'BV1yK4y1P7qH',
+          title: '去中心化网络架构设计：从零构建轻量无追踪媒体协议',
+          url: 'https://www.bilibili.com/video/BV1yK4y1P7qH',
+          thumbnailUrl: 'https://picsum.photos/seed/bili4/640/360',
+          viewCount: 31000,
+          duration: 870,
+          creatorProfileName: 'Kernel_Dev',
+          uploadDate: DateTime.now().subtract(const Duration(days: 5)),
+        ),
+      ];
+    } else {
+      return [
+        VideoModel(
+          id: 'dQw4w9WgXcQ',
+          title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          thumbnailUrl: 'https://picsum.photos/seed/yt1/640/360',
+          viewCount: 1500000000,
+          duration: 213,
+          creatorProfileName: 'Rick Astley',
+          uploadDate: DateTime.now().subtract(const Duration(days: 30)),
+        ),
+        VideoModel(
+          id: 'L_LUpnjgPso',
+          title: 'Building a Multi-Source Video Platform with Flutter',
+          url: 'https://www.youtube.com/watch?v=L_LUpnjgPso',
+          thumbnailUrl: 'https://picsum.photos/seed/yt2/640/360',
+          viewCount: 240000,
+          duration: 1140,
+          creatorProfileName: 'Flutter Dev Tech',
+          uploadDate: DateTime.now().subtract(const Duration(days: 2)),
+        ),
+      ];
+    }
+  }
+
+  List<Map<String, String>> _getRecommendedLives(String sourceId) {
+    return [
+      {
+        'id': '230023',
+        'title': '【歌回】周五夜狂欢！新曲披露与杂谈',
+        'streamer': '米娅Mia_Official',
+        'viewers': '2.8万',
+        'thumbnailUrl': 'https://picsum.photos/seed/live1/480/270',
+      },
+      {
+        'id': '21686237',
+        'title': '全国高校大师锦标赛总决赛 DAY 3',
+        'streamer': '赛事官方直播间',
+        'viewers': '5.4万',
+        'thumbnailUrl': 'https://picsum.photos/seed/live2/480/270',
+      },
+      {
+        'id': '5201314',
+        'title': '深夜电台：用声音陪伴你的失眠之夜',
+        'streamer': '月下听风',
+        'viewers': '1.2万',
+        'thumbnailUrl': 'https://picsum.photos/seed/live3/480/270',
+      },
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final sources = context.mediaSources;
@@ -96,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: $styles.insets.sm,
+        titleSpacing: $styles.insets.xs,
         title: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
             final effectiveSourceId = sources.any((s) => s.id == state.sourceId)
@@ -192,6 +325,41 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.bookmark_border_rounded,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            tooltip: '我的收藏',
+            onPressed: () => _onFilterSelected('bookmarks', '我的收藏'),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.account_circle_outlined,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            tooltip: '个人中心',
+            onPressed: () {
+              final state = context.read<HomeBloc>().state;
+              final effectiveSourceId =
+                  sources.any((s) => s.id == state.sourceId)
+                  ? state.sourceId
+                  : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+              _showIdInputDialog(
+                context: context,
+                title: effectiveSourceId == 'bilibili' ? '访问 UP主空间' : '访问创作者频道',
+                labelText: '请输入 MID 或频道 ID：',
+                hintText: effectiveSourceId == 'bilibili'
+                    ? '例如 188339'
+                    : '频道 ID',
+                defaultId: effectiveSourceId == 'bilibili' ? '188339' : '',
+                onSubmit: (id) => widget.onSpace(id),
+              );
+            },
+          ),
+          SizedBox(width: $styles.insets.xs),
+        ],
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
@@ -212,192 +380,500 @@ class _HomeScreenState extends State<HomeScreen> {
           final hasLive = activeSource.liveRoomSearchDataSource != null;
           final hasVideoDetail = activeSource.videoDetailDataSource != null;
 
-          final cards = <Widget>[
-            if (hasSearch)
-              _FeatureCard(
-                icon: Icons.search_rounded,
-                title: '搜索探索',
-                subtitle: '在 ${activeSource.name} 探索视频、创作者或相关内容',
-                onTap: () => _onSearchSubmitted(_searchController.text),
-              ),
-            if (hasCreator)
-              _FeatureCard(
-                icon: Icons.account_circle_rounded,
-                title: activeSource.id == 'bilibili' ? 'UP主空间' : '创作者频道',
-                subtitle: '输入 ${activeSource.name} 创作者/用户 ID 访问个人空间',
-                onTap: () {
-                  _showIdInputDialog(
-                    context: context,
-                    title: activeSource.id == 'bilibili'
-                        ? '访问 UP主空间'
-                        : '访问创作者频道',
-                    labelText: '请输入 MID 或频道 ID：',
-                    hintText: activeSource.id == 'bilibili'
-                        ? '例如 188339'
-                        : '频道 ID',
-                    defaultId: activeSource.id == 'bilibili' ? '188339' : '',
-                    onSubmit: (id) => widget.onSpace(id),
-                  );
-                },
-              ),
-            if (hasLive)
-              _FeatureCard(
-                icon: Icons.live_tv_rounded,
-                title: '直播大厅',
-                subtitle: '输入 ${activeSource.name} 直播间 ID 快速进入直播',
-                onTap: () {
-                  _showIdInputDialog(
-                    context: context,
-                    title: '进入直播间',
-                    labelText: '请输入直播间 ID：',
-                    hintText: '例如 230023',
-                    defaultId: '230023',
-                    onSubmit: (id) => widget.onLive(id),
-                  );
-                },
-              ),
-            if (hasVideoDetail)
-              _FeatureCard(
-                icon: Icons.play_circle_fill_rounded,
-                title: '视频播放',
-                subtitle: '输入 ${activeSource.name} 视频 ID 快速查看详情与播放',
-                onTap: () {
-                  _showIdInputDialog(
-                    context: context,
-                    title: '播放视频',
-                    labelText: '请输入视频 ID (如 BV/AV 号)：',
-                    hintText: '例如 33',
-                    defaultId: '33',
-                    onSubmit: (id) => widget.onVideo(id),
-                  );
-                },
-              ),
-          ];
+          final videos = _getRecommendedVideos(activeSource.id);
+          final lives = _getRecommendedLives(activeSource.id);
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final double width = constraints.maxWidth;
-              final int crossAxisCount = width > 900
-                  ? 3
-                  : (width > 600 ? 2 : 1);
+          final showLiveSection =
+              hasLive &&
+              (_activeFilterId == 'all' || _activeFilterId == 'live');
+          final showVideoSection =
+              _activeFilterId == 'all' || _activeFilterId == 'top100';
 
-              return SingleChildScrollView(
-                padding: EdgeInsets.all($styles.insets.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${activeSource.name} 功能导航',
-                      style: $styles.text.h3.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
+          return CustomScrollView(
+            slivers: [
+              // 1. 横向 Filter Chips Row
+              SliverToBoxAdapter(
+                child: Material(
+                  color: Colors.transparent,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: $styles.insets.sm,
+                      vertical: $styles.insets.xs,
                     ),
-                    SizedBox(height: $styles.insets.xs),
-                    Text(
-                      '根据当前服务源可用能力动态展示可用功能',
-                      style: $styles.text.bodySmall.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    child: Row(
+                      children: _filterChips.map((chip) {
+                        final isSelected = chip['id'] == _activeFilterId;
+                        return Padding(
+                          padding: EdgeInsets.only(right: $styles.insets.xs),
+                          child: FilterChip(
+                            selected: isSelected,
+                            showCheckmark: false,
+                            avatar: Icon(
+                              chip['icon'] as IconData,
+                              size: 16,
+                              color: isSelected
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                            label: Text(chip['label'] as String),
+                            labelStyle: $styles.text.bodySmall.copyWith(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurface,
+                            ),
+                            selectedColor: colorScheme.primary,
+                            backgroundColor: colorScheme.surfaceContainerLow,
+                            shape: StadiumBorder(
+                              side: BorderSide(
+                                color: isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.outlineVariant.withValues(
+                                        alpha: 0.5,
+                                      ),
+                              ),
+                            ),
+                            onSelected: (_) => _onFilterSelected(
+                              chip['id'] as String,
+                              chip['label'] as String,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    SizedBox(height: $styles.insets.sm),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisExtent: 104.0,
-                        crossAxisSpacing: $styles.insets.sm,
-                        mainAxisSpacing: $styles.insets.sm,
-                      ),
-                      itemCount: cards.length,
-                      itemBuilder: (context, index) => cards[index],
-                    ),
-                  ],
+                  ),
                 ),
-              );
-            },
+              ),
+
+              // 2. 快捷功能入口 Chips 区域 (保证能力导航在首页立即可见)
+              SliverToBoxAdapter(
+                child: Material(
+                  color: Colors.transparent,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: $styles.insets.sm,
+                      vertical: $styles.insets.xs,
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          if (hasSearch)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: $styles.insets.xs,
+                              ),
+                              child: ActionChip(
+                                avatar: const Icon(
+                                  Icons.search_rounded,
+                                  size: 18,
+                                ),
+                                label: Text('搜索 ${activeSource.name}'),
+                                onPressed: () =>
+                                    _onSearchSubmitted(_searchController.text),
+                              ),
+                            ),
+                          if (hasCreator)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: $styles.insets.xs,
+                              ),
+                              child: ActionChip(
+                                avatar: const Icon(
+                                  Icons.account_circle,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  activeSource.id == 'bilibili'
+                                      ? 'UP主空间'
+                                      : '创作者频道',
+                                ),
+                                onPressed: () {
+                                  _showIdInputDialog(
+                                    context: context,
+                                    title: activeSource.id == 'bilibili'
+                                        ? '访问 UP主空间'
+                                        : '访问创作者频道',
+                                    labelText: '请输入 MID 或频道 ID：',
+                                    hintText: activeSource.id == 'bilibili'
+                                        ? '例如 188339'
+                                        : '频道 ID',
+                                    defaultId: activeSource.id == 'bilibili'
+                                        ? '188339'
+                                        : '',
+                                    onSubmit: (id) => widget.onSpace(id),
+                                  );
+                                },
+                              ),
+                            ),
+                          if (hasLive)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: $styles.insets.xs,
+                              ),
+                              child: ActionChip(
+                                avatar: const Icon(Icons.live_tv, size: 18),
+                                label: const Text('直播大厅'),
+                                onPressed: () {
+                                  _showIdInputDialog(
+                                    context: context,
+                                    title: '进入直播间',
+                                    labelText: '请输入直播间 ID：',
+                                    hintText: '例如 230023',
+                                    defaultId: '230023',
+                                    onSubmit: (id) => widget.onLive(id),
+                                  );
+                                },
+                              ),
+                            ),
+                          if (hasVideoDetail)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: $styles.insets.xs,
+                              ),
+                              child: ActionChip(
+                                avatar: const Icon(
+                                  Icons.play_circle_fill,
+                                  size: 18,
+                                ),
+                                label: const Text('视频播放'),
+                                onPressed: () {
+                                  _showIdInputDialog(
+                                    context: context,
+                                    title: '播放视频',
+                                    labelText: '请输入视频 ID (如 BV/AV 号)：',
+                                    hintText: '例如 33',
+                                    defaultId: '33',
+                                    onSubmit: (id) => widget.onVideo(id),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 3. 推荐直播 (Recommended Live Streams) 模块 (仅当 source 支持 live 时显示)
+              if (showLiveSection) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      $styles.insets.sm,
+                      $styles.insets.sm,
+                      $styles.insets.sm,
+                      $styles.insets.xs,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.error,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'LIVE',
+                                style: $styles.text.bodySmall.copyWith(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onError,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: $styles.insets.xs),
+                            Text(
+                              '推荐直播',
+                              style: $styles.text.h3.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _showIdInputDialog(
+                              context: context,
+                              title: '进入直播间',
+                              labelText: '请输入直播间 ID：',
+                              hintText: '例如 230023',
+                              defaultId: '230023',
+                              onSubmit: (id) => widget.onLive(id),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                '全部',
+                                style: $styles.text.bodySmallBold.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 18,
+                                color: colorScheme.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 200,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: $styles.insets.sm,
+                      ),
+                      itemCount: lives.length,
+                      itemBuilder: (context, index) {
+                        final live = lives[index];
+                        return Container(
+                          width: 220,
+                          margin: EdgeInsets.only(right: $styles.insets.sm),
+                          child: Card(
+                            clipBehavior: Clip.antiAlias,
+                            color: colorScheme.surfaceContainerLow,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.md,
+                              ),
+                              side: BorderSide(
+                                color: colorScheme.outlineVariant.withValues(
+                                  alpha: 0.4,
+                                ),
+                              ),
+                            ),
+                            child: InkWell(
+                              onTap: () => widget.onLive(live['id']!),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        child: CachedNetworkImage(
+                                          imageUrl: live['thumbnailUrl']!,
+                                          memCacheWidth: 320,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, url, error) =>
+                                              Container(
+                                                color: colorScheme
+                                                    .surfaceContainerHighest,
+                                                child: const Icon(
+                                                  Icons.live_tv,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 6,
+                                        left: 6,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.error,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '直播中',
+                                            style: $styles.text.bodySmall
+                                                .copyWith(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: colorScheme.onError,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 6,
+                                        right: 6,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.75,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.visibility_rounded,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                live['viewers']!,
+                                                style: $styles.text.bodySmall
+                                                    .copyWith(
+                                                      fontSize: 10,
+                                                      color: Colors.white,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.all($styles.insets.xs),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          live['title']!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: $styles.text.bodyBold.copyWith(
+                                            fontSize: 13,
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          live['streamer']!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: $styles.text.bodySmall
+                                              .copyWith(
+                                                fontSize: 11,
+                                                color: colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+
+              // 4. 推荐视频 (Recommended Videos) 模块 Header
+              if (showVideoSection) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      $styles.insets.sm,
+                      $styles.insets.md,
+                      $styles.insets.sm,
+                      $styles.insets.xs,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.recommend_rounded,
+                              color: colorScheme.primary,
+                              size: 24,
+                            ),
+                            SizedBox(width: $styles.insets.xs),
+                            Text(
+                              '推荐视频',
+                              style: $styles.text.h3.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: $styles.insets.xxs),
+                        Text(
+                          '依据综合热度推荐',
+                          style: $styles.text.bodySmall.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // 推荐视频 Grid Layout
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: $styles.insets.sm,
+                    vertical: $styles.insets.xs,
+                  ),
+                  sliver: SliverLayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.crossAxisExtent;
+                      final crossAxisCount = width > 900
+                          ? 3
+                          : (width > 600 ? 2 : 1);
+
+                      return SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: $styles.insets.sm,
+                          crossAxisSpacing: $styles.insets.sm,
+                          childAspectRatio: crossAxisCount == 1 ? 1.25 : 1.1,
+                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final video = videos[index];
+                          return VideoCard(
+                            variant: VideoCardVariant.feed,
+                            sourceBadge: activeSource.name,
+                            videoInfoBase: video,
+                            onTap: () => widget.onVideo(video.id),
+                            onMorePressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('操作: ${video.title}'),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                          );
+                        }, childCount: videos.length),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ],
           );
         },
-      ),
-    );
-  }
-}
-
-class const _FeatureCard({
-  required final IconData icon,
-  required final String title,
-  required final String subtitle,
-  required final VoidCallback onTap,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular($styles.corners.md),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular($styles.corners.md),
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: $styles.insets.sm,
-            vertical: $styles.insets.xs,
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all($styles.insets.xs),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular($styles.corners.sm),
-                ),
-                child: Icon(
-                  icon,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 24,
-                ),
-              ),
-              SizedBox(width: $styles.insets.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      style: $styles.text.bodyBold.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: $styles.insets.xxs),
-                    Text(
-                      subtitle,
-                      style: $styles.text.bodySmall.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
