@@ -20,6 +20,7 @@ class FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      tooltip: title,
       onPressed: () => _showFilterBottomSheet(context),
       icon: const Icon(Icons.filter_list),
     );
