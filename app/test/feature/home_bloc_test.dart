@@ -5,6 +5,7 @@ import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -154,6 +155,37 @@ void main() {
         expect(find.text('创作者频道'), findsOneWidget);
         // YouTube does not support LiveRoomSearch or VideoDetail, so '直播大厅' should not be present
         expect(find.text('直播大厅'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'Enforces text input length limits on search input field',
+      (tester) async {
+        await tester.pumpWidget(
+          Provider<List<MediaSource>>.value(
+            value: defaultMediaSources,
+            child: MaterialApp(
+              home: BlocProvider<HomeBloc>.value(
+                value: homeBloc,
+                child: HomeScreen(
+                  onLive: (_) {},
+                  navigateToSearchReault: (_) {},
+                  onSpace: (_) {},
+                  onVideo: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final searchTextField = tester.widget<TextField>(
+          find.byType(TextField).first,
+        );
+        expect(searchTextField.maxLength, 200);
+        expect(
+          searchTextField.maxLengthEnforcement,
+          MaxLengthEnforcement.enforced,
+        );
       },
     );
   });

@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -100,7 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: $styles.insets.xs),
             TextField(
               controller: controller,
+              maxLength: 100,
+              maxLengthEnforcement: MaxLengthEnforcement.enforced,
               decoration: InputDecoration(
+                counterText: '',
                 hintText: hintText,
                 border: const OutlineInputBorder(),
               ),
@@ -290,6 +294,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
+                      maxLength: 200,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       onSubmitted: _onSearchSubmitted,
                       textInputAction: TextInputAction.search,
                       textAlignVertical: TextAlignVertical.center,
@@ -297,6 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: colorScheme.onSurface,
                       ),
                       decoration: InputDecoration(
+                        counterText: '',
                         hintText: '搜索 ${activeSource.name} 内容...',
                         hintStyle: $styles.text.bodySmall.copyWith(
                           color: colorScheme.onSurfaceVariant.withValues(
