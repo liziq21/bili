@@ -9,13 +9,42 @@ import '../../providers/media_sources_provider.dart';
 import '../../ui/video_card.dart';
 import 'bloc/home_bloc.dart';
 
-class const HomeScreen({
-  super.key,
-  required final Function(String roomId) onLive,
-  required final Function(String searchQuery) navigateToSearchReault,
-  required final Function(String mid) onSpace,
-  required final Function(String id) onVideo,
-}) extends StatefulWidget {
+@immutable
+class FilterChipItem {
+  const FilterChipItem({
+    required this.id,
+    required this.label,
+    required this.icon,
+  });
+
+  final String id;
+  final String label;
+  final IconData icon;
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    super.key,
+    required Function(String roomId) onLive,
+    required Function(String searchQuery) navigateToSearchResult,
+    required Function(String mid) onSpace,
+    required Function(String id) onVideo,
+  })  : _onLive = onLive,
+        _navigateToSearchResult = navigateToSearchResult,
+        _onSpace = onSpace,
+        _onVideo = onVideo;
+
+  final Function(String roomId) _onLive;
+  final Function(String searchQuery) _navigateToSearchResult;
+  final Function(String mid) _onSpace;
+  final Function(String id) _onVideo;
+
+  Function(String roomId) get onLive => _onLive;
+  Function(String searchQuery) get navigateToSearchResult =>
+      _navigateToSearchResult;
+  Function(String mid) get onSpace => _onSpace;
+  Function(String id) get onVideo => _onVideo;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -24,18 +53,42 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _activeFilterId = 'all';
 
-  final List<Map<String, dynamic>> _filterChips = [
-    {'id': 'all', 'label': '全部推荐', 'icon': Icons.auto_awesome_rounded},
-    {
-      'id': 'top100',
-      'label': '前 100 榜单',
-      'icon': Icons.local_fire_department_rounded,
-    },
-    {'id': 'live', 'label': '推荐直播', 'icon': Icons.sensors_rounded},
-    {'id': 'sub', 'label': '订阅更新', 'icon': Icons.rss_feed_rounded},
-    {'id': 'bookmarks', 'label': '我的收藏', 'icon': Icons.bookmark_border_rounded},
-    {'id': 'downloaded', 'label': '已下载', 'icon': Icons.download_done_rounded},
-    {'id': 'history', 'label': '观看历史', 'icon': Icons.history_rounded},
+  final List<FilterChipItem> _filterChips = const [
+    FilterChipItem(
+      id: 'all',
+      label: '全部推荐',
+      icon: Icons.auto_awesome_rounded,
+    ),
+    FilterChipItem(
+      id: 'top100',
+      label: '前 100 榜单',
+      icon: Icons.local_fire_department_rounded,
+    ),
+    FilterChipItem(
+      id: 'live',
+      label: '推荐直播',
+      icon: Icons.sensors_rounded,
+    ),
+    FilterChipItem(
+      id: 'sub',
+      label: '订阅更新',
+      icon: Icons.rss_feed_rounded,
+    ),
+    FilterChipItem(
+      id: 'bookmarks',
+      label: '我的收藏',
+      icon: Icons.bookmark_border_rounded,
+    ),
+    FilterChipItem(
+      id: 'downloaded',
+      label: '已下载',
+      icon: Icons.download_done_rounded,
+    ),
+    FilterChipItem(
+      id: 'history',
+      label: '观看历史',
+      icon: Icons.history_rounded,
+    ),
   ];
 
   @override
@@ -47,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onSearchSubmitted(String query) {
     final trimmed = query.trim();
     if (trimmed.isNotEmpty) {
-      widget.navigateToSearchReault(trimmed);
+      widget.navigateToSearchResult(trimmed);
     }
   }
 
@@ -379,13 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
             orElse: () => sources.first,
           );
 
-          final hasSearch =
-              activeSource.videoSearchDataSource != null ||
-              activeSource.aggregateSearchDataSource != null;
-          final hasCreator =
-              activeSource.creatorProfileSearchDataSource != null;
           final hasLive = activeSource.liveRoomSearchDataSource != null;
-          final hasVideoDetail = activeSource.videoDetailDataSource != null;
 
           final videos = _getRecommendedVideos(activeSource.id);
           final lives = _getRecommendedLives(activeSource.id);
@@ -410,20 +457,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Row(
                       children: _filterChips.map((chip) {
-                        final isSelected = chip['id'] == _activeFilterId;
+                        final isSelected = chip.id == _activeFilterId;
                         return Padding(
                           padding: EdgeInsets.only(right: $styles.insets.xs),
                           child: FilterChip(
                             selected: isSelected,
                             showCheckmark: false,
                             avatar: Icon(
-                              chip['icon'] as IconData,
+                              chip.icon,
                               size: 16,
                               color: isSelected
                                   ? colorScheme.onPrimary
                                   : colorScheme.onSurfaceVariant,
                             ),
-                            label: Text(chip['label'] as String),
+                            label: Text(chip.label),
                             labelStyle: $styles.text.bodySmall.copyWith(
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -433,20 +480,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   : colorScheme.onSurface,
                             ),
                             selectedColor: colorScheme.primary,
-                            backgroundColor: colorScheme.surfaceContainerLow,
-                            shape: StadiumBorder(
-                              side: BorderSide(
-                                color: isSelected
-                                    ? colorScheme.primary
-                                    : colorScheme.outlineVariant.withValues(
-                                        alpha: 0.5,
-                                      ),
+                            backgroundColor:
+                                colorScheme.surfaceContainerHighest,
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.lg,
                               ),
                             ),
-                            onSelected: (_) => _onFilterSelected(
-                              chip['id'] as String,
-                              chip['label'] as String,
-                            ),
+                            onSelected: (_) =>
+                                _onFilterSelected(chip.id, chip.label),
                           ),
                         );
                       }).toList(),
@@ -455,42 +498,64 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // 2. 快捷功能入口 Chips 区域 (保证能力导航在首页立即可见)
+              // 2. 交互与检索快捷操作区域 (Quick Actions Grid)
               SliverToBoxAdapter(
-                child: Material(
-                  color: Colors.transparent,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: $styles.insets.sm,
-                      vertical: $styles.insets.xs,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: $styles.insets.sm,
+                    vertical: $styles.insets.xs,
+                  ),
+                  child: Card(
+                    elevation: 0,
+                    color: colorScheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular($styles.corners.md),
+                      side: BorderSide(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
                     ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
+                    child: Padding(
+                      padding: EdgeInsets.all($styles.insets.sm),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (hasSearch)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: $styles.insets.xs,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.explore_rounded,
+                                color: colorScheme.primary,
+                                size: 20,
                               ),
-                              child: ActionChip(
+                              SizedBox(width: $styles.insets.xs),
+                              Text(
+                                '${activeSource.name} 核心服务入口',
+                                style: $styles.text.title2.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: $styles.insets.xs),
+                          Wrap(
+                            spacing: $styles.insets.xs,
+                            runSpacing: $styles.insets.xs,
+                            children: [
+                              ActionChip(
                                 avatar: const Icon(
                                   Icons.search_rounded,
                                   size: 18,
                                 ),
-                                label: Text('搜索 ${activeSource.name}'),
-                                onPressed: () =>
-                                    _onSearchSubmitted(_searchController.text),
+                                label: const Text('检索视频 / 频道'),
+                                onPressed: () {
+                                  _onSearchSubmitted(_searchController.text);
+                                },
                               ),
-                            ),
-                          if (hasCreator)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: $styles.insets.xs,
-                              ),
-                              child: ActionChip(
+                              ActionChip(
                                 avatar: const Icon(
-                                  Icons.account_circle,
+                                  Icons.person_search_rounded,
                                   size: 18,
                                 ),
                                 label: Text(
@@ -515,50 +580,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 },
                               ),
-                            ),
-                          if (hasLive)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: $styles.insets.xs,
-                              ),
-                              child: ActionChip(
-                                avatar: const Icon(Icons.live_tv, size: 18),
-                                label: const Text('直播大厅'),
-                                onPressed: () {
-                                  _showIdInputDialog(
-                                    context: context,
-                                    title: '进入直播间',
-                                    labelText: '请输入直播间 ID：',
-                                    hintText: '例如 230023',
-                                    defaultId: '230023',
-                                    onSubmit: (id) => widget.onLive(id),
-                                  );
-                                },
-                              ),
-                            ),
-                          if (hasVideoDetail)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: $styles.insets.xs,
-                              ),
-                              child: ActionChip(
-                                avatar: const Icon(
-                                  Icons.play_circle_fill,
-                                  size: 18,
+                              if (hasLive)
+                                ActionChip(
+                                  avatar: const Icon(
+                                    Icons.live_tv,
+                                    size: 18,
+                                  ),
+                                  label: const Text('直播大厅'),
+                                  onPressed: () {
+                                    _showIdInputDialog(
+                                      context: context,
+                                      title: '直达直播间',
+                                      labelText: '请输入直播间 Room ID：',
+                                      hintText: '例如 230023',
+                                      defaultId: '230023',
+                                      onSubmit: (roomId) =>
+                                          widget.onLive(roomId),
+                                    );
+                                  },
                                 ),
-                                label: const Text('视频播放'),
-                                onPressed: () {
-                                  _showIdInputDialog(
-                                    context: context,
-                                    title: '播放视频',
-                                    labelText: '请输入视频 ID (如 BV/AV 号)：',
-                                    hintText: '例如 33',
-                                    defaultId: '33',
-                                    onSubmit: (id) => widget.onVideo(id),
-                                  );
-                                },
-                              ),
-                            ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -566,7 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // 3. 推荐直播 (Recommended Live Streams) 模块 (仅当 source 支持 live 时显示)
+              // 3. 推荐直播 (Recommended Lives) 模块
               if (showLiveSection) ...[
                 SliverToBoxAdapter(
                   child: Padding(
@@ -576,28 +618,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       $styles.insets.sm,
                       $styles.insets.xs,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.error,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'LIVE',
-                                style: $styles.text.bodySmall.copyWith(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onError,
-                                ),
-                              ),
+                            Icon(
+                              Icons.sensors_rounded,
+                              color: colorScheme.error,
+                              size: 24,
                             ),
                             SizedBox(width: $styles.insets.xs),
                             Text(
@@ -608,190 +637,201 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ],
                         ),
-                        TextButton(
-                          onPressed: () {
-                            _showIdInputDialog(
-                              context: context,
-                              title: '进入直播间',
-                              labelText: '请输入直播间 ID：',
-                              hintText: '例如 230023',
-                              defaultId: '230023',
-                              onSubmit: (id) => widget.onLive(id),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Text(
-                                '全部',
-                                style: $styles.text.bodySmallBold.copyWith(
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 18,
-                                color: colorScheme.primary,
-                              ),
-                            ],
+                        SizedBox(height: $styles.insets.xxs),
+                        Text(
+                          '正在热播的直播间',
+                          style: $styles.text.bodySmall.copyWith(
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: $styles.insets.sm,
-                      ),
-                      itemCount: lives.length,
-                      itemBuilder: (context, index) {
-                        final live = lives[index];
-                        return Container(
-                          width: 220,
-                          margin: EdgeInsets.only(right: $styles.insets.sm),
-                          child: Card(
-                            clipBehavior: Clip.antiAlias,
-                            color: colorScheme.surfaceContainerLow,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                $styles.corners.md,
-                              ),
-                              side: BorderSide(
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.4,
+
+                SliverLayoutBuilder(
+                  builder: (context, constraints) {
+                    final availableWidth = constraints.crossAxisExtent;
+                    final cardWidth = availableWidth > 900
+                        ? (availableWidth * 0.28).clamp(260.0, 360.0)
+                        : (availableWidth > 600
+                            ? (availableWidth * 0.38).clamp(240.0, 320.0)
+                            : (availableWidth * 0.58).clamp(200.0, 280.0));
+                    final imageHeight = cardWidth * (9 / 16);
+                    final cardHeight = imageHeight + $styles.insets.xs * 2 + 50.0;
+
+                    return SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: cardHeight,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: $styles.insets.sm,
+                          ),
+                          itemCount: lives.length,
+                          itemBuilder: (context, index) {
+                            final live = lives[index];
+                            return Container(
+                              width: cardWidth,
+                              margin: EdgeInsets.only(right: $styles.insets.sm),
+                              child: Card(
+                                clipBehavior: Clip.antiAlias,
+                                color: colorScheme.surfaceContainerLow,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    $styles.corners.md,
+                                  ),
+                                  side: BorderSide(
+                                    color: colorScheme.outlineVariant.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            child: InkWell(
-                              onTap: () => widget.onLive(live['id']!),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
+                                child: InkWell(
+                                  onTap: () => widget.onLive(live['id']!),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      AspectRatio(
-                                        aspectRatio: 16 / 9,
-                                        child: CachedNetworkImage(
-                                          imageUrl: live['thumbnailUrl']!,
-                                          memCacheWidth: 320,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, url, error) =>
-                                              Container(
-                                                color: colorScheme
-                                                    .surfaceContainerHighest,
-                                                child: const Icon(
-                                                  Icons.live_tv,
-                                                  color: Colors.grey,
+                                      Stack(
+                                        children: [
+                                          AspectRatio(
+                                            aspectRatio: 16 / 9,
+                                            child: CachedNetworkImage(
+                                              imageUrl: live['thumbnailUrl']!,
+                                              memCacheWidth: 320,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                        color: colorScheme
+                                                            .surfaceContainerHighest,
+                                                        child: const Icon(
+                                                          Icons.live_tv,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: $styles.insets.xs,
+                                            left: $styles.insets.xs,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: $styles.insets.xs,
+                                                vertical:
+                                                    $styles.insets.xxs / 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: colorScheme.error,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  $styles.corners.sm,
                                                 ),
                                               ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 6,
-                                        left: 6,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: colorScheme.error,
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            '直播中',
-                                            style: $styles.text.bodySmall
-                                                .copyWith(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colorScheme.onError,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        bottom: 6,
-                                        right: 6,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.75,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.visibility_rounded,
-                                                size: 12,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                live['viewers']!,
+                                              child: Text(
+                                                '直播中',
                                                 style: $styles.text.bodySmall
                                                     .copyWith(
                                                       fontSize: 10,
-                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          colorScheme.onError,
                                                     ),
                                               ),
-                                            ],
+                                            ),
                                           ),
+                                          Positioned(
+                                            bottom: $styles.insets.xs,
+                                            right: $styles.insets.xs,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: $styles.insets.xs,
+                                                vertical:
+                                                    $styles.insets.xxs / 2,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.75,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  $styles.corners.sm,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.visibility_rounded,
+                                                    size: $styles.insets.sm -
+                                                        $styles.insets.xxs,
+                                                    color: Colors.white,
+                                                  ),
+                                                  SizedBox(
+                                                    width: $styles.insets.xxs,
+                                                  ),
+                                                  Text(
+                                                    live['viewers']!,
+                                                    style: $styles.text.bodySmall
+                                                        .copyWith(
+                                                          fontSize: 10,
+                                                          color: Colors.white,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.all(
+                                          $styles.insets.xs,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              live['title']!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: $styles.text.bodyBold
+                                                  .copyWith(
+                                                    fontSize: 13,
+                                                    color:
+                                                        colorScheme.onSurface,
+                                                  ),
+                                            ),
+                                            SizedBox(
+                                              height: $styles.insets.xxs / 2,
+                                            ),
+                                            Text(
+                                              live['streamer']!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: $styles.text.bodySmall
+                                                  .copyWith(
+                                                    fontSize: 11,
+                                                    color: colorScheme
+                                                        .onSurfaceVariant,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Padding(
-                                    padding: EdgeInsets.all($styles.insets.xs),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          live['title']!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: $styles.text.bodyBold.copyWith(
-                                            fontSize: 13,
-                                            color: colorScheme.onSurface,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          live['streamer']!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: $styles.text.bodySmall
-                                              .copyWith(
-                                                fontSize: 11,
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
 
