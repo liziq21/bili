@@ -15,9 +15,9 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
             final source = context.read<HomeBloc>().state.sourceId;
             context.navigateToLive(roomId, source: source);
           },
-          navigateToSearchReault: (keyword) {
+          navigateToSearchResult: (keyword) {
             final source = context.read<HomeBloc>().state.sourceId;
-            context.navigateToSearchReault(keyword, source: source);
+            context.navigateToSearchResult(keyword, source: source);
           },
           onSpace: (mid) {
             final source = context.read<HomeBloc>().state.sourceId;

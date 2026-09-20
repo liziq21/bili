@@ -113,7 +113,7 @@ void main() {
                 value: homeBloc,
                 child: HomeScreen(
                   onLive: (_) {},
-                  navigateToSearchReault: (_) {},
+                  navigateToSearchResult: (_) {},
                   onSpace: (_) {},
                   onVideo: (_) {},
                 ),
@@ -141,7 +141,7 @@ void main() {
                 value: homeBloc,
                 child: HomeScreen(
                   onLive: (_) {},
-                  navigateToSearchReault: (_) {},
+                  navigateToSearchResult: (_) {},
                   onSpace: (_) {},
                   onVideo: (_) {},
                 ),
@@ -169,7 +169,7 @@ void main() {
                 value: homeBloc,
                 child: HomeScreen(
                   onLive: (_) {},
-                  navigateToSearchReault: (_) {},
+                  navigateToSearchResult: (_) {},
                   onSpace: (_) {},
                   onVideo: (_) {},
                 ),

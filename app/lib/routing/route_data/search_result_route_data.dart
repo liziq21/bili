@@ -1,7 +1,7 @@
 part of '../router.dart';
 
 extension BuildContextSearch on BuildContext {
-  void navigateToSearchReault(String keyword, {String? source}) {
+  void navigateToSearchResult(String keyword, {String? source}) {
     SearchRouteData(keyword: keyword, source: source).push(this);
   }
 }
