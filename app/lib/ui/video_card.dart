@@ -6,15 +6,24 @@ import '../main.dart';
 
 enum VideoCardVariant { defaultCard, feed }
 
-class const VideoCard({
-  super.key,
-  required final VideoModel videoInfoBase,
-  final GestureTapCallback? onTap,
-  final VideoCardVariant variant = VideoCardVariant.defaultCard,
-  final String? sourceBadge,
-  final String? creatorAvatarUrl,
-  final VoidCallback? onMorePressed,
-}) extends StatelessWidget {
+class VideoCard extends StatelessWidget {
+  const VideoCard({
+    super.key,
+    required this.videoInfoBase,
+    this.onTap,
+    this.variant = VideoCardVariant.defaultCard,
+    this.sourceBadge,
+    this.creatorAvatarUrl,
+    this.onMorePressed,
+  });
+
+  final VideoModel videoInfoBase;
+  final GestureTapCallback? onTap;
+  final VideoCardVariant variant;
+  final String? sourceBadge;
+  final String? creatorAvatarUrl;
+  final VoidCallback? onMorePressed;
+
   static String formatDuration(int? seconds) {
     if (seconds == null || seconds <= 0) return '';
     final duration = Duration(seconds: seconds);
