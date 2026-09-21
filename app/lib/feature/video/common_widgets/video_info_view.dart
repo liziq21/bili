@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
@@ -246,6 +247,7 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                     Gap($styles.insets.xs),
                     // Open External Origin Link & Follow Button
                     IconButton(
+                      tooltip: '在浏览器中打开原链接',
                       iconSize: 18,
                       icon: Icon(
                         Icons.open_in_new,
@@ -646,7 +648,10 @@ class _ActionButton extends StatelessWidget {
       label: label,
       tooltip: label,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         borderRadius: BorderRadius.circular($styles.corners.lg),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
