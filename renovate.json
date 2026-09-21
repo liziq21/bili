@@ -21,7 +21,9 @@
     },
     {
       "matchUpdateTypes": ["patch", "pin", "digest"],
-      "automerge": true
+      "automerge": true,
+      "automergeSchedule": ["any time"],
+      "platformAutomerge": true
     }
   ]
 }
