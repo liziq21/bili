@@ -14,5 +14,8 @@ abstract class const MediaSource() {
   VideoDetailRemoteDataSource? get videoDetailDataSource => null;
   VideoCommentRemoteDataSource? get videoCommentDataSource => null;
 
+  List<VideoFeedRemoteDataSource> get videoFeedDataSources => const [];
+  List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
+
   Future<void> close() async {}
 }
