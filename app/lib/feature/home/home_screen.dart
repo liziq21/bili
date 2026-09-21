@@ -29,10 +29,10 @@ class HomeScreen extends StatefulWidget {
     required Function(String searchQuery) navigateToSearchResult,
     required Function(String mid) onSpace,
     required Function(String id) onVideo,
-  })  : _onLive = onLive,
-        _navigateToSearchResult = navigateToSearchResult,
-        _onSpace = onSpace,
-        _onVideo = onVideo;
+  }) : _onLive = onLive,
+       _navigateToSearchResult = navigateToSearchResult,
+       _onSpace = onSpace,
+       _onVideo = onVideo;
 
   final Function(String roomId) _onLive;
   final Function(String searchQuery) _navigateToSearchResult;
@@ -54,26 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String _activeFilterId = 'all';
 
   final List<FilterChipItem> _filterChips = const [
-    FilterChipItem(
-      id: 'all',
-      label: '全部推荐',
-      icon: Icons.auto_awesome_rounded,
-    ),
+    FilterChipItem(id: 'all', label: '全部推荐', icon: Icons.auto_awesome_rounded),
     FilterChipItem(
       id: 'top100',
       label: '前 100 榜单',
       icon: Icons.local_fire_department_rounded,
     ),
-    FilterChipItem(
-      id: 'live',
-      label: '推荐直播',
-      icon: Icons.sensors_rounded,
-    ),
-    FilterChipItem(
-      id: 'sub',
-      label: '订阅更新',
-      icon: Icons.rss_feed_rounded,
-    ),
+    FilterChipItem(id: 'live', label: '推荐直播', icon: Icons.sensors_rounded),
+    FilterChipItem(id: 'sub', label: '订阅更新', icon: Icons.rss_feed_rounded),
     FilterChipItem(
       id: 'bookmarks',
       label: '我的收藏',
@@ -84,11 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       label: '已下载',
       icon: Icons.download_done_rounded,
     ),
-    FilterChipItem(
-      id: 'history',
-      label: '观看历史',
-      icon: Icons.history_rounded,
-    ),
+    FilterChipItem(id: 'history', label: '观看历史', icon: Icons.history_rounded),
   ];
 
   @override
@@ -582,10 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               if (hasLive)
                                 ActionChip(
-                                  avatar: const Icon(
-                                    Icons.live_tv,
-                                    size: 18,
-                                  ),
+                                  avatar: const Icon(Icons.live_tv, size: 18),
                                   label: const Text('直播大厅'),
                                   onPressed: () {
                                     _showIdInputDialog(
@@ -655,10 +636,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     final cardWidth = availableWidth > 900
                         ? (availableWidth * 0.28).clamp(260.0, 360.0)
                         : (availableWidth > 600
-                            ? (availableWidth * 0.38).clamp(240.0, 320.0)
-                            : (availableWidth * 0.58).clamp(200.0, 280.0));
+                              ? (availableWidth * 0.38).clamp(240.0, 320.0)
+                              : (availableWidth * 0.58).clamp(200.0, 280.0));
                     final imageHeight = cardWidth * (9 / 16);
-                    final cardHeight = imageHeight + $styles.insets.xs * 2 + 50.0;
+                    final cardHeight =
+                        imageHeight + $styles.insets.xs * 2 + 50.0;
 
                     return SliverToBoxAdapter(
                       child: SizedBox(
@@ -682,9 +664,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     $styles.corners.md,
                                   ),
                                   side: BorderSide(
-                                    color: colorScheme.outlineVariant.withValues(
-                                      alpha: 0.4,
-                                    ),
+                                    color: colorScheme.outlineVariant
+                                        .withValues(alpha: 0.4),
                                   ),
                                 ),
                                 child: InkWell(
@@ -702,15 +683,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                               memCacheWidth: 320,
                                               fit: BoxFit.cover,
                                               errorBuilder:
-                                                  (context, url, error) =>
-                                                      Container(
-                                                        color: colorScheme
-                                                            .surfaceContainerHighest,
-                                                        child: const Icon(
-                                                          Icons.live_tv,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
+                                                  (
+                                                    context,
+                                                    url,
+                                                    error,
+                                                  ) => Container(
+                                                    color: colorScheme
+                                                        .surfaceContainerHighest,
+                                                    child: const Icon(
+                                                      Icons.live_tv,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                           Positioned(
@@ -726,8 +710,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 color: colorScheme.error,
                                                 borderRadius:
                                                     BorderRadius.circular(
-                                                  $styles.corners.sm,
-                                                ),
+                                                      $styles.corners.sm,
+                                                    ),
                                               ),
                                               child: Text(
                                                 '直播中',
@@ -757,15 +741,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 borderRadius:
                                                     BorderRadius.circular(
-                                                  $styles.corners.sm,
-                                                ),
+                                                      $styles.corners.sm,
+                                                    ),
                                               ),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Icon(
                                                     Icons.visibility_rounded,
-                                                    size: $styles.insets.sm -
+                                                    size:
+                                                        $styles.insets.sm -
                                                         $styles.insets.xxs,
                                                     color: Colors.white,
                                                   ),
@@ -774,7 +759,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   Text(
                                                     live['viewers']!,
-                                                    style: $styles.text.bodySmall
+                                                    style: $styles
+                                                        .text
+                                                        .bodySmall
                                                         .copyWith(
                                                           fontSize: 10,
                                                           color: Colors.white,

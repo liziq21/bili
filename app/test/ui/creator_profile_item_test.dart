@@ -32,10 +32,7 @@ void main() {
       );
 
       // Verify Semantics label exists for screen readers
-      expect(
-        find.bySemanticsLabel('CodeCraft, @188339'),
-        findsOneWidget,
-      );
+      expect(find.bySemanticsLabel('CodeCraft, @188339'), findsOneWidget);
 
       // Verify tap behavior
       await tester.tap(find.byType(CreatorProfileItem));
