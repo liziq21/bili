@@ -17,9 +17,12 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  data: ^1.0.0
-  bpi: ^1.0.0
-  model: ^1.0.0
+  data:
+    path: ../data
+  bpi:
+    path: bpi
+  model:
+    path: ../model
   http: ^1.6.0
   intl: any
 
