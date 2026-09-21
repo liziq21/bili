@@ -1,0 +1,41 @@
+name: Skills Code Scanning
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scan-skills:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - run: dart install skills_lint
+
+      # The linter exits 1 when it finds violations. continue-on-error
+      # lets the upload step run first, so findings reach Code Scanning
+      # instead of disappearing with the failed job.
+      - name: Generate SARIF report
+        id: lint
+        continue-on-error: true
+        run: skills_lint --skills-directory ./.claude/skills --format=sarif > skills-lint.sarif
+
+      # Pull requests from forks cannot write security events, so skip
+      # the upload there rather than failing the job on a permission
+      # error.
+      - name: Upload SARIF report
+        if: ${{ !cancelled() && steps.lint.conclusion != 'skipped' && (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork) }}
+        uses: github/codeql-action/upload-sarif@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          sarif_file: skills-lint.sarif
+          category: skills_lint
+
+      - name: Fail on lint violations
+        if: steps.lint.outcome != 'success'
+        run: exit 1
