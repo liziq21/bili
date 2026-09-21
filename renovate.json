@@ -4,10 +4,11 @@
     "config:recommended",
     "helpers:pinGitHubActionDigests"
   ],
-  "ignoreDeps": [
-    "dev.flutter.flutter-plugin-loader:dev.flutter.flutter-plugin-loader.gradle.plugin"
-  ],
   "packageRules": [
+    {
+      "matchPackageNames": ["dev.flutter.flutter-plugin-loader:dev.flutter.flutter-plugin-loader.gradle.plugin"],
+      "enabled": false
+    },
     {
       "matchManagers": ["github-actions"],
       "groupName": "CI 自动化流 Actions 更新",
