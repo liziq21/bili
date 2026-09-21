@@ -13,6 +13,10 @@ import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_comment_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 
+/// 数据源 Context 依赖注入提供器 (Service Source Provider)
+///
+/// 当导航到特定数据源页面（如 Bilibili 或 YouTube）时，
+/// 负责为组件树条件注入该数据源实例及其实现的相关 Repository。
 class ServiceSourceProviders extends StatelessWidget {
   const ServiceSourceProviders({
     super.key,
@@ -20,9 +24,13 @@ class ServiceSourceProviders extends StatelessWidget {
     required this.child,
   });
 
+  /// 数据源标识名称（如 'bilibili', 'youtube'）
   final String source;
+
+  /// 子组件
   final Widget child;
 
+  /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
   MediaSource? _createMediaSource(String sourceName) =>
       switch (sourceName.toLowerCase()) {
         'bilibili' => Bili(),
