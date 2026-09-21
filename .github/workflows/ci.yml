@@ -70,7 +70,15 @@ jobs:
           fi
 
       - name: Run analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings > flutter_analyze.txt || true
+        env:
+          IS_JULES_ASSIGNED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') }}
+        run: |
+          if [ "$IS_JULES_ASSIGNED" = "true" ]; then
+            echo "检测到来自 google-labs-jules 的 PR，提升警告和一般提示为错误级别..."
+            flutter analyze --fatal-infos --fatal-warnings > flutter_analyze.txt || true
+          else
+            flutter analyze --no-fatal-infos --no-fatal-warnings > flutter_analyze.txt || true
+          fi
       
       - name: Dart Analyze to SARIF
         uses: advanced-security/dart-analyzer-sarif@63edda78ee1ce2b3b5bc5b8c0418ce3128887e23 # main
