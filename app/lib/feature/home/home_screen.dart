@@ -29,10 +29,10 @@ class HomeScreen extends StatefulWidget {
     required Function(String searchQuery) navigateToSearchResult,
     required Function(String mid) onSpace,
     required Function(String id) onVideo,
-  })  : _onLive = onLive,
-        _navigateToSearchResult = navigateToSearchResult,
-        _onSpace = onSpace,
-        _onVideo = onVideo;
+  }) : _onLive = onLive,
+       _navigateToSearchResult = navigateToSearchResult,
+       _onSpace = onSpace,
+       _onVideo = onVideo;
 
   final Function(String roomId) _onLive;
   final Function(String searchQuery) _navigateToSearchResult;
@@ -53,27 +53,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _activeFilterId = 'all';
 
-  final List<FilterChipItem> _filterChips = const [
-    FilterChipItem(
-      id: 'all',
-      label: '全部推荐',
-      icon: Icons.auto_awesome_rounded,
-    ),
+  // Cached filter chip options
+  static final List<FilterChipItem> _filterChips = const [
+    FilterChipItem(id: 'all', label: '全部推荐', icon: Icons.auto_awesome_rounded),
     FilterChipItem(
       id: 'top100',
       label: '前 100 榜单',
       icon: Icons.local_fire_department_rounded,
     ),
-    FilterChipItem(
-      id: 'live',
-      label: '推荐直播',
-      icon: Icons.sensors_rounded,
-    ),
-    FilterChipItem(
-      id: 'sub',
-      label: '订阅更新',
-      icon: Icons.rss_feed_rounded,
-    ),
+    FilterChipItem(id: 'live', label: '推荐直播', icon: Icons.sensors_rounded),
+    FilterChipItem(id: 'sub', label: '订阅更新', icon: Icons.rss_feed_rounded),
     FilterChipItem(
       id: 'bookmarks',
       label: '我的收藏',
@@ -84,11 +73,98 @@ class _HomeScreenState extends State<HomeScreen> {
       label: '已下载',
       icon: Icons.download_done_rounded,
     ),
-    FilterChipItem(
-      id: 'history',
-      label: '观看历史',
-      icon: Icons.history_rounded,
+    FilterChipItem(id: 'history', label: '观看历史', icon: Icons.history_rounded),
+  ];
+
+  // Cached mock video datasets to avoid repeated allocations during rebuilds
+  static final List<VideoModel> _bilibiliRecommendedVideos = [
+    VideoModel(
+      id: 'BV1xx411c7mD',
+      title: '【午餐盒子】生命会卡住生命',
+      url: 'https://www.bilibili.com/video/BV1xx411c7mD',
+      thumbnailUrl: 'https://picsum.photos/seed/bili1/640/360',
+      viewCount: 79000,
+      duration: 557,
+      creatorProfileName: '五盒ll十箱',
+      uploadDate: DateTime.now().subtract(const Duration(days: 1)),
     ),
+    VideoModel(
+      id: 'BV1aK4y1P7qG',
+      title: 'ドリームコア / john feat.初音未来',
+      url: 'https://www.bilibili.com/video/BV1aK4y1P7qG',
+      thumbnailUrl: 'https://picsum.photos/seed/bili2/640/360',
+      viewCount: 47000,
+      duration: 127,
+      creatorProfileName: '初音未来_Crypton',
+      uploadDate: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    VideoModel(
+      id: 'BV14z4y1m7S7',
+      title: '【完全测评】传奇起点！真骨雕空我全形态回顾解析',
+      url: 'https://www.bilibili.com/video/BV14z4y1m7S7',
+      thumbnailUrl: 'https://picsum.photos/seed/bili3/640/360',
+      viewCount: 182000,
+      duration: 1601,
+      creatorProfileName: '模玩档案馆',
+      uploadDate: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    VideoModel(
+      id: 'BV1yK4y1P7qH',
+      title: '去中心化网络架构设计：从零构建轻量无追踪媒体协议',
+      url: 'https://www.bilibili.com/video/BV1yK4y1P7qH',
+      thumbnailUrl: 'https://picsum.photos/seed/bili4/640/360',
+      viewCount: 31000,
+      duration: 870,
+      creatorProfileName: 'Kernel_Dev',
+      uploadDate: DateTime.now().subtract(const Duration(days: 5)),
+    ),
+  ];
+
+  static final List<VideoModel> _youtubeRecommendedVideos = [
+    VideoModel(
+      id: 'dQw4w9WgXcQ',
+      title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
+      url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      thumbnailUrl: 'https://picsum.photos/seed/yt1/640/360',
+      viewCount: 1500000000,
+      duration: 213,
+      creatorProfileName: 'Rick Astley',
+      uploadDate: DateTime.now().subtract(const Duration(days: 30)),
+    ),
+    VideoModel(
+      id: 'L_LUpnjgPso',
+      title: 'Building a Multi-Source Video Platform with Flutter',
+      url: 'https://www.youtube.com/watch?v=L_LUpnjgPso',
+      thumbnailUrl: 'https://picsum.photos/seed/yt2/640/360',
+      viewCount: 240000,
+      duration: 1140,
+      creatorProfileName: 'Flutter Dev Tech',
+      uploadDate: DateTime.now().subtract(const Duration(days: 2)),
+    ),
+  ];
+
+  static const List<Map<String, String>> _recommendedLives = [
+    {
+      'id': '230023',
+      'title': '【歌回】周五夜狂欢！新曲披露与杂谈',
+      'streamer': '米娅Mia_Official',
+      'viewers': '2.8万',
+      'thumbnailUrl': 'https://picsum.photos/seed/live1/480/270',
+    },
+    {
+      'id': '21686237',
+      'title': '全国高校大师锦标赛总决赛 DAY 3',
+      'streamer': '赛事官方直播间',
+      'viewers': '5.4万',
+      'thumbnailUrl': 'https://picsum.photos/seed/live2/480/270',
+    },
+    {
+      'id': '5201314',
+      'title': '深夜电台：用声音陪伴你的失眠之夜',
+      'streamer': '月下听风',
+      'viewers': '1.2万',
+      'thumbnailUrl': 'https://picsum.photos/seed/live3/480/270',
+    },
   ];
 
   @override
@@ -185,98 +261,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<VideoModel> _getRecommendedVideos(String sourceId) {
     if (sourceId == 'bilibili') {
-      return [
-        VideoModel(
-          id: 'BV1xx411c7mD',
-          title: '【午餐盒子】生命会卡住生命',
-          url: 'https://www.bilibili.com/video/BV1xx411c7mD',
-          thumbnailUrl: 'https://picsum.photos/seed/bili1/640/360',
-          viewCount: 79000,
-          duration: 557,
-          creatorProfileName: '五盒ll十箱',
-          uploadDate: DateTime.now().subtract(const Duration(days: 1)),
-        ),
-        VideoModel(
-          id: 'BV1aK4y1P7qG',
-          title: 'ドリームコア / john feat.初音未来',
-          url: 'https://www.bilibili.com/video/BV1aK4y1P7qG',
-          thumbnailUrl: 'https://picsum.photos/seed/bili2/640/360',
-          viewCount: 47000,
-          duration: 127,
-          creatorProfileName: '初音未来_Crypton',
-          uploadDate: DateTime.now().subtract(const Duration(days: 1)),
-        ),
-        VideoModel(
-          id: 'BV14z4y1m7S7',
-          title: '【完全测评】传奇起点！真骨雕空我全形态回顾解析',
-          url: 'https://www.bilibili.com/video/BV14z4y1m7S7',
-          thumbnailUrl: 'https://picsum.photos/seed/bili3/640/360',
-          viewCount: 182000,
-          duration: 1601,
-          creatorProfileName: '模玩档案馆',
-          uploadDate: DateTime.now().subtract(const Duration(days: 3)),
-        ),
-        VideoModel(
-          id: 'BV1yK4y1P7qH',
-          title: '去中心化网络架构设计：从零构建轻量无追踪媒体协议',
-          url: 'https://www.bilibili.com/video/BV1yK4y1P7qH',
-          thumbnailUrl: 'https://picsum.photos/seed/bili4/640/360',
-          viewCount: 31000,
-          duration: 870,
-          creatorProfileName: 'Kernel_Dev',
-          uploadDate: DateTime.now().subtract(const Duration(days: 5)),
-        ),
-      ];
+      return _bilibiliRecommendedVideos;
     } else {
-      return [
-        VideoModel(
-          id: 'dQw4w9WgXcQ',
-          title: 'Rick Astley - Never Gonna Give You Up (Official Music Video)',
-          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          thumbnailUrl: 'https://picsum.photos/seed/yt1/640/360',
-          viewCount: 1500000000,
-          duration: 213,
-          creatorProfileName: 'Rick Astley',
-          uploadDate: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        VideoModel(
-          id: 'L_LUpnjgPso',
-          title: 'Building a Multi-Source Video Platform with Flutter',
-          url: 'https://www.youtube.com/watch?v=L_LUpnjgPso',
-          thumbnailUrl: 'https://picsum.photos/seed/yt2/640/360',
-          viewCount: 240000,
-          duration: 1140,
-          creatorProfileName: 'Flutter Dev Tech',
-          uploadDate: DateTime.now().subtract(const Duration(days: 2)),
-        ),
-      ];
+      return _youtubeRecommendedVideos;
     }
   }
 
   List<Map<String, String>> _getRecommendedLives(String sourceId) {
-    return [
-      {
-        'id': '230023',
-        'title': '【歌回】周五夜狂欢！新曲披露与杂谈',
-        'streamer': '米娅Mia_Official',
-        'viewers': '2.8万',
-        'thumbnailUrl': 'https://picsum.photos/seed/live1/480/270',
-      },
-      {
-        'id': '21686237',
-        'title': '全国高校大师锦标赛总决赛 DAY 3',
-        'streamer': '赛事官方直播间',
-        'viewers': '5.4万',
-        'thumbnailUrl': 'https://picsum.photos/seed/live2/480/270',
-      },
-      {
-        'id': '5201314',
-        'title': '深夜电台：用声音陪伴你的失眠之夜',
-        'streamer': '月下听风',
-        'viewers': '1.2万',
-        'thumbnailUrl': 'https://picsum.photos/seed/live3/480/270',
-      },
-    ];
+    return _recommendedLives;
   }
 
   @override
@@ -287,11 +279,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: $styles.insets.xs,
-        title: BlocBuilder<HomeBloc, HomeState>(
-          builder: (context, state) {
-            final effectiveSourceId = sources.any((s) => s.id == state.sourceId)
-                ? state.sourceId
-                : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+        title: BlocSelector<HomeBloc, HomeState, String>(
+          selector: (state) => state.sourceId,
+          builder: (context, sourceId) {
+            final effectiveSourceId = sources.any((s) => s.id == sourceId)
+                ? sourceId
+                : (sources.isNotEmpty ? sources.first.id : sourceId);
 
             final activeSource = sources.firstWhere(
               (s) => s.id == effectiveSourceId,
@@ -401,11 +394,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             tooltip: '个人中心',
             onPressed: () {
-              final state = context.read<HomeBloc>().state;
-              final effectiveSourceId =
-                  sources.any((s) => s.id == state.sourceId)
-                  ? state.sourceId
-                  : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+              final sourceId = context.read<HomeBloc>().state.sourceId;
+              final effectiveSourceId = sources.any((s) => s.id == sourceId)
+                  ? sourceId
+                  : (sources.isNotEmpty ? sources.first.id : sourceId);
               _showIdInputDialog(
                 context: context,
                 title: effectiveSourceId == 'bilibili' ? '访问 UP主空间' : '访问创作者频道',
@@ -421,11 +413,12 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(width: $styles.insets.xs),
         ],
       ),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          final effectiveSourceId = sources.any((s) => s.id == state.sourceId)
-              ? state.sourceId
-              : (sources.isNotEmpty ? sources.first.id : state.sourceId);
+      body: BlocSelector<HomeBloc, HomeState, String>(
+        selector: (state) => state.sourceId,
+        builder: (context, sourceId) {
+          final effectiveSourceId = sources.any((s) => s.id == sourceId)
+              ? sourceId
+              : (sources.isNotEmpty ? sources.first.id : sourceId);
 
           final activeSource = sources.firstWhere(
             (s) => s.id == effectiveSourceId,
@@ -582,10 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               if (hasLive)
                                 ActionChip(
-                                  avatar: const Icon(
-                                    Icons.live_tv,
-                                    size: 18,
-                                  ),
+                                  avatar: const Icon(Icons.live_tv, size: 18),
                                   label: const Text('直播大厅'),
                                   onPressed: () {
                                     _showIdInputDialog(
@@ -655,10 +645,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     final cardWidth = availableWidth > 900
                         ? (availableWidth * 0.28).clamp(260.0, 360.0)
                         : (availableWidth > 600
-                            ? (availableWidth * 0.38).clamp(240.0, 320.0)
-                            : (availableWidth * 0.58).clamp(200.0, 280.0));
+                              ? (availableWidth * 0.38).clamp(240.0, 320.0)
+                              : (availableWidth * 0.58).clamp(200.0, 280.0));
                     final imageHeight = cardWidth * (9 / 16);
-                    final cardHeight = imageHeight + $styles.insets.xs * 2 + 50.0;
+                    final cardHeight =
+                        imageHeight + $styles.insets.xs * 2 + 50.0;
 
                     return SliverToBoxAdapter(
                       child: SizedBox(
@@ -682,9 +673,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     $styles.corners.md,
                                   ),
                                   side: BorderSide(
-                                    color: colorScheme.outlineVariant.withValues(
-                                      alpha: 0.4,
-                                    ),
+                                    color: colorScheme.outlineVariant
+                                        .withValues(alpha: 0.4),
                                   ),
                                 ),
                                 child: InkWell(
@@ -702,15 +692,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                               memCacheWidth: 320,
                                               fit: BoxFit.cover,
                                               errorBuilder:
-                                                  (context, url, error) =>
-                                                      Container(
-                                                        color: colorScheme
-                                                            .surfaceContainerHighest,
-                                                        child: const Icon(
-                                                          Icons.live_tv,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
+                                                  (
+                                                    context,
+                                                    url,
+                                                    error,
+                                                  ) => Container(
+                                                    color: colorScheme
+                                                        .surfaceContainerHighest,
+                                                    child: const Icon(
+                                                      Icons.live_tv,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                           Positioned(
@@ -726,8 +719,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 color: colorScheme.error,
                                                 borderRadius:
                                                     BorderRadius.circular(
-                                                  $styles.corners.sm,
-                                                ),
+                                                      $styles.corners.sm,
+                                                    ),
                                               ),
                                               child: Text(
                                                 '直播中',
@@ -757,15 +750,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 borderRadius:
                                                     BorderRadius.circular(
-                                                  $styles.corners.sm,
-                                                ),
+                                                      $styles.corners.sm,
+                                                    ),
                                               ),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Icon(
                                                     Icons.visibility_rounded,
-                                                    size: $styles.insets.sm -
+                                                    size:
+                                                        $styles.insets.sm -
                                                         $styles.insets.xxs,
                                                     color: Colors.white,
                                                   ),
@@ -774,7 +768,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   ),
                                                   Text(
                                                     live['viewers']!,
-                                                    style: $styles.text.bodySmall
+                                                    style: $styles
+                                                        .text
+                                                        .bodySmall
                                                         .copyWith(
                                                           fontSize: 10,
                                                           color: Colors.white,
