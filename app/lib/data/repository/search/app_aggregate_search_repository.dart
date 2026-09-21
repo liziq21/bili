@@ -1,6 +1,6 @@
-/// Aggregate search returns a combined page with video results plus
-/// optional creator and creator-videos data. Currently commented out until
-/// the UI consumes the aggregate form.
+// Aggregate search returns a combined page with video results plus
+// optional creator and creator-videos data. Currently commented out until
+// the UI consumes the aggregate form.
 // import 'package:bilibili/bilibili.dart';
 // import 'package:data/data.dart';
 // import 'package:model/model.dart';
