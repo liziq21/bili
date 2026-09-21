@@ -36,10 +36,10 @@ class const ThemeWrapper({
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         final theme = lightDynamic != null
-            ? baseLight.copyWith(colorScheme: lightDynamic)
+            ? baseLight.copyWith(colorScheme: lightDynamic as ColorScheme?)
             : baseLight;
         final darkTheme = darkDynamic != null
-            ? baseDark.copyWith(colorScheme: darkDynamic)
+            ? baseDark.copyWith(colorScheme: darkDynamic as ColorScheme?)
             : baseDark;
 
         return builder(theme, darkTheme, themeMode);

@@ -41,7 +41,7 @@ Future<void> main() async {
         },
         'query': 'Flutter',
         'params': YoutubeProtobufEncoder.encodeSearchParams(
-          contentType: YoutubeContentTypeFilter.video,
+          contentType: 1, // video
         ),
       }),
     );
@@ -73,7 +73,7 @@ Future<void> main() async {
         },
         'query': 'Flutter',
         'params': YoutubeProtobufEncoder.encodeSearchParams(
-          contentType: YoutubeContentTypeFilter.channel,
+          contentType: 2, // channel
         ),
       }),
     );
