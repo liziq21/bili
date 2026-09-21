@@ -65,24 +65,24 @@ class ServiceSourceProviders extends StatelessWidget {
               ),
               RepositoryProvider<VideoSearchRepository>(
                 create: (context) => AppVideoSearchRepository(
-                  context.read<Bili>().videoSearchDataSource!,
+                  context.read<Bili>().videoSearchDataSource,
                 ),
               ),
               RepositoryProvider<CreatorProfileSearchRepository>(
                 create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource!,
-                  context.read<Bili>().searchSuggestDataSource!,
+                  context.read<Bili>().creatorProfileSearchDataSource,
+                  context.read<Bili>().searchSuggestDataSource,
                 ),
               ),
               RepositoryProvider<LiveRoomSearchRepository>(
                 create: (context) => AppLiveRoomSearchRepository(
-                  context.read<Bili>().liveRoomSearchDataSource!,
+                  context.read<Bili>().liveRoomSearchDataSource,
                 ),
               ),
               RepositoryProvider<SearchSuggestRepository>(
                 create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource!,
-                  context.read<Bili>().searchSuggestDataSource!,
+                  context.read<Bili>().creatorProfileSearchDataSource,
+                  context.read<Bili>().searchSuggestDataSource,
                 ),
               ),
               RepositoryProvider<VideoDetailRepository>(
@@ -106,7 +106,7 @@ class ServiceSourceProviders extends StatelessWidget {
               ),
               RepositoryProvider<VideoSearchRepository>(
                 create: (context) => AppYouTubeVideoSearchRepository(
-                  context.read<YouTube>().videoSearchDataSource!,
+                  context.read<YouTube>().videoSearchDataSource,
                 ),
               ),
             ],
