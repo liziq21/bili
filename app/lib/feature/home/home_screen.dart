@@ -1,8 +1,10 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
-import 'package:data/data.dart';
+import 'package:data/data.dart' hide Page;
+import 'package:data/data.dart' as data show Page;
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:model/model.dart';
 
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
@@ -29,10 +31,10 @@ class HomeScreen extends StatefulWidget {
     required Function(String searchQuery) navigateToSearchResult,
     required Function(String mid) onSpace,
     required Function(String id) onVideo,
-  }) : _onLive = onLive,
-       _navigateToSearchResult = navigateToSearchResult,
-       _onSpace = onSpace,
-       _onVideo = onVideo;
+  })  : _onLive = onLive,
+        _navigateToSearchResult = navigateToSearchResult,
+        _onSpace = onSpace,
+        _onVideo = onVideo;
 
   final Function(String roomId) _onLive;
   final Function(String searchQuery) _navigateToSearchResult;
@@ -53,30 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _activeFilterId = 'all';
 
-  // Cached filter chip options
-  static final List<FilterChipItem> _filterChips = const [
-    FilterChipItem(id: 'all', label: '全部推荐', icon: Icons.auto_awesome_rounded),
-    FilterChipItem(
-      id: 'top100',
-      label: '前 100 榜单',
-      icon: Icons.local_fire_department_rounded,
-    ),
-    FilterChipItem(id: 'live', label: '推荐直播', icon: Icons.sensors_rounded),
-    FilterChipItem(id: 'sub', label: '订阅更新', icon: Icons.rss_feed_rounded),
-    FilterChipItem(
-      id: 'bookmarks',
-      label: '我的收藏',
-      icon: Icons.bookmark_border_rounded,
-    ),
-    FilterChipItem(
-      id: 'downloaded',
-      label: '已下载',
-      icon: Icons.download_done_rounded,
-    ),
-    FilterChipItem(id: 'history', label: '观看历史', icon: Icons.history_rounded),
-  ];
-
-  // Cached mock video datasets to avoid repeated allocations during rebuilds
+  // Cached mock video datasets as fallback
   static final List<VideoModel> _bilibiliRecommendedVideos = [
     VideoModel(
       id: 'BV1xx411c7mD',
@@ -259,16 +238,61 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  List<VideoModel> _getRecommendedVideos(String sourceId) {
+  List<FilterChipItem> _buildFilterChips(MediaSource activeSource) {
+    final chips = <FilterChipItem>[
+      const FilterChipItem(
+        id: 'all',
+        label: '全部推荐',
+        icon: Icons.auto_awesome_rounded,
+      ),
+    ];
+
+    for (final feed in activeSource.videoFeedDataSources) {
+      IconData icon = Icons.video_library_rounded;
+      if (feed.id == 'top100') {
+        icon = Icons.local_fire_department_rounded;
+      } else if (feed.id == 'hot' || feed.id == 'trending') {
+        icon = Icons.whatshot_rounded;
+      } else if (feed.id == 'recommend') {
+        icon = Icons.recommend_rounded;
+      }
+      chips.add(FilterChipItem(id: feed.id, label: feed.title, icon: icon));
+    }
+
+    for (final feed in activeSource.liveRoomFeedDataSources) {
+      chips.add(
+        FilterChipItem(
+          id: feed.id,
+          label: feed.title,
+          icon: Icons.sensors_rounded,
+        ),
+      );
+    }
+
+    chips.addAll(const [
+      FilterChipItem(id: 'sub', label: '订阅更新', icon: Icons.rss_feed_rounded),
+      FilterChipItem(
+        id: 'bookmarks',
+        label: '我的收藏',
+        icon: Icons.bookmark_border_rounded,
+      ),
+      FilterChipItem(
+        id: 'downloaded',
+        label: '已下载',
+        icon: Icons.download_done_rounded,
+      ),
+      FilterChipItem(id: 'history', label: '观看历史', icon: Icons.history_rounded),
+    ]);
+
+    return chips;
+  }
+
+  List<VideoModel> _getFallbackVideos(String sourceId) {
     if (sourceId == 'bilibili') {
       return _bilibiliRecommendedVideos;
     } else {
       return _youtubeRecommendedVideos;
     }
-  }
-
-  List<Map<String, String>> _getRecommendedLives(String sourceId) {
-    return _recommendedLives;
   }
 
   @override
@@ -425,20 +449,27 @@ class _HomeScreenState extends State<HomeScreen> {
             orElse: () => sources.first,
           );
 
+          final filterChips = _buildFilterChips(activeSource);
+          final validFilterIds = filterChips.map((c) => c.id).toSet();
+          final effectiveFilterId = validFilterIds.contains(_activeFilterId)
+              ? _activeFilterId
+              : 'all';
+
+          final activeVideoFeeds = activeSource.videoFeedDataSources.where((f) {
+            return effectiveFilterId == 'all' || effectiveFilterId == f.id;
+          }).toList();
+
+          final activeLiveFeeds = activeSource.liveRoomFeedDataSources.where((
+            f,
+          ) {
+            return effectiveFilterId == 'all' || effectiveFilterId == f.id;
+          }).toList();
+
           final hasLive = activeSource.liveRoomSearchDataSource != null;
-
-          final videos = _getRecommendedVideos(activeSource.id);
-          final lives = _getRecommendedLives(activeSource.id);
-
-          final showLiveSection =
-              hasLive &&
-              (_activeFilterId == 'all' || _activeFilterId == 'live');
-          final showVideoSection =
-              _activeFilterId == 'all' || _activeFilterId == 'top100';
 
           return CustomScrollView(
             slivers: [
-              // 1. 横向 Filter Chips Row
+              // 1. 横向 Dynamic Filter Chips Row
               SliverToBoxAdapter(
                 child: Material(
                   color: Colors.transparent,
@@ -449,8 +480,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       vertical: $styles.insets.xs,
                     ),
                     child: Row(
-                      children: _filterChips.map((chip) {
-                        final isSelected = chip.id == _activeFilterId;
+                      children: filterChips.map((chip) {
+                        final isSelected = chip.id == effectiveFilterId;
                         return Padding(
                           padding: EdgeInsets.only(right: $styles.insets.xs),
                           child: FilterChip(
@@ -598,8 +629,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // 3. 推荐直播 (Recommended Lives) 模块
-              if (showLiveSection) ...[
+              // 3. 动态 Feed Sections (Live Room Feeds)
+              for (final liveFeed in activeLiveFeeds) ...[
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
@@ -620,7 +651,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(width: $styles.insets.xs),
                             Text(
-                              '推荐直播',
+                              liveFeed.title,
                               style: $styles.text.h3.copyWith(
                                 color: colorScheme.onSurface,
                               ),
@@ -629,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         SizedBox(height: $styles.insets.xxs),
                         Text(
-                          '正在热播的直播间',
+                          '${activeSource.name} 动态直播列表',
                           style: $styles.text.bodySmall.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -659,9 +690,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: EdgeInsets.symmetric(
                             horizontal: $styles.insets.sm,
                           ),
-                          itemCount: lives.length,
+                          itemCount: _recommendedLives.length,
                           itemBuilder: (context, index) {
-                            final live = lives[index];
+                            final live = _recommendedLives[index];
                             return Container(
                               width: cardWidth,
                               margin: EdgeInsets.only(right: $styles.insets.sm),
@@ -831,8 +862,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
 
-              // 4. 推荐视频 (Recommended Videos) 模块 Header
-              if (showVideoSection) ...[
+              // 4. 动态 Video Feed Sections
+              for (final videoFeed in activeVideoFeeds) ...[
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
@@ -853,7 +884,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(width: $styles.insets.xs),
                             Text(
-                              '推荐视频',
+                              videoFeed.title,
                               style: $styles.text.h3.copyWith(
                                 color: colorScheme.onSurface,
                               ),
@@ -862,7 +893,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         SizedBox(height: $styles.insets.xxs),
                         Text(
-                          '依据综合热度推荐',
+                          '${activeSource.name} 动态内容展示',
                           style: $styles.text.bodySmall.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -872,43 +903,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // 推荐视频 Grid Layout
+                // Video Feed Items Grid
                 SliverPadding(
                   padding: EdgeInsets.symmetric(
                     horizontal: $styles.insets.sm,
                     vertical: $styles.insets.xs,
                   ),
-                  sliver: SliverLayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = constraints.crossAxisExtent;
-                      final crossAxisCount = width > 900
-                          ? 3
-                          : (width > 600 ? 2 : 1);
+                  sliver: FutureBuilder<Result<data.Page<VideoModel>>>(
+                    future: videoFeed.fetchFeed(),
+                    builder: (context, snapshot) {
+                      final res = snapshot.data;
+                      final videos = res is Ok<data.Page<VideoModel>> &&
+                              res.value.data.isNotEmpty
+                          ? res.value.data
+                          : _getFallbackVideos(activeSource.id);
 
-                      return SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          mainAxisSpacing: $styles.insets.sm,
-                          crossAxisSpacing: $styles.insets.sm,
-                          childAspectRatio: crossAxisCount == 1 ? 1.25 : 1.1,
-                        ),
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final video = videos[index];
-                          return VideoCard(
-                            variant: VideoCardVariant.feed,
-                            sourceBadge: activeSource.name,
-                            videoInfoBase: video,
-                            onTap: () => widget.onVideo(video.id),
-                            onMorePressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('操作: ${video.title}'),
-                                  duration: const Duration(seconds: 1),
+                      return SliverLayoutBuilder(
+                        builder: (context, constraints) {
+                          final width = constraints.crossAxisExtent;
+                          final crossAxisCount = width > 900
+                              ? 3
+                              : (width > 600 ? 2 : 1);
+
+                          return SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: $styles.insets.sm,
+                                  crossAxisSpacing: $styles.insets.sm,
+                                  childAspectRatio: crossAxisCount == 1
+                                      ? 1.25
+                                      : 1.1,
                                 ),
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final video = videos[index];
+                              return VideoCard(
+                                variant: VideoCardVariant.feed,
+                                sourceBadge: activeSource.name,
+                                videoInfoBase: video,
+                                onTap: () => widget.onVideo(video.id),
+                                onMorePressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('操作: ${video.title}'),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
                               );
-                            },
+                            }, childCount: videos.length),
                           );
-                        }, childCount: videos.length),
+                        },
                       );
                     },
                   ),

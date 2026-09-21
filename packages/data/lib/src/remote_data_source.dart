@@ -68,3 +68,16 @@ abstract class const VideoCommentRemoteDataSource() extends RemoteDataSource {
     int pageSize = 20,
   });
 }
+
+
+abstract class const FeedRemoteDataSource<T>() extends RemoteDataSource {
+  String get id;
+  String get title;
+  Future<Result<Page<T>>> fetchFeed({int? pageKey});
+}
+
+abstract class const VideoFeedRemoteDataSource()
+    extends FeedRemoteDataSource<VideoModel> {}
+
+abstract class const LiveRoomFeedRemoteDataSource()
+    extends FeedRemoteDataSource<LiveRoomModel> {}
