@@ -29,4 +29,4 @@ This directory contains shared packages and modules (`packages/*`).
 - `packages/data` owns domain models, `RemoteDataSource`, and `SearchQuery`.
 - **`sourceId` Placement**: Each service module overrides `sourceId` on its `RemoteDataSource` implementation to identify origin — `sourceId` lives on the source, not on model instances.
 - **Canonical Models**: Use `VideoModel` / `LiveRoomModel` (avoid deprecated `VideoInfoBase` / `LiveRoom` aliases).
-- **Optional Capability Interfaces**: Design specific features as mixins or optional interfaces (e.g. `VideoDetailRemoteDataSource`, `VideoCommentRemoteDataSource`). Implementations pick and choose supported capabilities; consumers check interface availability before invocation.
+- **Optional Capability Interfaces**: Design specific features as mixins or optional interfaces (e.g. `VideoDetailRemoteDataSource`, `VideoCommentRemoteDataSource`, `VideoFeedRemoteDataSource`, `LiveRoomFeedRemoteDataSource`). Implementations pick and choose supported capabilities; consumers check interface availability before invocation.
