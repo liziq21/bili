@@ -158,35 +158,34 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Enforces text input length limits on search input field',
-      (tester) async {
-        await tester.pumpWidget(
-          Provider<List<MediaSource>>.value(
-            value: defaultMediaSources,
-            child: MaterialApp(
-              home: BlocProvider<HomeBloc>.value(
-                value: homeBloc,
-                child: HomeScreen(
-                  onLive: (_) {},
-                  navigateToSearchResult: (_) {},
-                  onSpace: (_) {},
-                  onVideo: (_) {},
-                ),
+    testWidgets('Enforces text input length limits on search input field', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        Provider<List<MediaSource>>.value(
+          value: defaultMediaSources,
+          child: MaterialApp(
+            home: BlocProvider<HomeBloc>.value(
+              value: homeBloc,
+              child: HomeScreen(
+                onLive: (_) {},
+                navigateToSearchResult: (_) {},
+                onSpace: (_) {},
+                onVideo: (_) {},
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        final searchTextField = tester.widget<TextField>(
-          find.byType(TextField).first,
-        );
-        expect(searchTextField.maxLength, 200);
-        expect(
-          searchTextField.maxLengthEnforcement,
-          MaxLengthEnforcement.enforced,
-        );
-      },
-    );
+      final searchTextField = tester.widget<TextField>(
+        find.byType(TextField).first,
+      );
+      expect(searchTextField.maxLength, 200);
+      expect(
+        searchTextField.maxLengthEnforcement,
+        MaxLengthEnforcement.enforced,
+      );
+    });
   });
 }

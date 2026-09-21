@@ -43,7 +43,7 @@ class const App({super.key}) extends StatelessWidget {
     return BlocBuilder<AppBloc, AppState>(
       builder: (_, state) => switch (state) {
         Loading() => const Center(child: CircularProgressIndicator()),
-        LoadFailure() => Text('${state.error}'),
+        LoadFailure() => const Text('应用加载失败，请重试'),
         LoadSuccess(:final userData) => ThemeWrapper(
           useDynamicColor: userData.useDynamicColor,
           themeConfig: userData.themeConfig,

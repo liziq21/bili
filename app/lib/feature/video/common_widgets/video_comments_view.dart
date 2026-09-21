@@ -35,7 +35,7 @@ class VideoCommentsView extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                '评论加载失败: ${state.error}',
+                '评论加载失败，请稍后重试',
                 style: $styles.text.body.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),

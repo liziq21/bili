@@ -43,7 +43,7 @@ class _VideoInfoViewState extends State<VideoInfoView> {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                '加载失败: ${state.error}',
+                '视频加载失败，请重试',
                 style: $styles.text.body.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),

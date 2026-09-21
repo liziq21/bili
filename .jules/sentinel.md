@@ -11,3 +11,9 @@ Prevention: Never hardcode `badCertificateCallback` overrides returning `true` i
 Vulnerability: `DebugOverlay.enabled = true` and `HttpLogClient(App.httpBucket, ...)` were hardcoded unconditionally in `app/lib/main.dart`, capturing sensitive network request/response traffic and runtime logs into memory buckets and exposing the debug overlay in production release builds.
 Learning: Debug overlays and HTTP logging interceptors must be guarded strictly by release mode checks (`kReleaseMode`), as un-guarded debug tools expose HTTP headers, response payloads, and internal log traces to end-users or background screen captures in release builds.
 Prevention: Always verify `DebugOverlay.enabled = false` and use standard un-intercepted network clients in `kReleaseMode`.
+
+## 2026-09-18 - Sanitize and Mask User-Facing UI Exception Outputs
+
+Vulnerability: Raw `${state.error}` string interpolations were directly rendered in user-facing UI components (`VideoInfoView`, `VideoCommentsView`, and `App`), exposing internal system exception messages, database paths, or network stack traces to end users.
+Learning: Displaying unformatted or raw exception strings in UI widgets leaks sensitive internal application state, database file locations, or network error details in release builds.
+Prevention: Always replace raw `${state.error}` UI interpolations with localized, generic error messages (e.g., `'视频加载失败，请重试'`) and confine detailed exception logs to internal logging frameworks.
