@@ -308,6 +308,7 @@ class const VideoCard({
                     // 更多操作按钮
                     if (onMorePressed != null)
                       IconButton(
+                        tooltip: '更多选项',
                         icon: Icon(
                           Icons.more_vert_rounded,
                           size: 20,

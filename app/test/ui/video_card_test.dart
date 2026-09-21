@@ -87,8 +87,9 @@ void main() {
     expect(find.text('09:17'), findsOneWidget);
     expect(tapped, isFalse);
     expect(find.textContaining('五盒ll十箱'), findsOneWidget);
+    expect(find.byTooltip('更多选项'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.more_vert_rounded));
+    await tester.tap(find.byTooltip('更多选项'));
     expect(moreTapped, isTrue);
   });
 }
