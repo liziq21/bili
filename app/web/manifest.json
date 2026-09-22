@@ -1,11 +1,11 @@
 {
-    "name": "ipa_testing_github_action",
-    "short_name": "ipa_testing_github_action",
+    "name": "Bili",
+    "short_name": "Bili",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Bili Flutter application under development.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
