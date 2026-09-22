@@ -19,11 +19,12 @@ enum HomeFilterKind {
 @immutable
 final class const HomeFilter({
   required final String id,
+  required final String rawId,
   required final String label,
   required final HomeFilterKind kind,
 }) extends Equatable {
   @override
-  List<Object?> get props => [id, label, kind];
+  List<Object?> get props => [id, rawId, label, kind];
 }
 
 @immutable
@@ -37,22 +38,38 @@ class HomeState extends Equatable {
   });
 
   /// “全部推荐”聚合筛选项的标识
-  static const String allFilterId = 'all';
+  static const String allFilterId = 'aggregate:all';
+
+  static String videoFilterId(String feedId) => 'video:$feedId';
+
+  static String liveFilterId(String feedId) => 'live:$feedId';
 
   /// 本地功能占位筛选项
   static const List<HomeFilter> placeholderFilters = [
-    HomeFilter(id: 'sub', label: '订阅更新', kind: HomeFilterKind.placeholder),
     HomeFilter(
-      id: 'bookmarks',
+      id: 'placeholder:sub',
+      rawId: 'sub',
+      label: '订阅更新',
+      kind: HomeFilterKind.placeholder,
+    ),
+    HomeFilter(
+      id: 'placeholder:bookmarks',
+      rawId: 'bookmarks',
       label: '我的收藏',
       kind: HomeFilterKind.placeholder,
     ),
     HomeFilter(
-      id: 'downloaded',
+      id: 'placeholder:downloaded',
+      rawId: 'downloaded',
       label: '已下载',
       kind: HomeFilterKind.placeholder,
     ),
-    HomeFilter(id: 'history', label: '观看历史', kind: HomeFilterKind.placeholder),
+    HomeFilter(
+      id: 'placeholder:history',
+      rawId: 'history',
+      label: '观看历史',
+      kind: HomeFilterKind.placeholder,
+    ),
   ];
 
   final String sourceId;
@@ -63,16 +80,23 @@ class HomeState extends Equatable {
 
   /// 当前可用的全部筛选项（聚合项 + 数据源 Feed + 本地占位项）
   List<HomeFilter> get filters => [
-    const HomeFilter(id: allFilterId, label: '全部推荐', kind: HomeFilterKind.all),
+    const HomeFilter(
+      id: allFilterId,
+      rawId: 'all',
+      label: '全部推荐',
+      kind: HomeFilterKind.all,
+    ),
     for (final section in videoSections)
       HomeFilter(
-        id: section.id,
+        id: videoFilterId(section.id),
+        rawId: section.id,
         label: section.title,
         kind: HomeFilterKind.videoFeed,
       ),
     for (final section in liveSections)
       HomeFilter(
-        id: section.id,
+        id: liveFilterId(section.id),
+        rawId: section.id,
         label: section.title,
         kind: HomeFilterKind.liveFeed,
       ),
@@ -91,7 +115,7 @@ class HomeState extends Equatable {
         HomeFilterKind.all => videoSections,
         HomeFilterKind.videoFeed =>
           videoSections
-              .where((section) => section.id == activeFilter.id)
+              .where((section) => section.id == activeFilter.rawId)
               .toList(),
         HomeFilterKind.liveFeed || HomeFilterKind.placeholder => const [],
       };
@@ -102,7 +126,7 @@ class HomeState extends Equatable {
         HomeFilterKind.all => liveSections,
         HomeFilterKind.liveFeed =>
           liveSections
-              .where((section) => section.id == activeFilter.id)
+              .where((section) => section.id == activeFilter.rawId)
               .toList(),
         HomeFilterKind.videoFeed || HomeFilterKind.placeholder => const [],
       };

@@ -28,7 +28,7 @@ class HomeFilterBar extends SliverPersistentHeaderDelegate {
         $styles.insets.xs * 2;
   }
 
-  static IconData iconFor(HomeFilter filter) => switch (filter.id) {
+  static IconData iconFor(HomeFilter filter) => switch (filter.rawId) {
     'all' => Icons.auto_awesome_rounded,
     'top100' => Icons.local_fire_department_rounded,
     'hot' || 'trending' => Icons.whatshot_rounded,

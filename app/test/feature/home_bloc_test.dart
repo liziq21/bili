@@ -121,6 +121,78 @@ class FakeLiveFeed implements LiveRoomFeedRemoteDataSource {
   }
 }
 
+class ControlledVideoFeed({
+  @override required final String id,
+  @override required final String title,
+}) implements VideoFeedRemoteDataSource {
+  final requests = <Completer<Result<data.Page<VideoModel>>>>[];
+
+  @override
+  String get sourceId => 'fake';
+
+  @override
+  Future<Result<data.Page<VideoModel>>> fetchFeed({int? pageKey}) {
+    final request = Completer<Result<data.Page<VideoModel>>>();
+    requests.add(request);
+    return request.future;
+  }
+
+  void completeRequest(int index, String itemId) {
+    requests[index].complete(
+      Result.ok(
+        data.Page<VideoModel>(
+          number: 1,
+          totalPages: 1,
+          data: [
+            VideoModel(
+              id: itemId,
+              title: itemId,
+              url: 'https://example.com/$itemId',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ControlledLiveFeed({
+  @override required final String id,
+  @override required final String title,
+}) implements LiveRoomFeedRemoteDataSource {
+  final requests = <Completer<Result<data.Page<LiveRoomModel>>>>[];
+
+  @override
+  String get sourceId => 'fake';
+
+  @override
+  Future<Result<data.Page<LiveRoomModel>>> fetchFeed({int? pageKey}) {
+    final request = Completer<Result<data.Page<LiveRoomModel>>>();
+    requests.add(request);
+    return request.future;
+  }
+
+  void completeRequest(int index, int roomId) {
+    requests[index].complete(
+      Result.ok(
+        data.Page<LiveRoomModel>(
+          number: 1,
+          totalPages: 1,
+          data: [
+            LiveRoomModel(
+              id: roomId,
+              title: '直播间 $roomId',
+              url: 'https://example.com/live/$roomId',
+              isLive: true,
+              creatorProfileName: '主播',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FakeLiveRoomSearch implements LiveRoomSearchRemoteDataSource {
   const FakeLiveRoomSearch();
 
@@ -334,13 +406,97 @@ void main() {
             state.videoSections.first.status == FeedStatus.success,
       );
 
-      bloc.add(FilterSelected('recommend_live'));
-      await bloc.stream.firstWhere(
-        (state) => state.filterId == 'recommend_live',
-      );
+      final liveFilterId = HomeState.liveFilterId('recommend_live');
+      bloc.add(FilterSelected(liveFilterId));
+      await bloc.stream.firstWhere((state) => state.filterId == liveFilterId);
 
       expect(bloc.state.visibleVideoSections, isEmpty);
       expect(bloc.state.visibleLiveSections, hasLength(1));
+    });
+
+    test('Namespaces filter IDs while preserving raw feed IDs', () {
+      final state = HomeState(
+        videoSections: const [
+          FeedSectionState<VideoModel>(id: 'shared', title: '视频'),
+        ],
+        liveSections: const [
+          FeedSectionState<LiveRoomModel>(id: 'shared', title: '直播'),
+        ],
+      );
+
+      expect(state.filters.map((filter) => filter.id).toSet(), hasLength(7));
+      expect(
+        state
+            .copyWith(filterId: HomeState.videoFilterId('shared'))
+            .visibleVideoSections
+            .single
+            .id,
+        'shared',
+      );
+      expect(
+        state
+            .copyWith(filterId: HomeState.liveFilterId('shared'))
+            .visibleLiveSections
+            .single
+            .id,
+        'shared',
+      );
+    });
+
+    test(
+      'Refresh with no source emits refreshing then not refreshing',
+      () async {
+        mediaSources = [];
+        final bloc = buildBloc();
+        addTearDown(bloc.close);
+
+        final expectation = expectLater(
+          bloc.stream.map((state) => state.isRefreshing),
+          emitsInOrder([isTrue, isFalse]),
+        );
+        bloc.add(FeedsRequested(refresh: true));
+        await expectation;
+      },
+    );
+
+    test('Discards stale overlapping video and live feed requests', () async {
+      final videoFeed = ControlledVideoFeed(id: 'shared', title: '视频');
+      final liveFeed = ControlledLiveFeed(id: 'shared', title: '直播');
+      mediaSources = [
+        FakeMediaSource(
+          id: 'bilibili',
+          name: 'Bilibili',
+          videoFeedDataSources: [videoFeed],
+          liveRoomFeedDataSources: [liveFeed],
+        ),
+      ];
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      while (videoFeed.requests.isEmpty || liveFeed.requests.isEmpty) {
+        await pumpEventQueue();
+      }
+      bloc.add(FeedsRequested(refresh: true));
+      while (videoFeed.requests.length < 2 || liveFeed.requests.length < 2) {
+        await pumpEventQueue();
+      }
+
+      final refreshComplete = bloc.stream.firstWhere(
+        (state) =>
+            !state.isRefreshing &&
+            state.videoSections.firstOrNull?.isEmpty == false &&
+            state.liveSections.firstOrNull?.isEmpty == false,
+      );
+      videoFeed.completeRequest(1, 'new-video');
+      liveFeed.completeRequest(1, 2);
+      await refreshComplete;
+
+      videoFeed.completeRequest(0, 'old-video');
+      liveFeed.completeRequest(0, 1);
+      await pumpEventQueue();
+
+      expect(bloc.state.videoSections.single.items.single.id, 'new-video');
+      expect(bloc.state.liveSections.single.items.single.id, 2);
     });
   });
 

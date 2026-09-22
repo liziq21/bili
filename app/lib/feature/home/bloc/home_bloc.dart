@@ -36,6 +36,9 @@ class HomeBloc({
   final UserDataRepository _userDataRepository;
   final List<MediaSource> _mediaSources;
   final _log = Logger('HomeBloc');
+  final Map<String, int> _videoRequestVersions = {};
+  final Map<String, int> _liveRequestVersions = {};
+  int _nextRequestVersion = 0;
 
   /// 当前生效的数据源，`sourceId` 不可用时回退到首个可用数据源
   MediaSource? get activeSource {
@@ -92,7 +95,13 @@ class HomeBloc({
     Emitter<HomeState> emit,
   ) async {
     final source = activeSource;
-    if (source == null) return;
+    if (source == null) {
+      if (event.refresh) {
+        emit(state.copyWith(isRefreshing: true));
+        emit(state.copyWith(isRefreshing: false));
+      }
+      return;
+    }
 
     final videoFeeds = source.videoFeedDataSources;
     final liveFeeds = source.liveRoomFeedDataSources;
@@ -120,8 +129,10 @@ class HomeBloc({
     );
 
     await Future.wait([
-      for (final feed in videoFeeds) _fetchVideoPage(feed, emit, pageKey: 1),
-      for (final feed in liveFeeds) _fetchLivePage(feed, emit, pageKey: 1),
+      for (final feed in videoFeeds)
+        _fetchVideoPage(feed, emit, sourceId: source.id, pageKey: 1),
+      for (final feed in liveFeeds)
+        _fetchLivePage(feed, emit, sourceId: source.id, pageKey: 1),
     ]);
 
     if (state.isRefreshing) emit(state.copyWith(isRefreshing: false));
@@ -149,19 +160,32 @@ class HomeBloc({
         section.copyWith(status: FeedStatus.loadingMore, clearError: true),
       ),
     );
-    await _fetchVideoPage(feed, emit, pageKey: section.pageKey + 1);
+    await _fetchVideoPage(
+      feed,
+      emit,
+      sourceId: source.id,
+      pageKey: section.pageKey + 1,
+    );
   }
 
   Future<void> _fetchVideoPage(
     VideoFeedRemoteDataSource feed,
     Emitter<HomeState> emit, {
+    required String sourceId,
     required int pageKey,
   }) async {
+    final requestVersion = ++_nextRequestVersion;
+    _videoRequestVersions[feed.id] = requestVersion;
     final result = await feed.fetchFeed(pageKey: pageKey);
+    if (emit.isDone ||
+        _videoRequestVersions[feed.id] != requestVersion ||
+        activeSource?.id != sourceId) {
+      return;
+    }
     final current = state.videoSections
         .where((section) => section.id == feed.id)
         .firstOrNull;
-    if (current == null || emit.isDone) return;
+    if (current == null) return;
 
     emit(_replaceVideoSection(_merge(current, result, pageKey: pageKey)));
   }
@@ -169,13 +193,21 @@ class HomeBloc({
   Future<void> _fetchLivePage(
     LiveRoomFeedRemoteDataSource feed,
     Emitter<HomeState> emit, {
+    required String sourceId,
     required int pageKey,
   }) async {
+    final requestVersion = ++_nextRequestVersion;
+    _liveRequestVersions[feed.id] = requestVersion;
     final result = await feed.fetchFeed(pageKey: pageKey);
+    if (emit.isDone ||
+        _liveRequestVersions[feed.id] != requestVersion ||
+        activeSource?.id != sourceId) {
+      return;
+    }
     final current = state.liveSections
         .where((section) => section.id == feed.id)
         .firstOrNull;
-    if (current == null || emit.isDone) return;
+    if (current == null) return;
 
     emit(_replaceLiveSection(_merge(current, result, pageKey: pageKey)));
   }

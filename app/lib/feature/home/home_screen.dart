@@ -60,7 +60,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onRefresh() async {
     final bloc = context.read<HomeBloc>()..add(FeedsRequested(refresh: true));
-    await bloc.stream.firstWhere((state) => !state.isRefreshing);
+    try {
+      await bloc.stream.firstWhere((state) => !state.isRefreshing);
+    } on StateError {
+      // The bloc can close while this route is being disposed.
+    }
   }
 
   Future<void> _showIdInputDialog({
@@ -131,10 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
-        final activeSource = sources.firstWhere(
-          (source) => source.id == state.sourceId,
-          orElse: () => sources.first,
-        );
+        final activeSource = context.read<HomeBloc>().activeSource!;
         final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
         final isCreatorSource = activeSource.id == 'bilibili';
 
