@@ -182,78 +182,80 @@ class const VideoCard({
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 封面图及覆盖 Badge 区域
-                Stack(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: CachedNetworkImage(
-                        imageUrl: videoInfoBase.thumbnailUrl ?? '',
-                        memCacheWidth: 480,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, url, error) => Container(
-                          color: colorScheme.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.movie_outlined,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 顶部来源/平台 Badge
-                    if (sourceBadge != null && sourceBadge!.isNotEmpty)
-                      Positioned(
-                        top: $styles.insets.xs,
-                        left: $styles.insets.xs,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: $styles.insets.xs,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer.withValues(
-                              alpha: 0.9,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              $styles.corners.sm,
-                            ),
-                          ),
-                          child: Text(
-                            sourceBadge!,
-                            style: $styles.text.bodySmall.copyWith(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.onPrimaryContainer,
+                ExcludeSemantics(
+                  child: Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: CachedNetworkImage(
+                          imageUrl: videoInfoBase.thumbnailUrl ?? '',
+                          memCacheWidth: 480,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, url, error) => Container(
+                            color: colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.movie_outlined,
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
                       ),
-                    // 右下角时长 Badge
-                    if (durationStr.isNotEmpty)
-                      Positioned(
-                        bottom: $styles.insets.xs,
-                        right: $styles.insets.xs,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: $styles.insets.xs,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(
-                              $styles.corners.sm,
+                      // 顶部来源/平台 Badge
+                      if (sourceBadge != null && sourceBadge!.isNotEmpty)
+                        Positioned(
+                          top: $styles.insets.xs,
+                          left: $styles.insets.xs,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: $styles.insets.xs,
+                              vertical: 2,
                             ),
-                          ),
-                          child: Text(
-                            durationStr,
-                            style: $styles.text.bodySmall.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer.withValues(
+                                alpha: 0.9,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.sm,
+                              ),
+                            ),
+                            child: Text(
+                              sourceBadge!,
+                              style: $styles.text.bodySmall.copyWith(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onPrimaryContainer,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                      // 右下角时长 Badge
+                      if (durationStr.isNotEmpty)
+                        Positioned(
+                          bottom: $styles.insets.xs,
+                          right: $styles.insets.xs,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: $styles.insets.xs,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.75),
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.sm,
+                              ),
+                            ),
+                            child: Text(
+                              durationStr,
+                              style: $styles.text.bodySmall.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
 
                 // 信息与 Creator 元数据区域
@@ -262,58 +264,71 @@ class const VideoCard({
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Creator 头像
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: colorScheme.primaryContainer,
-                        backgroundImage:
-                            (creatorAvatarUrl != null &&
-                                creatorAvatarUrl!.isNotEmpty)
-                            ? CachedNetworkImageProvider(creatorAvatarUrl!)
-                            : null,
-                        child:
-                            (creatorAvatarUrl == null ||
-                                creatorAvatarUrl!.isEmpty)
-                            ? Text(
-                                creatorName.isNotEmpty
-                                    ? creatorName[0].toUpperCase()
-                                    : '?',
-                                style: $styles.text.bodySmallBold.copyWith(
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                              )
-                            : null,
-                      ),
-                      SizedBox(width: $styles.insets.xs),
-
-                      // 标题与次要信息
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              videoInfoBase.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: $styles.text.title2.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                                height: 1.25,
+                        child: ExcludeSemantics(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Creator 头像
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor: colorScheme.primaryContainer,
+                                backgroundImage:
+                                    (creatorAvatarUrl != null &&
+                                        creatorAvatarUrl!.isNotEmpty)
+                                    ? CachedNetworkImageProvider(
+                                        creatorAvatarUrl!,
+                                      )
+                                    : null,
+                                child:
+                                    (creatorAvatarUrl == null ||
+                                        creatorAvatarUrl!.isEmpty)
+                                    ? Text(
+                                        creatorName.isNotEmpty
+                                            ? creatorName[0].toUpperCase()
+                                            : '?',
+                                        style: $styles.text.bodySmallBold
+                                            .copyWith(
+                                              color: colorScheme
+                                                  .onPrimaryContainer,
+                                            ),
+                                      )
+                                    : null,
                               ),
-                            ),
-                            SizedBox(height: $styles.insets.xxs),
-                            Text(
-                              subtitleText.isNotEmpty
-                                  ? '$creatorName • $subtitleText'
-                                  : creatorName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: $styles.text.bodySmall.copyWith(
-                                fontSize: 12,
-                                color: colorScheme.onSurfaceVariant,
+                              SizedBox(width: $styles.insets.xs),
+
+                              // 标题与次要信息
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      videoInfoBase.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: $styles.text.title2.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurface,
+                                        height: 1.25,
+                                      ),
+                                    ),
+                                    SizedBox(height: $styles.insets.xxs),
+                                    Text(
+                                      subtitleText.isNotEmpty
+                                          ? '$creatorName • $subtitleText'
+                                          : creatorName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: $styles.text.bodySmall.copyWith(
+                                        fontSize: 12,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
 
@@ -323,6 +338,7 @@ class const VideoCard({
                           tooltip: '更多选项',
                           icon: Icon(
                             Icons.more_vert_rounded,
+                            semanticLabel: '更多选项',
                             size: 20,
                             color: colorScheme.onSurfaceVariant,
                           ),
