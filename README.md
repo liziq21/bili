@@ -39,16 +39,16 @@ flutter pub get
 
 ```bash
 # app 主工程
-cd app && flutter pub get
+(cd app && flutter pub get)
 
 # Flutter packages
-cd packages/bilibili && flutter pub get
-cd packages/youtube && flutter pub get
-cd packages/components && flutter pub get
+(cd packages/bilibili && flutter pub get)
+(cd packages/youtube && flutter pub get)
+(cd packages/components && flutter pub get)
 
 # Dart-only packages
-cd packages/data && dart pub get
-cd packages/model && dart pub get
+(cd packages/data && dart pub get)
+(cd packages/model && dart pub get)
 ```
 
 ## 运行应用
@@ -56,8 +56,10 @@ cd packages/model && dart pub get
 从 `app/` 目录启动应用：
 
 ```bash
-cd app
-flutter run
+(
+  cd app
+  flutter run
+)
 ```
 
 ## 代码生成
@@ -69,14 +71,16 @@ flutter run
 在 `app/` 目录下运行全量生成命令：
 
 ```bash
-cd app
-dart run build_runner build --delete-conflicting-outputs
+(
+  cd app
+  dart run build_runner build --delete-conflicting-outputs
+)
 ```
 
 或在根目录下执行：
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+dart run build_runner build --workspace --delete-conflicting-outputs
 ```
 
 ### 定向生成
@@ -85,12 +89,16 @@ dart run build_runner build --delete-conflicting-outputs
 
 ```bash
 # 定向生成 Drift 数据库代码
-cd app
-dart pub run build_runner build --build-filter="lib/database/**"
+(
+  cd app
+  dart pub run build_runner build --build-filter="lib/database/**"
+)
 
 # 定向生成 go_router 路由代码
-cd app
-dart pub run build_runner build --build-filter="lib/routing/**"
+(
+  cd app
+  dart pub run build_runner build --build-filter="lib/routing/**"
+)
 ```
 
 详细的生成器规范与机制请参考 [app/AGENTS.md](app/AGENTS.md)。生成的文件（如 `*.g.dart`）需要提交至版本控制。
@@ -100,9 +108,11 @@ dart pub run build_runner build --build-filter="lib/routing/**"
 ### app 模块
 
 ```bash
-cd app
-flutter analyze lib/
-flutter test
+(
+  cd app
+  flutter analyze lib/
+  flutter test
+)
 ```
 
 ### Flutter packages
@@ -111,19 +121,25 @@ flutter test
 
 ```bash
 # packages/bilibili
-cd packages/bilibili
-flutter analyze
-flutter test
+(
+  cd packages/bilibili
+  flutter analyze
+  flutter test
+)
 
 # packages/youtube
-cd packages/youtube
-flutter analyze
-flutter test
+(
+  cd packages/youtube
+  flutter analyze
+  flutter test
+)
 
 # packages/components
-cd packages/components
-flutter analyze
-flutter test
+(
+  cd packages/components
+  flutter analyze
+  flutter test
+)
 ```
 
 ### Dart-only packages
@@ -132,14 +148,18 @@ flutter test
 
 ```bash
 # packages/data
-cd packages/data
-dart analyze
-dart test
+(
+  cd packages/data
+  dart analyze
+  dart test
+)
 
 # packages/model
-cd packages/model
-dart analyze
-dart test
+(
+  cd packages/model
+  dart analyze
+  dart test
+)
 ```
 
 ### 完整检查建议

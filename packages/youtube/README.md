@@ -9,7 +9,7 @@ YouTube 相关 API 客户端与远程数据源实现 package。
 
 ## 依赖关系
 
-- **依赖项**：依赖 `packages/data` 和 `packages/model`。
+- **依赖项**：依赖 workspace 子包 `ypi`、`packages/data` 和 `packages/model`。
 - **被依赖**：被 `app` 主工程依赖。
 
 ## 主要目录

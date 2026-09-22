@@ -9,7 +9,7 @@
 
 ## 依赖关系
 
-- **依赖项**：依赖 Flutter SDK、`material_ui` 及 `packages/model`。
+- **依赖项**：依赖 Flutter SDK。
 - **被依赖**：被 `app` 主工程依赖。
 
 ## 主要目录

@@ -9,8 +9,8 @@
 
 ## 依赖关系
 
-- **依赖项**：仅依赖 Dart SDK 及基础工具包 (`equatable`, `meta` 等)。
-- **被依赖**：被 `app` 及其他所有子 package (`packages/data`, `packages/bilibili`, `packages/youtube`, `packages/components`) 依赖。
+- **依赖项**：依赖 `json_annotation`、`freezed_annotation` 和 `equatable`。
+- **被依赖**：被 `app`、`packages/data`、`packages/bilibili` 和 `packages/youtube` 依赖。
 
 ## 主要目录
 
