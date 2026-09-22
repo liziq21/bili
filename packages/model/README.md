@@ -1,39 +1,37 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# model
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
+跨 package 共享的数据模型与值对象 package。
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
+## 作用范围
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- **负责**：定义跨 package 共享的基础数据结构、配置对象（`UserData`, `ServiceSource`, `ThemeConfig`）以及通用的结果类型（`Result<T>`）。
+- **不负责**：不处理具体的业务逻辑、UI 组件或 API 通信。
 
-## Features
+## 依赖关系
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **依赖项**：仅依赖 Dart SDK 及基础工具包 (`equatable`, `meta` 等)。
+- **被依赖**：被 `app` 及其他所有子 package (`packages/data`, `packages/bilibili`, `packages/youtube`, `packages/components`) 依赖。
 
-## Getting started
+## 主要目录
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- `lib/src/`：领域配置模型、数据源类型定义与通用结果类型
 
-## Usage
+## 开发命令
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+本 package 为 **Dart-only package**，请在 `packages/model/` 目录下使用 `dart` 命令：
 
-```dart
-const like = 'sample';
+```bash
+# 依赖安装
+dart pub get
+
+# 静态分析
+dart analyze
+
+# 单元测试
+dart test
 ```
 
-## Additional information
+## 相关规范
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+详细的数据模型不可变性（`@immutable`）与相等性（`EquatableMixin`）约定请参阅：
+- [packages/AGENTS.md](../AGENTS.md)
