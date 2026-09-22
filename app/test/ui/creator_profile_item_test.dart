@@ -1,6 +1,6 @@
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:data/data.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
