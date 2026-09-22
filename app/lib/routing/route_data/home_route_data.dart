@@ -8,7 +8,10 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return BlocProvider<HomeBloc>(
-      create: (context) => HomeBloc(userDataRepository: context.read()),
+      create: (context) => HomeBloc(
+        userDataRepository: context.read(),
+        mediaSources: context.read<List<MediaSource>>(),
+      ),
       child: Builder(
         builder: (context) => HomeScreen(
           onLive: (roomId) {

@@ -58,6 +58,23 @@ class const VideoCard({
     }
   }
 
+  Widget _thumbnailPlaceholder(ColorScheme colorScheme) => Container(
+    color: colorScheme.surfaceContainerHighest,
+    child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
+  );
+
+  Widget _thumbnail(ColorScheme colorScheme) =>
+      switch (videoInfoBase.thumbnailUrl) {
+        final String url when url.isNotEmpty => CachedNetworkImage(
+          imageUrl: url,
+          memCacheWidth: 480,
+          fit: BoxFit.cover,
+          errorBuilder: (context, url, error) =>
+              _thumbnailPlaceholder(colorScheme),
+        ),
+        _ => _thumbnailPlaceholder(colorScheme),
+      };
+
   @override
   Widget build(BuildContext context) {
     if (variant == VideoCardVariant.feed) {
@@ -95,20 +112,7 @@ class const VideoCard({
                 // 封面图区域
                 AspectRatio(
                   aspectRatio: 16 / 9, // 固定的 16:9
-                  child: CachedNetworkImage(
-                    imageUrl: videoInfoBase.thumbnailUrl ?? '',
-                    memCacheWidth: 480,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, url, error) => Container(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      child: const Icon(
-                        Icons.movie_outlined,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+                  child: _thumbnail(Theme.of(context).colorScheme),
                 ),
                 // 文字区域：用 Expanded 承接剩下的所有空间
                 Expanded(
@@ -174,18 +178,7 @@ class const VideoCard({
                 children: [
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: CachedNetworkImage(
-                      imageUrl: videoInfoBase.thumbnailUrl ?? '',
-                      memCacheWidth: 480,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, url, error) => Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.movie_outlined,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
+                    child: _thumbnail(colorScheme),
                   ),
                   // 顶部来源/平台 Badge
                   if (sourceBadge != null && sourceBadge!.isNotEmpty)
@@ -297,7 +290,6 @@ class const VideoCard({
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: $styles.text.bodySmall.copyWith(
-                              fontSize: 12,
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),
