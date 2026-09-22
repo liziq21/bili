@@ -1,39 +1,39 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# components
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+可复用 Flutter UI 组件 package。
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+## 作用范围
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- **负责**：提供跨页面、跨数据源可复用的基础 Flutter UI 组件和样式扩展（如 `ToggleSwitchComponent`）。
+- **不负责**：不包含特定的应用页面逻辑、路由导航或 API 请求。
 
-## Features
+## 依赖关系
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **依赖项**：依赖 Flutter SDK。
+- **被依赖**：被 `app` 主工程依赖。
 
-## Getting started
+## 主要目录
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- `lib/`：通用 UI 组件实现
+- `lib/theme/`：组件层主题与样式定义
+- `test/`：UI 组件测试
 
-## Usage
+## 开发命令
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+本 package 为 **Flutter package**，请在 `packages/components/` 目录下使用 `flutter` 命令：
 
-```dart
-const like = 'sample';
+```bash
+# 依赖安装
+flutter pub get
+
+# 静态分析
+flutter analyze
+
+# 单元测试
+flutter test
 ```
 
-## Additional information
+## 相关规范
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+详细的组件开发规则与 UI 约束请参阅：
+- [packages/AGENTS.md](../AGENTS.md)

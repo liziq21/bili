@@ -1,39 +1,38 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# data
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
+共享数据层接口和抽象 package。
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
+## 作用范围
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- **负责**：定义核心规范模型（`VideoModel`, `LiveRoomModel`, `CreatorProfile` 等）、`RemoteDataSource` 抽象接口、`SearchQuery` 过滤/分页原语以及数据源可选能力接口（如 `VideoDetailRemoteDataSource`, `VideoCommentRemoteDataSource` 等）。
+- **不负责**：不处理具体的 API HTTP 请求实现，不包含特定数据源（如 Bilibili、YouTube）的平台私有解析逻辑。
 
-## Features
+## 依赖关系
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **依赖项**：依赖 `packages/model`（使用共享 `UserData` 与 `Result<T>`）及纯 Dart 基础包。
+- **被依赖**：被 `app` 主工程以及 `packages/bilibili`、`packages/youtube` 等具体数据源包依赖。
 
-## Getting started
+## 主要目录
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- `lib/src/models/`：共享规范数据模型与领域原语
+- `lib/src/remote_data_source.dart`：`RemoteDataSource` 核心抽象与能力接口
 
-## Usage
+## 开发命令
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+本 package 为 **Dart-only package**，请在 `packages/data/` 目录下使用 `dart` 命令：
 
-```dart
-const like = 'sample';
+```bash
+# 依赖安装
+dart pub get
+
+# 静态分析
+dart analyze
+
+# 单元测试
+dart test
 ```
 
-## Additional information
+## 相关规范
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+详细的数据层设计模式与 `sourceId` 约定请参阅：
+- [packages/AGENTS.md](../AGENTS.md)
