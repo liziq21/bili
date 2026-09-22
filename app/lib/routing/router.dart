@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -36,7 +37,9 @@ String _resolveSource(BuildContext context) {
 }
 
 final GoRouter router = GoRouter(
-  debugLogDiagnostics: true,
+  // Security Hardening: Restrict diagnostic logging to non-release builds
+  // to prevent leaking internal navigation traces, deep-link queries, and UI parameters.
+  debugLogDiagnostics: !kReleaseMode,
   onException: (_, GoRouterState state, GoRouter router) {},
   routes: [
     ShellRoute(

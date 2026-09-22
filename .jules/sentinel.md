@@ -17,3 +17,9 @@ Prevention: Always verify `DebugOverlay.enabled = false` and use standard un-int
 Vulnerability: Raw `${state.error}` string interpolations were directly rendered in user-facing UI components (`VideoInfoView`, `VideoCommentsView`, and `App`), exposing internal system exception messages, database paths, or network stack traces to end users.
 Learning: Displaying unformatted or raw exception strings in UI widgets leaks sensitive internal application state, database file locations, or network error details in release builds.
 Prevention: Always replace raw `${state.error}` UI interpolations with localized, generic error messages (e.g., `'视频加载失败，请重试'`) and confine detailed exception logs to internal logging frameworks.
+
+## 2026-09-19 - Restrict Router Diagnostic Logs in Release Builds
+
+Vulnerability: `debugLogDiagnostics: true` was hardcoded in `GoRouter` configuration (`app/lib/routing/router.dart`), outputting all internal navigation state transitions, route paths, deep-link queries, and UI parameters to system logs.
+Learning: Un-guarded router diagnostic logging prints route parameters and state paths to platform-level system logs (e.g., Logcat / os_log) in production release builds, exposing user navigation patterns and parameter payloads.
+Prevention: Always gate router diagnostic logging with `!kReleaseMode` (or `kDebugMode`) from `package:flutter/foundation.dart`.
