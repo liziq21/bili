@@ -23,6 +23,7 @@ dependencies:
     path: bpi
   model:
     path: ../model
+  material_ui: ^1.2.0
   http: ^1.6.0
   intl: any
 

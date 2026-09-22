@@ -1,5 +1,5 @@
+import 'package:flutter/widgets.dart';
 import 'package:data/data.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/repository/search_contents_repository.dart';

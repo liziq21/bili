@@ -23,6 +23,7 @@ dependencies:
     path: ../model
   ypi:
     path: ypi
+  material_ui: ^1.2.0
   meta: ^1.12.0
   equatable: ^2.0.7
   http: ^1.6.0

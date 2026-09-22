@@ -1,5 +1,5 @@
 import 'package:data/data.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SortBar extends StatelessWidget {
   const SortBar({super.key, required this.sortOptions, this.onChanged});
