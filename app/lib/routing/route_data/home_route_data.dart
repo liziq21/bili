@@ -8,24 +8,31 @@ class HomeRouteData extends GoRouteData with $HomeRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return BlocProvider<HomeBloc>(
-      create: (context) => HomeBloc(userDataRepository: context.read()),
+      create: (context) => HomeBloc(
+        userDataRepository: context.read(),
+        mediaSources: context.read<List<MediaSource>>(),
+      ),
       child: Builder(
         builder: (context) => HomeScreen(
           onLive: (roomId) {
-            final source = context.read<HomeBloc>().state.sourceId;
-            context.navigateToLive(roomId, source: source);
+            final sourceId = context.read<HomeBloc>().activeSource?.id;
+            if (sourceId == null) return;
+            context.navigateToLive(roomId, source: sourceId);
           },
           navigateToSearchResult: (keyword) {
-            final source = context.read<HomeBloc>().state.sourceId;
-            context.navigateToSearchResult(keyword, source: source);
+            final sourceId = context.read<HomeBloc>().activeSource?.id;
+            if (sourceId == null) return;
+            context.navigateToSearchResult(keyword, source: sourceId);
           },
           onSpace: (mid) {
-            final source = context.read<HomeBloc>().state.sourceId;
-            context.navigateToSpace(mid, source: source);
+            final sourceId = context.read<HomeBloc>().activeSource?.id;
+            if (sourceId == null) return;
+            context.navigateToSpace(mid, source: sourceId);
           },
           onVideo: (id) {
-            final source = context.read<HomeBloc>().state.sourceId;
-            context.navigateToVideo(id, source: source);
+            final sourceId = context.read<HomeBloc>().activeSource?.id;
+            if (sourceId == null) return;
+            context.navigateToVideo(id, source: sourceId);
           },
         ),
       ),
