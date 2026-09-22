@@ -18,6 +18,40 @@ class _VideoInfoViewState extends State<VideoInfoView> {
   bool _isDescExpanded = false;
   bool _isDanmakuActive = true;
 
+  // ⚡ Bolt Optimization: Extracted static recommendations into compile-time const widgets.
+  // Avoids re-instantiating list of maps, closures, text style copyWith objects,
+  // and non-const layout widgets during VideoBloc state emissions (e.g. like/favorite toggles).
+  static const List<_RelatedVideoCard> _relatedVideoCards = [
+    _RelatedVideoCard(
+      title: 'Flutter 3.24 全新渲染管线实战指南：自定义着色器与深度渲染',
+      author: 'CodeCraft',
+      views: '14.2万',
+      source: 'BILIBILI',
+      time: '4天前',
+      duration: '12:40',
+      badgeColor: Color(0xFF00A1D6),
+    ),
+    _RelatedVideoCard(
+      title:
+          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      author: 'Flutter Dev Hub',
+      views: '290K views',
+      source: 'YOUTUBE',
+      time: '1周前',
+      duration: '18:15',
+      badgeColor: Color(0xFFEF5350),
+    ),
+    _RelatedVideoCard(
+      title: '跨平台框架底层图形层横评：React Native Fabric vs Flutter Impeller',
+      author: '开源音频周刊',
+      views: '3.8万收听',
+      source: 'PEERTUBE / RSS',
+      time: '3天前',
+      duration: '45:20',
+      badgeColor: Color(0xFFFB7299),
+    ),
+  ];
+
   String _formatCount(int count) {
     if (count >= 10000) {
       return '${(count / 10000).toStringAsFixed(1)}万';
@@ -415,7 +449,9 @@ class _VideoInfoViewState extends State<VideoInfoView> {
                   ),
                   const Gap(6),
                   Text(
-                    video.desc != null && video.desc!.isNotEmpty ? video.desc! : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+                    video.desc != null && video.desc!.isNotEmpty
+                        ? video.desc!
+                        : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
                     maxLines: _isDescExpanded ? null : 2,
                     overflow: _isDescExpanded
                         ? TextOverflow.visible
@@ -465,159 +501,146 @@ class _VideoInfoViewState extends State<VideoInfoView> {
             ),
             Gap($styles.insets.xs),
 
-            // Related Video Feed List
-            ..._buildRelatedVideosList(),
+            // Related Video Feed List (reusing const widgets)
+            ..._relatedVideoCards,
           ],
         );
       },
     );
   }
+}
 
-  List<Widget> _buildRelatedVideosList() {
-    final relatedList = [
-      {
-        'title': 'Flutter 3.24 全新渲染管线实战指南：自定义着色器与深度渲染',
-        'author': 'CodeCraft',
-        'views': '14.2万',
-        'source': 'BILIBILI',
-        'time': '4天前',
-        'duration': '12:40',
-        'badgeColor': $styles.colors.accent1,
-      },
-      {
-        'title': 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
-        'author': 'Flutter Dev Hub',
-        'views': '290K views',
-        'source': 'YOUTUBE',
-        'time': '1周前',
-        'duration': '18:15',
-        'badgeColor': Colors.red.shade400,
-      },
-      {
-        'title': '跨平台框架底层图形层横评：React Native Fabric vs Flutter Impeller',
-        'author': '开源音频周刊',
-        'views': '3.8万收听',
-        'source': 'PEERTUBE / RSS',
-        'time': '3天前',
-        'duration': '45:20',
-        'badgeColor': $styles.colors.accent3,
-      },
-    ];
+class _RelatedVideoCard extends StatelessWidget {
+  const _RelatedVideoCard({
+    required this.title,
+    required this.author,
+    required this.views,
+    required this.source,
+    required this.time,
+    required this.duration,
+    required this.badgeColor,
+  });
 
-    return relatedList.map((item) {
-      return Container(
-        margin: EdgeInsets.only(bottom: $styles.insets.xs),
-        padding: EdgeInsets.all($styles.insets.xxs),
-        decoration: BoxDecoration(
-          color: $styles.colors.offWhite,
-          borderRadius: BorderRadius.circular($styles.corners.md),
-        ),
-        child: Row(
-          children: [
-            // Thumbnail with duration badge
-            ClipRRect(
-              borderRadius: BorderRadius.circular($styles.corners.sm),
-              child: Stack(
-                children: [
-                  Container(
-                    width: 120,
-                    height: 68,
-                    color: $styles.colors.greyStrong,
-                    child: Icon(
-                      Icons.play_circle_outline,
-                      color: $styles.colors.white.withValues(alpha: 0.7),
-                      size: 28,
+  final String title;
+  final String author;
+  final String views;
+  final String source;
+  final String time;
+  final String duration;
+  final Color badgeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: $styles.insets.xs),
+      padding: EdgeInsets.all($styles.insets.xxs),
+      decoration: BoxDecoration(
+        color: $styles.colors.offWhite,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+      ),
+      child: Row(
+        children: [
+          // Thumbnail with duration badge
+          ClipRRect(
+            borderRadius: BorderRadius.circular($styles.corners.sm),
+            child: Stack(
+              children: [
+                Container(
+                  width: 120,
+                  height: 68,
+                  color: $styles.colors.greyStrong,
+                  child: Icon(
+                    Icons.play_circle_outline,
+                    color: $styles.colors.white.withValues(alpha: 0.7),
+                    size: 28,
+                  ),
+                ),
+                Positioned(
+                  right: 4,
+                  bottom: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: $styles.colors.black.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      duration,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.white,
+                        fontSize: 10,
+                      ),
                     ),
                   ),
-                  Positioned(
-                    right: 4,
-                    bottom: 4,
-                    child: Container(
+                ),
+              ],
+            ),
+          ),
+          Gap($styles.insets.xs),
+
+          // Metadata column
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: $styles.text.bodySmallBold.copyWith(
+                    color: $styles.colors.black,
+                    height: 1.25,
+                    fontSize: 13,
+                  ),
+                ),
+                const Gap(4),
+                Text(
+                  '$author · $views',
+                  style: $styles.text.bodySmall.copyWith(
+                    color: $styles.colors.caption,
+                    fontSize: 11,
+                  ),
+                ),
+                const Gap(4),
+                Row(
+                  children: [
+                    Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 2,
+                        horizontal: 5,
+                        vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: $styles.colors.black.withValues(alpha: 0.7),
+                        color: badgeColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        item['duration'] as String,
-                        style: $styles.text.bodySmall.copyWith(
-                          color: $styles.colors.white,
-                          fontSize: 10,
+                        source,
+                        style: $styles.text.btn.copyWith(
+                          color: badgeColor,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    const Gap(6),
+                    Text(
+                      time,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.caption,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            Gap($styles.insets.xs),
-
-            // Metadata column
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['title'] as String,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: $styles.text.bodySmallBold.copyWith(
-                      color: $styles.colors.black,
-                      height: 1.25,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const Gap(4),
-                  Text(
-                    '${item['author']} · ${item['views']}',
-                    style: $styles.text.bodySmall.copyWith(
-                      color: $styles.colors.caption,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const Gap(4),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: (item['badgeColor'] as Color).withValues(
-                            alpha: 0.15,
-                          ),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          item['source'] as String,
-                          style: $styles.text.btn.copyWith(
-                            color: item['badgeColor'] as Color,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const Gap(6),
-                      Text(
-                        item['time'] as String,
-                        style: $styles.text.bodySmall.copyWith(
-                          color: $styles.colors.caption,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
+          ),
+        ],
+      ),
+    );
   }
 }
 
