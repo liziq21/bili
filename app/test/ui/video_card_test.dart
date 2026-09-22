@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction, SemanticsFlag;
+
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +49,7 @@ void main() {
   testWidgets('VideoCard feed variant renders badge and creator info', (
     WidgetTester tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     bool tapped = false;
     bool moreTapped = false;
     final video = VideoModel(
@@ -57,7 +60,6 @@ void main() {
       viewCount: 79000,
       duration: 557,
       creatorProfileName: '五盒ll十箱',
-      uploadDate: DateTime.now().subtract(const Duration(days: 1)),
     );
 
     await tester.pumpWidget(
@@ -82,12 +84,27 @@ void main() {
       ),
     );
 
+    expect(
+      find.bySemanticsLabel(
+        'Bilibili，Stitch Feed Video Title，创作者: 五盒ll十箱，时长 09:17，7.9万 观看',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Stitch Feed Video Title'), findsOneWidget);
     expect(find.text('Bilibili'), findsOneWidget);
     expect(find.text('09:17'), findsOneWidget);
     expect(tapped, isFalse);
     expect(find.textContaining('五盒ll十箱'), findsOneWidget);
     expect(find.byTooltip('更多选项'), findsOneWidget);
+
+    final moreOptions = find.bySemanticsLabel('更多选项');
+    expect(moreOptions, findsOneWidget);
+    final moreOptionsSemantics = tester.getSemantics(moreOptions);
+    expect(moreOptionsSemantics.label, '更多选项');
+    final moreOptionsData = moreOptionsSemantics.getSemanticsData();
+    expect(moreOptionsData.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(moreOptionsData.hasAction(SemanticsAction.tap), isTrue);
+    semantics.dispose();
 
     await tester.tap(find.byTooltip('更多选项'));
     expect(moreTapped, isTrue);
