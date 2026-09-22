@@ -23,13 +23,19 @@ class HomeBloc({
     : _userDataRepository = userDataRepository,
       _mediaSources = mediaSources,
       super(const HomeState()) {
-    on<MonitorUserData>(_onMonitorUserData);
+    on<_UserDataChanged>(_onUserDataChanged);
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
     on<FilterSelected>(_onFilterSelected);
     on<FeedNextPageRequested>(_onFeedNextPageRequested);
 
-    add(MonitorUserData());
+    _userDataSubscription = _userDataRepository.data.listen(
+      (userData) => add(_UserDataChanged(userData)),
+      onError: (error, stackTrace) {
+        _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
+      },
+    );
+
     add(FeedsRequested());
   }
 
@@ -39,6 +45,7 @@ class HomeBloc({
   final Map<String, int> _videoRequestVersions = {};
   final Map<String, int> _liveRequestVersions = {};
   int _nextRequestVersion = 0;
+  StreamSubscription<UserData>? _userDataSubscription;
 
   /// 当前生效的数据源，`sourceId` 不可用时回退到首个可用数据源
   MediaSource? get activeSource {
@@ -49,28 +56,28 @@ class HomeBloc({
     );
   }
 
-  Future<void> _onMonitorUserData(
-    MonitorUserData event,
+  @override
+  Future<void> close() {
+    _userDataSubscription?.cancel();
+    return super.close();
+  }
+
+  Future<void> _onUserDataChanged(
+    _UserDataChanged event,
     Emitter<HomeState> emit,
   ) async {
-    await emit.forEach<UserData>(
-      _userDataRepository.data,
-      onData: (userData) {
-        if (userData.sourceId == state.sourceId) return state;
-        // 数据源切换后旧 Feed 不再适用，清空并重新拉取。
-        add(FeedsRequested());
-        return state.copyWith(
-          sourceId: userData.sourceId,
-          filterId: HomeState.allFilterId,
-          videoSections: const [],
-          liveSections: const [],
-        );
-      },
-      onError: (error, stackTrace) {
-        _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
-        return state;
-      },
+    final userData = event.userData;
+    if (userData.sourceId == state.sourceId) return;
+    // 数据源切换后旧 Feed 不再适用，清空并重新拉取。
+    emit(
+      state.copyWith(
+        sourceId: userData.sourceId,
+        filterId: HomeState.allFilterId,
+        videoSections: const [],
+        liveSections: const [],
+      ),
     );
+    add(FeedsRequested());
   }
 
   Future<void> _onServiceSourceChanged(
