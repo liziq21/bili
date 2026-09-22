@@ -82,6 +82,12 @@ void main() {
       ),
     );
 
+    expect(
+      find.bySemanticsLabel(
+        RegExp(r'Bilibili.*Stitch Feed Video Title.*创作者: 五盒ll十箱.*时长 09:17'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Stitch Feed Video Title'), findsOneWidget);
     expect(find.text('Bilibili'), findsOneWidget);
     expect(find.text('09:17'), findsOneWidget);
