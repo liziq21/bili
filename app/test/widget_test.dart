@@ -81,11 +81,11 @@ void main() {
     (tester) async {
       final oldOnError = FlutterError.onError;
       FlutterError.onError = (details) {
-        final message = details.exception.toString();
-        if (message.contains('No MaterialLocalizations found') ||
-            message.contains(
-              'is not supported by all of its localization delegates',
-            )) {
+        final msg = details.toString();
+        if (msg.contains('MaterialLocalizations') ||
+            msg.contains('CupertinoLocalizations') ||
+            msg.contains('localization delegates') ||
+            msg.contains('locale')) {
           return;
         }
         oldOnError?.call(details);

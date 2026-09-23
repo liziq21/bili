@@ -65,7 +65,10 @@ class const App({super.key}) extends StatelessWidget {
                 BilibiliLocalizations.delegate,
                 YoutubeLocalizations.delegate,
               ],
-              supportedLocales: AppLocalizations.supportedLocales,
+              supportedLocales: const [
+                Locale('zh', 'CN'),
+                ...AppLocalizations.supportedLocales,
+              ],
               localeResolutionCallback: (locale, supportedLocales) {
                 if (locale != null) {
                   for (final supportedLocale in supportedLocales) {
@@ -74,7 +77,7 @@ class const App({super.key}) extends StatelessWidget {
                     }
                   }
                 }
-                return AppLocalizations.supportedLocales.first;
+                return supportedLocales.first;
               },
             );
           },

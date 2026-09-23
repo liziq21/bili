@@ -11,15 +11,15 @@ import '../../../data/repository/video_detail_repository.dart';
 part 'video_event.dart';
 part 'video_state.dart';
 
-class VideoBloc extends Bloc<VideoEvent, VideoState> {
-  VideoBloc({required this._repository}) : super(const VideoState()) {
+class VideoBloc({required final VideoDetailRepository _repository})
+    extends Bloc<VideoEvent, VideoState> {
+  this : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
     on<ToggleVideoLike>(_onToggleVideoLike);
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
     on<ToggleCreatorSubscribe>(_onToggleCreatorSubscribe);
   }
 
-  final VideoDetailRepository _repository;
   final _log = Logger('VideoBloc');
 
   Future<void> _onLoadVideoDetail(
@@ -54,7 +54,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     );
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleLike(detail.video.id, detail.isLiked);
+    await _repository.toggleLike(detail.video.id, updatedDetail.isLiked);
   }
 
   Future<void> _onToggleVideoFavorite(
@@ -74,7 +74,10 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     );
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleFavorite(detail.video.id, detail.isFavorited);
+    await _repository.toggleFavorite(
+      detail.video.id,
+      updatedDetail.isFavorited,
+    );
   }
 
   Future<void> _onToggleCreatorSubscribe(
@@ -88,6 +91,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
     final updatedDetail = detail.copyWith(isSubscribed: newIsSubscribed);
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleSubscribe(detail.creator!.id, detail.isSubscribed);
+    await _repository.toggleSubscribe(
+      detail.creator!.id,
+      updatedDetail.isSubscribed,
+    );
   }
 }

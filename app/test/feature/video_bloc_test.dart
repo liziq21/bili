@@ -6,9 +6,13 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
-class FakeVideoDetailRemoteDataSource extends VideoDetailRemoteDataSource {
+class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
+
+  final List<(String, bool)> likeCalls = [];
+  final List<(String, bool)> favoriteCalls = [];
+  final List<(String, bool)> subscribeCalls = [];
 
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async {
@@ -17,12 +21,42 @@ class FakeVideoDetailRemoteDataSource extends VideoDetailRemoteDataSource {
       title: 'Test Video Title $id',
       url: 'https://example.com/$id',
     );
-    final detail = VideoDetail(video: video, likeCount: 10);
+    final creator = CreatorProfile(id: 'creator_1', name: 'Creator 1');
+    final detail = VideoDetail(
+      video: video,
+      creator: creator,
+      likeCount: 10,
+      favoriteCount: 5,
+      isLiked: false,
+      isFavorited: false,
+      isSubscribed: false,
+    );
     return Result.ok(detail);
+  }
+
+  @override
+  Future<Result<bool>> toggleLike(String id, bool isLiked) async {
+    likeCalls.add((id, isLiked));
+    return Result.ok(isLiked);
+  }
+
+  @override
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async {
+    favoriteCalls.add((id, isFavorited));
+    return Result.ok(isFavorited);
+  }
+
+  @override
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async {
+    subscribeCalls.add((creatorId, isSubscribed));
+    return Result.ok(isSubscribed);
   }
 }
 
-class FakeVideoCommentRemoteDataSource extends VideoCommentRemoteDataSource {
+class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -45,11 +79,13 @@ class FakeVideoCommentRemoteDataSource extends VideoCommentRemoteDataSource {
 
 void main() {
   group('VideoBloc Tests', () {
+    late FakeVideoDetailRemoteDataSource fakeDataSource;
     late AppVideoDetailRepository detailRepo;
     late VideoBloc videoBloc;
 
     setUp(() {
-      detailRepo = AppVideoDetailRepository(FakeVideoDetailRemoteDataSource());
+      fakeDataSource = FakeVideoDetailRemoteDataSource();
+      detailRepo = AppVideoDetailRepository(fakeDataSource);
       videoBloc = VideoBloc(repository: detailRepo);
     });
 
@@ -77,23 +113,122 @@ void main() {
       );
     });
 
-    test('ToggleVideoLike updates like state and count', () async {
-      videoBloc.add(const LoadVideoDetail('test_id'));
-      await videoBloc.stream.firstWhere((s) => !s.isLoading);
+    test(
+      'ToggleVideoLike passes updated isLiked value to repository',
+      () async {
+        videoBloc.add(const LoadVideoDetail('test_id'));
+        await videoBloc.stream.firstWhere((s) => !s.isLoading);
 
-      final initialLikeCount = videoBloc.state.videoDetail!.likeCount;
-      videoBloc.add(const ToggleVideoLike());
+        final initialLikeCount = videoBloc.state.videoDetail!.likeCount;
+        videoBloc.add(const ToggleVideoLike());
 
-      await expectLater(
-        videoBloc.stream,
-        emits(
-          predicate<VideoState>((state) {
-            return state.videoDetail!.isLiked == true &&
-                state.videoDetail!.likeCount == initialLikeCount + 1;
-          }),
-        ),
-      );
-    });
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isLiked == true &&
+                  state.videoDetail!.likeCount == initialLikeCount + 1;
+            }),
+          ),
+        );
+
+        expect(fakeDataSource.likeCalls, equals([('test_id', true)]));
+
+        videoBloc.add(const ToggleVideoLike());
+
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isLiked == false &&
+                  state.videoDetail!.likeCount == initialLikeCount;
+            }),
+          ),
+        );
+
+        expect(
+          fakeDataSource.likeCalls,
+          equals([('test_id', true), ('test_id', false)]),
+        );
+      },
+    );
+
+    test(
+      'ToggleVideoFavorite passes updated isFavorited value to repository',
+      () async {
+        videoBloc.add(const LoadVideoDetail('test_id'));
+        await videoBloc.stream.firstWhere((s) => !s.isLoading);
+
+        final initialFavCount = videoBloc.state.videoDetail!.favoriteCount;
+        videoBloc.add(const ToggleVideoFavorite());
+
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isFavorited == true &&
+                  state.videoDetail!.favoriteCount == initialFavCount + 1;
+            }),
+          ),
+        );
+
+        expect(fakeDataSource.favoriteCalls, equals([('test_id', true)]));
+
+        videoBloc.add(const ToggleVideoFavorite());
+
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isFavorited == false &&
+                  state.videoDetail!.favoriteCount == initialFavCount;
+            }),
+          ),
+        );
+
+        expect(
+          fakeDataSource.favoriteCalls,
+          equals([('test_id', true), ('test_id', false)]),
+        );
+      },
+    );
+
+    test(
+      'ToggleCreatorSubscribe passes updated isSubscribed value to repository',
+      () async {
+        videoBloc.add(const LoadVideoDetail('test_id'));
+        await videoBloc.stream.firstWhere((s) => !s.isLoading);
+
+        videoBloc.add(const ToggleCreatorSubscribe());
+
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isSubscribed == true;
+            }),
+          ),
+        );
+
+        expect(fakeDataSource.subscribeCalls, equals([('creator_1', true)]));
+
+        videoBloc.add(const ToggleCreatorSubscribe());
+
+        await expectLater(
+          videoBloc.stream,
+          emits(
+            predicate<VideoState>((state) {
+              return state.videoDetail!.isSubscribed == false;
+            }),
+          ),
+        );
+
+        expect(
+          fakeDataSource.subscribeCalls,
+          equals([('creator_1', true), ('creator_1', false)]),
+        );
+      },
+    );
 
     test(
       'AppVideoDetailRepository returns error when no remote data source',

@@ -1,9 +1,9 @@
-import 'dart:ui' show SemanticsAction, SemanticsFlag;
+import 'dart:ui' show SemanticsAction;
 
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets(
@@ -102,7 +102,7 @@ void main() {
     final moreOptionsSemantics = tester.getSemantics(moreOptions);
     expect(moreOptionsSemantics.label, '更多选项');
     final moreOptionsData = moreOptionsSemantics.getSemanticsData();
-    expect(moreOptionsData.hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(moreOptionsData.flagsCollection.isButton, isTrue);
     expect(moreOptionsData.hasAction(SemanticsAction.tap), isTrue);
     semantics.dispose();
 

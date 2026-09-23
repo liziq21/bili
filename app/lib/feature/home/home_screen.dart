@@ -11,13 +11,29 @@ import 'widgets/home_search_bar.dart';
 import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
 
-class const HomeScreen({
-  super.key,
-  required final Function(String roomId) onLive,
-  required final Function(String searchQuery) navigateToSearchResult,
-  required final Function(String mid) onSpace,
-  required final Function(String id) onVideo,
-}) extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    super.key,
+    required Function(String roomId) onLive,
+    required Function(String searchQuery) navigateToSearchResult,
+    required Function(String mid) onSpace,
+    required Function(String id) onVideo,
+  }) : _onLive = onLive,
+       _navigateToSearchResult = navigateToSearchResult,
+       _onSpace = onSpace,
+       _onVideo = onVideo;
+
+  final Function(String roomId) _onLive;
+  final Function(String searchQuery) _navigateToSearchResult;
+  final Function(String mid) _onSpace;
+  final Function(String id) _onVideo;
+
+  Function(String roomId) get onLive => _onLive;
+  Function(String searchQuery) get navigateToSearchResult =>
+      _navigateToSearchResult;
+  Function(String mid) get onSpace => _onSpace;
+  Function(String id) get onVideo => _onVideo;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -114,21 +130,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ⚡ Bolt Optimization: Isolated AppBar rebuilds via BlocSelector targeting sourceId.
-    // Prevents re-instantiating the entire Scaffold, AppBar, HomeSearchBar, and dialog handlers
-    // during feed pagination, infinite scroll loading, or pull-to-refresh state updates (~16.6ms frame budget protection).
-    return Scaffold(
-      appBar: _HomeAppBar(
-        searchController: _searchController,
-        onSearchSubmitted: _onSearchSubmitted,
-        onLive: widget.onLive,
-        onSpace: widget.onSpace,
-        showIdInputDialog: _showIdInputDialog,
-      ),
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          final activeSource = context.read<HomeBloc>().activeSource!;
-          return RefreshIndicator(
+    final sources = context.mediaSources;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        final activeSource = context.read<HomeBloc>().activeSource!;
+        final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
+        final isCreatorSource = activeSource.id == 'bilibili';
+
+        return Scaffold(
+          appBar: AppBar(
+            titleSpacing: $styles.insets.xs,
+            title: HomeSearchBar(
+              controller: _searchController,
+              sources: sources,
+              activeSourceId: activeSource.id,
+              activeSourceName: activeSource.name,
+              onSubmitted: _onSearchSubmitted,
+            ),
+            actions: [
+              if (hasLiveEntry)
+                IconButton(
+                  icon: Icon(
+                    Icons.live_tv,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  tooltip: '直达直播间',
+                  onPressed: () => _showIdInputDialog(
+                    context: context,
+                    title: '直达直播间',
+                    labelText: '请输入直播间 Room ID：',
+                    hintText: '例如 230023',
+                    defaultId: '230023',
+                    onSubmit: widget.onLive,
+                  ),
+                ),
+              IconButton(
+                icon: Icon(
+                  Icons.account_circle_outlined,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                tooltip: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
+                onPressed: () => _showIdInputDialog(
+                  context: context,
+                  title: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
+                  labelText: '请输入 MID 或频道 ID：',
+                  hintText: isCreatorSource ? '例如 188339' : '频道 ID',
+                  defaultId: isCreatorSource ? '188339' : '',
+                  onSubmit: widget.onSpace,
+                ),
+              ),
+              SizedBox(width: $styles.insets.xs),
+            ],
+          ),
+          body: RefreshIndicator(
             onRefresh: _onRefresh,
             child: CustomScrollView(
               slivers: [
@@ -145,9 +201,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 SliverToBoxAdapter(child: SizedBox(height: $styles.insets.lg)),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -198,81 +254,5 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<HomeBloc>().add(FeedNextPageRequested(section.id)),
         ),
     ];
-  }
-}
-
-class const _HomeAppBar({
-  required final TextEditingController searchController,
-  required final ValueChanged<String> onSearchSubmitted,
-  required final ValueChanged<String> onLive,
-  required final ValueChanged<String> onSpace,
-  required final Future<void> Function({
-    required BuildContext context,
-    required String title,
-    required String labelText,
-    required String hintText,
-    required String defaultId,
-    required ValueChanged<String> onSubmit,
-  })
-  showIdInputDialog,
-}) extends StatelessWidget implements PreferredSizeWidget {
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  Widget build(BuildContext context) {
-    final sources = context.mediaSources;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return BlocSelector<HomeBloc, HomeState, String>(
-      selector: (state) => state.sourceId,
-      builder: (context, sourceId) {
-        final activeSource = context.read<HomeBloc>().activeSource!;
-        final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
-        final isCreatorSource = activeSource.id == 'bilibili';
-
-        return AppBar(
-          titleSpacing: $styles.insets.xs,
-          title: HomeSearchBar(
-            controller: searchController,
-            sources: sources,
-            activeSourceId: activeSource.id,
-            activeSourceName: activeSource.name,
-            onSubmitted: onSearchSubmitted,
-          ),
-          actions: [
-            if (hasLiveEntry)
-              IconButton(
-                icon: Icon(Icons.live_tv, color: colorScheme.onSurfaceVariant),
-                tooltip: '直达直播间',
-                onPressed: () => showIdInputDialog(
-                  context: context,
-                  title: '直达直播间',
-                  labelText: '请输入直播间 Room ID：',
-                  hintText: '例如 230023',
-                  defaultId: '230023',
-                  onSubmit: onLive,
-                ),
-              ),
-            IconButton(
-              icon: Icon(
-                Icons.account_circle_outlined,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              tooltip: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
-              onPressed: () => showIdInputDialog(
-                context: context,
-                title: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
-                labelText: '请输入 MID 或频道 ID：',
-                hintText: isCreatorSource ? '例如 188339' : '频道 ID',
-                defaultId: isCreatorSource ? '188339' : '',
-                onSubmit: onSpace,
-              ),
-            ),
-            SizedBox(width: $styles.insets.xs),
-          ],
-        );
-      },
-    );
   }
 }
