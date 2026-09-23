@@ -82,10 +82,10 @@ void main() {
     'App start smoke test: initializes core assembly and displays home screen',
     (tester) async {
       final oldOnError = FlutterError.onError;
+      var isInitialLoading = true;
       FlutterError.onError = (details) {
         final msg = details.exception.toString();
-        if (msg.contains('No MaterialLocalizations found') ||
-            msg.contains('localization delegates')) {
+        if (isInitialLoading && msg.contains('No MaterialLocalizations found')) {
           return;
         }
         oldOnError?.call(details);
@@ -118,6 +118,7 @@ void main() {
 
       // Pump to trigger AppBloc state change from Loading to LoadSuccess and render MaterialApp.router
       await tester.pump();
+      isInitialLoading = false;
 
       expect(find.byType(AppScaffold), findsOneWidget);
       expect(find.byType(HomeScreen), findsOneWidget);
