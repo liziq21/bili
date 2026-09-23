@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
@@ -94,13 +93,7 @@ class HomeFilterBar extends SliverPersistentHeaderDelegate {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular($styles.corners.lg),
                 ),
-                tooltip: '切换至${filter.label}',
-                onSelected: (selected) {
-                  if (selected) {
-                    HapticFeedback.selectionClick();
-                  }
-                  onSelected(filter);
-                },
+                onSelected: (_) => onSelected(filter),
               ),
             );
           },

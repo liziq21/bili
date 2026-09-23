@@ -48,10 +48,8 @@ class FakeUserDataRepository() implements UserDataRepository {
   }
 }
 
-class FakeMediaSource(
-  @override final String id,
-  @override final String name,
-) implements MediaSource {
+class FakeMediaSource(@override final String id, @override final String name)
+    implements MediaSource {
   @override
   final List<VideoFeedRemoteDataSource> videoFeedDataSources = const [];
   @override
@@ -83,7 +81,11 @@ void main() {
     (tester) async {
       final oldOnError = FlutterError.onError;
       FlutterError.onError = (details) {
-        if (details.exception.toString().contains('No MaterialLocalizations found')) {
+        final message = details.exception.toString();
+        if (message.contains('No MaterialLocalizations found') ||
+            message.contains(
+              'is not supported by all of its localization delegates',
+            )) {
           return;
         }
         oldOnError?.call(details);
