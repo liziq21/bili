@@ -1,7 +1,7 @@
 part of 'home_bloc.dart';
 
 /// 主页筛选项类型
-enum HomeFilterKind {
+enum HomeFilterKind() {
   /// 聚合展示全部 Feed
   all,
 
@@ -28,15 +28,13 @@ final class const HomeFilter({
 }
 
 @immutable
-class HomeState extends Equatable {
-  const HomeState({
-    this.sourceId = 'bilibili',
-    this.filterId = allFilterId,
-    this.isRefreshing = false,
-    this.videoSections = const [],
-    this.liveSections = const [],
-  });
-
+class const HomeState({
+    final String sourceId = 'bilibili',
+    final String filterId = allFilterId,
+    final bool isRefreshing = false,
+    final List<FeedSectionState<VideoModel>> videoSections = const [],
+    final List<FeedSectionState<LiveRoomModel>> liveSections = const [],
+  }) extends Equatable {
   /// “全部推荐”聚合筛选项的标识
   static const String allFilterId = 'aggregate:all';
 
@@ -71,12 +69,6 @@ class HomeState extends Equatable {
       kind: HomeFilterKind.placeholder,
     ),
   ];
-
-  final String sourceId;
-  final String filterId;
-  final bool isRefreshing;
-  final List<FeedSectionState<VideoModel>> videoSections;
-  final List<FeedSectionState<LiveRoomModel>> liveSections;
 
   /// 当前可用的全部筛选项（聚合项 + 数据源 Feed + 本地占位项）
   List<HomeFilter> get filters => [

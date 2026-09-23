@@ -1,6 +1,6 @@
 import 'uri_extensions.dart';
 
-class BiliUtils {
+class BiliUtils() {
   /// 从 URI 中提取并构建路由路径
   ///
   /// 支持的 URI 格式：

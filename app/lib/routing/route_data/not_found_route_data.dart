@@ -2,9 +2,7 @@ part of '../router.dart';
 
 @TypedGoRoute<NotFoundRouteData>(path: Routes.notFound)
 @immutable
-class NotFoundRouteData extends GoRouteData with $NotFoundRouteData {
-  const NotFoundRouteData();
-
+class const NotFoundRouteData() extends GoRouteData with $NotFoundRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final uri = state.extra as Uri?;

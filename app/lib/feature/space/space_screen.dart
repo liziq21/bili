@@ -1,15 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
-class SpaceScreen extends StatefulWidget {
-  const SpaceScreen({super.key, this.onBackClick, required this.mid});
-  final VoidCallback? onBackClick;
-  final String mid;
-
+class const SpaceScreen({super.key, final VoidCallback? onBackClick, required final String mid}) extends StatefulWidget {
   @override
   State<SpaceScreen> createState() => _SpaceScreenState();
 }
 
-class _SpaceScreenState extends State<SpaceScreen> {
+class _SpaceScreenState() extends State<SpaceScreen> {
   @override
   void initState() {
     super.initState();

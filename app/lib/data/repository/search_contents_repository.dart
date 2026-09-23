@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
-abstract interface class SearchContentsRepository<T> {
+abstract interface class SearchContentsRepository<T>() {
   List<SortOption> get sortOptions;
   List<FilterGroup> get filters;
 

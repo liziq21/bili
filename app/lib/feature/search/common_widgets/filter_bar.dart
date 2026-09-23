@@ -5,18 +5,12 @@ import 'filter_group_section.dart';
 
 typedef FilterChangedCallback = void Function(List<FilterGroup> updatedFilters);
 
-class FilterBar extends StatelessWidget {
-  const FilterBar({
+class const FilterBar({
     super.key,
-    required this.filters,
-    required this.onChanged,
-    this.title = '筛选器',
-  });
-
-  final List<FilterGroup> filters;
-  final FilterChangedCallback onChanged;
-  final String title;
-
+    required final List<FilterGroup> filters,
+    required final FilterChangedCallback onChanged,
+    final String title = '筛选器',
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(

@@ -8,12 +8,7 @@ extension BuildContextSearch on BuildContext {
 
 @TypedGoRoute<SearchRouteData>(path: Routes.search)
 @immutable
-class SearchRouteData extends GoRouteData with $SearchRouteData {
-  const SearchRouteData({required this.keyword, this.source});
-
-  final String keyword;
-  final String? source;
-
+class const SearchRouteData({required final String keyword, final String? source}) extends GoRouteData with $SearchRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = source ?? _resolveSource(context);

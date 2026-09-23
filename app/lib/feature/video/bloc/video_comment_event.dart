@@ -1,28 +1,18 @@
 part of 'video_comment_bloc.dart';
 
-sealed class VideoCommentEvent extends Equatable {
-  const VideoCommentEvent();
-
+sealed class const VideoCommentEvent() extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-final class LoadVideoComments extends VideoCommentEvent {
-  const LoadVideoComments(this.videoId);
-  final String videoId;
-
+final class const LoadVideoComments(final String videoId) extends VideoCommentEvent {
   @override
   List<Object?> get props => [videoId];
 }
 
-final class FetchNextCommentPage extends VideoCommentEvent {
-  const FetchNextCommentPage();
-}
+final class const FetchNextCommentPage() extends VideoCommentEvent;
 
-final class ToggleCommentLike extends VideoCommentEvent {
-  const ToggleCommentLike(this.commentId);
-  final String commentId;
-
+final class const ToggleCommentLike(final String commentId) extends VideoCommentEvent {
   @override
   List<Object?> get props => [commentId];
 }

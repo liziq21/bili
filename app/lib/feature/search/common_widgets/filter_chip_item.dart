@@ -1,17 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
-class FilterChipItem extends StatelessWidget {
-  const FilterChipItem({
+class const FilterChipItem({
     super.key,
-    required this.label,
-    required this.isSelected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final bool isSelected;
-  final ValueChanged<bool> onSelected;
-
+    required final String label,
+    required final bool isSelected,
+    required final ValueChanged<bool> onSelected,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceChip(

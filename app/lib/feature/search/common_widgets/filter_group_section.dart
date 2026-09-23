@@ -3,16 +3,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'filter_chip_item.dart';
 
-class FilterGroupSection extends StatelessWidget {
-  const FilterGroupSection({
+class const FilterGroupSection({
     super.key,
-    required this.group,
-    required this.onChanged,
-  });
-
-  final FilterGroup group;
-  final ValueChanged<FilterGroup> onChanged;
-
+    required final FilterGroup group,
+    required final ValueChanged<FilterGroup> onChanged,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -46,12 +41,7 @@ class FilterGroupSection extends StatelessWidget {
   }
 }
 
-class _SingleFilterView extends StatelessWidget {
-  const _SingleFilterView({required this.group, required this.onChanged});
-
-  final SingleFilterGroup group;
-  final ValueChanged<FilterGroup> onChanged;
-
+class const _SingleFilterView({required final SingleFilterGroup group, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -76,12 +66,7 @@ class _SingleFilterView extends StatelessWidget {
   }
 }
 
-class _MultiFilterView extends StatelessWidget {
-  const _MultiFilterView({required this.filter, required this.onChanged});
-
-  final MultiFilterGroup filter;
-  final ValueChanged<FilterGroup> onChanged;
-
+class const _MultiFilterView({required final MultiFilterGroup filter, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -110,12 +95,7 @@ class _MultiFilterView extends StatelessWidget {
   }
 }
 
-class _DateRangeView extends StatelessWidget {
-  const _DateRangeView({required this.group, required this.onChanged});
-
-  final DateRangeFilterGroup group;
-  final ValueChanged<FilterGroup> onChanged;
-
+class const _DateRangeView({required final DateRangeFilterGroup group, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final range = group.range;

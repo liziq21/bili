@@ -6,10 +6,8 @@ import '../table/recent_search_query.dart';
 part 'recent_search_query_dao.g.dart';
 
 @DriftAccessor(tables: [RecentSearchQuery])
-class RecentSearchQueryDao extends DatabaseAccessor<AppDatabase>
+class RecentSearchQueryDao(super.attachedDatabase) extends DatabaseAccessor<AppDatabase>
     with _$RecentSearchQueryDaoMixin {
-  RecentSearchQueryDao(super.attachedDatabase);
-
   Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(
     int limit,
   ) {

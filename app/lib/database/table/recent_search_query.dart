@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 @DataClassName('RecentSearchQueryEntity')
-class RecentSearchQuery extends Table {
+class RecentSearchQuery() extends Table {
   TextColumn get query => text()();
   DateTimeColumn get queriedDate =>
       dateTime().withDefault(currentDateAndTime)();

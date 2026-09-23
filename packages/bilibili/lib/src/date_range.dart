@@ -61,11 +61,9 @@ class DateRange({DateTime? start, DateTime? end}) {
 }
 
 // DO follow API design principles
-class TimeSlot({required this.start, required this.end}) {
+class TimeSlot({required final DateTime start, required final DateTime end}) {
   this : assert(start.isBefore(end), 'Start must be before end');
 
-  final DateTime start;
-  final DateTime end;
 }
 
 extension DateTimeExtension on DateTime {

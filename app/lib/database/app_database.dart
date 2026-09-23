@@ -38,8 +38,8 @@ part 'app_database.g.dart';
     PostDao,
   ],
 )
-class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? queryExecutor])
+class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
+  this
     : super(queryExecutor ?? _openConnection());
 
   @override

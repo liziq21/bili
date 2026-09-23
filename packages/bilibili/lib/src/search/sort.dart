@@ -1,6 +1,8 @@
 import 'package:data/data.dart';
 
-enum ArticleSearchSort implements SortOption {
+enum ArticleSearchSort(
+  @override
+  final String label) implements SortOption {
   totalrank('totalrank'),
   attention('attention'),
   click('click'),
@@ -9,11 +11,6 @@ enum ArticleSearchSort implements SortOption {
   scores('scores'),
   stow('stow');
 
-  const ArticleSearchSort(this.label);
-
-  @override
-  final String label;
-
   @override
   String get value => name;
 
@@ -21,7 +18,9 @@ enum ArticleSearchSort implements SortOption {
   Map<String, String> toQueryParams() => {'order': name};
 }
 
-enum PhotoOrVideoSearchSort implements SortOption {
+enum PhotoOrVideoSearchSort(
+  @override
+  final String label) implements SortOption {
   totalrank('totalrank'),
   click('click'),
   dm('dm'),
@@ -29,11 +28,6 @@ enum PhotoOrVideoSearchSort implements SortOption {
   scores('scores'),
   stow('stow');
 
-  const PhotoOrVideoSearchSort(this.label);
-
-  @override
-  final String label;
-
   @override
   String get value => name;
 
@@ -41,14 +35,11 @@ enum PhotoOrVideoSearchSort implements SortOption {
   Map<String, String> toQueryParams() => {'order': name};
 }
 
-enum LiveRoomSearchSort implements SortOption {
+enum LiveRoomSearchSort(
+  @override
+  final String label) implements SortOption {
   online('online'),
   liveTime('liveTime');
-
-  const LiveRoomSearchSort(this.label);
-
-  @override
-  final String label;
 
   @override
   String get value => name;
@@ -62,7 +53,9 @@ enum LiveRoomSearchSort implements SortOption {
   };
 }
 
-enum UserSearchSort implements SortOption {
+enum UserSearchSort(
+  @override
+  final String label, final UserSearchOrder? order, final OrderSort? orderSort) implements SortOption {
   defaultSort('defaultSort', null, null),
   fonsDescending('fonsDescending', UserSearchOrder.fons, OrderSort.descending),
   fonsAscending('fonsAscending', UserSearchOrder.fons, OrderSort.ascending),
@@ -72,13 +65,6 @@ enum UserSearchSort implements SortOption {
     OrderSort.descending,
   ),
   levelAscending('levelAscending', UserSearchOrder.level, OrderSort.ascending);
-
-  const UserSearchSort(this.label, this.order, this.orderSort);
-
-  @override
-  final String label;
-  final UserSearchOrder? order;
-  final OrderSort? orderSort;
 
   @override
   String get value => name;
@@ -90,7 +76,7 @@ enum UserSearchSort implements SortOption {
   };
 }
 
-enum UserSearchOrder {
+enum UserSearchOrder() {
   defaultOrder,
   fons,
   level;
@@ -103,7 +89,7 @@ enum UserSearchOrder {
   };
 }
 
-enum OrderSort {
+enum OrderSort() {
   descending,
   ascending;
 

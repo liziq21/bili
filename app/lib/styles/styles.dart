@@ -2,18 +2,17 @@
 
 import 'package:material_ui/material_ui.dart';
 
-import '../ui/common/utils/duration_utils.dart';
 import 'colors.dart';
 
 export 'colors.dart';
 
 @immutable
-class AppStyle {
-  AppStyle({
+class AppStyle({
     Size? screenSize,
-    this.disableAnimations = false,
-    this.highContrast = false,
+    final bool disableAnimations = false,
+    final bool highContrast = false,
   }) {
+  this {
     if (screenSize == null) {
       scale = 1;
       return;
@@ -31,16 +30,13 @@ class AppStyle {
   }
 
   late final double scale;
-  late final bool disableAnimations;
-  late final bool highContrast;
-
   /// The current theme colors for the app
   final AppColors colors = AppColors();
 
   /// Rounded edge corner radii
-  late final _Corners corners = _Corners();
+  late final _Corners corners = const _Corners();
 
-  late final _Shadows shadows = _Shadows();
+  late final _Shadows shadows = const _Shadows();
 
   /// Padding and margin values
   late final _Insets insets = _Insets(scale);
@@ -49,47 +45,39 @@ class AppStyle {
   late final _Text text = _Text(scale);
 
   /// Animation Durations
-  late final _Times times = _Times();
+  late final _Times times = _Times(disableAnimations);
 
   /// Shared sizes
   late final _Sizes sizes = _Sizes();
 }
 
-@immutable
-class _Text {
-  _Text(this._scale);
-  final double _scale;
-
-  final Map<String, TextStyle> _titleFonts = {
+class _Text(final double _scale) {
+  final Map<String, TextStyle> _titleFonts = const {
     'en': TextStyle(fontFamily: 'Tenor'),
   };
 
-  final Map<String, TextStyle> _monoTitleFonts = {
+  final Map<String, TextStyle> _monoTitleFonts = const {
     'en': TextStyle(fontFamily: 'B612Mono'),
   };
 
-  final Map<String, TextStyle> _quoteFonts = {
+  final Map<String, TextStyle> _quoteFonts = const {
     'en': TextStyle(fontFamily: 'Cinzel'),
     'zh': TextStyle(fontFamily: 'MaShanZheng'),
   };
 
-  final Map<String, TextStyle> _wonderTitleFonts = {
+  final Map<String, TextStyle> _wonderTitleFonts = const {
     'en': TextStyle(fontFamily: 'Yeseva'),
   };
 
-  final Map<String, TextStyle> _contentFonts = {
+  final Map<String, TextStyle> _contentFonts = const {
     'en': TextStyle(
       fontFamily: 'Raleway',
-      fontFeatures: const [FontFeature.enable('kern')],
+      fontFeatures: [FontFeature.enable('kern')],
     ),
   };
 
   TextStyle _getFontForLocale(Map<String, TextStyle> fonts) {
-    // if (localeLogic.isLoaded) {
-    //   return fonts.entries.firstWhere((x) => x.key == $strings.localeName, orElse: () => fonts.entries.first).value;
-    // } else {
     return fonts.entries.first.value;
-    // }
   }
 
   TextStyle get titleFont => _getFontForLocale(_titleFonts);
@@ -225,64 +213,79 @@ class _Text {
 }
 
 @immutable
-class _Times {
-  _Times();
-  late final Duration fast = 300.animateMs;
-  late final Duration med = 600.animateMs;
-  late final Duration slow = 900.animateMs;
-  late final Duration extraSlow = 1300.animateMs;
-  late final Duration pageTransition = 200.animateMs;
+class const _Times(final bool disableAnimations) {
+  final Duration fast = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 300);
+  final Duration med = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 600);
+  final Duration slow = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 900);
+  final Duration extraSlow = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 1300);
+  final Duration pageTransition = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 200);
 }
 
 @immutable
-class _Corners {
-  late final double sm = 4;
-  late final double md = 8;
-  late final double lg = 32;
+class const _Corners() {
+  final double sm = 4;
+  final double md = 8;
+  final double lg = 32;
 }
 
-// TODO: add, @immutable when design is solidified
-class _Sizes {
+class _Sizes() {
   double get maxContentWidth1 => 800;
   double get maxContentWidth2 => 600;
   double get maxContentWidth3 => 500;
-  final Size minAppSize = Size(380, 650);
+  final Size minAppSize = const Size(380, 650);
 }
 
 @immutable
-class _Insets {
-  _Insets(this._scale);
-  final double _scale;
+class const _Insets(double scale) {
+  this
+      : xxs = 4 * scale,
+        xs = 8 * scale,
+        sm = 16 * scale,
+        md = 24 * scale,
+        lg = 32 * scale,
+        xl = 48 * scale,
+        xxl = 56 * scale,
+        offset = 80 * scale;
 
-  late final double xxs = 4 * _scale;
-  late final double xs = 8 * _scale;
-  late final double sm = 16 * _scale;
-  late final double md = 24 * _scale;
-  late final double lg = 32 * _scale;
-  late final double xl = 48 * _scale;
-  late final double xxl = 56 * _scale;
-  late final double offset = 80 * _scale;
+  final double xxs;
+  final double xs;
+  final double sm;
+  final double md;
+  final double lg;
+  final double xl;
+  final double xxl;
+  final double offset;
 }
 
 @immutable
-class _Shadows {
-  final textSoft = [
+class const _Shadows() {
+  final textSoft = const [
     Shadow(
-      color: Colors.black.withValues(alpha: .25),
+      color: Color.fromRGBO(0, 0, 0, 0.25),
       offset: Offset(0, 2),
       blurRadius: 4,
     ),
   ];
-  final text = [
+  final text = const [
     Shadow(
-      color: Colors.black.withValues(alpha: .6),
+      color: Color.fromRGBO(0, 0, 0, 0.6),
       offset: Offset(0, 2),
       blurRadius: 2,
     ),
   ];
-  final textStrong = [
+  final textStrong = const [
     Shadow(
-      color: Colors.black.withValues(alpha: .6),
+      color: Color.fromRGBO(0, 0, 0, 0.6),
       offset: Offset(0, 4),
       blurRadius: 6,
     ),

@@ -10,9 +10,7 @@ typedef ArticleMediaCompanion = (MediaCompanion, ArticleCompanion);
 typedef ArticleMediaEntity = (MediaEntity, ArticleEntity);
 
 @DriftAccessor(tables: [Article, Media])
-class ArticleDao extends DatabaseAccessor<AppDatabase> with _$ArticleDaoMixin {
-  ArticleDao(super.db);
-
+class ArticleDao(super.db) extends DatabaseAccessor<AppDatabase> with _$ArticleDaoMixin {
   /// 插入或更新文章（如果已存在相同 serviceId + originalId + type='article'，则更新）
   Future<void> insertArticle(ArticleMediaCompanion articleMedia) async {
     final (mediaCompanion, articleCompanion) = articleMedia;

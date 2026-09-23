@@ -12,7 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
-class MockUserDataRepository implements UserDataRepository {
+class MockUserDataRepository() implements UserDataRepository {
   final StreamController<UserData> _controller =
       StreamController<UserData>.broadcast();
   UserData _currentData = const UserData();
@@ -48,21 +48,14 @@ class MockUserDataRepository implements UserDataRepository {
 }
 
 /// 可控的视频 Feed 数据源，避免测试发起真实网络请求
-class FakeVideoFeed implements VideoFeedRemoteDataSource {
-  FakeVideoFeed({
-    required this.id,
-    required this.title,
-    required this.pages,
-    this.failure = false,
-  });
-
-  @override
-  final String id;
-  @override
-  final String title;
-  final int pages;
-  final bool failure;
-
+class FakeVideoFeed({
+    @override
+  required final String id,
+    @override
+  required final String title,
+    required final int pages,
+    final bool failure = false,
+  }) implements VideoFeedRemoteDataSource {
   int fetchCount = 0;
 
   @override
@@ -90,14 +83,11 @@ class FakeVideoFeed implements VideoFeedRemoteDataSource {
 }
 
 /// 可控的直播 Feed 数据源
-class FakeLiveFeed implements LiveRoomFeedRemoteDataSource {
-  FakeLiveFeed({required this.id, required this.title});
-
+class FakeLiveFeed({
   @override
-  final String id;
+  required final String id,
   @override
-  final String title;
-
+  required final String title}) implements LiveRoomFeedRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -193,9 +183,7 @@ class ControlledLiveFeed({
   }
 }
 
-class FakeLiveRoomSearch implements LiveRoomSearchRemoteDataSource {
-  const FakeLiveRoomSearch();
-
+class const FakeLiveRoomSearch() implements LiveRoomSearchRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -214,26 +202,18 @@ class FakeLiveRoomSearch implements LiveRoomSearchRemoteDataSource {
   );
 }
 
-class FakeMediaSource implements MediaSource {
-  FakeMediaSource({
-    required this.id,
-    required this.name,
-    this.videoFeedDataSources = const [],
-    this.liveRoomFeedDataSources = const [],
-    this.liveRoomSearchDataSource,
-  });
-
-  @override
-  final String id;
-  @override
-  final String name;
-  @override
-  final List<VideoFeedRemoteDataSource> videoFeedDataSources;
-  @override
-  final List<LiveRoomFeedRemoteDataSource> liveRoomFeedDataSources;
-  @override
-  final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource;
-
+class FakeMediaSource({
+    @override
+  required final String id,
+    @override
+  required final String name,
+    @override
+  final List<VideoFeedRemoteDataSource> videoFeedDataSources = const [],
+    @override
+  final List<LiveRoomFeedRemoteDataSource> liveRoomFeedDataSources = const [],
+    @override
+  final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource,
+  }) implements MediaSource {
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
   @override

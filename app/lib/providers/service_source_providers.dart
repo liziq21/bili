@@ -17,19 +17,13 @@ import '../data/repository/video_detail_repository.dart';
 ///
 /// 当导航到特定数据源页面（如 Bilibili 或 YouTube）时，
 /// 负责为组件树条件注入该数据源实例及其实现的相关 Repository。
-class ServiceSourceProviders extends StatelessWidget {
-  const ServiceSourceProviders({
+class const ServiceSourceProviders({
     super.key,
-    required this.source,
-    required this.child,
-  });
-
-  /// 数据源标识名称（如 'bilibili', 'youtube'）
-  final String source;
-
-  /// 子组件
-  final Widget child;
-
+    /// 数据源标识名称（如 'bilibili', 'youtube'）
+  required final String source,
+    /// 子组件
+  required final Widget child,
+  }) extends StatelessWidget {
   /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
   MediaSource? _createMediaSource(String sourceName) =>
       switch (sourceName.toLowerCase()) {

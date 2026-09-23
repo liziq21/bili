@@ -10,9 +10,7 @@ typedef PostMediaCompanion = (MediaCompanion, PostCompanion);
 typedef PostMediaEntity = (MediaEntity, PostEntity);
 
 @DriftAccessor(tables: [Post, Media])
-class PostDao extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
-  PostDao(super.db);
-
+class PostDao(super.db) extends DatabaseAccessor<AppDatabase> with _$PostDaoMixin {
   /// 插入或更新图文（如果已存在相同 serviceId + originalId + type='post'，则更新）
   Future<void> insertPost(PostMediaCompanion postMedia) async {
     final (mediaCompanion, postCompanion) = postMedia;

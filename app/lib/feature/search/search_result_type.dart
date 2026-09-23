@@ -1,6 +1,6 @@
 import '../../l10n/localization_file/app_localizations.dart';
 
-enum SearchResultType {
+enum SearchResultType() {
   all,
   video;
 

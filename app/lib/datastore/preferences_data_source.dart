@@ -120,7 +120,7 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
   }
 }
 
-class const PreferencesKey<T>._(this.name, this.defaultValue) {
+class const PreferencesKey<T>._(final String name, final T defaultValue) {
   static const sourceId = PreferencesKey<String>._('SOURCE_ID', 'bilibili');
   static const themeConfig = PreferencesKey<String>._(
     'THEME_CONFIG',
@@ -131,9 +131,6 @@ class const PreferencesKey<T>._(this.name, this.defaultValue) {
     'USE_DYNAMIC_COLOR',
     true,
   );
-
-  final String name;
-  final T defaultValue;
 
   Future<T> _getData(SharedPreferencesAsync pref) async {
     final Future<Object?> data = switch (T) {

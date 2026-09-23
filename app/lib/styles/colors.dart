@@ -4,7 +4,7 @@ import 'color_utils.dart';
 
 export 'color_extensions.dart';
 
-class AppColors {
+class AppColors() {
   /// Common
   final Color accent1 = Color(0xFFE4935D);
   final Color accent2 = Color(0xFFBEABA1);

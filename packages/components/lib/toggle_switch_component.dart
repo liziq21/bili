@@ -45,7 +45,7 @@ class ToggleSwitchComponent extends StatefulWidget {
   State<ToggleSwitchComponent> createState() => _ToggleSwitchComponentState();
 }
 
-class _ToggleSwitchComponentState extends State<ToggleSwitchComponent> {
+class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
   bool? _selected;
   _ToggleSwitchExecutionState _executionState =
       _ToggleSwitchExecutionState.idle;
@@ -226,4 +226,4 @@ class _ToggleSwitchComponentState extends State<ToggleSwitchComponent> {
   }
 }
 
-enum _ToggleSwitchExecutionState { idle, inProgress, successful }
+enum _ToggleSwitchExecutionState() { idle, inProgress, successful }

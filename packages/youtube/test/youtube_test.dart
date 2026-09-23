@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:data/data.dart';
 import 'package:flutter/widgets.dart' hide Page;
 import 'package:model/model.dart';
@@ -27,13 +28,13 @@ void main() {
       expect(videoDS.filters, isNotEmpty);
       expect(videoDS.filters.length, equals(3));
 
-      youtube.close();
+      unawaited(youtube.close());
     });
 
     test('Remote data sources sanitize error handling and do not leak stack traces into Result.error', () async {
       final youtube = YouTube();
 
-      final ds = youtube.videoSearchDataSource as YouTubeVideoSearchRemoteDataSource;
+      final ds = youtube.videoSearchDataSource;
       final videoRes = await ds.searchVideoWithOptions(
         SearchQuery(
           query: 'test',
@@ -53,7 +54,7 @@ void main() {
         expect(videoRes.toString(), isNot(contains('\n#0')));
       }
 
-      youtube.close();
+      await youtube.close();
     });
 
     test('Search sort and filter options localize correctly in Chinese (zh) and English (en)', () {

@@ -2,9 +2,7 @@ part of '../router.dart';
 
 @TypedGoRoute<HomeRouteData>(path: Routes.home)
 @immutable
-class HomeRouteData extends GoRouteData with $HomeRouteData {
-  const HomeRouteData();
-
+class const HomeRouteData() extends GoRouteData with $HomeRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return BlocProvider<HomeBloc>(

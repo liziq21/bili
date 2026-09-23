@@ -7,7 +7,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 /// 平台与网络环境工具类
 ///
 /// 提供跨平台设备类型判断（桌面端/移动端/Web）以及网络连接状态检测。
-abstract final class PlatformInfo {
+abstract final class PlatformInfo() {
   static const _desktopPlatforms = [
     TargetPlatform.macOS,
     TargetPlatform.windows,

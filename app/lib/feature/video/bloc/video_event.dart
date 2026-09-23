@@ -1,28 +1,17 @@
 part of 'video_bloc.dart';
 
-sealed class VideoEvent extends Equatable {
-  const VideoEvent();
-
+sealed class const VideoEvent() extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-final class LoadVideoDetail extends VideoEvent {
-  const LoadVideoDetail(this.id);
-  final String id;
-
+final class const LoadVideoDetail(final String id) extends VideoEvent {
   @override
   List<Object?> get props => [id];
 }
 
-final class ToggleVideoLike extends VideoEvent {
-  const ToggleVideoLike();
-}
+final class const ToggleVideoLike() extends VideoEvent;
 
-final class ToggleVideoFavorite extends VideoEvent {
-  const ToggleVideoFavorite();
-}
+final class const ToggleVideoFavorite() extends VideoEvent;
 
-final class ToggleCreatorSubscribe extends VideoEvent {
-  const ToggleCreatorSubscribe();
-}
+final class const ToggleCreatorSubscribe() extends VideoEvent;
