@@ -1,9 +1,7 @@
-
 name: Enable Auto-Merge for Jules
 
 on:
   pull_request:
-    # 增加了 synchronize 和 review_requested，确保在代码追加或评审变动时始终有效
     types: [assigned, opened, reopened, edited, synchronize, review_requested]
 
 permissions:
@@ -13,13 +11,14 @@ permissions:
 jobs:
   enable-automerge:
     runs-on: ubuntu-latest
-    # 依然针对 google-labs-jules[bot] 指派的 PR 触发
-    if: contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
+    # 💡 优化条件：不管是作者是 Jules，还是指派人里有 Jules，都触发自动合并
+    if: |
+      github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
+      contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
     steps:
       - name: Enable GitHub auto-merge for this PR
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ github.event.pull_request.number }}
-          # 推荐使用 squash 保持主分支提交历史整洁，也可以维持原样 'merge'
-          merge-method: squash 
+          merge-method: squash
