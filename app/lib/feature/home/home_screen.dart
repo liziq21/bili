@@ -130,61 +130,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sources = context.mediaSources;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        final activeSource = context.read<HomeBloc>().activeSource!;
-        final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
-        final isCreatorSource = activeSource.id == 'bilibili';
-
-        return Scaffold(
-          appBar: AppBar(
-            titleSpacing: $styles.insets.xs,
-            title: HomeSearchBar(
-              controller: _searchController,
-              sources: sources,
-              activeSourceId: activeSource.id,
-              activeSourceName: activeSource.name,
-              onSubmitted: _onSearchSubmitted,
-            ),
-            actions: [
-              if (hasLiveEntry)
-                IconButton(
-                  icon: Icon(
-                    Icons.live_tv,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  tooltip: '直达直播间',
-                  onPressed: () => _showIdInputDialog(
-                    context: context,
-                    title: '直达直播间',
-                    labelText: '请输入直播间 Room ID：',
-                    hintText: '例如 230023',
-                    defaultId: '230023',
-                    onSubmit: widget.onLive,
-                  ),
-                ),
-              IconButton(
-                icon: Icon(
-                  Icons.account_circle_outlined,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                tooltip: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
-                onPressed: () => _showIdInputDialog(
-                  context: context,
-                  title: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
-                  labelText: '请输入 MID 或频道 ID：',
-                  hintText: isCreatorSource ? '例如 188339' : '频道 ID',
-                  defaultId: isCreatorSource ? '188339' : '',
-                  onSubmit: widget.onSpace,
-                ),
-              ),
-              SizedBox(width: $styles.insets.xs),
-            ],
-          ),
-          body: RefreshIndicator(
+    // ⚡ Bolt Optimization: Isolated AppBar rebuilds via BlocSelector targeting sourceId.
+    // Prevents re-instantiating the entire Scaffold, AppBar, HomeSearchBar, and dialog handlers
+    // during feed pagination, infinite scroll loading, or pull-to-refresh state updates (~16.6ms frame budget protection).
+    return Scaffold(
+      appBar: _HomeAppBar(
+        searchController: _searchController,
+        onSearchSubmitted: _onSearchSubmitted,
+        onLive: widget.onLive,
+        onSpace: widget.onSpace,
+        showIdInputDialog: _showIdInputDialog,
+      ),
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          final activeSource = context.read<HomeBloc>().activeSource!;
+          return RefreshIndicator(
             onRefresh: _onRefresh,
             child: CustomScrollView(
               slivers: [
@@ -201,9 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 SliverToBoxAdapter(child: SizedBox(height: $styles.insets.lg)),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -254,5 +214,89 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<HomeBloc>().add(FeedNextPageRequested(section.id)),
         ),
     ];
+  }
+}
+
+class _HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _HomeAppBar({
+    required this.searchController,
+    required this.onSearchSubmitted,
+    required this.onLive,
+    required this.onSpace,
+    required this.showIdInputDialog,
+  });
+
+  final TextEditingController searchController;
+  final ValueChanged<String> onSearchSubmitted;
+  final ValueChanged<String> onLive;
+  final ValueChanged<String> onSpace;
+  final Future<void> Function({
+    required BuildContext context,
+    required String title,
+    required String labelText,
+    required String hintText,
+    required String defaultId,
+    required ValueChanged<String> onSubmit,
+  })
+  showIdInputDialog;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    final sources = context.mediaSources;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return BlocSelector<HomeBloc, HomeState, String>(
+      selector: (state) => state.sourceId,
+      builder: (context, sourceId) {
+        final activeSource = context.read<HomeBloc>().activeSource!;
+        final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
+        final isCreatorSource = activeSource.id == 'bilibili';
+
+        return AppBar(
+          titleSpacing: $styles.insets.xs,
+          title: HomeSearchBar(
+            controller: searchController,
+            sources: sources,
+            activeSourceId: activeSource.id,
+            activeSourceName: activeSource.name,
+            onSubmitted: onSearchSubmitted,
+          ),
+          actions: [
+            if (hasLiveEntry)
+              IconButton(
+                icon: Icon(Icons.live_tv, color: colorScheme.onSurfaceVariant),
+                tooltip: '直达直播间',
+                onPressed: () => showIdInputDialog(
+                  context: context,
+                  title: '直达直播间',
+                  labelText: '请输入直播间 Room ID：',
+                  hintText: '例如 230023',
+                  defaultId: '230023',
+                  onSubmit: onLive,
+                ),
+              ),
+            IconButton(
+              icon: Icon(
+                Icons.account_circle_outlined,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              tooltip: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
+              onPressed: () => showIdInputDialog(
+                context: context,
+                title: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
+                labelText: '请输入 MID 或频道 ID：',
+                hintText: isCreatorSource ? '例如 188339' : '频道 ID',
+                defaultId: isCreatorSource ? '188339' : '',
+                onSubmit: onSpace,
+              ),
+            ),
+            SizedBox(width: $styles.insets.xs),
+          ],
+        );
+      },
+    );
   }
 }
