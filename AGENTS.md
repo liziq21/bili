@@ -28,9 +28,15 @@ For directory-specific guidelines, refer to:
 - Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
 
 #### Primary Constructors & Concise Syntax (Dart 3.13+)
-- **Declaring Fields**: Use `var` or `final` in parameter headers to implicitly declare and initialize fields.
+- **Primary constructors require parameters.** Use `var`/`final` in the parameter header to implicitly declare and initialize fields.
   ```dart
   class Person(final String name, var int age);
+  ```
+- **No-arg classes:** Do NOT write a primary-constructor header on a class that has no parameters. Write the class name directly with an empty (or concise `;`) body.
+  ```dart
+  sealed class SearchEvent {}
+  class MonitorRecentSearches extends SearchEvent {}
+  // NOT: sealed class SearchEvent() {}  // empty header is noise
   ```
 - **Constant Constructors**: Place `const` before `class`, `enum`, or `extension type`.
   ```dart
