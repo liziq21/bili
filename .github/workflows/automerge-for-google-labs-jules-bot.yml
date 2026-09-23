@@ -11,7 +11,6 @@ permissions:
 jobs:
   enable-automerge:
     runs-on: ubuntu-latest
-    # 💡 优化条件：不管是作者是 Jules，还是指派人里有 Jules，都触发自动合并
     if: |
       github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
       contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
