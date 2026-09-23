@@ -1,0 +1,34 @@
+language: "zh-CN"
+
+reviews:
+  auto_review:
+    enabled: true
+    drafts: false
+    auto_incremental_review: true
+    ignore_usernames:
+      - "n24q02m"
+      - "dependabot[bot]"
+      - "renovate[bot]"
+      - "github-actions[bot]"
+      - "devin-ai-integration[bot]"
+      # 💡 保持注释状态：确保不要忽略 google-labs-jules[bot]，否则 CodeRabbit 不会去审查它提的 PR
+      # - "google-labs-jules[bot]"
+  profile: "chill"
+  
+  # 🔍 【关键修改】开启请求变更流水线。
+  # 当 CodeRabbit 评审发现问题（如严重 Bug、安全隐患）时，会向 PR 提交 "Request Changes" 状态。
+  request_changes_workflow: true
+  
+  # 💡 【建议添加】开启 Commit 状态同步，这能让 GitHub 分支保护规则更精准地捕捉到 CodeRabbit 的评审状态。
+  commit_status: true
+  
+  high_level_summary: true
+
+issue_enrichment:
+  auto_enrich:
+    enabled: true
+  planning:
+    enabled: true
+
+chat:
+  auto_reply: false
