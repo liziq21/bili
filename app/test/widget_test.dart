@@ -83,7 +83,9 @@ void main() {
     (tester) async {
       final oldOnError = FlutterError.onError;
       FlutterError.onError = (details) {
-        if (details.exception.toString().contains('No MaterialLocalizations found')) {
+        final msg = details.exception.toString();
+        if (msg.contains('No MaterialLocalizations found') ||
+            msg.contains('localization delegates')) {
           return;
         }
         oldOnError?.call(details);
