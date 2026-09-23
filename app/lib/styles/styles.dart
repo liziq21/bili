@@ -45,7 +45,7 @@ class AppStyle({
   late final _Text text = _Text(scale);
 
   /// Animation Durations
-  late final _Times times = const _Times();
+  late final _Times times = _Times(disableAnimations);
 
   /// Shared sizes
   late final _Sizes sizes = _Sizes();
@@ -213,12 +213,22 @@ class _Text(final double _scale) {
 }
 
 @immutable
-class const _Times() {
-  final Duration fast = const Duration(milliseconds: 300);
-  final Duration med = const Duration(milliseconds: 600);
-  final Duration slow = const Duration(milliseconds: 900);
-  final Duration extraSlow = const Duration(milliseconds: 1300);
-  final Duration pageTransition = const Duration(milliseconds: 200);
+class const _Times(final bool disableAnimations) {
+  final Duration fast = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 300);
+  final Duration med = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 600);
+  final Duration slow = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 900);
+  final Duration extraSlow = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 1300);
+  final Duration pageTransition = disableAnimations
+      ? const Duration(milliseconds: 1)
+      : const Duration(milliseconds: 200);
 }
 
 @immutable
