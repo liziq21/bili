@@ -62,6 +62,7 @@ class const App({super.key}) extends StatelessWidget {
               routerConfig: router,
               localizationsDelegates: const [
                 ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
                 BilibiliLocalizations.delegate,
                 YoutubeLocalizations.delegate,
               ],
