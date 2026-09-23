@@ -95,8 +95,10 @@ class HomeFilterBar extends SliverPersistentHeaderDelegate {
                   borderRadius: BorderRadius.circular($styles.corners.lg),
                 ),
                 tooltip: '切换至${filter.label}',
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
+                onSelected: (selected) {
+                  if (selected) {
+                    HapticFeedback.selectionClick();
+                  }
                   onSelected(filter);
                 },
               ),

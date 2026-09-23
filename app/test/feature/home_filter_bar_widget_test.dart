@@ -1,5 +1,6 @@
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/widgets/home_filter_bar.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -56,11 +57,33 @@ void main() {
       final secondChip = tester.widget<FilterChip>(chipFinder.at(1));
       expect(secondChip.tooltip, '切换至热门');
 
-      await tester.tap(chipFinder.at(1));
-      await tester.pump();
+      final platformCalls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+            platformCalls.add(call);
+          });
+      try {
+        await tester.tap(chipFinder.at(1));
+        await tester.pump();
+      } finally {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null);
+      }
 
       expect(selected, isTrue);
       expect(selectedFilter?.id, 'bilibili:hot');
+      expect(
+        platformCalls,
+        contains(
+          isA<MethodCall>()
+              .having((call) => call.method, 'method', 'HapticFeedback.vibrate')
+              .having(
+                (call) => call.arguments,
+                'arguments',
+                'HapticFeedbackType.selectionClick',
+              ),
+        ),
+      );
     },
   );
 }
