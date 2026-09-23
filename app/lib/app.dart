@@ -63,10 +63,8 @@ class const App({super.key}) extends StatelessWidget {
               themeMode: themeMode,
               routerConfig: router,
               localizationsDelegates: const [
-                AppLocalizations.delegate,
+                ...AppLocalizations.localizationsDelegates,
                 ...GlobalMaterialLocalizations.delegates,
-                flutter_localizations.GlobalMaterialLocalizations.delegate,
-                flutter_localizations.GlobalCupertinoLocalizations.delegate,
                 BilibiliLocalizations.delegate,
                 YoutubeLocalizations.delegate,
               ],
