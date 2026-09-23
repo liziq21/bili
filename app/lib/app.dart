@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'
-    as flutter_localizations;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
@@ -64,7 +62,6 @@ class const App({super.key}) extends StatelessWidget {
               routerConfig: router,
               localizationsDelegates: const [
                 ...AppLocalizations.localizationsDelegates,
-                ...GlobalMaterialLocalizations.delegates,
                 BilibiliLocalizations.delegate,
                 YoutubeLocalizations.delegate,
               ],

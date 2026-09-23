@@ -11,29 +11,13 @@ import 'widgets/home_search_bar.dart';
 import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({
-    super.key,
-    required Function(String roomId) onLive,
-    required Function(String searchQuery) navigateToSearchResult,
-    required Function(String mid) onSpace,
-    required Function(String id) onVideo,
-  }) : _onLive = onLive,
-       _navigateToSearchResult = navigateToSearchResult,
-       _onSpace = onSpace,
-       _onVideo = onVideo;
-
-  final Function(String roomId) _onLive;
-  final Function(String searchQuery) _navigateToSearchResult;
-  final Function(String mid) _onSpace;
-  final Function(String id) _onVideo;
-
-  Function(String roomId) get onLive => _onLive;
-  Function(String searchQuery) get navigateToSearchResult =>
-      _navigateToSearchResult;
-  Function(String mid) get onSpace => _onSpace;
-  Function(String id) get onVideo => _onVideo;
-
+class const HomeScreen({
+  super.key,
+  required final Function(String roomId) onLive,
+  required final Function(String searchQuery) navigateToSearchResult,
+  required final Function(String mid) onSpace,
+  required final Function(String id) onVideo,
+}) extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -217,20 +201,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _HomeAppBar({
-    required this.searchController,
-    required this.onSearchSubmitted,
-    required this.onLive,
-    required this.onSpace,
-    required this.showIdInputDialog,
-  });
-
-  final TextEditingController searchController;
-  final ValueChanged<String> onSearchSubmitted;
-  final ValueChanged<String> onLive;
-  final ValueChanged<String> onSpace;
-  final Future<void> Function({
+class const _HomeAppBar({
+  required final TextEditingController searchController,
+  required final ValueChanged<String> onSearchSubmitted,
+  required final ValueChanged<String> onLive,
+  required final ValueChanged<String> onSpace,
+  required final Future<void> Function({
     required BuildContext context,
     required String title,
     required String labelText,
@@ -238,8 +214,8 @@ class _HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     required String defaultId,
     required ValueChanged<String> onSubmit,
   })
-  showIdInputDialog;
-
+  showIdInputDialog,
+}) extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
