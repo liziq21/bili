@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'media.dart';
 
 @DataClassName('VideoEntity')
-class Video extends Table {
+class Video() extends Table {
   IntColumn get mediaId => integer().references(
     Media,
     #internalId,

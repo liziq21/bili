@@ -27,14 +27,14 @@ class AppBloc({required final UserDataRepository _userDataRepository})
   }
 }
 
-sealed class AppEvent {}
+sealed class AppEvent() {}
 
-class AppStarted extends AppEvent {}
+class AppStarted() extends AppEvent {}
 
-sealed class AppState;
+sealed class AppState();
 
 class LoadFailure(final Object error) extends AppState;
 
-class Loading extends AppState;
+class Loading() extends AppState;
 
 class LoadSuccess(final UserData userData) extends AppState;

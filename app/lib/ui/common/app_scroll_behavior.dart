@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../utils/platfrom_info.dart';
 
-class AppScrollBehavior extends ScrollBehavior {
+class const AppScrollBehavior() extends ScrollBehavior {
   @override
   // Add mouse drag on desktop for easier responsive testing
   Set<PointerDeviceKind> get dragDevices {

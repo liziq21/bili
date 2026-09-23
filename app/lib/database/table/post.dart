@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'media.dart';
 
 @DataClassName('PostEntity')
-class Post extends Table {
+class Post() extends Table {
   IntColumn get mediaId =>
       integer().references(Media, #internalId, onDelete: KeyAction.cascade)();
   TextColumn get content => text()();

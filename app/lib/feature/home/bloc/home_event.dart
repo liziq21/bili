@@ -1,6 +1,6 @@
 part of 'home_bloc.dart';
 
-sealed class HomeEvent {}
+sealed class HomeEvent() {}
 
 class _UserDataChanged(final UserData userData) extends HomeEvent;
 

@@ -7,12 +7,7 @@ extension BuildContextSpace on BuildContext {
 
 @TypedGoRoute<SpaceRouteData>(path: '${Routes.space}/:mid')
 @immutable
-class SpaceRouteData extends GoRouteData with $SpaceRouteData {
-  const SpaceRouteData({required this.mid, this.source});
-
-  final String mid;
-  final String? source;
-
+class const SpaceRouteData({required final String mid, final String? source}) extends GoRouteData with $SpaceRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = source ?? _resolveSource(context);

@@ -10,9 +10,7 @@ typedef VideoMediaCompanion = (MediaCompanion, VideoCompanion);
 typedef VideoMediaEntity = (MediaEntity, VideoEntity);
 
 @DriftAccessor(tables: [Video, Media])
-class VideoDao extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
-  VideoDao(super.db);
-
+class VideoDao(super.db) extends DatabaseAccessor<AppDatabase> with _$VideoDaoMixin {
   Future<void> insertVideo(VideoMediaCompanion videoMedia) async {
     final (mediaCompanion, videoCompanion) = videoMedia;
 

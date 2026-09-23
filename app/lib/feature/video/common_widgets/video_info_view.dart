@@ -7,14 +7,12 @@ import 'package:gap/gap.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 
-class VideoInfoView extends StatefulWidget {
-  const VideoInfoView({super.key});
-
+class const VideoInfoView({super.key}) extends StatefulWidget {
   @override
   State<VideoInfoView> createState() => _VideoInfoViewState();
 }
 
-class _VideoInfoViewState extends State<VideoInfoView> {
+class _VideoInfoViewState() extends State<VideoInfoView> {
   bool _isDescExpanded = false;
   bool _isDanmakuActive = true;
 
@@ -510,25 +508,15 @@ class _VideoInfoViewState extends State<VideoInfoView> {
   }
 }
 
-class _RelatedVideoCard extends StatelessWidget {
-  const _RelatedVideoCard({
-    required this.title,
-    required this.author,
-    required this.views,
-    required this.source,
-    required this.time,
-    required this.duration,
-    required this.badgeColor,
-  });
-
-  final String title;
-  final String author;
-  final String views;
-  final String source;
-  final String time;
-  final String duration;
-  final Color badgeColor;
-
+class const _RelatedVideoCard({
+    required final String title,
+    required final String author,
+    required final String views,
+    required final String source,
+    required final String time,
+    required final String duration,
+    required final Color badgeColor,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -644,23 +632,14 @@ class _RelatedVideoCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isActive,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final Color color;
-  final VoidCallback onTap;
-
+class const _ActionButton({
+    required final IconData icon,
+    required final IconData activeIcon,
+    required final String label,
+    required final bool isActive,
+    required final Color color,
+    required final VoidCallback onTap,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

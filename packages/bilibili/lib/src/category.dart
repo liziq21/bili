@@ -1,8 +1,8 @@
-abstract interface class Category {
+abstract interface class Category() {
   String toJson();
 }
 
-enum ArticleCategory implements Category {
+enum ArticleCategory(final int id) implements Category {
   all(0),
   animation(2),
   games(1),
@@ -12,9 +12,6 @@ enum ArticleCategory implements Category {
   lightNovels(16),
   technology(17);
 
-  const ArticleCategory(this.id);
-  final int id;
-
   @override
   String toString() => '$id';
 
@@ -22,7 +19,7 @@ enum ArticleCategory implements Category {
   String toJson() => toString();
 }
 
-enum PhotoCategory implements Category {
+enum PhotoCategory() implements Category {
   all,
   artists,
   photography;

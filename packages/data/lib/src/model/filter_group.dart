@@ -20,17 +20,12 @@ sealed class const FilterGroup({
   FilterGroup copyWith();
 }
 
-class SingleFilterGroup extends FilterGroup {
-  const SingleFilterGroup({
+class const SingleFilterGroup({
     required super.key,
     required super.label,
-    required this.options,
-    this.selection,
-  });
-
-  final List<FilterOption> options;
-  final FilterOption? selection;
-
+    required final List<FilterOption> options,
+    final FilterOption? selection,
+  }) extends FilterGroup {
   @override
   Map<String, String> toQueryParams() => {key: ?selection?.value};
 
@@ -45,17 +40,12 @@ class SingleFilterGroup extends FilterGroup {
   }
 }
 
-class MultiFilterGroup extends FilterGroup {
-  const MultiFilterGroup({
+class const MultiFilterGroup({
     required super.key,
     required super.label,
-    required this.options,
-    this.selections = const {},
-  });
-
-  final List<FilterOption> options;
-  final Set<FilterOption> selections;
-
+    required final List<FilterOption> options,
+    final Set<FilterOption> selections = const {},
+  }) extends FilterGroup {
   bool isSelected(FilterOption option) => selections.contains(option);
 
   @override
@@ -78,15 +68,11 @@ class MultiFilterGroup extends FilterGroup {
 
 typedef DateRange = ({DateTime start, DateTime end});
 
-class DateRangeFilterGroup extends FilterGroup {
-  const DateRangeFilterGroup({
+class const DateRangeFilterGroup({
     required super.key,
     required super.label,
-    this.range,
-  });
-
-  final DateRange? range;
-
+    final DateRange? range,
+  }) extends FilterGroup {
   @override
   DateRangeFilterGroup copyWith({DateRange? range}) {
     return .new(key: key, label: label, range: range);

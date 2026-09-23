@@ -1,15 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
-class LiveScreen extends StatefulWidget {
-  const LiveScreen({super.key, this.onBackClick, required this.roomId});
-  final VoidCallback? onBackClick;
-  final String roomId;
-
+class const LiveScreen({super.key, final VoidCallback? onBackClick, required final String roomId}) extends StatefulWidget {
   @override
   State<LiveScreen> createState() => _LiveScreenState();
 }
 
-class _LiveScreenState extends State<LiveScreen> {
+class _LiveScreenState() extends State<LiveScreen> {
   @override
   void initState() {
     super.initState();

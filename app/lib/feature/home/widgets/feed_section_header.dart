@@ -3,20 +3,13 @@ import 'package:material_ui/material_ui.dart';
 import '../../../main.dart';
 
 /// Feed 区块标题
-class FeedSectionHeader extends StatelessWidget {
-  const FeedSectionHeader({
+class const FeedSectionHeader({
     super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    this.iconColor,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color? iconColor;
-
+    required final String title,
+    required final String subtitle,
+    required final IconData icon,
+    final Color? iconColor,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

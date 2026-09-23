@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 /// 应用统一的响应式宽度档位
-enum LayoutSize {
+enum LayoutSize() {
   /// 手机竖屏等紧凑宽度（< 600）
   compact,
 

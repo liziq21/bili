@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 @DataClassName('MediaEntity')
-class Media extends Table {
+class Media() extends Table {
   static const String typeVideo = 'video';
   static const String typeArticle = 'article';
   static const String typePost = 'post';

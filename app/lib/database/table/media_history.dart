@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'media.dart';
 
 @DataClassName('MediaHistoryEntity')
-class MediaHistory extends Table {
+class MediaHistory() extends Table {
   IntColumn get internalId => integer().autoIncrement()();
   IntColumn get mediaId => integer().references(
     Media,

@@ -1,4 +1,4 @@
-abstract final class Routes {
+abstract final class Routes() {
   static const notFound = '/404';
   static const home = '/';
   static const live = '/$liveRelative';

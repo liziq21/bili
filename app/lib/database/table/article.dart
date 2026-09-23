@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'media.dart';
 
 @DataClassName('ArticleEntity')
-class Article extends Table {
+class Article() extends Table {
   IntColumn get mediaId =>
       integer().references(Media, #internalId, onDelete: KeyAction.cascade)();
   TextColumn get content => text()();

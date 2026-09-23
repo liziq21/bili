@@ -18,7 +18,7 @@ class const AppSearchAnchor({
   State<AppSearchAnchor> createState() => _AppSearchAnchorState();
 }
 
-class _AppSearchAnchorState extends State<AppSearchAnchor> {
+class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   final SearchController _controller = SearchController();
   String? _searchingWithQuery;
   late Iterable<Widget> _lastOptions = <Widget>[];

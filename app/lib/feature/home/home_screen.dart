@@ -11,23 +11,13 @@ import 'widgets/home_search_bar.dart';
 import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({
+class const HomeScreen({
     super.key,
-    required Function(String roomId) onLive,
-    required Function(String searchQuery) navigateToSearchResult,
-    required Function(String mid) onSpace,
-    required Function(String id) onVideo,
-  }) : _onLive = onLive,
-       _navigateToSearchResult = navigateToSearchResult,
-       _onSpace = onSpace,
-       _onVideo = onVideo;
-
-  final Function(String roomId) _onLive;
-  final Function(String searchQuery) _navigateToSearchResult;
-  final Function(String mid) _onSpace;
-  final Function(String id) _onVideo;
-
+    required final Function(String roomId) _onLive,
+    required final Function(String searchQuery) _navigateToSearchResult,
+    required final Function(String mid) _onSpace,
+    required final Function(String id) _onVideo,
+  }) extends StatefulWidget {
   Function(String roomId) get onLive => _onLive;
   Function(String searchQuery) get navigateToSearchResult =>
       _navigateToSearchResult;
@@ -38,7 +28,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState() extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override

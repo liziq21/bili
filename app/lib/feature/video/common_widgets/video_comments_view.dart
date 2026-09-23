@@ -7,9 +7,7 @@ import 'package:gap/gap.dart';
 import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
-class VideoCommentsView extends StatelessWidget {
-  const VideoCommentsView({super.key});
-
+class const VideoCommentsView({super.key}) extends StatelessWidget {
   String _formatCount(int count) {
     if (count >= 10000) {
       return '${(count / 10000).toStringAsFixed(1)}万';
@@ -97,12 +95,7 @@ class VideoCommentsView extends StatelessWidget {
   }
 }
 
-class _CommentItem extends StatelessWidget {
-  const _CommentItem({required this.comment, required this.formatCount});
-
-  final VideoComment comment;
-  final String Function(int) formatCount;
-
+class const _CommentItem({required final VideoComment comment, required final String Function(int) formatCount}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(

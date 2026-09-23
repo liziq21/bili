@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 @DataClassName('CreatorProfileEntity')
-class CreatorProfile extends Table {
+class CreatorProfile() extends Table {
   IntColumn get internalId => integer().autoIncrement()(); // 全局唯一内部ID
   TextColumn get serviceId => text()(); // 服务标识
   TextColumn get id => text()(); // 服务内原始ID

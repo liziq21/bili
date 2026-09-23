@@ -1,6 +1,6 @@
 import 'package:data/data.dart';
 
-mixin class YouTubeRemoteDataSource implements RemoteDataSource {
+mixin class YouTubeRemoteDataSource() implements RemoteDataSource {
   static const String youtubeSourceId = 'youtube';
 
   @override

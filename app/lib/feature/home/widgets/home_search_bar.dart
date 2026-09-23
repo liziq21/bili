@@ -7,22 +7,14 @@ import '../../../main.dart';
 import '../bloc/home_bloc.dart';
 
 /// 主页 AppBar 中的「数据源切换 + 搜索」输入条
-class HomeSearchBar extends StatelessWidget {
-  const HomeSearchBar({
+class const HomeSearchBar({
     super.key,
-    required this.controller,
-    required this.sources,
-    required this.activeSourceId,
-    required this.activeSourceName,
-    required this.onSubmitted,
-  });
-
-  final TextEditingController controller;
-  final List<MediaSource> sources;
-  final String activeSourceId;
-  final String activeSourceName;
-  final ValueChanged<String> onSubmitted;
-
+    required final TextEditingController controller,
+    required final List<MediaSource> sources,
+    required final String activeSourceId,
+    required final String activeSourceName,
+    required final ValueChanged<String> onSubmitted,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

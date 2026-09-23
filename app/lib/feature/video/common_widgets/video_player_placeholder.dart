@@ -4,23 +4,17 @@ import 'package:gap/gap.dart';
 
 import '../../../main.dart';
 
-class VideoPlayerPlaceholder extends StatefulWidget {
-  const VideoPlayerPlaceholder({
+class const VideoPlayerPlaceholder({
     super.key,
-    this.thumbnailUrl,
-    this.title,
-    this.aspectRatio = 16 / 9,
-  });
-
-  final String? thumbnailUrl;
-  final String? title;
-  final double aspectRatio;
-
+    final String? thumbnailUrl,
+    final String? title,
+    final double aspectRatio = 16 / 9,
+  }) extends StatefulWidget {
   @override
   State<VideoPlayerPlaceholder> createState() => _VideoPlayerPlaceholderState();
 }
 
-class _VideoPlayerPlaceholderState extends State<VideoPlayerPlaceholder> {
+class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
   bool _isPlaying = false;
   double _progress = 0.25;
   bool _showSourcePopover = false;
