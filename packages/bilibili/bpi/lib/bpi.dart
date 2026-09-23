@@ -3,6 +3,7 @@ library;
 export 'src/error/bpi_exception.dart';
 export 'src/model/reply/network_reply_data.dart';
 export 'src/model/reply/network_reply_reply_data.dart';
+export 'src/model/search/common/html_title.dart';
 export 'src/model/search/common/network_bili_user_res.dart';
 export 'src/model/search/concrete_results/network_article_search_result.dart';
 export 'src/model/search/concrete_results/network_bili_user_search_result.dart';

@@ -16,6 +16,26 @@ void main() {
     return jsonDecode(content) as Map<String, dynamic>;
   }
 
+  group('HtmlTitle sanitization tests', () {
+    test('strips em keyword tags correctly from search title', () {
+      final title = HtmlTitle.fromJson('<em class="keyword">Flutter</em> 教程');
+      expect(title.parsedTitle(), equals('Flutter 教程'));
+    });
+
+    test('strips malicious or arbitrary html tags safely', () {
+      final title = HtmlTitle.fromJson('<script>alert(1)</script><b>Title</b>');
+      expect(title.parsedTitle(), equals('Title'));
+    });
+
+    test('handles empty or null json gracefully', () {
+      final titleNull = HtmlTitle.fromJson(null);
+      expect(titleNull.parsedTitle(), equals(''));
+
+      final titleEmpty = HtmlTitle.fromJson('');
+      expect(titleEmpty.parsedTitle(), equals(''));
+    });
+  });
+
   group('NetworkSearchSuggest fromJson tests', () {
     test('parses real search_suggest.json correctly', () {
       final json = loadFixture('search_suggest.json');

@@ -23,3 +23,9 @@ Prevention: Always replace raw `${state.error}` UI interpolations with localized
 Vulnerability: `debugLogDiagnostics: true` was hardcoded in `GoRouter` configuration (`app/lib/routing/router.dart`), outputting all internal navigation state transitions, route paths, deep-link queries, and UI parameters to system logs.
 Learning: Un-guarded router diagnostic logging prints route parameters and state paths to platform-level system logs (e.g., Logcat / os_log) in production release builds, exposing user navigation patterns and parameter payloads.
 Prevention: Always gate router diagnostic logging with `!kReleaseMode` (or `kDebugMode`) from `package:flutter/foundation.dart`.
+
+## 2026-09-20 - Sanitize HTML Markup in Search Titles and Handle Null Values Safely
+
+Vulnerability: `HtmlTitle.fromJson` converted raw dynamic JSON strings without null guards or defensive HTML tag stripping, potentially leading to null type errors or rendering unparsed HTML/XSS markup in UI text components.
+Learning: Search API results from external endpoints (like Bilibili) embed raw HTML formatting tags (`<em class="keyword">`) and require robust tag stripping and null handling during deserialization.
+Prevention: Always sanitize untrusted HTML string payloads during JSON deserialization and provide fallback regex stripping and null-coalescing.
