@@ -48,10 +48,8 @@ class FakeUserDataRepository() implements UserDataRepository {
   }
 }
 
-class FakeMediaSource(
-  @override final String id,
-  @override final String name,
-) implements MediaSource {
+class FakeMediaSource(@override final String id, @override final String name)
+    implements MediaSource {
   @override
   final List<VideoFeedRemoteDataSource> videoFeedDataSources = const [];
   @override
