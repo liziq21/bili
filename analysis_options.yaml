@@ -29,9 +29,6 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
-  plugins:
-    #- custom_lint
-    #- dart_code_linter
 
 linter:
   rules:
