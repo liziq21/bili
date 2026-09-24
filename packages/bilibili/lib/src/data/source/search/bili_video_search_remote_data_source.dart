@@ -4,6 +4,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../../search/search_filter.dart';
 import '../../model/search_results.dart';
 import '../bili_remote_data_source.dart';
 
@@ -11,7 +12,7 @@ final class const BiliVideoSearchRemoteDataSource({
   required final NetworkSearchDataSource _network,
 }) extends VideoSearchRemoteDataSource with BiliRemoteDataSource {
   @override
-  List<FilterGroup> get filters => const [];
+  List<FilterGroup> get filters => const [VideoDurationFilter()];
   @override
   List<SortOption> get sortOptions => const [];
   @override
