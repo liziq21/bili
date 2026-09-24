@@ -24,14 +24,14 @@ For directory-specific guidelines, refer to:
 - Do not use `flutter/material.dart` or `flutter/cupertino.dart`. Use `material_ui` instead.
 
 ### Generated Files
-- 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行生成命令重新生成（build_runner build）。
+- 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。
 
 ### Dart Version & Syntax
 - Do not arbitrarily downgrade the Dart SDK version.
 - Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
 
 #### Primary Constructors & Concise Syntax (Dart 3.13+)
-权威规范见 Dart language tour — Concise syntax: https://dart.dev/guides/language/language-tour#concise-syntax；本仓库特例见上文。
+权威规范见 Dart constructors — Concise constructor syntax: https://dart.dev/language/constructors#concise-constructor-syntax；本仓库特例见下文的无参类规则。
 
 - **Primary constructors require parameters.** Use `var`/`final` in the parameter header to implicitly declare and initialize fields.
   ```dart
