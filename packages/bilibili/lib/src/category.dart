@@ -1,4 +1,4 @@
-abstract interface class Category() {
+abstract interface class Category {
   String toJson();
 }
 
@@ -19,7 +19,7 @@ enum ArticleCategory(final int id) implements Category {
   String toJson() => toString();
 }
 
-enum PhotoCategory() implements Category {
+enum PhotoCategory implements Category {
   all,
   artists,
   photography;

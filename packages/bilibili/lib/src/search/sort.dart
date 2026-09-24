@@ -73,7 +73,7 @@ enum UserSearchSort(
   };
 }
 
-enum UserSearchOrder() {
+enum UserSearchOrder {
   defaultOrder,
   fons,
   level;
@@ -86,7 +86,7 @@ enum UserSearchOrder() {
   };
 }
 
-enum OrderSort() {
+enum OrderSort {
   descending,
   ascending;
 

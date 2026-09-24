@@ -1,4 +1,4 @@
-enum VideoDurationFilter() {
+enum VideoDurationFilter {
   allDuration,
   below10Minutes,
   tenTo30Minutes,
