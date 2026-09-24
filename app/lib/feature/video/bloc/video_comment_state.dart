@@ -1,15 +1,15 @@
 part of 'video_comment_bloc.dart';
 
 class const VideoCommentState({
-    final bool isLoading = false,
-    final bool isLoadingMore = false,
-    final String? error,
-    final List<VideoComment> comments = const [],
-    final int currentPage = 1,
-    final int totalPages = 1,
-    final bool hasMore = false,
-    final String videoId = '',
-  }) extends Equatable {
+  final bool isLoading = false,
+  final bool isLoadingMore = false,
+  final String? error,
+  final List<VideoComment> comments = const [],
+  final int currentPage = 1,
+  final int totalPages = 1,
+  final bool hasMore = false,
+  final String videoId = '',
+}) extends Equatable {
   VideoCommentState copyWith({
     bool? isLoading,
     bool? isLoadingMore,

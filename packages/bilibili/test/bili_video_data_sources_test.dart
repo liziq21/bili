@@ -7,12 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
 class MockNetworkVideoDataSource({
-    required final Map<String, dynamic> videoDetailJson,
-    required final Map<String, dynamic> videoRelationJson,
-    required final List<dynamic> relatedVideosJson,
-    required final Map<String, dynamic> replyListJson,
-  }) implements NetworkVideoDataSource {
-
+  required final Map<String, dynamic> videoDetailJson,
+  required final Map<String, dynamic> videoRelationJson,
+  required final List<dynamic> relatedVideosJson,
+  required final Map<String, dynamic> replyListJson,
+}) implements NetworkVideoDataSource {
   @override
   Future<VideoDetailData> getVideoDetail({required String bvid}) async {
     return VideoDetailData.fromJson(

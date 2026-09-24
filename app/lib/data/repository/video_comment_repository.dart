@@ -19,7 +19,9 @@ abstract interface class VideoCommentRepository() {
 ///
 /// 依赖可选的 [VideoCommentRemoteDataSource] 能力接口。
 /// 当当前数据源未实现评论功能时，安全返回错误结果。
-class AppVideoCommentRepository([final VideoCommentRemoteDataSource? _remoteDataSource]) implements VideoCommentRepository {
+class AppVideoCommentRepository([
+  final VideoCommentRemoteDataSource? _remoteDataSource,
+]) implements VideoCommentRepository {
   @override
   Future<Result<Page<VideoComment>>> getVideoComments(
     String videoId, {

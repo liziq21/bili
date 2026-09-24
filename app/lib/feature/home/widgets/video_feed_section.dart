@@ -10,13 +10,13 @@ import 'feed_status_view.dart';
 
 /// 单个视频 Feed 区块（标题 + 响应式网格 + 加载更多）
 class const VideoFeedSection({
-    super.key,
-    required final FeedSectionState<VideoModel> section,
-    required final String sourceName,
-    required final ValueChanged<VideoModel> onVideoTap,
-    required final VoidCallback onRetry,
-    required final VoidCallback onLoadMore,
-  }) extends StatelessWidget {
+  super.key,
+  required final FeedSectionState<VideoModel> section,
+  required final String sourceName,
+  required final ValueChanged<VideoModel> onVideoTap,
+  required final VoidCallback onRetry,
+  required final VoidCallback onLoadMore,
+}) extends StatelessWidget {
   /// 视频卡片高度：封面 16:9 + 文字区块，随字体缩放而变化，避免固定宽高比溢出
   static double cardExtent(BuildContext context, double cardWidth) {
     final textScaler = MediaQuery.textScalerOf(context);

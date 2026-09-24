@@ -21,13 +21,13 @@ extension BuildContextVideo on BuildContext {
 @TypedGoRoute<VideoRouteData>(path: '${Routes.video}/:id')
 @immutable
 class const VideoRouteData({
-    required final String id,
-    final String? source,
-    final String? cid,
-    final String? commentRootId,
-    final String? commentSecondaryId,
-    final String? dmProgress,
-  }) extends GoRouteData with $VideoRouteData {
+  required final String id,
+  final String? source,
+  final String? cid,
+  final String? commentRootId,
+  final String? commentSecondaryId,
+  final String? dmProgress,
+}) extends GoRouteData with $VideoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = source ?? _resolveSource(context);

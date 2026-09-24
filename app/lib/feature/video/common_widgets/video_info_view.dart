@@ -31,8 +31,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       onTap: null,
     ),
     _RelatedVideoCard(
-      title:
-          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
       author: 'Flutter Dev Hub',
       views: '290K views',
       source: 'YOUTUBE',
@@ -537,15 +536,14 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
 }
 
 class const _RelatedVideoCard({
-    required final String title,
-    required final String author,
-    required final String views,
-    required final String source,
-    required final String time,
-    required final String duration,
-    required final Color badgeColor,
-    final VoidCallback? onTap,
-  }) extends StatelessWidget {
+  required final String title,
+  required final String author,
+  required final String views,
+  required final String source,
+  required final String time,
+  required final String duration,
+  required final Color badgeColor,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semanticLabel = '$title, $author, $views, $time';
@@ -679,13 +677,13 @@ class const _RelatedVideoCard({
 }
 
 class const _ActionButton({
-    required final IconData icon,
-    required final IconData activeIcon,
-    required final String label,
-    required final bool isActive,
-    required final Color color,
-    required final VoidCallback onTap,
-  }) extends StatelessWidget {
+  required final IconData icon,
+  required final IconData activeIcon,
+  required final String label,
+  required final bool isActive,
+  required final Color color,
+  required final VoidCallback onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

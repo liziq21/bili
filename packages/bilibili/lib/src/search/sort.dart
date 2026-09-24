@@ -1,8 +1,6 @@
 import 'package:data/data.dart';
 
-enum ArticleSearchSort(
-  @override
-  final String label) implements SortOption {
+enum ArticleSearchSort(@override final String label) implements SortOption {
   totalrank('totalrank'),
   attention('attention'),
   click('click'),
@@ -18,9 +16,8 @@ enum ArticleSearchSort(
   Map<String, String> toQueryParams() => {'order': name};
 }
 
-enum PhotoOrVideoSearchSort(
-  @override
-  final String label) implements SortOption {
+enum PhotoOrVideoSearchSort(@override final String label)
+    implements SortOption {
   totalrank('totalrank'),
   click('click'),
   dm('dm'),
@@ -35,9 +32,7 @@ enum PhotoOrVideoSearchSort(
   Map<String, String> toQueryParams() => {'order': name};
 }
 
-enum LiveRoomSearchSort(
-  @override
-  final String label) implements SortOption {
+enum LiveRoomSearchSort(@override final String label) implements SortOption {
   online('online'),
   liveTime('liveTime');
 
@@ -54,8 +49,10 @@ enum LiveRoomSearchSort(
 }
 
 enum UserSearchSort(
-  @override
-  final String label, final UserSearchOrder? order, final OrderSort? orderSort) implements SortOption {
+  @override final String label,
+  final UserSearchOrder? order,
+  final OrderSort? orderSort,
+) implements SortOption {
   defaultSort('defaultSort', null, null),
   fonsDescending('fonsDescending', UserSearchOrder.fons, OrderSort.descending),
   fonsAscending('fonsAscending', UserSearchOrder.fons, OrderSort.ascending),
