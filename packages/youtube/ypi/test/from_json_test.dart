@@ -22,7 +22,12 @@ void main() {
       isTrue,
       reason: 'Fixture file testing/$name should exist',
     );
-    final content = file.readAsStringSync();
+    var content = file.readAsStringSync();
+    if (content.startsWith('window.google.ac.h(')) {
+      content = content
+          .substring('window.google.ac.h('.length, content.length - 1)
+          .trim();
+    }
     return jsonDecode(content);
   }
 
