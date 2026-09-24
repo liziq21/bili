@@ -23,8 +23,17 @@ class RecentSearchQueryDao(super.attachedDatabase)
         .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
         .trim();
     if (sanitized.isEmpty) return Future.value();
+    final cutoff =
+        sanitized.length > 200 &&
+            sanitized.codeUnitAt(199) >= 0xD800 &&
+            sanitized.codeUnitAt(199) <= 0xDBFF &&
+            sanitized.codeUnitAt(200) >= 0xDC00 &&
+            sanitized.codeUnitAt(200) <= 0xDFFF
+        ? 199
+        : 200;
     final cappedQuery =
-        sanitized.length > 200 ? sanitized.substring(0, 200) : sanitized;
+        (sanitized.length > 200 ? sanitized.substring(0, cutoff) : sanitized)
+            .trimRight();
 
     return into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
