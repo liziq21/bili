@@ -5,11 +5,11 @@ import 'package:gap/gap.dart';
 import '../../../main.dart';
 
 class const VideoPlayerPlaceholder({
-    super.key,
-    final String? thumbnailUrl,
-    final String? title,
-    final double aspectRatio = 16 / 9,
-  }) extends StatefulWidget {
+  super.key,
+  final String? thumbnailUrl,
+  final String? title,
+  final double aspectRatio = 16 / 9,
+}) extends StatefulWidget {
   @override
   State<VideoPlayerPlaceholder> createState() => _VideoPlayerPlaceholderState();
 }

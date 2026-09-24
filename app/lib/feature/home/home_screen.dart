@@ -12,12 +12,12 @@ import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
 
 class const HomeScreen({
-    super.key,
-    required final Function(String roomId) _onLive,
-    required final Function(String searchQuery) _navigateToSearchResult,
-    required final Function(String mid) _onSpace,
-    required final Function(String id) _onVideo,
-  }) extends StatefulWidget {
+  super.key,
+  required final Function(String roomId) _onLive,
+  required final Function(String searchQuery) _navigateToSearchResult,
+  required final Function(String mid) _onSpace,
+  required final Function(String id) _onVideo,
+}) extends StatefulWidget {
   Function(String roomId) get onLive => _onLive;
   Function(String searchQuery) get navigateToSearchResult =>
       _navigateToSearchResult;
