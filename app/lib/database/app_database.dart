@@ -39,7 +39,8 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
-  this : super(queryExecutor ?? _openConnection());
+  this
+    : super(queryExecutor ?? _openConnection());
 
   @override
   int get schemaVersion => 1;

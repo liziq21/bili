@@ -13,7 +13,3 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-18 - Isolate BLoC state rebuilding above TabControllers
 **Learning:** Wrapping a screen's root layout in a broad `BlocBuilder` re-instantiates descendant `DefaultTabController`, `TabBar`, and `TabBarView` subtrees on every BLoC state change (e.g., like/favorite toggles), resetting tab states and causing unnecessary rebuild passes across the screen.
 **Action:** Use targeted `BlocSelector` (or `context.select`) scoped tightly to only the widgets consuming specific state fields, keeping `DefaultTabController` and lower tab content outside reactive rebuild boundaries.
-
-## 2026-09-19 - Guard NotificationListener pagination before checking extent
-**Learning:** Checking `scrollInfo.metrics.pixels >= maxScrollExtent - 200` inside `NotificationListener<ScrollNotification>` fires BLoC events on every frame update during scrolling. Checking BLoC state flags (`!state.isLoadingMore && state.hasMore`) first short-circuits scroll notification processing during active loads, preventing stream event queue flooding.
-**Action:** Always place state flags (`!isLoadingMore && hasMore`) before scroll metric calculations in `NotificationListener<ScrollNotification>`.

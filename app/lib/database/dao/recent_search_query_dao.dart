@@ -6,8 +6,7 @@ import '../table/recent_search_query.dart';
 part 'recent_search_query_dao.g.dart';
 
 @DriftAccessor(tables: [RecentSearchQuery])
-class RecentSearchQueryDao(super.attachedDatabase)
-    extends DatabaseAccessor<AppDatabase>
+class RecentSearchQueryDao(super.attachedDatabase) extends DatabaseAccessor<AppDatabase>
     with _$RecentSearchQueryDaoMixin {
   Stream<List<RecentSearchQueryEntity>> getRecentSearchQueryEntities(
     int limit,
@@ -19,25 +18,9 @@ class RecentSearchQueryDao(super.attachedDatabase)
   }
 
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
-    final sanitized = searchQuery
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
-        .trim();
-    if (sanitized.isEmpty) return Future.value();
-    final cutoff =
-        sanitized.length > 200 &&
-            sanitized.codeUnitAt(199) >= 0xD800 &&
-            sanitized.codeUnitAt(199) <= 0xDBFF &&
-            sanitized.codeUnitAt(200) >= 0xDC00 &&
-            sanitized.codeUnitAt(200) <= 0xDFFF
-        ? 199
-        : 200;
-    final cappedQuery =
-        (sanitized.length > 200 ? sanitized.substring(0, cutoff) : sanitized)
-            .trimRight();
-
     return into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
-        query: Value(cappedQuery),
+        query: Value(searchQuery),
         queriedDate: Value(DateTime.now()),
       ),
     );

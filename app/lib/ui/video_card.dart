@@ -4,10 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../main.dart';
 
-enum VideoCardVariant() {
-  defaultCard,
-  feed,
-}
+enum VideoCardVariant() { defaultCard, feed }
 
 class const VideoCard({
   super.key,

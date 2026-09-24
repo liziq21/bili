@@ -31,7 +31,8 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       onTap: null,
     ),
     _RelatedVideoCard(
-      title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      title:
+          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
       author: 'Flutter Dev Hub',
       views: '290K views',
       source: 'YOUTUBE',
@@ -436,30 +437,27 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                         expanded: _isDescExpanded,
                         label: _isDescExpanded ? '收起摘要' : '展开完整大纲',
                         tooltip: _isDescExpanded ? '收起摘要' : '展开完整大纲',
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _isDescExpanded = !_isDescExpanded;
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(
-                              $styles.corners.sm,
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _isDescExpanded = !_isDescExpanded;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(
+                            $styles.corners.sm,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              child: Text(
-                                _isDescExpanded ? '收起' : '展开完整大纲',
-                                style: $styles.text.bodySmall.copyWith(
-                                  color: $styles.colors.accent1,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            child: Text(
+                              _isDescExpanded ? '收起' : '展开完整大纲',
+                              style: $styles.text.bodySmall.copyWith(
+                                color: $styles.colors.accent1,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -536,14 +534,15 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
 }
 
 class const _RelatedVideoCard({
-  required final String title,
-  required final String author,
-  required final String views,
-  required final String source,
-  required final String time,
-  required final String duration,
-  required final Color badgeColor,
-}) extends StatelessWidget {
+    required final String title,
+    required final String author,
+    required final String views,
+    required final String source,
+    required final String time,
+    required final String duration,
+    required final Color badgeColor,
+    final VoidCallback? onTap,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semanticLabel = '$title, $author, $views, $time';
@@ -555,15 +554,13 @@ class const _RelatedVideoCard({
         borderRadius: BorderRadius.circular($styles.corners.md),
         clipBehavior: Clip.antiAlias,
         child: Semantics(
-          button: onTap != null,
+          button: true,
           label: semanticLabel,
           child: InkWell(
-            onTap: onTap == null
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    onTap!();
-                  },
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTap?.call();
+            },
             child: Padding(
               padding: EdgeInsets.all($styles.insets.xxs),
               child: Row(
@@ -677,13 +674,13 @@ class const _RelatedVideoCard({
 }
 
 class const _ActionButton({
-  required final IconData icon,
-  required final IconData activeIcon,
-  required final String label,
-  required final bool isActive,
-  required final Color color,
-  required final VoidCallback onTap,
-}) extends StatelessWidget {
+    required final IconData icon,
+    required final IconData activeIcon,
+    required final String label,
+    required final bool isActive,
+    required final Color color,
+    required final VoidCallback onTap,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

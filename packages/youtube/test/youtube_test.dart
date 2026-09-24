@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:data/data.dart';
 import 'package:flutter/widgets.dart' hide Page;
 import 'package:model/model.dart';

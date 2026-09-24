@@ -7,8 +7,7 @@ import '../table/media_history.dart';
 part 'media_history_dao.g.dart';
 
 @DriftAccessor(tables: [Media, MediaHistory])
-class MediaHistoryDao(super.db)
-    extends DatabaseAccessor<AppDatabase>
+class MediaHistoryDao(super.db) extends DatabaseAccessor<AppDatabase>
     with _$MediaHistoryDaoMixin {
   Future<int> insertMediaHistory(Insertable<MediaHistoryEntity> entry) =>
       into(mediaHistory).insert(entry);

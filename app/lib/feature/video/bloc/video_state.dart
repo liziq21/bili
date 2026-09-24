@@ -1,10 +1,6 @@
 part of 'video_bloc.dart';
 
-class const VideoState({
-  final bool isLoading = false,
-  final String? error,
-  final VideoDetail? videoDetail,
-}) extends Equatable {
+class const VideoState({final bool isLoading = false, final String? error, final VideoDetail? videoDetail}) extends Equatable {
   VideoState copyWith({
     bool? isLoading,
     String? error,

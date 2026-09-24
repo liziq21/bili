@@ -24,9 +24,7 @@ abstract interface class VideoDetailRepository() {
 ///
 /// 依赖可选的 [VideoDetailRemoteDataSource] 能力接口。
 /// 当当前数据源未实现视频详情能力时，安全返回相应的错误或默认状态。
-class AppVideoDetailRepository([
-  final VideoDetailRemoteDataSource? _remoteDataSource,
-]) implements VideoDetailRepository {
+class AppVideoDetailRepository([final VideoDetailRemoteDataSource? _remoteDataSource]) implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async {
     if (_remoteDataSource != null) {

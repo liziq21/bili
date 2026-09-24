@@ -49,11 +49,13 @@ class MockUserDataRepository() implements UserDataRepository {
 
 /// 可控的视频 Feed 数据源，避免测试发起真实网络请求
 class FakeVideoFeed({
-  @override required final String id,
-  @override required final String title,
-  required final int pages,
-  final bool failure = false,
-}) implements VideoFeedRemoteDataSource {
+    @override
+  required final String id,
+    @override
+  required final String title,
+    required final int pages,
+    final bool failure = false,
+  }) implements VideoFeedRemoteDataSource {
   int fetchCount = 0;
 
   @override
@@ -82,9 +84,10 @@ class FakeVideoFeed({
 
 /// 可控的直播 Feed 数据源
 class FakeLiveFeed({
-  @override required final String id,
-  @override required final String title,
-}) implements LiveRoomFeedRemoteDataSource {
+  @override
+  required final String id,
+  @override
+  required final String title}) implements LiveRoomFeedRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -200,14 +203,17 @@ class const FakeLiveRoomSearch() implements LiveRoomSearchRemoteDataSource {
 }
 
 class FakeMediaSource({
-  @override required final String id,
-  @override required final String name,
-  @override
+    @override
+  required final String id,
+    @override
+  required final String name,
+    @override
   final List<VideoFeedRemoteDataSource> videoFeedDataSources = const [],
-  @override
+    @override
   final List<LiveRoomFeedRemoteDataSource> liveRoomFeedDataSources = const [],
-  @override final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource,
-}) implements MediaSource {
+    @override
+  final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource,
+  }) implements MediaSource {
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
   @override
