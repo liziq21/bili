@@ -437,27 +437,30 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                         expanded: _isDescExpanded,
                         label: _isDescExpanded ? '收起摘要' : '展开完整大纲',
                         tooltip: _isDescExpanded ? '收起摘要' : '展开完整大纲',
-                        child: InkWell(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              _isDescExpanded = !_isDescExpanded;
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(
-                            $styles.corners.sm,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                _isDescExpanded = !_isDescExpanded;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(
+                              $styles.corners.sm,
                             ),
-                            child: Text(
-                              _isDescExpanded ? '收起' : '展开完整大纲',
-                              style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.accent1,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              child: Text(
+                                _isDescExpanded ? '收起' : '展开完整大纲',
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.accent1,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -554,13 +557,15 @@ class const _RelatedVideoCard({
         borderRadius: BorderRadius.circular($styles.corners.md),
         clipBehavior: Clip.antiAlias,
         child: Semantics(
-          button: true,
+          button: onTap != null,
           label: semanticLabel,
           child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onTap?.call();
-            },
+            onTap: onTap == null
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    onTap!();
+                  },
             child: Padding(
               padding: EdgeInsets.all($styles.insets.xxs),
               child: Row(
