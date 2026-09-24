@@ -46,6 +46,55 @@ void main() {
         expect(list3, isEmpty);
       },
     );
+
+    test('sanitizes search input: strips control chars, trims, rejects empty, and caps length to 200', () async {
+      final dao = db.recentSearchQueryDao;
+
+      // Control characters and surrounding whitespace should be cleaned
+      await dao.insertOrReplaceRecentSearch('  flutter\x00\x07test\x1F  ');
+      final list1 = await dao.getRecentSearchQueryEntities(10).first;
+      expect(list1.single.query, equals('fluttertest'));
+
+      // Empty / whitespace-only inputs should be ignored
+      await dao.insertOrReplaceRecentSearch('   ');
+      await dao.insertOrReplaceRecentSearch('\x00\x01\x02');
+      final list2 = await dao.getRecentSearchQueryEntities(10).first;
+      expect(list2, hasLength(1));
+
+      // Excessively long inputs (>200 chars) should be capped to 200
+      final longQuery = 'A' * 250;
+      await dao.insertOrReplaceRecentSearch(longQuery);
+      final list3 = await dao.getRecentSearchQueryEntities(10).first;
+      expect(list3.first.query.length, equals(200));
+      expect(list3.first.query, equals('A' * 200));
+    });
+
+    test('does not split a supplementary character at the query cap', () async {
+      final dao = db.recentSearchQueryDao;
+
+      await dao.insertOrReplaceRecentSearch('${'A' * 199}😀');
+
+      final savedQuery =
+          (await dao.getRecentSearchQueryEntities(10).first).single.query;
+      expect(savedQuery, equals('A' * 199));
+      expect(
+        savedQuery.codeUnits.where(
+          (codeUnit) => codeUnit >= 0xD800 && codeUnit <= 0xDFFF,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('trims whitespace left by truncating a query', () async {
+      final dao = db.recentSearchQueryDao;
+
+      await dao.insertOrReplaceRecentSearch('${'A' * 199} B');
+
+      final savedQuery =
+          (await dao.getRecentSearchQueryEntities(10).first).single.query;
+      expect(savedQuery, equals('A' * 199));
+      expect(savedQuery, isNot(endsWith(' ')));
+    });
   });
 
   group('VideoDao', () {
