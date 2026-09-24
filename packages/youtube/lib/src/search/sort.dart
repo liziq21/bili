@@ -1,7 +1,8 @@
 import 'package:data/data.dart';
 
-enum YoutubeSearchSort(@override final String label, final int valueInt)
-    implements SortOption {
+enum YoutubeSearchSort(
+  @override
+  final String label, final int valueInt) implements SortOption {
   relevance('relevance', 0),
   uploadDate('uploadDate', 1),
   viewCount('viewCount', 2),

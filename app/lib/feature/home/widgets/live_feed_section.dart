@@ -10,12 +10,12 @@ import 'feed_status_view.dart';
 
 /// 单个直播 Feed 区块（标题 + 横向卡片列表）
 class const LiveFeedSection({
-  super.key,
-  required final FeedSectionState<LiveRoomModel> section,
-  required final String sourceName,
-  required final ValueChanged<LiveRoomModel> onLiveTap,
-  required final VoidCallback onRetry,
-}) extends StatelessWidget {
+    super.key,
+    required final FeedSectionState<LiveRoomModel> section,
+    required final String sourceName,
+    required final ValueChanged<LiveRoomModel> onLiveTap,
+    required final VoidCallback onRetry,
+  }) extends StatelessWidget {
   /// 直播卡片高度：封面 16:9 + 两行文字，随字体缩放而变化
   static double cardExtent(BuildContext context, double cardWidth) {
     final textScaler = MediaQuery.textScalerOf(context);
@@ -92,10 +92,7 @@ class const LiveFeedSection({
   }
 }
 
-class const _LiveRoomCard({
-  required final LiveRoomModel liveRoom,
-  required final VoidCallback onTap,
-}) extends StatelessWidget {
+class const _LiveRoomCard({required final LiveRoomModel liveRoom, required final VoidCallback onTap}) extends StatelessWidget {
   Widget _thumbnailPlaceholder(ColorScheme colorScheme) => Container(
     color: colorScheme.surfaceContainerHighest,
     child: Icon(Icons.live_tv, color: colorScheme.onSurfaceVariant),

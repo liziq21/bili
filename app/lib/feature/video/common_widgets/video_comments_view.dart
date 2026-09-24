@@ -8,6 +8,13 @@ import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
+  String _formatCount(int count) {
+    if (count >= 10000) {
+      return '${(count / 10000).toStringAsFixed(1)}万';
+    }
+    return '$count';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<VideoCommentBloc, VideoCommentState>(
@@ -49,14 +56,10 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           );
         }
 
-        // ⚡ Bolt Optimization: Guard pagination check with state flags (!isLoadingMore && hasMore)
-        // before evaluating extentAfter. Prevents flooding BLoC with redundant FetchNextCommentPage
-        // events on every single scroll frame when pagination is already loading or completed.
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
-            if (!state.isLoadingMore &&
-                state.hasMore &&
-                scrollInfo.metrics.extentAfter < 200) {
+            if (scrollInfo.metrics.pixels >=
+                scrollInfo.metrics.maxScrollExtent - 200) {
               context.read<VideoCommentBloc>().add(
                 const FetchNextCommentPage(),
               );
@@ -83,7 +86,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
               }
 
               final comment = state.comments[index];
-              return _CommentItem(comment: comment);
+              return _CommentItem(comment: comment, formatCount: _formatCount);
             },
           ),
         );
@@ -92,17 +95,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
   }
 }
 
-class const _CommentItem({required final VideoComment comment})
-    extends StatelessWidget {
-  // ⚡ Bolt Optimization: Internal static helper avoids creating new closure instances/tear-offs
-  // for every comment list item during ListView scroll builds.
-  static String _formatCount(int count) {
-    if (count >= 10000) {
-      return '${(count / 10000).toStringAsFixed(1)}万';
-    }
-    return '$count';
-  }
-
+class const _CommentItem({required final VideoComment comment, required final String Function(int) formatCount}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -160,7 +153,7 @@ class const _CommentItem({required final VideoComment comment})
                     enabled: true,
                     selected: comment.isLiked,
                     excludeSemantics: true,
-                    label: '点赞评论 ${_formatCount(comment.likeCount)}',
+                    label: '点赞评论 ${formatCount(comment.likeCount)}',
                     tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
                     child: InkWell(
                       onTap: () {
@@ -187,7 +180,7 @@ class const _CommentItem({required final VideoComment comment})
                             ),
                             const Gap(4),
                             Text(
-                              _formatCount(comment.likeCount),
+                              formatCount(comment.likeCount),
                               style: $styles.text.bodySmall.copyWith(
                                 fontSize: 11,
                                 color: comment.isLiked

@@ -18,7 +18,11 @@ final class const YouTubeRecommendVideoFeedRemoteDataSource(
     try {
       final (videos, _) = await _youtubeService.searchVideos('Flutter');
       return Result.ok(
-        Page<VideoModel>(number: pageKey ?? 1, totalPages: 1, data: videos),
+        Page<VideoModel>(
+          number: pageKey ?? 1,
+          totalPages: 1,
+          data: videos,
+        ),
       );
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
@@ -40,7 +44,11 @@ final class const YouTubeTrendingVideoFeedRemoteDataSource(
     try {
       final (videos, _) = await _youtubeService.searchVideos('Trending');
       return Result.ok(
-        Page<VideoModel>(number: pageKey ?? 1, totalPages: 1, data: videos),
+        Page<VideoModel>(
+          number: pageKey ?? 1,
+          totalPages: 1,
+          data: videos,
+        ),
       );
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));

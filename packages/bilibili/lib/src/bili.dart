@@ -64,13 +64,13 @@ class Bili() implements MediaSource {
 
   @override
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => [
-    BiliRecommendVideoFeedRemoteDataSource(network: _searchApi),
-    BiliTop100VideoFeedRemoteDataSource(network: _searchApi),
-    BiliHotVideoFeedRemoteDataSource(network: _searchApi),
-  ];
+        BiliRecommendVideoFeedRemoteDataSource(network: _searchApi),
+        BiliTop100VideoFeedRemoteDataSource(network: _searchApi),
+        BiliHotVideoFeedRemoteDataSource(network: _searchApi),
+      ];
 
   @override
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => [
-    BiliRecommendLiveRoomFeedRemoteDataSource(network: _searchApi),
-  ];
+        BiliRecommendLiveRoomFeedRemoteDataSource(network: _searchApi),
+      ];
 }

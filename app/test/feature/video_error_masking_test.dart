@@ -6,9 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MockVideoBloc(super.initialState)
-    extends Cubit<VideoState>
-    implements VideoBloc {
+class MockVideoBloc(super.initialState) extends Cubit<VideoState> implements VideoBloc {
   @override
   void add(VideoEvent event) {}
 
@@ -28,8 +26,7 @@ class MockVideoBloc(super.initialState)
   void onTransition(Transition<VideoEvent, VideoState> transition) {}
 }
 
-class MockVideoCommentBloc(super.initialState)
-    extends Cubit<VideoCommentState>
+class MockVideoCommentBloc(super.initialState) extends Cubit<VideoCommentState>
     implements VideoCommentBloc {
   @override
   void add(VideoCommentEvent event) {}

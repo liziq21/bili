@@ -6,8 +6,7 @@ import '../table/creator_profile.dart';
 part 'creator_profile_dao.g.dart';
 
 @DriftAccessor(tables: [CreatorProfile])
-class CreatorProfileDao(super.db)
-    extends DatabaseAccessor<AppDatabase>
+class CreatorProfileDao(super.db) extends DatabaseAccessor<AppDatabase>
     with _$CreatorProfileDaoMixin {
   Future<int> insertCreatorProfile(Insertable<CreatorProfileEntity> entry) =>
       into(creatorProfile).insert(entry);

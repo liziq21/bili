@@ -28,15 +28,18 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       time: '4天前',
       duration: '12:40',
       badgeColor: Color(0xFF00A1D6),
+      onTap: null,
     ),
     _RelatedVideoCard(
-      title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      title:
+          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
       author: 'Flutter Dev Hub',
       views: '290K views',
       source: 'YOUTUBE',
       time: '1周前',
       duration: '18:15',
       badgeColor: Color(0xFFEF5350),
+      onTap: null,
     ),
     _RelatedVideoCard(
       title: '跨平台框架底层图形层横评：React Native Fabric vs Flutter Impeller',
@@ -46,6 +49,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       time: '3天前',
       duration: '45:20',
       badgeColor: Color(0xFFFB7299),
+      onTap: null,
     ),
   ];
 
@@ -428,32 +432,58 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                           fontSize: 13,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isDescExpanded = !_isDescExpanded;
-                          });
-                        },
-                        child: Text(
-                          _isDescExpanded ? '收起' : '展开完整大纲',
-                          style: $styles.text.bodySmall.copyWith(
-                            color: $styles.colors.accent1,
-                            fontSize: 12,
+                      Semantics(
+                        button: true,
+                        expanded: _isDescExpanded,
+                        label: _isDescExpanded ? '收起摘要' : '展开完整大纲',
+                        tooltip: _isDescExpanded ? '收起摘要' : '展开完整大纲',
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _isDescExpanded = !_isDescExpanded;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(
+                            $styles.corners.sm,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            child: ExcludeSemantics(
+                              child: Text(
+                                _isDescExpanded ? '收起' : '展开完整大纲',
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.accent1,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                   const Gap(6),
-                  Text(
-                    video.desc != null && video.desc!.isNotEmpty ? video.desc! : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
-                    maxLines: _isDescExpanded ? null : 2,
-                    overflow: _isDescExpanded
-                        ? TextOverflow.visible
-                        : TextOverflow.ellipsis,
-                    style: $styles.text.bodySmall.copyWith(
-                      color: $styles.colors.body,
-                      height: 1.4,
+                  AnimatedSize(
+                    duration: $styles.times.fast,
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: Text(
+                      video.desc != null && video.desc!.isNotEmpty
+                          ? video.desc!
+                          : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+                      maxLines: _isDescExpanded ? null : 2,
+                      overflow: _isDescExpanded
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.body,
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
@@ -506,25 +536,37 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
 }
 
 class const _RelatedVideoCard({
-  required final String title,
-  required final String author,
-  required final String views,
-  required final String source,
-  required final String time,
-  required final String duration,
-  required final Color badgeColor,
-}) extends StatelessWidget {
+    required final String title,
+    required final String author,
+    required final String views,
+    required final String source,
+    required final String time,
+    required final String duration,
+    required final Color badgeColor,
+    final VoidCallback? onTap,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final semanticLabel = '$title, $author, $views, $time';
+
     return Container(
       margin: EdgeInsets.only(bottom: $styles.insets.xs),
-      padding: EdgeInsets.all($styles.insets.xxs),
-      decoration: BoxDecoration(
+      child: Material(
         color: $styles.colors.offWhite,
         borderRadius: BorderRadius.circular($styles.corners.md),
-      ),
-      child: Row(
-        children: [
+        clipBehavior: Clip.antiAlias,
+        child: Semantics(
+          button: true,
+          label: semanticLabel,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTap?.call();
+            },
+            child: Padding(
+              padding: EdgeInsets.all($styles.insets.xxs),
+              child: Row(
+                children: [
           // Thumbnail with duration badge
           ClipRRect(
             borderRadius: BorderRadius.circular($styles.corners.sm),
@@ -625,18 +667,22 @@ class const _RelatedVideoCard({
           ),
         ],
       ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class const _ActionButton({
-  required final IconData icon,
-  required final IconData activeIcon,
-  required final String label,
-  required final bool isActive,
-  required final Color color,
-  required final VoidCallback onTap,
-}) extends StatelessWidget {
+    required final IconData icon,
+    required final IconData activeIcon,
+    required final String label,
+    required final bool isActive,
+    required final Color color,
+    required final VoidCallback onTap,
+  }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

@@ -9,3 +9,9 @@
 **Learning:** When wrapping composite feed cards with `Semantics(excludeSemantics: true)` to condense multiple text labels into a concise screen reader description, `excludeSemantics: true` suppresses nested interactive buttons (such as "More Options" `IconButton`). Removing `excludeSemantics: true` or applying `Semantics` to child content regions while keeping independent action buttons as unexcluded siblings preserves both card accessibility summary and individual button accessibility.
 
 **Action:** Avoid applying `excludeSemantics: true` at a parent card level if child widgets contain nested secondary actions (`IconButton`), ensuring secondary actions remain accessible to screen readers.
+
+## 2026-09-24 - Collapsible Text Section Semantics & Smooth Size Animations
+
+**Learning:** Replacing abrupt text maxLines toggles with `AnimatedSize` combined with `Semantics(button: true, expanded: ...)` on the toggle button creates a polished micro-interaction that provides both visual smoothness and essential screen reader state updates (`expanded: true/false`).
+
+**Action:** Always pair `AnimatedSize` layout transitions with explicit `Semantics(button: true, expanded: ...)` and `HapticFeedback.lightImpact()` when building expandable text or summary sections.

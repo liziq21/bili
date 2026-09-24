@@ -1,11 +1,7 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
-class const SortBar({
-  super.key,
-  required final List<SortOption> sortOptions,
-  final void Function(SortOption?)? onChanged,
-}) extends StatelessWidget {
+class const SortBar({super.key, required final List<SortOption> sortOptions, final void Function(SortOption?)? onChanged}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<SortOption>(

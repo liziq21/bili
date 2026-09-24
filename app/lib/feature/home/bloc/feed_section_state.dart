@@ -2,13 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 /// 单个 Feed 区块的加载状态
-enum FeedStatus() {
-  initial,
-  loading,
-  loadingMore,
-  success,
-  failure,
-}
+enum FeedStatus() { initial, loading, loadingMore, success, failure }
 
 /// 主页单个 Feed 区块（视频流或直播流）的状态
 @immutable
