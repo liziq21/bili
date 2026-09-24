@@ -30,7 +30,7 @@ Future<void> main() async {
         'Referer': 'https://www.bilibili.com/',
       },
     );
-    if (response.statusCode != 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw HttpException('HTTP ${response.statusCode}');
     }
 
@@ -206,7 +206,23 @@ Future<void> main() async {
       },
       'play URL',
     );
-    NetworkPlayUrl.fromJson(_requireDataObject(playUrl.json, 'play URL'));
+    final parsedPlayUrl = NetworkPlayUrl.fromJson(
+      _requireDataObject(playUrl.json, 'play URL'),
+    );
+    final dashVideo = parsedPlayUrl.dash?.video;
+    final dashAudio = parsedPlayUrl.dash?.audio;
+    final hasDash =
+        dashVideo != null &&
+        dashVideo.isNotEmpty &&
+        dashAudio != null &&
+        dashAudio.isNotEmpty &&
+        dashVideo.any((stream) => stream.playUrls.isNotEmpty);
+    final hasDurl =
+        parsedPlayUrl.durl?.any((stream) => stream.playUrls.isNotEmpty) ??
+        false;
+    if (!hasDash && !hasDurl) {
+      throw const FormatException('play URL has no playable streams');
+    }
     saveResponse('testing/play_url.json', playUrl);
 
     print('All Bili fixtures fetched and saved successfully!');
@@ -241,7 +257,7 @@ Map<String, dynamic> _decodeJsonObject(http.Response response, String label) {
 
 void _requireBiliSuccess(Map<String, dynamic> json, String label) {
   final code = json['code'];
-  if (code is! num || code.toInt() != 0) {
+  if (code is! int || code != 0) {
     throw FormatException('$label returned Bilibili code $code');
   }
 }

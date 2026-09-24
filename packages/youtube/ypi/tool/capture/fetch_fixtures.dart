@@ -25,16 +25,20 @@ Future<void> main() async {
   }
 
   try {
+    const requestTimeout = Duration(seconds: 30);
+
     print('1. Fetching search video JSON...');
-    final videoSearchResponse = await client.post(
-      Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-      headers: _headers,
-      body: jsonEncode({
-        'context': _clientContext,
-        'query': 'Flutter',
-        'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 1),
-      }),
-    );
+    final videoSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 1),
+          }),
+        )
+        .timeout(requestTimeout);
     final video = _captureJson(
       videoSearchResponse,
       'search video',
@@ -44,15 +48,17 @@ Future<void> main() async {
     saveResponse('testing/search_video.json', video);
 
     print('2. Fetching search channel JSON...');
-    final channelSearchResponse = await client.post(
-      Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-      headers: _headers,
-      body: jsonEncode({
-        'context': _clientContext,
-        'query': 'Flutter',
-        'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
-      }),
-    );
+    final channelSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
+          }),
+        )
+        .timeout(requestTimeout);
     final channel = _captureJson(
       channelSearchResponse,
       'search channel',
@@ -62,11 +68,13 @@ Future<void> main() async {
     saveResponse('testing/search_channel.json', channel);
 
     print('3. Fetching search suggest JSON...');
-    final suggestResponse = await client.get(
-      Uri.parse(
-        'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
-      ),
-    );
+    final suggestResponse = await client
+        .get(
+          Uri.parse(
+            'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
+          ),
+        )
+        .timeout(requestTimeout);
     final suggest = _captureJson(
       suggestResponse,
       'search suggest',
@@ -171,29 +179,51 @@ void _validateSearchResponse(dynamic json, {required String requiredRenderer}) {
       'InnerTube search response has no result sections',
     );
   }
-  if (!_containsKey(sections, requiredRenderer)) {
+  if (!_containsRendererInItemSections(sections, requiredRenderer)) {
     throw FormatException('InnerTube search response has no $requiredRenderer');
   }
 }
 
-bool _containsKey(dynamic value, String key) {
-  if (value is Map) {
-    if (value.containsKey(key)) {
-      return true;
+bool _containsRendererInItemSections(
+  dynamic sections,
+  String requiredRenderer,
+) {
+  if (sections is! Iterable) {
+    return false;
+  }
+  return sections.any((section) {
+    if (section is! Map) {
+      return false;
     }
-    return value.values.any((item) => _containsKey(item, key));
-  }
-  if (value is Iterable) {
-    return value.any((item) => _containsKey(item, key));
-  }
-  return false;
+    final itemSection = section['itemSectionRenderer'];
+    if (itemSection is! Map) {
+      return false;
+    }
+    final items = itemSection['contents'];
+    if (items is! Iterable) {
+      return false;
+    }
+    return items.any((item) => item is Map && item[requiredRenderer] is Map);
+  });
 }
 
 void _validateSuggestResponse(dynamic json) {
   if (json is! List || json.length < 2 || json[1] is! List) {
     throw const FormatException('Google suggest response has an invalid shape');
   }
-  if ((json[1] as List).isEmpty) {
+  final suggestions = json[1] as List;
+  if (suggestions.isEmpty) {
     throw const FormatException('Google suggest response has no suggestions');
+  }
+  if (suggestions.any((item) {
+    if (item is! List || item.isEmpty) {
+      return true;
+    }
+    final text = item[0];
+    return text is! String || text.isEmpty;
+  })) {
+    throw const FormatException(
+      'Google suggest response has an invalid suggestion',
+    );
   }
 }
