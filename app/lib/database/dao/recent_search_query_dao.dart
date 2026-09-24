@@ -17,10 +17,15 @@ class RecentSearchQueryDao(super.attachedDatabase) extends DatabaseAccessor<AppD
         .watch();
   }
 
-  Future<void> insertOrReplaceRecentSearch(String searchQuery) {
-    return into(recentSearchQuery).insertOnConflictUpdate(
+  Future<void> insertOrReplaceRecentSearch(String searchQuery) async {
+    final trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.isEmpty) {
+      return;
+    }
+
+    await into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
-        query: Value(searchQuery),
+        query: Value(trimmedQuery),
         queriedDate: Value(DateTime.now()),
       ),
     );

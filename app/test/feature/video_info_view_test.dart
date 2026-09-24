@@ -65,6 +65,13 @@ void main() {
         // Initial state: toggle shows "展开完整大纲"
         final expandFinder = find.text('展开完整大纲');
         expect(expandFinder, findsOneWidget);
+        expect(
+          find.ancestor(
+            of: expandFinder,
+            matching: find.byType(ExcludeSemantics),
+          ),
+          findsOneWidget,
+        );
 
         // Tap toggle to expand
         await tester.tap(expandFinder);

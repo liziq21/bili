@@ -452,12 +452,14 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                               horizontal: 6,
                               vertical: 2,
                             ),
-                            child: Text(
-                              _isDescExpanded ? '收起' : '展开完整大纲',
-                              style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.accent1,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                            child: ExcludeSemantics(
+                              child: Text(
+                                _isDescExpanded ? '收起' : '展开完整大纲',
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.accent1,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),

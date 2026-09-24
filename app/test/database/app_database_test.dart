@@ -16,6 +16,16 @@ void main() {
   });
 
   group('RecentSearchQueryDao', () {
+    test('trims queries and ignores whitespace-only searches', () async {
+      final dao = db.recentSearchQueryDao;
+
+      await dao.insertOrReplaceRecentSearch('  query  ');
+      await dao.insertOrReplaceRecentSearch(' \t\n ');
+
+      final queries = await dao.getRecentSearchQueryEntities(10).first;
+      expect(queries.map((query) => query.query), equals(['query']));
+    });
+
     test(
       'inserts, orders descending, and updates timestamp on re-search',
       () async {
