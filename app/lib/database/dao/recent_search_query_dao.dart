@@ -19,9 +19,16 @@ class RecentSearchQueryDao(super.attachedDatabase)
   }
 
   Future<void> insertOrReplaceRecentSearch(String searchQuery) {
+    final sanitized = searchQuery
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '')
+        .trim();
+    if (sanitized.isEmpty) return Future.value();
+    final cappedQuery =
+        sanitized.length > 200 ? sanitized.substring(0, 200) : sanitized;
+
     return into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
-        query: Value(searchQuery),
+        query: Value(cappedQuery),
         queriedDate: Value(DateTime.now()),
       ),
     );
