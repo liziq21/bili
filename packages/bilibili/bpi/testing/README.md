@@ -20,5 +20,6 @@
 - 抓取脚本放在 `tool/capture/`，只手动执行，不进入 CI。
 - 新 fixture 写入 `testing/<endpoint>.json` 前必须确认响应为成功响应且结构可识别，并在本文件记录实际非敏感请求参数。
 - 失败响应不得写入或覆盖已有 fixture。
+- 抓取遇到非 2xx、Bilibili 业务失败或无法识别结构时，不得写入或覆盖 fixture，并返回非零状态。
 - 原始 response body 之外不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
 - 新增 endpoint 必须同步更新本文件和包级 `AGENTS.md` 的来源记录。

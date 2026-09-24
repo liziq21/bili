@@ -40,7 +40,7 @@ This directory contains shared packages and modules (`packages/*`).
 ### 边界与依赖
 
 - API 子包只负责平台请求、响应 envelope/DTO、网络错误和客户端配置。
-- API 子包不得依赖任何 workspace 包，包括 `data`、`model`、平台 wrapper、`app` 或 UI 包；只允许依赖 Dart 第三方包和自身源码。
+- API 子包不得依赖任何 workspace 包，包括 `data`、`model`、平台 wrapper、`app` 或 UI 包。`ypi` 仅可在历史 `data` path dependency 移除前保留现有依赖；新增或修改的 API 代码不得扩大该依赖。除该过渡例外外，API 子包只允许依赖 Dart 第三方包和自身源码。
 - API 子包不得返回或接收 `VideoModel`、`CreatorProfile`、`Page`、`Result` 等外层领域模型，也不得负责外层分页状态。
 - `lib/<package>.dart` 的公共导出只包含 service、网络 DTO、包级 typed exception、Token/客户端配置；内部 parser、fixture、tool 和测试代码不导出。
 
@@ -65,6 +65,6 @@ This directory contains shared packages and modules (`packages/*`).
 - 单元测试和 CI 不得访问真实网络；使用固定 JSON fixture、fake client 或 `MockClient`。
 - 每个新增 endpoint 固定包含四项测试：真实响应 fixture、MockClient 请求形状测试、fixture 解析测试、失败路径测试。
 - 真实请求只能通过 `tool/capture/` 下的抓取脚本手动执行，输出到 `testing/<endpoint>.json`；脚本不得进入 CI。
-- fixture 只保存原始 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
+- fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
 - 抓取遇到非 2xx、业务失败或无法识别的响应结构时不得写入或覆盖 fixture，必须返回非零并打印状态。
 - 抓取元数据、来源和非敏感请求参数记录在包级 `testing/README.md`，不得记录秘密。
