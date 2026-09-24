@@ -1,6 +1,8 @@
 # App Layer Guidelines
 
 > **Important**: If you are not familiar with the contents of the root [`AGENTS.md`](../AGENTS.md) (such as Primary Constructors guidelines, UI framework constraints, Dart version rules, etc.), you **must** read it first before proceeding.
+>
+> Primary Constructors 规则见根 AGENTS.md。
 
 This directory contains the main Flutter application (`app/`).
 
