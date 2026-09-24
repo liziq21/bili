@@ -23,20 +23,24 @@ For directory-specific guidelines, refer to:
 ### UI Framework
 - Do not use `flutter/material.dart` or `flutter/cupertino.dart`. Use `material_ui` instead.
 
+### Generated Files
+- 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行生成命令重新生成（build_runner build）。
+
 ### Dart Version & Syntax
 - Do not arbitrarily downgrade the Dart SDK version.
 - Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
 
 #### Primary Constructors & Concise Syntax (Dart 3.13+)
+权威规范见 Dart language tour — Concise syntax: https://dart.dev/guides/language/language-tour#concise-syntax；本仓库特例见上文。
+
 - **Primary constructors require parameters.** Use `var`/`final` in the parameter header to implicitly declare and initialize fields.
   ```dart
   class Person(final String name, var int age);
   ```
-- **No-arg classes:** Do NOT write a primary-constructor header on a class that has no parameters. Write the class name directly with an empty (or concise `;`) body.
+- **No-arg classes:** 无参类不写头（即空括号）、const 类例外。
   ```dart
   sealed class SearchEvent {}
   class MonitorRecentSearches extends SearchEvent {}
-  // NOT: sealed class SearchEvent() {}  // empty header is noise
   ```
 - **Constant Constructors**: Place `const` before `class`, `enum`, or `extension type`.
   ```dart
