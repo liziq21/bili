@@ -30,8 +30,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       badgeColor: Color(0xFF00A1D6),
     ),
     _RelatedVideoCard(
-      title:
-          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
       author: 'Flutter Dev Hub',
       views: '290K views',
       source: 'YOUTUBE',
@@ -447,9 +446,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                   ),
                   const Gap(6),
                   Text(
-                    video.desc != null && video.desc!.isNotEmpty
-                        ? video.desc!
-                        : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+                    video.desc != null && video.desc!.isNotEmpty ? video.desc! : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
                     maxLines: _isDescExpanded ? null : 2,
                     overflow: _isDescExpanded
                         ? TextOverflow.visible
@@ -509,14 +506,14 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
 }
 
 class const _RelatedVideoCard({
-    required final String title,
-    required final String author,
-    required final String views,
-    required final String source,
-    required final String time,
-    required final String duration,
-    required final Color badgeColor,
-  }) extends StatelessWidget {
+  required final String title,
+  required final String author,
+  required final String views,
+  required final String source,
+  required final String time,
+  required final String duration,
+  required final Color badgeColor,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -633,13 +630,13 @@ class const _RelatedVideoCard({
 }
 
 class const _ActionButton({
-    required final IconData icon,
-    required final IconData activeIcon,
-    required final String label,
-    required final bool isActive,
-    required final Color color,
-    required final VoidCallback onTap,
-  }) extends StatelessWidget {
+  required final IconData icon,
+  required final IconData activeIcon,
+  required final String label,
+  required final bool isActive,
+  required final Color color,
+  required final VoidCallback onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

@@ -4,10 +4,10 @@ import 'package:material_ui/material_ui.dart';
 import 'filter_chip_item.dart';
 
 class const FilterGroupSection({
-    super.key,
-    required final FilterGroup group,
-    required final ValueChanged<FilterGroup> onChanged,
-  }) extends StatelessWidget {
+  super.key,
+  required final FilterGroup group,
+  required final ValueChanged<FilterGroup> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -41,7 +41,10 @@ class const FilterGroupSection({
   }
 }
 
-class const _SingleFilterView({required final SingleFilterGroup group, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
+class const _SingleFilterView({
+  required final SingleFilterGroup group,
+  required final ValueChanged<FilterGroup> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -66,7 +69,10 @@ class const _SingleFilterView({required final SingleFilterGroup group, required 
   }
 }
 
-class const _MultiFilterView({required final MultiFilterGroup filter, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
+class const _MultiFilterView({
+  required final MultiFilterGroup filter,
+  required final ValueChanged<FilterGroup> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -95,7 +101,10 @@ class const _MultiFilterView({required final MultiFilterGroup filter, required f
   }
 }
 
-class const _DateRangeView({required final DateRangeFilterGroup group, required final ValueChanged<FilterGroup> onChanged}) extends StatelessWidget {
+class const _DateRangeView({
+  required final DateRangeFilterGroup group,
+  required final ValueChanged<FilterGroup> onChanged,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final range = group.range;

@@ -8,11 +8,11 @@ import '../bloc/home_bloc.dart';
 ///
 /// 使用 [SliverPersistentHeader] 固定，避免滚动后失去主导航入口。
 class const HomeFilterBar({
-    required final List<HomeFilter> filters,
-    required final String activeFilterId,
-    required final ValueChanged<HomeFilter> onSelected,
-    required final double height,
-  }) extends SliverPersistentHeaderDelegate {
+  required final List<HomeFilter> filters,
+  required final String activeFilterId,
+  required final ValueChanged<HomeFilter> onSelected,
+  required final double height,
+}) extends SliverPersistentHeaderDelegate {
   /// 筛选栏高度：chip 文字高度 + 上下内边距，随字体缩放而变化
   static double preferredHeight(BuildContext context) {
     final textScaler = MediaQuery.textScalerOf(context);

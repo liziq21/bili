@@ -226,4 +226,8 @@ class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
   }
 }
 
-enum _ToggleSwitchExecutionState() { idle, inProgress, successful }
+enum _ToggleSwitchExecutionState() {
+  idle,
+  inProgress,
+  successful,
+}

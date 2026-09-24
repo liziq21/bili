@@ -8,13 +8,13 @@ import '../bloc/home_bloc.dart';
 
 /// 主页 AppBar 中的「数据源切换 + 搜索」输入条
 class const HomeSearchBar({
-    super.key,
-    required final TextEditingController controller,
-    required final List<MediaSource> sources,
-    required final String activeSourceId,
-    required final String activeSourceName,
-    required final ValueChanged<String> onSubmitted,
-  }) extends StatelessWidget {
+  super.key,
+  required final TextEditingController controller,
+  required final List<MediaSource> sources,
+  required final String activeSourceId,
+  required final String activeSourceName,
+  required final ValueChanged<String> onSubmitted,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
