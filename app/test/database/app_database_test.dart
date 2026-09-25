@@ -16,14 +16,51 @@ void main() {
   });
 
   group('RecentSearchQueryDao', () {
-    test('trims queries and ignores whitespace-only searches', () async {
+    test('trims queries, strips control characters, and ignores whitespace/control-only searches', () async {
       final dao = db.recentSearchQueryDao;
 
-      await dao.insertOrReplaceRecentSearch('  query  ');
-      await dao.insertOrReplaceRecentSearch(' \t\n ');
+      await dao.insertOrReplaceRecentSearch('  query\x00\x1F\x7F  ');
+      await dao.insertOrReplaceRecentSearch(' \t\n\x00 ');
 
       final queries = await dao.getRecentSearchQueryEntities(10).first;
       expect(queries.map((query) => query.query), equals(['query']));
+    });
+
+    test(
+      'truncates searches exceeding max length constraint (200 chars)',
+      () async {
+        final dao = db.recentSearchQueryDao;
+        final longQuery = 'A' * 250;
+
+        await dao.insertOrReplaceRecentSearch(longQuery);
+
+        final queries = await dao.getRecentSearchQueryEntities(10).first;
+        expect(queries, hasLength(1));
+        expect(queries.first.query.length, equals(200));
+        expect(queries.first.query, equals('A' * 200));
+      },
+    );
+
+    test('truncates at a complete Unicode character boundary', () async {
+      final dao = db.recentSearchQueryDao;
+      final queryAtBoundary = '${'A' * 199}😀';
+
+      await dao.insertOrReplaceRecentSearch(queryAtBoundary);
+
+      final queries = await dao.getRecentSearchQueryEntities(10).first;
+      expect(queries, hasLength(1));
+      expect(queries.first.query, equals('A' * 199));
+    });
+
+    test('trims whitespace exposed by truncation', () async {
+      final dao = db.recentSearchQueryDao;
+      final queryWithBoundaryWhitespace = '${'A' * 199} B';
+
+      await dao.insertOrReplaceRecentSearch(queryWithBoundaryWhitespace);
+
+      final queries = await dao.getRecentSearchQueryEntities(10).first;
+      expect(queries, hasLength(1));
+      expect(queries.first.query, equals('A' * 199));
     });
 
     test(
