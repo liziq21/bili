@@ -11,6 +11,7 @@ class AppStyle({
   Size? screenSize,
   final bool disableAnimations = false,
   final bool highContrast = false,
+  final bool isDark = false,
 }) {
   this {
     if (screenSize == null) {
@@ -32,7 +33,7 @@ class AppStyle({
   late final double scale;
 
   /// The current theme colors for the app
-  final AppColors colors = AppColors();
+  late final AppColors colors = AppColors(isDark: isDark);
 
   /// Rounded edge corner radii
   late final _Corners corners = const _Corners();
