@@ -186,6 +186,29 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
+  Future<NetworkBiliRankingResponse> getRanking({
+    int rankingId = 0,
+    String type = 'all',
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/web-interface/ranking/v2',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'rid': rankingId,
+      'type': type,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkBiliRankingResponse> $response = await client
+        .send<NetworkBiliRankingResponse, NetworkBiliRankingResponse>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
   Future<NetworkReplyData> getReplyListMain({
     required int oid,
     required int type,

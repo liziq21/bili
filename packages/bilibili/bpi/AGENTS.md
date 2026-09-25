@@ -22,9 +22,9 @@
 | 评论 | `GET /x/v2/reply/*` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/reply_*.json` | 已有原始 fixture；抓取日期未记录 |
 | 播放地址 | `GET /x/player/wbi/playurl` | WBI | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/play_url.json` | 已有原始 fixture；抓取日期未记录 |
 | 热门视频 | `GET /x/web-interface/popular` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/popular.json` | 2026-09-25 |
-| 排行榜/推荐 | 待探针确认 | 依端点而定 | 社区文档和 Bilibili Web 实际请求，未验证前不得实现 | 尚无 | 未实测 |
+| 排行榜 | `GET /x/web-interface/ranking/v2` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/ranking.json` | 2026-09-25 |
 
-`https://api.bilibili.com/x/web-interface/ranking/v2` 可作为后续探针候选，但只有完成真实请求、保存响应和记录来源后才能进入实现。
+`ranking/v2` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以 `testing/ranking.json` 为准。
 
 ## Bili DTO 与异常
 

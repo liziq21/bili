@@ -74,6 +74,20 @@ Future<void> main() async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_RANKING_ONLY'] == '1') {
+      final ranking = await getJson(
+        Uri.https('api.bilibili.com', '/x/web-interface/ranking/v2', {
+          'rid': '0',
+          'type': 'all',
+        }),
+        'ranking',
+      );
+      _requireRankingItems(ranking.json, 'ranking');
+      saveResponse('testing/ranking.json', ranking);
+      print('Ranking fixture fetched successfully.');
+      return;
+    }
+
     mixinKey = await WbiUtils.fetchMixinKey(client);
 
     const sampleBvid = 'BV1GJ411x7vy';
@@ -307,5 +321,21 @@ void _requirePopularItems(Map<String, dynamic> json, String label) {
   });
   if (!hasVideo) {
     throw FormatException('$label has no item with bvid or aid');
+  }
+}
+
+void _requireRankingItems(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final items = data['list'];
+  if (items is! List || items.isEmpty) {
+    throw FormatException('$label data.list is not a non-empty list');
+  }
+  final videoItems = items.whereType<Map>().where((item) {
+    final bvid = item['bvid'];
+    final aid = item['aid'];
+    return aid is int && bvid is String && bvid.isNotEmpty;
+  }).length;
+  if (videoItems == 0) {
+    throw FormatException('$label has no video item with aid and bvid');
   }
 }
