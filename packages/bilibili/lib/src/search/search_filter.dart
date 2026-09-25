@@ -1,8 +1,7 @@
 import 'package:data/data.dart';
 
-enum VideoDurationFilterOption(
-  @override
-  final String label) implements FilterOption {
+enum VideoDurationFilterOption(@override final String label)
+    implements FilterOption {
   allDuration('不限'),
   below10Minutes('10分钟以下'),
   tenTo30Minutes('10-30分钟'),
@@ -13,9 +12,7 @@ enum VideoDurationFilterOption(
   String get value => name;
 }
 
-enum UserType(
-  @override
-  final String label) implements FilterOption {
+enum UserType(@override final String label) implements FilterOption {
   allUsers('全部用户'),
   upMain('UP主'),
   normalUser('普通用户'),

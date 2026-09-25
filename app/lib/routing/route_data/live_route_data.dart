@@ -7,7 +7,9 @@ extension BuildContextLive on BuildContext {
 
 @TypedGoRoute<LiveRouteData>(path: '${Routes.live}/:roomId')
 @immutable
-class const LiveRouteData({required final String roomId, final String? source}) extends GoRouteData with $LiveRouteData {
+class const LiveRouteData({required final String roomId, final String? source})
+    extends GoRouteData
+    with $LiveRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = source ?? _resolveSource(context);

@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-class MockVideoBloc(super.initialState) extends Cubit<VideoState>
+class MockVideoBloc(super.initialState)
+    extends Cubit<VideoState>
     implements VideoBloc {
   @override
   void add(VideoEvent event) {}
@@ -39,10 +40,7 @@ void main() {
             desc: '这是一个用于测试的视频摘要说明文本，用于验证展开与收起交互',
             viewCount: 10000,
           ),
-          creator: const CreatorProfile(
-            id: 'test_creator',
-            name: '测试UP主',
-          ),
+          creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
         );
 
         final mockBloc = MockVideoBloc(

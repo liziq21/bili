@@ -9,7 +9,8 @@ import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player_placeholder.dart';
 
-class const VideoScreen({super.key, final String videoId = 'demo_video'}) extends StatelessWidget {
+class const VideoScreen({super.key, final String videoId = 'demo_video'})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -22,7 +23,8 @@ class const VideoScreen({super.key, final String videoId = 'demo_video'}) extend
   }
 }
 
-class const _VideoContent({required final String videoId}) extends StatelessWidget {
+class const _VideoContent({required final String videoId})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;

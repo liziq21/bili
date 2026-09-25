@@ -4,12 +4,12 @@ import '../../../main.dart';
 
 /// Feed 加载失败 / 空结果 / 功能占位的统一提示视图
 class const FeedStatusView({
-    super.key,
-    required final IconData icon,
-    required final String message,
-    final String? description,
-    final VoidCallback? onRetry,
-  }) extends StatelessWidget {
+  super.key,
+  required final IconData icon,
+  required final String message,
+  final String? description,
+  final VoidCallback? onRetry,
+}) extends StatelessWidget {
   /// 加载失败提示
   factory FeedStatusView.failure({
     Key? key,
@@ -77,7 +77,8 @@ class const FeedStatusView({
 }
 
 /// 卡片骨架占位，用于首屏加载
-class const FeedSkeletonCard({super.key, final bool showTextLines = true}) extends StatelessWidget {
+class const FeedSkeletonCard({super.key, final bool showTextLines = true})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

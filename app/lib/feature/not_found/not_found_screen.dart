@@ -1,6 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
-class const NotFoundScreen({super.key, required final String uri, required final String path}) extends StatelessWidget {
+class const NotFoundScreen({
+  super.key,
+  required final String uri,
+  required final String path,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

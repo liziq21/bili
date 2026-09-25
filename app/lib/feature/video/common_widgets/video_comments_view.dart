@@ -95,7 +95,10 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
   }
 }
 
-class const _CommentItem({required final VideoComment comment, required final String Function(int) formatCount}) extends StatelessWidget {
+class const _CommentItem({
+  required final VideoComment comment,
+  required final String Function(int) formatCount,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
