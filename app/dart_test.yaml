@@ -1,0 +1,6 @@
+# Alchemist tags every goldenTest with `golden`. Declaring it here lets you
+# split the suite: `flutter test --tags golden` runs only screenshot tests,
+# `flutter test --exclude-tags golden` runs everything else.
+tags:
+  golden:
+    description: Screenshot (golden) tests backed by alchemist.
