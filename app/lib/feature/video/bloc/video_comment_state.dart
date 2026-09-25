@@ -1,6 +1,8 @@
 part of 'video_comment_bloc.dart';
 
-const _keepVideoCommentError = Object();
+class const _VideoCommentErrorSentinel();
+
+const _keepVideoCommentError = _VideoCommentErrorSentinel();
 
 class const VideoCommentState({
   final bool isLoading = false,

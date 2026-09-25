@@ -264,6 +264,10 @@ void main() {
 
       expect(state.copyWith(isLoading: true).error, 'old error');
       expect(state.copyWith(error: null).error, isNull);
+      expect(
+        () => state.copyWith(error: const Object()),
+        throwsA(isA<TypeError>()),
+      );
     });
 
     test('LoadVideoComments fetches first page of comments', () async {
