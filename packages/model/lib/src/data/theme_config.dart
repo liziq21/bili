@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'theme_config.g.dart';
 
 @JsonEnum(alwaysCreate: true, fieldRename: .screamingSnake)
-enum ThemeConfig {
+enum ThemeConfig() {
   followSystem,
   light,
   dark;

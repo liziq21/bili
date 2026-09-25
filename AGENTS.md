@@ -37,11 +37,6 @@ For directory-specific guidelines, refer to:
   ```dart
   class Person(final String name, var int age);
   ```
-- **No-arg classes:** 无参类不写头（即空括号）、const 类例外。
-  ```dart
-  sealed class SearchEvent {}
-  class MonitorRecentSearches extends SearchEvent {}
-  ```
 - **Constant Constructors**: Place `const` before `class`, `enum`, or `extension type`.
   ```dart
   class const UserProfile(final String id, final String name);
