@@ -148,6 +148,8 @@ const _prohibitedFixtureFields = {
   'trackingParams',
   'clickTrackingParams',
   'visitorData',
+  'serviceTrackingParams',
+  'trackingParam',
 };
 
 dynamic _redactTrackingFields(dynamic value) {
