@@ -33,7 +33,11 @@ For directory-specific guidelines, refer to:
 #### Primary Constructors & Concise Syntax (Dart 3.13+)
 权威规范见 Dart constructors — Concise constructor syntax: https://dart.dev/language/constructors#concise-constructor-syntax；本仓库特例见下文的无参类规则。
 
-- **Primary constructors require parameters.** Use `var`/`final` in the parameter header to implicitly declare and initialize fields.
+- **Primary constructors may be parameterless for enums.** Keep explicit empty parentheses for parameterless enum constructors.
+  ```dart
+  enum ThemeConfig() { followSystem, light, dark; }
+  ```
+- **Parameterized primary constructors**: Use `var`/`final` in the parameter header to implicitly declare and initialize fields.
   ```dart
   class Person(final String name, var int age);
   ```
