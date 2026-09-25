@@ -17,7 +17,6 @@ VideoModel _video({
   url: 'https://www.bilibili.com/video/$id',
   thumbnailUrl: 'https://example.com/thumb-$id.jpg',
   viewCount: viewCount,
-  uploadDate: DateTime(2026, 9, 17),
   duration: duration,
   creatorProfileName: '测试UP主',
   creatorProfileId: '123456',
@@ -32,13 +31,14 @@ void main() {
       // and ThemeData types. Alchemist's built-in scaffolding uses Flutter's
       // material, so the widget tree has to be wrapped with the fork's app.
       pumpWidget: (tester, widget) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(child: widget),
+        await mockNetworkImagesFor(() async {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(body: Center(child: widget)),
             ),
-          ),
-        );
+          );
+          await tester.pumpAndSettle();
+        });
       },
       builder: () => GoldenTestGroup(
         columns: 2,
@@ -46,7 +46,10 @@ void main() {
         // Alchemist lays scenarios out in a table with unbounded height, which
         // would trip `RenderFlex children have non-zero flex but incoming
         // height constraints are unbounded`.
-        scenarioConstraints: const BoxConstraints(maxWidth: 320, maxHeight: 280),
+        scenarioConstraints: const BoxConstraints(
+          maxWidth: 320,
+          maxHeight: 280,
+        ),
         children: [
           GoldenTestScenario(
             name: 'default card',
@@ -84,24 +87,20 @@ void main() {
     );
   });
 
-  testWidgets('thumbnail renders the mocked network image', (
-    tester,
-  ) async {
-    await mockNetworkImagesFor(
-      () async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 320,
-                child: VideoCard(videoInfoBase: _video()),
-              ),
+  testWidgets('thumbnail renders the mocked network image', (tester) async {
+    await mockNetworkImagesFor(() async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 320,
+              child: VideoCard(videoInfoBase: _video()),
             ),
           ),
-        );
-        await tester.pump();
-        expect(find.byType(CachedNetworkImage), findsWidgets);
-      },
-    );
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(CachedNetworkImage), findsWidgets);
+    });
   });
 }

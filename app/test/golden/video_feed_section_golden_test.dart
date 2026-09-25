@@ -4,6 +4,7 @@ import 'package:app/feature/home/widgets/video_feed_section.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:network_image_mock/network_image_mock.dart';
 
 List<VideoModel> _videos(int count) => List.generate(
   count,
@@ -13,7 +14,6 @@ List<VideoModel> _videos(int count) => List.generate(
     url: 'https://www.bilibili.com/video/BV$i',
     thumbnailUrl: 'https://example.com/thumb-$i.jpg',
     viewCount: 1000 * (i + 1),
-    uploadDate: DateTime(2026, 9, 17),
     duration: 300 + i * 37,
   ),
 );
@@ -56,11 +56,14 @@ void main() {
       'renders every status and breakpoint',
       fileName: 'video_feed_section',
       pumpWidget: (tester, widget) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(body: Center(child: widget)),
-          ),
-        );
+        await mockNetworkImagesFor(() async {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(body: Center(child: widget)),
+            ),
+          );
+          await tester.pumpAndSettle();
+        });
       },
       builder: () => GoldenTestGroup(
         columns: 1,
