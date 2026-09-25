@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:ypi/ypi.dart';
+
+import 'package:ypi/src/protobuf/yt_protobuf_encoder.dart';
 
 final class _CapturedResponse {
-  const _CapturedResponse(this.response);
+  const _CapturedResponse(this.response, this.bodyBytes);
 
   final http.Response response;
+  final List<int> bodyBytes;
 }
 
 Future<void> main() async {
@@ -20,7 +22,7 @@ Future<void> main() async {
 
   void saveResponse(String path, _CapturedResponse captured) {
     final file = File(path);
-    file.writeAsBytesSync(captured.response.bodyBytes);
+    file.writeAsBytesSync(captured.bodyBytes);
     print('Saved: $path (HTTP ${captured.response.statusCode})');
   }
 
@@ -131,7 +133,37 @@ _CapturedResponse _captureJson(
     throw FormatException('$label returned invalid JSON');
   }
   validate(decoded);
-  return _CapturedResponse(response);
+  final redacted = _redactTrackingFields(decoded);
+  final prefix = response.body.startsWith('window.google.ac.h(')
+      ? 'window.google.ac.h('
+      : '';
+  final suffix = prefix.isEmpty ? '' : ')';
+  return _CapturedResponse(
+    response,
+    utf8.encode('$prefix${jsonEncode(redacted)}$suffix'),
+  );
+}
+
+const _prohibitedFixtureFields = {
+  'trackingParams',
+  'clickTrackingParams',
+  'visitorData',
+  'serviceTrackingParams',
+  'trackingParam',
+};
+
+dynamic _redactTrackingFields(dynamic value) {
+  if (value is Map) {
+    return <String, dynamic>{
+      for (final entry in value.entries)
+        if (!_prohibitedFixtureFields.contains(entry.key))
+          entry.key as String: _redactTrackingFields(entry.value),
+    };
+  }
+  if (value is List) {
+    return value.map(_redactTrackingFields).toList();
+  }
+  return value;
 }
 
 dynamic _decodeBody(String body) {

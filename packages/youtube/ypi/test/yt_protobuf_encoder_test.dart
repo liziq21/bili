@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:test/test.dart';
-import 'package:ypi/ypi.dart';
+
+import 'package:ypi/src/protobuf/params_builder.dart';
+import 'package:ypi/src/protobuf/yt_protobuf_encoder.dart';
 
 void main() {
   group('YoutubeProtobufEncoder Tests', () {
