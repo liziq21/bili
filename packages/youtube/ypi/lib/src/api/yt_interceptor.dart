@@ -18,7 +18,7 @@ final class YoutubeInnerTubeInterceptor implements Interceptor {
     final headers = Map<String, String>.from(request.headers);
     headers[HttpHeaders.contentTypeHeader] = 'application/json';
     headers[HttpHeaders.userAgentHeader] = config.userAgent;
-    headers['X-YouTube-Client-Name'] = '1';
+    headers['X-YouTube-Client-Name'] = config.clientNameId;
     headers['X-YouTube-Client-Version'] = config.clientVersion;
 
     return chain.proceed(request.copyWith(headers: headers));

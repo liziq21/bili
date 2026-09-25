@@ -58,6 +58,7 @@ void main() {
         ),
       );
       expect(videoRes, isA<Result<Page<VideoModel>>>());
+      expect(videoRes, isA<Error>());
       if (videoRes is Error) {
         expect(videoRes.toString(), isNot(contains('\n#0')));
       }

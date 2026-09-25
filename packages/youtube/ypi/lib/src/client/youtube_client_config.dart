@@ -2,6 +2,7 @@
 final class YoutubeClientConfig {
   const YoutubeClientConfig({
     this.clientName = 'WEB',
+    this.clientNameId = '1',
     this.clientVersion = '2.20230818.00.00',
     this.language = 'en',
     this.country = 'US',
@@ -11,6 +12,7 @@ final class YoutubeClientConfig {
   });
 
   final String clientName;
+  final String clientNameId;
   final String clientVersion;
   final String language;
   final String country;

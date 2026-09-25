@@ -167,6 +167,7 @@ final class YoutubeService {
   void _validateConfig() {
     final fields = <String, String>{
       'clientName': _config.clientName,
+      'clientNameId': _config.clientNameId,
       'clientVersion': _config.clientVersion,
       'language': _config.language,
       'country': _config.country,

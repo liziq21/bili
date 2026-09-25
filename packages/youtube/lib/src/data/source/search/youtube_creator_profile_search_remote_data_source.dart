@@ -68,7 +68,21 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
     if (text == null || text.isEmpty) {
       return null;
     }
-    return int.tryParse(text.replaceAll(RegExp(r'[^0-9]'), ''));
+    final lower = text.toLowerCase();
+    final numMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(K|M)?', caseSensitive: false).firstMatch(lower);
+    if (numMatch == null) {
+      return null;
+    }
+    final value = double.tryParse(numMatch.group(1)!) ?? 0.0;
+    final suffix = numMatch.group(2)?.toUpperCase();
+    switch (suffix) {
+      case 'M':
+        return (value * 1e6).round();
+      case 'K':
+        return (value * 1e3).round();
+      default:
+        return value.round();
+    }
   }
 }
 
