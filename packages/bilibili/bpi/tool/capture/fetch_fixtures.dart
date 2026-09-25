@@ -216,9 +216,7 @@ Future<void> main() async {
         dashVideo.isNotEmpty &&
         dashAudio != null &&
         dashAudio.isNotEmpty &&
-        dashVideo.any(
-          (stream) => stream.playUrls.any((url) => url.isNotEmpty),
-        );
+        dashVideo.any((stream) => stream.playUrls.any((url) => url.isNotEmpty));
     final hasDurl =
         parsedPlayUrl.durl?.any(
           (stream) => stream.playUrls.any((url) => url.isNotEmpty),

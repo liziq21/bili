@@ -11,9 +11,9 @@ import '../../../data/repository/video_comment_repository.dart';
 part 'video_comment_event.dart';
 part 'video_comment_state.dart';
 
-class VideoCommentBloc({required final VideoCommentRepository _repository}) extends Bloc<VideoCommentEvent, VideoCommentState> {
-  this
-    : super(const VideoCommentState()) {
+class VideoCommentBloc({required final VideoCommentRepository _repository})
+    extends Bloc<VideoCommentEvent, VideoCommentState> {
+  this : super(const VideoCommentState()) {
     on<LoadVideoComments>(_onLoadVideoComments);
     on<FetchNextCommentPage>(_onFetchNextCommentPage);
     on<ToggleCommentLike>(_onToggleCommentLike);

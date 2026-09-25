@@ -1,6 +1,9 @@
 import 'package:model/model.dart';
 
-class const ThemeState(final bool useDynamicColor, final ThemeConfig themeConfig) {
+class const ThemeState(
+  final bool useDynamicColor,
+  final ThemeConfig themeConfig,
+) {
   @override
   bool operator ==(Object other) =>
       other is ThemeState &&

@@ -8,10 +8,10 @@ export 'colors.dart';
 
 @immutable
 class AppStyle({
-    Size? screenSize,
-    final bool disableAnimations = false,
-    final bool highContrast = false,
-  }) {
+  Size? screenSize,
+  final bool disableAnimations = false,
+  final bool highContrast = false,
+}) {
   this {
     if (screenSize == null) {
       scale = 1;
@@ -30,6 +30,7 @@ class AppStyle({
   }
 
   late final double scale;
+
   /// The current theme colors for the app
   final AppColors colors = AppColors();
 
@@ -248,14 +249,14 @@ class _Sizes() {
 @immutable
 class const _Insets(double scale) {
   this
-      : xxs = 4 * scale,
-        xs = 8 * scale,
-        sm = 16 * scale,
-        md = 24 * scale,
-        lg = 32 * scale,
-        xl = 48 * scale,
-        xxl = 56 * scale,
-        offset = 80 * scale;
+    : xxs = 4 * scale,
+      xs = 8 * scale,
+      sm = 16 * scale,
+      md = 24 * scale,
+      lg = 32 * scale,
+      xl = 48 * scale,
+      xxl = 56 * scale,
+      offset = 80 * scale;
 
   final double xxs;
   final double xs;

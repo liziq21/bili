@@ -4,12 +4,12 @@ import '../../../main.dart';
 
 /// Feed 区块标题
 class const FeedSectionHeader({
-    super.key,
-    required final String title,
-    required final String subtitle,
-    required final IconData icon,
-    final Color? iconColor,
-  }) extends StatelessWidget {
+  super.key,
+  required final String title,
+  required final String subtitle,
+  required final IconData icon,
+  final Color? iconColor,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;

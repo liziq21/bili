@@ -29,12 +29,12 @@ final class const HomeFilter({
 
 @immutable
 class const HomeState({
-    final String sourceId = 'bilibili',
-    final String filterId = allFilterId,
-    final bool isRefreshing = false,
-    final List<FeedSectionState<VideoModel>> videoSections = const [],
-    final List<FeedSectionState<LiveRoomModel>> liveSections = const [],
-  }) extends Equatable {
+  final String sourceId = 'bilibili',
+  final String filterId = allFilterId,
+  final bool isRefreshing = false,
+  final List<FeedSectionState<VideoModel>> videoSections = const [],
+  final List<FeedSectionState<LiveRoomModel>> liveSections = const [],
+}) extends Equatable {
   /// “全部推荐”聚合筛选项的标识
   static const String allFilterId = 'aggregate:all';
 

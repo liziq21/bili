@@ -15,3 +15,9 @@
 **Learning:** Replacing abrupt text maxLines toggles with `AnimatedSize` combined with `Semantics(button: true, expanded: ...)` on the toggle button creates a polished micro-interaction that provides both visual smoothness and essential screen reader state updates (`expanded: true/false`).
 
 **Action:** Always pair `AnimatedSize` layout transitions with explicit `Semantics(button: true, expanded: ...)` and `HapticFeedback.lightImpact()` when building expandable text or summary sections.
+
+## 2026-09-25 - Navigation Filter Chips Tactile Feedback & Tooltip Accessibility
+
+**Learning:** Navigation `FilterChip` elements in horizontal filter bars provide visual tab selection, but lacking tactile `HapticFeedback.selectionClick()` and explicit `tooltip` attributes reduces physical responsiveness on touch screens and leaves desktop/screen-reader users without context on long-press or hover.
+
+**Action:** Always combine `HapticFeedback.selectionClick()` with `tooltip: filter.label` on filter chip selection handlers to ensure clear tactile feedback and accessibility.

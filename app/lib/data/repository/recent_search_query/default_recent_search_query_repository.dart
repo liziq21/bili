@@ -4,8 +4,9 @@ import '../../../database/dao/recent_search_query_dao.dart';
 import '../../model/recent_search_query.dart';
 import 'recent_search_query_repository.dart';
 
-class DefaultRecentSearchQueryRepository({required final RecentSearchQueryDao _recentSearchQueryDao})
-    implements RecentSearchQueryRepository {
+class DefaultRecentSearchQueryRepository({
+  required final RecentSearchQueryDao _recentSearchQueryDao,
+}) implements RecentSearchQueryRepository {
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       _recentSearchQueryDao
