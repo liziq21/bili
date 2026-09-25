@@ -5,7 +5,6 @@ import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_screen.dart';
 import 'package:data/data.dart' hide Page;
 import 'package:data/data.dart' as data show Page;
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -537,25 +536,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(biliVideoFeed.fetchCount, greaterThan(fetchCountBeforeRefresh));
-    });
-
-    testWidgets('Enforces text input length limits on search input field', (
-      tester,
-    ) async {
-      final bloc = buildBloc();
-      addTearDown(bloc.close);
-
-      await tester.pumpWidget(buildScreen(bloc));
-      await tester.pumpAndSettle();
-
-      final searchTextField = tester.widget<TextField>(
-        find.byType(TextField).first,
-      );
-      expect(searchTextField.maxLength, 200);
-      expect(
-        searchTextField.maxLengthEnforcement,
-        MaxLengthEnforcement.enforced,
-      );
     });
   });
 }

@@ -2,12 +2,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../search/app_search_anchor.dart';
 import 'bloc/home_bloc.dart';
 import 'widgets/feed_status_view.dart';
 import 'widgets/home_filter_bar.dart';
-import 'widgets/home_search_bar.dart';
+import 'widgets/home_source_selector.dart';
 import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
 
@@ -17,38 +19,18 @@ class const HomeScreen({
   required final Function(String searchQuery) _navigateToSearchResult,
   required final Function(String mid) _onSpace,
   required final Function(String id) _onVideo,
-}) extends StatefulWidget {
+}) extends StatelessWidget {
   Function(String roomId) get onLive => _onLive;
   Function(String searchQuery) get navigateToSearchResult =>
       _navigateToSearchResult;
   Function(String mid) get onSpace => _onSpace;
   Function(String id) get onVideo => _onVideo;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState() extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearchSubmitted(String query) {
-    final trimmed = query.trim();
-    if (trimmed.isNotEmpty) {
-      widget.navigateToSearchResult(trimmed);
-    }
-  }
-
-  void _onFilterSelected(HomeFilter filter) {
+  void _onFilterSelected(BuildContext context, HomeFilter filter) {
     context.read<HomeBloc>().add(FilterSelected(filter.id));
   }
 
-  Future<void> _onRefresh() async {
+  Future<void> _onRefresh(BuildContext context) async {
     final bloc = context.read<HomeBloc>()..add(FeedsRequested(refresh: true));
     try {
       await bloc.stream.firstWhere((state) => !state.isRefreshing);
@@ -125,8 +107,8 @@ class _HomeScreenState() extends State<HomeScreen> {
 
     // ⚡ Bolt Optimization: Isolate Scaffold and AppBar rebuild passes from HomeState feed updates.
     // By scoping BlocSelector to sourceId for the AppBar and moving BlocBuilder inside body,
-    // feed emissions (e.g. pagination, refresh, items loading) will not trigger AppBar or
-    // HomeSearchBar rebuilds, saving ~2-4ms per frame on feed state updates.
+    // feed emissions (e.g. pagination, refresh, items loading) will not trigger the AppBar,
+    // saving ~2-4ms per frame on feed state updates.
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -136,25 +118,32 @@ class _HomeScreenState() extends State<HomeScreen> {
             final activeSource = context.read<HomeBloc>().activeSource!;
             final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
             final isCreatorSource = activeSource.id == 'bilibili';
+            // 搜索入口复用 AppSearchAnchor 的建议浮层，它依赖 SearchBloc；
+            // 数据源没有建议能力时不提供该 bloc，因此这里也不显示搜索入口。
+            final hasSearchSuggest =
+                context.read<SearchSuggestRepository?>() != null;
 
             return AppBar(
               titleSpacing: $styles.insets.xs,
-              title: Align(
-                alignment: Alignment.centerLeft,
-                // 手机宽度下不起作用；宽屏上避免搜索框被拉成一条
-                // 1000+ 逻辑像素的横条。
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 640),
-                  child: HomeSearchBar(
-                    controller: _searchController,
-                    sources: sources,
-                    activeSourceId: activeSource.id,
-                    activeSourceName: activeSource.name,
-                    onSubmitted: _onSearchSubmitted,
-                  ),
-                ),
+              title: HomeSourceSelector(
+                sources: sources,
+                activeSourceId: activeSource.id,
               ),
               actions: [
+                if (hasSearchSuggest)
+                  AppSearchAnchor(
+                    // 搜索历史写入尚无 API，与搜索结果页保持一致。
+                    onSearch: (String _) {},
+                    navigateToSearchResult: navigateToSearchResult,
+                    builder: (context, controller) => IconButton(
+                      icon: Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      tooltip: '搜索',
+                      onPressed: controller.openView,
+                    ),
+                  ),
                 if (hasLiveEntry)
                   IconButton(
                     icon: Icon(
@@ -168,7 +157,7 @@ class _HomeScreenState() extends State<HomeScreen> {
                       labelText: '请输入直播间 Room ID：',
                       hintText: '例如 230023',
                       defaultId: '230023',
-                      onSubmit: widget.onLive,
+                      onSubmit: onLive,
                     ),
                   ),
                 IconButton(
@@ -183,7 +172,7 @@ class _HomeScreenState() extends State<HomeScreen> {
                     labelText: '请输入 MID 或频道 ID：',
                     hintText: isCreatorSource ? '例如 188339' : '频道 ID',
                     defaultId: isCreatorSource ? '188339' : '',
-                    onSubmit: widget.onSpace,
+                    onSubmit: onSpace,
                   ),
                 ),
                 SizedBox(width: $styles.insets.xs),
@@ -196,7 +185,7 @@ class _HomeScreenState() extends State<HomeScreen> {
         builder: (context, state) {
           final activeSource = context.read<HomeBloc>().activeSource!;
           return RefreshIndicator(
-            onRefresh: _onRefresh,
+            onRefresh: () => _onRefresh(context),
             child: CustomScrollView(
               slivers: [
                 SliverPersistentHeader(
@@ -204,11 +193,11 @@ class _HomeScreenState() extends State<HomeScreen> {
                   delegate: HomeFilterBar(
                     filters: state.filters,
                     activeFilterId: state.activeFilter.id,
-                    onSelected: _onFilterSelected,
+                    onSelected: (filter) => _onFilterSelected(context, filter),
                     height: HomeFilterBar.preferredHeight(context),
                   ),
                 ),
-                ..._buildContentSlivers(state, activeSource.name),
+                ..._buildContentSlivers(context, state, activeSource.name),
                 SliverToBoxAdapter(child: SizedBox(height: $styles.insets.lg)),
               ],
             ),
@@ -218,7 +207,11 @@ class _HomeScreenState() extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildContentSlivers(HomeState state, String sourceName) {
+  List<Widget> _buildContentSlivers(
+    BuildContext context,
+    HomeState state,
+    String sourceName,
+  ) {
     if (state.activeFilter.kind == HomeFilterKind.placeholder) {
       return [
         SliverToBoxAdapter(
@@ -252,14 +245,14 @@ class _HomeScreenState() extends State<HomeScreen> {
         LiveFeedSection(
           section: section,
           sourceName: sourceName,
-          onLiveTap: (liveRoom) => widget.onLive('${liveRoom.id}'),
+          onLiveTap: (liveRoom) => onLive('${liveRoom.id}'),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
         ),
       for (final section in videoSections)
         VideoFeedSection(
           section: section,
           sourceName: sourceName,
-          onVideoTap: (video) => widget.onVideo(video.id),
+          onVideoTap: (video) => onVideo(video.id),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           onLoadMore: () =>
               context.read<HomeBloc>().add(FeedNextPageRequested(section.id)),
