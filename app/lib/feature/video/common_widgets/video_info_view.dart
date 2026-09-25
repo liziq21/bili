@@ -31,8 +31,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       onTap: null,
     ),
     _RelatedVideoCard(
-      title:
-          'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
+      title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
       author: 'Flutter Dev Hub',
       views: '290K views',
       source: 'YOUTUBE',
@@ -536,15 +535,15 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
 }
 
 class const _RelatedVideoCard({
-    required final String title,
-    required final String author,
-    required final String views,
-    required final String source,
-    required final String time,
-    required final String duration,
-    required final Color badgeColor,
-    final VoidCallback? onTap,
-  }) extends StatelessWidget {
+  required final String title,
+  required final String author,
+  required final String views,
+  required final String source,
+  required final String time,
+  required final String duration,
+  required final Color badgeColor,
+  final VoidCallback? onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semanticLabel = '$title, $author, $views, $time';
@@ -567,106 +566,108 @@ class const _RelatedVideoCard({
               padding: EdgeInsets.all($styles.insets.xxs),
               child: Row(
                 children: [
-          // Thumbnail with duration badge
-          ClipRRect(
-            borderRadius: BorderRadius.circular($styles.corners.sm),
-            child: Stack(
-              children: [
-                Container(
-                  width: 120,
-                  height: 68,
-                  color: $styles.colors.greyStrong,
-                  child: Icon(
-                    Icons.play_circle_outline,
-                    color: $styles.colors.white.withValues(alpha: 0.7),
-                    size: 28,
-                  ),
-                ),
-                Positioned(
-                  right: 4,
-                  bottom: 4,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: $styles.colors.black.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      duration,
-                      style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.white,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Gap($styles.insets.xs),
-
-          // Metadata column
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: $styles.text.bodySmallBold.copyWith(
-                    color: $styles.colors.black,
-                    height: 1.25,
-                    fontSize: 13,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  '$author · $views',
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.caption,
-                    fontSize: 11,
-                  ),
-                ),
-                const Gap(4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: badgeColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        source,
-                        style: $styles.text.btn.copyWith(
-                          color: badgeColor,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
+                  // Thumbnail with duration badge
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular($styles.corners.sm),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 68,
+                          color: $styles.colors.greyStrong,
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            color: $styles.colors.white.withValues(alpha: 0.7),
+                            size: 28,
+                          ),
                         ),
-                      ),
+                        Positioned(
+                          right: 4,
+                          bottom: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: $styles.colors.black.withValues(
+                                alpha: 0.7,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              duration,
+                              style: $styles.text.bodySmall.copyWith(
+                                color: $styles.colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const Gap(6),
-                    Text(
-                      time,
-                      style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.caption,
-                        fontSize: 10,
-                      ),
+                  ),
+                  Gap($styles.insets.xs),
+
+                  // Metadata column
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: $styles.text.bodySmallBold.copyWith(
+                            color: $styles.colors.black,
+                            height: 1.25,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const Gap(4),
+                        Text(
+                          '$author · $views',
+                          style: $styles.text.bodySmall.copyWith(
+                            color: $styles.colors.caption,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const Gap(4),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                source,
+                                style: $styles.text.btn.copyWith(
+                                  color: badgeColor,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const Gap(6),
+                            Text(
+                              time,
+                              style: $styles.text.bodySmall.copyWith(
+                                color: $styles.colors.caption,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -676,13 +677,13 @@ class const _RelatedVideoCard({
 }
 
 class const _ActionButton({
-    required final IconData icon,
-    required final IconData activeIcon,
-    required final String label,
-    required final bool isActive,
-    required final Color color,
-    required final VoidCallback onTap,
-  }) extends StatelessWidget {
+  required final IconData icon,
+  required final IconData activeIcon,
+  required final String label,
+  required final bool isActive,
+  required final Color color,
+  required final VoidCallback onTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(

@@ -7,7 +7,8 @@ import 'data/source/search/youtube_search_suggest_remote_data_source.dart';
 import 'data/source/search/youtube_video_search_remote_data_source.dart';
 import 'data/source/youtube_feed_remote_data_source.dart';
 
-class YouTube({YoutubeService? youtubeService, http.Client? httpClient}) implements MediaSource {
+class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
+    implements MediaSource {
   this
     : _youtubeService =
           youtubeService ?? YoutubeService(httpClient: httpClient);
@@ -49,9 +50,9 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient}) impleme
 
   @override
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => [
-        YouTubeRecommendVideoFeedRemoteDataSource(_youtubeService),
-        YouTubeTrendingVideoFeedRemoteDataSource(_youtubeService),
-      ];
+    YouTubeRecommendVideoFeedRemoteDataSource(_youtubeService),
+    YouTubeTrendingVideoFeedRemoteDataSource(_youtubeService),
+  ];
 
   @override
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
