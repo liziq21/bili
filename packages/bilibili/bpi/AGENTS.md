@@ -24,7 +24,7 @@
 | 热门视频 | `GET /x/web-interface/popular` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/popular.json` | 2026-09-25 |
 | 排行榜/推荐 | 待探针确认 | 依端点而定 | 社区文档和 Bilibili Web 实际请求，未验证前不得实现 | 尚无 | 未实测 |
 
-`https://api.bilibili.com/x/web-interface/popular` 和 `https://api.bilibili.com/x/web-interface/ranking/v2` 可作为后续探针候选，但只有完成真实请求、保存响应和记录来源后才能进入实现。
+`https://api.bilibili.com/x/web-interface/ranking/v2` 可作为后续探针候选，但只有完成真实请求、保存响应和记录来源后才能进入实现。
 
 ## Bili DTO 与异常
 
