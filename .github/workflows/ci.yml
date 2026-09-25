@@ -71,10 +71,7 @@ jobs:
 
       - name: Run analyze
         env:
-          IS_JULES_RELATED: ${{
-            contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
-            || github.event.pull_request.user.login == 'google-labs-jules[bot]'
-          }}
+          IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
         run: |
           if [ "$IS_JULES_RELATED" = "true" ]; then
             echo "检测到与 google-labs-jules 相关的 PR，提升警告和一般提示为错误级别..."
