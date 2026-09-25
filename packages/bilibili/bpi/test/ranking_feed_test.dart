@@ -53,6 +53,25 @@ void main() {
     expect(response.data.note, 'ranking');
   });
 
+  test('drops items with numeric or malformed bvid values', () {
+    final response = NetworkBiliRankingResponse.fromJson({
+      'code': 0,
+      'message': 'OK',
+      'ttl': 1,
+      'data': {
+        'note': 'ranking',
+        'list': [
+          {'aid': 1, 'bvid': 123},
+          {'aid': 2, 'bvid': ''},
+          {'aid': 3, 'bvid': 'BVgood', 'owner': {}, 'stat': {}},
+        ],
+      },
+    });
+
+    expect(response.data.list, hasLength(1));
+    expect(response.data.list.single.bvid, 'BVgood');
+  });
+
   group('BiliNetworkSearch.getRanking', () {
     test('sends rid and type and parses the response', () async {
       final requests = <http.BaseRequest>[];

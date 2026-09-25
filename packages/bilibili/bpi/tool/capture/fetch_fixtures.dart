@@ -333,9 +333,9 @@ void _requireRankingItems(Map<String, dynamic> json, String label) {
   final videoItems = items.whereType<Map>().where((item) {
     final bvid = item['bvid'];
     final aid = item['aid'];
-    return (bvid is String && bvid.isNotEmpty) || aid is int;
+    return aid is int && bvid is String && bvid.isNotEmpty;
   }).length;
   if (videoItems == 0) {
-    throw FormatException('$label has no video item with bvid or aid');
+    throw FormatException('$label has no video item with aid and bvid');
   }
 }

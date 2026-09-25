@@ -89,7 +89,8 @@ final class NetworkBiliRankingVideo {
 
   static NetworkBiliRankingVideo? tryFromJson(Map<dynamic, dynamic> json) {
     final aid = _readInt(json['aid']);
-    final bvid = json['bvid']?.toString();
+    final bvidRaw = json['bvid'];
+    final bvid = bvidRaw is String ? bvidRaw : null;
     if (aid == null || bvid == null || bvid.isEmpty) {
       return null;
     }
