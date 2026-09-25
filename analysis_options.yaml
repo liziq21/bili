@@ -38,6 +38,10 @@ linter:
     - avoid_unnecessary_containers      # 减少冗余的 Container
     - cancel_subscriptions              # 检查 Stream 订阅是否关闭
     - close_sinks                       # 检查 Sink 是否关闭
+    - empty_container_bodies              # 空 class/mixin 体用 ; 代替 {}
+    - unnecessary_const_in_enum_constructor  # 去掉 enum 构造里多余的 const
+    - unnecessary_type_name_in_constructor   # 构造体里别重复写类名（用 new）
+    - unnecessary_primary_constructor_body    # 主构造体无实际逻辑时去掉
     - combinators_ordering
     #- directives_ordering
     #- omit_local_variable_types

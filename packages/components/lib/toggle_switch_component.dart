@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'theme/motion.dart';
 
 class ToggleSwitchComponent extends StatefulWidget {
-  const ToggleSwitchComponent({
+  const new({
     super.key,
     required this.selected,
     required this.onChanged,
@@ -17,7 +17,7 @@ class ToggleSwitchComponent extends StatefulWidget {
     this.successDuration = _defaultSuccessDuration,
   }) : _value = null;
 
-  ToggleSwitchComponent.async({
+  new async({
     super.key,
     required ValueGetter<bool> value,
     required FutureOr<void> Function() onChanged,

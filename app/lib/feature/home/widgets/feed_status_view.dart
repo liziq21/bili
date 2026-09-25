@@ -11,7 +11,7 @@ class const FeedStatusView({
   final VoidCallback? onRetry,
 }) extends StatelessWidget {
   /// 加载失败提示
-  factory FeedStatusView.failure({
+  factory failure({
     Key? key,
     required String title,
     required VoidCallback onRetry,
@@ -24,7 +24,7 @@ class const FeedStatusView({
   );
 
   /// 空结果提示
-  factory FeedStatusView.empty({Key? key, required String title}) =>
+  factory empty({Key? key, required String title}) =>
       FeedStatusView(
         key: key,
         icon: Icons.inbox_rounded,

@@ -41,10 +41,11 @@ For directory-specific guidelines, refer to:
   ```dart
   class Person(final String name, var int age);
   ```
+
 - **Constant Constructors**: Place `const` before `class`, `enum`, or `extension type`.
   ```dart
   class const UserProfile(final String id, final String name);
-  enum const Priority(final int level) { low(1), high(2); }
+  enum Priority(final int level) { low(1), high(2); }
   ```
 - **Class Body Constructors**: Omit repeating class names for secondary (`new`) and factory (`factory`) constructors in class bodies.
   ```dart

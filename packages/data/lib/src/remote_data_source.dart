@@ -111,8 +111,8 @@ abstract class const FeedRemoteDataSource<T>() extends RemoteDataSource {
 
 /// 视频推荐 Feed 数据源接口
 abstract class const VideoFeedRemoteDataSource()
-    extends FeedRemoteDataSource<VideoModel> {}
+    extends FeedRemoteDataSource<VideoModel>;
 
 /// 直播推荐 Feed 数据源接口
 abstract class const LiveRoomFeedRemoteDataSource()
-    extends FeedRemoteDataSource<LiveRoomModel> {}
+    extends FeedRemoteDataSource<LiveRoomModel>;

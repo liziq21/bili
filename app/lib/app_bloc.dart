@@ -27,9 +27,9 @@ class AppBloc({required final UserDataRepository _userDataRepository})
   }
 }
 
-sealed class AppEvent() {}
+sealed class AppEvent();
 
-class AppStarted() extends AppEvent {}
+class AppStarted() extends AppEvent;
 
 sealed class AppState();
 

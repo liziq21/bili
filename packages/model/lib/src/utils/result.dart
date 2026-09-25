@@ -15,10 +15,10 @@ final class const Ok<T>._(final T value) extends Result<T> {
 /// 封装操作成功 [Ok] 或失败 [Error] 两种状态，避免抛出未经处理的异常。
 sealed class const Result<T>() {
   /// 构造失败的 [Result] 实例
-  const factory Result.error(Exception error) = Error._;
+  const factory error(Exception error) = Error._;
 
   /// 构造成功的 [Result] 实例
-  const factory Result.ok(T value) = Ok._;
+  const factory ok(T value) = Ok._;
 }
 
 /// 扩展 [Future] 以将其执行过程转换为 [Result]
