@@ -1,29 +1,34 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:chopper/chopper.dart';
-import 'package:data/data.dart';
 import 'package:http/http.dart' as http;
 
 import '../api/yt_api.dart';
 import '../api/yt_interceptor.dart';
+import '../client/youtube_client_config.dart';
+import '../exception/ypi_exception.dart';
+import '../models/network_youtube_search.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
-class YoutubeService {
-  YoutubeService({http.Client? httpClient, ChopperClient? chopperClient})
-    : _ownsHttpClient = httpClient == null && chopperClient == null,
-      _httpClient = httpClient ?? http.Client() {
-    _chopperClient =
-        chopperClient ??
-        ChopperClient(
-          client: _httpClient,
-          converter: const YoutubeRequestConverter(),
-          interceptors: [const YoutubeInnerTubeInterceptor()],
-        );
+final class YoutubeService {
+  YoutubeService({
+    http.Client? httpClient,
+    YoutubeClientConfig config = const YoutubeClientConfig(),
+  }) : _httpClient = httpClient ?? http.Client(),
+       _ownsHttpClient = httpClient == null,
+       _config = config {
+    _validateConfig();
+    _chopperClient = ChopperClient(
+      client: _httpClient,
+      converter: YoutubeRequestConverter(config),
+      interceptors: [YoutubeInnerTubeInterceptor(config)],
+    );
     _api = YoutubeApi.create(_chopperClient);
   }
 
   final http.Client _httpClient;
   final bool _ownsHttpClient;
+  final YoutubeClientConfig _config;
   late final ChopperClient _chopperClient;
   late final YoutubeApi _api;
 
@@ -34,7 +39,7 @@ class YoutubeService {
     }
   }
 
-  Future<(List<VideoModel> videos, String? continuationToken)> searchVideos(
+  Future<NetworkYouTubeVideoSearchResponse> searchVideos(
     String query, {
     int? sort,
     int? uploadDate,
@@ -50,7 +55,7 @@ class YoutubeService {
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
         uploadDate: uploadDate,
-        contentType: 1, // Video contentType = 1
+        contentType: 1,
         duration: duration,
         features: features,
       );
@@ -59,17 +64,15 @@ class YoutubeService {
       }
     }
 
-    final response = await _api.search(body);
-    if (!response.isSuccessful || response.body == null) {
-      return (const <VideoModel>[], null);
-    }
-
-    final data = response.body!;
-    return _parseVideoSearchResponse(data);
+    final response = await _sendSearch(body);
+    return _parseResponse(response, NetworkYouTubeVideoSearchResponse.fromJson);
   }
 
-  Future<(List<CreatorProfile> profiles, String? continuationToken)>
-  searchChannels(String query, {int? sort, String? continuation}) async {
+  Future<NetworkYouTubeChannelSearchResponse> searchChannels(
+    String query, {
+    int? sort,
+    String? continuation,
+  }) async {
     final body = <String, dynamic>{};
     if (continuation != null && continuation.isNotEmpty) {
       body['continuation'] = continuation;
@@ -77,335 +80,105 @@ class YoutubeService {
       body['query'] = query;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
-        contentType: 2, // Channel contentType = 2
+        contentType: 2,
       );
       if (params.isNotEmpty) {
         body['params'] = params;
       }
     }
 
-    final response = await _api.search(body);
-    if (!response.isSuccessful || response.body == null) {
-      return (const <CreatorProfile>[], null);
-    }
-
-    final data = response.body!;
-    return _parseChannelSearchResponse(data);
+    final response = await _sendSearch(body);
+    return _parseResponse(
+      response,
+      NetworkYouTubeChannelSearchResponse.fromJson,
+    );
   }
 
-  Future<List<String>> getSearchSuggestions(String query) async {
+  Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(
+    String query,
+  ) async {
+    final Response<String> response;
     try {
-      final response = await _api.getSearchSuggestions(query);
-      if (!response.isSuccessful || response.body == null) {
-        return const [];
-      }
+      response = await _api.getSearchSuggestions(query);
+    } on YpiException {
+      rethrow;
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        YpiNetworkException('Google Suggest request failed: $error'),
+        stackTrace,
+      );
+    }
 
-      final bodyString = response.body!;
-      var jsonText = bodyString;
-      if (jsonText.startsWith('window.google.ac.h(')) {
-        jsonText = jsonText
-            .substring('window.google.ac.h('.length, jsonText.length - 1)
-            .trim();
-      }
+    _throwForStatus(response);
+    final body = response.body;
+    if (body == null) {
+      throw const YpiJsonException('Google Suggest response body is empty');
+    }
+    return NetworkYouTubeSearchSuggestions.fromResponse(
+      query: query,
+      responseBody: body,
+    );
+  }
 
-      final decoded = json.decode(jsonText);
-      if (decoded is List && decoded.length >= 2 && decoded[1] is List) {
-        final rawSuggestions = decoded[1] as List;
-        return rawSuggestions
-            .map((e) => e is List ? e[0].toString() : e.toString())
-            .toList();
-      }
-      return const [];
-    } catch (_) {
-      return const [];
+  Future<Response<Map<String, dynamic>>> _sendSearch(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final response = await _api.search(body);
+      _throwForStatus(response);
+      return response;
+    } on YpiException {
+      rethrow;
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        YpiNetworkException('YouTube search request failed: $error'),
+        stackTrace,
+      );
     }
   }
 
-  (List<VideoModel> videos, String? continuationToken)
-  _parseVideoSearchResponse(Map<String, dynamic> data) {
-    final videos = <VideoModel>[];
-    String? continuationToken;
-
-    final items = [];
-
-    final contents =
-        data['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
-            as List?;
-    if (contents != null) {
-      for (final section in contents) {
-        final itemSection =
-            section['itemSectionRenderer']?['contents'] as List?;
-        if (itemSection != null) {
-          items.addAll(itemSection);
-        }
-        final contItem = section['continuationItemRenderer'];
-        if (contItem != null) {
-          continuationToken = _extractContinuationToken(contItem);
-        }
-      }
+  T _parseResponse<T>(
+    Response<Map<String, dynamic>> response,
+    T Function(Map<String, dynamic>) parser,
+  ) {
+    final body = response.body;
+    if (body == null) {
+      throw const YpiJsonException('YouTube search response body is empty');
     }
-
-    final continuationContents = data['onResponseReceivedCommands'] as List?;
-    if (continuationContents != null) {
-      for (final command in continuationContents) {
-        final appendContinuationItems =
-            command['appendContinuationItemsAction']?['continuationItems']
-                as List?;
-        if (appendContinuationItems != null) {
-          for (final item in appendContinuationItems) {
-            final itemSection =
-                item['itemSectionRenderer']?['contents'] as List?;
-            if (itemSection != null) {
-              items.addAll(itemSection);
-            } else {
-              items.add(item);
-            }
-            if (item.containsKey('continuationItemRenderer')) {
-              continuationToken = _extractContinuationToken(
-                item['continuationItemRenderer'],
-              );
-            }
-          }
-        }
-      }
+    try {
+      return parser(body);
+    } on YpiException {
+      rethrow;
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        YpiJsonException('Could not parse YouTube search response: $error'),
+        stackTrace,
+      );
     }
+  }
 
-    for (final item in items) {
-      if (item is Map<String, dynamic> && item.containsKey('videoRenderer')) {
-        final video = _parseVideoRenderer(item['videoRenderer']);
-        if (video != null) {
-          videos.add(video);
-        }
-      } else if (item is Map<String, dynamic> &&
-          item.containsKey('continuationItemRenderer')) {
-        continuationToken = _extractContinuationToken(
-          item['continuationItemRenderer'],
+  void _throwForStatus(Response<Object?> response) {
+    if (response.isSuccessful) {
+      return;
+    }
+    throw YpiHttpException(response.statusCode);
+  }
+
+  void _validateConfig() {
+    final fields = <String, String>{
+      'clientName': _config.clientName,
+      'clientNameId': _config.clientNameId,
+      'clientVersion': _config.clientVersion,
+      'language': _config.language,
+      'country': _config.country,
+      'userAgent': _config.userAgent,
+    };
+    for (final entry in fields.entries) {
+      if (entry.value.trim().isEmpty) {
+        throw YpiClientContextException(
+          'YoutubeClientConfig.${entry.key} must not be empty',
         );
       }
     }
-
-    return (videos, continuationToken);
-  }
-
-  (List<CreatorProfile> profiles, String? continuationToken)
-  _parseChannelSearchResponse(Map<String, dynamic> data) {
-    final profiles = <CreatorProfile>[];
-    String? continuationToken;
-
-    final items = [];
-
-    final contents =
-        data['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
-            as List?;
-    if (contents != null) {
-      for (final section in contents) {
-        final itemSection =
-            section['itemSectionRenderer']?['contents'] as List?;
-        if (itemSection != null) {
-          items.addAll(itemSection);
-        }
-        final contItem = section['continuationItemRenderer'];
-        if (contItem != null) {
-          continuationToken = _extractContinuationToken(contItem);
-        }
-      }
-    }
-
-    final continuationContents = data['onResponseReceivedCommands'] as List?;
-    if (continuationContents != null) {
-      for (final command in continuationContents) {
-        final appendContinuationItems =
-            command['appendContinuationItemsAction']?['continuationItems']
-                as List?;
-        if (appendContinuationItems != null) {
-          for (final item in appendContinuationItems) {
-            final itemSection =
-                item['itemSectionRenderer']?['contents'] as List?;
-            if (itemSection != null) {
-              items.addAll(itemSection);
-            } else {
-              items.add(item);
-            }
-            if (item.containsKey('continuationItemRenderer')) {
-              continuationToken = _extractContinuationToken(
-                item['continuationItemRenderer'],
-              );
-            }
-          }
-        }
-      }
-    }
-
-    for (final item in items) {
-      if (item is Map<String, dynamic> && item.containsKey('channelRenderer')) {
-        final profile = _parseChannelRenderer(item['channelRenderer']);
-        if (profile != null) {
-          profiles.add(profile);
-        }
-      } else if (item is Map<String, dynamic> &&
-          item.containsKey('continuationItemRenderer')) {
-        continuationToken = _extractContinuationToken(
-          item['continuationItemRenderer'],
-        );
-      }
-    }
-
-    return (profiles, continuationToken);
-  }
-
-  String? _extractContinuationToken(dynamic contItem) {
-    if (contItem is Map<String, dynamic>) {
-      final endpoint = contItem['continuationEndpoint'];
-      final token = endpoint?['continuationCommand']?['token'] as String?;
-      return token;
-    }
-    return null;
-  }
-
-  VideoModel? _parseVideoRenderer(Map<String, dynamic> json) {
-    try {
-      final videoId = json['videoId'] as String?;
-      if (videoId == null || videoId.isEmpty) return null;
-
-      final title = _extractText(json['title']);
-      final url = 'https://www.youtube.com/watch?v=$videoId';
-
-      final thumbnails = json['thumbnail']?['thumbnails'] as List?;
-      final thumbnailUrl = (thumbnails != null && thumbnails.isNotEmpty)
-          ? (thumbnails.last['url'] as String?) ?? ''
-          : '';
-
-      final viewCountText = _extractText(json['viewCountText']);
-      final viewCount = _parseViewCount(viewCountText);
-
-      final uploadDateText = _extractText(json['publishedTimeText']);
-      final uploadDate = _parseUploadDate(uploadDateText);
-      final lengthText = _extractText(json['lengthText']);
-      final duration = _parseDurationInSeconds(lengthText);
-
-      final ownerRuns = json['ownerText']?['runs'] as List?;
-      final creatorName = (ownerRuns != null && ownerRuns.isNotEmpty)
-          ? (ownerRuns[0]['text'] as String?) ?? ''
-          : '';
-
-      final browseEndpoint =
-          ownerRuns?[0]?['navigationEndpoint']?['browseEndpoint'];
-      final creatorId = (browseEndpoint?['browseId'] as String?) ?? '';
-
-      final descriptionSnippet = _extractText(json['descriptionSnippet']);
-
-      return VideoModel(
-        id: videoId,
-        title: title,
-        url: url,
-        thumbnailUrl: thumbnailUrl,
-        viewCount: viewCount,
-        uploadDate: uploadDate,
-        duration: duration,
-        desc: descriptionSnippet,
-        creatorProfileName: creatorName,
-        creatorProfileId: creatorId,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  CreatorProfile? _parseChannelRenderer(Map<String, dynamic> json) {
-    try {
-      final channelId = json['channelId'] as String?;
-      if (channelId == null || channelId.isEmpty) return null;
-
-      final title = _extractText(json['title']);
-
-      final avatarThumbnails = json['thumbnail']?['thumbnails'] as List?;
-      final thumbnailUrl =
-          (avatarThumbnails != null && avatarThumbnails.isNotEmpty)
-          ? (avatarThumbnails.last['url'] as String?) ?? ''
-          : null;
-
-      final videoCountText = _extractText(json['videoCountText']);
-      final videoCount = _parseInt(videoCountText);
-
-      return CreatorProfile(
-        id: channelId,
-        name: title,
-        thumbnailUrl: thumbnailUrl,
-        videos: videoCount,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  String _extractText(dynamic node) {
-    if (node == null) return '';
-    if (node is String) return node;
-    if (node is Map<String, dynamic>) {
-      if (node.containsKey('simpleText')) {
-        return (node['simpleText'] as String?) ?? '';
-      }
-      if (node.containsKey('runs') && node['runs'] is List) {
-        final runs = node['runs'] as List;
-        return runs.map((r) => (r['text'] as String?) ?? '').join();
-      }
-    }
-    return '';
-  }
-
-  int? _parseViewCount(String text) {
-    if (text.isEmpty) return null;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(digits);
-  }
-
-  int? _parseInt(String text) {
-    if (text.isEmpty) return null;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
-    return int.tryParse(digits);
-  }
-
-  int? _parseDurationInSeconds(String text) {
-    if (text.isEmpty) return null;
-    final parts = text.split(':');
-    if (parts.length == 2) {
-      final m = int.tryParse(parts[0]) ?? 0;
-      final s = int.tryParse(parts[1]) ?? 0;
-      return m * 60 + s;
-    } else if (parts.length == 3) {
-      final h = int.tryParse(parts[0]) ?? 0;
-      final m = int.tryParse(parts[1]) ?? 0;
-      final s = int.tryParse(parts[2]) ?? 0;
-      return h * 3600 + m * 60 + s;
-    }
-    return null;
-  }
-
-  DateTime? _parseUploadDate(String text) {
-    if (text.isEmpty) return null;
-    final parsedDirect = DateTime.tryParse(text);
-    if (parsedDirect != null) return parsedDirect;
-
-    final now = DateTime.now();
-    final lower = text.toLowerCase();
-
-    final numberMatch = RegExp(r'\d+').firstMatch(lower);
-    if (numberMatch == null) return null;
-    final amount = int.tryParse(numberMatch.group(0)!) ?? 0;
-
-    if (lower.contains('hour') || lower.contains('小时')) {
-      return now.subtract(Duration(hours: amount));
-    } else if (lower.contains('day') || lower.contains('天')) {
-      return now.subtract(Duration(days: amount));
-    } else if (lower.contains('week') || lower.contains('周')) {
-      return now.subtract(Duration(days: amount * 7));
-    } else if (lower.contains('month') || lower.contains('月')) {
-      return now.subtract(Duration(days: amount * 30));
-    } else if (lower.contains('year') || lower.contains('年')) {
-      return now.subtract(Duration(days: amount * 365));
-    } else if (lower.contains('minute') || lower.contains('分')) {
-      return now.subtract(Duration(minutes: amount));
-    }
-    return null;
   }
 }

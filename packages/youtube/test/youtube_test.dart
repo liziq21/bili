@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:data/data.dart';
 import 'package:flutter/widgets.dart' hide Page;
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:model/model.dart';
 import 'package:test/test.dart';
 import 'package:youtube/youtube.dart';
@@ -28,12 +30,17 @@ void main() {
 
       expect(videoDS.filters, isNotEmpty);
       expect(videoDS.filters.length, equals(3));
+      expect(youtube.videoFeedDataSources, isEmpty);
 
       unawaited(youtube.close());
     });
 
     test('Remote data sources sanitize error handling and do not leak stack traces into Result.error', () async {
-      final youtube = YouTube();
+      final youtube = YouTube(
+        httpClient: MockClient(
+          (_) async => http.Response('unavailable', 503),
+        ),
+      );
 
       final ds = youtube.videoSearchDataSource;
       final videoRes = await ds.searchVideoWithOptions(
@@ -51,6 +58,7 @@ void main() {
         ),
       );
       expect(videoRes, isA<Result<Page<VideoModel>>>());
+      expect(videoRes, isA<Error>());
       if (videoRes is Error) {
         expect(videoRes.toString(), isNot(contains('\n#0')));
       }

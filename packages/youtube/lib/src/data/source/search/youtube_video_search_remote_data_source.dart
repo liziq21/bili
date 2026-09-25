@@ -7,6 +7,7 @@ import 'package:ypi/ypi.dart';
 import '../../../search/search_filter.dart';
 import '../../../search/sort.dart';
 import '../youtube_remote_data_source.dart';
+import 'youtube_network_search_mapper.dart';
 
 final class const YouTubeVideoSearchRemoteDataSource(
   final YoutubeService _youtubeService,
@@ -51,36 +52,38 @@ final class const YouTubeVideoSearchRemoteDataSource(
 
       for (final filter in searchQuery.filters) {
         if (filter is SingleFilterGroup) {
-          if (filter.key == 'upload_date' && filter.selection != null) {
-            final sel = filter.selection;
-            if (sel is YoutubeUploadDateFilterOption) {
-              uploadDate = sel.valueInt;
+          final selection = filter.selection;
+          if (selection == null) {
+            continue;
+          }
+          if (filter.key == 'upload_date') {
+            if (selection is YoutubeUploadDateFilterOption) {
+              uploadDate = selection.valueInt;
             } else {
               final found = YoutubeUploadDateFilterOption.values.firstWhere(
-                (e) => e.value == sel!.value,
+                (option) => option.value == selection.value,
                 orElse: () => YoutubeUploadDateFilterOption.today,
               );
               uploadDate = found.valueInt;
             }
-          } else if (filter.key == 'duration' && filter.selection != null) {
-            final sel = filter.selection;
-            if (sel is YoutubeDurationFilterOption) {
-              duration = sel.valueInt;
+          } else if (filter.key == 'duration') {
+            if (selection is YoutubeDurationFilterOption) {
+              duration = selection.valueInt;
             } else {
               final found = YoutubeDurationFilterOption.values.firstWhere(
-                (e) => e.value == sel!.value,
+                (option) => option.value == selection.value,
                 orElse: () => YoutubeDurationFilterOption.fourTo20Minutes,
               );
               duration = found.valueInt;
             }
           }
         } else if (filter is MultiFilterGroup && filter.key == 'feature') {
-          for (final sel in filter.selections) {
-            if (sel is YoutubeFeatureFilterOption) {
-              features.add(sel.fieldTag);
+          for (final selection in filter.selections) {
+            if (selection is YoutubeFeatureFilterOption) {
+              features.add(selection.fieldTag);
             } else {
               final found = YoutubeFeatureFilterOption.values.firstWhere(
-                (e) => e.value == sel.value,
+                (option) => option.value == selection.value,
                 orElse: () => YoutubeFeatureFilterOption.hd,
               );
               features.add(found.fieldTag);
@@ -90,29 +93,30 @@ final class const YouTubeVideoSearchRemoteDataSource(
       }
 
       final continuationKey = '$query:$targetPage';
-      final prevContinuationKey = '$query:${targetPage - 1}';
-
-      final continuationToken = targetPage > 1
-          ? _continuationTokens[prevContinuationKey]
+      final previousContinuationKey = '$query:${targetPage - 1}';
+      final continuation = targetPage > 1
+          ? _continuationTokens[previousContinuationKey]
           : null;
 
-      final (videos, nextToken) = await _youtubeService.searchVideos(
+      final response = await _youtubeService.searchVideos(
         query,
         sort: sort,
         uploadDate: uploadDate,
         duration: duration,
         features: features,
-        continuation: continuationToken,
+        continuation: continuation,
       );
-
+      final nextToken = videoContinuationToken(response);
       if (nextToken != null && nextToken.isNotEmpty) {
         _continuationTokens[continuationKey] = nextToken;
       }
 
-      final totalPages = (nextToken != null && nextToken.isNotEmpty)
-          ? targetPage + 1
-          : targetPage;
-
+      final videos = videoRenderers(response)
+          .map(_toVideoModel)
+          .toList(growable: false);
+      final totalPages = nextToken == null || nextToken.isEmpty
+          ? targetPage
+          : targetPage + 1;
       return Result.ok(
         Page<VideoModel>(
           number: targetPage,
@@ -120,8 +124,102 @@ final class const YouTubeVideoSearchRemoteDataSource(
           data: videos,
         ),
       );
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+    } catch (error) {
+      return Result.error(
+        error is Exception ? error : Exception(error.toString()),
+      );
     }
   }
+
+  VideoModel _toVideoModel(NetworkYouTubeVideoRenderer video) {
+    return VideoModel(
+      id: video.videoId,
+      title: video.title?.value ?? '',
+      url: 'https://www.youtube.com/watch?v=${video.videoId}',
+      thumbnailUrl: video.thumbnail?.thumbnails.lastOrNull?.url,
+      viewCount: _parseInt(video.viewCountText?.value),
+      uploadDate: _parseUploadDate(video.publishedTimeText?.value),
+      duration: _parseDuration(video.lengthText?.value),
+      desc: video.descriptionSnippet?.value,
+      creatorProfileName: video.owner?.text.value,
+      creatorProfileId: video.owner?.browseId,
+    );
+  }
+
+  int? _parseInt(String? text) {
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+    final lower = text.toLowerCase().replaceAll(',', '');
+    final numMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(K|M)?', caseSensitive: false).firstMatch(lower);
+    if (numMatch == null) {
+      return null;
+    }
+    final value = double.tryParse(numMatch.group(1)!) ?? 0.0;
+    final suffix = numMatch.group(2)?.toUpperCase();
+    switch (suffix) {
+      case 'M':
+        return (value * 1e6).round();
+      case 'K':
+        return (value * 1e3).round();
+      default:
+        return value.round();
+    }
+  }
+
+  DateTime? _parseUploadDate(String? text) {
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+    final direct = DateTime.tryParse(text);
+    if (direct != null) {
+      return direct;
+    }
+    final match = RegExp(r'\d+').firstMatch(text.toLowerCase());
+    if (match == null) {
+      return null;
+    }
+    final amount = int.tryParse(match.group(0)!) ?? 0;
+    final lower = text.toLowerCase();
+    if (lower.contains('minute') || lower.contains('分钟')) {
+      return DateTime.now().subtract(Duration(minutes: amount));
+    }
+    if (lower.contains('hour') || lower.contains('小时')) {
+      return DateTime.now().subtract(Duration(hours: amount));
+    }
+    if (lower.contains('day') || lower.contains('天')) {
+      return DateTime.now().subtract(Duration(days: amount));
+    }
+    if (lower.contains('week') || lower.contains('周')) {
+      return DateTime.now().subtract(Duration(days: amount * 7));
+    }
+    if (lower.contains('month') || lower.contains('月')) {
+      return DateTime.now().subtract(Duration(days: amount * 30));
+    }
+    if (lower.contains('year') || lower.contains('年')) {
+      return DateTime.now().subtract(Duration(days: amount * 365));
+    }
+    return null;
+  }
+
+  int? _parseDuration(String? text) {
+    if (text == null || text.isEmpty) {
+      return null;
+    }
+    final parts = text.split(':');
+    if (parts.length == 2) {
+      return (int.tryParse(parts[0]) ?? 0) * 60 +
+          (int.tryParse(parts[1]) ?? 0);
+    }
+    if (parts.length == 3) {
+      return (int.tryParse(parts[0]) ?? 0) * 3600 +
+          (int.tryParse(parts[1]) ?? 0) * 60 +
+          (int.tryParse(parts[2]) ?? 0);
+    }
+    return null;
+  }
+}
+
+extension _LastOrNull<T> on List<T> {
+  T? get lastOrNull => isEmpty ? null : last;
 }

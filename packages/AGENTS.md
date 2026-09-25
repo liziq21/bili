@@ -40,7 +40,7 @@ This directory contains shared packages and modules (`packages/*`).
 ### 边界与依赖
 
 - API 子包只负责平台请求、响应 envelope/DTO、网络错误和客户端配置。
-- API 子包不得依赖任何 workspace 包，包括 `data`、`model`、平台 wrapper、`app` 或 UI 包。`ypi` 仅可在历史 `data` path dependency 移除前保留现有依赖；新增或修改的 API 代码不得扩大该依赖。除该过渡例外外，API 子包只允许依赖 Dart 第三方包和自身源码。
+- API 子包不得依赖任何 workspace 包，包括 `data`、`model`、平台 wrapper、`app` 或 UI 包。API 子包只允许依赖 Dart 第三方包和自身源码。
 - API 子包不得返回或接收 `VideoModel`、`CreatorProfile`、`Page`、`Result` 等外层领域模型，也不得负责外层分页状态。
 - `lib/<package>.dart` 的公共导出只包含 service、网络 DTO、包级 typed exception、Token/客户端配置；内部 parser、fixture、tool 和测试代码不导出。
 

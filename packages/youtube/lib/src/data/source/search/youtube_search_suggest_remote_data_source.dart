@@ -12,10 +12,10 @@ final class const YouTubeSearchSuggestRemoteDataSource(
   @override
   Future<Result<List<String>>> getSuggests(String query) async {
     try {
-      final suggests = await _youtubeService.getSearchSuggestions(query);
-      return Result.ok(suggests);
-    } catch (e) {
-      return Result.error(e is Exception ? e : Exception(e.toString()));
+      final response = await _youtubeService.getSearchSuggestions(query);
+      return Result.ok(response.suggestions);
+    } catch (error) {
+      return Result.error(error is Exception ? error : Exception(error.toString()));
     }
   }
 }

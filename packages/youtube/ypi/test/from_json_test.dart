@@ -2,71 +2,52 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
+import 'package:ypi/ypi.dart';
 
 void main() {
   Map<String, dynamic> loadFixtureMap(String name) {
     final file = File('testing/$name');
-    expect(
-      file.existsSync(),
-      isTrue,
-      reason: 'Fixture file testing/$name should exist',
-    );
-    final content = file.readAsStringSync();
-    return jsonDecode(content) as Map<String, dynamic>;
+    expect(file.existsSync(), isTrue, reason: 'Fixture $name should exist');
+    return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
   }
 
-  dynamic loadFixtureDynamic(String name) {
-    final file = File('testing/$name');
-    expect(
-      file.existsSync(),
-      isTrue,
-      reason: 'Fixture file testing/$name should exist',
+  test('parses the real video search fixture into typed renderers', () {
+    final response = NetworkYouTubeVideoSearchResponse.fromJson(
+      loadFixtureMap('search_video.json'),
     );
-    var content = file.readAsStringSync();
-    if (content.startsWith('window.google.ac.h(')) {
-      content = content
-          .substring('window.google.ac.h('.length, content.length - 1)
-          .trim();
-    }
-    return jsonDecode(content);
-  }
+    final sections = response
+        .contents!
+        .twoColumnSearchResultsRenderer!
+        .primaryContents!
+        .sectionListRenderer!
+        .contents;
+    expect(sections, isNotEmpty);
+    expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
+    expect(sections.whereType<NetworkYouTubeContinuationSection>(), isNotEmpty);
+  });
 
-  group('YouTube Fixtures Tests', () {
-    test('parses real search_video.json correctly', () {
-      final json = loadFixtureMap('search_video.json');
+  test('parses the real channel search fixture into typed renderers', () {
+    final response = NetworkYouTubeChannelSearchResponse.fromJson(
+      loadFixtureMap('search_channel.json'),
+    );
+    final sections = response
+        .contents!
+        .twoColumnSearchResultsRenderer!
+        .primaryContents!
+        .sectionListRenderer!
+        .contents;
+    expect(sections, isNotEmpty);
+    expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
+  });
 
-      expect(json, isNotNull);
-      expect(json.containsKey('contents'), isTrue);
-
-      final contents =
-          json['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
-              as List?;
-      expect(contents, isNotNull);
-      expect(contents, isNotEmpty);
-    });
-
-    test('parses real search_channel.json correctly', () {
-      final json = loadFixtureMap('search_channel.json');
-
-      expect(json, isNotNull);
-      expect(json.containsKey('contents'), isTrue);
-
-      final contents =
-          json['contents']?['twoColumnSearchResultsRenderer']?['primaryContents']?['sectionListRenderer']?['contents']
-              as List?;
-      expect(contents, isNotNull);
-      expect(contents, isNotEmpty);
-    });
-
-    test('parses real search_suggest.json correctly', () {
-      final json = loadFixtureDynamic('search_suggest.json');
-
-      expect(json, isA<List>());
-      final list = json as List;
-      expect(list.length, greaterThanOrEqualTo(2));
-      expect(list[1], isA<List>());
-      final suggestions = list[1] as List;
-      expect(suggestions, isNotEmpty);
-    });
+  test('parses the real suggest fixture into a typed suggestion DTO', () {
+    final file = File('testing/search_suggest.json');
+    expect(file.existsSync(), isTrue);
+    final response = NetworkYouTubeSearchSuggestions.fromResponse(
+      query: 'flutter',
+      responseBody: file.readAsStringSync(),
+    );
+    expect(response.query, 'flutter');
+    expect(response.suggestions, isNotEmpty);
   });
 }
