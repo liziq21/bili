@@ -41,6 +41,28 @@ void main() {
       },
     );
 
+    test('truncates at a complete Unicode character boundary', () async {
+      final dao = db.recentSearchQueryDao;
+      final queryAtBoundary = '${'A' * 199}😀';
+
+      await dao.insertOrReplaceRecentSearch(queryAtBoundary);
+
+      final queries = await dao.getRecentSearchQueryEntities(10).first;
+      expect(queries, hasLength(1));
+      expect(queries.first.query, equals('A' * 199));
+    });
+
+    test('trims whitespace exposed by truncation', () async {
+      final dao = db.recentSearchQueryDao;
+      final queryWithBoundaryWhitespace = '${'A' * 199} B';
+
+      await dao.insertOrReplaceRecentSearch(queryWithBoundaryWhitespace);
+
+      final queries = await dao.getRecentSearchQueryEntities(10).first;
+      expect(queries, hasLength(1));
+      expect(queries.first.query, equals('A' * 199));
+    });
+
     test(
       'inserts, orders descending, and updates timestamp on re-search',
       () async {

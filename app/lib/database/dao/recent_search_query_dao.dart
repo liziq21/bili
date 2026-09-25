@@ -24,7 +24,12 @@ class RecentSearchQueryDao(super.attachedDatabase)
   Future<void> insertOrReplaceRecentSearch(String searchQuery) async {
     var sanitizedQuery = searchQuery.replaceAll(_controlChars, '').trim();
     if (sanitizedQuery.length > maxQueryLength) {
-      sanitizedQuery = sanitizedQuery.substring(0, maxQueryLength);
+      var truncationIndex = maxQueryLength;
+      final precedingCodeUnit = sanitizedQuery.codeUnitAt(truncationIndex - 1);
+      if (precedingCodeUnit >= 0xD800 && precedingCodeUnit <= 0xDBFF) {
+        truncationIndex--;
+      }
+      sanitizedQuery = sanitizedQuery.substring(0, truncationIndex).trim();
     }
     if (sanitizedQuery.isEmpty) {
       return;
