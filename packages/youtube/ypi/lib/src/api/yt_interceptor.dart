@@ -3,70 +3,58 @@ import 'dart:io';
 
 import 'package:chopper/chopper.dart';
 
-final class YoutubeInnerTubeInterceptor implements Interceptor {
-  const YoutubeInnerTubeInterceptor({this.clientVersion = '2.20230818.00.00'});
+import '../client/youtube_client_config.dart';
 
-  final String clientVersion;
+final class YoutubeInnerTubeInterceptor implements Interceptor {
+  const YoutubeInnerTubeInterceptor(this.config);
+
+  final YoutubeClientConfig config;
 
   @override
   FutureOr<Response<BodyType>> intercept<BodyType>(
     Chain<BodyType> chain,
   ) async {
     final request = chain.request;
+    final headers = Map<String, String>.from(request.headers);
+    headers[HttpHeaders.contentTypeHeader] = 'application/json';
+    headers[HttpHeaders.userAgentHeader] = config.userAgent;
+    headers['X-YouTube-Client-Name'] = '1';
+    headers['X-YouTube-Client-Version'] = config.clientVersion;
 
-    final updatedHeaders = Map<String, String>.from(request.headers);
-    updatedHeaders[HttpHeaders.contentTypeHeader] = 'application/json';
-    updatedHeaders[HttpHeaders.userAgentHeader] =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36';
-    updatedHeaders['X-YouTube-Client-Name'] = '1';
-    updatedHeaders['X-YouTube-Client-Version'] = clientVersion;
-
-    final newRequest = request.copyWith(headers: updatedHeaders);
-    return chain.proceed(newRequest);
+    return chain.proceed(request.copyWith(headers: headers));
   }
 }
 
 final class YoutubeRequestConverter extends JsonConverter {
-  const YoutubeRequestConverter({
-    this.clientName = 'WEB',
-    this.clientVersion = '2.20230818.00.00',
-    this.hl = 'en',
-    this.gl = 'US',
-  });
+  const YoutubeRequestConverter(this.config);
 
-  final String clientName;
-  final String clientVersion;
-  final String hl;
-  final String gl;
+  final YoutubeClientConfig config;
 
   Map<String, dynamic> get clientContext => {
-    'context': {
-      'client': {
-        'clientName': clientName,
-        'clientVersion': clientVersion,
-        'hl': hl,
-        'gl': gl,
-      },
+    'client': {
+      'clientName': config.clientName,
+      'clientVersion': config.clientVersion,
+      'hl': config.language,
+      'gl': config.country,
     },
   };
 
   @override
   Request convertRequest(Request request) {
-    dynamic updatedBody = request.body;
+    var body = request.body;
     if (request.method == 'POST') {
-      if (updatedBody is Map<String, dynamic>) {
-        final bodyMap = Map<String, dynamic>.from(updatedBody);
+      if (body is Map) {
+        final bodyMap = body.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
         if (!bodyMap.containsKey('context')) {
-          bodyMap['context'] = clientContext['context'];
+          bodyMap['context'] = clientContext;
         }
-        updatedBody = bodyMap;
+        body = bodyMap;
       } else {
-        updatedBody ??= clientContext;
+        body ??= {'context': clientContext};
       }
     }
-
-    final jsonRequest = request.copyWith(body: updatedBody);
-    return super.convertRequest(jsonRequest);
+    return super.convertRequest(request.copyWith(body: body));
   }
 }

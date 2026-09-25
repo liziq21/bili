@@ -5,7 +5,7 @@
 ## 范围与依赖
 
 - `ypi` 的目标边界是纯 Dart YouTube InnerTube 网络包，不依赖任何 workspace 包。
-- 当前 `ypi` 仍有历史性的 `data` 依赖和外层领域模型返回，必须在后续重构中移除；新增或修改的 API 代码不得继续扩大该依赖。
+- `ypi` 不得返回或接收外层领域模型、分页状态或 continuation 状态；这些由 `packages/youtube` 适配层负责。
 - `lib/ypi.dart` 只导出正式 service、网络 DTO、typed exception 和客户端配置；parser、fixture、tool 和测试代码保持内部。
 - InnerTube 是 YouTube 客户端使用的内部协议，不是官方公开 SDK；来源以实际请求、响应 fixture 和可复核开源实现为准。
 
