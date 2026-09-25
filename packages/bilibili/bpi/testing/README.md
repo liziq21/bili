@@ -14,6 +14,7 @@
 | `related_videos.json` | `/x/web-interface/archive/related` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
 | `reply_*.json` | `/x/v2/reply/*` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
 | `play_url.json` | `/x/player/wbi/playurl` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
+| `popular.json` | `/x/web-interface/popular` | GET | `pn=1&ps=20` | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
 
 ## 抓取规则
 

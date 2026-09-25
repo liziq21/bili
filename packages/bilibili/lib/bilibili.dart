@@ -4,6 +4,7 @@ export 'l10n/localization_file/bilibili_localizations.dart';
 export 'src/bili.dart';
 export 'src/category.dart';
 export 'src/data/source/bili_remote_data_source.dart';
+export 'src/data/source/bili_popular_video_feed_remote_data_source.dart';
 export 'src/data/source/bili_video_comment_remote_data_source.dart';
 export 'src/data/source/bili_video_detail_remote_data_source.dart';
 export 'src/data/source/search/bili_aggregate_search_remote_data_source.dart';

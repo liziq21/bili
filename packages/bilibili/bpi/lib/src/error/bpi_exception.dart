@@ -64,6 +64,10 @@ final class BpiHttpException extends BpiException {
   });
 }
 
+final class BpiNetworkException extends BpiException {
+  const BpiNetworkException(super.message, {super.uri, super.cause});
+}
+
 final class TokenException extends BpiException {
   const TokenException(super.message, {super.cause});
 }

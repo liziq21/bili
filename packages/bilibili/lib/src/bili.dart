@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:http/http.dart';
 
 import 'data/source/bili_feed_remote_data_source.dart';
+import 'data/source/bili_popular_video_feed_remote_data_source.dart';
 import 'data/source/bili_video_comment_remote_data_source.dart';
 import 'data/source/bili_video_detail_remote_data_source.dart';
 import 'data/source/search/bili_aggregate_search_remote_data_source.dart';
@@ -21,6 +22,11 @@ class Bili() implements MediaSource {
   }
 
   NetworkVideoDataSource get _videoApi {
+    _networkSearch ??= BiliNetworkSearch(client: client);
+    return _networkSearch!;
+  }
+
+  NetworkBiliFeedDataSource get _feedApi {
     _networkSearch ??= BiliNetworkSearch(client: client);
     return _networkSearch!;
   }
@@ -64,9 +70,7 @@ class Bili() implements MediaSource {
 
   @override
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => [
-    BiliRecommendVideoFeedRemoteDataSource(network: _searchApi),
-    BiliTop100VideoFeedRemoteDataSource(network: _searchApi),
-    BiliHotVideoFeedRemoteDataSource(network: _searchApi),
+    BiliPopularVideoFeedRemoteDataSource(network: _feedApi),
   ];
 
   @override

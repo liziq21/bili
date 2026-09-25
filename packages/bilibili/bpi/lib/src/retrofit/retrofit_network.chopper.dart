@@ -163,6 +163,29 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
+  Future<NetworkBiliPopularResponse> getPopular({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/web-interface/popular',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'pn': page,
+      'ps': pageSize,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkBiliPopularResponse> $response = await client
+        .send<NetworkBiliPopularResponse, NetworkBiliPopularResponse>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
   Future<NetworkReplyData> getReplyListMain({
     required int oid,
     required int type,

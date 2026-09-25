@@ -1,6 +1,7 @@
 library;
 
 export 'src/error/bpi_exception.dart';
+export 'src/model/feed/network_bili_popular_response.dart';
 export 'src/model/reply/network_reply_data.dart';
 export 'src/model/reply/network_reply_reply_data.dart';
 export 'src/model/search/common/html_title.dart';
@@ -19,6 +20,7 @@ export 'src/model/video/network_related_video.dart';
 export 'src/model/video/network_video_relation.dart';
 export 'src/model/video/video_detail_data.dart';
 export 'src/network_search_data_source.dart';
+export 'src/network_feed_data_source.dart';
 export 'src/network_video_data_source.dart';
 export 'src/retrofit/retrofit_network.dart';
 export 'src/retrofit/token_storage.dart';
