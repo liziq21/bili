@@ -259,6 +259,13 @@ void main() {
       expect(commentBloc.state, const VideoCommentState());
     });
 
+    test('copyWith preserves error unless explicitly cleared', () {
+      const state = VideoCommentState(error: 'old error');
+
+      expect(state.copyWith(isLoading: true).error, 'old error');
+      expect(state.copyWith(error: null).error, isNull);
+    });
+
     test('LoadVideoComments fetches first page of comments', () async {
       commentBloc.add(const LoadVideoComments('test_id'));
 
