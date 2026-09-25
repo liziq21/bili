@@ -6,19 +6,13 @@ import 'theme_config.dart';
 part 'user_data.g.dart';
 
 @JsonSerializable(fieldRename: .screamingSnake, createToJson: true)
-class UserData extends Equatable {
-  const UserData({
-    this.sourceId = 'bilibili',
-    this.themeConfig = ThemeConfig.followSystem,
-    this.useDynamicColor = true,
-  });
-
+class const UserData({
+  final String sourceId = 'bilibili',
+  final ThemeConfig themeConfig = ThemeConfig.followSystem,
+  final bool useDynamicColor = true,
+}) extends Equatable {
   factory UserData.fromJson(Map<String, dynamic> json) =>
       _$UserDataFromJson(json);
-
-  final String sourceId;
-  final ThemeConfig themeConfig;
-  final bool useDynamicColor;
 
   Map<String, dynamic> toJson() => _$UserDataToJson(this);
 
