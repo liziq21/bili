@@ -60,6 +60,20 @@ Future<void> main() async {
   }
 
   try {
+    if (Platform.environment['CAPTURE_POPULAR_ONLY'] == '1') {
+      final popular = await getJson(
+        Uri.https('api.bilibili.com', '/x/web-interface/popular', {
+          'pn': '1',
+          'ps': '20',
+        }),
+        'popular',
+      );
+      _requirePopularItems(popular.json, 'popular');
+      saveResponse('testing/popular.json', popular);
+      print('Popular fixture fetched successfully.');
+      return;
+    }
+
     mixinKey = await WbiUtils.fetchMixinKey(client);
 
     const sampleBvid = 'BV1GJ411x7vy';
@@ -276,4 +290,22 @@ Map<String, dynamic> _requireDataObject(
     return Map<String, dynamic>.from(data);
   }
   throw FormatException('$label data is not an object');
+}
+
+void _requirePopularItems(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final items = data['list'];
+  if (items is! List || items.isEmpty) {
+    throw FormatException('$label data.list is not a non-empty list');
+  }
+  final hasVideo = items.any((item) {
+    if (item is! Map) {
+      return false;
+    }
+    final value = item['bvid'] ?? item['aid'];
+    return value is String && value.isNotEmpty || value is int;
+  });
+  if (!hasVideo) {
+    throw FormatException('$label has no item with bvid or aid');
+  }
 }

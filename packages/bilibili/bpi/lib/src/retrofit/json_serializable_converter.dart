@@ -7,8 +7,10 @@ import '../model/api_result.dart';
 
 typedef JsonFactory<T> = T Function(Map<String, dynamic> json);
 
-class const JsonSerializableConverter(final Map<Type, JsonFactory> factories)
-    extends JsonConverter {
+class const JsonSerializableConverter(
+  final Map<Type, JsonFactory> factories, {
+  final Map<Type, JsonFactory> envelopeFactories = const {},
+}) extends JsonConverter {
   @override
   FutureOr<Response<ResultType>> convertResponse<ResultType, Item>(
     Response response,
@@ -20,25 +22,28 @@ class const JsonSerializableConverter(final Map<Type, JsonFactory> factories)
       );
     }
 
-    // use [JsonConverter] to decode json
     final jsonRes = await super.convertResponse(response);
-    final jsonFactory = factories[ResultType];
-    if (jsonFactory == null || jsonFactory is! JsonFactory<ResultType>) {
-      throw BpiSerializationException(
-        'No JSON factory is registered for $ResultType.',
-      );
-    }
     if (jsonRes.body is! Map) {
       throw BpiSerializationException(
         'Expected a JSON object for $ResultType but received '
         '${jsonRes.body.runtimeType}.',
       );
     }
+    final json = Map<String, dynamic>.from(jsonRes.body as Map);
 
-    final apiResult = ApiResult<ResultType>.fromJson(
-      Map<String, dynamic>.from(jsonRes.body as Map),
-      jsonFactory,
-    );
+    final envelopeFactory = envelopeFactories[ResultType];
+    if (envelopeFactory is JsonFactory<ResultType>) {
+      return jsonRes.copyWith<ResultType>(body: envelopeFactory(json));
+    }
+
+    final jsonFactory = factories[ResultType];
+    if (jsonFactory is! JsonFactory<ResultType>) {
+      throw BpiSerializationException(
+        'No JSON factory is registered for $ResultType.',
+      );
+    }
+
+    final apiResult = ApiResult<ResultType>.fromJson(json, jsonFactory);
     return switch (apiResult) {
       Ok(:final data) => jsonRes.copyWith<ResultType>(body: data),
       Error(:final code, :final message) => throw BiliApiException(
@@ -50,13 +55,10 @@ class const JsonSerializableConverter(final Map<Type, JsonFactory> factories)
   }
 
   @override
-  // all objects should implements toJson method
-  // ignore: unnecessary_overrides
-  Request convertRequest(Request request) => super.convertRequest(request);
-
-  @override
   FutureOr<Response> convertError<ResultType, Item>(Response response) {
-    // use [JsonConverter] to decode json
-    return super.convertError(response);
+    throw BpiHttpException(
+      'Bilibili request failed.',
+      statusCode: response.statusCode,
+    );
   }
 }

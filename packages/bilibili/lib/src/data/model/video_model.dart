@@ -27,3 +27,24 @@ extension NetworkBiliUserResX on NetworkBiliUserRes {
     desc: desc,
   );
 }
+
+extension NetworkBiliPopularVideoX on NetworkBiliPopularVideo {
+  VideoModel asModel() => VideoModel(
+    id: bvid,
+    title: title ?? bvid,
+    url: 'https://www.bilibili.com/video/$bvid',
+    thumbnailUrl: _normalizeBiliUrl(pic),
+    viewCount: stat?.view,
+    uploadDate: pubdate == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(pubdate! * 1000),
+    duration: duration,
+    creatorProfileName: owner?.name,
+    creatorProfileId: owner?.mid?.toString(),
+  );
+}
+
+String? _normalizeBiliUrl(String? value) {
+  if (value == null || value.isEmpty) return null;
+  return value.startsWith('http://') ? 'https://${value.substring(7)}' : value;
+}

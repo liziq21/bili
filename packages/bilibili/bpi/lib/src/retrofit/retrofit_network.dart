@@ -4,6 +4,8 @@ import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 
 import '../api.dart';
+import '../error/bpi_exception.dart';
+import '../model/feed/network_bili_popular_response.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
@@ -14,6 +16,7 @@ import '../model/video/network_video_relation.dart';
 import '../model/video/video_detail_data.dart';
 import '../network_search_data_source.dart';
 import '../network_video_data_source.dart';
+import '../network_feed_data_source.dart';
 import '../search_type.dart';
 import 'api_interceptor.dart';
 import 'chopper_wbi_interceptor.dart';
@@ -69,6 +72,12 @@ abstract class BiliNetworkApi extends ChopperService {
     @query required String bvid,
   });
 
+  @GET(path: ApiPath.popular)
+  Future<NetworkBiliPopularResponse> getPopular({
+    @Query('pn') int page = 1,
+    @Query('ps') int pageSize = 20,
+  });
+
   @GET(path: ApiPath.replyListMain)
   Future<NetworkReplyData> getReplyListMain({
     @query required int oid,
@@ -109,13 +118,15 @@ abstract class BiliNetworkApi extends ChopperService {
 }
 
 class BiliNetworkSearch
-    implements NetworkSearchDataSource, NetworkVideoDataSource {
+    implements
+        NetworkSearchDataSource,
+        NetworkVideoDataSource,
+        NetworkBiliFeedDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null {
-    _chopperClient = ChopperClient(
-      client: _httpClient,
-      converter: JsonSerializableConverter({
+    final converter = JsonSerializableConverter(
+      {
         NetworkSearchResult: NetworkSearchResult.fromJson,
         NetworkSearchSuggest: NetworkSearchSuggest.fromJson,
         VideoDetailData: VideoDetailData.fromJson,
@@ -124,7 +135,15 @@ class BiliNetworkSearch
         NetworkReplyData: NetworkReplyData.fromJson,
         NetworkReplyReplyData: NetworkReplyReplyData.fromJson,
         NetworkPlayUrl: NetworkPlayUrl.fromJson,
-      }),
+      },
+      envelopeFactories: {
+        NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
+      },
+    );
+    _chopperClient = ChopperClient(
+      client: _httpClient,
+      converter: converter,
+      errorConverter: converter,
       interceptors: [
         ApiInterceptor(),
         BiliWbiInterceptor(
@@ -254,6 +273,28 @@ class BiliNetworkSearch
   @override
   Future<NetworkVideoRelation> getVideoRelation({required String bvid}) =>
       _networkApi.getVideoRelation(bvid: bvid);
+
+  @override
+  Future<NetworkBiliPopularResponse> getPopular({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      return await _networkApi.getPopular(page: page, pageSize: pageSize);
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili popular response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili popular network request failed.',
+        cause: error,
+      );
+    }
+  }
 
   @override
   Future<List<NetworkRelatedVideo>> getRelatedVideos({
