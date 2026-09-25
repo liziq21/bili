@@ -65,6 +65,7 @@ dev_dependencies:
   # (would break drift_dev 2.34.0). Route data classes must use named constructors
   # instead of primary constructor syntax (class const Foo({...}) extends ...).
   go_router_builder: ^4.5.0
+  alchemist: ^0.14.0
 
 flutter:
   generate: true
