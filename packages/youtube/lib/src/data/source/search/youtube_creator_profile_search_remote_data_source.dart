@@ -68,7 +68,7 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
     if (text == null || text.isEmpty) {
       return null;
     }
-    final lower = text.toLowerCase();
+    final lower = text.toLowerCase().replaceAll(',', '');
     final numMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(K|M)?', caseSensitive: false).firstMatch(lower);
     if (numMatch == null) {
       return null;
