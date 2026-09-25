@@ -1,5 +1,9 @@
 part of 'video_comment_bloc.dart';
 
+class const _VideoCommentErrorSentinel();
+
+const _keepVideoCommentError = _VideoCommentErrorSentinel();
+
 class const VideoCommentState({
   final bool isLoading = false,
   final bool isLoadingMore = false,
@@ -13,7 +17,7 @@ class const VideoCommentState({
   VideoCommentState copyWith({
     bool? isLoading,
     bool? isLoadingMore,
-    String? error,
+    Object? error = _keepVideoCommentError,
     List<VideoComment>? comments,
     int? currentPage,
     int? totalPages,
@@ -23,7 +27,9 @@ class const VideoCommentState({
     return VideoCommentState(
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: error,
+      error: identical(error, _keepVideoCommentError)
+          ? this.error
+          : error as String?,
       comments: comments ?? this.comments,
       currentPage: currentPage ?? this.currentPage,
       totalPages: totalPages ?? this.totalPages,
