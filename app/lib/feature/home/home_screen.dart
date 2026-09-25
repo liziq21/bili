@@ -139,12 +139,20 @@ class _HomeScreenState() extends State<HomeScreen> {
 
             return AppBar(
               titleSpacing: $styles.insets.xs,
-              title: HomeSearchBar(
-                controller: _searchController,
-                sources: sources,
-                activeSourceId: activeSource.id,
-                activeSourceName: activeSource.name,
-                onSubmitted: _onSearchSubmitted,
+              title: Align(
+                alignment: Alignment.centerLeft,
+                // 手机宽度下不起作用；宽屏上避免搜索框被拉成一条
+                // 1000+ 逻辑像素的横条。
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: HomeSearchBar(
+                    controller: _searchController,
+                    sources: sources,
+                    activeSourceId: activeSource.id,
+                    activeSourceName: activeSource.name,
+                    onSubmitted: _onSearchSubmitted,
+                  ),
+                ),
               ),
               actions: [
                 if (hasLiveEntry)
