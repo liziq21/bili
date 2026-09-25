@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../api.dart';
 import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
+import '../model/feed/network_bili_ranking_response.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
@@ -78,6 +79,12 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ps') int pageSize = 20,
   });
 
+  @GET(path: ApiPath.ranking)
+  Future<NetworkBiliRankingResponse> getRanking({
+    @Query('rid') int rankingId = 0,
+    @Query('type') String type = 'all',
+  });
+
   @GET(path: ApiPath.replyListMain)
   Future<NetworkReplyData> getReplyListMain({
     @query required int oid,
@@ -138,6 +145,7 @@ class BiliNetworkSearch
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
+        NetworkBiliRankingResponse: NetworkBiliRankingResponse.fromJson,
       },
     );
     _chopperClient = ChopperClient(
@@ -291,6 +299,28 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili popular network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliRankingResponse> getRanking({
+    int rankingId = 0,
+    String type = 'all',
+  }) async {
+    try {
+      return await _networkApi.getRanking(rankingId: rankingId, type: type);
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili ranking response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili ranking network request failed.',
         cause: error,
       );
     }

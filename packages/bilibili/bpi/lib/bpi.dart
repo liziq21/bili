@@ -2,6 +2,7 @@ library;
 
 export 'src/error/bpi_exception.dart';
 export 'src/model/feed/network_bili_popular_response.dart';
+export 'src/model/feed/network_bili_ranking_response.dart';
 export 'src/model/reply/network_reply_data.dart';
 export 'src/model/reply/network_reply_reply_data.dart';
 export 'src/model/search/common/html_title.dart';
