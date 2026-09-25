@@ -29,3 +29,9 @@ Prevention: Always gate router diagnostic logging with `!kReleaseMode` (or `kDeb
 Vulnerability: `HtmlTitle.fromJson` converted raw dynamic JSON strings without null guards or defensive HTML tag stripping, potentially leading to null type errors or rendering unparsed HTML/XSS markup in UI text components.
 Learning: Search API results from external endpoints (like Bilibili) embed raw HTML formatting tags (`<em class="keyword">`) and require robust tag stripping and null handling during deserialization.
 Prevention: Always sanitize untrusted HTML string payloads during JSON deserialization and provide fallback regex stripping and null-coalescing.
+
+## 2026-09-21 - Sanitize Control Characters and Enforce Length Limits on Search Queries in Local Storage
+
+Vulnerability: Unbounded user search input in `RecentSearchQueryDao.insertOrReplaceRecentSearch` stored raw queries directly into SQLite without character sanitization or length limits, allowing potential application DoS via memory/storage exhaustion or control-character rendering corruption.
+Learning: Local database queries sourced from user input (e.g. search bars) must be constrained and sanitized before storage to prevent excessive memory allocations and UI lag during retrieval.
+Prevention: Strip non-printable control characters (`[\x00-\x1F\x7F]`) and enforce strict length limits (e.g. 200 characters) in local storage DAOs.

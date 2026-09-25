@@ -18,15 +18,21 @@ class RecentSearchQueryDao(super.attachedDatabase)
         .watch();
   }
 
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+  static const int maxQueryLength = 200;
+
   Future<void> insertOrReplaceRecentSearch(String searchQuery) async {
-    final trimmedQuery = searchQuery.trim();
-    if (trimmedQuery.isEmpty) {
+    var sanitizedQuery = searchQuery.replaceAll(_controlChars, '').trim();
+    if (sanitizedQuery.length > maxQueryLength) {
+      sanitizedQuery = sanitizedQuery.substring(0, maxQueryLength);
+    }
+    if (sanitizedQuery.isEmpty) {
       return;
     }
 
     await into(recentSearchQuery).insertOnConflictUpdate(
       RecentSearchQueryCompanion(
-        query: Value(trimmedQuery),
+        query: Value(sanitizedQuery),
         queriedDate: Value(DateTime.now()),
       ),
     );
