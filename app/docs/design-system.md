@@ -149,7 +149,7 @@ DynamicColorBuilder 拿到壁纸色  →  ThemeData.copyWith(colorScheme: dynami
 
 ### R6 —— 字体配置删除
 
-`styles.dart` 里 5 个字体族（Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva / Raleway）× 3 张 Map = 15 条 `TextStyle`，仓库 0 个 `.ttf`/`.otf`，全部静默回落系统字体。半死的配置比没有更糟 —— 删除，文字走 Material `textTheme`。`$styles.text` 保留，但只管字号/行高/字重，不再指定 `fontFamily`。
+`styles.dart` 里 5 个字体族（Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva / Raleway）× 3 张 Map = 15 条 `TextStyle`，仓库 0 个 `.ttf`/`.otf`，全部静默回落系统字体。半死的配置比没有更糟 —— 删除，文字走 Material `textTheme`（由 `Material` 内部那层 `AnimatedDefaultTextStyle(theme.textTheme.bodyMedium)` 送达，见 `material.dart:476`；**不是**经 `AppScaffold` 的 `DefaultTextStyle`，那层在 `Material` 之上、够不到普通 `Text`）。`$styles.text` 保留，但只管字号/行高/字重，不再指定 `fontFamily`。
 
 **`kern` 必须留下。** Raleway 那条 `TextStyle` 上挂着 `fontFeatures: [FontFeature.enable('kern')]`，它不是死配置：实测用 SDK 自带 Roboto 经 `FontLoader` 装载后逐字形比对 caret 位置，开启 `kern` 会让 23 个字形里的 **22 个**发生位移，`fontSize 40` 时最大差约 **15px**。R6 只删 `fontFamily`，`kern` 照旧。`h3` / `title2` 原先走 Tenor、本就没有这个特性，所以保留两个基底样式而不是统一成一个 —— 统一任一方向都会改变真实设备的渲染结果。
 

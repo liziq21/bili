@@ -51,8 +51,18 @@ class _Text(final double _scale) {
   /// 字体族已按 R6 全部删除。仓库从未 bundle 任何字体文件（0 个 `.ttf`/`.otf`），
   /// 从前声明的 6 个族——Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva /
   /// Raleway——在每个平台都静默回落到系统字体。半死的配置比没有配置更糟：
-  /// 读代码的人以为换了字体，实际什么都没变。字体族现在交回 Material
-  /// `textTheme` 决定。
+  /// 读代码的人以为换了字体，实际什么都没变。
+  ///
+  /// 字体族现在由 Material `textTheme` 决定，但**机制不在 `AppScaffold`**：
+  /// `AppScaffold` 用的是 `DefaultTextStyle(style:)`，那是**替换**而非合并，
+  /// 它自己不带 `fontFamily`。真正把主题字体族送到普通 `Text` 的是
+  /// `Material` 内部那层 `AnimatedDefaultTextStyle(theme.textTheme.bodyMedium)`
+  /// （`material.dart:476`）。因为 `Material` 位于 `AppScaffold` 之下、对
+  /// `Text` 更近，`AppScaffold` 这层只对 `Material` 之外的 widget 生效
+  /// （Hero 飞行等）。
+  ///
+  /// 实测确认：主题声明 `fontFamily` 时，`Scaffold` 内的普通 `Text` 拿到的
+  /// 就是主题的族，与 `AppScaffold` 这层无关。
   ///
   /// [baseKern] 保留了原先只挂在 Raleway 上的 `kern` 特性。**它不是可以顺手
   /// 一起删的死配置**：实测（用 SDK 自带 Roboto 经 `FontLoader` 装载后逐字形
