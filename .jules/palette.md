@@ -21,3 +21,9 @@
 **Learning:** Navigation `FilterChip` elements in horizontal filter bars provide visual tab selection, but lacking tactile `HapticFeedback.selectionClick()` and explicit `tooltip` attributes reduces physical responsiveness on touch screens and leaves desktop/screen-reader users without context on long-press or hover.
 
 **Action:** Always combine `HapticFeedback.selectionClick()` with `tooltip: filter.label` on filter chip selection handlers to ensure clear tactile feedback and accessibility.
+
+## 2026-09-25 - Action Button Metric Semantics & Dynamic Action Context
+
+**Learning:** When custom action buttons display numeric stats (e.g. view/like/favorite counts like "3.8万"), passing only the formatted number string to `Semantics(label: ..., tooltip: ...)` leaves screen readers (TalkBack/VoiceOver) without action context (announcing "3.8万, button" instead of "点赞 3.8万, button"), and causes hover tooltips to show useless metric numbers instead of action hints.
+
+**Action:** Always combine explicit action names with formatted metric counts in `Semantics(label: '$actionName $count')` and supply state-aware dynamic tooltips (e.g., `isLiked ? '取消点赞' : '点赞'`).
