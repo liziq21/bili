@@ -128,7 +128,7 @@ class const _SourceLogsView() extends StatelessWidget {
         Container(
           padding: EdgeInsets.all($styles.insets.xs),
           decoration: BoxDecoration(
-            color: $styles.colors.black,
+            color: $styles.colors.scrim,
             borderRadius: BorderRadius.circular($styles.corners.sm),
           ),
           child: Text(

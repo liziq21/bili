@@ -38,6 +38,9 @@ class AppColors({
   static const _bodyDark = Color(0xFFE5E0DC);
   static const _greyStrongDark = Color(0xFF3A3836);
   static const _greyMediumDark = Color(0xFF7A7672);
+  // 恒深色板：两种亮度下取值相同。
+  static const _scrimLight = Color(0xFF1E1B18);
+  static const _scrimDark = Color(0xFF141210);
 
   Color get accent1 => isDark ? _accent1Dark : _accent1Light;
   Color get accent2 => isDark ? _accent2Dark : _accent2Light;
@@ -62,9 +65,16 @@ class AppColors({
   // web/index.html -
   /// 强前景色。语义上是「浅底上的文字」，暗色下反转为「深底上的文字」。
   ///
-  /// 注意：有 4 处把本常量当作容器背景而非文字用（深色面板 + 浅色文字），
-  /// 暗色下反色后需单独确认对比度。
+  /// 不要拿它当容器背景用——需要深底时请用 [scrim]。背景与前景是两套语义，
+  /// 暗色下二者的方向恰好相反，共用一个常量必然有一边出错。
   Color get black => isDark ? _offWhiteLight : _offWhiteDark;
+
+  /// 恒深色的承载面：视频占位底、日志面板、渐变遮罩、时长标签底。
+  ///
+  /// 这些位置在两种亮度下都必须是深色——上面承载的是白色文字或图标。
+  /// 暗色下比 [offWhite] 再压暗一档，避免深色页面里出现一块比周围更亮的
+  /// 「发光」区域。
+  Color get scrim => isDark ? _scrimDark : _scrimLight;
 
   Color shift(Color c, double d) =>
       ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));

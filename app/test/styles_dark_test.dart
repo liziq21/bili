@@ -83,4 +83,43 @@ void main() {
       expect($styles.colors.body, const Color(0xFF514F4D));
     });
   });
+
+  group('scrim surface token', () {
+    final light = AppColors(isDark: false);
+    final dark = AppColors(isDark: true);
+
+    test('stays dark in both brightnesses', () {
+      // 视频占位底、日志面板、渐变遮罩、时长标签底——这些位置两种亮度下
+      // 都必须是深色。用相对亮度断言而不是硬编码色值：真正的不变量是
+      // 「深色」，不是「恰好是这个 RGB」。
+      for (final c in [light.scrim, dark.scrim]) {
+        expect(
+          c.computeLuminance(),
+          lessThan(0.1),
+          reason: 'scrim 必须是深色承载面，实际 ${c.toARGB32()}',
+        );
+      }
+    });
+
+    test('dark mode is darker than the page surface', () {
+      // 暗色页面里出现一块比周围更亮的承载面会像在发光。
+      expect(dark.scrim.computeLuminance(), lessThan(dark.offWhite.computeLuminance()));
+    });
+
+    test('carries white foreground above WCAG AA', () {
+      // 上面承载的是白字/白图标，必须够读。
+      // WCAG 相对亮度对比度：(L_较亮 + 0.05) / (L_较暗 + 0.05)，白色 L = 1.0。
+      for (final c in [light.scrim, dark.scrim]) {
+        final ratio = (1.0 + 0.05) / (c.computeLuminance() + 0.05);
+        expect(ratio, greaterThan(4.5), reason: '白字压 scrim 需 > 4.5:1，实际 $ratio');
+      }
+    });
+
+    test('differs from black, which stays a foreground token', () {
+      // black 是前景语义，暗色下反转为浅色；scrim 是背景语义，恒深。
+      // 两者混用是这次缺陷的根因，测试钉住它们的区别。
+      expect(dark.black.computeLuminance(), greaterThan(0.5));
+      expect(dark.scrim.computeLuminance(), lessThan(0.1));
+    });
+  });
 }
