@@ -85,6 +85,74 @@ void main() {
     });
   });
 
+  group('page rebuild on theme flip', () {
+    // Reproduces the production tree shape. `ShellRoute` hands `AppScaffold` a
+    // long-lived `navigator`, so after a brightness change `AppScaffold` does
+    // rebuild (it reads `Theme.of`) but returns the *identical* child widget,
+    // and `Element.updateChild` short-circuits — nothing below the scaffold
+    // rebuilds and the page keeps painting the old palette.
+    //
+    // The probe stands in for `VideoScreen`, which is the single entry point
+    // every `$styles.colors.*` read in the video feature hangs off, and it
+    // declares a `Theme.of(context)` dependency exactly as the fix does.
+    testWidgets('re-reads the palette after a light → dark flip', (tester) async {
+      final mode = ValueNotifier(ThemeMode.light);
+      addTearDown(mode.dispose);
+
+      // Built once and handed back by reference on every rebuild, exactly like
+      // the navigator instance `ShellRoute` gives the scaffold.
+      final probe = Builder(
+        builder: (context) {
+          Theme.of(context); // the same opt-in the page now makes
+          return ColoredBox(
+            color: $styles.colors.offWhite,
+            child: const SizedBox.expand(),
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        ValueListenableBuilder(
+          valueListenable: mode,
+          builder: (_, ThemeMode m, _) => MediaQuery(
+            data: const MediaQueryData(size: Size(360, 800)),
+            child: MaterialApp(
+              theme: ThemeData.light(),
+              darkTheme: ThemeData.dark(),
+              themeMode: m,
+              home: AppScaffold(child: probe),
+            ),
+          ),
+        ),
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == const Color(0xFFF8ECE5),
+        ),
+        findsOneWidget,
+      );
+
+      mode.value = ThemeMode.dark;
+      await tester.pumpAndSettle();
+
+      // Assert on the painted widget, not on `$styles.colors.*`: the static is
+      // refreshed by `AppScaffold` either way, so only the tree can show that
+      // the page itself re-ran its build with the new palette.
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == const Color(0xFF1E1B18),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == const Color(0xFFF8ECE5),
+        ),
+        findsNothing,
+      );
+    });
+  });
+
   group('scrim surface token', () {
     final light = AppColors(isDark: false);
     final dark = AppColors(isDark: true);
