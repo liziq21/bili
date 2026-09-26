@@ -136,7 +136,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           Text(
                             _selectedSource.split(' ').first,
                             style: $styles.text.btn.copyWith(
-                              color: $styles.colors.offWhite,
+                              color: $styles.colors.white,
                               fontSize: 11,
                             ),
                           ),
@@ -146,7 +146,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             size: 16,
-                            color: $styles.colors.offWhite,
+                            color: $styles.colors.white,
                           ),
                         ],
                       ),
@@ -329,7 +329,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     Text(
                       '03:12 / 12:00',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.offWhite,
+                        color: $styles.colors.white,
                         fontSize: 11,
                       ),
                     ),
@@ -392,7 +392,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         child: Text(
                           _selectedQuality,
                           style: $styles.text.btn.copyWith(
-                            color: $styles.colors.offWhite,
+                            color: $styles.colors.white,
                             fontSize: 10,
                           ),
                         ),
