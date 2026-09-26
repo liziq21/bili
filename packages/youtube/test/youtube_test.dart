@@ -35,6 +35,26 @@ void main() {
       unawaited(youtube.close());
     });
 
+    test('YouTube respects static YouTube.client when httpClient parameter is null', () async {
+      var clientUsed = false;
+      final mockClient = MockClient((_) async {
+        clientUsed = true;
+        return http.Response('unavailable', 503);
+      });
+
+      YouTube.client = mockClient;
+      addTearDown(() => YouTube.client = null);
+
+      final youtube = YouTube();
+      final ds = youtube.videoSearchDataSource;
+      await ds.searchVideoWithOptions(
+        const SearchQuery(query: 'test', pageKey: 1),
+      );
+
+      expect(clientUsed, isTrue);
+      await youtube.close();
+    });
+
     test('Remote data sources sanitize error handling and do not leak stack traces into Result.error', () async {
       final youtube = YouTube(
         httpClient: MockClient((_) async => http.Response('unavailable', 503)),
