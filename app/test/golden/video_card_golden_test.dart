@@ -99,8 +99,11 @@ void main() {
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.byType(CachedNetworkImage), findsWidgets);
+      // 图片加载失败时 CachedNetworkImage 仍留在树里，光断言它存在证明不了
+      // 加载成功——必须断言错误占位图不存在。
+      expect(find.byIcon(Icons.movie_outlined), findsNothing);
     });
   });
 }
