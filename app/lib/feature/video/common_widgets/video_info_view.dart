@@ -344,6 +344,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     icon: Icons.thumb_up_outlined,
                     activeIcon: Icons.thumb_up,
                     label: _formatCount(detail.likeCount),
+                    actionName: '点赞',
                     isActive: detail.isLiked,
                     color: $styles.colors.accent1,
                     onTap: () {
@@ -354,6 +355,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     icon: Icons.grade_outlined,
                     activeIcon: Icons.grade,
                     label: _formatCount(detail.favoriteCount),
+                    actionName: '收藏',
                     isActive: detail.isFavorited,
                     color: $styles.colors.accent3,
                     onTap: () {
@@ -366,6 +368,8 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     icon: Icons.cloud_sync,
                     activeIcon: Icons.cloud_sync,
                     label: '多源换源',
+                    actionName: '多源换源',
+                    tooltip: '切换视频数据源',
                     isActive: true,
                     color: $styles.colors.accent1,
                     onTap: () {
@@ -381,6 +385,8 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     icon: Icons.share_outlined,
                     activeIcon: Icons.share,
                     label: _formatCount(detail.shareCount),
+                    actionName: '分享',
+                    tooltip: '分享视频',
                     isActive: false,
                     color: $styles.colors.accent2,
                     onTap: () {
@@ -398,6 +404,8 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                         : Icons.closed_caption_disabled,
                     activeIcon: Icons.closed_caption,
                     label: _isDanmakuActive ? '弹幕开' : '弹幕关',
+                    actionName: '弹幕',
+                    tooltip: _isDanmakuActive ? '关闭弹幕' : '开启弹幕',
                     isActive: _isDanmakuActive,
                     color: $styles.colors.accent1,
                     onTap: () {
@@ -680,19 +688,24 @@ class const _ActionButton({
   required final IconData icon,
   required final IconData activeIcon,
   required final String label,
+  required final String actionName,
   required final bool isActive,
   required final Color color,
   required final VoidCallback onTap,
+  final String? tooltip,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final semanticLabel = '$actionName $label';
+    final computedTooltip = tooltip ?? (isActive ? '取消$actionName' : actionName);
+
     return Semantics(
       button: true,
       enabled: true,
       selected: isActive,
       excludeSemantics: true,
-      label: label,
-      tooltip: label,
+      label: semanticLabel,
+      tooltip: computedTooltip,
       child: InkWell(
         onTap: () {
           HapticFeedback.lightImpact();
