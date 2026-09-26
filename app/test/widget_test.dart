@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:app/app.dart';
 import 'package:app/app_bloc.dart';
 import 'package:app/app_scaffold.dart';
+import 'package:app/data/model/recent_search_query.dart';
+import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
+import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/home/home_screen.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,6 +49,23 @@ class FakeUserDataRepository() implements UserDataRepository {
   void dispose() {
     _controller.close();
   }
+}
+
+/// 首页搜索入口（`HomeRouteData` 里的 `_withSearchBloc`）会 `read` 这个仓库来
+/// 构造 `SearchBloc`。生产环境由 `main.dart` 的 `repoProviders` 提供，本测试
+/// 之前没提供，于是 `SearchBloc` 一旦真的被创建就会抛
+/// `ProviderNotFoundException`。
+class const FakeRecentSearchQueryRepository()
+    implements RecentSearchQueryRepository {
+  @override
+  Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
+      const Stream.empty();
+
+  @override
+  Future<void> insertOrReplaceRecentSearch(String searchQuery) async {}
+
+  @override
+  Future<void> clearRecentSearchQueries() async {}
 }
 
 class FakeMediaSource(@override final String id, @override final String name)
@@ -103,14 +123,25 @@ void main() {
         userDataRepository.dispose();
       });
 
+      // 顺序对齐 `main.dart`：仓库在 bloc 和 MediaSource 之外层。
+      final recentSearchQueryRepository = FakeRecentSearchQueryRepository();
+
       await tester.pumpWidget(
         RepositoryProvider<UserDataRepository>.value(
           value: userDataRepository,
-          child: BlocProvider<AppBloc>.value(
-            value: appBloc,
-            child: Provider<List<MediaSource>>.value(
-              value: mediaSources,
-              child: const App(),
+          child: RepositoryProvider<RecentSearchQueryRepository>.value(
+            value: recentSearchQueryRepository,
+            child: RepositoryProvider<GetRecentSearchQueriesUseCase>.value(
+              value: GetRecentSearchQueriesUseCase(
+                recentSearchQueryRepository: recentSearchQueryRepository,
+              ),
+              child: BlocProvider<AppBloc>.value(
+                value: appBloc,
+                child: Provider<List<MediaSource>>.value(
+                  value: mediaSources,
+                  child: const App(),
+                ),
+              ),
             ),
           ),
         ),
