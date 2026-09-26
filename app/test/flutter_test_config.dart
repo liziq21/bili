@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:alchemist/alchemist.dart';
-import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:flutter_test/flutter_test.dart' show tearDownAll;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 /// Every path_provider lookup in a widget test resolves under [root].
@@ -52,38 +52,52 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // thumbnail first writes it, and every other file then gets a cache hit and
   // never issues the request `mockNetworkImagesFor` is there to intercept — the
   // rendered image would depend on which file happened to run first. A unique
-  // root per test executable, removed on the way out, keeps each run hermetic
-  // and leaves nothing behind in the system temp dir.
+  // root per test executable, removed when the executable finishes, keeps each
+  // run hermetic and leaves nothing behind in the system temp dir.
   final root = Directory.systemTemp.createTempSync('bili_test_');
   _sweepStaleRoots();
   PathProviderPlatform.instance = FakePathProviderPlatform(root.path);
 
-  try {
-    await AlchemistConfig.runWithConfig(
-      config: AlchemistConfig(
-        platformGoldensConfig: const PlatformGoldensConfig(enabled: false),
-        ciGoldensConfig: const CiGoldensConfig(diffThreshold: 0.01),
-      ),
-      run: testMain,
-    );
-  } finally {
-    // The cache manager is a lazily created singleton: reading it here forces
-    // construction even if no test rendered a thumbnail. Cleanup must not turn
-    // a green run red, so failures here are reported and swallowed.
+  // testMain only declares the tests; the framework runs their bodies after it
+  // returns. A `finally` around it therefore deletes the root before any
+  // thumbnail is loaded, and the bodies recreate it through
+  // [FakePathProviderPlatform._dir], so the cache written by the run survived:
+  // one `flutter test test/golden/video_card_golden_test.dart` left one fresh
+  // root behind. tearDownAll is the first hook that runs after the last test
+  // body of this executable.
+  //
+  // The root is removed synchronously and the cache manager is left alone:
+  // deleting the root already removes everything the manager wrote, because
+  // both its cache directory and its Hive box live under the path_provider
+  // root (cached_network_image_ce default_cache_manager.dart, `_doInit`).
+  // Its two async teardown calls cannot be awaited here — measured, each one
+  // hangs the run past the 300s test timeout after the bodies have executed,
+  // while the same calls complete before them. `dispose()` blocks on the
+  // cleanup sweep `_doInit` launched from inside a test body (lines 220 and
+  // 766); the reason `emptyCache()` blocks is not established.
+  tearDownAll(() {
     try {
-      await CachedNetworkImageProvider.defaultCacheManager.emptyCache();
-      await CachedNetworkImageProvider.defaultCacheManager.dispose();
-    } on Object catch (error) {
-      stderr.writeln('bili_test: image cache cleanup failed: $error');
+      if (root.existsSync()) root.deleteSync(recursive: true);
+    } on FileSystemException catch (error) {
+      // A root that cannot be removed is reclaimed by [_sweepStaleRoots] on a
+      // later run. Cleanup must not turn a green run red.
+      stderr.writeln('bili_test: temp root cleanup failed: $error');
     }
-    if (root.existsSync()) root.deleteSync(recursive: true);
-  }
+  });
+
+  await AlchemistConfig.runWithConfig(
+    config: AlchemistConfig(
+      platformGoldensConfig: const PlatformGoldensConfig(enabled: false),
+      ciGoldensConfig: const CiGoldensConfig(diffThreshold: 0.01),
+    ),
+    run: testMain,
+  );
 }
 
 /// Deletes cache roots left behind by earlier runs.
 ///
 /// `flutter test` tears its isolates down as soon as the run reports, so the
-/// `finally` cleanup does not always get to run and a few roots survive. A run
+/// teardown hook does not always get to run and a few roots survive. A run
 /// cannot blanket-delete them: test files in the same run execute concurrently
 /// and each one owns a live root, so only roots older than [_staleAfter] are
 /// removed. That is old enough to spare any sibling of the current run and new
