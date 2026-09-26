@@ -252,9 +252,17 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField).last, 'b' * 250);
-    await tester.pumpAndSettle();
+    await pumpPastDebounce(tester);
 
-    // SearchAnchor.bar 没有 viewOnChanged，限制由 suggestionsBuilder 兜底
-    expect(suggest.receivedQueries.every((q) => q.length <= 200), isTrue);
+    // SearchAnchor.bar 没有 viewOnChanged（material_ui 1.4.0 的 API 缺口），
+    // 限制由 suggestionsBuilder 兜底。
+    //
+    // 不能只断言 `every((q) => q.length <= 200)`：空列表上 `every` 也返回 true，
+    // 而 `pumpAndSettle` 推不动 300ms debounce，查询根本没发出去时这个测试照样
+    // 绿。必须先断言查询确实发出去了，且拿到的就是截断后的 200 个字符。
+    final viewField = tester.widget<TextField>(find.byType(TextField).last);
+    expect(viewField.controller!.text, 'b' * 200);
+    expect(suggest.receivedQueries, isNotEmpty);
+    expect(suggest.receivedQueries, everyElement('b' * 200));
   });
 }
