@@ -66,7 +66,7 @@ class const VideoFeedSection({
               }
 
               final width = constraints.crossAxisExtent;
-              final columns = LayoutSize.fromWidth(width).feedColumns;
+              final columns = LayoutSize.fromWidth(width).feedColumnsFor(width);
               final spacing = $styles.insets.sm;
               final cardWidth = (width - spacing * (columns - 1)) / columns;
 

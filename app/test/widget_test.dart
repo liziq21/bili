@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:app/app.dart';
 import 'package:app/app_bloc.dart';
 import 'package:app/app_scaffold.dart';
+import 'package:app/data/model/recent_search_query.dart';
+import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
+import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/home/home_screen.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,6 +51,23 @@ class FakeUserDataRepository() implements UserDataRepository {
   }
 }
 
+/// 首页搜索入口（`HomeRouteData` 里的 `_withSearchBloc`）会 `read` 这个仓库来
+/// 构造 `SearchBloc`。生产环境由 `main.dart` 的 `repoProviders` 提供，本测试
+/// 之前没提供，于是 `SearchBloc` 一旦真的被创建就会抛
+/// `ProviderNotFoundException`。
+class const FakeRecentSearchQueryRepository()
+    implements RecentSearchQueryRepository {
+  @override
+  Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
+      const Stream.empty();
+
+  @override
+  Future<void> insertOrReplaceRecentSearch(String searchQuery) async {}
+
+  @override
+  Future<void> clearRecentSearchQueries() async {}
+}
+
 class FakeMediaSource(@override final String id, @override final String name)
     implements MediaSource {
   @override
@@ -90,14 +110,25 @@ void main() {
         userDataRepository.dispose();
       });
 
+      // 顺序对齐 `main.dart`：仓库在 bloc 和 MediaSource 之外层。
+      final recentSearchQueryRepository = FakeRecentSearchQueryRepository();
+
       await tester.pumpWidget(
         RepositoryProvider<UserDataRepository>.value(
           value: userDataRepository,
-          child: BlocProvider<AppBloc>.value(
-            value: appBloc,
-            child: Provider<List<MediaSource>>.value(
-              value: mediaSources,
-              child: const App(),
+          child: RepositoryProvider<RecentSearchQueryRepository>.value(
+            value: recentSearchQueryRepository,
+            child: RepositoryProvider<GetRecentSearchQueriesUseCase>.value(
+              value: GetRecentSearchQueriesUseCase(
+                recentSearchQueryRepository: recentSearchQueryRepository,
+              ),
+              child: BlocProvider<AppBloc>.value(
+                value: appBloc,
+                child: Provider<List<MediaSource>>.value(
+                  value: mediaSources,
+                  child: const App(),
+                ),
+              ),
             ),
           ),
         ),
@@ -111,14 +142,22 @@ void main() {
 
       // `material_ui` is a fork of the material library with its own
       // `MaterialLocalizations` type, so the `flutter_localizations` delegates
-      // alone leave its widgets without localizations. The home screen search
-      // field is the first thing to crash on that, taking the whole app down
+      // alone leave its widgets without localizations, taking the app down
       // with a red error screen. Assert on the lookup instead of letting a
       // blanket `FlutterError.onError` filter hide it again.
-      final searchField = find.byType(TextField);
-      expect(searchField, findsWidgets);
+      //
+      // The probe follows the search entry's current shape rather than pinning
+      // one: the home screen renders an icon (see `AppSearchAnchor`), and the
+      // widget that actually needs localizations is the BackButton inside the
+      // view it opens -- that is where #96 blew up. So open the view and check
+      // the BackButton.
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pumpAndSettle();
+
+      final backButton = find.byType(BackButton);
+      expect(backButton, findsWidgets);
       expect(
-        MaterialLocalizations.of(tester.element(searchField.first)),
+        MaterialLocalizations.of(tester.element(backButton.first)),
         isNotNull,
       );
       expect(tester.takeException(), isNull);
