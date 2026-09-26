@@ -9,7 +9,7 @@ import 'bloc/search_bloc.dart';
 
 class const AppSearchAnchor({
   super.key,
-  required final void Function(String query) onSearch, // 执行搜索（通常用于插入数据库）
+  required final void Function(String query) onSearch,
   final List<RecentSearchQuery> recentSearchQuery = const [],
   final Function(String)? navigateToSearchResult,
   final SearchAnchorChildBuilder? builder,

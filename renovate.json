@@ -15,11 +15,6 @@
       "schedule": ["before 5am on monday"]
     },
     {
-      "matchManagers": ["pub"],
-      "groupName": "Flutter & Dart 依赖批量更新",
-      "schedule": ["every weekend"]
-    },
-    {
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true,
       "automergeSchedule": ["any time"],
