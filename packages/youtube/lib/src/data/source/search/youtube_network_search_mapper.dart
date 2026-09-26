@@ -49,9 +49,7 @@ List<NetworkYouTubeChannelRenderer> channelRenderers(
   ];
 }
 
-String? videoContinuationToken(
-  NetworkYouTubeVideoSearchResponse response,
-) {
+String? videoContinuationToken(NetworkYouTubeVideoSearchResponse response) {
   String? token;
   for (final section in _sections(
     contents: response.contents,
@@ -73,9 +71,7 @@ String? videoContinuationToken(
   return token;
 }
 
-String? channelContinuationToken(
-  NetworkYouTubeChannelSearchResponse response,
-) {
+String? channelContinuationToken(NetworkYouTubeChannelSearchResponse response) {
   String? token;
   for (final section in _sections(
     contents: response.contents,

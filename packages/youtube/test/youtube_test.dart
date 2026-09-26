@@ -37,9 +37,7 @@ void main() {
 
     test('Remote data sources sanitize error handling and do not leak stack traces into Result.error', () async {
       final youtube = YouTube(
-        httpClient: MockClient(
-          (_) async => http.Response('unavailable', 503),
-        ),
+        httpClient: MockClient((_) async => http.Response('unavailable', 503)),
       );
 
       final ds = youtube.videoSearchDataSource;
