@@ -35,7 +35,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
     return AspectRatio(
       aspectRatio: widget.aspectRatio,
       child: Container(
-        color: $styles.colors.black,
+        color: $styles.colors.scrim,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -60,9 +60,9 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      $styles.colors.black.withValues(alpha: 0.7),
+                      $styles.colors.scrim.withValues(alpha: 0.7),
                       Colors.transparent,
-                      $styles.colors.black.withValues(alpha: 0.85),
+                      $styles.colors.scrim.withValues(alpha: 0.85),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -136,7 +136,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           Text(
                             _selectedSource.split(' ').first,
                             style: $styles.text.btn.copyWith(
-                              color: $styles.colors.offWhite,
+                              color: $styles.colors.white,
                               fontSize: 11,
                             ),
                           ),
@@ -146,7 +146,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             size: 16,
-                            color: $styles.colors.offWhite,
+                            color: $styles.colors.white,
                           ),
                         ],
                       ),
@@ -181,7 +181,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     width: 240,
                     padding: EdgeInsets.all($styles.insets.xs),
                     decoration: BoxDecoration(
-                      color: $styles.colors.black.withValues(alpha: 0.92),
+                      color: $styles.colors.scrim.withValues(alpha: 0.92),
                       borderRadius: BorderRadius.circular($styles.corners.md),
                       border: Border.all(
                         color: $styles.colors.accent1.withValues(alpha: 0.3),
@@ -306,7 +306,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      $styles.colors.black.withValues(alpha: 0.9),
+                      $styles.colors.scrim.withValues(alpha: 0.9),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -329,7 +329,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     Text(
                       '03:12 / 12:00',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.offWhite,
+                        color: $styles.colors.white,
                         fontSize: 11,
                       ),
                     ),
@@ -392,7 +392,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         child: Text(
                           _selectedQuality,
                           style: $styles.text.btn.copyWith(
-                            color: $styles.colors.offWhite,
+                            color: $styles.colors.white,
                             fontSize: 10,
                           ),
                         ),

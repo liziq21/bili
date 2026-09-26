@@ -22,7 +22,11 @@ class const AppScaffold({super.key, required final Widget child})
     _style = AppStyle(
       screenSize: context.sizePx,
       disableAnimations: mq.disableAnimations,
-      highContrast: mq.highContrast,
+      // Read the real theme brightness so `$styles.colors.*` can pick light or
+      // dark values. Previously `AppColors.isDark` was hardcoded to false,
+      // which pinned every surface and text colour to the light palette and
+      // left the whole app light-only.
+      isDark: Theme.of(context).brightness == Brightness.dark,
     );
     return KeyedSubtree(
       key: ValueKey($styles.scale),
