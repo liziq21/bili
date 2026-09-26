@@ -1,5 +1,6 @@
 import 'package:bilibili/bilibili.dart';
 import 'package:data/data.dart';
+import 'package:youtube/youtube.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
@@ -47,6 +48,7 @@ void initDebugOverlayBridge() {
   if (kReleaseMode) {
     DebugOverlay.enabled = false;
     Bili.client = http.IOClient();
+    YouTube.client = http.IOClient();
     return;
   }
 
@@ -106,6 +108,7 @@ void initDebugOverlayBridge() {
   });
   // Enforce strict TLS/SSL certificate validation to protect against MitM attacks.
   Bili.client = HttpLogClient(App.httpBucket, http.IOClient());
+  YouTube.client = HttpLogClient(App.httpBucket, http.IOClient());
 }
 
 AppStyle get $styles => AppScaffold.style;
