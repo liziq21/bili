@@ -81,11 +81,17 @@
 
 ### 1.5 死代码（调用点为 0 或只存不读）
 
+> 下表在 `51cdc4f` 上用 `git grep` 全仓核实（`app/` + `packages/`，不含本文件）。
+> 标「实测」的两项是 P1 落地时新发现的，原清单漏了。
+
 - `ColorUtils` 全类 —— 唯一调用者是 `AppColors.shift()`，而 `shift()` **零调用点**
 - `_Shadows`（3 组阴影定义）—— `$styles.shadows` **0 调用点**
-- `_Sizes`（`maxContentWidth1/2/3`、`minAppSize`）—— `$styles.sizes` **0 调用点**
+- `_Sizes`（maxContentWidth1/2/3、minAppSize）—— `$styles.sizes` **0 调用点**
 - `AppStyle.highContrast` —— 只写入，**从不读取**
-- `colors.dart` 里 `black` 上方的注释「also change it in web/manifest.json / web/index.html」是**假的**：`app/web/manifest.json:6` 的 `background_color` 现在是 `#0175C2`（Flutter 默认蓝），从没同步过
+- `colors.dart` 里「改色值记得同步 web/manifest.json / web/index.html」是**假的**：`app/web/manifest.json:6` 的 `background_color` 现在是 `#0175C2`（Flutter 默认蓝），从没同步过
+- **实测**：`color_extensions.dart` 的 `Color.colorFilter` 扩展 —— 全仓 0 调用点（唯一 `export` 在 `colors.dart`）
+- **实测**：10 个 0 调用点的 `TextStyle`——`dropCase` / `wonderTitle`（Wonderous 遗留）、`h1` / `h2` / `h4` / `title1` / `quote1` / `quote2` / `quote2Sub` / `callout`，以及 5 个字体族 getter `titleFont` / `quoteFont` / `wonderTitleFont` / `contentFont` / `monoTitleFont`
+- **实测**：`fontFeatures: [FontFeature.enable('kern')]` **不是**死配置，R6 不得顺手删。见 R6。
 
 ---
 
@@ -143,7 +149,9 @@ DynamicColorBuilder 拿到壁纸色  →  ThemeData.copyWith(colorScheme: dynami
 
 ### R6 —— 字体配置删除
 
-`styles.dart` 里 5 个字体族（Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva / Raleway）× 3 张 Map = 15 条 `TextStyle`，仓库 0 个 `.ttf`/`.otf`，全部静默回落系统字体。半死的配置比没有更糟 —— 删除，文字走 Material `textTheme`。`$styles.text` 保留，但只管字号/行高/字重，不再指定 `fontFamily`。
+`styles.dart` 里 5 个字体族（Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva / Raleway）× 3 张 Map = 15 条 `TextStyle`，仓库 0 个 `.ttf`/`.otf`，全部静默回落系统字体。半死的配置比没有更糟 —— 删除，文字走 Material `textTheme`（由 `Material` 内部那层 `AnimatedDefaultTextStyle(theme.textTheme.bodyMedium)` 送达，见 `material.dart:476`；**不是**经 `AppScaffold` 的 `DefaultTextStyle`，那层在 `Material` 之上、够不到普通 `Text`）。`$styles.text` 保留，但只管字号/行高/字重，不再指定 `fontFamily`。
+
+**`kern` 必须留下。** Raleway 那条 `TextStyle` 上挂着 `fontFeatures: [FontFeature.enable('kern')]`，它不是死配置：实测用 SDK 自带 Roboto 经 `FontLoader` 装载后逐字形比对 caret 位置，开启 `kern` 会让 23 个字形里的 **22 个**发生位移，`fontSize 40` 时最大差约 **15px**。R6 只删 `fontFamily`，`kern` 照旧。`h3` / `title2` 原先走 Tenor、本就没有这个特性，所以保留两个基底样式而不是统一成一个 —— 统一任一方向都会改变真实设备的渲染结果。
 
 ### R7 —— 死代码清理
 
@@ -219,12 +227,24 @@ app/lib/design/
 
 | PR | 内容 | 像素变化 | 依赖 |
 |---|---|---|---|
-| **P1** | 死代码清理 + 字体剥离（R6/R7） | 无 | #104（要删的 `ColorUtils`/`shift()` 在 `colors.dart`，`highContrast` 注入在 `app_scaffold.dart`，两个文件 #104 都重写过） |
-| **P2** | 结构收敛 + 角色改名：建 `design/`、R1~R4、R2.1、`toThemeData()` **仍不接线** | 无 | P1、#104、#97 |
-| **P3** | **唯一改像素的一次**：亮色色板重取值 + `ThemeWrapper` 接线 + DynamicColor 优先 + G2 测试全绿 | **有 → golden 在此重录** | P2 |
+| **P1** | 死代码清理 + 字体剥离（R6/R7） | 仅测试环境，见下 | #104 ✅ 已合 |
+| **P2** | 结构收敛 + 角色改名：建 `design/`、R1~R4、R2.1、`toThemeData()` **仍不接线** | 无 | P1、#104 ✅、#97 |
+| **P3** | **改像素的主力**：亮色色板重取值 + `ThemeWrapper` 接线 + DynamicColor 优先 + G2 测试全绿 | **有 → golden 在此重录** | P2 |
 | **P4** | custom_lint 门禁（G1） | 无 | P2 |
 
 P2 保持 `toThemeData()` 不接线，是为了让「Material 组件首次拿到颜色」这件事单独落在 P3，golden 失效原因唯一。
+
+### P1 的像素变化是真实的，且只在测试环境
+
+原方案写 P1「无像素变化」，**这是错的**，P1 落地时实测推翻：把 R6 的字体族删掉后，golden 变了 —— `video_card` 1.83% 的像素、`video_feed_section` 1.63%。
+
+二分定位：只删死代码（不动字体族）→ 与基线**逐字节一致**；只把 `fontFamily` 换成基底样式 → 出现差异。所以差异源是 R6 本身，不是死代码删除。
+
+机理：**指定一个不存在的字体族，会把回落限制在默认字体；不指定则走引擎的完整回落链。** 两条路径只在「主字体缺该字形」时分开。golden 跑在 flutter_test 里，唯一可用字体是只含拉丁字形的 Ahem，于是中文全部落到 notdef —— 实测差异就集中在 `VideoCard` 头像那个 `Text(creatorName[0])` 上：改动前是 1em 宽的实心方块，改动后是一根窄竖条。
+
+真实设备上两条路径都会落到平台默认字体 + 平台 CJK 回落（Noto 等），预期渲染一致；本沙箱没有 Android/iOS 渲染器，**这一点无法在此证实**，只能标注为预期。
+
+因此 golden 基线要重录两次而不是一次：一次是 P1 让测试环境的 notdef 形状对齐（若 P1 先于 #97 合入，则由 #97 重录），一次是 P3 的真实改色。**合并顺序决定这次重录记在谁头上**，不改变总次数。
 
 ---
 
