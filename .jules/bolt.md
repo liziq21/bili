@@ -13,3 +13,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-18 - Isolate BLoC state rebuilding above TabControllers
 **Learning:** Wrapping a screen's root layout in a broad `BlocBuilder` re-instantiates descendant `DefaultTabController`, `TabBar`, and `TabBarView` subtrees on every BLoC state change (e.g., like/favorite toggles), resetting tab states and causing unnecessary rebuild passes across the screen.
 **Action:** Use targeted `BlocSelector` (or `context.select`) scoped tightly to only the widgets consuming specific state fields, keeping `DefaultTabController` and lower tab content outside reactive rebuild boundaries.
+
+## 2026-09-20 - Cap image decode size on small avatars using ResizeImage.resizeIfNeeded
+**Learning:** Displaying network avatar images inside small `CircleAvatar` widgets (36x36px to 40x40px) without bounding target decode dimensions causes Flutter's image pipeline to decode uncompressed high-resolution (1080p/4K) network bitmaps into GPU memory (~4MB–16MB per avatar), leading to memory bloat and raster thread decode jank when scrolling lists.
+**Action:** Always wrap network `ImageProvider`s for small avatar icons with `ResizeImage.resizeIfNeeded(128, 128, provider)`, limiting decoded bitmap size to ~64KB per avatar while preserving high-DPI display quality.

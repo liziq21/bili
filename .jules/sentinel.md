@@ -35,3 +35,9 @@ Prevention: Always sanitize untrusted HTML string payloads during JSON deseriali
 Vulnerability: Unbounded user search input in `RecentSearchQueryDao.insertOrReplaceRecentSearch` stored raw queries directly into SQLite without character sanitization or length limits, allowing potential application DoS via memory/storage exhaustion or control-character rendering corruption.
 Learning: Local database queries sourced from user input (e.g. search bars) must be constrained and sanitized before storage to prevent excessive memory allocations and UI lag during retrieval.
 Prevention: Strip non-printable control characters (`[\x00-\x1F\x7F]`) and enforce strict length limits (e.g. 200 characters) in local storage DAOs.
+
+## 2026-09-22 - Enforce Static YouTube HTTP Client Configuration Parity with Bilibili Media Source
+
+Vulnerability: `YouTube` facade class created un-monitored default `http.Client()` instances when instantiated without explicit parameters, ignoring `initDebugOverlayBridge` static HTTP client policy configuration in `app/lib/main.dart` and bypassing network logging isolation and release/debug client policies.
+Learning: Media source facades in modular architectures must support static client properties (`YouTube.client`) to ensure global HTTP client policies (such as debug log buckets or release IO clients) apply uniformly across all data sources.
+Prevention: Always expose static `client` configuration fields on media source wrappers and default `httpClient ?? client` during service initialization.

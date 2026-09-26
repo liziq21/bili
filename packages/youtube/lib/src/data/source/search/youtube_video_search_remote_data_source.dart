@@ -151,7 +151,10 @@ final class const YouTubeVideoSearchRemoteDataSource(
       return null;
     }
     final lower = text.toLowerCase().replaceAll(',', '');
-    final numMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(K|M)?', caseSensitive: false).firstMatch(lower);
+    final numMatch = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(K|M)?',
+      caseSensitive: false,
+    ).firstMatch(lower);
     if (numMatch == null) {
       return null;
     }
@@ -208,8 +211,7 @@ final class const YouTubeVideoSearchRemoteDataSource(
     }
     final parts = text.split(':');
     if (parts.length == 2) {
-      return (int.tryParse(parts[0]) ?? 0) * 60 +
-          (int.tryParse(parts[1]) ?? 0);
+      return (int.tryParse(parts[0]) ?? 0) * 60 + (int.tryParse(parts[1]) ?? 0);
     }
     if (parts.length == 3) {
       return (int.tryParse(parts[0]) ?? 0) * 3600 +

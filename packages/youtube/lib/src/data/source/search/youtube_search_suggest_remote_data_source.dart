@@ -15,7 +15,9 @@ final class const YouTubeSearchSuggestRemoteDataSource(
       final response = await _youtubeService.getSearchSuggestions(query);
       return Result.ok(response.suggestions);
     } catch (error) {
-      return Result.error(error is Exception ? error : Exception(error.toString()));
+      return Result.error(
+        error is Exception ? error : Exception(error.toString()),
+      );
     }
   }
 }
