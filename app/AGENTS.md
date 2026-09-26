@@ -34,6 +34,7 @@ This directory contains the main Flutter application (`app/`).
 - Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
 - Access the live singleton directly (`$styles.colors`, `$styles.corners`, `$styles.insets`, `$styles.text`, etc.) — do not create local copies.
 - **Strict Rule**: When writing or updating UI components (including Stitch designs), strictly map visual elements to `$styles` design tokens. Never hardcode colors or stitch-specific style constants.
+- See [`docs/design-system.md`](docs/design-system.md) for token roles, contrast requirements, and the only two files where color literals are allowed.
 
 ### Dependency Injection & Source Providers (`ServiceSourceProviders`)
 - Inject screen-level BlocProviders (such as `HomeBloc`) inside route data (`GoRouteData`).
