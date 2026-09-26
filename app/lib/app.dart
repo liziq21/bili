@@ -62,6 +62,12 @@ class const App({super.key}) extends StatelessWidget {
               routerConfig: router,
               localizationsDelegates: const [
                 ...AppLocalizations.localizationsDelegates,
+                // `material_ui` is a fork of Flutter's material library with its
+                // own `MaterialLocalizations` type, so the delegates shipped by
+                // `flutter_localizations` cannot satisfy it. Without these the
+                // `MaterialLocalizations.of(context)` lookup in widgets such as
+                // `TextField` returns null for any non-en locale.
+                ...GlobalMaterialLocalizations.delegates,
                 BilibiliLocalizations.delegate,
                 YoutubeLocalizations.delegate,
               ],

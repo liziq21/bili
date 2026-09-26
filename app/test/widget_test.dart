@@ -79,18 +79,6 @@ void main() {
   testWidgets(
     'App start smoke test: initializes core assembly and displays home screen',
     (tester) async {
-      final oldOnError = FlutterError.onError;
-      FlutterError.onError = (details) {
-        final msg = details.toString();
-        if (msg.contains('MaterialLocalizations') ||
-            msg.contains('CupertinoLocalizations') ||
-            msg.contains('localization delegates') ||
-            msg.contains('locale')) {
-          return;
-        }
-        oldOnError?.call(details);
-      };
-
       final userDataRepository = FakeUserDataRepository();
       final appBloc = AppBloc(userDataRepository: userDataRepository);
       final mediaSources = <MediaSource>[
@@ -98,7 +86,6 @@ void main() {
       ];
 
       addTearDown(() {
-        FlutterError.onError = oldOnError;
         appBloc.close();
         userDataRepository.dispose();
       });
@@ -121,6 +108,20 @@ void main() {
 
       expect(find.byType(AppScaffold), findsOneWidget);
       expect(find.byType(HomeScreen), findsOneWidget);
+
+      // `material_ui` is a fork of the material library with its own
+      // `MaterialLocalizations` type, so the `flutter_localizations` delegates
+      // alone leave its widgets without localizations. The home screen search
+      // field is the first thing to crash on that, taking the whole app down
+      // with a red error screen. Assert on the lookup instead of letting a
+      // blanket `FlutterError.onError` filter hide it again.
+      final searchField = find.byType(TextField);
+      expect(searchField, findsWidgets);
+      expect(
+        MaterialLocalizations.of(tester.element(searchField.first)),
+        isNotNull,
+      );
+      expect(tester.takeException(), isNull);
     },
   );
 }
