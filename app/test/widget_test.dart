@@ -142,14 +142,22 @@ void main() {
 
       // `material_ui` is a fork of the material library with its own
       // `MaterialLocalizations` type, so the `flutter_localizations` delegates
-      // alone leave its widgets without localizations. The home screen search
-      // field is the first thing to crash on that, taking the whole app down
+      // alone leave its widgets without localizations, taking the app down
       // with a red error screen. Assert on the lookup instead of letting a
       // blanket `FlutterError.onError` filter hide it again.
-      final searchField = find.byType(TextField);
-      expect(searchField, findsWidgets);
+      //
+      // The probe follows the search entry's current shape rather than pinning
+      // one: the home screen renders an icon (see `AppSearchAnchor`), and the
+      // widget that actually needs localizations is the BackButton inside the
+      // view it opens -- that is where #96 blew up. So open the view and check
+      // the BackButton.
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pumpAndSettle();
+
+      final backButton = find.byType(BackButton);
+      expect(backButton, findsWidgets);
       expect(
-        MaterialLocalizations.of(tester.element(searchField.first)),
+        MaterialLocalizations.of(tester.element(backButton.first)),
         isNotNull,
       );
       expect(tester.takeException(), isNull);
