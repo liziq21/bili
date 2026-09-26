@@ -12,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class FakeSuggestRepository implements SearchSuggestRepository {
-  FakeSuggestRepository(this.suggests);
-
+class FakeSuggestRepository({
+  required this.suggests,
+}) implements SearchSuggestRepository {
   final List<String> suggests;
   final List<String> receivedQueries = [];
 
@@ -25,7 +25,8 @@ class FakeSuggestRepository implements SearchSuggestRepository {
   }
 }
 
-class FakeRecentSearchQueryRepository implements RecentSearchQueryRepository {
+class const FakeRecentSearchQueryRepository()
+    implements RecentSearchQueryRepository {
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       const Stream.empty();
@@ -91,7 +92,7 @@ void main() {
   testWidgets('icon builder opens a view that shows suggestions', (
     tester,
   ) async {
-    final suggest = FakeSuggestRepository(const ['Flutter 教程', 'Flutter 测试']);
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程', 'Flutter 测试']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -114,7 +115,7 @@ void main() {
   });
 
   testWidgets('submitting a suggestion reports it to onSearch', (tester) async {
-    final suggest = FakeSuggestRepository(const ['Flutter 教程', 'Flutter 测试']);
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程', 'Flutter 测试']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
     final submitted = <String>[];
@@ -134,7 +135,7 @@ void main() {
   });
 
   testWidgets('input is truncated to maxQueryLength', (tester) async {
-    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -150,5 +151,30 @@ void main() {
 
     final field = tester.widget<TextField>(find.byType(TextField));
     expect(field.controller!.text.length, 200);
+  });
+
+  testWidgets('truncation counts grapheme clusters, not UTF-16 units', (
+    tester,
+  ) async {
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(buildAnchor(bloc: bloc, onSearch: (_) {}));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // 代理对字符：每个 emoji 占 2 个 UTF-16 code unit。按 code unit 截断会
+    // 把第 100 个 emoji 劈成半个代理，留下一个残缺字符。
+    final emoji = '\u{1F44D}'; // 👍
+    await tester.enterText(find.byType(TextField), emoji * 250);
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final text = field.controller!.text;
+    expect(text.characters.length, 200);
+    // 截断处不能留下半个代理对
+    expect(text, emoji * 200);
   });
 }

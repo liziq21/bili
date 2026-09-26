@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,11 +56,29 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   }
 
   /// 把超长输入截断回 [AppSearchAnchor.maxQueryLength]。
+  ///
+  /// SearchBar 没有暴露 `inputFormatters`，只能在 `viewOnChanged` 里回写。
+  /// 用 SDK 的 [LengthLimitingTextInputFormatter] 而不是
+  /// `value.substring(0, limit)`：后者按 UTF-16 code unit 切，会把 emoji 的
+  /// 代理对劈成半个字符，而且经由 `.text` 赋值会丢掉选区和输入法 composing
+  /// 状态（中文输入法的候选窗会因此跳字）。
+  ///
+  /// 走 `formatEditUpdate` 而不是 SDK 内部的 `truncate` 静态方法——后者标了
+  /// `@visibleForTesting`。显式传 `enforced`：默认值在 linux 桌面上是
+  /// `truncateAfterCompositionEnds`，会让 composing 期间的输入突破上限。
   void _handleViewChanged(String value) {
     final limit = widget.maxQueryLength;
-    if (limit > 0 && value.length > limit) {
-      _controller.text = value.substring(0, limit);
-    }
+    if (limit <= 0) return;
+
+    final current = _controller.value;
+    if (current.text.characters.length <= limit) return;
+
+    // oldValue 传空值：这里的语义是「本次编辑的结果超限了，截断它」，
+    // 而不是「已到上限还想再加」——后者会把用户正在输的最后一个字弹回去。
+    _controller.value = LengthLimitingTextInputFormatter(
+      limit,
+      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+    ).formatEditUpdate(const TextEditingValue(), current);
   }
 
   @override
