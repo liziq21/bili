@@ -13,6 +13,20 @@ class const VideoScreen({super.key, final String videoId = 'demo_video'})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // `$styles` is a mutable static that `AppScaffold` refreshes during its own
+    // build, and this page sits below the navigator that `AppScaffold` wraps.
+    // Reading a global in `build()` registers no InheritedWidget dependency, so
+    // nothing tells Flutter to rebuild this page when the brightness flips.
+    // `AppScaffold` does rebuild (it reads `Theme.of`), but it hands back the
+    // very same `navigator` widget instance, and `Element.updateChild`
+    // short-circuits on an identical child — so the whole route subtree keeps
+    // the previous theme's colours.
+    //
+    // Adding the brightness into `AppScaffold`'s `KeyedSubtree` key would fix
+    // the rebuild but destroy and rebuild the navigator with it, resetting tab
+    // and bloc state. A dependency read is the cheap way to opt in.
+    Theme.of(context);
+
     return MultiBlocProvider(
       providers: getVideoBlocProviders(context, videoId: videoId),
       child: Scaffold(
@@ -128,7 +142,7 @@ class const _SourceLogsView() extends StatelessWidget {
         Container(
           padding: EdgeInsets.all($styles.insets.xs),
           decoration: BoxDecoration(
-            color: $styles.colors.black,
+            color: $styles.colors.scrim,
             borderRadius: BorderRadius.circular($styles.corners.sm),
           ),
           child: Text(
