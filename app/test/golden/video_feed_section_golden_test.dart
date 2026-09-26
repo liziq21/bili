@@ -47,6 +47,43 @@ Widget _sectionUnder({
 );
 
 void main() {
+  testWidgets('expanded width resolves to three columns', (tester) async {
+    // Guards the golden scenario above: the image alone cannot prove the grid
+    // rendered three columns, and the column count is derived from the sliver
+    // width rather than from the scenario name.
+    for (final (width, expected) in [(960.0, 3), (1100.0, 4)]) {
+      tester.view.physicalSize = Size(width, 600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await mockNetworkImagesFor(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: _sectionUnder(
+                  section: _section(FeedStatus.success, 6),
+                  width: width,
+                  height: 600,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      final grid = tester.widget<SliverGrid>(find.byType(SliverGrid));
+      final delegate =
+          grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      expect(
+        delegate.crossAxisCount,
+        expected,
+        reason: 'width $width should render $expected columns',
+      );
+    }
+  });
+
   group('VideoFeedSection golden', () {
     // The grid column count is derived from the incoming sliver width
     // (LayoutSize.fromWidth: <600 -> 1 col, <900 -> 2 cols, else 3), so each
@@ -88,7 +125,11 @@ void main() {
             name: 'expanded 3 columns, populated',
             child: _sectionUnder(
               section: _section(FeedStatus.success, 6),
-              width: 1100,
+              // 960 leaves 928 after the `sm` horizontal padding, which is the
+              // upper half of the [900, 960) band `feedColumnsFor` maps to three
+              // columns. 1100 would resolve to 928 -> 4 columns and the
+              // scenario name would lie; the guard below pins the real count.
+              width: 960,
               height: 600,
             ),
           ),
