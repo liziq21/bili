@@ -11,31 +11,64 @@ class const HomeRouteData() extends GoRouteData with $HomeRouteData {
         mediaSources: context.read<List<MediaSource>>(),
       ),
       child: Builder(
-        builder: (context) => _withSearchBloc(
-          context,
-          HomeScreen(
-          onLive: (roomId) {
-            final sourceId = context.read<HomeBloc>().activeSource?.id;
-            if (sourceId == null) return;
-            context.navigateToLive(roomId, source: sourceId);
-          },
-          navigateToSearchResult: (keyword) {
-            final sourceId = context.read<HomeBloc>().activeSource?.id;
-            if (sourceId == null) return;
-            context.navigateToSearchResult(keyword, source: sourceId);
-          },
-          onSpace: (mid) {
-            final sourceId = context.read<HomeBloc>().activeSource?.id;
-            if (sourceId == null) return;
-            context.navigateToSpace(mid, source: sourceId);
-          },
-            onVideo: (id) {
-              final sourceId = context.read<HomeBloc>().activeSource?.id;
-              if (sourceId == null) return;
-              context.navigateToVideo(id, source: sourceId);
-            },
-          ),
-        ),
+        builder: (context) =>
+            BlocSelector<HomeBloc, HomeState, String>(
+              selector: (state) => state.sourceId,
+              builder: (context, sourceId) {
+                // activeSource 会把不可用的 sourceId 回退到首个可用数据源，
+                // 搜索建议必须跟着实际生效的数据源走。
+                final effectiveSource =
+                    context.read<HomeBloc>().activeSource?.id ?? sourceId;
+
+                return ServiceSourceProviders(
+                  source: effectiveSource,
+                  // 内层 Builder 的 context 位于 ServiceSourceProviders 之下，
+                  // 才能读到它注入的 SearchSuggestRepository。
+                  child: Builder(
+                    builder: (context) => _withSearchBloc(
+                      context,
+                      HomeScreen(
+                        onLive: (roomId) {
+                          final sourceId = context
+                              .read<HomeBloc>()
+                              .activeSource
+                              ?.id;
+                          if (sourceId == null) return;
+                          context.navigateToLive(roomId, source: sourceId);
+                        },
+                        navigateToSearchResult: (keyword) {
+                          final sourceId = context
+                              .read<HomeBloc>()
+                              .activeSource
+                              ?.id;
+                          if (sourceId == null) return;
+                          context.navigateToSearchResult(
+                            keyword,
+                            source: sourceId,
+                          );
+                        },
+                        onSpace: (mid) {
+                          final sourceId = context
+                              .read<HomeBloc>()
+                              .activeSource
+                              ?.id;
+                          if (sourceId == null) return;
+                          context.navigateToSpace(mid, source: sourceId);
+                        },
+                        onVideo: (id) {
+                          final sourceId = context
+                              .read<HomeBloc>()
+                              .activeSource
+                              ?.id;
+                          if (sourceId == null) return;
+                          context.navigateToVideo(id, source: sourceId);
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
       ),
     );
   }
@@ -43,6 +76,9 @@ class const HomeRouteData() extends GoRouteData with $HomeRouteData {
 
 /// 首页搜索入口复用 [SearchBloc] 提供联想建议；数据源没有建议能力时直接返回
 /// 原 child，让 AppBar 隐藏搜索入口，而不是在缺少 bloc 时崩溃。
+///
+/// 必须在 [ServiceSourceProviders] 之下调用，否则读不到它注入的
+/// [SearchSuggestRepository]。
 Widget _withSearchBloc(BuildContext context, Widget child) {
   if (context.read<SearchSuggestRepository?>() == null) return child;
 

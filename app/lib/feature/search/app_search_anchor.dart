@@ -13,6 +13,11 @@ class const AppSearchAnchor({
   final List<RecentSearchQuery> recentSearchQuery = const [],
   final Function(String)? navigateToSearchResult,
   final SearchAnchorChildBuilder? builder,
+
+  /// 搜索关键词的最大长度。SearchAnchor 的 SearchBar 没有暴露 maxLength，
+  /// 这里在 viewOnChanged 里截断，等价于旧 TextField 的
+  /// [MaxLengthEnforcement.enforced]。
+  final int maxQueryLength = 200,
 }) extends StatefulWidget {
   @override
   State<AppSearchAnchor> createState() => _AppSearchAnchorState();
@@ -22,6 +27,20 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   final SearchController _controller = SearchController();
   String? _searchingWithQuery;
   late Iterable<Widget> _lastOptions = <Widget>[];
+
+  /// [SearchAnchor] 把建议浮层作为一条路由推进最近的 [Navigator]，该路由挂在
+  /// Navigator 的 overlay 上，位于本路由子树之外，因此在浮层里
+  /// `context.read<SearchBloc>()` 只会得到 null 或直接抛
+  /// [ProviderNotFoundException]。这里在 anchor 一侧（bloc 可见处）抓住实例，
+  /// 供浮层回调使用。
+  SearchBloc? _searchBloc;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _searchBloc = context.read<SearchBloc?>();
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -33,6 +52,14 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     widget.onSearch(query);
     widget.navigateToSearchResult?.call(query);
     _controller.closeView(query); // 搜索后关闭建议视图
+  }
+
+  /// 把超长输入截断回 [AppSearchAnchor.maxQueryLength]。
+  void _handleViewChanged(String value) {
+    final limit = widget.maxQueryLength;
+    if (limit > 0 && value.length > limit) {
+      _controller.text = value.substring(0, limit);
+    }
   }
 
   @override
@@ -50,6 +77,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
                   suggestionsBuilder: _getSuggestions,
                   textInputAction: .search,
                   onSubmitted: _handleSearch,
+                  onChanged: _handleViewChanged,
                 )
               : SearchAnchor(
                   searchController: _controller,
@@ -57,6 +85,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
                   suggestionsBuilder: _getSuggestions,
                   textInputAction: .search,
                   viewOnSubmitted: _handleSearch,
+                  viewOnChanged: _handleViewChanged,
                 );
         },
       ),
@@ -73,10 +102,18 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     //   return _buildHistoryList(widget.recentSearchQuery);
     // }
 
-    final bloc = context.read<SearchBloc>()
-      ..add(SearchQueryChanged(_searchingWithQuery!));
+    final bloc = _searchBloc;
+    if (bloc == null || bloc.isClosed) return _lastOptions;
 
-    final options = (await bloc.stream.first).suggests;
+    // bloc 在等待期间可能被关闭（用户提交或直接离开搜索页），此时
+    // `stream.first` 会抛 `Bad state: No element`，直接吃掉返回上一次结果。
+    List<String> options;
+    try {
+      bloc.add(SearchQueryChanged(_searchingWithQuery!));
+      options = (await bloc.stream.first).suggests;
+    } on StateError {
+      return _lastOptions;
+    }
 
     if (_searchingWithQuery != controller.text) return _lastOptions;
 
