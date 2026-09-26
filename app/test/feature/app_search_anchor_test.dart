@@ -5,6 +5,7 @@ import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/search/app_search_anchor.dart';
 import 'package:app/feature/search/bloc/search_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 // 必须用 material_ui 而不是 flutter/material：SearchAnchor 内部查找的是
 // material_ui 自己的 MaterialLocalizations 类型，flutter 的 MaterialApp 提供的
@@ -59,6 +60,7 @@ SearchBloc buildBloc(SearchSuggestRepository suggest) {
 Widget buildAnchor({
   required SearchBloc bloc,
   required void Function(String) onSearch,
+  bool useBar = false,
 }) {
   // BlocProvider 必须放在 MaterialApp 内部、Navigator 之下，才和线上一致：
   // SearchAnchor 打开的浮层是一条推到 Navigator overlay 上的路由，位于这个
@@ -69,10 +71,13 @@ Widget buildAnchor({
       child: Scaffold(
         body: AppSearchAnchor(
           onSearch: onSearch,
-          builder: (context, controller) => IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: controller.openView,
-          ),
+          // bar 模式是省略 builder 时的形态，搜索结果页用的就是它。
+          builder: useBar
+              ? null
+              : (context, controller) => IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: controller.openView,
+                ),
         ),
       ),
     ),
@@ -176,5 +181,67 @@ void main() {
     expect(text.characters.length, 200);
     // 截断处不能留下半个代理对
     expect(text, emoji * 200);
+  });
+
+  testWidgets('icon is keyboard focusable', (tester) async {
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(buildAnchor(bloc: bloc, onSearch: (_) {}));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+
+    // 关键断言：图标模式下不能套 descendantsAreFocusable: false。
+    // bar 模式需要它（避免自带 TextField 参与 Tab 序列），但套到图标上
+    // 会让纯键盘用户无法聚焦到搜索入口——这是 icon 化改造引入的回归。
+    final blockingScopes = tester
+        .widgetList<FocusScope>(find.byType(FocusScope))
+        .where((s) => s.descendantsAreFocusable == false)
+        .toList();
+    expect(
+      blockingScopes,
+      isEmpty,
+      reason: '图标模式不应禁用子节点聚焦，否则键盘用户打不开搜索',
+    );
+
+    // Tab 一次后焦点应落在搜索按钮上
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    final focusNode = FocusManager.instance.primaryFocus;
+    expect(focusNode, isNotNull);
+    final context = focusNode!.context;
+    if (context != null) {
+      expect(
+        find.byWidget(context.widget),
+        findsOneWidget,
+        reason: 'Tab 后焦点应落在可交互控件上',
+      );
+    }
+  });
+
+  testWidgets('bar mode view also truncates to maxQueryLength', (tester) async {
+    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      buildAnchor(bloc: bloc, onSearch: (_) {}, useBar: true),
+    );
+    await tester.pumpAndSettle();
+
+    // bar 模式自带输入框
+    expect(find.byType(TextField), findsOneWidget);
+
+    // 打开浮层——bar 模式的浮层是另一个 TextField
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).last, 'b' * 250);
+    await tester.pumpAndSettle();
+
+    // SearchAnchor.bar 没有 viewOnChanged，限制由 suggestionsBuilder 兜底
+    expect(suggest.receivedQueries.every((q) => q.length <= 200), isTrue);
   });
 }
