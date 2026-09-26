@@ -93,8 +93,14 @@ class AppColors({
       surface: offWhite,
       onSurface: body,
       onError: Colors.white,
-      onPrimary: Colors.white,
-      onSecondary: Colors.white,
+      // onPrimary / onSecondary 压在 accent1 上。accent1 在两种亮度下都是浅色
+      // （#E4935D / #EFA97C），白色前景只有 2.4:1 / 2.0:1，达不到 WCAG AA
+      // 的 4.5:1——搜索结果页筛选栏那个 FilledButton 就是这个组合。
+      //
+      // 用 [scrim] 而不是 [black]：[black] 是前景语义，暗色下会反转为浅色，
+      // 压在这里就看不见了；[scrim] 恒深，两种亮度下都是 7.0:1 / 9.7:1。
+      onPrimary: scrim,
+      onSecondary: scrim,
       error: Colors.red.shade400,
     );
 

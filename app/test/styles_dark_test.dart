@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/app_scaffold.dart';
 import 'package:app/main.dart';
 import 'package:app/styles/colors.dart';
@@ -119,6 +121,44 @@ void main() {
       // 两者混用是这次缺陷的根因，测试钉住它们的区别。
       expect(dark.black.computeLuminance(), greaterThan(0.5));
       expect(dark.scrim.computeLuminance(), lessThan(0.1));
+    });
+  });
+
+  group('ColorScheme on-primary foreground', () {
+    /// WCAG 相对亮度对比度：两条颜色 whichever 更亮的在上。
+    double contrast(Color a, Color b) {
+      final la = a.computeLuminance();
+      final lb = b.computeLuminance();
+      return (max(la, lb) + 0.05) / (min(la, lb) + 0.05);
+    }
+
+    test('clears WCAG AA against the primary in both brightnesses', () {
+      // accent1 在两种亮度下都是浅色（#E4935D / #EFA97C），白色前景只有
+      // 2.4:1 / 2.0:1。搜索结果页筛选栏的 FilledButton 就是这个组合，
+      // 文字实际读不出来。
+      for (final c in [AppColors(isDark: false), AppColors(isDark: true)]) {
+        final scheme = c.toThemeData().colorScheme;
+        for (final pair in [
+          (fg: scheme.onPrimary, bg: scheme.primary),
+          (fg: scheme.onSecondary, bg: scheme.secondary),
+        ]) {
+          final ratio = contrast(pair.fg, pair.bg);
+          expect(
+            ratio,
+            greaterThan(4.5),
+            reason:
+                'onPrimary/onSecondary 压 accent1 需 > 4.5:1，'
+                '实际 $ratio（fg ${pair.fg.toARGB32()} on bg ${pair.bg.toARGB32()}）',
+          );
+        }
+      }
+    });
+
+    test('is not the light white it replaced', () {
+      // 钉住「不再是白字」：白字那一版虽然也是 bug，但如果哪天有人把
+      // accent1 调深了，这条会先于对比度断言提醒他前景色需要重新评估。
+      final dark = AppColors(isDark: true);
+      expect(dark.toThemeData().colorScheme.onPrimary, isNot(Colors.white));
     });
   });
 }
