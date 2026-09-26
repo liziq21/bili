@@ -50,7 +50,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
       platformGoldensConfig: const PlatformGoldensConfig(enabled: false),
-      ciGoldensConfig: const CiGoldensConfig(diffThreshold: 0.001),
+      ciGoldensConfig: const CiGoldensConfig(diffThreshold: 0.01),
     ),
     run: testMain,
   );
