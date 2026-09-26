@@ -111,7 +111,14 @@
 | 恒定承载面 | `scrim`（恒深） / `onScrim`（恒浅） | `AppColors` 自有，ColorScheme 无此角色 |
 | 强调 | `accentFill`（容器底） / `onAccentFill`（压在上面） / `accentText`（**直接压 surface**，必须 ≥4.5:1） | ColorScheme + 派生 |
 
-**R2.1** `accent` 一个色相必须拆成 **Fill** 和 **Text** 两个角色：现状 `accent1` 在浅色 `surface` 上只有 2.10:1，28 处调用全部共用这一个值。TabBar `labelColor`、Slider `activeTrackColor` 属 UI 图形（3:1），Text/Icon 属正文（4.5:1），门槛不同。
+**R2.1** `accent` 一个色相必须拆成 **Fill** 和 **Text** 两个角色：现状 `accent1` 在浅色 `surface` 上只有 2.10:1，28 处调用全部共用这一个值。门槛按**用途**分，不按控件分：
+
+| 用途 | 门槛 | 落到哪个 token |
+|---|---|---|
+| 文本（`Text`、`TabBar.labelColor`、按钮文字） | **4.5:1** | `accentText` |
+| 非文本指示器与图形对象（`Slider.activeTrackColor` / `thumbColor`、`CircularProgressIndicator`、Tab 指示条本身） | 3:1 | `accentFill` |
+
+`TabBar.labelColor` 是**文本**，归 4.5:1 一档；3:1 只留给 `activeTrackColor` 这类非文本指示器（WCAG 2.1 Understanding §1.4.3：3:1 是「大文本」与非文本内容的门槛，普通字号文本一律 4.5:1）。
 
 **R2.2 语义不能混用**：`scrim` 与 `onSurface` 在暗色下方向相反，禁止共用常量 —— 这条已由 #104 的注释确立，保留。
 
@@ -168,9 +175,10 @@ app/lib/design/
 ### G1 —— custom_lint：禁止硬编码色
 
 - 新增 workspace 包 `packages/design_lints/`，依赖 `custom_lint` + `custom_lint_builder`
-- 一条规则 `no_hardcoded_color`：报 `Color(0x…)` / `Color.fromARGB` / `Colors.xxx`，allow-list = `app/lib/design/brand_palette.dart`、`app/lib/design/service_brands.dart`、`.g.dart` 生成文件
+- 一条规则 `no_hardcoded_color`：报**所有**直接构造颜色的形式 —— `Color(0x…)`、`Color.fromARGB`、`Color.fromRGBO`、`Color.from`、以及任何 `Colors.xxx` 常量引用。
+- **allow-list 与 R1 逐字一致：只有 `app/lib/design/brand_palette.dart` 和 `app/lib/design/service_brands.dart` 两个文件，无任何例外。** 特别地**不豁免 `.g.dart`** —— 实测当前仓库的生成文件里颜色字面量命中数为 0，豁免它只会留下一条没人用的旁路。
 - `analysis_options.yaml` 重新加回 `plugins:` 块（该块刚被删掉，这次是有理由地加回来）
-- 选 `custom_lint` 自写规则而非第三方 rule set 的原因：语义要精确到"白名单只有这两个文件"，`altive_lints`（2022 年）和 `clean_code_lints`（0.1.0，带 20+ 条主观规则）都不匹配
+- 选 `custom_lint` 自写规则而非第三方 rule set 的原因：语义要精确到「白名单只有这两个文件」，`altive_lints`（2022 年）和 `clean_code_lints`（0.1.0，带 20+ 条主观规则）都不匹配。规则必须覆盖完整的构造器集合——漏掉 `Color.fromRGBO` 之类就等于门禁形同虚设。
 
 ### G2 —— 对比度测试
 
@@ -196,7 +204,8 @@ app/lib/design/
 | `greyStrong` | 边框/图标容器 | `outlineVariant` | 4 |
 | `accent1` | 容器底 | `accentFill` | 部分 |
 | `accent1` | 压 surface 的文字/图标 | `accentText` | 部分 |
-| `accent1` | TabBar / Slider / ProgressIndicator | `accentFill`（UI 图形，3:1 门槛） | 部分 |
+| `accent1` | `TabBar.labelColor`（文本，4.5:1） | `accentText` | 部分 |
+| `accent1` | `TabBar.indicatorColor` / `Slider` / `CircularProgressIndicator`（非文本，3:1） | `accentFill` | 部分 |
 | `accent2` | 次级强调 | `secondary` | 5 |
 | `accent3` | 三级强调 | `tertiary` | 2 |
 
