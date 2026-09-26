@@ -107,10 +107,15 @@ class const _CommentItem({
         CircleAvatar(
           radius: 18,
           backgroundColor: $styles.colors.greyStrong,
-          backgroundImage: comment.authorAvatar != null
-              ? CachedNetworkImageProvider(comment.authorAvatar!)
+          backgroundImage:
+              comment.authorAvatar != null && comment.authorAvatar!.isNotEmpty
+              ? ResizeImage.resizeIfNeeded(
+                  128,
+                  128,
+                  CachedNetworkImageProvider(comment.authorAvatar!),
+                )
               : null,
-          child: comment.authorAvatar == null
+          child: comment.authorAvatar == null || comment.authorAvatar!.isEmpty
               ? Icon(Icons.person, color: $styles.colors.white, size: 20)
               : null,
         ),

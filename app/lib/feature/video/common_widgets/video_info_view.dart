@@ -212,12 +212,20 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundImage: creator.thumbnailUrl != null
-                              ? CachedNetworkImageProvider(
-                                  creator.thumbnailUrl!,
+                          backgroundImage:
+                              creator.thumbnailUrl != null &&
+                                  creator.thumbnailUrl!.isNotEmpty
+                              ? ResizeImage.resizeIfNeeded(
+                                  128,
+                                  128,
+                                  CachedNetworkImageProvider(
+                                    creator.thumbnailUrl!,
+                                  ),
                                 )
                               : null,
-                          child: creator.thumbnailUrl == null
+                          child:
+                              creator.thumbnailUrl == null ||
+                                  creator.thumbnailUrl!.isEmpty
                               ? const Icon(Icons.person)
                               : null,
                         ),
@@ -697,7 +705,8 @@ class const _ActionButton({
   @override
   Widget build(BuildContext context) {
     final semanticLabel = '$actionName $label';
-    final computedTooltip = tooltip ?? (isActive ? '取消$actionName' : actionName);
+    final computedTooltip =
+        tooltip ?? (isActive ? '取消$actionName' : actionName);
 
     return Semantics(
       button: true,

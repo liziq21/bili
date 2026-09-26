@@ -24,12 +24,11 @@ class const FeedStatusView({
   );
 
   /// 空结果提示
-  factory empty({Key? key, required String title}) =>
-      FeedStatusView(
-        key: key,
-        icon: Icons.inbox_rounded,
-        message: '$title 暂无内容',
-      );
+  factory empty({Key? key, required String title}) => FeedStatusView(
+    key: key,
+    icon: Icons.inbox_rounded,
+    message: '$title 暂无内容',
+  );
 
   @override
   Widget build(BuildContext context) {

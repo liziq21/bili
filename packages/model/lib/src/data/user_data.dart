@@ -11,8 +11,7 @@ class const UserData({
   final ThemeConfig themeConfig = ThemeConfig.followSystem,
   final bool useDynamicColor = true,
 }) extends Equatable {
-  factory fromJson(Map<String, dynamic> json) =>
-      _$UserDataFromJson(json);
+  factory fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserDataToJson(this);
 

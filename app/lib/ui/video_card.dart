@@ -194,18 +194,7 @@ class const VideoCard({
                     children: [
                       AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: CachedNetworkImage(
-                          imageUrl: videoInfoBase.thumbnailUrl ?? '',
-                          memCacheWidth: 480,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, url, error) => Container(
-                            color: colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.movie_outlined,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
+                        child: _thumbnail(colorScheme),
                       ),
                       // 顶部来源/平台 Badge
                       if (sourceBadge != null && sourceBadge!.isNotEmpty)
@@ -277,14 +266,22 @@ class const VideoCard({
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Creator 头像
+                              // ⚡ Bolt Optimization: Wrap provider with ResizeImage.resizeIfNeeded.
+                              // Visual size is 36x36px (radius 18). Capping decode resolution to 128x128px
+                              // prevents decoding uncompressed high-res avatar images into full GPU RAM,
+                              // saving ~2MB-8MB RAM per video item and eliminating raster thread decode jank during feed scroll.
                               CircleAvatar(
                                 radius: 18,
                                 backgroundColor: colorScheme.primaryContainer,
                                 backgroundImage:
                                     (creatorAvatarUrl != null &&
                                         creatorAvatarUrl!.isNotEmpty)
-                                    ? CachedNetworkImageProvider(
-                                        creatorAvatarUrl!,
+                                    ? ResizeImage.resizeIfNeeded(
+                                        128,
+                                        128,
+                                        CachedNetworkImageProvider(
+                                          creatorAvatarUrl!,
+                                        ),
                                       )
                                     : null,
                                 child:

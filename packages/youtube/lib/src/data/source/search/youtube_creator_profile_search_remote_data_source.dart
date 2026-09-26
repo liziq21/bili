@@ -51,7 +51,9 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
         ),
       );
     } catch (error) {
-      return Result.error(error is Exception ? error : Exception(error.toString()));
+      return Result.error(
+        error is Exception ? error : Exception(error.toString()),
+      );
     }
   }
 
@@ -69,7 +71,10 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
       return null;
     }
     final lower = text.toLowerCase().replaceAll(',', '');
-    final numMatch = RegExp(r'(\d+(?:\.\d+)?)\s*(K|M)?', caseSensitive: false).firstMatch(lower);
+    final numMatch = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(K|M)?',
+      caseSensitive: false,
+    ).firstMatch(lower);
     if (numMatch == null) {
       return null;
     }
