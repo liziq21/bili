@@ -1,9 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'color_utils.dart';
-
-export 'color_extensions.dart';
-
 /// 应用色板。
 ///
 /// 这套色值来自 Wonderous（亮色设计）。接入 bili 时 `isDark` 被硬编码为
@@ -60,9 +56,6 @@ class AppColors({
 
   Color get white => Colors.white;
 
-  // NOTE: If this color is changed, also change it in
-  // web/manifest.json
-  // web/index.html -
   /// 强前景色。语义上是「浅底上的文字」，暗色下反转为「深底上的文字」。
   ///
   /// 不要拿它当容器背景用——需要深底时请用 [scrim]。背景与前景是两套语义，
@@ -75,9 +68,6 @@ class AppColors({
   /// 暗色下比 [offWhite] 再压暗一档，避免深色页面里出现一块比周围更亮的
   /// 「发光」区域。
   Color get scrim => isDark ? _scrimDark : _scrimLight;
-
-  Color shift(Color c, double d) =>
-      ColorUtils.shiftHsl(c, d * (isDark ? -1 : 1));
 
   ThemeData toThemeData() {
     /// Create a TextTheme and ColorScheme, that we can use to generate ThemeData

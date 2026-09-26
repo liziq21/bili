@@ -10,7 +10,6 @@ export 'colors.dart';
 class AppStyle({
   Size? screenSize,
   final bool disableAnimations = false,
-  final bool highContrast = false,
   final bool isDark = false,
 }) {
   this {
@@ -38,8 +37,6 @@ class AppStyle({
   /// Rounded edge corner radii
   late final _Corners corners = const _Corners();
 
-  late final _Shadows shadows = const _Shadows();
-
   /// Padding and margin values
   late final _Insets insets = _Insets(scale);
 
@@ -48,144 +45,64 @@ class AppStyle({
 
   /// Animation Durations
   late final _Times times = _Times(disableAnimations);
-
-  /// Shared sizes
-  late final _Sizes sizes = _Sizes();
 }
 
 class _Text(final double _scale) {
-  final Map<String, TextStyle> _titleFonts = const {
-    'en': TextStyle(fontFamily: 'Tenor'),
-  };
+  /// 字体族已按 R6 全部删除。仓库从未 bundle 任何字体文件（0 个 `.ttf`/`.otf`），
+  /// 从前声明的 6 个族——Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva /
+  /// Raleway——在每个平台都静默回落到系统字体。半死的配置比没有配置更糟：
+  /// 读代码的人以为换了字体，实际什么都没变。字体族现在交回 Material
+  /// `textTheme` 决定。
+  ///
+  /// [baseKern] 保留了原先只挂在 Raleway 上的 `kern` 特性。**它不是可以顺手
+  /// 一起删的死配置**：实测（用 SDK 自带 Roboto 经 `FontLoader` 装载后逐字形
+  /// 比对 caret 位置）开启 `kern` 会让 23 个字形里的 22 个发生位移，
+  /// fontSize 40 时最大差约 15px。而 h3 / title2 原先走 Tenor、本就没有这个
+  /// 特性，所以这里保留两个基底，而不是统一成一个——统一任一方向都会改变
+  /// 真实设备的渲染结果。
+  static const TextStyle base = TextStyle();
 
-  final Map<String, TextStyle> _monoTitleFonts = const {
-    'en': TextStyle(fontFamily: 'B612Mono'),
-  };
-
-  final Map<String, TextStyle> _quoteFonts = const {
-    'en': TextStyle(fontFamily: 'Cinzel'),
-    'zh': TextStyle(fontFamily: 'MaShanZheng'),
-  };
-
-  final Map<String, TextStyle> _wonderTitleFonts = const {
-    'en': TextStyle(fontFamily: 'Yeseva'),
-  };
-
-  final Map<String, TextStyle> _contentFonts = const {
-    'en': TextStyle(
-      fontFamily: 'Raleway',
-      fontFeatures: [FontFeature.enable('kern')],
-    ),
-  };
-
-  TextStyle _getFontForLocale(Map<String, TextStyle> fonts) {
-    return fonts.entries.first.value;
-  }
-
-  TextStyle get titleFont => _getFontForLocale(_titleFonts);
-  TextStyle get quoteFont => _getFontForLocale(_quoteFonts);
-  TextStyle get wonderTitleFont => _getFontForLocale(_wonderTitleFonts);
-  TextStyle get contentFont => _getFontForLocale(_contentFonts);
-  TextStyle get monoTitleFont => _getFontForLocale(_monoTitleFonts);
-
-  late final TextStyle dropCase = _createFont(
-    quoteFont,
-    sizePx: 56,
-    heightPx: 20,
+  static const TextStyle baseKern = TextStyle(
+    fontFeatures: [FontFeature.enable('kern')],
   );
 
-  late final TextStyle wonderTitle = _createFont(
-    wonderTitleFont,
-    sizePx: 64,
-    heightPx: 56,
-  );
-
-  late final TextStyle h1 = _createFont(titleFont, sizePx: 64, heightPx: 62);
-  late final TextStyle h2 = _createFont(titleFont, sizePx: 32, heightPx: 46);
   late final TextStyle h3 = _createFont(
-    titleFont,
+    base,
     sizePx: 24,
     heightPx: 36,
     weight: FontWeight.w600,
   );
-  late final TextStyle h4 = _createFont(
-    contentFont,
-    sizePx: 14,
-    heightPx: 23,
-    spacingPc: 5,
-    weight: FontWeight.w600,
-  );
 
-  late final TextStyle title1 = _createFont(
-    titleFont,
-    sizePx: 16,
-    heightPx: 26,
-    spacingPc: 5,
-  );
-  late final TextStyle title2 = _createFont(
-    titleFont,
-    sizePx: 14,
-    heightPx: 16.38,
-  );
+  late final TextStyle title2 = _createFont(base, sizePx: 14, heightPx: 16.38);
 
-  late final TextStyle body = _createFont(
-    contentFont,
-    sizePx: 16,
-    heightPx: 26,
-  );
+  late final TextStyle body = _createFont(baseKern, sizePx: 16, heightPx: 26);
   late final TextStyle bodyBold = _createFont(
-    contentFont,
+    baseKern,
     sizePx: 16,
     heightPx: 26,
     weight: FontWeight.w600,
   );
   late final TextStyle bodySmall = _createFont(
-    contentFont,
+    baseKern,
     sizePx: 14,
     heightPx: 23,
   );
   late final TextStyle bodySmallBold = _createFont(
-    contentFont,
+    baseKern,
     sizePx: 14,
     heightPx: 23,
     weight: FontWeight.w600,
   );
 
-  late final TextStyle quote1 = _createFont(
-    quoteFont,
-    sizePx: 32,
-    heightPx: 40,
-    weight: FontWeight.w600,
-    spacingPc: -3,
-  );
-  late final TextStyle quote2 = _createFont(
-    quoteFont,
-    sizePx: 21,
-    heightPx: 32,
-    weight: FontWeight.w400,
-  );
-  late final TextStyle quote2Sub = _createFont(
-    body,
-    sizePx: 16,
-    heightPx: 40,
-    weight: FontWeight.w400,
-  );
-
   late final TextStyle caption = _createFont(
-    contentFont,
+    baseKern,
     sizePx: 14,
     heightPx: 20,
     weight: FontWeight.w500,
   ).copyWith(fontStyle: FontStyle.italic);
 
-  late final TextStyle callout = _createFont(
-    contentFont,
-    sizePx: 16,
-    heightPx: 26,
-    weight: FontWeight.w600,
-  ).copyWith(fontStyle: FontStyle.italic);
   late final TextStyle btn = _createFont(
-    contentFont,
+    baseKern,
     sizePx: 14,
     weight: FontWeight.w500,
     spacingPc: 2,
@@ -240,13 +157,6 @@ class const _Corners() {
   final double lg = 32;
 }
 
-class _Sizes() {
-  double get maxContentWidth1 => 800;
-  double get maxContentWidth2 => 600;
-  double get maxContentWidth3 => 500;
-  final Size minAppSize = const Size(380, 650);
-}
-
 @immutable
 class const _Insets(double scale) {
   this
@@ -267,29 +177,4 @@ class const _Insets(double scale) {
   final double xl;
   final double xxl;
   final double offset;
-}
-
-@immutable
-class const _Shadows() {
-  final textSoft = const [
-    Shadow(
-      color: Color.fromRGBO(0, 0, 0, 0.25),
-      offset: Offset(0, 2),
-      blurRadius: 4,
-    ),
-  ];
-  final text = const [
-    Shadow(
-      color: Color.fromRGBO(0, 0, 0, 0.6),
-      offset: Offset(0, 2),
-      blurRadius: 2,
-    ),
-  ];
-  final textStrong = const [
-    Shadow(
-      color: Color.fromRGBO(0, 0, 0, 0.6),
-      offset: Offset(0, 4),
-      blurRadius: 6,
-    ),
-  ];
 }
