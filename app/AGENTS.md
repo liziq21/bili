@@ -66,7 +66,7 @@ Use `flutter` commands for `app`:
 
 | Task | Command |
 |------|---------|
-| Analyze | `flutter analyze`（与 CI 同范围，含 `test/`） |
+| Analyze | `flutter analyze`（在 `app/` 执行只覆盖本包；CI 在仓库根目录执行，覆盖 workspace 全部包，含 `app/test/`） |
 | Test | `flutter test` |
 | Test (single file) | `flutter test test/feature/home_bloc_test.dart` |
 | Test (single case) | `flutter test test/feature/home_bloc_test.dart --plain-name "Refresh with no source emits refreshing then not refreshing"` |
