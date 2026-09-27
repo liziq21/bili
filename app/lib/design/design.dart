@@ -10,5 +10,4 @@ export 'app_style.dart';
 export 'app_theme.dart';
 export 'brand_palette.dart';
 export 'contrast.dart';
-export 'service_brands.dart';
 export 'theme_wrapper.dart';
