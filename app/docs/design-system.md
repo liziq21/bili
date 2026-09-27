@@ -18,11 +18,11 @@
 
 ## 2. 条款
 
-### R1 —— 色值单一来源，白名单同时约束路径与内容
+### R1 —— 色值单一来源，允许路径与文件内容均受约束
 
-`app/lib/` 内允许出现颜色字面量的文件**只有一个**：`app/lib/design/brand_palette.dart`。其余一切颜色从 `ColorScheme` 派生。G1 门禁强制。
+`app/lib/` 内允许出现颜色字面量的文件**只有一个**：`app/lib/design/brand_palette.dart`。无语义的 `Colors.transparent` 不属于此限制。其余一切颜色从 `ColorScheme` 派生。G1 门禁强制。
 
-白名单按**路径 + 内容**双重授权。只按路径授权等于开了「不限内容」的后门 —— 任何外部实体都能来这里加条目。文件内只允许：色值常量、`ColorScheme` 构造、`isDark` 分支取值。
+路径白名单仅包含上述文件，其内容也受约束，不能因路径获准就任意添加条目。文件内只允许：色值常量、`ColorScheme` 构造、`isDark` 分支取值。
 
 增删色值只能改该文件。产生「这里需要一个新颜色」的需求时，先判定它是否属于**界面角色**（R2）；不属于则不得进该文件。
 
@@ -119,10 +119,10 @@ app/lib/design/
 ### G1 —— custom_lint：禁止硬编码色
 
 - 规则 `no_hardcoded_color` 报**所有**直接构造颜色的形式：`Color(0x…)`、`Color.fromARGB`、`Color.fromRGBO`、`Color.from`、以及任何 `Colors.xxx` 常量引用。`Colors.transparent` 豁免（无语义，不构成硬编码色）。
-- **allow-list 与 R1 逐字一致：只有 `app/lib/design/brand_palette.dart`。** 不豁免生成文件 —— 豁免生成文件等于留下一条与 R1 无关的旁路。
+- **路径 allow-list 与 R1 的允许路径一致：只有 `app/lib/design/brand_palette.dart`。** 不豁免生成文件 —— 豁免生成文件等于留下一条与 R1 无关的旁路。
 - **上线前置**：仓库现存硬编码色必须先迁完，否则门禁一次报出全部历史遗留。迁移与门禁在同一 PR 内完成。
 - 规则必须覆盖**完整的构造器集合**；漏掉 `Color.fromRGBO` 之类即形同虚设。
-- 自写 `custom_lint` 规则而非采用第三方 rule set：语义需精确到「白名单单文件且内容受限」，通用 rule set 无法表达。
+- 自写 `custom_lint` 规则而非采用第三方 rule set：语义需精确到「路径白名单仅含单文件，且该文件内容受限」，通用 rule set 无法表达。
 
 ### G2 —— 对比度测试
 

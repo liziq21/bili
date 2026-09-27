@@ -34,7 +34,7 @@ This directory contains the main Flutter application (`app/`).
 - Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
 - Access the live singleton directly (`$styles.colors`, `$styles.corners`, `$styles.insets`, `$styles.text`, etc.) — do not create local copies.
 - **Strict Rule**: When writing or updating UI components (including Stitch designs), strictly map visual elements to `$styles` design tokens. Never hardcode colors or stitch-specific style constants.
-- See [`docs/design-system.md`](docs/design-system.md) for token roles and contrast requirements. It is the **only** file where color literals are allowed. Decision rationale and measurements are deliberately kept out of the repository — read them from the git history of the commits that established each rule.
+- See [`docs/design-system.md`](docs/design-system.md) for the color-literal policy, token roles, and contrast requirements. Within `app/lib/`, [`lib/design/brand_palette.dart`](lib/design/brand_palette.dart) is the **only** file where color literals are allowed. Decision rationale and measurements are deliberately kept out of the repository — read them from the git history of the commits that established each rule.
 
 ### Dependency Injection & Source Providers (`ServiceSourceProviders`)
 - Inject screen-level BlocProviders (such as `HomeBloc`) inside route data (`GoRouteData`).
