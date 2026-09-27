@@ -2,10 +2,12 @@
 
 import 'package:material_ui/material_ui.dart';
 
-import 'colors.dart';
+import 'app_colors.dart';
+import 'brand_palette.dart';
 
-export 'colors.dart';
-
+/// 排版尺度、圆角、间距、动效时长。与颜色无关的部分。
+///
+/// 颜色一律走 [colors]（R2/R4），本类不持有色值。
 @immutable
 class AppStyle({
   Size? screenSize,
@@ -31,8 +33,14 @@ class AppStyle({
 
   late final double scale;
 
+  /// 品牌色板（R1 的唯一来源）。[isDark] 由 `AppScaffold` 从真实的
+  /// `Theme.of(context).brightness` 传入（R3：亮度只有这一个来源）。
+  late final BrandPalette palette = BrandPalette.of(
+    isDark ? Brightness.dark : Brightness.light,
+  );
+
   /// The current theme colors for the app
-  late final AppColors colors = AppColors(isDark: isDark);
+  late final AppColors colors = AppColors(palette);
 
   /// Rounded edge corner radii
   late final _Corners corners = const _Corners();

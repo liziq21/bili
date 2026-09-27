@@ -50,12 +50,12 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                   memCacheWidth: 720,
                   fit: BoxFit.cover,
                   errorBuilder: (context, url, error) =>
-                      Container(color: $styles.colors.greyStrong),
+                      Container(color: $styles.colors.surfaceContainerHighest),
                 ),
               )
             else
               Positioned.fill(
-                child: Container(color: $styles.colors.greyStrong),
+                child: Container(color: $styles.colors.surfaceContainerHighest),
               ),
 
             // Subtle Ambient Overlay
@@ -84,7 +84,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: $styles.colors.white),
+                    icon: Icon(Icons.arrow_back, color: $styles.colors.onScrim),
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -98,7 +98,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: $styles.text.title2.copyWith(
-                        color: $styles.colors.white,
+                        color: $styles.colors.onScrim,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -117,12 +117,12 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         vertical: $styles.insets.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: $styles.colors.greyStrong.withValues(
+                        color: $styles.colors.surfaceContainerHighest.withValues(
                           alpha: 0.85,
                         ),
                         borderRadius: BorderRadius.circular($styles.corners.lg),
                         border: Border.all(
-                          color: $styles.colors.accent1.withValues(alpha: 0.5),
+                          color: $styles.colors.accentFill.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -132,7 +132,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                             width: 6,
                             height: 6,
                             decoration: BoxDecoration(
-                              color: $styles.colors.accent1,
+                              color: $styles.colors.accentFill,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -140,7 +140,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           Text(
                             _selectedSource.split(' ').first,
                             style: $styles.text.btn.copyWith(
-                              color: $styles.colors.white,
+                              color: $styles.colors.onScrim,
                               fontSize: 11,
                             ),
                           ),
@@ -150,7 +150,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             size: 16,
-                            color: $styles.colors.white,
+                            color: $styles.colors.onScrim,
                           ),
                         ],
                       ),
@@ -165,7 +165,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
               iconSize: 56,
               icon: Icon(
                 _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                color: $styles.colors.accent1,
+                color: $styles.colors.accentFill,
               ),
               onPressed: () {
                 setState(() {
@@ -188,7 +188,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                       color: $styles.colors.scrim.withValues(alpha: 0.92),
                       borderRadius: BorderRadius.circular($styles.corners.md),
                       border: Border.all(
-                        color: $styles.colors.accent1.withValues(alpha: 0.3),
+                        color: $styles.colors.accentFill.withValues(alpha: 0.3),
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -208,14 +208,14 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                             Text(
                               '多源分流线路',
                               style: $styles.text.bodySmallBold.copyWith(
-                                color: $styles.colors.accent2,
+                                color: $styles.colors.secondary,
                                 fontSize: 11,
                               ),
                             ),
                             Text(
                               '自动优选: 极速',
                               style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.accent1,
+                                color: $styles.colors.accentText,
                                 fontSize: 10,
                               ),
                             ),
@@ -252,8 +252,8 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                               : Icons.radio_button_unchecked,
                                           size: 14,
                                           color: isSelected
-                                              ? $styles.colors.accent1
-                                              : $styles.colors.greyMedium,
+                                              ? $styles.colors.accentFill
+                                              : $styles.colors.outline,
                                         ),
                                         const Gap(6),
                                         Expanded(
@@ -264,8 +264,8 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                             style: $styles.text.bodySmall
                                                 .copyWith(
                                                   color: isSelected
-                                                      ? $styles.colors.accent1
-                                                      : $styles.colors.white,
+                                                      ? $styles.colors.accentText
+                                                      : $styles.colors.onScrim,
                                                   fontSize: 11,
                                                   fontWeight: isSelected
                                                       ? FontWeight.bold
@@ -280,8 +280,8 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                     src['ping']!,
                                     style: $styles.text.bodySmall.copyWith(
                                       color: isSelected
-                                          ? $styles.colors.accent1
-                                          : $styles.colors.caption,
+                                          ? $styles.colors.accentText
+                                          : $styles.colors.onSurfaceVariant,
                                       fontSize: 10,
                                     ),
                                   ),
@@ -322,7 +322,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                       iconSize: 22,
                       icon: Icon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: $styles.colors.white,
+                        color: $styles.colors.onScrim,
                       ),
                       onPressed: () {
                         setState(() {
@@ -333,7 +333,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     Text(
                       '03:12 / 12:00',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.white,
+                        color: $styles.colors.onScrim,
                         fontSize: 11,
                       ),
                     ),
@@ -344,11 +344,11 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                             enabledThumbRadius: 5,
                           ),
                           trackHeight: 3,
-                          activeTrackColor: $styles.colors.accent1,
-                          inactiveTrackColor: $styles.colors.white.withValues(
+                          activeTrackColor: $styles.colors.accentFill,
+                          inactiveTrackColor: $styles.colors.onScrim.withValues(
                             alpha: 0.3,
                           ),
-                          thumbColor: $styles.colors.accent1,
+                          thumbColor: $styles.colors.accentFill,
                         ),
                         child: Slider(
                           value: _progress,
@@ -375,8 +375,8 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                                 q,
                                 style: $styles.text.bodySmall.copyWith(
                                   color: q == _selectedQuality
-                                      ? $styles.colors.accent1
-                                      : $styles.colors.body,
+                                      ? $styles.colors.accentText
+                                      : $styles.colors.onSurface,
                                 ),
                               ),
                             ),
@@ -388,7 +388,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          border: Border.all(color: $styles.colors.accent2),
+                          border: Border.all(color: $styles.colors.secondary),
                           borderRadius: BorderRadius.circular(
                             $styles.corners.sm,
                           ),
@@ -396,7 +396,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         child: Text(
                           _selectedQuality,
                           style: $styles.text.btn.copyWith(
-                            color: $styles.colors.white,
+                            color: $styles.colors.onScrim,
                             fontSize: 10,
                           ),
                         ),
@@ -404,7 +404,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     IconButton(
                       iconSize: 20,
-                      icon: Icon(Icons.fullscreen, color: $styles.colors.white),
+                      icon: Icon(Icons.fullscreen, color: $styles.colors.onScrim),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

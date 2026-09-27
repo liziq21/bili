@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
+import '../../../design/design.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 
@@ -27,7 +28,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'BILIBILI',
       time: '4天前',
       duration: '12:40',
-      badgeColor: Color(0xFF00A1D6),
+      badgeColor: ServiceBrands.bilibiliBlue,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -37,7 +38,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'YOUTUBE',
       time: '1周前',
       duration: '18:15',
-      badgeColor: Color(0xFFEF5350),
+      badgeColor: ServiceBrands.bilibiliRed,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -47,7 +48,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'PEERTUBE / RSS',
       time: '3天前',
       duration: '45:20',
-      badgeColor: Color(0xFFFB7299),
+      badgeColor: ServiceBrands.bilibiliPink,
       onTap: null,
     ),
   ];
@@ -67,7 +68,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: CircularProgressIndicator(color: $styles.colors.accent1),
+              child: CircularProgressIndicator(color: $styles.colors.accentFill),
             ),
           );
         }
@@ -101,7 +102,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
             Text(
               video.title,
               style: $styles.text.h3.copyWith(
-                color: $styles.colors.black,
+                color: $styles.colors.onSurfaceStrong,
                 fontWeight: FontWeight.bold,
                 height: 1.3,
               ),
@@ -120,55 +121,55 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     Icon(
                       Icons.visibility,
                       size: 14,
-                      color: $styles.colors.accent1,
+                      color: $styles.colors.accentFill,
                     ),
                     const Gap(2),
                     Text(
                       '${_formatCount(video.viewCount ?? 386000)} 播放',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.caption,
+                        color: $styles.colors.onSurfaceVariant,
                         fontSize: 12,
                       ),
                     ),
                   ],
                 ),
-                Text('·', style: TextStyle(color: $styles.colors.greyMedium)),
+                Text('·', style: TextStyle(color: $styles.colors.outline)),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.forum, size: 14, color: $styles.colors.accent2),
+                    Icon(Icons.forum, size: 14, color: $styles.colors.secondary),
                     const Gap(2),
                     Text(
                       '2.4万 弹幕',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.caption,
+                        color: $styles.colors.onSurfaceVariant,
                         fontSize: 12,
                       ),
                     ),
                   ],
                 ),
-                Text('·', style: TextStyle(color: $styles.colors.greyMedium)),
+                Text('·', style: TextStyle(color: $styles.colors.outline)),
                 Text(
                   '1天前',
                   style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.caption,
+                    color: $styles.colors.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
-                Text('·', style: TextStyle(color: $styles.colors.greyMedium)),
+                Text('·', style: TextStyle(color: $styles.colors.outline)),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: $styles.colors.greyStrong.withValues(alpha: 0.1),
+                    color: $styles.colors.surfaceContainerHighest.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
                   ),
                   child: Text(
                     '原创技术',
                     style: $styles.text.btn.copyWith(
-                      color: $styles.colors.accent3,
+                      color: $styles.colors.tertiary,
                       fontSize: 11,
                     ),
                   ),
@@ -179,13 +180,13 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: $styles.colors.greyStrong.withValues(alpha: 0.1),
+                    color: $styles.colors.surfaceContainerHighest.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
                   ),
                   child: Text(
                     video.id.isNotEmpty ? video.id : 'BV1m44y1G7rk',
                     style: $styles.text.btn.copyWith(
-                      color: $styles.colors.accent1,
+                      color: $styles.colors.accentText,
                       fontSize: 11,
                     ),
                   ),
@@ -199,10 +200,10 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
               Container(
                 padding: EdgeInsets.all($styles.insets.xs),
                 decoration: BoxDecoration(
-                  color: $styles.colors.offWhite,
+                  color: $styles.colors.surface,
                   borderRadius: BorderRadius.circular($styles.corners.md),
                   border: Border.all(
-                    color: $styles.colors.greyMedium.withValues(alpha: 0.2),
+                    color: $styles.colors.outline.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
@@ -235,13 +236,13 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                           child: Container(
                             padding: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
-                              color: $styles.colors.accent1,
+                              color: $styles.colors.accentFill,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.check,
                               size: 10,
-                              color: $styles.colors.white,
+                              color: $styles.colors.onScrim,
                             ),
                           ),
                         ),
@@ -261,7 +262,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: $styles.text.bodyBold.copyWith(
-                                    color: $styles.colors.black,
+                                    color: $styles.colors.onSurfaceStrong,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -270,7 +271,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                               Icon(
                                 Icons.verified,
                                 size: 14,
-                                color: $styles.colors.accent2,
+                                color: $styles.colors.secondary,
                               ),
                             ],
                           ),
@@ -279,7 +280,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: $styles.text.bodySmall.copyWith(
-                              color: $styles.colors.caption,
+                              color: $styles.colors.onSurfaceVariant,
                               fontSize: 11,
                             ),
                           ),
@@ -293,7 +294,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                       iconSize: 18,
                       icon: Icon(
                         Icons.open_in_new,
-                        color: $styles.colors.caption,
+                        color: $styles.colors.onSurfaceVariant,
                       ),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -307,11 +308,11 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: detail.isSubscribed
-                            ? $styles.colors.greyMedium.withValues(alpha: 0.3)
-                            : $styles.colors.accent1,
+                            ? $styles.colors.outline.withValues(alpha: 0.3)
+                            : $styles.colors.accentFill,
                         foregroundColor: detail.isSubscribed
-                            ? $styles.colors.body
-                            : $styles.colors.white,
+                            ? $styles.colors.onSurface
+                            : $styles.colors.onScrim,
                         elevation: 0,
                         padding: EdgeInsets.symmetric(
                           horizontal: $styles.insets.xs,
@@ -354,7 +355,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     label: _formatCount(detail.likeCount),
                     actionName: '点赞',
                     isActive: detail.isLiked,
-                    color: $styles.colors.accent1,
+                    color: $styles.colors.accentFill,
                     onTap: () {
                       context.read<VideoBloc>().add(const ToggleVideoLike());
                     },
@@ -365,7 +366,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     label: _formatCount(detail.favoriteCount),
                     actionName: '收藏',
                     isActive: detail.isFavorited,
-                    color: $styles.colors.accent3,
+                    color: $styles.colors.tertiary,
                     onTap: () {
                       context.read<VideoBloc>().add(
                         const ToggleVideoFavorite(),
@@ -379,7 +380,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     actionName: '多源换源',
                     tooltip: '切换视频数据源',
                     isActive: true,
-                    color: $styles.colors.accent1,
+                    color: $styles.colors.accentFill,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -396,7 +397,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     actionName: '分享',
                     tooltip: '分享视频',
                     isActive: false,
-                    color: $styles.colors.accent2,
+                    color: $styles.colors.secondary,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -415,7 +416,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     actionName: '弹幕',
                     tooltip: _isDanmakuActive ? '关闭弹幕' : '开启弹幕',
                     isActive: _isDanmakuActive,
-                    color: $styles.colors.accent1,
+                    color: $styles.colors.accentFill,
                     onTap: () {
                       setState(() {
                         _isDanmakuActive = !_isDanmakuActive;
@@ -425,13 +426,13 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                 ],
               ),
             ),
-            Divider(color: $styles.colors.greyMedium.withValues(alpha: 0.2)),
+            Divider(color: $styles.colors.outline.withValues(alpha: 0.2)),
 
             // Collapsible Synopsis Box
             Container(
               padding: EdgeInsets.all($styles.insets.xs),
               decoration: BoxDecoration(
-                color: $styles.colors.offWhite,
+                color: $styles.colors.surface,
                 borderRadius: BorderRadius.circular($styles.corners.md),
               ),
               child: Column(
@@ -443,7 +444,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                       Text(
                         '本期摘要 & 核心技术点',
                         style: $styles.text.bodyBold.copyWith(
-                          color: $styles.colors.black,
+                          color: $styles.colors.onSurfaceStrong,
                           fontSize: 13,
                         ),
                       ),
@@ -471,7 +472,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                               child: Text(
                                 _isDescExpanded ? '收起' : '展开完整大纲',
                                 style: $styles.text.bodySmall.copyWith(
-                                  color: $styles.colors.accent1,
+                                  color: $styles.colors.accentText,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -496,7 +497,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                           ? TextOverflow.visible
                           : TextOverflow.ellipsis,
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.body,
+                        color: $styles.colors.onSurface,
                         height: 1.4,
                       ),
                     ),
@@ -516,7 +517,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                       width: 4,
                       height: 14,
                       decoration: BoxDecoration(
-                        color: $styles.colors.accent1,
+                        color: $styles.colors.accentFill,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -524,7 +525,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     Text(
                       '多源关联推荐',
                       style: $styles.text.title2.copyWith(
-                        color: $styles.colors.black,
+                        color: $styles.colors.onSurfaceStrong,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -533,7 +534,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                 Text(
                   '聚合源: Bilibili / YT / Pod',
                   style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.caption,
+                    color: $styles.colors.onSurfaceVariant,
                     fontSize: 11,
                   ),
                 ),
@@ -567,7 +568,7 @@ class const _RelatedVideoCard({
     return Container(
       margin: EdgeInsets.only(bottom: $styles.insets.xs),
       child: Material(
-        color: $styles.colors.offWhite,
+        color: $styles.colors.surface,
         borderRadius: BorderRadius.circular($styles.corners.md),
         clipBehavior: Clip.antiAlias,
         child: Semantics(
@@ -590,10 +591,10 @@ class const _RelatedVideoCard({
                         Container(
                           width: 120,
                           height: 68,
-                          color: $styles.colors.greyStrong,
+                          color: $styles.colors.surfaceContainerHighest,
                           child: Icon(
                             Icons.play_circle_outline,
-                            color: $styles.colors.white.withValues(alpha: 0.7),
+                            color: $styles.colors.onScrim.withValues(alpha: 0.7),
                             size: 28,
                           ),
                         ),
@@ -606,7 +607,7 @@ class const _RelatedVideoCard({
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: $styles.colors.black.withValues(
+                              color: $styles.colors.onSurfaceStrong.withValues(
                                 alpha: 0.7,
                               ),
                               borderRadius: BorderRadius.circular(4),
@@ -614,7 +615,7 @@ class const _RelatedVideoCard({
                             child: Text(
                               duration,
                               style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.white,
+                                color: $styles.colors.onScrim,
                                 fontSize: 10,
                               ),
                             ),
@@ -635,7 +636,7 @@ class const _RelatedVideoCard({
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: $styles.text.bodySmallBold.copyWith(
-                            color: $styles.colors.black,
+                            color: $styles.colors.onSurfaceStrong,
                             height: 1.25,
                             fontSize: 13,
                           ),
@@ -644,7 +645,7 @@ class const _RelatedVideoCard({
                         Text(
                           '$author · $views',
                           style: $styles.text.bodySmall.copyWith(
-                            color: $styles.colors.caption,
+                            color: $styles.colors.onSurfaceVariant,
                             fontSize: 11,
                           ),
                         ),
@@ -673,7 +674,7 @@ class const _RelatedVideoCard({
                             Text(
                               time,
                               style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.caption,
+                                color: $styles.colors.onSurfaceVariant,
                                 fontSize: 10,
                               ),
                             ),
@@ -732,20 +733,20 @@ class const _ActionButton({
                 decoration: BoxDecoration(
                   color: isActive
                       ? color.withValues(alpha: 0.15)
-                      : $styles.colors.greyMedium.withValues(alpha: 0.15),
+                      : $styles.colors.outline.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isActive ? activeIcon : icon,
                   size: 20,
-                  color: isActive ? color : $styles.colors.caption,
+                  color: isActive ? color : $styles.colors.onSurfaceVariant,
                 ),
               ),
               const Gap(4),
               Text(
                 label,
                 style: $styles.text.bodySmall.copyWith(
-                  color: isActive ? color : $styles.colors.caption,
+                  color: isActive ? color : $styles.colors.onSurfaceVariant,
                   fontSize: 11,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 ),

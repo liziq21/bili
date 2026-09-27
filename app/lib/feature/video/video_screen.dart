@@ -30,7 +30,7 @@ class const VideoScreen({super.key, final String videoId = 'demo_video'})
     return MultiBlocProvider(
       providers: getVideoBlocProviders(context, videoId: videoId),
       child: Scaffold(
-        backgroundColor: $styles.colors.offWhite,
+        backgroundColor: $styles.colors.surface,
         body: SafeArea(child: _VideoContent(videoId: videoId)),
       ),
     );
@@ -80,7 +80,7 @@ class const _VideoContent({required final String videoId})
         const Expanded(child: VideoInfoView()),
         VerticalDivider(
           width: 1,
-          color: $styles.colors.greyMedium.withValues(alpha: 0.2),
+          color: $styles.colors.outline.withValues(alpha: 0.2),
         ),
         const Expanded(child: VideoCommentsView()),
       ],
@@ -93,11 +93,11 @@ class const _VideoContent({required final String videoId})
       child: Column(
         children: [
           Container(
-            color: $styles.colors.offWhite,
+            color: $styles.colors.surface,
             child: TabBar(
-              labelColor: $styles.colors.accent1,
-              unselectedLabelColor: $styles.colors.caption,
-              indicatorColor: $styles.colors.accent1,
+              labelColor: $styles.colors.accentText,
+              unselectedLabelColor: $styles.colors.onSurfaceVariant,
+              indicatorColor: $styles.colors.accentFill,
               indicatorWeight: 3,
               labelStyle: $styles.text.btn.copyWith(
                 fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class const _SourceLogsView() extends StatelessWidget {
         Text(
           '多源引擎与分流状态日志',
           style: $styles.text.title2.copyWith(
-            color: $styles.colors.black,
+            color: $styles.colors.onSurfaceStrong,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -153,7 +153,7 @@ class const _SourceLogsView() extends StatelessWidget {
             '[SYNC] PeerTube fallback mirror initialized (Standing by)\n'
             '[STATUS] Playback Smooth, 0 Dropped Frames.',
             style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.accent1,
+              color: $styles.colors.accentText,
               fontFamily: 'B612Mono',
               fontSize: 11,
               height: 1.5,

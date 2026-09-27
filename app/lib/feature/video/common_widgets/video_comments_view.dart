@@ -23,7 +23,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: CircularProgressIndicator(color: $styles.colors.accent1),
+              child: CircularProgressIndicator(color: $styles.colors.accentFill),
             ),
           );
         }
@@ -49,7 +49,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
               child: Text(
                 '暂无评论',
                 style: $styles.text.body.copyWith(
-                  color: $styles.colors.caption,
+                  color: $styles.colors.onSurfaceVariant,
                 ),
               ),
             ),
@@ -71,7 +71,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
             itemCount: state.comments.length + (state.hasMore ? 1 : 0),
             separatorBuilder: (_, _) => Divider(
               height: 20,
-              color: $styles.colors.greyMedium.withValues(alpha: 0.15),
+              color: $styles.colors.outline.withValues(alpha: 0.15),
             ),
             itemBuilder: (context, index) {
               if (index >= state.comments.length) {
@@ -79,7 +79,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
                     child: CircularProgressIndicator(
-                      color: $styles.colors.accent1,
+                      color: $styles.colors.accentFill,
                     ),
                   ),
                 );
@@ -106,7 +106,7 @@ class const _CommentItem({
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: $styles.colors.greyStrong,
+          backgroundColor: $styles.colors.surfaceContainerHighest,
           backgroundImage:
               comment.authorAvatar != null && comment.authorAvatar!.isNotEmpty
               ? ResizeImage.resizeIfNeeded(
@@ -116,7 +116,7 @@ class const _CommentItem({
                 )
               : null,
           child: comment.authorAvatar == null || comment.authorAvatar!.isEmpty
-              ? Icon(Icons.person, color: $styles.colors.white, size: 20)
+              ? Icon(Icons.person, color: $styles.colors.onScrim, size: 20)
               : null,
         ),
         Gap($styles.insets.xs),
@@ -130,7 +130,7 @@ class const _CommentItem({
                   Text(
                     comment.authorName,
                     style: $styles.text.bodyBold.copyWith(
-                      color: $styles.colors.black,
+                      color: $styles.colors.onSurfaceStrong,
                       fontSize: 13,
                     ),
                   ),
@@ -138,7 +138,7 @@ class const _CommentItem({
                     Text(
                       '${comment.createdAt!.hour.toString().padLeft(2, '0')}:${comment.createdAt!.minute.toString().padLeft(2, '0')}',
                       style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.caption,
+                        color: $styles.colors.onSurfaceVariant,
                         fontSize: 11,
                       ),
                     ),
@@ -148,7 +148,7 @@ class const _CommentItem({
               Text(
                 comment.content,
                 style: $styles.text.body.copyWith(
-                  color: $styles.colors.body,
+                  color: $styles.colors.onSurface,
                   fontSize: 13,
                   height: 1.35,
                 ),
@@ -183,8 +183,8 @@ class const _CommentItem({
                                   : Icons.thumb_up_outlined,
                               size: 14,
                               color: comment.isLiked
-                                  ? $styles.colors.accent1
-                                  : $styles.colors.caption,
+                                  ? $styles.colors.accentFill
+                                  : $styles.colors.onSurfaceVariant,
                             ),
                             const Gap(4),
                             Text(
@@ -192,8 +192,8 @@ class const _CommentItem({
                               style: $styles.text.bodySmall.copyWith(
                                 fontSize: 11,
                                 color: comment.isLiked
-                                    ? $styles.colors.accent1
-                                    : $styles.colors.caption,
+                                    ? $styles.colors.accentText
+                                    : $styles.colors.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -209,10 +209,10 @@ class const _CommentItem({
                 Container(
                   padding: EdgeInsets.all($styles.insets.xs),
                   decoration: BoxDecoration(
-                    color: $styles.colors.offWhite,
+                    color: $styles.colors.surface,
                     borderRadius: BorderRadius.circular($styles.corners.sm),
                     border: Border.all(
-                      color: $styles.colors.greyMedium.withValues(alpha: 0.15),
+                      color: $styles.colors.outline.withValues(alpha: 0.15),
                     ),
                   ),
                   child: Column(
@@ -226,14 +226,14 @@ class const _CommentItem({
                               TextSpan(
                                 text: '${reply.authorName}: ',
                                 style: $styles.text.bodyBold.copyWith(
-                                  color: $styles.colors.black,
+                                  color: $styles.colors.onSurfaceStrong,
                                   fontSize: 12,
                                 ),
                               ),
                               TextSpan(
                                 text: reply.content,
                                 style: $styles.text.bodySmall.copyWith(
-                                  color: $styles.colors.body,
+                                  color: $styles.colors.onSurface,
                                   fontSize: 12,
                                 ),
                               ),
