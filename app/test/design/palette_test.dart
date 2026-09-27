@@ -21,16 +21,18 @@ void main() {
     final light = AppColors(BrandPalette.of(Brightness.light));
     final dark = AppColors(BrandPalette.of(Brightness.dark));
 
-    test('keeps the original light values unchanged', () {
+    test('keeps the P3-retuned light values', () {
+      // P3 重取值（方案 B）：留余量 + 拉层级，不卡在门槛线上。
+      // 亮色 golden 基线需重录（P3 承诺：改像素只发生在这一个提交）。
       expect(light.surface, const Color(0xFFF8ECE5));
       expect(light.onSurfaceStrong, const Color(0xFF1E1B18));
       expect(light.onSurface, const Color(0xFF514F4D));
-      expect(light.onSurfaceVariant, const Color(0xFF7D7873));
-      expect(light.accentFill, const Color(0xFFE4935D));
-      expect(light.secondary, const Color(0xFFBEABA1));
+      expect(light.onSurfaceVariant, const Color(0xFF696561));
+      expect(light.accentFill, const Color(0xFFB75B1E));
+      expect(light.secondary, const Color(0xFF947666));
       expect(light.tertiary, const Color(0xFFC47642));
       expect(light.surfaceContainerHighest, const Color(0xFF272625));
-      expect(light.outline, const Color(0xFF9D9995));
+      expect(light.outline, const Color(0xFF89847F));
     });
 
     test('swaps foreground and background in dark mode', () {

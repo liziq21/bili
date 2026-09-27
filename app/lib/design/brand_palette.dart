@@ -45,14 +45,18 @@ class const BrandPalette(
       };
 
   // ── 亮色取值 ────────────────────────────────────────────────────────────
-  static const Color _accentLight = Color(0xFFE4935D);
-  static const Color _accent2Light = Color(0xFFBEABA1);
+  // 相对亮色 surface #F8ECE5 的对比度按 WCAG AA 门槛选取：
+  // accentText 5.0:1（正文）、accentFill 4.0:1（图形/指示器）、
+  // onSurfaceVariant 5.0:1（弱化文字）、secondary 3.6:1（次级强调）、
+  // outline 3.2:1（分隔线/弱图形）。留有余量，不卡在门槛线上。
+  static const Color _accentLight = Color(0xFFB75B1E);
+  static const Color _accent2Light = Color(0xFF947666);
   static const Color _accent3Light = Color(0xFFC47642);
   static const Color _surfaceLight = Color(0xFFF8ECE5);
-  static const Color _captionLight = Color(0xFF7D7873);
+  static const Color _captionLight = Color(0xFF696561);
   static const Color _bodyLight = Color(0xFF514F4D);
   static const Color _greyStrongLight = Color(0xFF272625);
-  static const Color _greyMediumLight = Color(0xFF9D9995);
+  static const Color _greyMediumLight = Color(0xFF89847F);
   static const Color _scrimLight = Color(0xFF1E1B18);
 
   // ── 暗色取值：前景与背景互换，弱化色提亮以保住对比度 ──────────────────
@@ -72,14 +76,14 @@ class const BrandPalette(
     ColorScheme(
       brightness: Brightness.light,
       primary: _accentLight,
-      onPrimary: _scrimLight,
+      onPrimary: Color(0xFF000000),
       primaryContainer: _accentLight,
-      onPrimaryContainer: _scrimLight,
+      onPrimaryContainer: Color(0xFF000000),
       secondary: _accent2Light,
-      onSecondary: _scrimLight,
+      onSecondary: Color(0xFF000000),
       secondaryContainer: _accent2Light,
       tertiary: _accent3Light,
-      onTertiary: _scrimLight,
+      onTertiary: Color(0xFF000000),
       surface: _surfaceLight,
       onSurface: _bodyLight,
       onSurfaceVariant: _captionLight,

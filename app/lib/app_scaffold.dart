@@ -30,15 +30,19 @@ class const AppScaffold({super.key, required final Widget child})
     );
     return KeyedSubtree(
       key: ValueKey($styles.scale),
-      child: /*Theme(
+      child: Theme(
         data: appThemeData($styles.colors),
-        // Provide a default texts style to allow Hero's to render text properly
-        child: */ DefaultTextStyle(
-        style: $styles.text.body,
-        // Use a custom scroll behavior across entire app
-        child: ScrollConfiguration(behavior: AppScrollBehavior(), child: child),
+        // 品牌色板作为 Material 组件的默认配色（P3 接线）；
+        // 不接线时 Material 走 stock ThemeData.light()，$styles.colors.*
+        // 的取值就只是装饰、不影响组件渲染（R4 双色板问题的实质）。
+        child: /* 外层 Theme(data:) 提供 AppColors 取值，DefaultTextStyle
+               提供 Material 之外的 widget（Hero 飞行等）的字样。 */
+            DefaultTextStyle(
+          style: $styles.text.body,
+          // Use a custom scroll behavior across entire app
+          child: ScrollConfiguration(behavior: AppScrollBehavior(), child: child),
+        ),
       ),
-      //),
     );
   }
 }
