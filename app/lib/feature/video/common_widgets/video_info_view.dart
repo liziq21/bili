@@ -607,7 +607,7 @@ class const _RelatedVideoCard({
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: $styles.colors.onSurfaceStrong.withValues(
+                              color: $styles.colors.scrim.withValues(
                                 alpha: 0.7,
                               ),
                               borderRadius: BorderRadius.circular(4),
