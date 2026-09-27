@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:alchemist/alchemist.dart';
-import 'package:flutter_test/flutter_test.dart' show tearDownAll;
+import 'package:flutter/foundation.dart' show BindingBase, kIsWeb;
+import 'package:flutter/painting.dart' show PaintingBinding;
+import 'package:flutter_test/flutter_test.dart' show tearDown, tearDownAll;
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 /// Every path_provider lookup in a widget test resolves under [root].
@@ -46,7 +49,66 @@ class FakePathProviderPlatform(final String _root)
 /// across macOS, Linux and Windows. That is what lets a baseline committed
 /// from a dev machine match `ubuntu-latest` in CI. Platform goldens stay off
 /// so nobody records a readable baseline that can never pass on CI.
+/// Whether leak tracking is enabled for every `testWidgets` in this package.
+///
+/// Off unless the run opts in, through either `--dart-define LEAK_TRACKING=true`
+/// at compile time or `LEAK_TRACKING=true` in the environment, matching how the
+/// Flutter framework gates the same facility
+/// (`packages/flutter/test/flutter_test_config.dart`).
+///
+/// Leak tracking reports every disposable object that survived the test that
+/// created it — an undisposed `StreamController`, `FocusNode`, `Timer`, or
+/// Bloc. Measured on `main` at 662a7e9 with this switch on: the widget and bloc
+/// test files report no leaks, while `test/golden/video_card_golden_test.dart`
+/// reports two undisposed `ImageStreamCompleterHandle` objects per run before
+/// the image cache teardown below was added.
+bool _isLeakTrackingEnabled() {
+  if (kIsWeb) {
+    return false;
+  }
+  // The two forms are not interchangeable: the first is a compile-time
+  // constant, the second is read from the environment of the test process.
+  return const bool.fromEnvironment('LEAK_TRACKING') ||
+      (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '') ?? false);
+}
+
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+  if (_isLeakTrackingEnabled()) {
+    LeakTesting.enable();
+    // The tracking implementations are only wired up on the platforms the
+    // widget tester runs on here (Linux and macOS CI, Linux locally); leaving
+    // the warning on makes every widget test report an unsupported platform.
+    LeakTracking.warnForUnsupportedPlatforms = false;
+    // Objects a test itself creates are not the code under test, so they are
+    // excluded from the report. This is the Flutter framework's own setting.
+    LeakTesting.settings = LeakTesting.settings.withIgnored(
+      createdByTestHelpers: true,
+    );
+  }
+
+  // Every thumbnail in this app is loaded through a network image, and both
+  // the mocked HttpClient in tests and `CachedNetworkImage` at runtime register
+  // a completer with the binding-wide `PaintingBinding.instance.imageCache`.
+  // Disposing the widget tree does not dispose those completers or the live
+  // image tracking objects, and the cache is shared by the whole test
+  // executable, so a thumbnail loaded in one test is still held when a later
+  // test in the same file runs its leak check. Measured with leak tracking on
+  // `main` at 662a7e9: this teardown takes
+  // `test/golden/video_card_golden_test.dart` from two undisposed
+  // `ImageStreamCompleterHandle` objects plus one `_LiveImage` down to one
+  // handle. The remaining handle comes from the `cached_network_image_ce`
+  // decode path rather than from this cache; its owner is not established.
+  tearDown(() {
+    // The Drift database suite and the pure Dart package tests never
+    // initialize the Flutter binding, so there is no image cache to reach.
+    if (BindingBase.debugBindingType() == null) {
+      return;
+    }
+    final imageCache = PaintingBinding.instance.imageCache;
+    imageCache.clear();
+    imageCache.clearLiveImages();
+  });
+
   // `flutter test` runs test files concurrently, so the image cache must not be
   // shared between them. With one fixed directory, whichever file fetches a
   // thumbnail first writes it, and every other file then gets a cache hit and
