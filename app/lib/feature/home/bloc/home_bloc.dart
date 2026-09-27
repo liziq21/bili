@@ -23,7 +23,7 @@ class HomeBloc({
     : _userDataRepository = userDataRepository,
       _mediaSources = mediaSources,
       // 数据源清单由 DI 注入，可能为空；此时用空标识而不是崩溃或写死某个服务名。
-      super(HomeState(sourceId: mediaSources.isEmpty ? '' : mediaSources.first.id)) {
+      super(HomeState(sourceId: _fallbackId(mediaSources))) {
     on<_UserDataChanged>(_onUserDataChanged);
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
@@ -48,6 +48,23 @@ class HomeBloc({
   int _nextRequestVersion = 0;
   StreamSubscription<UserData>? _userDataSubscription;
 
+  /// 服务源清单非空时取首项，为空时返回空标识。清单本身是 app 配置，不含服务名硬编码。
+  static String _fallbackId(List<MediaSource> mediaSources) =>
+      mediaSources.isEmpty ? '' : mediaSources.first.id;
+
+  /// 把持久化的 [UserData.sourceId] 解析成当前生效的标识——这是全 app 唯一一处
+  /// 「未选择过 / 脏值」与「生效值」之间的转换点。
+  ///
+  /// [persisted] 为 null（用户尚未选择过）或不在当前 [_mediaSources] 清单内时，
+  /// 回退到清单首项。model 层不再持有服务名默认值，R8 由此在结构上满足，
+  /// 而不依赖注释声明。
+  String _resolveSourceId(String? persisted) {
+    if (persisted != null && _mediaSources.any((s) => s.id == persisted)) {
+      return persisted;
+    }
+    return _fallbackId(_mediaSources);
+  }
+
   /// 当前生效的数据源，`sourceId` 不可用时回退到首个可用数据源
   MediaSource? get activeSource {
     if (_mediaSources.isEmpty) return null;
@@ -68,11 +85,12 @@ class HomeBloc({
     Emitter<HomeState> emit,
   ) async {
     final userData = event.userData;
-    if (userData.sourceId == state.sourceId) return;
+    final resolved = _resolveSourceId(userData.sourceId);
+    if (resolved == state.sourceId) return;
     // 数据源切换后旧 Feed 不再适用，清空并重新拉取。
     emit(
       state.copyWith(
-        sourceId: userData.sourceId,
+        sourceId: resolved,
         filterId: HomeState.allFilterId,
         videoSections: const [],
         liveSections: const [],

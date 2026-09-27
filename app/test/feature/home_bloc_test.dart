@@ -354,6 +354,50 @@ void main() {
       );
     });
 
+    test('Keeps the first source and does not refetch on a fresh install', () async {
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      await bloc.stream.firstWhere((state) => state.videoSections.isNotEmpty);
+      final fetchesBefore = biliVideoFeed.fetchCount;
+
+      // 首次安装：SharedPreferences 无 SOURCE_ID，读到的 UserData.sourceId 为 null。
+      // 解析后与构造时的初始值相同，不应清空并重拉 Feed。
+      mockUserDataRepository.emitData(const UserData());
+      await pumpEventQueue();
+
+      expect(bloc.state.sourceId, 'bilibili');
+      expect(biliVideoFeed.fetchCount, fetchesBefore);
+    });
+
+    test('Ignores a persisted sourceId that is not in the list', () async {
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+      await bloc.stream.firstWhere((state) => state.videoSections.isNotEmpty);
+      final fetchesBefore = biliVideoFeed.fetchCount;
+
+      // 服务源已从清单中移除时，持久化的脏值不应生效。
+      mockUserDataRepository.emitData(
+        const UserData(sourceId: 'removed-service'),
+      );
+      await pumpEventQueue();
+
+      expect(bloc.state.sourceId, 'bilibili');
+      expect(biliVideoFeed.fetchCount, fetchesBefore);
+    });
+
+    test('Returns to the first source when UserData reports no selection', () async {
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
+      await bloc.stream.firstWhere((state) => state.sourceId == 'youtube');
+
+      mockUserDataRepository.emitData(const UserData());
+      await bloc.stream.firstWhere((state) => state.sourceId == 'bilibili');
+
+      expect(bloc.state.sourceId, 'bilibili');
+    });
+
     test(
       'ServiceSourceChanged event triggers repository setSourceId',
       () async {

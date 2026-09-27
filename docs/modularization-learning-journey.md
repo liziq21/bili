@@ -33,7 +33,6 @@ graph TD
   youtube["packages/youtube<br/>YouTube 客户端"]
   data["packages/data<br/>模型与远端数据源抽象"]
   model["packages/model<br/>UserData、Result"]
-  components["packages/components<br/>UI 组件库"]
   bpi["packages/bilibili/bpi<br/>B 站 API 客户端"]
   ypi["packages/youtube/ypi<br/>YouTube API 客户端"]
 
@@ -60,7 +59,6 @@ graph TD
 | `packages/youtube/ypi` | YouTube API 客户端；额外有 Protobuf 编码 | InnerTube 端点、`YoutubeProtobufEncoder` |
 | `packages/bilibili` | B 站客户端的上层封装：l10n、`RemoteDataSource` 实现 | `BiliPopularVideoFeedRemoteDataSource`、`BiliVideoDetailRemoteDataSource` |
 | `packages/youtube` | YouTube 客户端的上层封装 | `YouTubeRemoteDataSource`、`YouTubeVideoSearchRemoteDataSource` |
-| `packages/components` | 独立 UI 组件库 | `ToggleSwitchComponent` |
 | `app` | 主应用：UI、路由、领域用例、本地数据库、依赖注入 | `HomeBloc`、`AppDatabase`、`GoRouter` |
 
 ## 4. 依赖方向规则
@@ -117,7 +115,7 @@ graph TD
 这份文档描述的是当前的切分方式，不是唯一正确答案：
 
 - 粒度会随规模变化。`data` 和 `model` 现在都很小，如果它们继续各自只有一个文件，合并成一个包会让依赖图少一层。
-- `packages/components` 目前没有任何包依赖它，全仓也没有一处 `import 'package:components/...'`。它在设计系统重构之后失去了引用者，删或留是待定的取舍。
+- **原本的 `packages/components` 已并入 `app`**（2026-09-27）。它此前没有任何包依赖、全仓也没有一处 `import 'package:components/...'`，作为独立包没有存在价值；`ToggleSwitchComponent` 落到 `app/lib/ui/common/`，`Motion` 落到 `app/lib/design/`。并入后两者仍无引用者——共享控件的归属由它实际的调用方决定，等有了调用方再谈是否值得独立成包。
 - **包级测试目前不在 CI 里跑。** CI 的测试步骤只有 `cd app && flutter test`。这四个包合计 81 个用例，改包之后必须本地跑过才算完。
 - 加新服务要动五处：新建 `packages/<service>/pubspec.yaml` 写 `resolution: workspace`；在 `packages/data` 加能力接口；在 `packages/<service>` 实现；若另有 API 客户端子包（如 `bpi`），在 `packages/<service>/pubspec.yaml` 里加嵌套 `workspace:` 把子包纳入；在 `app/pubspec.yaml` 加一条 path 依赖，并在 app 的服务清单里注册。**根 `pubspec.yaml` 的 `packages/*` 只覆盖顶层包**——glob 不递归，新包不需要动根文件，但子包要靠父包的嵌套声明。
 
