@@ -30,8 +30,14 @@ void main() {
 
   group('LayoutSize.liveCardWidth', () {
     test('stays within the phone and tablet ranges', () {
-      expect(LayoutSize.fromWidth(360).liveCardWidth(360), inInclusiveRange(200, 280));
-      expect(LayoutSize.fromWidth(768).liveCardWidth(768), inInclusiveRange(240, 320));
+      expect(
+        LayoutSize.fromWidth(360).liveCardWidth(360),
+        inInclusiveRange(200, 280),
+      );
+      expect(
+        LayoutSize.fromWidth(768).liveCardWidth(768),
+        inInclusiveRange(240, 320),
+      );
     });
 
     test('does not grow without bound on wide desktop windows', () {
