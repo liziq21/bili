@@ -45,7 +45,7 @@ void main() {
     final semanticsFinder = find.byWidgetPredicate(
       (widget) =>
           widget is Semantics &&
-          widget.properties.label == '切换数据源，当前：Bilibili' &&
+          widget.properties.label == '切换数据源' &&
           widget.properties.hint == '切换视频与媒体数据源',
     );
     expect(semanticsFinder, findsOneWidget);

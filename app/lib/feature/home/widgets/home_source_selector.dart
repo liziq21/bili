@@ -15,12 +15,7 @@ class const HomeSourceSelector({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final activeSource = sources.cast<MediaSource?>().firstWhere(
-      (s) => s?.id == activeSourceId,
-      orElse: () => null,
-    );
-    final activeSourceName = activeSource?.name ?? activeSourceId;
-    final semanticLabel = '切换数据源，当前：$activeSourceName';
+    const semanticLabel = '切换数据源';
 
     return Tooltip(
       message: '切换数据源',
