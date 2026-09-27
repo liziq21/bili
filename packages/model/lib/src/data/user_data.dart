@@ -9,9 +9,10 @@ part 'user_data.g.dart';
 class const UserData({
   // 写死的服务身份，违反 app/docs/design-system.md 的 R8「服务源无关性」。
   // 此处是真正生效的那一处默认值：SharedPreferences 无 SOURCE_ID 时，
-  // fromJson 走生成代码 user_data.g.dart 的 `?? 'bilibili'` 读到的就是它。
-  // 同值另有一处 app/lib/datastore/preferences_data_source.dart:124（实测不可达），
-  // 迁移时两处需同时处理。跨层依赖与 static const 的求值限制见该文件注释。
+  // 生成的 _$UserDataFromJson 以 `?? 'bilibili'` 读到的就是它。
+  // 同值另有一处 app/lib/datastore/preferences_data_source.dart 的
+  // PreferencesKey.sourceId（实测不可达），迁移时两处需同时处理。
+  // 跨层依赖与 static const 的求值限制见该文件注释。
   final String sourceId = 'bilibili',
   final ThemeConfig themeConfig = ThemeConfig.followSystem,
   final bool useDynamicColor = true,
