@@ -1,5 +1,5 @@
 {
-  "labels": ["deep-review"],
+  "labels": ["greptile-review"],
   "autoReview": ["open"],
   "strictness": 2,
   "commentTypes": ["logic", "syntax"],
