@@ -28,7 +28,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'BILIBILI',
       time: '4天前',
       duration: '12:40',
-      badgeColor: ServiceBrands.bilibiliBlue,
+      badgeColor: ServiceBrands.bilibili,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -38,7 +38,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'YOUTUBE',
       time: '1周前',
       duration: '18:15',
-      badgeColor: ServiceBrands.bilibiliRed,
+      badgeColor: ServiceBrands.youtube,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -48,7 +48,7 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'PEERTUBE / RSS',
       time: '3天前',
       duration: '45:20',
-      badgeColor: ServiceBrands.bilibiliPink,
+      badgeColor: ServiceBrands.peerTube,
       onTap: null,
     ),
   ];
