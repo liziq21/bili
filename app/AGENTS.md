@@ -66,12 +66,16 @@ Use `flutter` commands for `app`:
 
 | Task | Command |
 |------|---------|
-| Analyze | `flutter analyze lib/` |
+| Analyze | `flutter analyze`（在 `app/` 执行只覆盖本包；CI 在仓库根目录执行，覆盖 workspace 全部包，含 `app/test/`） |
 | Test | `flutter test` |
+| Test (single file) | `flutter test test/feature/home_bloc_test.dart` |
+| Test (single case) | `flutter test test/feature/home_bloc_test.dart --plain-name "Refresh with no source emits refreshing then not refreshing"` |
 | Build Runner (Drift) | `dart pub run build_runner build --build-filter="lib/database/**"` |
 | Build Runner (go_router) | `dart pub run build_runner build --build-filter="lib/routing/**"` |
 | Full Code Generation | `dart run build_runner build --delete-conflicting-outputs` |
 | Pub Get | `flutter pub get` |
+
+CI 对分析的处理分两档：Jules 相关 PR 用 `--fatal-infos --fatal-warnings`，其余 PR 用 `--no-fatal-infos --no-fatal-warnings`。也就是说 info 级问题在普通 PR 上不会让 CI 变红。要按 CI 的严格档自查，本地跑 `flutter analyze --fatal-infos --fatal-warnings`。
 
 Database unit tests live in `app/test/database/` using `NativeDatabase.memory()`.
 Note: Import `package:drift/drift.dart` with `hide isNotNull` to avoid collision with `package:flutter_test`.

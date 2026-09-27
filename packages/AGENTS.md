@@ -26,6 +26,8 @@ This directory contains shared packages and modules (`packages/*`).
 
 **Rule**: For Dart-only packages, use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`, `components`), use `flutter` commands.
 
+**CI scope**: The CI test step runs only `app/`. No package test suite runs in CI, so every change to a package must be verified locally with that package's own test command before it is considered done.
+
 ## Data Layer & Remote Data Source Conventions
 
 - `packages/data` owns domain models, `RemoteDataSource`, and `SearchQuery`.
