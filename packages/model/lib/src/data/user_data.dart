@@ -7,13 +7,11 @@ part 'user_data.g.dart';
 
 @JsonSerializable(fieldRename: .screamingSnake, createToJson: true)
 class const UserData({
-  // 写死的服务身份，违反 app/docs/design-system.md 的 R8「服务源无关性」。
-  // 此处是真正生效的那一处默认值：SharedPreferences 无 SOURCE_ID 时，
-  // 生成的 _$UserDataFromJson 以 `?? 'bilibili'` 读到的就是它。
-  // 同值另有一处 app/lib/datastore/preferences_data_source.dart 的
-  // PreferencesKey.sourceId（实测不可达），迁移时两处需同时处理。
-  // 跨层依赖与 static const 的求值限制见该文件注释。
-  final String sourceId = 'bilibili',
+  /// 用户选择的服务源标识，null 表示尚未选择过。
+  ///
+  /// 取值由 app 层决定（见 HomeBloc 的解析点），model 层不绑定任何服务名，
+  /// 满足 app/docs/design-system.md 的 R8「服务源无关性」。
+  final String? sourceId,
   final ThemeConfig themeConfig = ThemeConfig.followSystem,
   final bool useDynamicColor = true,
 }) extends Equatable {
