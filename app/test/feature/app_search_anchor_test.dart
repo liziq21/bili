@@ -13,10 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class FakeSuggestRepository({
-  required this.suggests,
-}) implements SearchSuggestRepository {
-  final List<String> suggests;
+class FakeSuggestRepository(
+  final List<String> suggests,
+) implements SearchSuggestRepository {
   final List<String> receivedQueries = [];
 
   @override
@@ -97,7 +96,7 @@ void main() {
   testWidgets('icon builder opens a view that shows suggestions', (
     tester,
   ) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程', 'Flutter 测试']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程', 'Flutter 测试']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -120,7 +119,7 @@ void main() {
   });
 
   testWidgets('submitting a suggestion reports it to onSearch', (tester) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程', 'Flutter 测试']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程', 'Flutter 测试']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
     final submitted = <String>[];
@@ -140,7 +139,7 @@ void main() {
   });
 
   testWidgets('input is truncated to maxQueryLength', (tester) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -161,7 +160,7 @@ void main() {
   testWidgets('truncation counts grapheme clusters, not UTF-16 units', (
     tester,
   ) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -184,7 +183,7 @@ void main() {
   });
 
   testWidgets('icon is keyboard focusable', (tester) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
@@ -235,7 +234,7 @@ void main() {
   });
 
   testWidgets('bar mode view also truncates to maxQueryLength', (tester) async {
-    final suggest = FakeSuggestRepository(suggests: const ['Flutter 教程']);
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
     final bloc = buildBloc(suggest);
     addTearDown(bloc.close);
 
