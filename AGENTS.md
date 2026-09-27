@@ -32,6 +32,14 @@ For how the repository is split into packages, which dependency directions are a
 ### Generated Files
 - 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。
 
+### Screenshot Tests
+
+- The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` sets `platformGoldens: false`). They render through a fixed font with text masked into solid blocks, so a recorded baseline does not depend on the machine that recorded it. Do not switch to native `matchesGoldenFile` goldens: the Flutter API docs state that "custom fonts may render differently across different platforms, or between different versions of Flutter" (https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).
+- **Never hand-edit a baseline.** Baselines are generated, not drawn.
+- **The target is for CI to record baselines, not workstations.** The repository has no baseline-recording step: `ci.yml` only compares. Until one is added, a change to what a covered widget renders is finished by re-recording from `app/` with `flutter test test/golden/<file>_golden_test.dart --update-goldens` and committing the result. `Run Flutter Test` fails only when the comparison exceeds `diffThreshold` — a rendering change small enough to fall inside the 0.01 tolerance passes without a baseline update, so a green check does not mean the baseline is current.
+- `diffThreshold` is `0.01`, a comparison tolerance — the maximum fraction of differing pixels that still passes. A passing golden test does not prove pixel-exact equality.
+- **Coverage limit**: a golden test proves only the widgets it renders, under the theme it records. Treating "the goldens did not change" as proof that no visible pixel changed anywhere is unsupported — anything outside a test's own `pumpWidget` tree is unverified.
+
 ### Dart Version & Syntax
 - Do not arbitrarily downgrade the Dart SDK version.
 - Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
