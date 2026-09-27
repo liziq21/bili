@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:sized_context/sized_context.dart';
 
 import 'main.dart';
-import 'styles/styles.dart';
+import 'design/design.dart';
 import 'ui/common/app_scroll_behavior.dart';
 
 class const AppScaffold({super.key, required final Widget child})
@@ -31,7 +31,7 @@ class const AppScaffold({super.key, required final Widget child})
     return KeyedSubtree(
       key: ValueKey($styles.scale),
       child: /*Theme(
-        data: $styles.colors.toThemeData(),
+        data: appThemeData($styles.colors),
         // Provide a default texts style to allow Hero's to render text properly
         child: */ DefaultTextStyle(
         style: $styles.text.body,

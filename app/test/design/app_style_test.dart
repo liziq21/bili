@@ -1,4 +1,4 @@
-import 'package:app/styles/styles.dart';
+import 'package:app/design/design.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

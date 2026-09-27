@@ -15,7 +15,7 @@ import 'app_scaffold.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/media_sources_provider.dart';
 import 'providers/repo_providers.dart';
-import 'styles/styles.dart';
+import 'design/design.dart';
 
 void main() {
   initDebugOverlayBridge();

@@ -11,7 +11,7 @@ import 'package:youtube/youtube.dart';
 import 'app_bloc.dart';
 import 'l10n/localization_file/app_localizations.dart';
 import 'routing/router.dart';
-import 'theme_wrapper.dart';
+import 'design/design.dart';
 
 const double windowWidth = 360;
 const double windowHeight = 640;

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:app/app_scaffold.dart';
 import 'package:app/main.dart';
-import 'package:app/styles/colors.dart';
+import 'package:app/design/design.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,38 +14,38 @@ import 'package:material_ui/material_ui.dart';
 /// regardless of the active theme. These tests pin both halves of the fix:
 /// light values must not drift, and dark mode must actually resolve.
 void main() {
-  group('AppColors light palette', () {
+  group('BrandPalette light values', () {
     // Byte-exact: the light values are the ones that were in use before the
     // fix, and the recorded golden images depend on them. Any drift here
     // shows up as a golden diff.
-    final light = AppColors(isDark: false);
-    final dark = AppColors(isDark: true);
+    final light = AppColors(BrandPalette.of(Brightness.light));
+    final dark = AppColors(BrandPalette.of(Brightness.dark));
 
     test('keeps the original light values unchanged', () {
-      expect(light.offWhite, const Color(0xFFF8ECE5));
-      expect(light.black, const Color(0xFF1E1B18));
-      expect(light.body, const Color(0xFF514F4D));
-      expect(light.caption, const Color(0xFF7D7873));
-      expect(light.accent1, const Color(0xFFE4935D));
-      expect(light.accent2, const Color(0xFFBEABA1));
-      expect(light.accent3, const Color(0xFFC47642));
-      expect(light.greyStrong, const Color(0xFF272625));
-      expect(light.greyMedium, const Color(0xFF9D9995));
+      expect(light.surface, const Color(0xFFF8ECE5));
+      expect(light.onSurfaceStrong, const Color(0xFF1E1B18));
+      expect(light.onSurface, const Color(0xFF514F4D));
+      expect(light.onSurfaceVariant, const Color(0xFF7D7873));
+      expect(light.accentFill, const Color(0xFFE4935D));
+      expect(light.secondary, const Color(0xFFBEABA1));
+      expect(light.tertiary, const Color(0xFFC47642));
+      expect(light.surfaceContainerHighest, const Color(0xFF272625));
+      expect(light.outline, const Color(0xFF9D9995));
     });
 
     test('swaps foreground and background in dark mode', () {
-      // offWhite is used as a page background; black is used as text. They
-      // must trade places, otherwise the video screen stays near-white.
-      expect(dark.offWhite, const Color(0xFF1E1B18));
-      expect(dark.black, const Color(0xFFF8ECE5));
+      // surface is the page background; onSurfaceStrong is text. They must
+      // trade places, otherwise the video screen stays near-white.
+      expect(dark.surface, const Color(0xFF1E1B18));
+      expect(dark.onSurfaceStrong, const Color(0xFFF8ECE5));
     });
 
     test('lifts muted text above the dark surface', () {
       // WCAG AA (4.5:1) against #1E1B18:
       // body ~13:1, caption ~6.9:1, accent1 ~6.5:1.
-      expect(dark.body, const Color(0xFFE5E0DC));
-      expect(dark.caption, const Color(0xFFA8A29D));
-      expect(dark.accent1, const Color(0xFFEFA97C));
+      expect(dark.onSurface, const Color(0xFFE5E0DC));
+      expect(dark.onSurfaceVariant, const Color(0xFFA8A29D));
+      expect(dark.accentFill, const Color(0xFFEFA97C));
     });
   });
 
@@ -60,7 +60,7 @@ void main() {
                 child: Builder(
                   builder: (context) => Text(
                     'probe',
-                    style: TextStyle(color: $styles.colors.body),
+                    style: TextStyle(color: $styles.colors.onSurface),
                   ),
                 ),
               ),
@@ -72,16 +72,16 @@ void main() {
       await pump(tester, ThemeData.dark());
       // `$styles` is a mutable static refreshed during AppScaffold.build(), so
       // it must only be read from inside a Builder that runs afterwards.
-      expect($styles.colors.offWhite, const Color(0xFF1E1B18));
-      expect($styles.colors.body, const Color(0xFFE5E0DC));
+      expect($styles.colors.surface, const Color(0xFF1E1B18));
+      expect($styles.colors.onSurface, const Color(0xFFE5E0DC));
     });
 
     testWidgets('resolves the light palette under a light theme', (
       tester,
     ) async {
       await pump(tester, ThemeData.light());
-      expect($styles.colors.offWhite, const Color(0xFFF8ECE5));
-      expect($styles.colors.body, const Color(0xFF514F4D));
+      expect($styles.colors.surface, const Color(0xFFF8ECE5));
+      expect($styles.colors.onSurface, const Color(0xFF514F4D));
     });
   });
 
@@ -107,7 +107,7 @@ void main() {
         builder: (context) {
           Theme.of(context); // the same opt-in the page now makes
           return ColoredBox(
-            color: $styles.colors.offWhite,
+            color: $styles.colors.surface,
             child: const SizedBox.expand(),
           );
         },
@@ -156,8 +156,8 @@ void main() {
   });
 
   group('scrim surface token', () {
-    final light = AppColors(isDark: false);
-    final dark = AppColors(isDark: true);
+    final light = AppColors(BrandPalette.of(Brightness.light));
+    final dark = AppColors(BrandPalette.of(Brightness.dark));
 
     test('stays dark in both brightnesses', () {
       // 视频占位底、日志面板、渐变遮罩、时长标签底——这些位置两种亮度下
@@ -176,7 +176,7 @@ void main() {
       // 暗色页面里出现一块比周围更亮的承载面会像在发光。
       expect(
         dark.scrim.computeLuminance(),
-        lessThan(dark.offWhite.computeLuminance()),
+        lessThan(dark.surface.computeLuminance()),
       );
     });
 
@@ -193,10 +193,10 @@ void main() {
       }
     });
 
-    test('differs from black, which stays a foreground token', () {
-      // black 是前景语义，暗色下反转为浅色；scrim 是背景语义，恒深。
+    test('differs from the strong foreground, which inverts', () {
+      // onSurfaceStrong 是前景语义，暗色下反转为浅色；scrim 是背景语义，恒深。
       // 两者混用是这次缺陷的根因，测试钉住它们的区别。
-      expect(dark.black.computeLuminance(), greaterThan(0.5));
+      expect(dark.onSurfaceStrong.computeLuminance(), greaterThan(0.5));
       expect(dark.scrim.computeLuminance(), lessThan(0.1));
     });
   });
@@ -210,11 +210,11 @@ void main() {
     }
 
     test('clears WCAG AA against the primary in both brightnesses', () {
-      // accent1 在两种亮度下都是浅色（#E4935D / #EFA97C），白色前景只有
+      // 强调色在两种亮度下都是浅色（#E4935D / #EFA97C），白色前景只有
       // 2.4:1 / 2.0:1。搜索结果页筛选栏的 FilledButton 就是这个组合，
       // 文字实际读不出来。
-      for (final c in [AppColors(isDark: false), AppColors(isDark: true)]) {
-        final scheme = c.toThemeData().colorScheme;
+      for (final c in [AppColors(BrandPalette.of(Brightness.light)), AppColors(BrandPalette.of(Brightness.dark))]) {
+        final scheme = appThemeData(c).colorScheme;
         for (final pair in [
           (fg: scheme.onPrimary, bg: scheme.primary),
           (fg: scheme.onSecondary, bg: scheme.secondary),
@@ -224,7 +224,7 @@ void main() {
             ratio,
             greaterThan(4.5),
             reason:
-                'onPrimary/onSecondary 压 accent1 需 > 4.5:1，'
+                'onPrimary/onSecondary 压强调色需 > 4.5:1，'
                 '实际 $ratio（fg ${pair.fg.toARGB32()} on bg ${pair.bg.toARGB32()}）',
           );
         }
@@ -234,8 +234,8 @@ void main() {
     test('is not the light white it replaced', () {
       // 钉住「不再是白字」：白字那一版虽然也是 bug，但如果哪天有人把
       // accent1 调深了，这条会先于对比度断言提醒他前景色需要重新评估。
-      final dark = AppColors(isDark: true);
-      expect(dark.toThemeData().colorScheme.onPrimary, isNot(Colors.white));
+      final dark = AppColors(BrandPalette.of(Brightness.dark));
+      expect(appThemeData(dark).colorScheme.onPrimary, isNot(Colors.white));
     });
   });
 }

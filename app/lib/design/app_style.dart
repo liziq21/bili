@@ -2,10 +2,12 @@
 
 import 'package:material_ui/material_ui.dart';
 
-import 'colors.dart';
+import 'app_colors.dart';
+import 'brand_palette.dart';
 
-export 'colors.dart';
-
+/// 排版尺度、圆角、间距、动效时长。与颜色无关的部分。
+///
+/// 颜色一律走 [colors]（R2/R4），本类不持有色值。
 @immutable
 class AppStyle({
   Size? screenSize,
@@ -31,8 +33,14 @@ class AppStyle({
 
   late final double scale;
 
+  /// 品牌色板（R1 的唯一来源）。[isDark] 由 `AppScaffold` 从真实的
+  /// `Theme.of(context).brightness` 传入（R3：亮度只有这一个来源）。
+  late final BrandPalette palette = BrandPalette.of(
+    isDark ? Brightness.dark : Brightness.light,
+  );
+
   /// The current theme colors for the app
-  late final AppColors colors = AppColors(isDark: isDark);
+  late final AppColors colors = AppColors(palette);
 
   /// Rounded edge corner radii
   late final _Corners corners = const _Corners();
@@ -48,28 +56,27 @@ class AppStyle({
 }
 
 class _Text(final double _scale) {
-  /// 字体族已按 R6 全部删除。仓库从未 bundle 任何字体文件（0 个 `.ttf`/`.otf`），
-  /// 从前声明的 6 个族——Tenor / B612Mono / Cinzel / MaShanZheng / Yeseva /
-  /// Raleway——在每个平台都静默回落到系统字体。半死的配置比没有配置更糟：
-  /// 读代码的人以为换了字体，实际什么都没变。
+  /// 字体族声明已按 R6 全部移除。
   ///
-  /// 字体族现在由 Material `textTheme` 决定，但**机制不在 `AppScaffold`**：
-  /// `AppScaffold` 用的是 `DefaultTextStyle(style:)`，那是**替换**而非合并，
-  /// 它自己不带 `fontFamily`。真正把主题字体族送到普通 `Text` 的是
-  /// `Material` 内部那层 `AnimatedDefaultTextStyle(theme.textTheme.bodyMedium)`
-  /// （`material.dart:476`）。因为 `Material` 位于 `AppScaffold` 之下、对
-  /// `Text` 更近，`AppScaffold` 这层只对 `Material` 之外的 widget 生效
-  /// （Hero 飞行等）。
+  /// 移除依据：仓库未声明任何字体资源（`pubspec.yaml` 无 `fonts:` 块，仓库内
+  /// 无 `.ttf`/`.otf` 文件）。原先声明的 Tenor / B612Mono / Cinzel /
+  /// MaShanZheng / Yeseva / Raleway 六个族在所有平台均无法解析，实际生效的
+  /// 均为平台默认字体。保留无法解析的族声明只会使代码与实际渲染不一致。
   ///
-  /// 实测确认：主题声明 `fontFamily` 时，`Scaffold` 内的普通 `Text` 拿到的
-  /// 就是主题的族，与 `AppScaffold` 这层无关。
+  /// 移除后的生效路径：由 `Material` 创建的
+  /// `AnimatedDefaultTextStyle(style: theme.textTheme.bodyMedium)` 提供
+  /// （`material.dart:476`）。`AppScaffold` 的
+  /// `DefaultTextStyle(style: $styles.text.body)` 是整体替换上层样式、不与
+  /// 之合并，其自身不含 `fontFamily`；且 `Material` 位于 `AppScaffold` 之下、
+  /// 对 `Text` 更近，故该层仅对 `Material` 之外的 widget 生效（Hero 飞行等）。
+  /// 实测：主题声明 `fontFamily` 时，`Scaffold` 内未显式指定 `style` 的
+  /// `Text` 取到的即主题声明的族。
   ///
-  /// [baseKern] 保留了原先只挂在 Raleway 上的 `kern` 特性。**它不是可以顺手
-  /// 一起删的死配置**：实测（用 SDK 自带 Roboto 经 `FontLoader` 装载后逐字形
-  /// 比对 caret 位置）开启 `kern` 会让 23 个字形里的 22 个发生位移，
-  /// fontSize 40 时最大差约 15px。而 h3 / title2 原先走 Tenor、本就没有这个
-  /// 特性，所以这里保留两个基底，而不是统一成一个——统一任一方向都会改变
-  /// 真实设备的渲染结果。
+  /// [baseKern] 保留 `kern` 特性。依据：在 `flutter_test` 中以 `FontLoader`
+  /// 装载 SDK 自带 Roboto、fontSize 40 的条件下逐字形比对 caret 位置，开启
+  /// `kern` 使 23 个字形中的 22 个发生位移，最大位移约 15px。`h3` / `title2`
+  /// 原先走 Tenor、不带该特性，故保留 [base] 与 [baseKern] 两个基底而不合并
+  /// 为一个：任一方向的合并都会改变真实设备上的渲染结果。
   static const TextStyle base = TextStyle();
 
   static const TextStyle baseKern = TextStyle(
