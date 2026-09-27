@@ -37,4 +37,4 @@
 - fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。
 - 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
 - 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- CI 只运行离线 `dart test`；禁止在单元测试或 CI 中访问真实 YouTube 服务。
+- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的测试步骤只跑 `app/`，不覆盖本包，因此每次改动本包都要在包目录本地跑 `dart test` 并确认全绿。
