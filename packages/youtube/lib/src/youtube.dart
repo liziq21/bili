@@ -10,8 +10,7 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
     implements MediaSource {
   this
     : _youtubeService =
-          youtubeService ??
-          YoutubeService(httpClient: httpClient ?? client);
+          youtubeService ?? YoutubeService(httpClient: httpClient ?? client);
 
   static http.Client? client;
 

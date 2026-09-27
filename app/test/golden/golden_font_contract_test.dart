@@ -62,7 +62,9 @@ void main() {
       );
     });
 
-    testWidgets('the effective font draws every glyph 1em wide', (tester) async {
+    testWidgets('the effective font draws every glyph 1em wide', (
+      tester,
+    ) async {
       // 第 3 环的签名，也是基线里文字长成这样的原因。等宽方块字体对 'i' 和
       // 'W' 一视同仁；任何真字体的这两个宽度都差好几倍。
       for (final glyph in ['i', 'W', 'M', '-', '1', '8']) {

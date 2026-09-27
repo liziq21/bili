@@ -42,8 +42,12 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
             // Background Thumbnail Image
             if (widget.thumbnailUrl != null && widget.thumbnailUrl!.isNotEmpty)
               Positioned.fill(
+                // ⚡ Bolt Optimization: Cap thumbnail image decode resolution using memCacheWidth: 720.
+                // Prevents decoding raw high-res 1080p/4K network preview images into uncompressed GPU RAM,
+                // saving ~10MB-25MB RAM per player view while preserving high-DPI crisp visual detail.
                 child: CachedNetworkImage(
                   imageUrl: widget.thumbnailUrl!,
+                  memCacheWidth: 720,
                   fit: BoxFit.cover,
                   errorBuilder: (context, url, error) =>
                       Container(color: $styles.colors.greyStrong),

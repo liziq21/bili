@@ -95,7 +95,9 @@ void main() {
     // The probe stands in for `VideoScreen`, which is the single entry point
     // every `$styles.colors.*` read in the video feature hangs off, and it
     // declares a `Theme.of(context)` dependency exactly as the fix does.
-    testWidgets('re-reads the palette after a light → dark flip', (tester) async {
+    testWidgets('re-reads the palette after a light → dark flip', (
+      tester,
+    ) async {
       final mode = ValueNotifier(ThemeMode.light);
       addTearDown(mode.dispose);
 
@@ -172,7 +174,10 @@ void main() {
 
     test('dark mode is darker than the page surface', () {
       // 暗色页面里出现一块比周围更亮的承载面会像在发光。
-      expect(dark.scrim.computeLuminance(), lessThan(dark.offWhite.computeLuminance()));
+      expect(
+        dark.scrim.computeLuminance(),
+        lessThan(dark.offWhite.computeLuminance()),
+      );
     });
 
     test('carries white foreground above WCAG AA', () {
@@ -180,7 +185,11 @@ void main() {
       // WCAG 相对亮度对比度：(L_较亮 + 0.05) / (L_较暗 + 0.05)，白色 L = 1.0。
       for (final c in [light.scrim, dark.scrim]) {
         final ratio = (1.0 + 0.05) / (c.computeLuminance() + 0.05);
-        expect(ratio, greaterThan(4.5), reason: '白字压 scrim 需 > 4.5:1，实际 $ratio');
+        expect(
+          ratio,
+          greaterThan(4.5),
+          reason: '白字压 scrim 需 > 4.5:1，实际 $ratio',
+        );
       }
     });
 
