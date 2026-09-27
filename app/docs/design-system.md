@@ -10,7 +10,7 @@
 |---|---|
 | D1 | `toThemeData()` **接进生产**，设计系统拥有 ColorScheme。DynamicColor 保留并作为**首选**，当前品牌色作不支持动态色设备的 fallback |
 | D2 | 色 token 一律**角色命名**，外观名（black / white / offWhite / greyMedium / accent1 等）禁止出现 |
-| D3 | 硬编码色用 **custom_lint** 规则治（`analysis_options.yaml` 的 `plugins:` 块保留） |
+| D3 | 硬编码色用 **custom_lint** 规则治（规则经 `analysis_options.yaml` 的 `plugins:` 块接入） |
 | D4 | 字体六族**不配置**，文字退回系统字体 |
 | D5 | 亮色色板**重新取值**，接受亮色观感变化；放弃「亮色取值逐字节不变」这一性质 |
 | D6 | DynamicColor 开启时自研 widget 跟随壁纸色相；**同屏出现两种以上不受壁纸色相约束的强调色相属缺陷** |
