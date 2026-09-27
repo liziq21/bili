@@ -136,7 +136,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   Future<T> _getData(SharedPreferencesAsync pref) async {
     final Future<Object?> data = switch (T) {
       const (String) => pref.getString(name),
-      _ when T.toString() == 'String?' => pref.getString(name),
       const (bool) => pref.getBool(name),
       const (int) => pref.getInt(name),
       const (double) => pref.getDouble(name),
