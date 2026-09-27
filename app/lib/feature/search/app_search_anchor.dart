@@ -93,23 +93,23 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
       selector: (state) => state.recentSearchQueries,
       builder: (_, state) {
         final anchor = widget.builder == null
-              ? SearchAnchor.bar(
-                  searchController: _controller,
-                  barHintText: '搜索...',
-                  barElevation: const WidgetStatePropertyAll(0.0),
-                  suggestionsBuilder: _getSuggestions,
-                  textInputAction: .search,
-                  onSubmitted: _handleSearch,
-                  onChanged: _handleViewChanged,
-                )
-              : SearchAnchor(
-                  searchController: _controller,
-                  builder: widget.builder!,
-                  suggestionsBuilder: _getSuggestions,
-                  textInputAction: .search,
-                  viewOnSubmitted: _handleSearch,
-                  viewOnChanged: _handleViewChanged,
-                );
+            ? SearchAnchor.bar(
+                searchController: _controller,
+                barHintText: '搜索...',
+                barElevation: const WidgetStatePropertyAll(0.0),
+                suggestionsBuilder: _getSuggestions,
+                textInputAction: .search,
+                onSubmitted: _handleSearch,
+                onChanged: _handleViewChanged,
+              )
+            : SearchAnchor(
+                searchController: _controller,
+                builder: widget.builder!,
+                suggestionsBuilder: _getSuggestions,
+                textInputAction: .search,
+                viewOnSubmitted: _handleSearch,
+                viewOnChanged: _handleViewChanged,
+              );
 
         // bar 模式自带一个 TextField，用 descendantsAreFocusable: false 避免
         // 它参与外层 Tab 序列。图标模式相反——那个 IconButton 必须能被键盘

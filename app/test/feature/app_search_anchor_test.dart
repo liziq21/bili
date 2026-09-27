@@ -199,11 +199,7 @@ void main() {
         .widgetList<FocusScope>(find.byType(FocusScope))
         .where((s) => s.descendantsAreFocusable == false)
         .toList();
-    expect(
-      blockingScopes,
-      isEmpty,
-      reason: '图标模式不应禁用子节点聚焦，否则键盘用户打不开搜索',
-    );
+    expect(blockingScopes, isEmpty, reason: '图标模式不应禁用子节点聚焦，否则键盘用户打不开搜索');
 
     // 浮层没打开时没有输入框
     expect(find.byType(TextField), findsNothing);
@@ -226,11 +222,7 @@ void main() {
     // 「焦点落在某个控件上」——后者在别的控件拿到焦点时也会通过。
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await pumpPastDebounce(tester);
-    expect(
-      find.byType(TextField),
-      findsWidgets,
-      reason: '回车应打开搜索浮层',
-    );
+    expect(find.byType(TextField), findsWidgets, reason: '回车应打开搜索浮层');
   });
 
   testWidgets('bar mode view also truncates to maxQueryLength', (tester) async {
