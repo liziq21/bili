@@ -66,6 +66,10 @@ dev_dependencies:
   # instead of primary constructor syntax (class const Foo({...}) extends ...).
   go_router_builder: ^4.5.0
   alchemist: ^0.14.0
+  # Transitive dependency of flutter_test, declared here because
+  # app/test/flutter_test_config.dart imports it directly to enable leak
+  # tracking. Version constraint matches the one flutter_test pins.
+  leak_tracker_flutter_testing: ^3.0.10
   network_image_mock: ^2.1.1
   path_provider_platform_interface: ^2.1.3
 
