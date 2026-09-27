@@ -17,16 +17,7 @@ class const VideoPlayerPlaceholder({
 class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
   bool _isPlaying = false;
   double _progress = 0.25;
-  bool _showSourcePopover = false;
-  String _selectedSource = 'B站 官方原生源 (4K)';
   String _selectedQuality = '4K 60FPS';
-
-  final List<Map<String, String>> _sources = [
-    {'name': 'B站 官方原生源 (4K)', 'ping': '24ms'},
-    {'name': 'YouTube 镜像 (1080P)', 'ping': '118ms'},
-    {'name': 'P2P 节点分布式加速', 'ping': '45ms'},
-    {'name': 'RSS 直连媒体流 (WebM)', 'ping': '62ms'},
-  ];
 
   final List<String> _qualities = ['4K 60FPS', '1080P 高码率', '720P', '480P'];
 
@@ -76,7 +67,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
               ),
             ),
 
-            // Top Control Bar (Back, Title Preview, Source Switcher)
+            // Top Control Bar (Back, Title Preview)
             Positioned(
               top: 8,
               left: 12,
@@ -103,59 +94,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                       ),
                     ),
                   ),
-                  const Gap(8),
-                  // Multi-Source Switcher Button
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _showSourcePopover = !_showSourcePopover;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: $styles.insets.xs,
-                        vertical: $styles.insets.xxs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: $styles.colors.surfaceContainerHighest.withValues(
-                          alpha: 0.85,
-                        ),
-                        borderRadius: BorderRadius.circular($styles.corners.lg),
-                        border: Border.all(
-                          color: $styles.colors.accentFill.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: $styles.colors.accentFill,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const Gap(6),
-                          Text(
-                            _selectedSource.split(' ').first,
-                            style: $styles.text.btn.copyWith(
-                              color: $styles.colors.onScrim,
-                              fontSize: 11,
-                            ),
-                          ),
-                          const Gap(2),
-                          Icon(
-                            _showSourcePopover
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                            size: 16,
-                            color: $styles.colors.onScrim,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -173,128 +111,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                 });
               },
             ),
-
-            // Source Switcher Popover Overlay
-            if (_showSourcePopover)
-              Positioned(
-                top: 48,
-                right: 12,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    width: 240,
-                    padding: EdgeInsets.all($styles.insets.xs),
-                    decoration: BoxDecoration(
-                      color: $styles.colors.scrim.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular($styles.corners.md),
-                      border: Border.all(
-                        color: $styles.colors.accentFill.withValues(alpha: 0.3),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '多源分流线路',
-                              style: $styles.text.bodySmallBold.copyWith(
-                                color: $styles.colors.secondary,
-                                fontSize: 11,
-                              ),
-                            ),
-                            Text(
-                              '自动优选: 极速',
-                              style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.accentText,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 12),
-                        ..._sources.map((src) {
-                          final isSelected = src['name'] == _selectedSource;
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedSource = src['name']!;
-                                _showSourcePopover = false;
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(
-                              $styles.corners.sm,
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: $styles.insets.xxs,
-                                vertical: $styles.insets.xxs,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isSelected
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_unchecked,
-                                          size: 14,
-                                          color: isSelected
-                                              ? $styles.colors.accentFill
-                                              : $styles.colors.outline,
-                                        ),
-                                        const Gap(6),
-                                        Expanded(
-                                          child: Text(
-                                            src['name']!,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: $styles.text.bodySmall
-                                                .copyWith(
-                                                  color: isSelected
-                                                      ? $styles.colors.accentText
-                                                      : $styles.colors.onScrim,
-                                                  fontSize: 11,
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    src['ping']!,
-                                    style: $styles.text.bodySmall.copyWith(
-                                      color: isSelected
-                                          ? $styles.colors.accentText
-                                          : $styles.colors.onSurfaceVariant,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
 
             // Bottom Player Control Bar
             Positioned(

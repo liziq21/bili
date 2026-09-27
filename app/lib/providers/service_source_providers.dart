@@ -27,26 +27,35 @@ class const ServiceSourceProviders({
   required final Widget child,
 }) extends StatelessWidget {
   /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
-  MediaSource? _createMediaSource(String sourceName) =>
+  ///
+  /// 未知标识直接抛错而非返回 null：返回 null 会让子树在缺少 Repository 的情况下
+  /// 继续构建，错误改到离病因很远的 `context.read<...>()` 才暴露成
+  /// ProviderNotFoundException，无法回溯到是哪个标识没被注册。
+  MediaSource _createMediaSource(String sourceName) =>
       switch (sourceName.toLowerCase()) {
         'bilibili' => Bili(),
         'youtube' => YouTube(),
-        _ => null,
+        _ => throw ArgumentError.value(
+          sourceName,
+          'sourceName',
+          '未知数据源标识（已注册：bilibili、youtube）',
+        ),
       };
 
   @override
   Widget build(BuildContext context) {
+    // 仅「String provider 未注册」时按需注入；其它异常不得吞掉。
+    String? currentSource;
     try {
-      final currentSource = context.read<String?>();
-      if (currentSource?.toLowerCase() == source.toLowerCase()) {
-        return child;
-      }
-    } catch (_) {}
-
-    final mediaSource = _createMediaSource(source);
-    if (mediaSource == null) {
+      currentSource = context.read<String?>();
+    } on ProviderNotFoundException {
+      currentSource = null;
+    }
+    if (currentSource?.toLowerCase() == source.toLowerCase()) {
       return child;
     }
+
+    final mediaSource = _createMediaSource(source);
 
     return RepositoryProvider<String>.value(
       value: source,

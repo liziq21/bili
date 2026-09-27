@@ -44,10 +44,9 @@ class const HomeScreen({
     required String title,
     required String labelText,
     required String hintText,
-    required String defaultId,
     required ValueChanged<String> onSubmit,
   }) async {
-    final controller = TextEditingController(text: defaultId);
+    final controller = TextEditingController();
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -117,7 +116,6 @@ class const HomeScreen({
           builder: (context, sourceId) {
             final activeSource = context.read<HomeBloc>().activeSource!;
             final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
-            final isCreatorSource = activeSource.id == 'bilibili';
             // 搜索入口复用 AppSearchAnchor 的建议浮层，它依赖 SearchBloc；
             // 数据源没有建议能力时不提供该 bloc，因此这里也不显示搜索入口。
             final hasSearchSuggest =
@@ -155,8 +153,7 @@ class const HomeScreen({
                       context: context,
                       title: '直达直播间',
                       labelText: '请输入直播间 Room ID：',
-                      hintText: '例如 230023',
-                      defaultId: '230023',
+                      hintText: '直播间号',
                       onSubmit: onLive,
                     ),
                   ),
@@ -165,13 +162,12 @@ class const HomeScreen({
                     Icons.account_circle_outlined,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  tooltip: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
+                  tooltip: '访问创作者空间',
                   onPressed: () => _showIdInputDialog(
                     context: context,
-                    title: isCreatorSource ? '访问 UP主空间' : '访问创作者频道',
-                    labelText: '请输入 MID 或频道 ID：',
-                    hintText: isCreatorSource ? '例如 188339' : '频道 ID',
-                    defaultId: isCreatorSource ? '188339' : '',
+                    title: '访问创作者空间',
+                    labelText: '请输入创作者 ID：',
+                    hintText: '创作者 ID',
                     onSubmit: onSpace,
                   ),
                 ),

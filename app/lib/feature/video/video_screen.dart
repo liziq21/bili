@@ -48,7 +48,7 @@ class const _VideoContent({required final String videoId})
 
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayerPlaceholder.
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower
-    // layout tree (DefaultTabController, TabBar, TabBarView, VideoCommentsView, _SourceLogsView).
+    // layout tree (DefaultTabController, TabBar, TabBarView, VideoCommentsView).
     // Saves ~2-4ms per frame emission during video detail state changes.
     return Column(
       children: [
@@ -106,7 +106,6 @@ class const _VideoContent({required final String videoId})
               tabs: const [
                 Tab(text: '简介与相关'),
                 Tab(text: '评论区 (1,429)'),
-                Tab(text: '源参数/日志'),
               ],
             ),
           ),
@@ -115,52 +114,11 @@ class const _VideoContent({required final String videoId})
               children: [
                 VideoInfoView(),
                 VideoCommentsView(),
-                _SourceLogsView(),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class const _SourceLogsView() extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.all($styles.insets.sm),
-      children: [
-        Text(
-          '多源引擎与分流状态日志',
-          style: $styles.text.title2.copyWith(
-            color: $styles.colors.onSurfaceStrong,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: EdgeInsets.all($styles.insets.xs),
-          decoration: BoxDecoration(
-            color: $styles.colors.scrim,
-            borderRadius: BorderRadius.circular($styles.corners.sm),
-          ),
-          child: Text(
-            '[SYS] Engine: Impeller / Vulkan Backend\n'
-            '[SRC] Selected Primary Source: Bilibili Native (CDN-SH-01)\n'
-            '[NET] Ping: 24ms | Bandwidth: 82.4 Mbps\n'
-            '[DEC] Video: H.265 / 4K 60fps | Audio: AAC 320kbps\n'
-            '[SYNC] PeerTube fallback mirror initialized (Standing by)\n'
-            '[STATUS] Playback Smooth, 0 Dropped Frames.',
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.accentText,
-              fontFamily: 'B612Mono',
-              fontSize: 11,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

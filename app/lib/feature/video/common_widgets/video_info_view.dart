@@ -527,13 +527,6 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     ),
                   ],
                 ),
-                Text(
-                  '聚合源: Bilibili / YT / Pod',
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                ),
               ],
             ),
             Gap($styles.insets.xs),

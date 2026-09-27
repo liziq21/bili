@@ -22,7 +22,8 @@ class HomeBloc({
   this
     : _userDataRepository = userDataRepository,
       _mediaSources = mediaSources,
-      super(const HomeState()) {
+      // 数据源清单由 DI 注入，可能为空；此时用空标识而不是崩溃或写死某个服务名。
+      super(HomeState(sourceId: mediaSources.isEmpty ? '' : mediaSources.first.id)) {
     on<_UserDataChanged>(_onUserDataChanged);
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
