@@ -14,6 +14,9 @@ For directory-specific guidelines, refer to:
 For a guided walkthrough of the architecture — one request traced from the widget down to the HTTP call, with the official documentation each principle comes from — see:
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).
 
+For how the repository is split into packages, which dependency directions are allowed, and why the boundaries fall where they do — see:
+- [`docs/modularization-learning-journey.md`](docs/modularization-learning-journey.md).
+
 ## Universal Development Guidelines
 
 ### Language Flexibility
