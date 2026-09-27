@@ -11,6 +11,12 @@ For directory-specific guidelines, refer to:
 - [`app/AGENTS.md`](app/AGENTS.md) for application layer, Drift database, caching, UI styles, dependency injection, and app tooling commands.
 - [`packages/AGENTS.md`](packages/AGENTS.md) for package classification, data layer models, remote data sources, and package tooling commands.
 
+For a guided walkthrough of the architecture — one request traced from the widget down to the HTTP call, with the official documentation each principle comes from — see:
+- [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).
+
+For how the repository is split into packages, which dependency directions are allowed, and why the boundaries fall where they do — see:
+- [`docs/modularization-learning-journey.md`](docs/modularization-learning-journey.md).
+
 ## Universal Development Guidelines
 
 ### Language Flexibility
