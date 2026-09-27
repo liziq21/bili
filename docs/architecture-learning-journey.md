@@ -46,7 +46,7 @@ Flutter 官方的架构文档把应用切成 UI 层与数据层，复杂应用�
 | 9 | 合并进 section 并发新状态 | `emit(_replaceVideoSection(_merge(current, result, pageKey: pageKey)))` |
 | 10 | 请求全部返回后收起刷新态 | `if (state.isRefreshing) emit(state.copyWith(isRefreshing: false))` |
 
-第 8 步值得单独看一眼。快速切服务源时，先发的请求后回来，如果不做版本检查，旧响应会覆盖新服务源的数据——这是「界面显示的和用户选的不一致」这类 bug 的典型成因。
+第 8 步值得单独看一眼。这里的两个检查解决的是两件事：`activeSource?.id != sourceId` 丢弃服务源从 A 切到 B 之后才返回的 A 响应；请求版本检查丢弃同一类 feed、同一 `feed.id` 上被更新请求取代的旧响应。缺少后者时，旧响应可能覆盖较新的请求结果。
 
 ## 4. 数据层
 
@@ -60,6 +60,8 @@ Flutter 官方的架构文档把应用切成 UI 层与数据层，复杂应用�
 abstract interface class VideoDetailRepository() {
   Future<Result<VideoDetail>> getVideoDetail(String id);
   Future<Result<bool>> toggleLike(String id, bool isLiked);
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited);
+  Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed);
 }
 
 class AppVideoDetailRepository([...]) implements VideoDetailRepository { ... }
@@ -85,7 +87,7 @@ final class const Ok<T>._(final T value) extends Result<T> { }
 final class const Error<T>._(final Exception error) extends Result<T> { }
 ```
 
-所有仓库方法返回 `Future<Result<T>>` 而不是抛异常。
+面向远端数据的仓库方法返回 `Future<Result<T>>` 而不是抛异常。这不是全仓库无例外的规则——`RecentSearchQueryRepository.getRecentSearchQueries` 返回的是 `Stream<List<RecentSearchQuery>>`，因为搜索历史需要随数据变化持续推送，不是一次取值。
 
 **官方**：Flutter 架构文档提到「Result 是一个包装异步调用的工具类，让处理错误和管理依赖异步调用的 UI 状态变得容易。**这个模式是推荐，不是要求**」（[Data layer case study](https://docs.flutter.dev/app-architecture/case-study/data-layer)）。
 

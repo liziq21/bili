@@ -32,7 +32,7 @@ graph TD
   bilibili["packages/bilibili<br/>B 站客户端"]
   youtube["packages/youtube<br/>YouTube 客户端"]
   data["packages/data<br/>模型与远端数据源抽象"]
-  model["packages/model<br/">UserData / Result&lt;T&gt;"]
+  model["packages/model<br/>UserData、Result"]
   components["packages/components<br/>UI 组件库"]
   bpi["packages/bilibili/bpi<br/>B 站 API 客户端"]
   ypi["packages/youtube/ypi<br/>YouTube API 客户端"]
@@ -108,9 +108,9 @@ graph TD
 
 同一页还说明，flutter_test 默认用 Ahem 字体（把每个字符画成实心方块），并给了用 `FontLoader` 在 `flutter_test_config.dart` 里加载固定字体的做法。
 
-结论：跨平台提交一张基线 PNG 在原生机制下不成立。bili 用 alchemist 的 CI goldens——固定字体 + 把文字替换成纯色块，让同一张 PNG 在 macOS / Linux / Windows 上渲染出完全相同的字节，差异阈值设为 0。`app/test/flutter_test_config.dart` 显式关掉了 platform goldens。
+本仓库没有启用原生 `platform goldens`，因此用 alchemist 的 CI goldens 作为跨平台基线：CI goldens 走 Ahem 字体并把文字遮蔽成纯色块，`app/test/flutter_test_config.dart` 把 `platformGoldens` 设为 `false`、`diffThreshold` 设为 `0.01`。
 
-**截图基线由 CI 产出，不从工作机提交。** 详见根 `AGENTS.md` 的 `Screenshot Tests` 一节。
+这是本仓库的选择，不代表原生 golden 加载固定字体后就无法共享一张基线 PNG——官方文档给的就是 `FontLoader` 这条路。要注意的是 `0.01` 是**比较容差**：截图测试通过不等于逐像素相等。
 
 ## 8. 演进说明
 
@@ -119,7 +119,7 @@ graph TD
 - 粒度会随规模变化。`data` 和 `model` 现在都很小，如果它们继续各自只有一个文件，合并成一个包会让依赖图少一层。
 - `packages/components` 目前没有任何包依赖它，全仓也没有一处 `import 'package:components/...'`。它在设计系统重构之后失去了引用者，删或留是待定的取舍。
 - **包级测试目前不在 CI 里跑。** CI 的测试步骤只有 `cd app && flutter test`。这四个包合计 81 个用例，改包之后必须本地跑过才算完。
-- 加新服务的流程是：新建 `packages/<service>/<abbr>` 放 API 客户端，在 `packages/data` 加能力接口，在 `packages/<service>` 实现，最后在 app 的服务清单里注册。不需要动根 `pubspec.yaml`——`packages/*` 的 glob 已经覆盖了。
+- 加新服务要动五处：新建 `packages/<service>/pubspec.yaml` 写 `resolution: workspace`；在 `packages/data` 加能力接口；在 `packages/<service>` 实现；若另有 API 客户端子包（如 `bpi`），在 `packages/<service>/pubspec.yaml` 里加嵌套 `workspace:` 把子包纳入；在 `app/pubspec.yaml` 加一条 path 依赖，并在 app 的服务清单里注册。**根 `pubspec.yaml` 的 `packages/*` 只覆盖顶层包**——glob 不递归，新包不需要动根文件，但子包要靠父包的嵌套声明。
 
 ## 9. 延伸阅读
 
