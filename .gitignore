@@ -104,3 +104,8 @@ coverage/
 
 # Widget Preview related
 .widget_preview/
+
+# Alchemist screenshot test artifacts. The CI goldens under
+# test/golden/goldens/ are deliberately committed; the diff output written on a
+# failed run is not.
+/app/test/golden/failures/
