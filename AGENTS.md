@@ -26,6 +26,13 @@ For directory-specific guidelines, refer to:
 ### Generated Files
 - 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。
 
+### Screenshot Tests
+
+- **Baselines are produced by CI, never by a workstation.** Do not record golden PNGs locally, do not commit them from a development machine, and never hand-edit a baseline. Re-recording happens in a CI run.
+- The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` disables platform goldens). They render with a fixed font and masked text so one committed PNG verifies byte-identically on macOS, Linux, and Windows. Do not switch to native `matchesGoldenFile` goldens, which are not reproducible across platforms.
+- A change that alters what a covered widget renders is not finished until CI has produced the new baseline and it has been committed from that run.
+- **Coverage limit**: a golden test proves only the widgets it renders, under the theme it records. Treating "the goldens did not change" as proof that no visible pixel changed anywhere is unsupported — anything outside a test's own `pumpWidget` tree is unverified.
+
 ### Dart Version & Syntax
 - Do not arbitrarily downgrade the Dart SDK version.
 - Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
