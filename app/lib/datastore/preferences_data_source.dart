@@ -121,6 +121,22 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
 }
 
 class const PreferencesKey<T>._(final String name, final T defaultValue) {
+  // TODO 写死的服务身份，违反 app/docs/design-system.md 的 R8「服务源无关性」：
+  // 数据的默认值不应由服务源决定。
+  //
+  // 实测（2026-09-27）：此处的默认值当前不可达。PreferencesKey.sourceId 全仓
+  // 仅被 DefaultUserDataRepository.setSourceId 用于 set()。读取走 data 流
+  // （PreferencesDataSource.data 的 onListen）→ _readAndEmitData →
+  // SharedPreferencesAsync.getAll() → UserData.fromJson；本类的 _getData
+  // 只服务 get() 与 streamOfSet()，不在该路径上。
+  //
+  // 真正生效的是另一处同值默认：UserData.sourceId，落到 packages/model 生成的
+  // _$UserDataFromJson（`?? 'bilibili'`）——首次安装、SharedPreferences
+  // 无 SOURCE_ID 时读到的就是它。迁移需同时处理两处。
+  //
+  // 改法未定，故本轮不处理：本文件属 datastore 层、UserData 属 model 包，
+  // 引用 providers 层的 defaultMediaSources 是跨层依赖；且 PreferencesKey 是
+  // static const，声明期无法求值，不能直接换成 defaultMediaSources.first.id。
   static const sourceId = PreferencesKey<String>._('SOURCE_ID', 'bilibili');
   static const themeConfig = PreferencesKey<String>._(
     'THEME_CONFIG',
