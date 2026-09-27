@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
-import '../../../design/design.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 
@@ -28,7 +27,6 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'BILIBILI',
       time: '4天前',
       duration: '12:40',
-      badgeColor: ServiceBrands.bilibili,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -38,7 +36,6 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'YOUTUBE',
       time: '1周前',
       duration: '18:15',
-      badgeColor: ServiceBrands.youtube,
       onTap: null,
     ),
     _RelatedVideoCard(
@@ -48,7 +45,6 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
       source: 'PEERTUBE / RSS',
       time: '3天前',
       duration: '45:20',
-      badgeColor: ServiceBrands.peerTube,
       onTap: null,
     ),
   ];
@@ -558,7 +554,6 @@ class const _RelatedVideoCard({
   required final String source,
   required final String time,
   required final String duration,
-  required final Color badgeColor,
   final VoidCallback? onTap,
 }) extends StatelessWidget {
   @override
@@ -658,13 +653,21 @@ class const _RelatedVideoCard({
                                 vertical: 1,
                               ),
                               decoration: BoxDecoration(
-                                color: badgeColor.withValues(alpha: 0.15),
+                                color: $styles.colors.onSurfaceVariant
+                                    .withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 source,
+                                // 文字用 onSurface 而非 onSurfaceVariant：chip 底色是
+                                // onSurfaceVariant 的 0.15 alpha 合成，文字若同用
+                                // onSurfaceVariant，亮色下实测 3.21:1（暗色 5.25:1），
+                                // 低于 9px 文字的 4.5:1 门槛。改 onSurface 后实测
+                                // 亮色 6.00:1、暗色 10.12:1。
+                                // 测量条件：WCAG 2.1 相对亮度公式，chip 底按
+                                // 0.15*onSurfaceVariant + 0.85*surface 合成。
                                 style: $styles.text.btn.copyWith(
-                                  color: badgeColor,
+                                  color: $styles.colors.onSurface,
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                 ),

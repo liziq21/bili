@@ -1,13 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
-/// 品牌 fallback 色板 —— R1 允许出现颜色字面量的两个文件之一。
+/// 品牌 fallback 色板 —— R1 允许出现颜色字面量的**唯一**文件。
 ///
-/// 这里是全应用色值的**唯一来源**（R1）。`AppColors` 只从本类取值，
+/// 这里是全应用色值的**单一来源**（R1）。`AppColors` 只从本类取值，
 /// 不持有任何字面量（R4）。
 ///
+/// R1 同时约束本文件的**内容**：不得出现按外部实体（服务源、页面、功能
+/// 模块、品牌方）命名的条目，只允许色值常量、`ColorScheme` 构造与
+/// `isDark` 分支取值。R8 禁止按服务源开条目。
+///
 /// 取值沿用接入 Wonderous 时的亮色设计，暗色为逐项配对值，未做任何重新调校。
-/// 重新取值的取舍见 `app/docs/design-system.md` §7.1；P3 才会真正改色，
-/// P2 的承诺是零像素变化。
+/// 重新取值的取舍见 `app/docs/design-system.md` §7.1；提值属 P3。
+/// P2 不主动改像素，但含两处缺陷修复，见该文档 §6。
 @immutable
 class const BrandPalette(
   /// Material 组件与自研 token 的共同真值（R4）。
