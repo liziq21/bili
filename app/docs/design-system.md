@@ -1,6 +1,6 @@
 # bili 设计系统规范 v0.2
 
-> 状态：**已定稿**。v0.2 于 2026-09-27 修订，补 17 处漏洞，逐条见 §8。
+> 状态：**已定稿**。v0.2 于 2026-09-27 修订，记录 18 项修订，逐条见 §8。
 > 对比度均为 WCAG 2.1 相对亮度公式实算，测量条件见各表脚注，非估计。
 > **两套基线不要混用**：§1 是 #104 之前的历史快照，§5 的映射表在 #104 之后的真实基线上重算。
 
@@ -166,7 +166,7 @@ Material 组件读 `ColorScheme`；`$styles.colors.*` 从**同一个** `ColorSch
 **签名修正**：v0.1 写 `AppColors(ColorScheme scheme)` 且「构造后不再持有任何硬编码色值」，**这条不可实现** —— `scrim` / `onScrim` / `onSurfaceStrong` 三个角色在 `ColorScheme` 里没有对应字段。实际签名是：
 
 ```dart
-class const AppColors(BrandPalette palette)   // palette 同时携带 ColorScheme 与这三个自有角色
+class const AppColors(final BrandPalette _palette)   // 色板同时携带 ColorScheme 与这三个自有角色
 ```
 
 约束不变的部分：这三个自有角色**只在 `brand_palette.dart` 取值**，其余全部从 `palette.scheme` 派生，单一来源不破。
@@ -308,7 +308,9 @@ P2 保持 `toThemeData()` 不接线，是为了让「Material 组件首次拿到
 「P2 不改像素」约束的是**不主动改**，不覆盖缺陷修复：
 
 1. `video_info_view.dart` 时长标签底色原为 `onSurfaceStrong.withValues(alpha: 0.7)` —— 前景 token 当背景用，暗色下浅奶油底 + 白字约 1.2:1 不可读。改 `scrim`。亮色下两者同值 `#1E1B18`，golden 不受影响。
-2. 来源徽章的品牌色删除（依据 R8）—— 3 个色相 → 1 个 `onSurfaceVariant`，**这是 P2 内的像素变化**。理由是 `service_brands.dart` 这个结构本身就是 P2 造错的，不应带进 P3。该区域不在 golden 覆盖内（见 G4 覆盖声明），实测确认两张 golden 未变。
+2. 来源徽章的品牌色删除（依据 R8）—— 3 个色相 → 1 组 app 角色（chip 底 `onSurfaceVariant` 0.15 alpha，文字 `onSurface`），**这是 P2 内的像素变化**。理由是 `service_brands.dart` 这个结构本身就是 P2 造错的，不应带进 P3。该区域不在 golden 覆盖内（见 G2 覆盖声明），实测确认两张 golden 未变。
+
+   文字取 `onSurface` 而非 `onSurfaceVariant` 的实测依据：chip 底是 `onSurfaceVariant` 的 0.15 alpha 合成，文字若同用 `onSurfaceVariant`，亮色实测 **3.21:1**（暗色 5.25:1），低于 9px 文字的 4.5:1 门槛；改 `onSurface` 后亮色 **6.00:1**、暗色 **10.12:1**。测量条件为 WCAG 2.1 相对亮度公式，chip 底按 `0.15*onSurfaceVariant + 0.85*surface` 合成。去掉 chip 反而退回 3.77:1（与相邻 `time` 文本同一欠账），故保留 chip。
 
 ### P1 的像素变化是真实的，且只在测试环境
 
@@ -333,7 +335,7 @@ P2 保持 `toThemeData()` 不接线，是为了让「Material 组件首次拿到
 
 ## 8. v0.2 修订记录
 
-2026-09-27 审查，共 17 条。前 3 条是架构性的，第 4 条是缺失的原则，后 10 条是与实况不符。
+2026-09-27 审查，共 18 条。前 3 条是架构性的，第 4 条是缺失的原则，中间 10 条是与实况不符，最后 4 条涉及门禁与分阶段。
 
 **架构性**
 

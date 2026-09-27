@@ -659,8 +659,15 @@ class const _RelatedVideoCard({
                               ),
                               child: Text(
                                 source,
+                                // 文字用 onSurface 而非 onSurfaceVariant：chip 底色是
+                                // onSurfaceVariant 的 0.15 alpha 合成，文字若同用
+                                // onSurfaceVariant，亮色下实测 3.21:1（暗色 5.25:1），
+                                // 低于 9px 文字的 4.5:1 门槛。改 onSurface 后实测
+                                // 亮色 6.00:1、暗色 10.12:1。
+                                // 测量条件：WCAG 2.1 相对亮度公式，chip 底按
+                                // 0.15*onSurfaceVariant + 0.85*surface 合成。
                                 style: $styles.text.btn.copyWith(
-                                  color: $styles.colors.onSurfaceVariant,
+                                  color: $styles.colors.onSurface,
                                   fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                 ),
