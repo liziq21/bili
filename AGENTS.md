@@ -29,7 +29,8 @@ For directory-specific guidelines, refer to:
 ### Screenshot Tests
 
 - **Baselines are produced by CI, never by a workstation.** Do not record golden PNGs locally, do not commit them from a development machine, and never hand-edit a baseline. Re-recording happens in a CI run.
-- The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` disables platform goldens). They render with a fixed font and masked text so one committed PNG verifies byte-identically on macOS, Linux, and Windows. Do not switch to native `matchesGoldenFile` goldens: the Flutter API docs state that "custom fonts may render differently across different platforms, or between different versions of Flutter" (https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).
+- The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` sets `platformGoldens: false`). They render through a fixed font with text masked into solid blocks, so one committed baseline verifies on macOS, Linux, and Windows alike. Do not switch to native `matchesGoldenFile` goldens: the Flutter API docs state that "custom fonts may render differently across different platforms, or between different versions of Flutter" (https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).
+- `diffThreshold` is `0.01`, a comparison tolerance. A passing golden test does not prove pixel-exact equality, and "the goldens did not change" is not evidence that no visible pixel changed.
 - A change that alters what a covered widget renders is not finished until CI has produced the new baseline and it has been committed from that run.
 - **Coverage limit**: a golden test proves only the widgets it renders, under the theme it records. Treating "the goldens did not change" as proof that no visible pixel changed anywhere is unsupported — anything outside a test's own `pumpWidget` tree is unverified.
 
