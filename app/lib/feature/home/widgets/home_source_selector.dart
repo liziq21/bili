@@ -15,29 +15,42 @@ class const HomeSourceSelector({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: activeSourceId,
-        isDense: true,
-        icon: Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
-        items: [
-          for (final source in sources)
-            DropdownMenuItem<String>(
-              value: source.id,
-              child: Text(
-                source.name,
-                overflow: TextOverflow.ellipsis,
-                style: $styles.text.title2.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-              ),
+    const semanticLabel = '切换数据源';
+
+    return Tooltip(
+      message: '切换数据源',
+      child: Semantics(
+        button: true,
+        label: semanticLabel,
+        hint: '切换视频与媒体数据源',
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: activeSourceId,
+            isDense: true,
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color: colorScheme.onSurfaceVariant,
             ),
-        ],
-        onChanged: (newSource) {
-          if (newSource == null) return;
-          context.read<HomeBloc>().add(ServiceSourceChanged(newSource));
-        },
+            items: [
+              for (final source in sources)
+                DropdownMenuItem<String>(
+                  value: source.id,
+                  child: Text(
+                    source.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.title2.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+            ],
+            onChanged: (newSource) {
+              if (newSource == null) return;
+              context.read<HomeBloc>().add(ServiceSourceChanged(newSource));
+            },
+          ),
+        ),
       ),
     );
   }
