@@ -29,7 +29,7 @@ final class const HomeFilter({
 
 @immutable
 class const HomeState({
-  final String sourceId = 'bilibili',
+  required final String sourceId,
   final String filterId = allFilterId,
   final bool isRefreshing = false,
   final List<FeedSectionState<VideoModel>> videoSections = const [],

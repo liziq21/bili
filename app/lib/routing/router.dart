@@ -12,6 +12,7 @@ import '../feature/home/bloc/home_bloc.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';
 import '../providers/service_source_providers.dart';
+import '../providers/media_sources_provider.dart';
 import 'routes.dart';
 import '../feature/home/home_screen.dart';
 import '../feature/live/live_screen.dart';
@@ -29,11 +30,14 @@ part 'route_data/video_route_data.dart';
 part 'router.g.dart';
 
 String _resolveSource(BuildContext context) {
+  // 未注册 String provider 时回落到配置的默认数据源，不在此处写死服务标识。
   try {
     final s = context.read<String?>();
     if (s != null) return s;
-  } catch (_) {}
-  return 'bilibili';
+  } on ProviderNotFoundException {
+    // 未注册，按默认数据源处理
+  }
+  return defaultMediaSources.first.id;
 }
 
 final GoRouter router = GoRouter(

@@ -389,6 +389,7 @@ void main() {
 
     test('Namespaces filter IDs while preserving raw feed IDs', () {
       final state = HomeState(
+        sourceId: 'test',
         videoSections: const [
           FeedSectionState<VideoModel>(id: 'shared', title: '视频'),
         ],
@@ -502,7 +503,12 @@ void main() {
 
       expect(find.text('YouTube'), findsWidgets);
       expect(find.byTooltip('直达直播间'), findsNothing);
-      expect(find.byTooltip('访问创作者频道'), findsOneWidget);
+      expect(find.byTooltip('访问创作者空间'), findsOneWidget);
+      // R8：创作者入口的文案不随服务源变化。
+      mockUserDataRepository.emitData(const UserData(sourceId: 'bilibili'));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('访问创作者空间'), findsOneWidget);
+      expect(find.byTooltip('访问 UP主空间'), findsNothing);
     });
 
     testWidgets('Shows a placeholder notice for local-only filters', (
