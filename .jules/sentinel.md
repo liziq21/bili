@@ -41,3 +41,9 @@ Prevention: Strip non-printable control characters (`[\x00-\x1F\x7F]`) and enfor
 Vulnerability: `YouTube` facade class created un-monitored default `http.Client()` instances when instantiated without explicit parameters, ignoring `initDebugOverlayBridge` static HTTP client policy configuration in `app/lib/main.dart` and bypassing network logging isolation and release/debug client policies.
 Learning: Media source facades in modular architectures must support static client properties (`YouTube.client`) to ensure global HTTP client policies (such as debug log buckets or release IO clients) apply uniformly across all data sources.
 Prevention: Always expose static `client` configuration fields on media source wrappers and default `httpClient ?? client` during service initialization.
+
+## 2026-09-23 - Mask Deep-Link Query Parameters and Sanitize Control Characters on 404 NotFound UI
+
+Vulnerability: Unhandled or invalid deep-link URIs (e.g., `bili://auth/callback?token=secret123`) passed to `NotFoundScreen` rendered raw query parameters in cleartext UI text, exposing sensitive session tokens or authentication credentials to end users and screen captures.
+Learning: Navigation 404/error screens displaying raw state URIs or deep-link routes can inadvertently expose sensitive authentication query parameters or crash UI text rendering due to non-printable control characters.
+Prevention: Always mask query parameter values (e.g., replacing values with `'REDACTED'`) and strip control characters (`[\x00-\x1F\x7F]`) when formatting URI representations for user-facing error views.
