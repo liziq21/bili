@@ -26,24 +26,39 @@ class const ServiceSourceProviders({
   /// 子组件
   required final Widget child,
 }) extends StatelessWidget {
-  /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
+  /// 已注册数据源标识 → 实例构造函数。新增数据源在此登记一处。
   ///
-  /// 未知标识直接抛错而非返回 null：返回 null 会让子树在缺少 Repository 的情况下
-  /// 继续构建，错误改到离病因很远的 `context.read<...>()` 才暴露成
-  /// ProviderNotFoundException，无法回溯到是哪个标识没被注册。
+  /// 用构造函数 tear-off 而非已建实例：校验只需查表，不必每次 build 都 new
+  /// 一个 [Bili]/[YouTube]（`Bili` 的生命周期由下方 `dispose` 负责关闭）。
+  static const _registry = <String, MediaSource Function()>{
+    'bilibili': Bili.new,
+    'youtube': YouTube.new,
+  };
+
+  /// 未注册标识直接抛错，不静默放过。
+  ///
+  /// 必须在任何提前返回 `child` 之前调用：[source] 是公开构造参数，若祖先已
+  /// 注册了同名 String provider，校验会被 `return child` 绕过。
+  void _assertRegistered(String sourceName) {
+    if (!_registry.containsKey(sourceName.toLowerCase())) {
+      throw ArgumentError.value(
+        sourceName,
+        'sourceName',
+        '未知数据源标识（已注册：${_registry.keys.join('、')}）',
+      );
+    }
+  }
+
+  /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
   MediaSource _createMediaSource(String sourceName) =>
-      switch (sourceName.toLowerCase()) {
-        'bilibili' => Bili(),
-        'youtube' => YouTube(),
-        _ => throw ArgumentError.value(
-          sourceName,
-          'sourceName',
-          '未知数据源标识（已注册：bilibili、youtube）',
-        ),
-      };
+      _registry[sourceName.toLowerCase()]!();
 
   @override
   Widget build(BuildContext context) {
+    // 先校验再谈其它：未注册标识必须在建树前暴露，否则错误会推迟到子树里
+    // 某处 `context.read<...>()` 抛出 ProviderNotFoundException 而无法回溯来源。
+    _assertRegistered(source);
+
     // 仅「String provider 未注册」时按需注入；其它异常不得吞掉。
     String? currentSource;
     try {
