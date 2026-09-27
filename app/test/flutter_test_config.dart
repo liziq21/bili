@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/foundation.dart' show BindingBase, kIsWeb;
 import 'package:flutter/painting.dart' show PaintingBinding;
+import 'package:flutter/rendering.dart' show RendererBinding;
+import 'package:flutter/scheduler.dart' show SchedulerPhase;
 import 'package:flutter_test/flutter_test.dart' show tearDown, tearDownAll;
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -42,26 +44,28 @@ class FakePathProviderPlatform(final String _root)
   }
 }
 
-/// Global Alchemist configuration for every test in this package.
-///
-/// Only CI goldens are enabled. CI goldens render through the Ahem font with
-/// all text obscured into solid blocks, which makes the output byte-identical
-/// across macOS, Linux and Windows. That is what lets a baseline committed
-/// from a dev machine match `ubuntu-latest` in CI. Platform goldens stay off
-/// so nobody records a readable baseline that can never pass on CI.
 /// Whether leak tracking is enabled for every `testWidgets` in this package.
 ///
-/// Off unless the run opts in, through either `--dart-define LEAK_TRACKING=true`
-/// at compile time or `LEAK_TRACKING=true` in the environment, matching how the
+/// Off unless the run opts in, through either
+/// `--dart-define LEAK_TRACKING=true` at compile time or `LEAK_TRACKING=true` in
+/// the environment, matching how the
 /// Flutter framework gates the same facility
 /// (`packages/flutter/test/flutter_test_config.dart`).
 ///
 /// Leak tracking reports every disposable object that survived the test that
 /// created it — an undisposed `StreamController`, `FocusNode`, `Timer`, or
-/// Bloc. Measured on `main` at 662a7e9 with this switch on: the widget and bloc
-/// test files report no leaks, while `test/golden/video_card_golden_test.dart`
-/// reports two undisposed `ImageStreamCompleterHandle` objects per run before
-/// the image cache teardown below was added.
+/// Bloc. It stays opt-in because it has never been green: measured on Linux
+/// against `main` at 4bf35df with the switch on, 4 of the package's 22 test
+/// files reported leaks. The image cache teardown below accounts for 3 of
+/// them. The fourth,
+/// `test/widget_test.dart`, reports `HeroController`,
+/// `GoRouteInformationProvider` and `GoRouterDelegate` — all three owned by
+/// the top-level `final GoRouter router` in `app/lib/routing/router.dart`,
+/// which is process-lifetime and never disposed. In the app the router lives
+/// as long as the process, so the report is an artefact of the test process
+/// outliving one test rather than a defect, and it is accepted rather than
+/// fixed. Turning the switch on and expecting a clean run will not hold until
+/// that router is owned by something disposable.
 bool _isLeakTrackingEnabled() {
   if (kIsWeb) {
     return false;
@@ -72,6 +76,13 @@ bool _isLeakTrackingEnabled() {
       (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '') ?? false);
 }
 
+/// Global Alchemist configuration for every test in this package.
+///
+/// Only CI goldens are enabled. CI goldens render through the Ahem font with
+/// all text obscured into solid blocks, which makes the output byte-identical
+/// across macOS, Linux and Windows. That is what lets a baseline committed
+/// from a dev machine match `ubuntu-latest` in CI. Platform goldens stay off
+/// so nobody records a readable baseline that can never pass on CI.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
@@ -89,15 +100,21 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // Every thumbnail in this app is loaded through a network image, and both
   // the mocked HttpClient in tests and `CachedNetworkImage` at runtime register
   // a completer with the binding-wide `PaintingBinding.instance.imageCache`.
-  // Disposing the widget tree does not dispose those completers or the live
-  // image tracking objects, and the cache is shared by the whole test
-  // executable, so a thumbnail loaded in one test is still held when a later
-  // test in the same file runs its leak check. Measured with leak tracking on
-  // `main` at 662a7e9: this teardown takes
-  // `test/golden/video_card_golden_test.dart` from two undisposed
-  // `ImageStreamCompleterHandle` objects plus one `_LiveImage` down to one
-  // handle. The remaining handle comes from the `cached_network_image_ce`
-  // decode path rather than from this cache; its owner is not established.
+  // `ImageCache.clear` disposes those entries through
+  // `_CachedImageBase.dispose`
+  // (packages/flutter/lib/src/painting/image_cache.dart), which releases the
+  // completer handle inside `SchedulerBinding.addPostFrameCallback`. That
+  // callback only runs if another frame follows, and a test that is the last in
+  // its file is never followed by one. Measured on Linux against `main` at
+  // 4bf35df with leak tracking on, that left one undisposed
+  // `ImageStreamCompleterHandle` in each of the three test files whose final
+  // test renders a thumbnail: `test/golden/video_card_golden_test.dart`,
+  // `test/ui/video_card_test.dart` and
+  // `test/ui/creator_profile_item_test.dart`.
+  // Driving one frame here releases it.
+  // `AutomatedTestWidgetsFlutterBinding.pump` cannot be used from `tearDown` —
+  // it asserts `inTest` — so the frame is driven directly, guarded so it never
+  // lands inside a persistent-callback phase.
   tearDown(() {
     // The Drift database suite and the pure Dart package tests never
     // initialize the Flutter binding, so there is no image cache to reach.
@@ -107,6 +124,11 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     final imageCache = PaintingBinding.instance.imageCache;
     imageCache.clear();
     imageCache.clearLiveImages();
+    final binding = RendererBinding.instance;
+    if (binding.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      binding.handleBeginFrame(Duration.zero);
+      binding.handleDrawFrame();
+    }
   });
 
   // `flutter test` runs test files concurrently, so the image cache must not be
