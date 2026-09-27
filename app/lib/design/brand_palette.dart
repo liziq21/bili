@@ -9,9 +9,8 @@ import 'package:material_ui/material_ui.dart';
 /// 模块、品牌方）命名的条目，只允许色值常量、`ColorScheme` 构造与
 /// `isDark` 分支取值。R8 禁止按服务源开条目。
 ///
-/// 取值沿用接入 Wonderous 时的亮色设计，暗色为逐项配对值，未做任何重新调校。
-/// 重新取值的取舍见 `app/docs/design-system.md` §7.1；提值属 P3。
-/// P2 不主动改像素，但含两处缺陷修复，见该文档 §6。
+/// 取值沿用接入上游项目时的亮色设计，暗色为逐项配对值。
+/// 重新取值的取舍与对比度实测见建立本文件的提交与相关 PR。
 @immutable
 class const BrandPalette(
   /// Material 组件与自研 token 的共同真值（R4）。
