@@ -18,6 +18,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// 漏掉即形同虚设。因此这里不枚举构造器名，而是匹配「类型名等于 Color」
 /// 并接受任意具名构造器与任意导入前缀。
 ///
+/// 判据是闭合的，只有两条：
+/// ① 构造路径按 `.` 分段后含 `Color` 段——覆盖 `Color(0x…)`、
+///    `Color.fromARGB(…)`、`ui.Color(0x…)`、`Color.new(0x…)` 全部形态，
+///    新增构造器不需要改这里。
+/// ② 路径末段不是 `Color` 的静态方法（`lerp` / `lerpColor` / `parse`）——
+///    那三个接收 token 做插值或解析，属规范允许的操作。
+/// Dart 把颜色构造表达成三种 AST 节点（带 const 的实例创建、不带 const 的
+/// 方法调用、点简写调用），三者都只需先把「构造路径」拼出来再走同一条判据。
+///
 /// 扫描是纯语法的（`parseString`，不 resolve），判据按标识符名字面匹配：
 /// 局部变量若叫 `Colors`，其 `Colors.foo` 会被误报。误报的方向是「逼
 /// 作者用 token」，与 R1 的意图一致；反过来不会漏报。
@@ -115,6 +124,9 @@ void f() {
   final d = Colors.grey[300];
   final e = Colors.grey.shade400;
   final g = Colors.transparent;
+  final h = ui.Color(0xFF123456);
+  final i = Color.new(0xFF123456);
+  Color j = .fromARGB(1, 2, 3, 4);
 }
 ''';
       final result = parseString(
@@ -129,10 +141,10 @@ void f() {
 
       expect(
         flagged,
-        hasLength(5),
+        hasLength(8),
         reason:
-            '探针里恰好 5 处应报（Colors.grey 出现两次算两处），'
-            '实际：$flagged',
+            '探针里恰好 8 处应报（Colors.grey 出现两次算两处，'
+            'Colors.transparent 豁免），实际：$flagged',
       );
       expect(
         flagged.first,
@@ -149,6 +161,19 @@ void f() {
         flagged[3],
         contains('Colors.grey'),
         reason: '下标写法 Colors.grey[300] 也要覆盖',
+      );
+      // 以下三种曾各自绕过门禁：导入前缀在 methodName 上、`new` 被当成
+      // 非构造器排除、点简写走独立 AST 节点。
+      expect(
+        flagged[5],
+        '直接构造颜色：ui.Color',
+        reason: '导入前缀在 target 上、类型名在 methodName 上时也要覆盖',
+      );
+      expect(flagged[6], '直接构造颜色：Color.new', reason: 'new 是构造器，不是静态方法');
+      expect(
+        flagged[7],
+        '直接构造颜色：Color.fromARGB',
+        reason: '点简写 .fromARGB(…) 走 DotShorthandInvocation 节点',
       );
     });
 
@@ -282,38 +307,65 @@ class _HardcodedColorVisitor(
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    // 实测 `const Color.fromRGBO(…)` 的 constructorName.type.toSource()
-    // 是 "Color.fromRGBO"——具名构造器折进了 type 的源码里，所以按分段
-    // 判断而不是只比较整串。
-    final typeSource = node.constructorName.type.toSource();
-    if (_mentionsColorType(typeSource) &&
-        !_isAllowedColorLiteral(node.offset)) {
-      _report(node.offset, '直接构造颜色：$typeSource');
-    }
+    // 带 const 的构造落在这里。实测 `const Color.fromRGBO(…)` 的
+    // constructorName.type.toSource() 是 "Color.fromRGBO"——具名构造器折进了
+    // type 的源码里，所以按分段判断而不是只比较整串。
+    _checkConstructorPath(node, node.constructorName.type.toSource());
     super.visitInstanceCreationExpression(node);
   }
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
+    // 不带 const 的构造落在这里，target 有三种形态：
+    //   Color(0x…)        target=null, method='Color'
+    //   Color.fromARGB(…)  target='Color', method='fromARGB'
+    //   ui.Color(0x…)      target='ui',     method='Color'
+    //   Color.new(0x…)     target='Color',  method='new'
+    // 前两种之外，后两种曾被各自的判断漏掉（`ui.` 前缀不在 target 的
+    // 首段里；`new` 被当成非构造器排除）。拼成完整路径后交给同一条判据。
     final target = node.target;
-    if (target == null) {
-      if (node.methodName.name == 'Color' &&
-          !_isAllowedColorLiteral(node.offset)) {
-        _report(node.offset, '直接构造颜色：Color');
-      }
-    } else {
-      final method = node.methodName.name;
-      // Color 的静态方法（Color.lerp / Color.parse / Color.from 等）
-      // 不是构造器，使用 token 值做插值或解析属于规范允许的操作，不报。
-      // 只报真正构造颜色的调用（带 new 或具名构造器形式）。
-      if (method != 'new' &&
-          !_isColorStaticMethod(method) &&
-          _mentionsColorType(target.toSource()) &&
-          !_isAllowedColorLiteral(node.offset)) {
-        _report(node.offset, '直接构造颜色：${target.toSource()}.$method');
+    _checkConstructorPath(
+      node,
+      target == null
+          ? node.methodName.name
+          : '${target.toSource()}.${node.methodName.name}',
+    );
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitDotShorthandInvocation(DotShorthandInvocation node) {
+    // 点简写 `.fromARGB(…)` 是 Dart 3.10 起的新语法，走独立节点
+    // （analyzer 13.3.0 实测），不接 `visitMethodInvocation`。
+    // 它的类型来自上下文而非 target，所以先确认父声明的类型注解是 Color，
+    // 再按 `Color.<成员名>` 拼路径走同一条判据。
+    final declaration = node.parent;
+    if (declaration is VariableDeclaration &&
+        identical(declaration.initializer, node)) {
+      final list = declaration.parent;
+      if (list is VariableDeclarationList &&
+          list.type != null &&
+          _mentionsColorType(list.type!.toSource())) {
+        _checkConstructorPath(node, 'Color.${node.memberName.name}');
       }
     }
-    super.visitMethodInvocation(node);
+    super.visitDotShorthandInvocation(node);
+  }
+
+  /// 三种构造节点的共同出口：把「构造路径」按 `.` 分段，含 `Color` 段且
+  /// 末段不是静态方法时报出。
+  void _checkConstructorPath(AstNode node, String path) {
+    if (_isColorConstructorPath(path) && !_isAllowedColorLiteral(node.offset)) {
+      _report(node.offset, '直接构造颜色：$path');
+    }
+  }
+
+  /// 路径含 `Color` 段（`Color` / `ui.Color` / `material_ui.Color` 都算；
+  /// `MyColor` 与 `ColorScheme` 不算），且末段不是静态方法。
+  static bool _isColorConstructorPath(String path) {
+    final segments = path.split('.');
+    return segments.contains('Color') &&
+        !_colorStaticMethods.contains(segments.last);
   }
 
   /// `Color` 的静态方法白名单：这些方法接收 Color 参数（通常是 token），
@@ -321,8 +373,6 @@ class _HardcodedColorVisitor(
   /// 注意：`from`/`fromARGB`/`fromRGBO`/`fromAlpha` 是具名构造器，
   /// 会创建字面量颜色，属于 G1 应报范围，**不在**此白名单里。
   static const _colorStaticMethods = {'lerp', 'lerpColor', 'parse'};
-  static bool _isColorStaticMethod(String name) =>
-      _colorStaticMethods.contains(name);
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
