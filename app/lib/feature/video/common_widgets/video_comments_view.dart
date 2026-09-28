@@ -23,7 +23,9 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: CircularProgressIndicator(color: $styles.colors.accentFill),
+              child: CircularProgressIndicator(
+                color: $styles.colors.accentFill,
+              ),
             ),
           );
         }

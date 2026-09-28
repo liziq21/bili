@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:chopper/chopper.dart';
 
 class const ApiInterceptor({final bool? _enableHttp2}) implements Interceptor {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   FutureOr<Response<BodyType>> intercept<BodyType>(
     Chain<BodyType> chain,
@@ -19,7 +21,7 @@ class const ApiInterceptor({final bool? _enableHttp2}) implements Interceptor {
       }) ...{
         'origin': 'https://search.bilibili.com',
         HttpHeaders.refererHeader:
-            'https://search.bilibili.com/$searchType?keyword=${Uri.encodeFull(keyword)}',
+            'https://search.bilibili.com/${searchType.toString().replaceAll(_controlChars, '')}?keyword=${Uri.encodeQueryComponent(keyword.toString().replaceAll(_controlChars, ''))}',
       },
     });
     return chain.proceed(request);

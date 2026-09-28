@@ -220,7 +220,10 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     IconButton(
                       iconSize: 20,
-                      icon: Icon(Icons.fullscreen, color: $styles.colors.onScrim),
+                      icon: Icon(
+                        Icons.fullscreen,
+                        color: $styles.colors.onScrim,
+                      ),
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

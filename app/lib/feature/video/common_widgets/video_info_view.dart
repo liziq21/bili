@@ -187,10 +187,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
             ),
             Text('·', style: TextStyle(color: $styles.colors.outline)),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: $styles.colors.surfaceContainerHighest.withValues(
                   alpha: 0.1,
@@ -206,10 +203,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: $styles.colors.surfaceContainerHighest.withValues(
                   alpha: 0.1,
@@ -236,14 +230,14 @@ class const _CreatorProfileSection() extends StatelessWidget {
   Widget build(BuildContext context) {
     // ⚡ Bolt Optimization: Scoped selector for creator profile and subscription state.
     // Keeps creator profile widget isolated so like/favorite toggles do not rebuild it.
-    final creatorData = context.select<
-      VideoBloc,
-      ({CreatorProfile? creator, bool isSubscribed})?
-    >((bloc) {
-      final detail = bloc.state.videoDetail;
-      if (detail == null) return null;
-      return (creator: detail.creator, isSubscribed: detail.isSubscribed);
-    });
+    final creatorData = context
+        .select<VideoBloc, ({CreatorProfile? creator, bool isSubscribed})?>((
+          bloc,
+        ) {
+          final detail = bloc.state.videoDetail;
+          if (detail == null) return null;
+          return (creator: detail.creator, isSubscribed: detail.isSubscribed);
+        });
 
     if (creatorData == null || creatorData.creator == null) {
       return const SizedBox.shrink();
@@ -270,18 +264,18 @@ class const _CreatorProfileSection() extends StatelessWidget {
                 radius: 20,
                 backgroundImage:
                     creator.thumbnailUrl != null &&
-                            creator.thumbnailUrl!.isNotEmpty
-                        ? ResizeImage.resizeIfNeeded(
-                          128,
-                          128,
-                          CachedNetworkImageProvider(creator.thumbnailUrl!),
-                        )
-                        : null,
+                        creator.thumbnailUrl!.isNotEmpty
+                    ? ResizeImage.resizeIfNeeded(
+                        128,
+                        128,
+                        CachedNetworkImageProvider(creator.thumbnailUrl!),
+                      )
+                    : null,
                 child:
                     creator.thumbnailUrl == null ||
-                            creator.thumbnailUrl!.isEmpty
-                        ? const Icon(Icons.person)
-                        : null,
+                        creator.thumbnailUrl!.isEmpty
+                    ? const Icon(Icons.person)
+                    : null,
               ),
               Positioned(
                 bottom: 0,
@@ -395,7 +389,8 @@ class const _ActionButtonsSection() extends StatefulWidget {
   State<_ActionButtonsSection> createState() => _ActionButtonsSectionState();
 }
 
-class _ActionButtonsSectionState() extends State<_ActionButtonsSection>
+class _ActionButtonsSectionState()
+    extends State<_ActionButtonsSection>
     with AutomaticKeepAliveClientMixin {
   bool _isDanmakuActive = true;
 
@@ -413,26 +408,27 @@ class _ActionButtonsSectionState() extends State<_ActionButtonsSection>
     // ⚡ Bolt Optimization: Scoped selector for action metrics (likes, favorites, shares).
     // Rebuilds ONLY this action bar when like/favorite status changes, without rebuilding
     // the title, creator profile, synopsis, or recommendation list.
-    final metrics = context.select<
-      VideoBloc,
-      ({
-        int likeCount,
-        int favoriteCount,
-        int shareCount,
-        bool isLiked,
-        bool isFavorited,
-      })?
-    >((bloc) {
-      final detail = bloc.state.videoDetail;
-      if (detail == null) return null;
-      return (
-        likeCount: detail.likeCount,
-        favoriteCount: detail.favoriteCount,
-        shareCount: detail.shareCount,
-        isLiked: detail.isLiked,
-        isFavorited: detail.isFavorited,
-      );
-    });
+    final metrics = context
+        .select<
+          VideoBloc,
+          ({
+            int likeCount,
+            int favoriteCount,
+            int shareCount,
+            bool isLiked,
+            bool isFavorited,
+          })?
+        >((bloc) {
+          final detail = bloc.state.videoDetail;
+          if (detail == null) return null;
+          return (
+            likeCount: detail.likeCount,
+            favoriteCount: detail.favoriteCount,
+            shareCount: detail.shareCount,
+            isLiked: detail.isLiked,
+            isFavorited: detail.isFavorited,
+          );
+        });
 
     if (metrics == null) return const SizedBox.shrink();
 
@@ -498,10 +494,9 @@ class _ActionButtonsSectionState() extends State<_ActionButtonsSection>
             },
           ),
           _ActionButton(
-            icon:
-                _isDanmakuActive
-                    ? Icons.closed_caption
-                    : Icons.closed_caption_disabled,
+            icon: _isDanmakuActive
+                ? Icons.closed_caption
+                : Icons.closed_caption_disabled,
             activeIcon: Icons.closed_caption,
             label: _isDanmakuActive ? '弹幕开' : '弹幕关',
             actionName: '弹幕',
@@ -525,7 +520,8 @@ class const _SynopsisSection() extends StatefulWidget {
   State<_SynopsisSection> createState() => _SynopsisSectionState();
 }
 
-class _SynopsisSectionState() extends State<_SynopsisSection>
+class _SynopsisSectionState()
+    extends State<_SynopsisSection>
     with AutomaticKeepAliveClientMixin {
   bool _isDescExpanded = false;
 
@@ -602,14 +598,11 @@ class _SynopsisSectionState() extends State<_SynopsisSection>
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
             child: Text(
-              desc != null && desc.isNotEmpty
-                  ? desc
-                  : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+              desc != null && desc.isNotEmpty ? desc : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
               maxLines: _isDescExpanded ? null : 2,
-              overflow:
-                  _isDescExpanded
-                      ? TextOverflow.visible
-                      : TextOverflow.ellipsis,
+              overflow: _isDescExpanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
               style: $styles.text.bodySmall.copyWith(
                 color: $styles.colors.onSurface,
                 height: 1.4,
@@ -835,10 +828,9 @@ class const _ActionButton({
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color:
-                      isActive
-                          ? color.withValues(alpha: 0.15)
-                          : $styles.colors.outline.withValues(alpha: 0.15),
+                  color: isActive
+                      ? color.withValues(alpha: 0.15)
+                      : $styles.colors.outline.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
