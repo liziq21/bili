@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
 
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
@@ -41,6 +43,7 @@ jobs:
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           branch: ci/rerecord-goldens-${{ github.run_id }}
+          base: main
           commit-message: 'test(golden): re-record CI baselines from CI'
           title: 'test(golden): re-record CI baselines from CI'
           body: |
