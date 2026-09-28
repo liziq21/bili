@@ -213,7 +213,10 @@ void main() {
       // 强调色在两种亮度下都是浅色（#E4935D / #EFA97C），白色前景只有
       // 2.4:1 / 2.0:1。搜索结果页筛选栏的 FilledButton 就是这个组合，
       // 文字实际读不出来。
-      for (final c in [AppColors(BrandPalette.of(Brightness.light)), AppColors(BrandPalette.of(Brightness.dark))]) {
+      for (final c in [
+        AppColors(BrandPalette.of(Brightness.light)),
+        AppColors(BrandPalette.of(Brightness.dark)),
+      ]) {
         final scheme = appThemeData(c).colorScheme;
         for (final pair in [
           (fg: scheme.onPrimary, bg: scheme.primary),
