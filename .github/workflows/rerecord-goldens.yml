@@ -41,7 +41,11 @@ jobs:
 
       - name: Open PR with the new baselines
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        # GITHUB_TOKEN 创建的 PR 不会触发 workflow。GOLDEN_PR_TOKEN 是仓库级
+        # Actions secret，值为 fine-grained PAT，权限限定 Contents: R/W +
+        # Pull requests: R/W，仅限 liziq21/bili。
         with:
+          token: ${{ secrets.GOLDEN_PR_TOKEN }}
           branch: ci/rerecord-goldens-${{ github.run_id }}
           base: main
           commit-message: 'test(golden): re-record CI baselines from CI'
