@@ -41,10 +41,11 @@ class const AppColors(final BrandPalette _palette) {
 
   /// 强调色，直接压在 [surface] 上的文字/图标。
   ///
-  /// 与 [accentFill] 当前取值相同。按 R2.1 二者最终须分档：文本用
-  /// 4.5:1 的 [accentText]，非文本指示器用 3:1 的 [accentFill]。分档取值
-  /// 属于改像素，在 P3 落地——P2 承诺零像素变化。
-  Color get accentText => _palette.scheme.primary;
+  /// 与 [accentFill] 按 R2.1 分档：文字 4.5:1，图形 3:1。亮色下二者取值
+  /// 不同——`accentFill` 只有 4.00:1，够图形不够文字，故 [BrandPalette]
+  /// 另带一个 `accentText`（5.12:1）。暗色下 accent 本身已有 8.68:1，
+  /// 两档同值。
+  Color get accentText => _palette.accentText;
 
   /// 压在 [accentFill] 之上的前景。
   Color get onAccentFill => _palette.scheme.onPrimary;

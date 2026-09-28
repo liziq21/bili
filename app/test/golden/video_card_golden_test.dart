@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
+import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+
 VideoModel _video({
   String id = 'BV1xx411c7mD',
   String title = 'Golden 测试用的视频标题',
@@ -105,5 +107,6 @@ void main() {
       // 加载成功——必须断言错误占位图不存在。
       expect(find.byIcon(Icons.movie_outlined), findsNothing);
     });
+    await clearImageCacheDuringTest(tester);
   });
 }
