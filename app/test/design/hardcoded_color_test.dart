@@ -212,6 +212,25 @@ class A {
       expect(flagged[1], contains('Color.fromRGBO'));
       expect(flagged[2], contains('ui.Color'));
     });
+
+    test('Color.lerp 等静态方法调用不报（规范允许 token 插值）', () {
+      const source = '''
+class A {
+  static Color blend(Color a, Color b) => Color.lerp(a, b, 0.5);
+  static Color parseIt() => Color.parse('#FF112233');
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'lerp_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final hits = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: false,
+      ).hitsIn(result.unit);
+      expect(hits, isEmpty, reason: '静态方法调用被误报：$hits');
+    });
   });
 }
 
@@ -284,7 +303,11 @@ class _HardcodedColorVisitor(
       }
     } else {
       final method = node.methodName.name;
+      // Color 的静态方法（Color.lerp / Color.parse / Color.from 等）
+      // 不是构造器，使用 token 值做插值或解析属于规范允许的操作，不报。
+      // 只报真正构造颜色的调用（带 new 或具名构造器形式）。
       if (method != 'new' &&
+          !_isColorStaticMethod(method) &&
           _mentionsColorType(target.toSource()) &&
           !_isAllowedColorLiteral(node.offset)) {
         _report(node.offset, '直接构造颜色：${target.toSource()}.$method');
@@ -292,6 +315,14 @@ class _HardcodedColorVisitor(
     }
     super.visitMethodInvocation(node);
   }
+
+  /// `Color` 的静态方法白名单：这些方法接收 Color 参数（通常是 token），
+  /// 返回新 Color，不是硬编码颜色构造，不算 G1 违规。
+  /// 注意：`from`/`fromARGB`/`fromRGBO`/`fromAlpha` 是具名构造器，
+  /// 会创建字面量颜色，属于 G1 应报范围，**不在**此白名单里。
+  static const _colorStaticMethods = {'lerp', 'lerpColor', 'parse'};
+  static bool _isColorStaticMethod(String name) =>
+      _colorStaticMethods.contains(name);
 
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {

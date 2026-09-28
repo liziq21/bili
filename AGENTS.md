@@ -26,7 +26,7 @@ For how the repository is split into packages, which dependency directions are a
 dart format --set-exit-if-changed <changed files or directories>
 ```
 
-exit code 非 0 表示文件仍不符合格式，按输出修复后再提交。
+该命令会直接改写被格式化的文件，退出码非 0 表示有文件被修改过（即原格式不符），但不代表修复后仍不符。看到退出码非 0 时，先确认文件已被改写，再重跑一次同样的命令，确认退出码为 0 后才可提交。
 
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
