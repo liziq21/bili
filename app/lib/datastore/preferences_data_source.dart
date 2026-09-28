@@ -143,14 +143,14 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   static Type _typeOf<T>() => T;
 
   Future<T> _getData(SharedPreferencesAsync pref) async {
-    final T_ = _typeOf<T>();
-    final Future<Object?> data = switch (T_) {
-      _ when identical(T_, _typeOf<String>()) => pref.getString(name),
-      _ when identical(T_, _typeOf<String?>()) => pref.getString(name),
-      _ when identical(T_, _typeOf<bool>()) => pref.getBool(name),
-      _ when identical(T_, _typeOf<int>()) => pref.getInt(name),
-      _ when identical(T_, _typeOf<double>()) => pref.getDouble(name),
-      _ when identical(T_, _typeOf<List<String>>()) => pref.getStringList(name),
+    final runtimeType = _typeOf<T>();
+    final Future<Object?> data = switch (runtimeType) {
+      _ when identical(runtimeType, _typeOf<String>()) => pref.getString(name),
+      _ when identical(runtimeType, _typeOf<String?>()) => pref.getString(name),
+      _ when identical(runtimeType, _typeOf<bool>()) => pref.getBool(name),
+      _ when identical(runtimeType, _typeOf<int>()) => pref.getInt(name),
+      _ when identical(runtimeType, _typeOf<double>()) => pref.getDouble(name),
+      _ when identical(runtimeType, _typeOf<List<String>>()) => pref.getStringList(name),
       _ => throw UnsupportedError('Unsupported type: $T'),
     };
 
