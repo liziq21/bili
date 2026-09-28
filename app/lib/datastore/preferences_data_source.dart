@@ -133,13 +133,23 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
+  // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
+  // `const (String?)` is a compile error, and `T.toString()` for nullable
+  // types relies on `Type.toString()` being stable in release builds, which
+  // the spec does not guarantee. `_typeOf<T>()` instead captures the actual
+  // `Type` value for each supported argument once; the dispatch below compares
+  // those values directly, so no printed type name is involved.
+  static Type _typeOf<T>() => T;
+
   Future<T> _getData(SharedPreferencesAsync pref) async {
-    final Future<Object?> data = switch (T) {
-      const (String) => pref.getString(name),
-      const (bool) => pref.getBool(name),
-      const (int) => pref.getInt(name),
-      const (double) => pref.getDouble(name),
-      const (List<String>) => pref.getStringList(name),
+    final runtimeType = _typeOf<T>();
+    final Future<Object?> data = switch (runtimeType) {
+      _ when runtimeType == _typeOf<String>() => pref.getString(name),
+      _ when runtimeType == _typeOf<String?>() => pref.getString(name),
+      _ when runtimeType == _typeOf<bool>() => pref.getBool(name),
+      _ when runtimeType == _typeOf<int>() => pref.getInt(name),
+      _ when runtimeType == _typeOf<double>() => pref.getDouble(name),
+      _ when runtimeType == _typeOf<List<String>>() => pref.getStringList(name),
       _ => throw UnsupportedError('Unsupported type: $T'),
     };
 

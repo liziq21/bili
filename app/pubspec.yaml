@@ -43,6 +43,7 @@ dependencies:
   stream_transform: ^2.1.1
   material_ui: ^1.2.0
   shared_preferences: ^2.5.4
+  shared_preferences_platform_interface: ^2.4.2
   equatable: any
   drift: ^2.30.0
   drift_flutter: ^0.3.0
