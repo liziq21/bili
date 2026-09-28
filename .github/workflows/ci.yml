@@ -96,18 +96,22 @@ jobs:
         working-directory: app
 
       - name: Run bilibili package test
+        if: ${{ !cancelled() }}
         run: flutter test test/
         working-directory: packages/bilibili
 
       - name: Run bpi test
+        if: ${{ !cancelled() }}
         run: flutter test test/
         working-directory: packages/bilibili/bpi
 
       - name: Run youtube package test
+        if: ${{ !cancelled() }}
         run: flutter test test/
         working-directory: packages/youtube
 
       - name: Run ypi test
+        if: ${{ !cancelled() }}
         run: flutter test test/
         working-directory: packages/youtube/ypi
 
