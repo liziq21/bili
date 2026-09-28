@@ -51,13 +51,21 @@ jobs:
             app/test/golden/failures/
           if-no-files-found: ignore
 
+      # GITHUB_TOKEN 创建的 PR 不触发 workflow（GitHub 防递归设计，见
+      # peter-evans/create-pull-request docs/concepts-guidelines.md
+      # "Triggering further workflow runs"）。改用 uhibot 的 installation
+      # token：每次运行现生成，无过期；PR 作者是该 App 而非个人账号。
+      - name: Create uhibot App token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.GOLDEN_APP_ID }}
+          private-key: ${{ secrets.GOLDEN_APP_PRIVATE_KEY }}
+
       - name: Open PR with the new baselines
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
-        # GITHUB_TOKEN 创建的 PR 不会触发 workflow。GOLDEN_PR_TOKEN 是仓库级
-        # Actions secret，值为 fine-grained PAT，权限限定 Contents: R/W +
-        # Pull requests: R/W，仅限 liziq21/bili。
         with:
-          token: ${{ secrets.GOLDEN_PR_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: ci/rerecord-goldens-${{ github.run_id }}
           base: main
           commit-message: 'test(golden): re-record CI baselines from CI'
