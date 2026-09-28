@@ -18,9 +18,7 @@ ThemeData appThemeData(AppColors colors) {
   };
 
   return ThemeData.from(textTheme: textTheme, colorScheme: scheme).copyWith(
-    textSelectionTheme: TextSelectionThemeData(
-      cursorColor: colors.accentFill,
-    ),
+    textSelectionTheme: TextSelectionThemeData(cursorColor: colors.accentFill),
     highlightColor: colors.accentFill,
   );
 }

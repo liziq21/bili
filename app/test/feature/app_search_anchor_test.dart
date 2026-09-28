@@ -13,9 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class FakeSuggestRepository(
-  final List<String> suggests,
-) implements SearchSuggestRepository {
+class FakeSuggestRepository(final List<String> suggests)
+    implements SearchSuggestRepository {
   final List<String> receivedQueries = [];
 
   @override

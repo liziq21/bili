@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'filter_chip_item.dart';
@@ -59,6 +60,7 @@ class const _SingleFilterView({
             isSelected: isSelected,
             onSelected: (selected) {
               if (selected) {
+                HapticFeedback.selectionClick();
                 onChanged(group.copyWith(selection: option));
               }
             },
@@ -86,6 +88,7 @@ class const _MultiFilterView({
             label: option.label,
             isSelected: isSelected,
             onSelected: (selected) {
+              HapticFeedback.selectionClick();
               final newSet = Set<FilterOption>.from(filter.selections);
               if (selected) {
                 newSet.add(option);

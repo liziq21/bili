@@ -64,7 +64,9 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: CircularProgressIndicator(color: $styles.colors.accentFill),
+              child: CircularProgressIndicator(
+                color: $styles.colors.accentFill,
+              ),
             ),
           );
         }
@@ -133,7 +135,11 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.forum, size: 14, color: $styles.colors.secondary),
+                    Icon(
+                      Icons.forum,
+                      size: 14,
+                      color: $styles.colors.secondary,
+                    ),
                     const Gap(2),
                     Text(
                       '2.4万 弹幕',
@@ -159,7 +165,9 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: $styles.colors.surfaceContainerHighest.withValues(alpha: 0.1),
+                    color: $styles.colors.surfaceContainerHighest.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
                   ),
                   child: Text(
@@ -176,7 +184,9 @@ class _VideoInfoViewState() extends State<VideoInfoView> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: $styles.colors.surfaceContainerHighest.withValues(alpha: 0.1),
+                    color: $styles.colors.surfaceContainerHighest.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular($styles.corners.sm),
                   ),
                   child: Text(
@@ -582,7 +592,9 @@ class const _RelatedVideoCard({
                           color: $styles.colors.surfaceContainerHighest,
                           child: Icon(
                             Icons.play_circle_outline,
-                            color: $styles.colors.onScrim.withValues(alpha: 0.7),
+                            color: $styles.colors.onScrim.withValues(
+                              alpha: 0.7,
+                            ),
                             size: 28,
                           ),
                         ),
