@@ -2,6 +2,8 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../main.dart';
+
 class const CreatorProfileItem({
   super.key,
   required final CreatorProfile creatorProfile,
@@ -63,15 +65,18 @@ class const CreatorProfileItem({
                           '@${creatorProfile.id}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey,
+                            color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: $styles.colors.outline,
+                  ),
                 ],
               ),
             ),

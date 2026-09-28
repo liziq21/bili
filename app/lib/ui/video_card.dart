@@ -138,9 +138,9 @@ class const VideoCard({
                           subtitleText,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey,
+                            color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -235,7 +235,7 @@ class const VideoCard({
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.75),
+                              color: $styles.colors.scrim.withValues(alpha: 0.75),
                               borderRadius: BorderRadius.circular(
                                 $styles.corners.sm,
                               ),
@@ -245,7 +245,7 @@ class const VideoCard({
                               style: $styles.text.bodySmall.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: $styles.colors.onScrim,
                               ),
                             ),
                           ),
