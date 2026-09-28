@@ -95,35 +95,37 @@ void main() {
       expect($styles.colors.onSurface, const Color(0xFF514F4D));
     });
 
-    testWidgets('follows the inherited ColorScheme when it is not the brand one', (
-      tester,
-    ) async {
-      // 动态色路径：系统给一套色板，自研 token 必须整体跟随，
-      // accentFill 与 Material 默认 primary 同值（否则 TabBar.indicatorColor
-      // 与 FilledButton 底色分叉）。
-      final dynamicScheme =
-          ThemeData.light().colorScheme.copyWith(
-                primary: const Color(0xFF6750A4),
-                surface: const Color(0xFFFFFBFE),
-              );
-      await pump(
-        tester,
-        productionTheme(Brightness.light).copyWith(colorScheme: dynamicScheme),
-      );
+    testWidgets(
+      'follows the inherited ColorScheme when it is not the brand one',
+      (tester) async {
+        // 动态色路径：系统给一套色板，自研 token 必须整体跟随，
+        // accentFill 与 Material 默认 primary 同值（否则 TabBar.indicatorColor
+        // 与 FilledButton 底色分叉）。
+        final dynamicScheme = ThemeData.light().colorScheme.copyWith(
+          primary: const Color(0xFF6750A4),
+          surface: const Color(0xFFFFFBFE),
+        );
+        await pump(
+          tester,
+          productionTheme(Brightness.light)
+              .copyWith(colorScheme: dynamicScheme),
+        );
 
-      expect($styles.colors.accentFill, dynamicScheme.primary);
-      expect($styles.colors.surface, dynamicScheme.surface);
-      // accentText 不能沿用品牌橙——系统 primary 未必压得住系统 surface，
-      // 故按新色板重算到 4.5:1。
-      expect(
-        Contrast.ratio($styles.colors.accentText, dynamicScheme.surface),
-        greaterThanOrEqualTo(Contrast.aaText),
-        reason: '动态色板下的 accentText 须达文字门槛，实际 '
-            '${Contrast.ratio($styles.colors.accentText, dynamicScheme.surface).toStringAsFixed(2)}:1',
-      );
-      // 承载面语义与系统强调色无关，仍走品牌值。
-      expect($styles.colors.scrim, const Color(0xFF1E1B18));
-    });
+        expect($styles.colors.accentFill, dynamicScheme.primary);
+        expect($styles.colors.surface, dynamicScheme.surface);
+        // accentText 不能沿用品牌橙——系统 primary 未必压得住系统 surface，
+        // 故按新色板重算到 4.5:1。
+        expect(
+          Contrast.ratio($styles.colors.accentText, dynamicScheme.surface),
+          greaterThanOrEqualTo(Contrast.aaText),
+          reason:
+              '动态色板下的 accentText 须达文字门槛，实际 '
+              '${Contrast.ratio($styles.colors.accentText, dynamicScheme.surface).toStringAsFixed(2)}:1',
+        );
+        // 承载面语义与系统强调色无关，仍走品牌值。
+        expect($styles.colors.scrim, const Color(0xFF1E1B18));
+      },
+    );
 
     testWidgets('recomputes accentText when the dynamic scheme is dark', (
       tester,
@@ -132,11 +134,10 @@ void main() {
       // 门槛——重算在这里不是必需的，那条保证由下面
       // 'recomputes accentText for a surface the brand value cannot carry' 钉。
       // 本条只钉住 token 跟随。
-      final dynamicScheme =
-          ThemeData.dark().colorScheme.copyWith(
-                primary: const Color(0xFFD0BCFF),
-                surface: const Color(0xFF141218),
-              );
+      final dynamicScheme = ThemeData.dark().colorScheme.copyWith(
+        primary: const Color(0xFFD0BCFF),
+        surface: const Color(0xFF141218),
+      );
       await pump(
         tester,
         productionTheme(Brightness.dark).copyWith(colorScheme: dynamicScheme),
@@ -220,9 +221,7 @@ void main() {
           builder: (_, ThemeMode m, _) => MediaQuery(
             data: const MediaQueryData(size: Size(360, 800)),
             child: MaterialApp(
-              theme: appThemeData(
-                AppColors(BrandPalette.of(Brightness.light)),
-              ),
+              theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
               darkTheme: appThemeData(
                 AppColors(BrandPalette.of(Brightness.dark)),
               ),

@@ -179,7 +179,8 @@ class A {
       expect(
         flagged,
         hasLength(2),
-        reason: 'ok（字段 const）应放行；bad（getter）和 local（函数内局部 const）须报出。实际：$flagged',
+        reason:
+            'ok（字段 const）应放行；bad（getter）和 local（函数内局部 const）须报出。实际：$flagged',
       );
       expect(flagged[0], contains('直接构造颜色'));
       expect(flagged[1], contains('直接构造颜色'));

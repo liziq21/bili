@@ -235,7 +235,9 @@ class const VideoCard({
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: $styles.colors.scrim.withValues(alpha: 0.75),
+                              color: $styles.colors.scrim.withValues(
+                                alpha: 0.75,
+                              ),
                               borderRadius: BorderRadius.circular(
                                 $styles.corners.sm,
                               ),

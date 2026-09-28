@@ -19,6 +19,15 @@ For how the repository is split into packages, which dependency directions are a
 
 ## Universal Development Guidelines
 
+### Formatting
+提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。
+
+```bash
+dart format --set-exit-if-changed <changed files or directories>
+```
+
+exit code 非 0 表示文件仍不符合格式，按输出修复后再提交。
+
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
 - 保持代码库内的一致性，同类文件建议统一语言。
