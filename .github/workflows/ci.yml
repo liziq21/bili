@@ -92,7 +92,43 @@ jobs:
           sarif_file: flutter_analyze.sarif
       
       - name: Run test
-        run: cd app && flutter test
+        run: flutter test
+        working-directory: app
+
+      - name: Run bilibili package test
+        if: ${{ !cancelled() }}
+        run: flutter test test/
+        working-directory: packages/bilibili
+
+      - name: Run bpi test
+        if: ${{ !cancelled() }}
+        run: flutter test test/
+        working-directory: packages/bilibili/bpi
+
+      - name: Run youtube package test
+        if: ${{ !cancelled() }}
+        run: flutter test test/
+        working-directory: packages/youtube
+
+      - name: Run ypi test
+        if: ${{ !cancelled() }}
+        run: flutter test test/
+        working-directory: packages/youtube/ypi
+
+      - name: Upload golden failure diffs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: golden-failures-${{ github.run_id }}-${{ matrix.release.flutter }}
+          path: app/test/golden/failures/
+          if-no-files-found: ignore
+
+      - name: Upload current goldens for visual review
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: goldens-review-${{ github.run_id }}-${{ matrix.release.flutter }}
+          path: app/test/golden/goldens/ci/
 
 
   build_androidApp:
