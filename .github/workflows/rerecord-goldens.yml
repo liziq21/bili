@@ -15,9 +15,9 @@ permissions:
 
 jobs:
   rerecord:
-    # GOLDEN_PR_TOKEN 存放在名为 Actions 的 environment 中。environment 级
-    # secret 仅注入声明了该 environment 的 job，未声明时 secrets.GOLDEN_PR_TOKEN
-    # 解析为空并回退到 GITHUB_TOKEN。
+    # GOLDEN_APP_PRIVATE_KEY 存放在名为 Actions 的 environment 中。environment 级
+    # secret 仅注入声明了该 environment 的 job，未声明时 secrets.GOLDEN_APP_PRIVATE_KEY
+    # 解析为空，create-github-app-token 随之失败。
     environment: Actions
     runs-on: ubuntu-latest
     steps:
