@@ -24,7 +24,7 @@ This directory contains shared packages and modules (`packages/*`).
 
 **Rule**: For Dart-only packages, use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands.
 
-**CI scope**: The CI test step runs only `app/`. No package test suite runs in CI, so every change to a package must be verified locally with that package's own test command before it is considered done.
+**CI scope**: The CI test step runs `app/` plus all four package test suites (`packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`) — see `.github/workflows/ci.yml` for the authoritative list. Every change to a package must pass its own test command locally before being considered done.
 
 ## Data Layer & Remote Data Source Conventions
 
