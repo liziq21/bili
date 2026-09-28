@@ -13,6 +13,7 @@ class AppStyle({
   Size? screenSize,
   final bool disableAnimations = false,
   final bool isDark = false,
+  final ColorScheme? scheme,
 }) {
   this {
     if (screenSize == null) {
@@ -35,9 +36,18 @@ class AppStyle({
 
   /// 品牌色板（R1 的唯一来源）。[isDark] 由 `AppScaffold` 从真实的
   /// `Theme.of(context).brightness` 传入（R3：亮度只有这一个来源）。
-  late final BrandPalette palette = BrandPalette.of(
-    isDark ? Brightness.dark : Brightness.light,
+  ///
+  /// [scheme] 是上层 `Theme` 的实际色板：动态色开启时那是系统色板，此时
+  /// 按 [BrandPalette.fromScheme] 跟随，让自研 token 与 Material 默认色
+  /// 同源（R5）；为 null（默认）时按亮度取品牌色板。关闭动态色时上层色板
+  /// 本身即品牌色板，`fromScheme` 原样返回，两条路径等价。
+  late final BrandPalette palette = BrandPalette.fromScheme(
+    scheme ?? _brand.scheme,
+    base: _brand,
   );
+
+  BrandPalette get _brand =>
+      BrandPalette.of(isDark ? Brightness.dark : Brightness.light);
 
   /// The current theme colors for the app
   late final AppColors colors = AppColors(palette);
