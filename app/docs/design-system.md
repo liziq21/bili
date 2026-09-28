@@ -116,13 +116,14 @@ app/lib/design/
 
 ## 4. 门禁
 
-### G1 —— custom_lint：禁止硬编码色
+### G1 —— 禁止硬编码色
 
-- 规则 `no_hardcoded_color` 报**所有**直接构造颜色的形式：`Color(0x…)`、`Color.fromARGB`、`Color.fromRGBO`、`Color.from`、以及任何 `Colors.xxx` 常量引用。`Colors.transparent` 豁免（无语义，不构成硬编码色）。
+- 规则报**所有**直接构造颜色的形式：`Color(0x…)`、`Color.fromARGB`、`Color.fromRGBO`、`Color.from`、以及任何 `Colors.xxx` 常量引用。`Colors.transparent` 豁免（无语义，不构成硬编码色）。
 - **路径 allow-list 与 R1 的允许路径一致：只有 `app/lib/design/brand_palette.dart`。** 不豁免生成文件 —— 豁免生成文件等于留下一条与 R1 无关的旁路。
 - **上线前置**：仓库现存硬编码色必须先迁完，否则门禁一次报出全部历史遗留。迁移与门禁在同一 PR 内完成。
 - 规则必须覆盖**完整的构造器集合**；漏掉 `Color.fromRGBO` 之类即形同虚设。
-- 自写 `custom_lint` 规则而非采用第三方 rule set：语义需精确到「路径白名单仅含单文件，且该文件内容受限」，通用 rule set 无法表达。
+- 自写规则而非采用第三方 rule set：语义需精确到「路径白名单仅含单文件，且该文件内容受限」，通用 rule set 无法表达。
+- 实现落在 `app/test/design/hardcoded_color_test.dart`，跟着现有的 `cd app && flutter test` 走，不新增 CI 步骤。**不用 custom_lint 插件**：`custom_lint` 最新 0.8.1 把 `analyzer` 钉在 `^8.0.0`，而本仓在 Dart 3.13 上解析到 13.3.0，pub 求解器直接无解；降到 8 则解析不了本仓大量使用的 primary constructor 语法（`class const Foo(...)`）。改为测试后仍满足上面全部语义要求：白名单单文件、豁免生成文件、覆盖完整构造器集合。
 
 ### G2 —— 对比度测试
 
