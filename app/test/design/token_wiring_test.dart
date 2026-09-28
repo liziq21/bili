@@ -1,4 +1,6 @@
 import 'package:app/feature/search/common_widgets/filter_bar.dart';
+import 'package:app/app_scaffold.dart';
+import 'package:app/design/design.dart';
 import 'package:app/main.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:app/ui/video_card.dart';
@@ -152,13 +154,12 @@ void main() {
       );
 
       // 角标底是唯一的 75% 透明深色容器。
-      final badges = tester
-          .widgetList<Container>(find.byType(Container))
-          .where((c) {
-            final decoration = c.decoration;
-            return decoration is BoxDecoration && decoration.color != null;
-          })
-          .toList();
+      final badges = tester.widgetList<Container>(find.byType(Container)).where(
+        (c) {
+          final decoration = c.decoration;
+          return decoration is BoxDecoration && decoration.color != null;
+        },
+      ).toList();
       expect(
         badges.map((c) => (c.decoration! as BoxDecoration).color).toList(),
         contains($styles.colors.scrim.withValues(alpha: 0.75)),
@@ -167,9 +168,7 @@ void main() {
       await clearImageCacheDuringTest(tester);
     });
 
-    testWidgets('FilterBar 底部面板的拖拽条取 outline', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('FilterBar 底部面板的拖拽条取 outline', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -196,6 +195,62 @@ void main() {
         $styles.colors.outline,
         reason: '拖拽条属弱图形，与分隔线同取 outline',
       );
+    });
+
+    // Greptile P1：CreatorProfileItem 的 build() 修复前不读 Theme.of，
+    // $styles 是全局静态量，主题翻转后 AppScaffold 交回同一 child 实例、
+    // Element.updateChild 短路，颜色停留旧值。照 palette_test.dart 的
+    // "page rebuild on theme flip" 范式：探针照抄 video_screen.dart 的
+    // 依赖声明，断言的是**画出来的色值**（不是静态量），只有真正重跑
+    // build 才能变色。
+    testWidgets('CreatorProfileItem 主题翻转后重建', (tester) async {
+      final mode = ValueNotifier(ThemeMode.light);
+      addTearDown(mode.dispose);
+
+      const cp = CreatorProfile(
+        id: '188339',
+        name: 'CodeCraft',
+        thumbnailUrl: 'https://example.com/avatar.jpg',
+      );
+      final item = CreatorProfileItem(creatorProfile: cp, onTap: () {});
+
+      Color idTextColor(WidgetTester t) =>
+          t.widget<Text>(find.text('@188339')).style!.color!;
+
+      await tester.pumpWidget(
+        ValueListenableBuilder(
+          valueListenable: mode,
+          builder: (_, ThemeMode m, _) => MediaQuery(
+            data: const MediaQueryData(size: Size(360, 800)),
+            child: MaterialApp(
+              theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
+              darkTheme: appThemeData(
+                AppColors(BrandPalette.of(Brightness.dark)),
+              ),
+              themeMode: m,
+              home: AppScaffold(
+                child: SizedBox(width: 320, height: 80, child: item),
+              ),
+            ),
+          ),
+        ),
+      );
+      final light = idTextColor(tester);
+      expect(
+        light,
+        AppColors(BrandPalette.of(Brightness.light)).onSurfaceVariant,
+      );
+
+      mode.value = ThemeMode.dark;
+      await tester.pumpAndSettle();
+      final dark = idTextColor(tester);
+      expect(
+        dark,
+        AppColors(BrandPalette.of(Brightness.dark)).onSurfaceVariant,
+        reason: '翻转后必须重读暗色板；修复前 build 不依赖 Theme，会停留亮色值',
+      );
+      expect(dark, isNot(equals(light)));
+      await clearImageCacheDuringTest(tester);
     });
   });
 }

@@ -10,7 +10,7 @@
 |---|---|
 | D1 | `toThemeData()` **接进生产**，设计系统拥有 ColorScheme。DynamicColor 保留并作为**首选**，当前品牌色作不支持动态色设备的 fallback |
 | D2 | 色 token 一律**角色命名**，外观名（black / white / offWhite / greyMedium / accent1 等）禁止出现 |
-| D3 | 硬编码色用 **custom_lint** 规则治（规则经 `analysis_options.yaml` 的 `analyzer: plugins:` 块接入） |
+| D3 | 硬编码色用**自研门禁**治（实现见第 4 节 G1，落在 `app/test/` 下，不经 `analysis_options.yaml` 的 `analyzer: plugins:` 块） |
 | D4 | 字体六族**不配置**，文字退回系统字体 |
 | D5 | 亮色色板**重新取值**，接受亮色观感变化；放弃「亮色取值逐字节不变」这一性质 |
 | D6 | DynamicColor 开启时自研 widget 跟随壁纸色相；**同屏出现两种以上不受壁纸色相约束的强调色相属缺陷** |
@@ -123,7 +123,8 @@ app/lib/design/
 - **上线前置**：仓库现存硬编码色必须先迁完，否则门禁一次报出全部历史遗留。迁移与门禁在同一 PR 内完成。
 - 规则必须覆盖**完整的构造器集合**；漏掉 `Color.fromRGBO` 之类即形同虚设。
 - 自写规则而非采用第三方 rule set：语义需精确到「路径白名单仅含单文件，且该文件内容受限」，通用 rule set 无法表达。
-- 实现落在 `app/test/design/hardcoded_color_test.dart`，跟着现有的 `cd app && flutter test` 走，不新增 CI 步骤。**不用 custom_lint 插件**：`custom_lint` 最新 0.8.1 把 `analyzer` 钉在 `^8.0.0`，而本仓在 Dart 3.13 上解析到 13.3.0，pub 求解器直接无解；降到 8 则解析不了本仓大量使用的 primary constructor 语法（`class const Foo(...)`）。改为测试后仍满足上面全部语义要求：白名单单文件、豁免生成文件、覆盖完整构造器集合。
+- 实现落在 `app/test/design/hardcoded_color_test.dart`，跟着现有的 `cd app && flutter test` 走，不新增 CI 步骤。**不用 custom_lint 插件**：`custom_lint` 最新 0.8.1 把 `analyzer` 钉在 `^8.0.0`，而本仓在 Dart 3.13 上解析到 13.3.0，pub 求解器直接无解；降到 8 则解析不了本仓大量使用的 primary constructor 语法（`class const Foo(...)`）。改为测试后仍满足上面全部语义要求：白名单单文件、**不豁免生成文件**、覆盖完整构造器集合。
+- 白名单文件**不是整文件放行**：R1 同时约束 `brand_palette.dart` 的内容，因此门禁在该文件里只放行「`const` 变量/字段声明的初始值」这一处的 `Color(…)` 字面量，出现在 getter、工具函数、widget 或非 `const` 声明里的 `Color(…)` 一律报出。`ColorScheme(…)` 构造与 `Colors.*` 常量引用在该文件内不额外限制。
 
 ### G2 —— 对比度测试
 

@@ -54,12 +54,15 @@ void main() {
 
     test('lib/ 下除 brand_palette.dart 外不得出现颜色字面量', () {
       final violations = <String>[];
+      var paletteScanned = false;
 
       for (final file in libFiles) {
         final relative = file.path
             .substring(_libRoot.length + 1)
             .replaceAll(r'\', '/');
-        if (relative == _allowedPath) continue;
+        // 白名单文件不整文件放行：R1 同时约束它的内容，改走内容规则。
+        final inPaletteFile = relative == _allowedPath;
+        if (inPaletteFile) paletteScanned = true;
 
         final result = parseString(
           content: file.readAsStringSync(),
@@ -72,7 +75,10 @@ void main() {
           continue;
         }
 
-        final visitor = _HardcodedColorVisitor(result.lineInfo);
+        final visitor = _HardcodedColorVisitor(
+          result.lineInfo,
+          inPaletteFile: inPaletteFile,
+        );
         for (final hit in visitor.hitsIn(result.unit)) {
           violations.add(
             '$relative:${hit.line}:${hit.column}  ${hit.description}',
@@ -80,6 +86,13 @@ void main() {
         }
       }
 
+      expect(
+        paletteScanned,
+        isTrue,
+        reason:
+            '白名单文件 lib/$_allowedPath 必须真的被扫到，'
+            '否则「内容规则」是空转的',
+      );
       expect(
         violations,
         isEmpty,
@@ -111,12 +124,14 @@ void f() {
       );
       final flagged = _HardcodedColorVisitor(
         result.lineInfo,
+        inPaletteFile: false,
       ).hitsIn(result.unit).map((h) => h.description).toList();
 
       expect(
         flagged,
         hasLength(5),
-        reason: '探针里恰好 5 处应报（Colors.grey 出现两次算两处），'
+        reason:
+            '探针里恰好 5 处应报（Colors.grey 出现两次算两处），'
             '实际：$flagged',
       );
       expect(
@@ -124,11 +139,7 @@ void f() {
         '直接构造颜色：Color',
         reason: '无 const 的 Color(0x…) 走 MethodInvocation（target 为 null）',
       );
-      expect(
-        flagged[1],
-        contains('Color.fromARGB'),
-        reason: '具名构造器必须覆盖',
-      );
+      expect(flagged[1], contains('Color.fromARGB'), reason: '具名构造器必须覆盖');
       expect(
         flagged[2],
         contains('ui.Color.fromRGBO'),
@@ -160,6 +171,7 @@ class A {
       );
       final flagged = _HardcodedColorVisitor(
         result.lineInfo,
+        inPaletteFile: false,
       ).hitsIn(result.unit).map((h) => h.description).toList();
 
       expect(flagged, hasLength(3), reason: '实际：$flagged');
@@ -172,14 +184,38 @@ class A {
 class _Hit(final int line, final int column, final String description);
 
 /// 纯语法扫描器，行为见文件头注释。
-class _HardcodedColorVisitor(final LineInfo _lineInfo)
-    extends RecursiveAstVisitor<void> {
+class _HardcodedColorVisitor(
+  final LineInfo _lineInfo, {
+  // 声明式参数 `this.inPaletteFile` 在本 SDK 版本下被这条 lint 误报，
+  // 拆成「参数 + 字段」反而同时触发更多 lint，加 ignore 是最小消法。
+  // ignore: use_declaring_parameters
+  required this.inPaletteFile,
+}) extends RecursiveAstVisitor<void> {
+  // 公开字段：外部测试调用方（探针自检）需要按名字读，不能私有化。
+  final bool inPaletteFile;
+
   final List<_Hit> _hits = [];
 
+  /// 白名单文件里允许出现 `Color(…)` 字面量的位置，两路（含端点 offset 区间）：
+  /// ① `const` 变量/字段声明的初始值；
+  /// ② 任何 `ColorScheme(…)` 构造的参数列表——R1 允许清单里「ColorScheme 构造」
+  /// 的一部分，其参数就是色值。
+  ///
+  /// 必须先扫一遍再走主遍历——`RecursiveAstVisitor` 是单趟的，走到字面量时
+  /// 还不知道它归不归这两类位置。
+  final List<(int, int)> _allowedColorLiterals = [];
+
   List<_Hit> hitsIn(CompilationUnit unit) {
+    if (inPaletteFile) {
+      unit.accept(_AllowedColorLiteralCollector(_allowedColorLiterals));
+    }
     unit.accept(this);
     return _hits;
   }
+
+  /// 白名单模式下 `Color(…)` 落在允许位置时返回 `true`。
+  bool _isAllowedColorLiteral(int offset) =>
+      _allowedColorLiterals.any((r) => offset >= r.$1 && offset <= r.$2);
 
   void _report(int offset, String description) {
     final location = _lineInfo.getLocation(offset);
@@ -197,7 +233,8 @@ class _HardcodedColorVisitor(final LineInfo _lineInfo)
     // 是 "Color.fromRGBO"——具名构造器折进了 type 的源码里，所以按分段
     // 判断而不是只比较整串。
     final typeSource = node.constructorName.type.toSource();
-    if (_mentionsColorType(typeSource)) {
+    if (_mentionsColorType(typeSource) &&
+        !_isAllowedColorLiteral(node.offset)) {
       _report(node.offset, '直接构造颜色：$typeSource');
     }
     super.visitInstanceCreationExpression(node);
@@ -207,12 +244,15 @@ class _HardcodedColorVisitor(final LineInfo _lineInfo)
   void visitMethodInvocation(MethodInvocation node) {
     final target = node.target;
     if (target == null) {
-      if (node.methodName.name == 'Color') {
+      if (node.methodName.name == 'Color' &&
+          !_isAllowedColorLiteral(node.offset)) {
         _report(node.offset, '直接构造颜色：Color');
       }
     } else {
       final method = node.methodName.name;
-      if (method != 'new' && _mentionsColorType(target.toSource())) {
+      if (method != 'new' &&
+          _mentionsColorType(target.toSource()) &&
+          !_isAllowedColorLiteral(node.offset)) {
         _report(node.offset, '直接构造颜色：${target.toSource()}.$method');
       }
     }
@@ -222,15 +262,78 @@ class _HardcodedColorVisitor(final LineInfo _lineInfo)
   @override
   void visitPrefixedIdentifier(PrefixedIdentifier node) {
     // `Colors.grey[300]` 与 `Colors.grey.shade400` 的内层都是
-    // PrefixedIdentifier，所以只接这一种节点就能覆盖下标与级联两种写法。
-    if (_isColorsConstant(node) &&
+    // PrefixedIdentifier，所以这一处就能覆盖下标与级联两种写法。
+    if (!inPaletteFile &&
+        _isColorsClassRef(node.prefix) &&
         node.identifier.name != _exemptColorsConstant) {
       _report(node.offset, '硬编码色常量：Colors.${node.identifier.name}');
     }
     super.visitPrefixedIdentifier(node);
   }
 
-  /// 前缀是 `Colors` 或 `material.Colors` 形式。
-  static bool _isColorsConstant(PrefixedIdentifier node) =>
-      node.prefix.toSource().split('.').last == 'Colors';
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    // 带导入前缀时 `material.Colors.red` 的内层是
+    // PrefixedIdentifier('material.Colors')，常量名落在外层
+    // PropertyAccess 上——只接 PrefixedIdentifier 会让这种写法整条绕过门禁。
+    // 豁免判断必须放在这一层，否则 `material.Colors.transparent` 会被误报。
+    if (!inPaletteFile &&
+        _isColorsClassRef(node.target) &&
+        node.propertyName.name != _exemptColorsConstant) {
+      _report(node.offset, '硬编码色常量：Colors.${node.propertyName.name}');
+    }
+    super.visitPropertyAccess(node);
+  }
+
+  /// 表达式是否指向 `Colors` 这个类本身：`Colors` 或 `material.Colors`。
+  static bool _isColorsClassRef(Expression? expression) => switch (expression) {
+    SimpleIdentifier(name: final name) => name == 'Colors',
+    // `material.Colors`：标识符那一段就是类名，前面的是导入前缀。
+    PrefixedIdentifier(:final identifier) => identifier.name == 'Colors',
+    _ => false,
+  };
+}
+
+/// 收集白名单文件里允许出现 `Color(…)` 字面量的位置 offset 区间。
+///
+/// 两路：
+/// ① `const` 变量/字段声明的初始值。判据是 `VariableDeclarationList` 上的
+///    `const` 关键字（analyzer 13 实测：`static const Color x = Color(0x…)`
+///    取 `"const"`，`static final` 取 `"final"`，无修饰符取 `null`），
+///    不看声明的静态性——局部 `const` 与字段 `const` 同属规范说的「色值常量」。
+/// ② 任何 `ColorScheme(…)` 构造的 offset 区间（整串 `ColorScheme(…)`）——
+///    R1 允许清单里「ColorScheme 构造」的参数位置。
+class _AllowedColorLiteralCollector(final List<(int, int)> _ranges)
+    extends RecursiveAstVisitor<void> {
+  @override
+  void visitVariableDeclarationList(VariableDeclarationList node) {
+    if (node.keyword?.lexeme == 'const') {
+      for (final variable in node.variables) {
+        final initializer = variable.initializer;
+        if (initializer != null) {
+          _ranges.add((initializer.offset, initializer.end));
+        }
+      }
+    }
+    super.visitVariableDeclarationList(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    // 不带 const 的 `ColorScheme(...)` 是 MethodInvocation（target=null，
+    // methodName='ColorScheme'），带 const 时是 InstanceCreationExpression
+    // （`constructorName.type.toSource()` 含 "ColorScheme"）。两路都接。
+    if (node.target == null && node.methodName.name == 'ColorScheme') {
+      _ranges.add((node.offset, node.end));
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    if (node.constructorName.type.toSource().split('.').last == 'ColorScheme') {
+      _ranges.add((node.offset, node.end));
+    }
+    super.visitInstanceCreationExpression(node);
+  }
 }

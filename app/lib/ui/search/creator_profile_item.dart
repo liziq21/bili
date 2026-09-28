@@ -11,6 +11,16 @@ class const CreatorProfileItem({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // `$styles.colors.*` below is read from a mutable static that `AppScaffold`
+    // refreshes during its own build. Reading a global in `build()` registers no
+    // InheritedWidget dependency, so nothing tells Flutter to rebuild this item
+    // when the brightness flips: `AppScaffold` does rebuild (it reads
+    // `Theme.of`), but it hands back the same child widget instance and
+    // `Element.updateChild` short-circuits on an identical child, leaving the
+    // whole route subtree on the previous palette. The dependency read is the
+    // cheap opt-in — see `feature/video/video_screen.dart` for the long form.
+    Theme.of(context);
+
     final semanticLabel = '${creatorProfile.name}, @${creatorProfile.id}';
 
     return Card(
