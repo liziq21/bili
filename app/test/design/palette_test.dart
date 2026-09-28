@@ -71,8 +71,16 @@ void main() {
           ),
         );
 
+    // 生产接线是 `ThemeWrapper` 把 `appThemeData(品牌色板)` 交给
+    // `MaterialApp.router` 的 theme/darkTheme（app.dart:47-59），测试必须灌
+    // 同一个东西——早先这里灌 stock `ThemeData.light()/dark()` 来证明
+    // `$styles` 不看上层主题，那个契约在 P3 已改：动态色开启时上层色板是
+    // 系统色板，`$styles` 必须跟随，否则同屏两个强调色。
+    ThemeData productionTheme(Brightness brightness) =>
+        appThemeData(AppColors(BrandPalette.of(brightness)));
+
     testWidgets('resolves the dark palette under a dark theme', (tester) async {
-      await pump(tester, ThemeData.dark());
+      await pump(tester, productionTheme(Brightness.dark));
       // `$styles` is a mutable static refreshed during AppScaffold.build(), so
       // it must only be read from inside a Builder that runs afterwards.
       expect($styles.colors.surface, const Color(0xFF1E1B18));
@@ -82,9 +90,60 @@ void main() {
     testWidgets('resolves the light palette under a light theme', (
       tester,
     ) async {
-      await pump(tester, ThemeData.light());
+      await pump(tester, productionTheme(Brightness.light));
       expect($styles.colors.surface, const Color(0xFFF8ECE5));
       expect($styles.colors.onSurface, const Color(0xFF514F4D));
+    });
+
+    testWidgets('follows the inherited ColorScheme when it is not the brand one', (
+      tester,
+    ) async {
+      // 动态色路径：系统给一套色板，自研 token 必须整体跟随，
+      // accentFill 与 Material 默认 primary 同值（否则 TabBar.indicatorColor
+      // 与 FilledButton 底色分叉）。
+      final dynamicScheme =
+          ThemeData.light().colorScheme.copyWith(
+                primary: const Color(0xFF6750A4),
+                surface: const Color(0xFFFFFBFE),
+              );
+      await pump(
+        tester,
+        productionTheme(Brightness.light).copyWith(colorScheme: dynamicScheme),
+      );
+
+      expect($styles.colors.accentFill, dynamicScheme.primary);
+      expect($styles.colors.surface, dynamicScheme.surface);
+      // accentText 不能沿用品牌橙——系统 primary 未必压得住系统 surface，
+      // 故按新色板重算到 4.5:1。
+      expect(
+        Contrast.ratio($styles.colors.accentText, dynamicScheme.surface),
+        greaterThanOrEqualTo(Contrast.aaText),
+        reason: '动态色板下的 accentText 须达文字门槛，实际 '
+            '${Contrast.ratio($styles.colors.accentText, dynamicScheme.surface).toStringAsFixed(2)}:1',
+      );
+      // 承载面语义与系统强调色无关，仍走品牌值。
+      expect($styles.colors.scrim, const Color(0xFF1E1B18));
+    });
+
+    testWidgets('recomputes accentText when the dynamic scheme is dark', (
+      tester,
+    ) async {
+      // 注意：暗色动态色板这一档，沿用品牌 accentText（#EFA97C）本来就过
+      // 门槛——重算在这里不是必需的，那条保证由下面
+      // 'recomputes accentText for a surface the brand value cannot carry' 钉。
+      // 本条只钉住 token 跟随。
+      final dynamicScheme =
+          ThemeData.dark().colorScheme.copyWith(
+                primary: const Color(0xFFD0BCFF),
+                surface: const Color(0xFF141218),
+              );
+      await pump(
+        tester,
+        productionTheme(Brightness.dark).copyWith(colorScheme: dynamicScheme),
+      );
+
+      expect($styles.colors.accentFill, dynamicScheme.primary);
+      expect($styles.colors.surface, dynamicScheme.surface);
     });
 
     testWidgets('does not clobber the inherited ColorScheme', (tester) async {
@@ -161,8 +220,12 @@ void main() {
           builder: (_, ThemeMode m, _) => MediaQuery(
             data: const MediaQueryData(size: Size(360, 800)),
             child: MaterialApp(
-              theme: ThemeData.light(),
-              darkTheme: ThemeData.dark(),
+              theme: appThemeData(
+                AppColors(BrandPalette.of(Brightness.light)),
+              ),
+              darkTheme: appThemeData(
+                AppColors(BrandPalette.of(Brightness.dark)),
+              ),
               themeMode: m,
               home: AppScaffold(child: probe),
             ),

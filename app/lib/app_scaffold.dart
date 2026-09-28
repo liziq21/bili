@@ -27,6 +27,11 @@ class const AppScaffold({super.key, required final Widget child})
       // which pinned every surface and text colour to the light palette and
       // left the whole app light-only.
       isDark: Theme.of(context).brightness == Brightness.dark,
+      // 动态色开启时上层 Theme 的色板是系统色板（R5 要求动态色优先），
+      // 自研 token 必须跟着换，否则 TabBar.indicatorColor 这类取
+      // accentFill 的地方会与 Material 默认 primary 分叉。关闭动态色时
+      // 该色板就是品牌色板，AppStyle 内部原样返回，默认路径不变。
+      scheme: Theme.of(context).colorScheme,
     );
     return KeyedSubtree(
       key: ValueKey($styles.scale),

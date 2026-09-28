@@ -125,4 +125,36 @@ void main() {
       }
     },
   );
+
+  test('accentText is recomputed for a surface the brand value cannot carry', () {
+    // `BrandPalette.fromScheme` 的保证：accentText 压**它将要用的那个** surface
+    // 达 4.5:1。系统色板不受我们控制，若它给的 primary/surface 组合让品牌
+    // accentText 压不住（这里故意给亮色标记 + 深色底的不匹配组合），必须
+    // 重算而不是沿用。
+    //
+    // 说明范围：对「亮度标记与底色深浅一致」的正常系统色板，沿用品牌
+    // accentText 本就够（暗色 #EFA97C 压深底 8.68:1、亮色 #9D4E1A 压近白底
+    // 5.94:1），重算是防御性的；本条钉的是那条防御确实生效。
+    final base = BrandPalette.of(Brightness.light);
+    final mismatched = base.scheme.copyWith(surface: const Color(0xFF141218));
+
+    // 前提：不匹配时品牌值确实不达标，否则本测试证明不了任何东西。
+    expect(
+      Contrast.ratio(base.accentText, mismatched.surface),
+      lessThan(Contrast.aaText),
+      reason: '探针前提：品牌 accentText 压该底色应不达标',
+    );
+
+    final derived = BrandPalette.fromScheme(mismatched, base: base);
+    expect(
+      Contrast.ratio(derived.accentText, mismatched.surface),
+      greaterThanOrEqualTo(Contrast.aaText),
+      reason: '重算后实际 '
+          '${Contrast.ratio(derived.accentText, mismatched.surface).toStringAsFixed(2)}:1',
+    );
+    // 其余角色照旧跟随/沿用：色板角色取新的，承载面角色取品牌的。
+    expect(derived.scheme.primary, mismatched.primary);
+    expect(derived.scrim, base.scrim);
+    expect(derived.onSurfaceStrong, base.onSurfaceStrong);
+  });
 }

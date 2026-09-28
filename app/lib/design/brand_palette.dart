@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'contrast.dart';
+
 /// 品牌 fallback 色板 —— R1 允许出现颜色字面量的**唯一**文件。
 ///
 /// 这里是全应用色值的**单一来源**（R1）。`AppColors` 只从本类取值，
@@ -51,6 +53,50 @@ class const BrandPalette({
     Brightness.light => _light,
     Brightness.dark => _dark,
   };
+
+  /// 用上层 `Theme` 的**实际**色板重建色板：动态色开启时
+  /// `DynamicColorBuilder` 会把系统色板换到 `MaterialApp` 的 `theme` 上，
+  /// 此时自研 token 也要跟着换，否则 `TabBar.indicatorColor`（取
+  /// `accentFill`）与 Material 默认 `primary` 会同屏分叉（R5）。
+  ///
+  /// `ColorScheme` 无法表达的四个角色里，[scrim] / [onScrim] /
+  /// [onSurfaceStrong] 沿用 [base]——它们是承载面语义（恒深、随亮度反转），
+  /// 与系统强调色无关。[accentText] 不沿用，见 [_readableAccent]。
+  ///
+  /// [scheme] 与 [base] 的色板相同时原样返回 [base]：关闭动态色的默认路径
+  /// 上层色板就是品牌色板，这样走可保证默认路径逐字节不变。
+  static BrandPalette fromScheme(
+    ColorScheme scheme, {
+    required BrandPalette base,
+  }) {
+    if (scheme == base.scheme) return base;
+    return BrandPalette(
+      scheme: scheme,
+      scrim: base.scrim,
+      onScrim: base.onScrim,
+      onSurfaceStrong: base.onSurfaceStrong,
+      accentText: _readableAccent(scheme),
+    );
+  }
+
+  /// 取 [scheme] 的 `primary` 色相与饱和度，只调亮度直到压 `surface` 达到
+  /// [Contrast.aaText] 为止。系统给的 `primary` 未必压得住系统给的
+  /// `surface`，沿用品牌强调色配动态底色可能直接不过 4.5:1。底色深则提亮、
+  /// 底色浅则压暗；走到亮度两端仍不达标时退回纯黑/纯白。
+  static Color _readableAccent(ColorScheme scheme) {
+    final hsl = HSLColor.fromColor(scheme.primary);
+    final onLight = scheme.surface.computeLuminance() > 0.5;
+    for (var step = 0; step <= 100; step++) {
+      final lightness = (hsl.lightness - step / 100 * (onLight ? 1 : -1))
+          .clamp(0.0, 1.0);
+      final candidate = hsl.withLightness(lightness).toColor();
+      if (Contrast.ratio(candidate, scheme.surface) >= Contrast.aaText) {
+        return candidate;
+      }
+      if (lightness == 0.0 || lightness == 1.0) break;
+    }
+    return onLight ? Colors.black : Colors.white;
+  }
 
   // ── 亮色取值 ────────────────────────────────────────────────────────────
   // 相对亮色 surface #F8ECE5 的实测对比度（WCAG 2.1 相对亮度公式，见
