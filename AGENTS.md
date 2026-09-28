@@ -7,14 +7,33 @@ This repository is a Flutter workspace project with a modular structure separati
 - `app/`: The main Flutter application.
 - `packages/`: Shared packages/modules (`bilibili`, `youtube`, `components`, `data`, `model`).
 
-For directory-specific guidelines, refer to:
-- [`app/AGENTS.md`](app/AGENTS.md) for application layer, Drift database, caching, UI styles, dependency injection, and app tooling commands.
-- [`packages/AGENTS.md`](packages/AGENTS.md) for package classification, data layer models, remote data sources, and package tooling commands.
+## Normative Documents
 
-For a guided walkthrough of the architecture — one request traced from the widget down to the HTTP call, with the official documentation each principle comes from — see:
+Before writing or modifying code in this repository, read the specification files that govern your change. This list is the map; each file is the source of truth — no rule is restated here.
+
+**Before starting work, read:**
+
+- [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, Dart 3.13 syntax, immutability, testing.
+- [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
+- [`packages/AGENTS.md`](packages/AGENTS.md) — package classification, data layer rules, API sub-package conventions (`bilibili`/`youtube`), CI test scope.
+- [`app/docs/design-system.md`](app/docs/design-system.md) — design token policy: color literal allow-list, contrast requirements, token roles. **Must read before touching any UI colors, tokens, or theme code.**
+- [`packages/bilibili/bpi/AGENTS.md`](packages/bilibili/bpi/AGENTS.md) — Bilibili API sub-package rules.
+- [`packages/youtube/ypi/AGENTS.md`](packages/youtube/ypi/AGENTS.md) — YouTube API sub-package rules.
+- [`.coderabbit.yaml`](.coderabbit.yaml) — CodeRabbit review configuration (language, review profile, ignore rules).
+
+**When to read each file:**
+
+| You are about to… | Read first |
+|---|---|
+| Write or change any app/ widget, Bloc, or repository | `app/AGENTS.md` |
+| Touch colors, themes, or design tokens | `app/docs/design-system.md` + `app/AGENTS.md` (Global Style Access section) |
+| Add or modify a package under `packages/` | `packages/AGENTS.md` + the relevant sub-package `AGENTS.md` |
+| Add a new API endpoint or DTO in `bpi` or `ypi` | The corresponding sub-package `AGENTS.md` (API 子包通用规范 section) |
+| Write a test (unit, widget, or golden) | Root `AGENTS.md` (Testing section) + the test's layer file |
+| Change CI workflow or golden baselines | `.github/workflows/ci.yml` + `.github/workflows/rerecord-goldens.yml` |
+
+For architectural walkthroughs — not prescriptive rules, but context on why boundaries fall where they do:
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).
-
-For how the repository is split into packages, which dependency directions are allowed, and why the boundaries fall where they do — see:
 - [`docs/modularization-learning-journey.md`](docs/modularization-learning-journey.md).
 
 ## Universal Development Guidelines
@@ -36,7 +55,8 @@ For how the repository is split into packages, which dependency directions are a
 
 - The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` sets `platformGoldens: false`). They render through a fixed font with text masked into solid blocks, so a recorded baseline does not depend on the machine that recorded it. Do not switch to native `matchesGoldenFile` goldens: the Flutter API docs state that "custom fonts may render differently across different platforms, or between different versions of Flutter" (https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html).
 - **Never hand-edit a baseline.** Baselines are generated, not drawn.
-- **The target is for CI to record baselines, not workstations.** The repository has no baseline-recording step: `ci.yml` only compares. Until one is added, a change to what a covered widget renders is finished by re-recording from `app/` with `flutter test test/golden/<file>_golden_test.dart --update-goldens` and committing the result. `Run Flutter Test` fails only when the comparison exceeds `diffThreshold` — a rendering change small enough to fall inside the 0.01 tolerance passes without a baseline update, so a green check does not mean the baseline is current.
+- **The target is for CI to record baselines, not workstations.** Baseline re-recording is performed exclusively by the [`rerecord-goldens.yml`](.github/workflows/rerecord-goldens.yml) workflow (manual trigger only); `ci.yml` compares but does not update baselines. A local re-record is never a substitute. When a golden comparison has loaded a readable baseline and its matcher setup succeeds, a pixel-difference failure occurs only when the difference exceeds `diffThreshold` — a rendering change small enough to fall inside the 0.01 tolerance may pass without a baseline update, so a green check does not mean the baseline is current.
+- **Feature branch gap (open)**: `rerecord-goldens.yml` hard-codes `ref: main` and `base: main` (lines 26, 70), so it cannot re-record a feature branch's rendering. A PR that changes a widget covered by an existing golden test will fail `Run Flutter Test`, and there is no supported path to update its baseline from the PR's own branch. Until the workflow gains a branch-parameterised trigger, no supported path exists to re-record a feature branch's baseline.
 - `diffThreshold` is `0.01`, a comparison tolerance — the maximum fraction of differing pixels that still passes. A passing golden test does not prove pixel-exact equality.
 - **Coverage limit**: a golden test proves only the widgets it renders, under the theme it records. Treating "the goldens did not change" as proof that no visible pixel changed anywhere is unsupported — anything outside a test's own `pumpWidget` tree is unverified.
 
