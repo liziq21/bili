@@ -47,9 +47,3 @@ Prevention: Always expose static `client` configuration fields on media source w
 Vulnerability: Unhandled or invalid deep-link URIs (e.g., `bili://auth/callback?token=secret123`) passed to `NotFoundScreen` rendered raw query parameters in cleartext UI text, exposing sensitive session tokens or authentication credentials to end users and screen captures.
 Learning: Navigation 404/error screens displaying raw state URIs or deep-link routes can inadvertently expose sensitive authentication query parameters or crash UI text rendering due to non-printable control characters.
 Prevention: Always mask query parameter values (e.g., replacing values with `'REDACTED'`) and strip control characters (`[\x00-\x1F\x7F]`) when formatting URI representations for user-facing error views.
-
-## 2026-09-24 - Sanitize Control Characters and Encode Query Components in Referer Headers
-
-Vulnerability: `ApiInterceptor` constructed `HttpHeaders.refererHeader` using `Uri.encodeFull(keyword)`, which failed to escape URL query delimiters (`#`, `&`, `?`, `=`) and allowed non-printable control characters (`\r\n`) to pass into HTTP headers, creating risk of CRLF header injection and Referer parameter corruption.
-Learning: `Uri.encodeFull` is meant for full URIs and leaves reserved query characters intact. Constructing custom HTTP query strings for headers requires query component encoding (`Uri.encodeQueryComponent`) and control character stripping (`[\x00-\x1F\x7F]`).
-Prevention: Always use `Uri.encodeQueryComponent` for query parameter values in HTTP headers and sanitize control characters to prevent header splitting or injection.

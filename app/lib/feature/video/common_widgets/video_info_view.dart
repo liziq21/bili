@@ -394,17 +394,13 @@ class _ActionButtonsSectionState()
     with AutomaticKeepAliveClientMixin {
   bool _isDanmakuActive = true;
 
-  // This section is a direct child of the ListView at line 96. A child that
-  // does not request keep-alive is disposed once the recommendations list
-  // scrolls it past the cache extent, which resets `_isDanmakuActive` to its
-  // default. Measured on the app fixture: with a 100px-tall viewport, two
-  // scrolls to the bottom and back return the toggle to "弹幕开".
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     // ⚡ Bolt Optimization: Scoped selector for action metrics (likes, favorites, shares).
     // Rebuilds ONLY this action bar when like/favorite status changes, without rebuilding
     // the title, creator profile, synopsis, or recommendation list.
@@ -525,14 +521,13 @@ class _SynopsisSectionState()
     with AutomaticKeepAliveClientMixin {
   bool _isDescExpanded = false;
 
-  // Same reason as _ActionButtonsSectionState: a ListView child without
-  // keep-alive loses this flag when it is scrolled out of the cache extent.
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     // ⚡ Bolt Optimization: Scoped selector for video description.
     // Localizes expansion state (_isDescExpanded) so toggling synopsis does not rebuild
     // surrounding widgets (header, creator info, recommendations).

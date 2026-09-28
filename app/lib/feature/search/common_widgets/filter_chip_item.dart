@@ -11,7 +11,6 @@ class const FilterChipItem({
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      tooltip: label,
       onSelected: onSelected,
     );
   }
