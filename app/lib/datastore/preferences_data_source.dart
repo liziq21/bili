@@ -137,20 +137,19 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which
   // the spec does not guarantee. `_typeOf<T>()` instead captures the actual
-  // `Type` value for each supported argument once; the dispatch below uses
-  // `identical` (value identity) against those captured objects, so no
-  // printed type name is involved.
+  // `Type` value for each supported argument once; the dispatch below compares
+  // those values directly, so no printed type name is involved.
   static Type _typeOf<T>() => T;
 
   Future<T> _getData(SharedPreferencesAsync pref) async {
     final runtimeType = _typeOf<T>();
     final Future<Object?> data = switch (runtimeType) {
-      _ when identical(runtimeType, _typeOf<String>()) => pref.getString(name),
-      _ when identical(runtimeType, _typeOf<String?>()) => pref.getString(name),
-      _ when identical(runtimeType, _typeOf<bool>()) => pref.getBool(name),
-      _ when identical(runtimeType, _typeOf<int>()) => pref.getInt(name),
-      _ when identical(runtimeType, _typeOf<double>()) => pref.getDouble(name),
-      _ when identical(runtimeType, _typeOf<List<String>>()) => pref.getStringList(name),
+      _ when runtimeType == _typeOf<String>() => pref.getString(name),
+      _ when runtimeType == _typeOf<String?>() => pref.getString(name),
+      _ when runtimeType == _typeOf<bool>() => pref.getBool(name),
+      _ when runtimeType == _typeOf<int>() => pref.getInt(name),
+      _ when runtimeType == _typeOf<double>() => pref.getDouble(name),
+      _ when runtimeType == _typeOf<List<String>>() => pref.getStringList(name),
       _ => throw UnsupportedError('Unsupported type: $T'),
     };
 
