@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/foundation.dart' show BindingBase, kIsWeb;
 import 'package:flutter/painting.dart' show PaintingBinding;
-import 'package:flutter/rendering.dart' show RendererBinding;
-import 'package:flutter/scheduler.dart' show SchedulerPhase;
-import 'package:flutter_test/flutter_test.dart' show tearDown, tearDownAll;
+import 'package:flutter/widgets.dart' show SizedBox;
+import 'package:flutter_test/flutter_test.dart'
+    show WidgetTester, tearDown, tearDownAll;
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
@@ -56,7 +56,7 @@ class FakePathProviderPlatform(final String _root)
 /// created it — an undisposed `StreamController`, `FocusNode`, `Timer`, or
 /// Bloc. It stays opt-in because it has never been green: measured on Linux
 /// against `main` at 4bf35df with the switch on, 4 of the package's 22 test
-/// files reported leaks. The image cache teardown below accounts for 3 of
+/// files reported leaks. The image cache cleanup below accounts for 3 of
 /// them. The fourth,
 /// `test/widget_test.dart`, reports `HeroController`,
 /// `GoRouteInformationProvider` and `GoRouterDelegate` — all three owned by
@@ -74,6 +74,22 @@ bool _isLeakTrackingEnabled() {
   // constant, the second is read from the environment of the test process.
   return const bool.fromEnvironment('LEAK_TRACKING') ||
       (bool.tryParse(Platform.environment['LEAK_TRACKING'] ?? '') ?? false);
+}
+
+/// Releases cached image handles before a widget test finishes.
+///
+/// [ImageCache.clear] defers handle disposal to a post-frame callback, so the
+/// test must drive a frame after clearing the cache. Pumping an empty tree also
+/// removes image listeners without loading more thumbnails.
+Future<void> clearImageCacheDuringTest(WidgetTester tester) async {
+  _clearImageCache();
+  await tester.pumpWidget(const SizedBox.shrink());
+}
+
+void _clearImageCache() {
+  final imageCache = PaintingBinding.instance.imageCache;
+  imageCache.clear();
+  imageCache.clearLiveImages();
 }
 
 /// Global Alchemist configuration for every test in this package.
@@ -100,35 +116,17 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // Every thumbnail in this app is loaded through a network image, and both
   // the mocked HttpClient in tests and `CachedNetworkImage` at runtime register
   // a completer with the binding-wide `PaintingBinding.instance.imageCache`.
-  // `ImageCache.clear` disposes those entries through
-  // `_CachedImageBase.dispose`
-  // (packages/flutter/lib/src/painting/image_cache.dart), which releases the
-  // completer handle inside `SchedulerBinding.addPostFrameCallback`. That
-  // callback only runs if another frame follows, and a test that is the last in
-  // its file is never followed by one. Measured on Linux against `main` at
-  // 4bf35df with leak tracking on, that left one undisposed
-  // `ImageStreamCompleterHandle` in each of the three test files whose final
-  // test renders a thumbnail: `test/golden/video_card_golden_test.dart`,
-  // `test/ui/video_card_test.dart` and
-  // `test/ui/creator_profile_item_test.dart`.
-  // Driving one frame here releases it.
-  // `AutomatedTestWidgetsFlutterBinding.pump` cannot be used from `tearDown` —
-  // it asserts `inTest` — so the frame is driven directly, guarded so it never
-  // lands inside a persistent-callback phase.
+  // Tests that finish with a thumbnail call [clearImageCacheDuringTest] while
+  // the widget tester can still pump the frame needed to dispose cache handles.
+  // This teardown clears the shared cache for other tests without driving the
+  // binding's rendering flow after the test ends.
   tearDown(() {
     // The Drift database suite and the pure Dart package tests never
     // initialize the Flutter binding, so there is no image cache to reach.
     if (BindingBase.debugBindingType() == null) {
       return;
     }
-    final imageCache = PaintingBinding.instance.imageCache;
-    imageCache.clear();
-    imageCache.clearLiveImages();
-    final binding = RendererBinding.instance;
-    if (binding.schedulerPhase != SchedulerPhase.persistentCallbacks) {
-      binding.handleBeginFrame(Duration.zero);
-      binding.handleDrawFrame();
-    }
+    _clearImageCache();
   });
 
   // `flutter test` runs test files concurrently, so the image cache must not be
