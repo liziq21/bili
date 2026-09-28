@@ -38,11 +38,10 @@ class const BrandPalette(
   final Color onSurfaceStrong,
 ) {
   /// 按亮度取对应的一套色板。
-  static BrandPalette of(Brightness brightness) =>
-      switch (brightness) {
-        Brightness.light => _light,
-        Brightness.dark => _dark,
-      };
+  static BrandPalette of(Brightness brightness) => switch (brightness) {
+    Brightness.light => _light,
+    Brightness.dark => _dark,
+  };
 
   // ── 亮色取值 ────────────────────────────────────────────────────────────
   static const Color _accentLight = Color(0xFFE4935D);

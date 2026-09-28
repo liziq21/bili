@@ -110,12 +110,7 @@ class const _VideoContent({required final String videoId})
             ),
           ),
           const Expanded(
-            child: TabBarView(
-              children: [
-                VideoInfoView(),
-                VideoCommentsView(),
-              ],
-            ),
+            child: TabBarView(children: [VideoInfoView(), VideoCommentsView()]),
           ),
         ],
       ),
