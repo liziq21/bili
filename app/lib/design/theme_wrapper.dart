@@ -29,9 +29,7 @@ class const ThemeWrapper({
     // P3 接线：主题数据来自 BrandPalette（R1 唯一来源），不再走
     // stock ThemeData.light()/dark()，使 Material 组件拿到的是品牌色板
     // 而非默认配色（R4 想消除的双色板问题）。
-    final light = appThemeData(
-      AppColors(BrandPalette.of(Brightness.light)),
-    );
+    final light = appThemeData(AppColors(BrandPalette.of(Brightness.light)));
     final dark = appThemeData(AppColors(BrandPalette.of(Brightness.dark)));
 
     if (useDynamicColor) {

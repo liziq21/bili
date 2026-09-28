@@ -28,6 +28,7 @@ void main() {
       expect(light.onSurfaceStrong, const Color(0xFF1E1B18));
       expect(light.onSurface, const Color(0xFF514F4D));
       expect(light.onSurfaceVariant, const Color(0xFF696561));
+      expect(light.accentText, const Color(0xFF9D4E1A));
       expect(light.accentFill, const Color(0xFFB75B1E));
       expect(light.secondary, const Color(0xFF947666));
       expect(light.tertiary, const Color(0xFFC47642));
@@ -84,6 +85,45 @@ void main() {
       await pump(tester, ThemeData.light());
       expect($styles.colors.surface, const Color(0xFFF8ECE5));
       expect($styles.colors.onSurface, const Color(0xFF514F4D));
+    });
+
+    testWidgets('does not clobber the inherited ColorScheme', (tester) async {
+      // AppScaffold 早先包了一层 `Theme(data: appThemeData($styles.colors))`，
+      // 用品牌色板重算 ColorScheme 覆盖上层。动态色开启时
+      // DynamicColorBuilder 换上的动态色板就是这样被吃掉的（R5 要求动态
+      // 色优先）。用品牌色板自身探针（ThemeData.light() 恰好有一样的
+      // primary），所以这里改用一个不属于品牌色板的 primary 来区分两者。
+      const probePrimary = Color(0xFF00FF00);
+      final inherited = ThemeData.light().copyWith(
+        colorScheme: ThemeData.light().colorScheme.copyWith(
+          primary: probePrimary,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(size: Size(360, 800)),
+          child: MaterialApp(
+            theme: inherited,
+            home: AppScaffold(
+              child: Builder(
+                builder: (context) => ColoredBox(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: const SizedBox.expand(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ColoredBox && w.color == probePrimary,
+        ),
+        findsOneWidget,
+        reason: '后代必须仍读到上层 Theme 的 colorScheme（动态色靠这条生效）',
+      );
     });
   });
 
@@ -215,7 +255,10 @@ void main() {
       // 强调色在两种亮度下都是浅色（#E4935D / #EFA97C），白色前景只有
       // 2.4:1 / 2.0:1。搜索结果页筛选栏的 FilledButton 就是这个组合，
       // 文字实际读不出来。
-      for (final c in [AppColors(BrandPalette.of(Brightness.light)), AppColors(BrandPalette.of(Brightness.dark))]) {
+      for (final c in [
+        AppColors(BrandPalette.of(Brightness.light)),
+        AppColors(BrandPalette.of(Brightness.dark)),
+      ]) {
         final scheme = appThemeData(c).colorScheme;
         for (final pair in [
           (fg: scheme.onPrimary, bg: scheme.primary),

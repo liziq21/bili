@@ -30,18 +30,19 @@ class const AppScaffold({super.key, required final Widget child})
     );
     return KeyedSubtree(
       key: ValueKey($styles.scale),
-      child: Theme(
-        data: appThemeData($styles.colors),
-        // 品牌色板作为 Material 组件的默认配色（P3 接线）；
-        // 不接线时 Material 走 stock ThemeData.light()，$styles.colors.*
-        // 的取值就只是装饰、不影响组件渲染（R4 双色板问题的实质）。
-        child: /* 外层 Theme(data:) 提供 AppColors 取值，DefaultTextStyle
-               提供 Material 之外的 widget（Hero 飞行等）的字样。 */
-            DefaultTextStyle(
-          style: $styles.text.body,
-          // Use a custom scroll behavior across entire app
-          child: ScrollConfiguration(behavior: AppScrollBehavior(), child: child),
-        ),
+      // 这里不建 Theme：品牌色板已由 ThemeWrapper 交给 MaterialApp.router
+      // 的 theme/darkTheme（app.dart:47-59），本组件在路由子树内，
+      // Theme.of(context) 拿到的就是它。再建一层 Theme(data:) 会用
+      // $styles.colors 重算 ColorScheme 覆盖掉上层——动态色开启时
+      // DynamicColorBuilder 换上的动态色板就是这样被吃掉的（R5 要求动态
+      // 色优先于品牌色）。
+      //
+      // DefaultTextStyle 仍要留：它给 Hero 飞行目标等 Material 之外的
+      // widget 提供字样。
+      child: DefaultTextStyle(
+        style: $styles.text.body,
+        // Use a custom scroll behavior across entire app
+        child: ScrollConfiguration(behavior: AppScrollBehavior(), child: child),
       ),
     );
   }
