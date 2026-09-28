@@ -17,3 +17,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-20 - Cap image decode size on small avatars using ResizeImage.resizeIfNeeded
 **Learning:** Displaying network avatar images inside small `CircleAvatar` widgets (36x36px to 40x40px) without bounding target decode dimensions causes Flutter's image pipeline to decode uncompressed high-resolution (1080p/4K) network bitmaps into GPU memory (~4MB–16MB per avatar), leading to memory bloat and raster thread decode jank when scrolling lists.
 **Action:** Always wrap network `ImageProvider`s for small avatar icons with `ResizeImage.resizeIfNeeded(128, 128, provider)`, limiting decoded bitmap size to ~64KB per avatar while preserving high-DPI display quality.
+
+## 2026-09-21 - Decompose monolithic detail view BlocBuilders into fine-grained selectors
+**Learning:** Wrapping complex screen subviews (like `VideoInfoView`) in a single root `BlocBuilder<VideoBloc, VideoState>` causes every user action (e.g. toggling like or favorite) to force rebuild passes across the entire view, including static video metadata, creator profile info, expandable synopsis, and recommended video lists.
+**Action:** Split monolithic screen widgets into scoped sub-components (`_VideoHeaderSection`, `_CreatorProfileSection`, `_ActionButtonsSection`, `_SynopsisSection`), each consuming only their specific fields via `context.select` or `BlocSelector` to restrict rebuild passes strictly to the interacted elements.
