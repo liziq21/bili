@@ -152,6 +152,39 @@ void f() {
       );
     });
 
+    test('白名单文件里局部 const 颜色会被报出', () {
+      // 函数体/widget 里的局部 `const Color x = …` 不属于规范说的「色值常量」，
+      // G1 必须报出。验证 `inPaletteFile: true` 时这类位置不被放行。
+      const source = '''
+import 'package:flutter/material.dart';
+class A {
+  static const Color ok = Color(0xFF112233);
+  Color get bad => Color(0xFF445566);
+  void f() {
+    const Color local = Color(0xFF778899);
+    print(local);
+  }
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'palette_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final flagged = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: true,
+      ).hitsIn(result.unit).map((h) => h.description).toList();
+
+      expect(
+        flagged,
+        hasLength(2),
+        reason: 'ok（字段 const）应放行；bad（getter）和 local（函数内局部 const）须报出。实际：$flagged',
+      );
+      expect(flagged[0], contains('直接构造颜色'));
+      expect(flagged[1], contains('直接构造颜色'));
+    });
+
     test('const 形式的颜色构造同样会被报出', () {
       // parseString 对同一个构造会给出两种节点：带 const 的是
       // InstanceCreationExpression，不带的是 MethodInvocation。只接一种
@@ -307,7 +340,11 @@ class _AllowedColorLiteralCollector(final List<(int, int)> _ranges)
     extends RecursiveAstVisitor<void> {
   @override
   void visitVariableDeclarationList(VariableDeclarationList node) {
-    if (node.keyword?.lexeme == 'const') {
+    // 只放行「字段声明」（`FieldDeclaration`）里的 const 初始值；
+    // 函数体里的局部 `const Color x = …`（`VariableDeclarationStatement`）
+    // 不在 G1 允许清单内——规范说的是「色值常量」，局部 const 是工具
+    // 函数/widget 内部细节，不能借白名单文件名绕过 G1。
+    if (node.keyword?.lexeme == 'const' && node.parent is FieldDeclaration) {
       for (final variable in node.variables) {
         final initializer = variable.initializer;
         if (initializer != null) {
