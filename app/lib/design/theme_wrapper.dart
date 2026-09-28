@@ -37,10 +37,24 @@ class const ThemeWrapper({
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
           // R5 动态色优先：系统提供 DynamicColor 时压过品牌色。
           final theme = lightDynamic != null
-              ? light.copyWith(colorScheme: lightDynamic)
+              ? appThemeData(
+                  AppColors(
+                    BrandPalette.fromScheme(
+                      lightDynamic,
+                      base: BrandPalette.of(Brightness.light),
+                    ),
+                  ),
+                )
               : light;
           final darkTheme = darkDynamic != null
-              ? dark.copyWith(colorScheme: darkDynamic)
+              ? appThemeData(
+                  AppColors(
+                    BrandPalette.fromScheme(
+                      darkDynamic,
+                      base: BrandPalette.of(Brightness.dark),
+                    ),
+                  ),
+                )
               : dark;
           return builder(theme, darkTheme, themeMode);
         },
