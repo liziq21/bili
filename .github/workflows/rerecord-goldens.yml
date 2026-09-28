@@ -24,6 +24,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: main
+          # persist-credentials 默认 true，会把 GITHUB_TOKEN 写进 .git/config 的
+          # http.extraheader，后续任何 git 命令与第三方 action 都会带上它。关闭后
+          # create-pull-request 仍用 token 参数自行配置推送凭证。
+          persist-credentials: false
 
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
