@@ -3,6 +3,8 @@ import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+
 void main() {
   testWidgets(
     'CreatorProfileItem renders creator info and accessibility semantics correctly',
@@ -37,6 +39,7 @@ void main() {
       // Verify tap behavior
       await tester.tap(find.byType(CreatorProfileItem));
       expect(tapped, isTrue);
+      await clearImageCacheDuringTest(tester);
     },
   );
 }

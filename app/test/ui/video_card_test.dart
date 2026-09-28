@@ -5,6 +5,8 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+
 void main() {
   testWidgets(
     'VideoCard renders title and view count correctly without error',
@@ -108,5 +110,6 @@ void main() {
 
     await tester.tap(find.byTooltip('更多选项'));
     expect(moreTapped, isTrue);
+    await clearImageCacheDuringTest(tester);
   });
 }
