@@ -1,5 +1,4 @@
 {
-  "labels": ["deep-review"],
   "autoReview": ["open"],
   "strictness": 2,
   "commentTypes": ["logic", "syntax"],

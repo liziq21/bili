@@ -22,7 +22,6 @@
 - `app/`：主 Flutter 应用
 - `packages/bilibili/`：Bilibili 相关 API 和数据源
 - `packages/youtube/`：YouTube 相关 API 和数据源
-- `packages/components/`：可复用 Flutter UI 组件
 - `packages/data/`：共享数据层接口和抽象
 - `packages/model/`：共享模型和值对象
 - `.github/workflows/`：CI 配置
@@ -44,7 +43,6 @@ flutter pub get
 # Flutter packages
 (cd packages/bilibili && flutter pub get)
 (cd packages/youtube && flutter pub get)
-(cd packages/components && flutter pub get)
 
 # Dart-only packages
 (cd packages/data && dart pub get)
@@ -130,13 +128,6 @@ dart run build_runner build --workspace --delete-conflicting-outputs
 # packages/youtube
 (
   cd packages/youtube
-  flutter analyze
-  flutter test
-)
-
-# packages/components
-(
-  cd packages/components
   flutter analyze
   flutter test
 )

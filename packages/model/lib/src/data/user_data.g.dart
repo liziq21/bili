@@ -11,7 +11,7 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) => $checkedCreate(
   json,
   ($checkedConvert) {
     final val = UserData(
-      sourceId: $checkedConvert('SOURCE_ID', (v) => v as String? ?? 'bilibili'),
+      sourceId: $checkedConvert('SOURCE_ID', (v) => v as String?),
       themeConfig: $checkedConvert(
         'THEME_CONFIG',
         (v) =>
