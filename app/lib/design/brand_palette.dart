@@ -81,21 +81,32 @@ class const BrandPalette({
 
   /// 取 [scheme] 的 `primary` 色相与饱和度，只调亮度直到压 `surface` 达到
   /// [Contrast.aaText] 为止。系统给的 `primary` 未必压得住系统给的
-  /// `surface`，沿用品牌强调色配动态底色可能直接不过 4.5:1。底色深则提亮、
-  /// 底色浅则压暗；走到亮度两端仍不达标时退回纯黑/纯白。
+  /// `surface`，沿用品牌强调色配动态底色可能直接不过 4.5:1。
+  ///
+  /// **两个方向都试**。`primary` 可能已经贴在亮度的某一端，此时沿单一方向
+  /// 走只会撞上界并返回撞上的那个颜色：白色 `primary` 配中灰 `#999999`
+  /// `surface`，按"底色不算浅"判断会走提亮方向，白色提不亮 → 返回白色
+  /// 2.85:1，而黑色压同一底色有 7.37:1。两个方向都到不了亮度边界时，取纯黑
+  /// / 纯白中对 [scheme] 的 `surface` 对比度更高的那个。
   static Color _readableAccent(ColorScheme scheme) {
     final hsl = HSLColor.fromColor(scheme.primary);
-    final onLight = scheme.surface.computeLuminance() > 0.5;
-    for (var step = 0; step <= 100; step++) {
-      final lightness = (hsl.lightness - step / 100 * (onLight ? 1 : -1))
-          .clamp(0.0, 1.0);
-      final candidate = hsl.withLightness(lightness).toColor();
-      if (Contrast.ratio(candidate, scheme.surface) >= Contrast.aaText) {
-        return candidate;
+    final surface = scheme.surface;
+    // 先试远离 surface 亮度的方向（浅底压暗、深底提亮），再试反方向。
+    final preferred = surface.computeLuminance() > 0.5 ? -1 : 1;
+    for (final direction in [preferred, -preferred]) {
+      for (var step = 0; step <= 100; step++) {
+        final lightness = (hsl.lightness + direction * step / 100).clamp(0.0, 1.0);
+        final candidate = hsl.withLightness(lightness).toColor();
+        if (Contrast.ratio(candidate, surface) >= Contrast.aaText) {
+          return candidate;
+        }
+        if (lightness == 0.0 || lightness == 1.0) break;
       }
-      if (lightness == 0.0 || lightness == 1.0) break;
     }
-    return onLight ? Colors.black : Colors.white;
+    return Contrast.ratio(Colors.black, surface) >
+            Contrast.ratio(Colors.white, surface)
+        ? Colors.black
+        : Colors.white;
   }
 
   // ── 亮色取值 ────────────────────────────────────────────────────────────

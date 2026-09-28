@@ -157,4 +157,62 @@ void main() {
     expect(derived.scrim, base.scrim);
     expect(derived.onSurfaceStrong, base.onSurfaceStrong);
   });
+
+  test('accentText picks the workable direction when primary is at a bound', () {
+    // 白色 primary 配中灰 #999999 surface：单方向调整会判定"底色不算浅"
+    // 而走提亮方向，白色提不亮 → 返回白色，仅 2.85:1；黑色压同一底色
+    // 7.37:1。fallback 改为「取黑白中对比度更高者」才拿得到达标色。
+    final scheme = BrandPalette.of(Brightness.light).scheme.copyWith(
+      primary: Colors.white,
+      surface: const Color(0xFF999999),
+    );
+
+    expect(
+      Contrast.ratio(Colors.white, scheme.surface),
+      lessThan(Contrast.aaText),
+      reason: '前提：白色压该底色 2.85:1 不达标',
+    );
+
+    final derived = BrandPalette.fromScheme(
+      scheme,
+      base: BrandPalette.of(Brightness.light),
+    );
+    final ratio = Contrast.ratio(derived.accentText, scheme.surface);
+    expect(
+      ratio,
+      greaterThanOrEqualTo(Contrast.aaText),
+      reason: '实际 ${ratio.toStringAsFixed(2)}:1',
+    );
+    // 与白色同值即说明 fallback 仍按"底色深就退回白"取值。
+    expect(derived.accentText, isNot(Colors.white));
+  });
+
+  test('accentText keeps the system hue instead of collapsing to black', () {
+    // 两方向循环的职责：primary 接近白但不是纯白时，压暗方向能找到一个
+    // 保留色相的达标色；单方向会一路提亮撞上界，fallback 只能给纯黑，
+    // 把系统色相丢掉。
+    final scheme = BrandPalette.of(Brightness.light).scheme.copyWith(
+      primary: const Color(0xFFFFF0F0),
+      surface: const Color(0xFF999999),
+    );
+    final derived = BrandPalette.fromScheme(
+      scheme,
+      base: BrandPalette.of(Brightness.light),
+    );
+
+    expect(
+      Contrast.ratio(derived.accentText, scheme.surface),
+      greaterThanOrEqualTo(Contrast.aaText),
+      reason: '实际 '
+          '${Contrast.ratio(derived.accentText, scheme.surface).toStringAsFixed(2)}:1',
+    );
+    // 纯黑是 fallback 的产物，说明压暗方向没被尝试。
+    expect(derived.accentText, isNot(Colors.black));
+    // 纯黑/纯白饱和度为 0；保留色相则大于 0。
+    expect(
+      HSLColor.fromColor(derived.accentText).saturation,
+      greaterThan(0.0),
+      reason: '应保留 primary 的色相，实际 ${derived.accentText.toARGB32()}',
+    );
+  });
 }
