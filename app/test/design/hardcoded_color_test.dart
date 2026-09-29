@@ -260,6 +260,7 @@ void f() {
   final a = const ui.Color.new(0xFF112233);
   final notColor = Widget.new(0xFF112233);
   final noType = .fromARGB(1, 2, 3, 4);
+  const constSh = const .fromARGB(1, 2, 3, 4);
 }
 class Widget {
   Widget(int x);
@@ -280,8 +281,28 @@ class Widget {
         hasLength(5),
         reason:
             'notColor（Widget.new 不是 Color）与 noType（无类型注解、无上下文 '
-            '可判）不报；方法返回值、getter、顶层函数返回值、Color.new、'
-            'const ui.Color.new 共 5 处应报。实际：$flagged',
+            '可判）不报；m（箭头体）、g（getter）、topLevel（顶层箭头体）各 1 '
+            '条 + Color.new 1 条 + const ui.Color.new（InstanceCreationExpression）'
+            '1 条 + const .fromARGB（DotShorthandConstructorInvocation）1 条，'
+            '共 5 条。实际：$flagged',
+      );
+      expect(flagged, everyElement(contains('直接构造颜色')));
+      expect(
+        flagged,
+        contains('直接构造颜色：Color.new'),
+        reason: 'Color.new 须按「Color.new」路径报出，不能只数总数',
+      );
+      expect(
+        flagged.where((s) => s.contains('Color.fromARGB')).length,
+        2,
+        reason:
+            '箭头体返回值 .fromARGB 与 const .fromARGB 两条路径都必须报出，'
+            '按条数断言而不是只数总数，总数相等不能掩盖漏报或误报',
+      );
+      expect(
+        flagged.where((s) => s == '直接构造颜色：Color.new').length,
+        1,
+        reason: 'Color.new 只能出现一次，总数相等不能掩盖漏报或误报',
       );
     });
 
@@ -316,6 +337,57 @@ void f() {
             'a 与 e（单独用 transparent，含导入前缀）豁免；'
             'b/c/d/g 四个派生调用应报。实际：$flagged',
       );
+    });
+
+    test('可空类型注解与块函数体 return 的点简写会被报出', () {
+      // `Color?` 可空注解：`toSource()` 渲染为 `Color?`，旧实现按 `.` 分段
+      // 后含 `Color?` 不含 `Color`，整条绕过。块体 `return .fromARGB(…)`
+      // 父节点是 `ReturnStatement`，旧实现只认 `VariableDeclaration` 与
+      // `ExpressionFunctionBody`，同样绕过。两类都须报出。
+      const source = '''
+import 'dart:ui';
+class A {
+  Color? nullableArrow() => .fromARGB(1, 2, 3, 4);
+  Color? nullableBlock() {
+    return .fromARGB(1, 2, 3, 4);
+  }
+  Color blockBody() {
+    if (true) {
+      return .fromARGB(1, 2, 3, 4);
+    }
+    return .fromARGB(1, 2, 3, 4);
+  }
+  void closureInMethod() {
+    final plain = () { return .fromARGB(1, 2, 3, 4); };
+    plain();
+  }
+  int intBlock() {
+    return 1;
+  }
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'nullable_block_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final flagged = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: false,
+      ).hitsIn(result.unit).map((h) => h.description).toList();
+
+      expect(
+        flagged,
+        hasLength(4),
+        reason:
+            'nullableArrow（可空箭头体）、nullableBlock（可空块体 return）、'
+            'blockBody 两个 return（非可空块体）、closureInMethod 里的 '
+            'Color Function() 块体 return 共 5 处位置，但 closureInMethod '
+            '的闭包没有声明的返回类型注解（analyzer 13.3.0 实测读到 '
+            'FunctionExpression 即不可判，不报），实际报出 4 处。'
+            'plain 闭包与 intBlock 不报。实际：$flagged',
+      );
+      expect(flagged, everyElement(contains('直接构造颜色')));
     });
 
     test('白名单文件顶层 const 放行、局部 const 仍报出', () {
@@ -414,8 +486,12 @@ class _HardcodedColorVisitor(
 
   /// `Color` / `ui.Color` / `material_ui.Color` 都算；`MyColor` 与
   /// `ColorScheme` 不算（按点分段做整段相等比较，不做子串匹配）。
-  static bool _mentionsColorType(String source) =>
-      source.split('.').contains('Color');
+  /// 读自声明的类型注解（`returnType` / `VariableDeclarationList.type`）
+  /// 可能带可空标记（`Color?`），段里先剥掉尾部 `?` 再比较。
+  static bool _mentionsColorType(String source) => source
+      .split('.')
+      .map((s) => s.endsWith('?') ? s.substring(0, s.length - 1) : s)
+      .contains('Color');
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
@@ -470,16 +546,23 @@ class _HardcodedColorVisitor(
   }
 
   /// 点简写的类型来自上下文。它出现的位置不止变量初始化器——箭头函数
-  /// 返回值（`=> .fromARGB(…)`）同样会出现，只认 `VariableDeclaration`
-  /// 会让这种写法绕过门禁。
+  /// 返回值（`=> .fromARGB(…)`）与块函数体里的 `return .fromARGB(…)`
+  /// 同样会出现，只认 `VariableDeclaration` 会让这些写法绕过门禁。
   ///
   /// 位置与类型来源（analyzer 13.3.0 实测父链）：
-  /// | 位置                       | 父节点               | 类型读自            |
-  /// | 位置                       | 父节点               | 类型读自            |
-  /// |----------------------------|----------------------|---------------------|
-  /// | 变量/字段/顶层声明初始化器  | `VariableDeclaration` | `VariableDeclarationList.type` |
-  /// | 方法/getter 返回值          | `ExpressionFunctionBody` | `MethodDeclaration.returnType` |
-  /// | 顶层函数返回值              | `ExpressionFunctionBody` | `FunctionDeclaration.returnType` |
+  /// | 位置                        | 直接父节点               | 类型读自            |
+  /// |------------------------------|---------------------------|---------------------|
+  /// | 变量/字段/顶层声明初始化器   | `VariableDeclaration`     | `VariableDeclarationList.type` |
+  /// | 箭头函数体返回值             | `ExpressionFunctionBody`   | 所属声明的 `returnType` |
+  /// | 块函数体内 return 表达式      | `ReturnStatement`         | 所属 `FunctionBody` 的 `returnType` |
+  ///
+  /// 箭头体的 `ExpressionFunctionBody` 自身不持有 `returnType`（analyzer 13.3.0
+  /// 实测该节点没有这个 getter），须沿父链上推到声明。块体的
+  /// `ReturnStatement` 直接父是 `Block`，同样须上推到函数声明。
+  /// 闭包没有自己的返回类型注解（`() => …` 与 `() { … }` 都只有
+  /// 参数类型），所以读到 `FunctionExpression` 但再上一级不是带
+  /// `returnType` 的 `FunctionDeclaration`/`MethodDeclaration` 时，
+  /// 判定为不可判，不报。
   ///
   /// 命名参数实参（`{'k': .fromARGB(…)}`，父节点 `MapLiteralEntry`）没有
   /// 类型注解可读——`parseString` 不 resolve，拿不到所属参数的类型，故不覆盖。
@@ -495,14 +578,42 @@ class _HardcodedColorVisitor(
       case ExpressionFunctionBody(:final parent):
         // 返回类型在「声明」上而非函数体上。方法/getter 的声明是
         // MethodDeclaration，闭包（`() => …`）没有自己的返回类型注解，
-        // 它的声明还要再上一层才是 FunctionDeclaration。analyzer 13.3.0
-        // 实测只有这两个节点类有 returnType，没有公共基类可判。
+        // 它的声明还要再上一层才是带 returnType 的函数/方法声明。
+        // analyzer 13.3.0 实测 `ExpressionFunctionBody` 与
+        // `BlockFunctionBody` 都没有 returnType getter，只能从声明读。
         final returnType = switch (parent) {
           MethodDeclaration(:final returnType) => returnType,
           FunctionExpression(:final parent) => switch (parent) {
             FunctionDeclaration(:final returnType) => returnType,
             _ => null,
           },
+          _ => null,
+        };
+        return returnType != null && _mentionsColorType(returnType.toSource());
+      case ReturnStatement(:final parent):
+        // 块体里的 `return .fromARGB(…)`：直接父是 `Block`，没有类型信息，
+        // 须沿父链上推到最近的 `FunctionBody`（单层 `Block` 之外还可能
+        // 隔着 `IfStatement` 的块体，analyzer 13.3.0 实测：
+        // `if (true) { return …; }` 的父链是
+        // ReturnStatement → Block → IfStatement → Block → 外层函数体），
+        // 再上推到声明读 `returnType`。
+        // 闭包（父链先碰到 `FunctionExpression`）没有声明的返回类型注解，
+        // 读到 `FunctionExpression` 时返回 false（不可判，不报）；
+        // 外层声明是 `Color` 的方法里，闭包体的 return 仍报出——
+        // 判据读的是「所属函数体的声明」而非最外层方法，闭包自身
+        // 声明不出来的返回类型注解就不可判。
+        // 沿父链上推到最近的 `FunctionBody`；父链上 `Block` /
+        // `IfStatement` 等中间节点的 `parent` 必非空（analyzer 13.3.0
+        // 实测），直接以非可空形式走。
+        AstNode? up = parent;
+        while (up is! FunctionBody) {
+          if (up == null || up is FunctionExpression) return false;
+          up = up.parent;
+        }
+        final declaration = up.parent;
+        final returnType = switch (declaration) {
+          MethodDeclaration(:final returnType) => returnType,
+          FunctionDeclaration(:final returnType) => returnType,
           _ => null,
         };
         return returnType != null && _mentionsColorType(returnType.toSource());
