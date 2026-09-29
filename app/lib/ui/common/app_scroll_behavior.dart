@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../utils/platfrom_info.dart';
 
-class const AppScrollBehavior() extends ScrollBehavior {
+class const AppScrollBehavior() extends MaterialScrollBehavior {
   @override
   // Add mouse drag on desktop for easier responsive testing
   Set<PointerDeviceKind> get dragDevices {
@@ -11,11 +11,6 @@ class const AppScrollBehavior() extends ScrollBehavior {
     devices.add(PointerDeviceKind.mouse);
     return devices;
   }
-
-  // Use bouncing physics on all platforms, better matches the design of the app
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) =>
-      const BouncingScrollPhysics();
 
   @override
   Widget buildScrollbar(
