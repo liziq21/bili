@@ -8,6 +8,8 @@ final class NetworkYouTubeSearchSuggestions {
     required this.suggestions,
   });
 
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   factory NetworkYouTubeSearchSuggestions.fromResponse({
     required String query,
     required String responseBody,
@@ -38,7 +40,10 @@ final class NetworkYouTubeSearchSuggestions {
     for (final entry in decoded[1] as List<dynamic>) {
       final value = entry is List && entry.isNotEmpty ? entry.first : entry;
       if (value is String && value.isNotEmpty) {
-        suggestions.add(value);
+        final sanitized = value.replaceAll(_controlChars, '');
+        if (sanitized.isNotEmpty) {
+          suggestions.add(sanitized);
+        }
       }
     }
 
