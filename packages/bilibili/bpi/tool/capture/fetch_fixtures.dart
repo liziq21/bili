@@ -255,6 +255,18 @@ Future<void> main() async {
     }
     saveResponse('testing/play_url.json', playUrl);
 
+    // 11. Player v2 (Video Player Info & Subtitles)
+    final playerV2 = await getJson(
+      Uri.parse(
+        'https://api.bilibili.com/x/player/v2?bvid=$sampleBvid&cid=$sampleCid',
+      ),
+      'player v2',
+    );
+    NetworkBiliPlayerInfo.fromJson(
+      _requireDataObject(playerV2.json, 'player v2'),
+    );
+    saveResponse('testing/player_v2.json', playerV2);
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');

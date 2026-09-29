@@ -28,6 +28,7 @@ final class ApiPath {
   static const String replyReplyList = '/x/v2/reply/reply';
   static const String popular = '/x/web-interface/popular';
   static const String ranking = '/x/web-interface/ranking/v2';
+  static const String playerV2 = '/x/player/v2';
 }
 
 final class WbiApiPath {
