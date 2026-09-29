@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
+import 'golden_font.dart';
+
 List<VideoModel> _videos(int count) => List.generate(
   count,
   (i) => VideoModel(
@@ -93,9 +95,11 @@ void main() {
       'renders every status and breakpoint',
       fileName: 'video_feed_section',
       pumpWidget: (tester, widget) async {
+        await loadGoldenFont();
         await mockNetworkImagesFor(() async {
           await tester.pumpWidget(
             MaterialApp(
+              theme: goldenTestTheme(),
               home: Scaffold(body: Center(child: widget)),
             ),
           );
