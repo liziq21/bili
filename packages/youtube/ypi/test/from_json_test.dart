@@ -50,4 +50,24 @@ void main() {
     expect(response.query, 'flutter');
     expect(response.suggestions, isNotEmpty);
   });
+
+  test('strips non-printable control characters from search suggestions', () {
+    const rawResponseBody = '''
+window.google.ac.h(["test", [
+  ["flutter\\u0000tutorial\\r\\n", 0],
+  ["\\u001fbad\\u007f string", 0],
+  ["\\u0000\\u001f", 0],
+  ["clean query", 0]
+]])
+''';
+    final response = NetworkYouTubeSearchSuggestions.fromResponse(
+      query: 'test',
+      responseBody: rawResponseBody,
+    );
+    expect(response.suggestions, [
+      'fluttertutorial',
+      'bad string',
+      'clean query',
+    ]);
+  });
 }
