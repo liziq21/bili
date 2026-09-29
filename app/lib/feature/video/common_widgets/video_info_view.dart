@@ -357,6 +357,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
             child: Semantics(
               button: true,
               selected: isSubscribed,
+              excludeSemantics: true,
               label: isSubscribed
                   ? '已关注创作者 ${creator.name}'
                   : '关注创作者 ${creator.name}',
