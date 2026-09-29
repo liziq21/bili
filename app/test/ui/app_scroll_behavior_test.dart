@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'package:app/ui/common/app_scroll_behavior.dart';
@@ -14,48 +15,74 @@ void main() {
       expect(dragDevices, contains(PointerDeviceKind.touch));
     });
 
-    testWidgets(
-      'getScrollPhysics returns platform appropriate physics from MaterialScrollBehavior',
-      (tester) async {
+    for (final (platform, expectedPhysics) in [
+      (TargetPlatform.android, isA<ClampingScrollPhysics>()),
+      (TargetPlatform.iOS, isA<BouncingScrollPhysics>()),
+    ]) {
+      testWidgets('getScrollPhysics uses $platform physics', (tester) async {
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(useMaterial3: true),
+            theme: ThemeData(useMaterial3: true, platform: platform),
             home: Builder(
               builder: (context) {
-                final physics = scrollBehavior.getScrollPhysics(context);
-                expect(physics, isA<ScrollPhysics>());
+                expect(
+                  scrollBehavior.getScrollPhysics(context),
+                  expectedPhysics,
+                );
                 return const SizedBox();
               },
             ),
           ),
         );
-      },
-    );
+      });
+    }
 
     testWidgets(
       'buildScrollbar returns RawScrollbar on desktop/web or child on mobile',
       (tester) async {
+        final controller = ScrollController();
+        addTearDown(controller.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: Builder(
               builder: (context) {
-                const child = Text('test child');
+                final child = ListView(
+                  controller: controller,
+                  children: const [Text('test child')],
+                );
                 final details = ScrollableDetails(
                   direction: AxisDirection.down,
-                  controller: ScrollController(),
+                  controller: controller,
                 );
                 final widget = scrollBehavior.buildScrollbar(
                   context,
                   child,
                   details,
                 );
-                expect(widget, isNotNull);
+                final isNativeMobile =
+                    !kIsWeb &&
+                    (defaultTargetPlatform == TargetPlatform.android ||
+                        defaultTargetPlatform == TargetPlatform.iOS);
+                if (isNativeMobile) {
+                  expect(widget, same(child));
+                } else {
+                  expect(widget, isA<RawScrollbar>());
+                  expect((widget as RawScrollbar).controller, same(controller));
+                }
                 return widget;
               },
             ),
           ),
         );
+
+        expect(controller.hasClients, isTrue);
       },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+        TargetPlatform.linux,
+      }),
     );
   });
 }
