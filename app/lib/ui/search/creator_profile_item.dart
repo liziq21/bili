@@ -2,6 +2,8 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../main.dart';
+
 class const CreatorProfileItem({
   super.key,
   required final CreatorProfile creatorProfile,
@@ -9,6 +11,16 @@ class const CreatorProfileItem({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // `$styles.colors.*` below is read from a mutable static that `AppScaffold`
+    // refreshes during its own build. Reading a global in `build()` registers no
+    // InheritedWidget dependency, so nothing tells Flutter to rebuild this item
+    // when the brightness flips: `AppScaffold` does rebuild (it reads
+    // `Theme.of`), but it hands back the same child widget instance and
+    // `Element.updateChild` short-circuits on an identical child, leaving the
+    // whole route subtree on the previous palette. The dependency read is the
+    // cheap opt-in — see `feature/video/video_screen.dart` for the long form.
+    Theme.of(context);
+
     final semanticLabel = '${creatorProfile.name}, @${creatorProfile.id}';
 
     return Card(
@@ -63,15 +75,18 @@ class const CreatorProfileItem({
                           '@${creatorProfile.id}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey,
+                            color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: $styles.colors.outline,
+                  ),
                 ],
               ),
             ),

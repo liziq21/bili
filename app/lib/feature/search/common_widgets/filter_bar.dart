@@ -1,6 +1,7 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../main.dart';
 import 'filter_group_section.dart';
 
 typedef FilterChangedCallback = void Function(List<FilterGroup> updatedFilters);
@@ -78,7 +79,7 @@ class const FilterBar({
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: $styles.colors.outline,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

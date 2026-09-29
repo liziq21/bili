@@ -54,7 +54,6 @@ class const BrandPalette({
     Brightness.dark => _dark,
   };
 
-
   /// 用上层 `Theme` 的**实际**色板重建色板：动态色开启时
   /// `DynamicColorBuilder` 会把系统色板换到 `MaterialApp` 的 `theme` 上，
   /// 此时自研 token 也要跟着换，否则 `TabBar.indicatorColor`（取
@@ -96,7 +95,10 @@ class const BrandPalette({
     final preferred = surface.computeLuminance() > 0.5 ? -1 : 1;
     for (final direction in [preferred, -preferred]) {
       for (var step = 0; step <= 100; step++) {
-        final lightness = (hsl.lightness + direction * step / 100).clamp(0.0, 1.0);
+        final lightness = (hsl.lightness + direction * step / 100).clamp(
+          0.0,
+          1.0,
+        );
         final candidate = hsl.withLightness(lightness).toColor();
         if (Contrast.ratio(candidate, surface) >= Contrast.aaText) {
           return candidate;
@@ -109,7 +111,6 @@ class const BrandPalette({
         ? Colors.black
         : Colors.white;
   }
-
 
   // ── 亮色取值 ────────────────────────────────────────────────────────────
   // 相对亮色 surface #F8ECE5 的实测对比度（WCAG 2.1 相对亮度公式，见

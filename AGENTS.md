@@ -38,6 +38,15 @@ For architectural walkthroughs — not prescriptive rules, but context on why bo
 
 ## Universal Development Guidelines
 
+### Formatting
+提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。
+
+```bash
+dart format --set-exit-if-changed <changed files or directories>
+```
+
+该命令会直接改写被格式化的文件，退出码非 0 表示有文件被修改过（即原格式不符），但不代表修复后仍不符。看到退出码非 0 时，先确认文件已被改写，再重跑一次同样的命令，确认退出码为 0 后才可提交。
+
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
 - 保持代码库内的一致性，同类文件建议统一语言。
