@@ -98,11 +98,22 @@ class _CodePointCollector(this._sink) extends RecursiveAstVisitor<dynamic> {
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
-    // Iterate runes, not `split('')`. Splitting by UTF-16 code unit tears an
-    // astral character such as U+1F44D into two lone surrogates, and each half
-    // then looks like an ordinary BMP character: the astral-range check stops
-    // skipping it, and it gets reported as a missing glyph under a name that
-    // only renders as U+FFFD.
+    // Collect by code point, never by `split('')`. Splitting on UTF-16 code
+    // units tears an astral character such as U+1F44D into two lone
+    // surrogates, and each half then looks like an ordinary BMP character, so
+    // it escapes the astral-range check below and gets reported as a missing
+    // glyph under a name that only renders as U+FFFD.
+    _sink.addAll(node.value.runes);
+  }
+
+  /// The literal text around the holes in an interpolated string.
+  ///
+  /// Without this, `'暂未开放 $reason'` contributes only the surrounding
+  /// fragments, and the Chinese half of the message — the part a user reads —
+  /// goes unchecked. The tree has 78 interpolated fragments carrying non-ASCII
+  /// text, among them 加载失败, 推荐内容 and 正在直播.
+  @override
+  void visitInterpolationString(InterpolationString node) {
     _sink.addAll(node.value.runes);
   }
 }
