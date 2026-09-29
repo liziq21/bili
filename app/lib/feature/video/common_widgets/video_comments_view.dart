@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -167,6 +168,7 @@ class const _CommentItem({
                     tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
                     child: InkWell(
                       onTap: () {
+                        HapticFeedback.lightImpact();
                         context.read<VideoCommentBloc>().add(
                           ToggleCommentLike(comment.id),
                         );
