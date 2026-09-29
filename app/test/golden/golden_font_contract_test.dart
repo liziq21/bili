@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -59,6 +63,147 @@ int _differingBytes(List<int> a, List<int> b) {
     if (a[i] != b[i]) differing++;
   }
   return differing;
+}
+
+/// Collects every non-ASCII character that appears in a Dart string literal
+/// under [dirs].
+///
+/// Uses `package:analyzer`'s scanner rather than a regular expression. A
+/// regex over raw source text gets string quoting wrong in ways that are
+/// silent rather than loud: a literal bounded by a space on the wrong side
+/// misses `('热门')` and `['热门']`, and stripping `//.*$` before matching
+/// truncates any literal that contains a URL, so `https://example.com/路径`
+/// is cut down to `https:` and the characters after the slash are never seen.
+/// Both failures make this test pass while missing characters.
+Set<int> _stringLiteralRunes(List<String> dirs) {
+  final codePoints = <int>{};
+  for (final dir in dirs) {
+    for (final entity in Directory(dir).listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final result = parseString(
+        content: entity.readAsStringSync(),
+        path: entity.path,
+        throwIfDiagnostics: false,
+      );
+      result.unit.accept(_CodePointCollector(codePoints));
+    }
+  }
+  return codePoints.where((rune) => rune > 0x7f).toSet();
+}
+
+/// Adds the code points of every string literal it visits to [sink].
+// ignore: use_declaring_parameters
+class _CodePointCollector(this._sink) extends RecursiveAstVisitor<dynamic> {
+  final Set<int> _sink;
+
+  @override
+  void visitSimpleStringLiteral(SimpleStringLiteral node) {
+    // Iterate runes, not `split('')`. Splitting by UTF-16 code unit tears an
+    // astral character such as U+1F44D into two lone surrogates, and each half
+    // then looks like an ordinary BMP character: the astral-range check stops
+    // skipping it, and it gets reported as a missing glyph under a name that
+    // only renders as U+FFFD.
+    _sink.addAll(node.value.runes);
+  }
+}
+
+/// Reads the character map out of the font file itself.
+///
+/// The subset's coverage is a property of the font, not of the text file that
+/// generated it, so this is the only source that can answer "does the font
+/// have a glyph for this character".
+///
+/// Reads format 4 (BMP) and format 12 (full Unicode) subtables, keyed by code
+/// point. Non-BMP characters matter here: `app_search_anchor_test.dart` renders
+/// U+1F44D, whose UTF-16 `codeUnitAt(0)` is the lone high surrogate 0xD83D, so
+/// comparing code units against a BMP table would look up a value the format
+/// cannot hold and report a false gap.
+Set<int> _fontCmap(File font) {
+  final bytes = font.readAsBytesSync();
+  final view = ByteData.sublistView(Uint8List.fromList(bytes));
+
+  int u16(int offset) => view.getUint16(offset);
+  int u32(int offset) => view.getUint32(offset);
+
+  final tableCount = u16(4);
+  var cmapOffset = -1;
+  for (var i = 0; i < tableCount; i++) {
+    final record = 12 + i * 16;
+    if (String.fromCharCodes(bytes.sublist(record, record + 4)) == 'cmap') {
+      cmapOffset = u32(record + 8);
+      break;
+    }
+  }
+  expect(cmapOffset, isNot(-1), reason: '${font.path} has no cmap table');
+
+  final subtableCount = u16(cmapOffset + 2);
+  final format4Offsets = <int>[];
+  final format12Offsets = <int>[];
+  for (var i = 0; i < subtableCount; i++) {
+    final record = cmapOffset + 4 + i * 8;
+    final platform = u16(record);
+    final offset = cmapOffset + u32(record + 4);
+    final format = u16(offset);
+    if (format == 4) format4Offsets.add(offset);
+    // (0,x) Unicode and (3,10) Windows full Unicode are the full-range ones.
+    if (format == 12 && (platform == 0 || platform == 3)) {
+      format12Offsets.add(offset);
+    }
+  }
+  expect(
+    format4Offsets.isNotEmpty || format12Offsets.isNotEmpty,
+    isTrue,
+    reason: '${font.path} has no character map this reader understands',
+  );
+
+  final cmap = <int>{};
+
+  for (final table in format4Offsets) {
+    final segCountX2 = u16(table + 6);
+    final segCount = segCountX2 ~/ 2;
+    final endCodes = table + 14;
+    final startCodes = endCodes + segCountX2 + 2;
+    final idDeltas = startCodes + segCountX2;
+    final idRangeOffsets = idDeltas + segCountX2;
+
+    for (var segment = 0; segment < segCount; segment++) {
+      final end = u16(endCodes + segment * 2);
+      final start = u16(startCodes + segment * 2);
+      if (start == 0xffff) continue;
+      final delta = view.getInt16(idDeltas + segment * 2);
+      final rangeOffsetAddress = idRangeOffsets + segment * 2;
+      final rangeOffset = u16(rangeOffsetAddress);
+      for (var code = start; code <= end; code++) {
+        int glyph;
+        if (rangeOffset == 0) {
+          glyph = (code + delta) & 0xffff;
+        } else {
+          final glyphAddress =
+              rangeOffsetAddress + rangeOffset + (code - start) * 2;
+          if (glyphAddress + 1 >= bytes.length) continue;
+          glyph = u16(glyphAddress);
+          if (glyph != 0) glyph = (glyph + delta) & 0xffff;
+        }
+        if (glyph != 0) cmap.add(code);
+      }
+    }
+  }
+
+  for (final table in format12Offsets) {
+    final groupCount = u32(table + 12);
+    for (var group = 0; group < groupCount; group++) {
+      final record = table + 16 + group * 12;
+      final startChar = u32(record);
+      final endChar = u32(record + 4);
+      final startGlyph = u32(record + 8);
+      if (startGlyph == 0) continue;
+      for (var code = startChar; code <= endChar; code++) {
+        cmap.add(code);
+      }
+    }
+  }
+
+  return cmap;
 }
 
 void main() {
@@ -138,52 +283,62 @@ void main() {
     });
 
     test('the subset covers every character the app can render', () {
-      // 子集只收了 `lib/` 与 `test/` 字符串字面里出现过的字，外加 ASCII 与
-      // 常用符号。将来新增文案时如果用到了子集外的字，那一个字会静默退回
-      // 豆腐块 —— 基线看着正常，实际那个字没被验过。这一条把它变成红灯。
+      // The subset holds the characters that appear in `lib/` and `test/`
+      // string literals, plus ASCII and common symbols. When new copy needs a
+      // character the font does not carry, that one character renders as tofu
+      // in every baseline — the image still looks plausible, so nothing fails.
+      // This turns that into a red test.
+      //
+      // Coverage is read from the OTF's own `cmap`. `subset-characters.txt` is
+      // only the subsetting script's input, and it cannot stand in as proof:
+      // editing the list without regenerating the font leaves the list
+      // claiming characters the font lacks, and the test still passes.
+      // `FontLoader.load()` registers a family; it does not check glyphs.
       final font = File('test/fonts/NotoSansSC-golden-subset.otf');
       expect(font.existsSync(), isTrue, reason: 'run from app/');
+      final cmap = _fontCmap(font);
 
-      final literals = <String>{};
-      final pattern = RegExp(r''' '([^'\\\n]*)'|"([^"\\\n]*)" ''');
-      for (final dir in ['lib', 'test']) {
-        for (final entity in Directory(dir).listSync(recursive: true)) {
-          if (entity is! File || !entity.path.endsWith('.dart')) continue;
-          for (final line in entity.readAsLinesSync()) {
-            // 去掉行注释，免得把注释里的中文算成待验字符。
-            for (final match in pattern.allMatches(
-              line.replaceAll(RegExp(r'//.*$'), ''),
-            )) {
-              literals.add(match.group(1) ?? match.group(2) ?? '');
-            }
-          }
-        }
-      }
+      // Noto Sans CJK stops at U+3106C and carries no emoji, so an astral
+      // character cannot be covered by re-subsetting. The one in the tree
+      // (U+1F44D in `app_search_anchor_test.dart`) belongs to a widget test,
+      // not a golden fixture, and renders through the engine's own fallback
+      // exactly as it would on a device shipping no emoji font. Requiring it
+      // would be unsatisfiable, so the boundary is stated instead.
+      const astralUnreachable = 0x10000;
 
-      // 子集覆盖的字符集由子集化脚本决定，仓库里存一份快照供比对。
-      final covered = File('test/fonts/subset-characters.txt');
-      expect(
-        covered.existsSync(),
-        isTrue,
-        reason: 'run from app/; the character list ships beside the font',
-      );
-      final subsetChars = covered.readAsLinesSync().join().split('');
-      expect(subsetChars.toSet().length, greaterThan(400));
-
-      final uncovered = <String>{};
-      for (final literal in literals) {
-        for (final ch in literal.split('')) {
-          if (ch.codeUnitAt(0) <= 0x7f) continue;
-          if (!subsetChars.contains(ch)) uncovered.add(ch);
+      final uncovered = <int>{};
+      for (final rune in _stringLiteralRunes(['lib', 'test'])) {
+        if (rune > 0x7f && rune < astralUnreachable && !cmap.contains(rune)) {
+          uncovered.add(rune);
         }
       }
       expect(
         uncovered,
         isEmpty,
         reason:
-            'these characters appear in app strings but not in the golden '
-            'font subset; they would render as tofu in every baseline. '
-            'Re-subset with: $uncovered',
+            'these characters appear in app strings but the font has no glyph '
+            'for them, so they render as tofu in every baseline. Re-subset '
+            'with: ${uncovered.map((r) => String.fromCharCode(r)).toList()}',
+      );
+
+      // The list is the subsetting script's input, so it must describe the same
+      // character set as the font it produced; otherwise regenerating the font
+      // from an updated list eventually gets skipped unnoticed.
+      final listed = File('test/fonts/subset-characters.txt');
+      expect(
+        listed.existsSync(),
+        isTrue,
+        reason: 'run from app/; the character list ships beside the font',
+      );
+      final listedRunes = listed.readAsLinesSync().join().runes.toSet();
+      expect(listedRunes.length, greaterThan(400));
+      expect(
+        (listedRunes.where((r) => r > 0x7f && r < astralUnreachable).toSet())
+            .difference(cmap.where((r) => r > 0x7f).toSet()),
+        isEmpty,
+        reason:
+            'subset-characters.txt lists characters the font does not contain; '
+            'regenerate the OTF from the updated list',
       );
     });
 
