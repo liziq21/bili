@@ -12,6 +12,7 @@ import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import '../model/video/network_play_url.dart';
+import '../model/video/network_bili_player_info.dart';
 import '../model/video/network_related_video.dart';
 import '../model/video/network_video_relation.dart';
 import '../model/video/video_detail_data.dart';
@@ -120,6 +121,12 @@ abstract class BiliNetworkApi extends ChopperService {
     @tag String tag = 'WBI',
   });
 
+  @GET(path: ApiPath.playerV2)
+  Future<NetworkBiliPlayerInfo> getPlayerInfo({
+    @query required String bvid,
+    @query required int cid,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -142,6 +149,7 @@ class BiliNetworkSearch
         NetworkReplyData: NetworkReplyData.fromJson,
         NetworkReplyReplyData: NetworkReplyReplyData.fromJson,
         NetworkPlayUrl: NetworkPlayUrl.fromJson,
+        NetworkBiliPlayerInfo: NetworkBiliPlayerInfo.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -381,4 +389,10 @@ class BiliNetworkSearch
     int fnval = 4048,
     int fourk = 1,
   }) => _networkApi.getPlayUrl(bvid, cid, qn: qn, fnval: fnval, fourk: fourk);
+
+  @override
+  Future<NetworkBiliPlayerInfo> getPlayerInfo({
+    required String bvid,
+    required int cid,
+  }) => _networkApi.getPlayerInfo(bvid: bvid, cid: cid);
 }

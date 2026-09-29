@@ -68,6 +68,14 @@ class MockNetworkVideoDataSource({
   }) async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<NetworkBiliPlayerInfo> getPlayerInfo({
+    required String bvid,
+    required int cid,
+  }) async {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

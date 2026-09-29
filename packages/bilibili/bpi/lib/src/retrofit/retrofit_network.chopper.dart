@@ -313,4 +313,25 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkPlayUrl, NetworkPlayUrl>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkBiliPlayerInfo> getPlayerInfo({
+    required String bvid,
+    required int cid,
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/player/v2');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'bvid': bvid,
+      'cid': cid,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkBiliPlayerInfo> $response = await client
+        .send<NetworkBiliPlayerInfo, NetworkBiliPlayerInfo>($request);
+    return $response.bodyOrThrow;
+  }
 }
