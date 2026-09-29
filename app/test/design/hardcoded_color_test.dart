@@ -30,6 +30,11 @@ import 'package:flutter_test/flutter_test.dart';
 /// 扫描是纯语法的（`parseString`，不 resolve），判据按标识符名字面匹配：
 /// 局部变量若叫 `Colors`，其 `Colors.foo` 会被误报。误报的方向是「逼
 /// 作者用 token」，与 R1 的意图一致；反过来不会漏报。
+///
+/// 已知缺口（有意不补，补了要 resolve 而非 parse）：
+/// 命名参数实参位置上的点简写。`{'k': .fromARGB(1,2,3,4)}` 的父节点是
+/// `MapLiteralEntry`，那里没有类型注解，判断「实参该是什么类型」需要
+/// 所属参数的类型签名，即 resolve。
 const _allowedPath = 'design/brand_palette.dart';
 
 /// `flutter test` 的工作目录是包根，`listSync` 返回的路径同基准。
@@ -238,6 +243,113 @@ class A {
       expect(flagged[2], contains('ui.Color'));
     });
 
+    test('点简写覆盖 const 构造、返回值与 .new', () {
+      // 三种位置/节点各自曾绕过门禁：const 走
+      // DotShorthandConstructorInvocation（与前者不同节点），返回值走
+      // ExpressionFunctionBody 而非 VariableDeclaration，`.new` 的成员名
+      // 是 new 不能被静态方法白名单吃掉。
+      const source = '''
+import 'dart:ui' as ui;
+class C {
+  Color m() => .fromARGB(1, 2, 3, 4);
+  Color get g => .fromRGBO(1, 2, 3, .5);
+}
+Color topLevel() => .fromARGB(1, 2, 3, 4);
+void f() {
+  final n = Color.new(0xFF112233);
+  final a = const ui.Color.new(0xFF112233);
+  final notColor = Widget.new(0xFF112233);
+  final noType = .fromARGB(1, 2, 3, 4);
+}
+class Widget {
+  Widget(int x);
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'shorthand_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final flagged = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: false,
+      ).hitsIn(result.unit).map((h) => h.description).toList();
+
+      expect(
+        flagged,
+        hasLength(5),
+        reason:
+            'notColor（Widget.new 不是 Color）与 noType（无类型注解、无上下文 '
+            '可判）不报；方法返回值、getter、顶层函数返回值、Color.new、'
+            'const ui.Color.new 共 5 处应报。实际：$flagged',
+      );
+    });
+
+    test('透明色派生调用会报出，单独用 transparent 不报', () {
+      // 豁免的是 `Colors.transparent` 这个常量本身，不是以它为根的调用链：
+      // `.withAlpha/.withOpacity/.withValues` 产出的是不透明黑，与豁免初衷相反。
+      const source = '''
+import 'package:flutter/material.dart';
+void f() {
+  final a = Colors.transparent;
+  final b = Colors.transparent.withAlpha(255);
+  final c = Colors.transparent.withOpacity(1);
+  final d = Colors.transparent.withValues(alpha: 1);
+  final e = material.Colors.transparent;
+  final g = material.Colors.transparent.withAlpha(255);
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'transparent_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final flagged = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: false,
+      ).hitsIn(result.unit).map((h) => h.description).toList();
+
+      expect(
+        flagged,
+        hasLength(4),
+        reason:
+            'a 与 e（单独用 transparent，含导入前缀）豁免；'
+            'b/c/d/g 四个派生调用应报。实际：$flagged',
+      );
+    });
+
+    test('白名单文件顶层 const 放行、局部 const 仍报出', () {
+      // G1 允许顶层 `const Color accent = Color(0x…)`；顶层变量的声明节点是
+      // TopLevelVariableDeclaration，与字段的 FieldDeclaration 并列。
+      const source = '''
+import 'package:flutter/material.dart';
+const Color topOk = Color(0xFF112233);
+class A {
+  static const Color fieldOk = Color(0xFF223344);
+  Color get bad => Color(0xFF445566);
+  void f() {
+    const Color local = Color(0xFF778899);
+    print(local);
+  }
+}
+''';
+      final result = parseString(
+        content: source,
+        path: 'palette_top_probe.dart',
+        throwIfDiagnostics: false,
+      );
+      final flagged = _HardcodedColorVisitor(
+        result.lineInfo,
+        inPaletteFile: true,
+      ).hitsIn(result.unit).map((h) => h.description).toList();
+
+      expect(
+        flagged,
+        hasLength(2),
+        reason: '顶层与字段 const 应放行；getter 与局部 const 须报出。实际：$flagged',
+      );
+    });
+
     test('Color.lerp 等静态方法调用不报（规范允许 token 插值）', () {
       const source = '''
 class A {
@@ -337,19 +449,66 @@ class _HardcodedColorVisitor(
   void visitDotShorthandInvocation(DotShorthandInvocation node) {
     // 点简写 `.fromARGB(…)` 是 Dart 3.10 起的新语法，走独立节点
     // （analyzer 13.3.0 实测），不接 `visitMethodInvocation`。
-    // 它的类型来自上下文而非 target，所以先确认父声明的类型注解是 Color，
-    // 再按 `Color.<成员名>` 拼路径走同一条判据。
-    final declaration = node.parent;
-    if (declaration is VariableDeclaration &&
-        identical(declaration.initializer, node)) {
-      final list = declaration.parent;
-      if (list is VariableDeclarationList &&
-          list.type != null &&
-          _mentionsColorType(list.type!.toSource())) {
-        _checkConstructorPath(node, 'Color.${node.memberName.name}');
-      }
+    // 类型来自上下文而非 target，所以先确认所在位置的上下文类型是 Color。
+    final ctx = _dotShorthandContextIsColor(node);
+    if (ctx) {
+      _checkConstructorPath(node, 'Color.${node.memberName.name}');
     }
     super.visitDotShorthandInvocation(node);
+  }
+
+  @override
+  void visitDotShorthandConstructorInvocation(
+    DotShorthandConstructorInvocation node,
+  ) {
+    // `const .fromARGB(…)` 走这个节点而非上一个（实测两者并存：
+    // `.new(0x…)` 归前者，`const .fromARGB(…)` 归后者），必须单独接。
+    if (_dotShorthandContextIsColor(node)) {
+      _checkConstructorPath(node, 'Color.${node.constructorName.name}');
+    }
+    super.visitDotShorthandConstructorInvocation(node);
+  }
+
+  /// 点简写的类型来自上下文。它出现的位置不止变量初始化器——箭头函数
+  /// 返回值（`=> .fromARGB(…)`）同样会出现，只认 `VariableDeclaration`
+  /// 会让这种写法绕过门禁。
+  ///
+  /// 位置与类型来源（analyzer 13.3.0 实测父链）：
+  /// | 位置                       | 父节点               | 类型读自            |
+  /// | 位置                       | 父节点               | 类型读自            |
+  /// |----------------------------|----------------------|---------------------|
+  /// | 变量/字段/顶层声明初始化器  | `VariableDeclaration` | `VariableDeclarationList.type` |
+  /// | 方法/getter 返回值          | `ExpressionFunctionBody` | `MethodDeclaration.returnType` |
+  /// | 顶层函数返回值              | `ExpressionFunctionBody` | `FunctionDeclaration.returnType` |
+  ///
+  /// 命名参数实参（`{'k': .fromARGB(…)}`，父节点 `MapLiteralEntry`）没有
+  /// 类型注解可读——`parseString` 不 resolve，拿不到所属参数的类型，故不覆盖。
+  /// 该缺口记在文件头的「已知缺口」一节。
+  static bool _dotShorthandContextIsColor(AstNode node) {
+    switch (node.parent) {
+      case VariableDeclaration(:final parent?):
+        // `parent` 是 `vd.parent`（即 VariableDeclarationList，analyzer 13.3.0
+        // 实测），不能再上跳一层。
+        return parent is VariableDeclarationList &&
+            parent.type != null &&
+            _mentionsColorType(parent.type!.toSource());
+      case ExpressionFunctionBody(:final parent):
+        // 返回类型在「声明」上而非函数体上。方法/getter 的声明是
+        // MethodDeclaration，闭包（`() => …`）没有自己的返回类型注解，
+        // 它的声明还要再上一层才是 FunctionDeclaration。analyzer 13.3.0
+        // 实测只有这两个节点类有 returnType，没有公共基类可判。
+        final returnType = switch (parent) {
+          MethodDeclaration(:final returnType) => returnType,
+          FunctionExpression(:final parent) => switch (parent) {
+            FunctionDeclaration(:final returnType) => returnType,
+            _ => null,
+          },
+          _ => null,
+        };
+        return returnType != null && _mentionsColorType(returnType.toSource());
+      default:
+        return false;
+    }
   }
 
   /// 三种构造节点的共同出口：把「构造路径」按 `.` 分段，含 `Color` 段且
@@ -380,7 +539,7 @@ class _HardcodedColorVisitor(
     // PrefixedIdentifier，所以这一处就能覆盖下标与级联两种写法。
     if (!inPaletteFile &&
         _isColorsClassRef(node.prefix) &&
-        node.identifier.name != _exemptColorsConstant) {
+        !_isExemptColorsConstant(node)) {
       _report(node.offset, '硬编码色常量：Colors.${node.identifier.name}');
     }
     super.visitPrefixedIdentifier(node);
@@ -391,13 +550,31 @@ class _HardcodedColorVisitor(
     // 带导入前缀时 `material.Colors.red` 的内层是
     // PrefixedIdentifier('material.Colors')，常量名落在外层
     // PropertyAccess 上——只接 PrefixedIdentifier 会让这种写法整条绕过门禁。
-    // 豁免判断必须放在这一层，否则 `material.Colors.transparent` 会被误报。
     if (!inPaletteFile &&
         _isColorsClassRef(node.target) &&
-        node.propertyName.name != _exemptColorsConstant) {
+        !_isExemptColorsConstant(node)) {
       _report(node.offset, '硬编码色常量：Colors.${node.propertyName.name}');
     }
     super.visitPropertyAccess(node);
+  }
+
+  /// 豁免的判据是「`Colors.transparent` 没有被当作接收者继续调用」。
+  ///
+  /// 不能只判名字：`Colors.transparent.withAlpha(255)` 里的
+  /// `Colors.transparent` 与裸写时是**同一个 AST 节点**，按名字判断两者
+  /// 无法区分。它在派生调用里会成为 `MethodInvocation` 的 `target`
+  /// （或级联的 section），所以看它有没有被当成接收者才是根因判据。
+  /// 派生结果是不透明黑，与豁免初衷相反，必须报出。
+  static bool _isExemptColorsConstant(AstNode node) {
+    final name = switch (node) {
+      PrefixedIdentifier(:final identifier) => identifier.name,
+      PropertyAccess(:final propertyName) => propertyName.name,
+      _ => null,
+    };
+    if (name != _exemptColorsConstant) return false;
+    final parent = node.parent;
+    return !(parent is MethodInvocation && identical(parent.target, node)) &&
+        parent is! CascadeExpression;
   }
 
   /// 表达式是否指向 `Colors` 这个类本身：`Colors` 或 `material.Colors`。
@@ -426,7 +603,9 @@ class _AllowedColorLiteralCollector(final List<(int, int)> _ranges)
     // 函数体里的局部 `const Color x = …`（`VariableDeclarationStatement`）
     // 不在 G1 允许清单内——规范说的是「色值常量」，局部 const 是工具
     // 函数/widget 内部细节，不能借白名单文件名绕过 G1。
-    if (node.keyword?.lexeme == 'const' && node.parent is FieldDeclaration) {
+    if (node.keyword?.lexeme == 'const' &&
+        (node.parent is FieldDeclaration ||
+            node.parent is TopLevelVariableDeclaration)) {
       for (final variable in node.variables) {
         final initializer = variable.initializer;
         if (initializer != null) {
