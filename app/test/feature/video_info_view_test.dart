@@ -145,6 +145,63 @@ void main() {
       expect(favoriteSemantics.properties.tooltip, '取消收藏');
       expect(favoriteSemantics.properties.selected, true);
 
+      // Check Creator Subscribe button semantics: label '关注创作者 测试UP主', tooltip '关注创作者', selected false
+      final subSemantics = tester.widget<Semantics>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == '关注创作者 测试UP主',
+        ),
+      );
+      expect(subSemantics.properties.label, '关注创作者 测试UP主');
+      expect(subSemantics.properties.tooltip, '关注创作者');
+      expect(subSemantics.properties.selected, false);
+
+      await mockBloc.close();
+    });
+
+    testWidgets('subscribed creator profile exposes updated semantics and tooltip', (
+      tester,
+    ) async {
+      final mockDetail = VideoDetail(
+        video: const VideoModel(
+          id: 'BV1sub',
+          url: 'https://example.com/video',
+          title: '已关注创作者视频',
+          viewCount: 10000,
+        ),
+        isSubscribed: true,
+        creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
+      );
+
+      final mockBloc = MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: mockDetail),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: mockBloc,
+              child: const VideoInfoView(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final subSemantics = tester.widget<Semantics>(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == '已关注创作者 测试UP主',
+        ),
+      );
+      expect(subSemantics.properties.label, '已关注创作者 测试UP主');
+      expect(subSemantics.properties.tooltip, '取消关注创作者');
+      expect(subSemantics.properties.selected, true);
+
       await mockBloc.close();
     });
   });

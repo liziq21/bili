@@ -352,30 +352,42 @@ class const _CreatorProfileSection() extends StatelessWidget {
               );
             },
           ),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isSubscribed
-                  ? $styles.colors.outline.withValues(alpha: 0.3)
-                  : $styles.colors.accentFill,
-              foregroundColor: isSubscribed
-                  ? $styles.colors.onSurface
-                  : $styles.colors.onScrim,
-              elevation: 0,
-              padding: EdgeInsets.symmetric(
-                horizontal: $styles.insets.xs,
-                vertical: $styles.insets.xxs,
+          Tooltip(
+            message: isSubscribed ? '取消关注创作者' : '关注创作者',
+            child: Semantics(
+              button: true,
+              selected: isSubscribed,
+              label: isSubscribed
+                  ? '已关注创作者 ${creator.name}'
+                  : '关注创作者 ${creator.name}',
+              tooltip: isSubscribed ? '取消关注创作者' : '关注创作者',
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSubscribed
+                      ? $styles.colors.outline.withValues(alpha: 0.3)
+                      : $styles.colors.accentFill,
+                  foregroundColor: isSubscribed
+                      ? $styles.colors.onSurface
+                      : $styles.colors.onScrim,
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: $styles.insets.xs,
+                    vertical: $styles.insets.xxs,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular($styles.corners.lg),
+                  ),
+                ),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
+                },
+                icon: Icon(isSubscribed ? Icons.check : Icons.add, size: 16),
+                label: Text(
+                  isSubscribed ? '已关注' : '关注',
+                  style: $styles.text.btn.copyWith(fontSize: 12),
+                ),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular($styles.corners.lg),
-              ),
-            ),
-            onPressed: () {
-              context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
-            },
-            icon: Icon(isSubscribed ? Icons.check : Icons.add, size: 16),
-            label: Text(
-              isSubscribed ? '已关注' : '关注',
-              style: $styles.text.btn.copyWith(fontSize: 12),
             ),
           ),
         ],

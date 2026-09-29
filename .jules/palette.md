@@ -27,3 +27,9 @@
 **Learning:** When custom action buttons display numeric stats (e.g. view/like/favorite counts like "3.8万"), passing only the formatted number string to `Semantics(label: ..., tooltip: ...)` leaves screen readers (TalkBack/VoiceOver) without action context (announcing "3.8万, button" instead of "点赞 3.8万, button"), and causes hover tooltips to show useless metric numbers instead of action hints.
 
 **Action:** Always combine explicit action names with formatted metric counts in `Semantics(label: '$actionName $count')` and supply state-aware dynamic tooltips (e.g., `isLiked ? '取消点赞' : '点赞'`).
+
+## 2026-09-28 - Creator Subscription Button Semantics & State Tooltips
+
+**Learning:** Standard `ElevatedButton.icon` widgets used for toggle actions (like "关注/已关注") lack state-aware `tooltip` hints and explicit `Semantics(selected: ...)` attributes by default, leaving screen readers and hover users without context on the creator target name or un-subscribe action.
+
+**Action:** Always wrap toggle `ElevatedButton` components with explicit `Tooltip(message: isSubscribed ? '取消关注创作者' : '关注创作者')` and `Semantics(button: true, selected: isSubscribed, label: ...)` alongside `HapticFeedback.lightImpact()` on tap.
