@@ -94,11 +94,16 @@ void _clearImageCache() {
 
 /// Global Alchemist configuration for every test in this package.
 ///
-/// Only CI goldens are enabled. CI goldens render through the Ahem font with
-/// all text obscured into solid blocks, which makes the output byte-identical
-/// across macOS, Linux and Windows. That is what lets a baseline committed
-/// from a dev machine match `ubuntu-latest` in CI. Platform goldens stay off
-/// so nobody records a readable baseline that can never pass on CI.
+/// CI goldens render real glyphs from the subset in `test/fonts/`, not Ahem
+/// boxes. Alchemist's `obscureText` (default `true` for CI goldens) forces
+/// the Ahem family onto the resolved theme and, per its own documentation,
+/// ignores whatever family the theme names — with it on, the subset never
+/// reaches the text and every baseline records 1em boxes for every glyph.
+/// With it off, cross-platform determinism comes from the font file being
+/// byte-identical everywhere instead of from the typeface being trivial.
+///
+/// Platform goldens stay off so nobody records a second baseline that can
+/// never pass on CI.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
@@ -170,7 +175,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   await AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
       platformGoldensConfig: const PlatformGoldensConfig(enabled: false),
-      ciGoldensConfig: const CiGoldensConfig(diffThreshold: 0.01),
+      ciGoldensConfig: const CiGoldensConfig(
+        diffThreshold: 0.01,
+        obscureText: false,
+      ),
     ),
     run: testMain,
   );

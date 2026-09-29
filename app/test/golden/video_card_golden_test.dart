@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
 import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+import 'golden_font.dart';
 
 VideoModel _video({
   String id = 'BV1xx411c7mD',
@@ -33,9 +34,11 @@ void main() {
       // and ThemeData types. Alchemist's built-in scaffolding uses Flutter's
       // material, so the widget tree has to be wrapped with the fork's app.
       pumpWidget: (tester, widget) async {
+        await loadGoldenFont();
         await mockNetworkImagesFor(() async {
           await tester.pumpWidget(
             MaterialApp(
+              theme: goldenTestTheme(),
               home: Scaffold(body: Center(child: widget)),
             ),
           );
