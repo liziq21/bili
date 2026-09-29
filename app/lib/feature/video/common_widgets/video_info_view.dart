@@ -362,6 +362,10 @@ class const _CreatorProfileSection() extends StatelessWidget {
                   ? '已关注创作者 ${creator.name}'
                   : '关注创作者 ${creator.name}',
               tooltip: isSubscribed ? '取消关注创作者' : '关注创作者',
+              onTap: () {
+                HapticFeedback.lightImpact();
+                context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
+              },
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isSubscribed

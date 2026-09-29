@@ -149,61 +149,64 @@ void main() {
       final subSemantics = tester.widget<Semantics>(
         find.byWidgetPredicate(
           (widget) =>
-              widget is Semantics &&
-              widget.properties.label == '关注创作者 测试UP主',
+              widget is Semantics && widget.properties.label == '关注创作者 测试UP主',
         ),
       );
       expect(subSemantics.properties.label, '关注创作者 测试UP主');
       expect(subSemantics.properties.tooltip, '关注创作者');
       expect(subSemantics.properties.selected, false);
+      // excludeSemantics: true 会吞掉子节点语义动作，必须显式验证
+      // 外层节点自身携带 tap 动作（CodeRabbit Major：屏读用户须能触发订阅）
+      expect(subSemantics.properties.onTap, isNotNull);
 
       await mockBloc.close();
     });
 
-    testWidgets('subscribed creator profile exposes updated semantics and tooltip', (
-      tester,
-    ) async {
-      final mockDetail = VideoDetail(
-        video: const VideoModel(
-          id: 'BV1sub',
-          url: 'https://example.com/video',
-          title: '已关注创作者视频',
-          viewCount: 10000,
-        ),
-        isSubscribed: true,
-        creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
-      );
+    testWidgets(
+      'subscribed creator profile exposes updated semantics and tooltip',
+      (tester) async {
+        final mockDetail = VideoDetail(
+          video: const VideoModel(
+            id: 'BV1sub',
+            url: 'https://example.com/video',
+            title: '已关注创作者视频',
+            viewCount: 10000,
+          ),
+          isSubscribed: true,
+          creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
+        );
 
-      final mockBloc = MockVideoBloc(
-        VideoState(isLoading: false, videoDetail: mockDetail),
-      );
+        final mockBloc = MockVideoBloc(
+          VideoState(isLoading: false, videoDetail: mockDetail),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BlocProvider<VideoBloc>.value(
-              value: mockBloc,
-              child: const VideoInfoView(),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: BlocProvider<VideoBloc>.value(
+                value: mockBloc,
+                child: const VideoInfoView(),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      final subSemantics = tester.widget<Semantics>(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics &&
-              widget.properties.label == '已关注创作者 测试UP主',
-        ),
-      );
-      expect(subSemantics.properties.label, '已关注创作者 测试UP主');
-      expect(subSemantics.properties.tooltip, '取消关注创作者');
-      expect(subSemantics.properties.selected, true);
+        final subSemantics = tester.widget<Semantics>(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics &&
+                widget.properties.label == '已关注创作者 测试UP主',
+          ),
+        );
+        expect(subSemantics.properties.label, '已关注创作者 测试UP主');
+        expect(subSemantics.properties.tooltip, '取消关注创作者');
+        expect(subSemantics.properties.selected, true);
 
-      await mockBloc.close();
-    });
+        await mockBloc.close();
+      },
+    );
   });
 
   group('VideoInfoView list recycling', () {
