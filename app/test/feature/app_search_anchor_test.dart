@@ -137,6 +137,39 @@ void main() {
     expect(submitted, ['Flutter 教程']);
   });
 
+  testWidgets(
+    'trailing fill button has tooltip and fills text into search controller',
+    (tester) async {
+      final suggest = FakeSuggestRepository(const ['Flutter 教程']);
+      final bloc = buildBloc(suggest);
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildAnchor(bloc: bloc, onSearch: (_) {}));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Flu');
+      await pumpPastDebounce(tester);
+
+      // Verify trailing fill button has tooltip
+      final fillButtonFinder = find.widgetWithIcon(
+        IconButton,
+        Icons.north_west,
+      );
+      expect(fillButtonFinder, findsOneWidget);
+      final buttonWidget = tester.widget<IconButton>(fillButtonFinder);
+      expect(buttonWidget.tooltip, '输入到搜索框');
+
+      // Tap fill button and check controller text
+      await tester.tap(fillButtonFinder);
+      await tester.pumpAndSettle();
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.controller!.text, 'Flutter 教程');
+    },
+  );
+
   testWidgets('input is truncated to maxQueryLength', (tester) async {
     final suggest = FakeSuggestRepository(const ['Flutter 教程']);
     final bloc = buildBloc(suggest);

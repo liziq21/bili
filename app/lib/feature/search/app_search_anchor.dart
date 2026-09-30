@@ -170,7 +170,11 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
         onTap: () => _handleSearch(item),
         trailing: IconButton(
           icon: const Icon(Icons.north_west),
-          onPressed: () => _controller.text = item,
+          tooltip: '输入到搜索框',
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            _controller.text = item;
+          },
         ),
       );
     }));
