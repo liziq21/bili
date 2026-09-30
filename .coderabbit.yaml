@@ -5,6 +5,12 @@ reviews:
     enabled: true
     drafts: false
     auto_incremental_review: true
+    # 0 = 禁用自动暂停，每次 push 都评审。
+    # 官方默认 5：累计 5 个已评审 commit 后自动暂停，此时不再上报 commit status。
+    # 本仓库的 CodeRabbit commit status 是 ruleset 23869296 的唯一 required_status_check，
+    # 暂停期间 PR 会卡在「缺少必需检查」上而非「检查失败」，且解除暂停需要人工发
+    # `@coderabbitai resume`。这里用 review allowance 额度换合并不被静默卡死。
+    auto_pause_after_reviewed_commits: 0
     ignore_usernames:
       - "n24q02m"
       - "dependabot[bot]"
