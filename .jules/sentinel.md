@@ -53,3 +53,9 @@ Prevention: Always mask query parameter values (e.g., replacing values with `'RE
 Vulnerability: `ApiInterceptor` constructed `HttpHeaders.refererHeader` using `Uri.encodeFull(keyword)`, which failed to escape URL query delimiters (`#`, `&`, `?`, `=`) and allowed non-printable control characters (`\r\n`) to pass into HTTP headers, creating risk of CRLF header injection and Referer parameter corruption.
 Learning: `Uri.encodeFull` is meant for full URIs and leaves reserved query characters intact. Constructing custom HTTP query strings for headers requires query component encoding (`Uri.encodeQueryComponent`) and control character stripping (`[\x00-\x1F\x7F]`).
 Prevention: Always use `Uri.encodeQueryComponent` for query parameter values in HTTP headers and sanitize control characters to prevent header splitting or injection.
+
+## 2026-09-25 - Sanitize Control Characters in YouTube Service Search Queries
+
+Vulnerability: `YoutubeService` passed raw search `query` parameters containing non-printable control characters (`\r\n`, `\x00`, `\x1f`) directly into HTTP GET query parameters and POST request body payloads, exposing outgoing YouTube/Google Suggest API requests to CRLF query injection and server request errors.
+Learning: Unsanitized search inputs sourced from user text fields or deep-link params can leak control characters into HTTP query strings and REST API bodies.
+Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from search query parameters in API services before executing outgoing network requests.
