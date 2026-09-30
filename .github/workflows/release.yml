@@ -60,6 +60,11 @@ jobs:
           cache: true
 
       - name: Check signing secrets are configured
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
           missing=0
@@ -75,6 +80,11 @@ jobs:
           fi
 
       - name: Materialise keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/keystore"
@@ -95,7 +105,15 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs --verbose
 
       - name: Build signed release APK
-        run: cd app && flutter build apk --release --pub
+        # versionCode = run_number * 10 + run_attempt. Re-running a workflow keeps
+        # run_number but increments run_attempt, so without the attempt component a
+        # re-run would produce the same versionCode as the original run. Play rejects
+        # duplicate versionCodes on upload. The multiplier only has to exceed the
+        # maximum attempt count; 10 is ample, and keeps the product far below the
+        # 2100000000 ceiling for any realistic run_number.
+        run: >-
+          cd app && flutter build apk --release --pub
+          --build-number=$(( ${{ github.run_number }} * 10 + ${{ github.run_attempt }} ))
 
       - name: Upload signed APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

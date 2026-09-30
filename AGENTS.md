@@ -20,6 +20,8 @@ Before writing or modifying code in this repository, read the specification file
 - [`packages/bilibili/bpi/AGENTS.md`](packages/bilibili/bpi/AGENTS.md) — Bilibili API sub-package rules.
 - [`packages/youtube/ypi/AGENTS.md`](packages/youtube/ypi/AGENTS.md) — YouTube API sub-package rules.
 - [`.coderabbit.yaml`](.coderabbit.yaml) — CodeRabbit review configuration (language, review profile, ignore rules).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow: branch naming, pre-commit checks, the three required status checks.
+- [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 
 **When to read each file:**
 
@@ -31,6 +33,14 @@ Before writing or modifying code in this repository, read the specification file
 | Add a new API endpoint or DTO in `bpi` or `ypi` | The corresponding sub-package `AGENTS.md` (API 子包通用规范 section) |
 | Write a test (unit, widget, or golden) | Root `AGENTS.md` (Testing section) + the test's layer file |
 | Change CI workflow or golden baselines | `.github/workflows/ci.yml` + `.github/workflows/rerecord-goldens.yml` |
+| Bump the app version or cut a release | The Release section below |
+
+## Release
+
+- **Version source of truth** is `app/pubspec.yaml` `version: X.Y.Z+N`, not the git tag. Local `flutter build` reads the pubspec, so making the tag authoritative would silently produce a wrong `versionCode` on developer machines. The tag is a release marker; `.github/workflows/release.yml` fails the build when `vX.Y.Z` disagrees with the pubspec's `X.Y.Z`.
+- **Build number** is injected by CI and never committed. The verification build in `ci.yml` uses `--build-number=${{ github.run_number }}`; the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
+- **Release signing is mandatory.** `app/android/app/build.gradle.kts` throws `GradleException` when a release build has no `key.properties`, so a release build can never silently fall back to the debug keystore. `BILI_ALLOW_UNSIGNED_RELEASE=1` is the single opt-out; CI sets it to verify that the release variant compiles, and artifacts built that way are not publishable.
+- **Required status checks carry a version suffix.** The two CI checks in the ruleset are `Run Flutter Test (3.47.5, 3.13.4)` and `Build Flutter App (android) (3.47.5, 3.13.4)`; the matrix is generated from the root `pubspec.yaml` `environment` block. **Upgrading Flutter or Dart requires updating the ruleset in the same change**, or every PR blocks on a missing required check.
 
 For architectural walkthroughs — not prescriptive rules, but context on why boundaries fall where they do:
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).

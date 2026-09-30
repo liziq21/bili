@@ -122,16 +122,32 @@ dart run build_runner build --workspace --delete-conflicting-outputs
 (
   cd packages/bilibili
   flutter analyze
-  flutter test
+  flutter test test/
+)
+
+# packages/bilibili/bpi
+(
+  cd packages/bilibili/bpi
+  flutter analyze
+  flutter test test/
 )
 
 # packages/youtube
 (
   cd packages/youtube
   flutter analyze
-  flutter test
+  flutter test test/
+)
+
+# packages/youtube/ypi
+(
+  cd packages/youtube/ypi
+  flutter analyze
+  flutter test test/
 )
 ```
+
+`bpi` 与 `ypi` 是 API 子包，各有自己的测试目录，必须在自己的目录下执行；命令与 CI 的 `Run Flutter Test` job 逐条一致。
 
 ### Dart-only packages
 
@@ -174,6 +190,16 @@ dart run build_runner build --workspace --delete-conflicting-outputs
 3. 如涉及生成代码（Drift/go_router/l10n），运行对应的代码生成命令
 4. 确认生成文件无误且格式化结果正常 (`dart format .`)
 5. 检查 `git diff` 确保没有无关修改
+
+合并需要三个检查通过：`CodeRabbit`、`Run Flutter Test (3.47.5, 3.13.4)`、`Build Flutter App (android) (3.47.5, 3.13.4)`。
+
+## 版本与发布
+
+`app/pubspec.yaml` 的 `version` 是版本的唯一真相源，git tag 只是发布标记——push `vX.Y.Z` 后 `release.yml` 会校验 tag 与 pubspec 一致，不一致即构建失败。build number 由 CI 注入、不提交：`ci.yml` 的验证构建用 run number，`release.yml` 的发布构建用 `run_number * 10 + run_attempt`，保证重跑同一 tag 也拿到不同 versionCode。
+
+release 构建必须提供 `android/key.properties` 签名材料，缺失即失败，不会退化为 debug 签名。`BILI_ALLOW_UNSIGNED_RELEASE=1` 是唯一例外，CI 用它验证 release 变体可编译，产物不可发布。
+
+详见 [AGENTS.md](AGENTS.md) 的 Release 段与 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## Known Limitations / 已知限制
 
