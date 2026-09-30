@@ -44,8 +44,10 @@ Future<void> main() async {
     final video = _captureJson(
       videoSearchResponse,
       'search video',
-      (json) =>
-          _validateSearchResponse(json, requiredRenderer: 'videoRenderer'),
+      (json) => _validateSearchResponse(
+        json,
+        containsItem: _rendererItem('videoRenderer'),
+      ),
     );
     saveResponse('testing/search_video.json', video);
 
@@ -64,12 +66,34 @@ Future<void> main() async {
     final channel = _captureJson(
       channelSearchResponse,
       'search channel',
-      (json) =>
-          _validateSearchResponse(json, requiredRenderer: 'channelRenderer'),
+      (json) => _validateSearchResponse(
+        json,
+        containsItem: _rendererItem('channelRenderer'),
+      ),
     );
     saveResponse('testing/search_channel.json', channel);
 
-    print('3. Fetching search suggest JSON...');
+    print('3. Fetching search playlist JSON...');
+    final playlistSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 3),
+          }),
+        )
+        .timeout(requestTimeout);
+    final playlist = _captureJson(
+      playlistSearchResponse,
+      'search playlist',
+      (json) =>
+          _validateSearchResponse(json, containsItem: _containsPlaylistLockup),
+    );
+    saveResponse('testing/search_playlist.json', playlist);
+
+    print('4. Fetching search suggest JSON...');
     final suggestResponse = await client
         .get(
           Uri.parse(
@@ -179,7 +203,10 @@ dynamic _decodeBody(String body) {
   return jsonDecode(jsonText);
 }
 
-void _validateSearchResponse(dynamic json, {required String requiredRenderer}) {
+void _validateSearchResponse(
+  dynamic json, {
+  required bool Function(Map<String, dynamic> item) containsItem,
+}) {
   if (json is! Map<String, dynamic>) {
     throw const FormatException('InnerTube search response is not an object');
   }
@@ -211,14 +238,32 @@ void _validateSearchResponse(dynamic json, {required String requiredRenderer}) {
       'InnerTube search response has no result sections',
     );
   }
-  if (!_containsRendererInItemSections(sections, requiredRenderer)) {
-    throw FormatException('InnerTube search response has no $requiredRenderer');
+  if (!_itemSectionsContain(sections, containsItem)) {
+    throw const FormatException(
+      'InnerTube search response has no item matching the expected shape',
+    );
   }
 }
 
-bool _containsRendererInItemSections(
+bool Function(Map<String, dynamic> item) _rendererItem(String renderer) {
+  return (item) => item[renderer] is Map;
+}
+
+/// Playlist results arrive as `lockupViewModel` with a `PL`-prefixed
+/// [contentId], not as `playlistRenderer` (verified against the live
+/// InnerTube WEB endpoint on 2026-09-30: 0 occurrences of `playlistRenderer`).
+bool _containsPlaylistLockup(Map<String, dynamic> item) {
+  final lockup = item['lockupViewModel'];
+  if (lockup is! Map) {
+    return false;
+  }
+  final contentId = lockup['contentId'];
+  return contentId is String && contentId.startsWith('PL');
+}
+
+bool _itemSectionsContain(
   dynamic sections,
-  String requiredRenderer,
+  bool Function(Map<String, dynamic> item) containsItem,
 ) {
   if (sections is! Iterable) {
     return false;
@@ -235,7 +280,7 @@ bool _containsRendererInItemSections(
     if (items is! Iterable) {
       return false;
     }
-    return items.any((item) => item is Map && item[requiredRenderer] is Map);
+    return items.any((item) => item is Map && containsItem(item.cast()));
   });
 }
 

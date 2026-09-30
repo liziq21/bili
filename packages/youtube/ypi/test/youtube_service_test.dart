@@ -164,26 +164,72 @@ void main() {
                     'itemSectionRenderer': {
                       'contents': [
                         {
-                          'playlistRenderer': {
-                            'playlistId': 'PL_PLAYLIST_1',
-                            'title': {'simpleText': 'Playlist Title'},
-                            'thumbnail': {
-                              'thumbnails': [
-                                {'url': 'https://img.youtube.com/playlist.jpg'},
-                              ],
-                            },
-                            'videoCount': '25',
-                            'shortByline': {
-                              'runs': [
-                                {
-                                  'text': 'Playlist Owner',
-                                  'navigationEndpoint': {
-                                    'browseEndpoint': {
-                                      'browseId': 'UC_OWNER_1',
+                          'lockupViewModel': {
+                            'contentId': 'PL_PLAYLIST_1',
+                            'contentImage': {
+                              'collectionThumbnailViewModel': {
+                                'primaryThumbnail': {
+                                  'thumbnailViewModel': {
+                                    'image': {
+                                      'sources': [
+                                        {
+                                          'url': 'https://img.youtube.com/playlist.jpg',
+                                          'width': 360,
+                                          'height': 202,
+                                        },
+                                      ],
                                     },
+                                    'overlays': [
+                                      {
+                                        'thumbnailOverlayBadgeViewModel': {
+                                          'thumbnailBadges': [
+                                            {
+                                              'thumbnailBadgeViewModel': {
+                                                'text': '25 lessons',
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
-                              ],
+                              },
+                            },
+                            'metadata': {
+                              'lockupMetadataViewModel': {
+                                'title': {'content': 'Playlist Title'},
+                                'metadata': {
+                                  'contentMetadataViewModel': {
+                                    'metadataRows': [
+                                      {
+                                        'metadataParts': [
+                                          {
+                                            'text': {
+                                              'content': 'Playlist Owner',
+                                              'commandRuns': [
+                                                {
+                                                  'onTap': {
+                                                    'innertubeCommand': {
+                                                      'browseEndpoint': {
+                                                        'browseId':
+                                                            'UC_OWNER_1',
+                                                      },
+                                                    },
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                        'lockupContentMetadataRowExtension': {
+                                          'contentType': 'METADATA_ROW_CONTENT_TYPE_BYLINE',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
                             },
                           },
                         },
@@ -203,7 +249,7 @@ void main() {
         final body = json.decode(request.body) as Map<String, dynamic>;
         expect(body['query'], 'flutter playlist');
         expect(body['context'], isA<Map<String, dynamic>>());
-        expect(body['params'], isNotNull);
+        expect(body['params'], 'QgIQAw==');
         return http.Response(
           json.encode(mockJsonResponse),
           200,
@@ -226,9 +272,14 @@ void main() {
           (section.contents.single as NetworkYouTubePlaylistSearchItem)
               .renderer;
       expect(playlist.playlistId, 'PL_PLAYLIST_1');
-      expect(playlist.title?.value, 'Playlist Title');
-      expect(playlist.videoCountText?.value, '25');
+      expect(playlist.title, 'Playlist Title');
+      expect(playlist.videoCountText, '25 lessons');
+      expect(playlist.owner?.text.value, 'Playlist Owner');
       expect(playlist.owner?.browseId, 'UC_OWNER_1');
+      expect(
+        playlist.thumbnail?.thumbnails.single.url,
+        contains('playlist.jpg'),
+      );
       service.close();
     });
 

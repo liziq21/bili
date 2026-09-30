@@ -40,7 +40,7 @@ void main() {
     expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
   });
 
-  test('parses the real playlist search fixture into typed renderers', () {
+  test('parses the real playlist search fixture into typed lockups', () {
     final response = NetworkYouTubePlaylistSearchResponse.fromJson(
       loadFixtureMap('search_playlist.json'),
     );
@@ -51,20 +51,46 @@ void main() {
         .sectionListRenderer!
         .contents;
     expect(sections, isNotEmpty);
-    final section = sections
+    expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
+    expect(sections.whereType<NetworkYouTubeContinuationSection>(), isNotEmpty);
+    final playlists = sections
         .whereType<NetworkYouTubeItemSectionRenderer>()
-        .first;
-    expect(
-      section.contents.whereType<NetworkYouTubePlaylistSearchItem>(),
-      isNotEmpty,
-    );
-    final item = section.contents
+        .expand((section) => section.contents)
         .whereType<NetworkYouTubePlaylistSearchItem>()
-        .first;
-    expect(item.renderer.playlistId, 'PL1234567890ABCDEF');
-    expect(item.renderer.title?.value, 'Flutter Complete Course 2026');
-    expect(item.renderer.videoCountText?.value, '42');
-    expect(item.renderer.owner?.browseId, 'UC_FLUTTER_DEV_ID');
+        .toList();
+    expect(playlists, isNotEmpty);
+
+    final first = playlists.first.renderer;
+    expect(first.playlistId, 'PL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ');
+    expect(first.title, 'Flutter Tutorial for Beginners');
+    expect(first.videoCountText, isNotNull);
+    expect(first.owner?.text.value, 'Net Ninja');
+    expect(first.owner?.browseId, 'UCW5YeuERMmlnqo4oq8vwUpg');
+    expect(first.thumbnail?.thumbnails, isNotEmpty);
+    expect(first.thumbnail?.thumbnails.first.url, isNotNull);
+
+    for (final item in playlists) {
+      expect(item.renderer.playlistId, startsWith('PL'));
+    }
+  });
+
+  test('non-playlist lockups are dropped rather than mis-typed', () {
+    const lockup = {
+      'lockupViewModel': {
+        'contentId': 'dQw4w9WgXcQ',
+        'metadata': {
+          'lockupMetadataViewModel': {
+            'title': {'content': 'Not a playlist'},
+          },
+        },
+      },
+    };
+    final section = NetworkYouTubeItemSectionRenderer.fromJson({
+      'itemSectionRenderer': {
+        'contents': [lockup],
+      },
+    });
+    expect(section.contents, isEmpty);
   });
 
   test('parses the real suggest fixture into a typed suggestion DTO', () {
