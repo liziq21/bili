@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../design/motion.dart';
@@ -67,8 +68,8 @@ class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
             padding: const EdgeInsets.only(right: 2),
             child: AnimatedSwitcher(
               duration: Motion.standard,
-              switchInCurve: Curves.easeInExpo,
-              switchOutCurve: Curves.easeOutExpo,
+              switchInCurve: Motion.easingEmphasized,
+              switchOutCurve: Motion.easingDecelerate,
               child: ExcludeSemantics(child: _stateIcon(theme)),
             ),
           ),
@@ -126,6 +127,7 @@ class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
       return;
     }
 
+    await HapticFeedback.selectionClick();
     _loadingTimer?.cancel();
     _successTimer?.cancel();
     setState(() {

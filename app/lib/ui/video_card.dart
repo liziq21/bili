@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../main.dart';
@@ -108,7 +109,12 @@ class const VideoCard({
           label: '${videoInfoBase.title}, $subtitleText',
           excludeSemantics: true,
           child: InkWell(
-            onTap: onTap,
+            onTap: onTap != null
+                ? () {
+                    HapticFeedback.lightImpact();
+                    onTap!();
+                  }
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -184,7 +190,12 @@ class const VideoCard({
           enabled: onTap != null,
           label: semanticLabel,
           child: InkWell(
-            onTap: onTap,
+            onTap: onTap != null
+                ? () {
+                    HapticFeedback.lightImpact();
+                    onTap!();
+                  }
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

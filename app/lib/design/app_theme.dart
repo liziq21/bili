@@ -20,5 +20,14 @@ ThemeData appThemeData(AppColors colors) {
   return ThemeData.from(textTheme: textTheme, colorScheme: scheme).copyWith(
     textSelectionTheme: TextSelectionThemeData(cursorColor: colors.accentFill),
     highlightColor: colors.accentFill,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+      },
+    ),
   );
 }

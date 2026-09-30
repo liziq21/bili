@@ -14,9 +14,7 @@ void main() {
   setUp(() {
     inMemory = InMemorySharedPreferencesAsync.empty();
     SharedPreferencesAsyncPlatform.instance = inMemory;
-    ds = PreferencesDataSource(
-      sharedPreferences: SharedPreferencesAsync(),
-    );
+    ds = PreferencesDataSource(sharedPreferences: SharedPreferencesAsync());
   });
 
   test('PreferencesKey<String?> 读取未存储值时返回 null', () async {
