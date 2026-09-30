@@ -179,7 +179,7 @@ dart run build_runner build --workspace --delete-conflicting-outputs
 
 ## 版本与发布
 
-`app/pubspec.yaml` 的 `version` 是版本的唯一真相源，git tag 只是发布标记——push `vX.Y.Z` 后 `release.yml` 会校验 tag 与 pubspec 一致，不一致即构建失败。build number 由 CI 注入 `--build-number=${{ github.run_number }}`，不提交。
+`app/pubspec.yaml` 的 `version` 是版本的唯一真相源，git tag 只是发布标记——push `vX.Y.Z` 后 `release.yml` 会校验 tag 与 pubspec 一致，不一致即构建失败。build number 由 CI 注入、不提交：`ci.yml` 的验证构建用 run number，`release.yml` 的发布构建用 `run_number * 10 + run_attempt`，保证重跑同一 tag 也拿到不同 versionCode。
 
 release 构建必须提供 `android/key.properties` 签名材料，缺失即失败，不会退化为 debug 签名。`BILI_ALLOW_UNSIGNED_RELEASE=1` 是唯一例外，CI 用它验证 release 变体可编译，产物不可发布。
 
