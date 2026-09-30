@@ -34,7 +34,9 @@
    git push origin main
    ```
 
-   revert 是异常路径，不受 ruleset 的 required status checks 约束，`main` 上也不禁直推——liziq21 是仓库 admin。走直推是为了在事故中省掉一轮 PR 与 CI 等待。
+   revert 是异常路径，ruleset 的 required status checks 不作用于直推。liziq21 是仓库 admin 且在 ruleset 的 bypass 名单内，可直推 main——事故中这样能省掉一轮 PR 与 CI 等待。
+
+   **没有 bypass 权限的贡献者不能直推 main**：另建回滚分支、把 revert 推上去、开 PR，等必需检查通过后合。
 
    如果 revert 的 revert 又出问题，重复这个循环。
 
