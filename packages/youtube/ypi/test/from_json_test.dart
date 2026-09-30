@@ -40,6 +40,33 @@ void main() {
     expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
   });
 
+  test('parses the real playlist search fixture into typed renderers', () {
+    final response = NetworkYouTubePlaylistSearchResponse.fromJson(
+      loadFixtureMap('search_playlist.json'),
+    );
+    final sections = response
+        .contents!
+        .twoColumnSearchResultsRenderer!
+        .primaryContents!
+        .sectionListRenderer!
+        .contents;
+    expect(sections, isNotEmpty);
+    final section = sections
+        .whereType<NetworkYouTubeItemSectionRenderer>()
+        .first;
+    expect(
+      section.contents.whereType<NetworkYouTubePlaylistSearchItem>(),
+      isNotEmpty,
+    );
+    final item = section.contents
+        .whereType<NetworkYouTubePlaylistSearchItem>()
+        .first;
+    expect(item.renderer.playlistId, 'PL1234567890ABCDEF');
+    expect(item.renderer.title?.value, 'Flutter Complete Course 2026');
+    expect(item.renderer.videoCountText?.value, '42');
+    expect(item.renderer.owner?.browseId, 'UC_FLUTTER_DEV_ID');
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);

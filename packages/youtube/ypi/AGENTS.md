@@ -15,6 +15,7 @@
 |---|---|---|---|---|---|
 | 视频搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_video.json` | 已有原始 fixture；抓取日期未记录 |
 | 频道搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_channel.json` | 已有原始 fixture；抓取日期未记录 |
+| 播放列表搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/search_playlist.json` | 2026-10-01 |
 | 搜索建议 | `GET https://suggestqueries.google.com/complete/search` | 公共请求 | [Google Suggest](https://suggestqueries.google.com/complete/search) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录 |
 | 首页推荐 | `POST /youtubei/v1/browse`，`browseId=FEwhat_to_watch` | InnerTube client context；需真实探针确认 | [InnerTube 开源实现](https://github.com/tombulled/innertube) | 尚无 | 未实测 |
 | 独立 Trending | 不作为实现依据 | 社区报告旧 `FEtrending` 不稳定/退役，尚未验证，不注册 | [InnerTube 使用说明](https://github.com/tombulled/innertube) | 不适用 | 未验证 |

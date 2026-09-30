@@ -77,6 +77,12 @@ final class NetworkYouTubeText {
   const NetworkYouTubeText({this.simpleText, this.runs = const []});
 
   factory NetworkYouTubeText.fromJson(Object? value) {
+    if (value is String) {
+      return NetworkYouTubeText(simpleText: value);
+    }
+    if (value is num) {
+      return NetworkYouTubeText(simpleText: value.toString());
+    }
     final json = _map(value);
     if (json == null) {
       return const NetworkYouTubeText();
@@ -256,6 +262,48 @@ final class NetworkYouTubeChannelRenderer {
   final NetworkYouTubeNavigationEndpoint? navigationEndpoint;
 }
 
+final class NetworkYouTubePlaylistRenderer {
+  const NetworkYouTubePlaylistRenderer({
+    required this.playlistId,
+    this.title,
+    this.thumbnail,
+    this.videoCountText,
+    this.owner,
+    this.navigationEndpoint,
+  });
+
+  factory NetworkYouTubePlaylistRenderer.fromJson(Map<String, dynamic> json) {
+    final playlistId = _string(json['playlistId']);
+    if (playlistId == null || playlistId.isEmpty) {
+      throw const FormatException('playlistRenderer is missing playlistId');
+    }
+
+    final owner =
+        NetworkYouTubeOwner.fromJson(json['shortByline']) ??
+        NetworkYouTubeOwner.fromJson(json['longByline']);
+
+    return NetworkYouTubePlaylistRenderer(
+      playlistId: playlistId,
+      title: NetworkYouTubeText.fromJson(json['title']),
+      thumbnail: NetworkYouTubeThumbnail.fromJson(json['thumbnail']),
+      videoCountText: NetworkYouTubeText.fromJson(
+        json['videoCountText'] ?? json['videoCount'],
+      ),
+      owner: owner,
+      navigationEndpoint: NetworkYouTubeNavigationEndpoint.fromJson(
+        json['navigationEndpoint'],
+      ),
+    );
+  }
+
+  final String playlistId;
+  final NetworkYouTubeText? title;
+  final NetworkYouTubeThumbnail? thumbnail;
+  final NetworkYouTubeText? videoCountText;
+  final NetworkYouTubeOwner? owner;
+  final NetworkYouTubeNavigationEndpoint? navigationEndpoint;
+}
+
 final class NetworkYouTubeContinuationItemRenderer {
   const NetworkYouTubeContinuationItemRenderer({required this.token});
 
@@ -292,6 +340,12 @@ final class NetworkYouTubeChannelSearchItem extends NetworkYouTubeSearchItem {
   final NetworkYouTubeChannelRenderer renderer;
 }
 
+final class NetworkYouTubePlaylistSearchItem extends NetworkYouTubeSearchItem {
+  const NetworkYouTubePlaylistSearchItem(this.renderer);
+
+  final NetworkYouTubePlaylistRenderer renderer;
+}
+
 final class NetworkYouTubeContinuationSearchItem
     extends NetworkYouTubeSearchItem {
   const NetworkYouTubeContinuationSearchItem(this.renderer);
@@ -316,6 +370,17 @@ NetworkYouTubeSearchItem? _searchItemFromJson(Map<String, dynamic> json) {
     try {
       return NetworkYouTubeChannelSearchItem(
         NetworkYouTubeChannelRenderer.fromJson(channel),
+      );
+    } on FormatException {
+      return null;
+    }
+  }
+
+  final playlist = _map(json['playlistRenderer']);
+  if (playlist != null) {
+    try {
+      return NetworkYouTubePlaylistSearchItem(
+        NetworkYouTubePlaylistRenderer.fromJson(playlist),
       );
     } on FormatException {
       return null;
@@ -544,6 +609,36 @@ final class NetworkYouTubeChannelSearchResponse {
   ) {
     _throwInnerTubeError(json);
     return NetworkYouTubeChannelSearchResponse(
+      responseContext: _map(json['responseContext']) == null
+          ? null
+          : NetworkYouTubeResponseContext.fromJson(json['responseContext']),
+      estimatedResults: _string(json['estimatedResults']),
+      contents: json['contents'] == null
+          ? null
+          : NetworkYouTubeSearchContents.fromJson(json['contents']),
+      onResponseReceivedCommands: _responseCommands(json),
+    );
+  }
+
+  final NetworkYouTubeResponseContext? responseContext;
+  final String? estimatedResults;
+  final NetworkYouTubeSearchContents? contents;
+  final List<NetworkYouTubeResponseCommand> onResponseReceivedCommands;
+}
+
+final class NetworkYouTubePlaylistSearchResponse {
+  const NetworkYouTubePlaylistSearchResponse({
+    this.responseContext,
+    this.estimatedResults,
+    this.contents,
+    this.onResponseReceivedCommands = const [],
+  });
+
+  factory NetworkYouTubePlaylistSearchResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    _throwInnerTubeError(json);
+    return NetworkYouTubePlaylistSearchResponse(
       responseContext: _map(json['responseContext']) == null
           ? null
           : NetworkYouTubeResponseContext.fromJson(json['responseContext']),

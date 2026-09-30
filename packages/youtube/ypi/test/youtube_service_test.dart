@@ -153,6 +153,85 @@ void main() {
       service.close();
     });
 
+    test('searchPlaylists sends the request shape and returns typed playlist envelope', () async {
+      final mockJsonResponse = {
+        'contents': {
+          'twoColumnSearchResultsRenderer': {
+            'primaryContents': {
+              'sectionListRenderer': {
+                'contents': [
+                  {
+                    'itemSectionRenderer': {
+                      'contents': [
+                        {
+                          'playlistRenderer': {
+                            'playlistId': 'PL_PLAYLIST_1',
+                            'title': {'simpleText': 'Playlist Title'},
+                            'thumbnail': {
+                              'thumbnails': [
+                                {'url': 'https://img.youtube.com/playlist.jpg'},
+                              ],
+                            },
+                            'videoCount': '25',
+                            'shortByline': {
+                              'runs': [
+                                {
+                                  'text': 'Playlist Owner',
+                                  'navigationEndpoint': {
+                                    'browseEndpoint': {
+                                      'browseId': 'UC_OWNER_1',
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/youtubei/v1/search');
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['query'], 'flutter playlist');
+        expect(body['context'], isA<Map<String, dynamic>>());
+        expect(body['params'], isNotNull);
+        return http.Response(
+          json.encode(mockJsonResponse),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      final response = await service.searchPlaylists('flutter playlist');
+      final section =
+          response
+                  .contents!
+                  .twoColumnSearchResultsRenderer!
+                  .primaryContents!
+                  .sectionListRenderer!
+                  .contents
+                  .single
+              as NetworkYouTubeItemSectionRenderer;
+      final playlist =
+          (section.contents.single as NetworkYouTubePlaylistSearchItem)
+              .renderer;
+      expect(playlist.playlistId, 'PL_PLAYLIST_1');
+      expect(playlist.title?.value, 'Playlist Title');
+      expect(playlist.videoCountText?.value, '25');
+      expect(playlist.owner?.browseId, 'UC_OWNER_1');
+      service.close();
+    });
+
     test('getSearchSuggestions returns query and typed suggestions', () async {
       final client = MockClient(
         (_) async => http.Response(
@@ -194,6 +273,7 @@ void main() {
 
       await service.searchVideos('flutter\r\n\x00 search\x1f');
       await service.searchChannels('flutter\r\n\x00 search\x1f');
+      await service.searchPlaylists('flutter\r\n\x00 search\x1f');
 
       service.close();
     });
@@ -204,6 +284,10 @@ void main() {
       );
       await expectLater(
         httpService.searchVideos('flutter'),
+        throwsA(isA<YpiHttpException>()),
+      );
+      await expectLater(
+        httpService.searchPlaylists('flutter'),
         throwsA(isA<YpiHttpException>()),
       );
       httpService.close();
@@ -234,6 +318,16 @@ void main() {
               ),
         ),
       );
+      await expectLater(
+        innerTubeService.searchPlaylists('flutter'),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (error) => error.code,
+            'code',
+            400,
+          ),
+        ),
+      );
       innerTubeService.close();
     });
 
@@ -256,6 +350,10 @@ void main() {
       );
       await expectLater(
         networkService.searchVideos('flutter'),
+        throwsA(isA<YpiNetworkException>()),
+      );
+      await expectLater(
+        networkService.searchPlaylists('flutter'),
         throwsA(isA<YpiNetworkException>()),
       );
       networkService.close();

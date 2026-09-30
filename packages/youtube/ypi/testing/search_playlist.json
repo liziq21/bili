@@ -1,0 +1,58 @@
+{
+  "responseContext": {
+    "mainAppWebResponseContext": {
+      "loggedOut": true
+    }
+  },
+  "contents": {
+    "twoColumnSearchResultsRenderer": {
+      "primaryContents": {
+        "sectionListRenderer": {
+          "contents": [
+            {
+              "itemSectionRenderer": {
+                "contents": [
+                  {
+                    "playlistRenderer": {
+                      "playlistId": "PL1234567890ABCDEF",
+                      "title": {
+                        "simpleText": "Flutter Complete Course 2026"
+                      },
+                      "thumbnail": {
+                        "thumbnails": [
+                          {
+                            "url": "https://i.ytimg.com/vi/playlist_thumb.jpg",
+                            "width": 336,
+                            "height": 188
+                          }
+                        ]
+                      },
+                      "videoCount": "42",
+                      "shortByline": {
+                        "runs": [
+                          {
+                            "text": "Flutter Devs Channel",
+                            "navigationEndpoint": {
+                              "browseEndpoint": {
+                                "browseId": "UC_FLUTTER_DEV_ID"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "navigationEndpoint": {
+                        "browseEndpoint": {
+                          "browseId": "VLPL1234567890ABCDEF"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

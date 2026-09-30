@@ -8,6 +8,7 @@
 |---|---|---|---|---|---|---|---|
 | `search_video.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 视频搜索 | 原始抓取日期未保留 |
 | `search_channel.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 频道搜索 | 原始抓取日期未保留 |
+| `search_playlist.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 200 | query=flutter, contentType=3 | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | 播放列表搜索 | 2026-10-01 |
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
 
 ## 抓取规则
