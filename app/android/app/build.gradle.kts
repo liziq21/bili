@@ -51,11 +51,29 @@ android {
         }
     }
 
+    // A release build without signing material must not silently fall back to the
+    // debug keystore: the resulting APK installs but cannot be uploaded to any store.
+    // CI sets BILI_ALLOW_UNSIGNED_RELEASE to verify that the release variant compiles;
+    // such artifacts are for verification only and must not be published.
+    val allowUnsignedRelease = System.getenv("BILI_ALLOW_UNSIGNED_RELEASE") == "1"
+
     buildTypes {
-        all {
-            signingConfig = config ?: signingConfigs["debug"]
-        }
         release {
+            signingConfig = config ?: if (allowUnsignedRelease) {
+                logger.warn(
+                    "BILI_ALLOW_UNSIGNED_RELEASE is set and no key.properties was found — " +
+                        "signing the release build with the debug keystore. This artifact " +
+                        "is for CI verification only and must not be published."
+                )
+                signingConfigs["debug"]
+            } else {
+                throw GradleException(
+                    "No release signing config. Provide android/key.properties " +
+                        "(storeFile, storePassword, keyAlias, keyPassword), or set " +
+                        "BILI_ALLOW_UNSIGNED_RELEASE=1 when you only need the release " +
+                        "build to compile."
+                )
+            }
             if (project.hasProperty("dev")) {
                 applicationIdSuffix = ".dev"
                 resValue(
