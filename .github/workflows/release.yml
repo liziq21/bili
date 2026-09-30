@@ -95,7 +95,10 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs --verbose
 
       - name: Build signed release APK
-        run: cd app && flutter build apk --release --pub
+        # The build number comes from the run number, not from pubspec's +N. Play
+        # requires a unique versionCode per upload, so re-cutting a tag must not
+        # reuse the committed number.
+        run: cd app && flutter build apk --release --pub --build-number=${{ github.run_number }}
 
       - name: Upload signed APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
