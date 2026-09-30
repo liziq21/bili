@@ -102,7 +102,7 @@ CodeRabbit 只在有新 commit 时出增量评审。head commit 没变时旧的 
 
 ## 依赖更新没合进来
 
-Renovate 负责依赖更新，`.github/dependabot.yml` 已删除（避免双通道冲突）。
+Renovate（`renovate.json`）是唯一的依赖更新通道。`.github/dependabot.yml` 曾在同一 ecosystem 上并行配置（monthly + `autosubmit` label），已删除以消除双通道冲突；`renovate.json` 未改动。
 
 - patch / pin / digest 级别自动合入，无需干预。
 - major / minor 不在自动合并范围内，会开 PR 等评审。若该 PR 卡住，按上面的 CodeRabbit 章节处理。

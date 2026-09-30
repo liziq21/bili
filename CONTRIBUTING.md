@@ -14,10 +14,19 @@
 
 ```bash
 flutter analyze              # 分析器必须无新增告警
-flutter test                 # 测试必须通过
 ```
 
-两条都在 CI 里跑。`pubspec.lock` 不提交。
+测试必须逐包在自己的目录下执行，命令与 `.github/workflows/ci.yml` 的 `Run Flutter Test` job 一致。仓库根跑 `flutter test` 不等价于 CI，部分 package 会失败：
+
+```bash
+cd app && flutter test                    # 主应用与golden
+cd packages/bilibili && flutter test test/
+cd packages/bilibili/bpi && flutter test test/
+cd packages/youtube && flutter test test/
+cd packages/youtube/ypi && flutter test test/
+```
+
+`pubspec.lock` 不提交。
 
 ## Pull request
 
