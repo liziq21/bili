@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
+  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
+  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
   pull_request:
-    branches:
-      - main
-      
+
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true

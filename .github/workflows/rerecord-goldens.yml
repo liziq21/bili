@@ -8,6 +8,11 @@ on:
         description: 'Why the baselines need re-recording'
         required: true
         type: string
+      target_ref:
+        description: 'Branch to check out, re-record on, and open the PR into (main, or a feature branch)'
+        required: true
+        default: main
+        type: string
 
 permissions:
   contents: write
@@ -21,9 +26,17 @@ jobs:
     environment: Actions
     runs-on: ubuntu-latest
     steps:
+      # 生成的 PR 分支名不能含 '/'，否则会变成嵌套 ref。
+      - name: Resolve target ref
+        id: target
+        env:
+          TARGET_REF: ${{ inputs.target_ref }}
+        run: |
+          printf 'slug=%s\n' "${TARGET_REF//\//-}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: main
+          ref: ${{ inputs.target_ref }}
           # persist-credentials 默认 true，会把 GITHUB_TOKEN 写进 .git/config 的
           # http.extraheader，后续任何 git 命令与第三方 action 都会带上它。关闭后
           # create-pull-request 仍用 token 参数自行配置推送凭证。
@@ -66,14 +79,15 @@ jobs:
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           token: ${{ steps.app-token.outputs.token }}
-          branch: ci/rerecord-goldens-${{ github.run_id }}
-          base: main
+          branch: ci/rerecord-goldens-${{ steps.target.outputs.slug }}-${{ github.run_id }}
+          base: ${{ inputs.target_ref }}
           commit-message: 'test(golden): re-record CI baselines from CI'
           title: 'test(golden): re-record CI baselines from CI'
           body: |
             Automated baseline re-record triggered by `${{ github.actor }}`.
 
             Reason: ${{ inputs.reason }}
+            Recorded on: `${{ inputs.target_ref }}`
 
             These PNGs were rendered in the CI environment, not on a workstation.
             Review the diff in this PR before merging — a baseline change means
