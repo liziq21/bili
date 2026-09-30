@@ -122,16 +122,32 @@ dart run build_runner build --workspace --delete-conflicting-outputs
 (
   cd packages/bilibili
   flutter analyze
-  flutter test
+  flutter test test/
+)
+
+# packages/bilibili/bpi
+(
+  cd packages/bilibili/bpi
+  flutter analyze
+  flutter test test/
 )
 
 # packages/youtube
 (
   cd packages/youtube
   flutter analyze
-  flutter test
+  flutter test test/
+)
+
+# packages/youtube/ypi
+(
+  cd packages/youtube/ypi
+  flutter analyze
+  flutter test test/
 )
 ```
+
+`bpi` 与 `ypi` 是 API 子包，各有自己的测试目录，必须在自己的目录下执行；命令与 CI 的 `Run Flutter Test` job 逐条一致。
 
 ### Dart-only packages
 
