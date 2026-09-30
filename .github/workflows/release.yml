@@ -105,10 +105,15 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs --verbose
 
       - name: Build signed release APK
-        # The build number comes from the run number, not from pubspec's +N. Play
-        # requires a unique versionCode per upload, so re-cutting a tag must not
-        # reuse the committed number.
-        run: cd app && flutter build apk --release --pub --build-number=${{ github.run_number }}
+        # versionCode = run_number * 10 + run_attempt. Re-running a workflow keeps
+        # run_number but increments run_attempt, so without the attempt component a
+        # re-run would produce the same versionCode as the original run. Play rejects
+        # duplicate versionCodes on upload. The multiplier only has to exceed the
+        # maximum attempt count; 10 is ample, and keeps the product far below the
+        # 2100000000 ceiling for any realistic run_number.
+        run: >-
+          cd app && flutter build apk --release --pub
+          --build-number=$(( ${{ github.run_number }} * 10 + ${{ github.run_attempt }} ))
 
       - name: Upload signed APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
