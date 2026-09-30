@@ -29,7 +29,10 @@ jobs:
       # 生成的 PR 分支名不能含 '/'，否则会变成嵌套 ref。
       - name: Resolve target ref
         id: target
-        run: echo "slug=${{ replace(inputs.target_ref, '/', '-') }}" >> "$GITHUB_OUTPUT"
+        env:
+          TARGET_REF: ${{ inputs.target_ref }}
+        run: |
+          printf 'slug=%s\n' "${TARGET_REF//\//-}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
