@@ -256,6 +256,150 @@ final class NetworkYouTubeChannelRenderer {
   final NetworkYouTubeNavigationEndpoint? navigationEndpoint;
 }
 
+/// A playlist search result.
+///
+/// The InnerTube WEB search endpoint returns playlists as `lockupViewModel`
+/// with a `PL`-prefixed `contentId`; it does not emit `playlistRenderer`
+/// (measured 2026-09-30 against `/youtubei/v1/search` with
+/// `contentType: 3`: 0 occurrences of `playlistRenderer` across the WEB
+/// 2.20230818.00.00, WEB 2.20240726.00.00 and ANDROID 19.09.37 clients).
+final class NetworkYouTubePlaylistLockup {
+  const NetworkYouTubePlaylistLockup({
+    required this.playlistId,
+    this.title,
+    this.thumbnail,
+    this.videoCountText,
+    this.owner,
+  });
+
+  factory NetworkYouTubePlaylistLockup.fromJson(Map<String, dynamic> json) {
+    final contentId = _string(json['contentId']);
+    if (contentId == null || !contentId.startsWith('PL')) {
+      throw const FormatException(
+        'lockupViewModel does not carry a playlist contentId',
+      );
+    }
+
+    final metadata = _map(json['metadata'])?['lockupMetadataViewModel'];
+    final byline = _bylinePart(metadata);
+
+    return NetworkYouTubePlaylistLockup(
+      playlistId: contentId,
+      title: _string(_map(metadata?['title'])?['content']),
+      thumbnail: _lockupThumbnail(json['contentImage']),
+      videoCountText: _lockupBadgeText(json['contentImage']),
+      owner: byline == null
+          ? null
+          : NetworkYouTubeOwner(
+              text: NetworkYouTubeText(simpleText: byline.text),
+              browseId: byline.browseId,
+            ),
+    );
+  }
+
+  /// The channel byline is the metadata row tagged
+  /// `METADATA_ROW_CONTENT_TYPE_BYLINE`; its first part carries the owner name
+  /// and, through `commandRuns[0].onTap`, the owner `browseId`.
+  static ({String text, String? browseId})? _bylinePart(
+    Map<String, dynamic>? metadata,
+  ) {
+    final rows = _list(
+      _map(
+        _map(metadata?['metadata'])?['contentMetadataViewModel'],
+      )?['metadataRows'],
+    );
+    for (final row in rows.map(_map).nonNulls) {
+      final contentType = _string(
+        _map(row['lockupContentMetadataRowExtension'])?['contentType'],
+      );
+      if (contentType != 'METADATA_ROW_CONTENT_TYPE_BYLINE') {
+        continue;
+      }
+      final parts = _list(row['metadataParts']);
+      if (parts.isEmpty) {
+        return null;
+      }
+      final part = _map(parts.first);
+      final text = _string(_map(part?['text'])?['content']);
+      if (text == null) {
+        return null;
+      }
+      final commandRuns = _list(_map(part?['text'])?['commandRuns']);
+      final browseEndpoint = _map(
+        _map(
+          _map(_map(commandRuns.firstOrNull)?['onTap'])?['innertubeCommand'],
+        )?['browseEndpoint'],
+      );
+      return (text: text, browseId: _string(browseEndpoint?['browseId']));
+    }
+    return null;
+  }
+
+  static NetworkYouTubeThumbnail? _lockupThumbnail(Object? contentImage) {
+    final sources = _list(
+      _map(
+        _map(
+          _map(
+            _map(
+              _map(contentImage)?['collectionThumbnailViewModel'],
+            )?['primaryThumbnail'],
+          )?['thumbnailViewModel'],
+        )?['image'],
+      )?['sources'],
+    );
+    if (sources.isEmpty) {
+      return null;
+    }
+    return NetworkYouTubeThumbnail(
+      thumbnails: List.unmodifiable(
+        sources
+            .map(_map)
+            .nonNulls
+            .map(
+              (source) => NetworkYouTubeThumbnailSize(
+                url: _string(source['url']),
+                width: _integer(source['width']),
+                height: _integer(source['height']),
+              ),
+            )
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  /// The item count is a thumbnail overlay badge (for example `36 lessons`),
+  /// not a `videoCountText` field.
+  static String? _lockupBadgeText(Object? contentImage) {
+    final overlays = _list(
+      _map(
+        _map(
+          _map(
+            _map(contentImage)?['collectionThumbnailViewModel'],
+          )?['primaryThumbnail'],
+        )?['thumbnailViewModel'],
+      )?['overlays'],
+    );
+    for (final overlay in overlays.map(_map).nonNulls) {
+      final badges = _list(
+        _map(overlay['thumbnailOverlayBadgeViewModel'])?['thumbnailBadges'],
+      );
+      for (final badge in badges.map(_map).nonNulls) {
+        final text = _string(_map(badge['thumbnailBadgeViewModel'])?['text']);
+        if (text != null) {
+          return text;
+        }
+      }
+    }
+    return null;
+  }
+
+  final String playlistId;
+  final String? title;
+  final NetworkYouTubeThumbnail? thumbnail;
+  final String? videoCountText;
+  final NetworkYouTubeOwner? owner;
+}
+
 final class NetworkYouTubeContinuationItemRenderer {
   const NetworkYouTubeContinuationItemRenderer({required this.token});
 
@@ -292,6 +436,12 @@ final class NetworkYouTubeChannelSearchItem extends NetworkYouTubeSearchItem {
   final NetworkYouTubeChannelRenderer renderer;
 }
 
+final class NetworkYouTubePlaylistSearchItem extends NetworkYouTubeSearchItem {
+  const NetworkYouTubePlaylistSearchItem(this.renderer);
+
+  final NetworkYouTubePlaylistLockup renderer;
+}
+
 final class NetworkYouTubeContinuationSearchItem
     extends NetworkYouTubeSearchItem {
   const NetworkYouTubeContinuationSearchItem(this.renderer);
@@ -318,6 +468,18 @@ NetworkYouTubeSearchItem? _searchItemFromJson(Map<String, dynamic> json) {
         NetworkYouTubeChannelRenderer.fromJson(channel),
       );
     } on FormatException {
+      return null;
+    }
+  }
+
+  final lockup = _map(json['lockupViewModel']);
+  if (lockup != null) {
+    try {
+      return NetworkYouTubePlaylistSearchItem(
+        NetworkYouTubePlaylistLockup.fromJson(lockup),
+      );
+    } on FormatException {
+      // Non-playlist lockups (videos, shorts) are not part of this item type.
       return null;
     }
   }
@@ -544,6 +706,36 @@ final class NetworkYouTubeChannelSearchResponse {
   ) {
     _throwInnerTubeError(json);
     return NetworkYouTubeChannelSearchResponse(
+      responseContext: _map(json['responseContext']) == null
+          ? null
+          : NetworkYouTubeResponseContext.fromJson(json['responseContext']),
+      estimatedResults: _string(json['estimatedResults']),
+      contents: json['contents'] == null
+          ? null
+          : NetworkYouTubeSearchContents.fromJson(json['contents']),
+      onResponseReceivedCommands: _responseCommands(json),
+    );
+  }
+
+  final NetworkYouTubeResponseContext? responseContext;
+  final String? estimatedResults;
+  final NetworkYouTubeSearchContents? contents;
+  final List<NetworkYouTubeResponseCommand> onResponseReceivedCommands;
+}
+
+final class NetworkYouTubePlaylistSearchResponse {
+  const NetworkYouTubePlaylistSearchResponse({
+    this.responseContext,
+    this.estimatedResults,
+    this.contents,
+    this.onResponseReceivedCommands = const [],
+  });
+
+  factory NetworkYouTubePlaylistSearchResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    _throwInnerTubeError(json);
+    return NetworkYouTubePlaylistSearchResponse(
       responseContext: _map(json['responseContext']) == null
           ? null
           : NetworkYouTubeResponseContext.fromJson(json['responseContext']),

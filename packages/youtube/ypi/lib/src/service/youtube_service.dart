@@ -98,6 +98,33 @@ final class YoutubeService {
     );
   }
 
+  Future<NetworkYouTubePlaylistSearchResponse> searchPlaylists(
+    String query, {
+    int? sort,
+    String? continuation,
+  }) async {
+    final sanitizedQuery = query.replaceAll(_controlChars, '');
+    final body = <String, dynamic>{};
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      body['query'] = sanitizedQuery;
+      final params = YoutubeProtobufEncoder.encodeSearchParams(
+        sort: sort,
+        contentType: 3,
+      );
+      if (params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _sendSearch(body);
+    return _parseResponse(
+      response,
+      NetworkYouTubePlaylistSearchResponse.fromJson,
+    );
+  }
+
   Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(
     String query,
   ) async {

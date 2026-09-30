@@ -153,6 +153,136 @@ void main() {
       service.close();
     });
 
+    test('searchPlaylists sends the request shape and returns typed playlist envelope', () async {
+      final mockJsonResponse = {
+        'contents': {
+          'twoColumnSearchResultsRenderer': {
+            'primaryContents': {
+              'sectionListRenderer': {
+                'contents': [
+                  {
+                    'itemSectionRenderer': {
+                      'contents': [
+                        {
+                          'lockupViewModel': {
+                            'contentId': 'PL_PLAYLIST_1',
+                            'contentImage': {
+                              'collectionThumbnailViewModel': {
+                                'primaryThumbnail': {
+                                  'thumbnailViewModel': {
+                                    'image': {
+                                      'sources': [
+                                        {
+                                          'url': 'https://img.youtube.com/playlist.jpg',
+                                          'width': 360,
+                                          'height': 202,
+                                        },
+                                      ],
+                                    },
+                                    'overlays': [
+                                      {
+                                        'thumbnailOverlayBadgeViewModel': {
+                                          'thumbnailBadges': [
+                                            {
+                                              'thumbnailBadgeViewModel': {
+                                                'text': '25 lessons',
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            'metadata': {
+                              'lockupMetadataViewModel': {
+                                'title': {'content': 'Playlist Title'},
+                                'metadata': {
+                                  'contentMetadataViewModel': {
+                                    'metadataRows': [
+                                      {
+                                        'metadataParts': [
+                                          {
+                                            'text': {
+                                              'content': 'Playlist Owner',
+                                              'commandRuns': [
+                                                {
+                                                  'onTap': {
+                                                    'innertubeCommand': {
+                                                      'browseEndpoint': {
+                                                        'browseId':
+                                                            'UC_OWNER_1',
+                                                      },
+                                                    },
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                        'lockupContentMetadataRowExtension': {
+                                          'contentType': 'METADATA_ROW_CONTENT_TYPE_BYLINE',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/youtubei/v1/search');
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['query'], 'flutter playlist');
+        expect(body['context'], isA<Map<String, dynamic>>());
+        expect(body['params'], 'QgIQAw==');
+        return http.Response(
+          json.encode(mockJsonResponse),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      final response = await service.searchPlaylists('flutter playlist');
+      final section =
+          response
+                  .contents!
+                  .twoColumnSearchResultsRenderer!
+                  .primaryContents!
+                  .sectionListRenderer!
+                  .contents
+                  .single
+              as NetworkYouTubeItemSectionRenderer;
+      final playlist =
+          (section.contents.single as NetworkYouTubePlaylistSearchItem)
+              .renderer;
+      expect(playlist.playlistId, 'PL_PLAYLIST_1');
+      expect(playlist.title, 'Playlist Title');
+      expect(playlist.videoCountText, '25 lessons');
+      expect(playlist.owner?.text.value, 'Playlist Owner');
+      expect(playlist.owner?.browseId, 'UC_OWNER_1');
+      expect(
+        playlist.thumbnail?.thumbnails.single.url,
+        contains('playlist.jpg'),
+      );
+      service.close();
+    });
+
     test('getSearchSuggestions returns query and typed suggestions', () async {
       final client = MockClient(
         (_) async => http.Response(
@@ -194,6 +324,7 @@ void main() {
 
       await service.searchVideos('flutter\r\n\x00 search\x1f');
       await service.searchChannels('flutter\r\n\x00 search\x1f');
+      await service.searchPlaylists('flutter\r\n\x00 search\x1f');
 
       service.close();
     });
@@ -204,6 +335,10 @@ void main() {
       );
       await expectLater(
         httpService.searchVideos('flutter'),
+        throwsA(isA<YpiHttpException>()),
+      );
+      await expectLater(
+        httpService.searchPlaylists('flutter'),
         throwsA(isA<YpiHttpException>()),
       );
       httpService.close();
@@ -234,6 +369,16 @@ void main() {
               ),
         ),
       );
+      await expectLater(
+        innerTubeService.searchPlaylists('flutter'),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (error) => error.code,
+            'code',
+            400,
+          ),
+        ),
+      );
       innerTubeService.close();
     });
 
@@ -256,6 +401,10 @@ void main() {
       );
       await expectLater(
         networkService.searchVideos('flutter'),
+        throwsA(isA<YpiNetworkException>()),
+      );
+      await expectLater(
+        networkService.searchPlaylists('flutter'),
         throwsA(isA<YpiNetworkException>()),
       );
       networkService.close();
