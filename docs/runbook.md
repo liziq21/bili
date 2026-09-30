@@ -10,13 +10,27 @@
    git log --oneline -20 main
    ```
 
-   ruleset 允许 merge / squash / rebase 三种方式。squash 与 rebase 合并的 PR 在历史里是单条独立 commit，回滚它不影响其他 PR；用 merge 合并的 PR 会留下双 parent 的 merge commit，回滚时要 revert 该 merge commit 并指定 `-m 1`。
+   ruleset 允许 merge / squash / rebase 三种方式，三者的回滚方式不同：
+
+   - **squash** — PR 压成单条 commit。`git revert <sha>` 即可。
+   - **rebase** — PR 里的 commit 逐条进入 main。**必须逐条 revert**，只回滚其中一条会留下其余改动。定位方法：`git log --oneline` 找到该 PR 的首个 commit 到末个 commit 的连续区间。
+   - **merge** — 留下双 parent 的 merge commit。`git revert -m 1 <sha>`，缺 `-m 1` 会被 git 拒绝。
 
 2. 在 `main` 上 revert：
 
    ```bash
    git checkout main && git pull
+
+   # squash 合并的 PR
    git revert <sha>
+
+   # rebase 合并的 PR —— 区间内每条都要 revert
+   # 会为区间内每条 commit 各生成一个 revert commit
+   git revert --no-edit <first-sha>^..<last-sha>
+
+   # merge 合并的 PR
+   git revert -m 1 <sha>
+
    git push origin main
    ```
 
@@ -55,9 +69,16 @@ CodeRabbit 只在有新 commit 时出增量评审。head commit 没变时旧的 
    git diff --stat origin/main <pr-head>
    ```
 
-   基线 PNG **只能由 `rerecord-goldens.yml` 产出**，该工作流用 uhibot App token 开 PR。因此 PR 分支上出现 `goldens/ci/*.png` 的新增或修改即违规，无论 commit 作者署名是谁——包括 `google-labs-jules[bot]` 与 `liziq21`。squash 合并会重写作者署名，不能用作者字段判定。
+   基线 PNG **只能由 `rerecord-goldens.yml` 产出**，该工作流用 uhibot App token 开 PR。合规与违规的区分点是**引入 PNG 的那个 commit 是谁推的**：
 
-   区分方法：合规基线由 PR 带入（分支名形如 `ci/rerecord-goldens-*`），违规基线直接出现在 agent 的功能分支上。
+   ```bash
+   git log --oneline --name-only origin/main..<pr-head> -- app/test/golden/goldens/ci/
+   ```
+
+   - 引入 PNG 的 commit 来自 `rerecord-goldens` 生成的 PR 分支（`ci/rerecord-goldens-*`）——合规。
+   - 引入 PNG 的 commit 是 agent 直接推的功能分支——违规。
+
+   **不要只看「功能分支上有没有 PNG」**：重录工作流允许以功能分支为 `target_ref`，生成的基线 PR 也以该分支为目标，合规 PNG 合并后同样出现在功能分支上。按此判断并 revert 会撤掉合法基线，让 golden 测试再次失败。
 
 2. **用 revert commit 撤销，不要 force-push** —— bot 持有分支，任何历史改写都会被它的下一轮 push 覆盖。
 
