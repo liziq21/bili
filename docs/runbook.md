@@ -34,7 +34,9 @@
    git push origin main
    ```
 
-   直接推 main 需要维护者权限。如果 revert 的 revert 又出问题，重复这个循环。
+   revert 是异常路径，不受 ruleset 的 required status checks 约束，`main` 上也不禁直推——liziq21 是仓库 admin。走直推是为了在事故中省掉一轮 PR 与 CI 等待。
+
+   如果 revert 的 revert 又出问题，重复这个循环。
 
    提交信息里写明回滚原因与原 PR 编号，不要只留 revert 的默认信息。
 
@@ -69,16 +71,22 @@ CodeRabbit 只在有新 commit 时出增量评审。head commit 没变时旧的 
    git diff --stat origin/main <pr-head>
    ```
 
-   基线 PNG **只能由 `rerecord-goldens.yml` 产出**，该工作流用 uhibot App token 开 PR。合规与违规的区分点是**引入 PNG 的那个 commit 是谁推的**：
+   基线 PNG **只能由 `rerecord-goldens.yml` 产出**，该工作流用 uhibot App token 开 PR。判定违规需要追溯引入 PNG 的 commit 到它的来源，而**不能只看分支名或 commit 作者**：
+
+1. 列出触碰基线的 commit：
 
    ```bash
    git log --oneline --name-only origin/main..<pr-head> -- app/test/golden/goldens/ci/
    ```
 
-   - 引入 PNG 的 commit 来自 `rerecord-goldens` 生成的 PR 分支（`ci/rerecord-goldens-*`）——合规。
-   - 引入 PNG 的 commit 是 agent 直接推的功能分支——违规。
+2. 对每个 sha 到 GitHub 上确认来源。PR 分支删除或 squash 合并后，本地 git 历史不再保留 PR 分支名，`git log --decorate` 也只显示仍指向该 commit 的 ref，因此这一步必须在 GitHub 上做：
 
-   **不要只看「功能分支上有没有 PNG」**：重录工作流允许以功能分支为 `target_ref`，生成的基线 PR 也以该分支为目标，合规 PNG 合并后同样出现在功能分支上。按此判断并 revert 会撤掉合法基线，让 golden 测试再次失败。
+   - 该 sha 对应 `Re-record screenshot baselines` 工作流的某次 run（Actions 页面查 run 记录，生成的 PR 分支名形如 `ci/rerecord-goldens-*`）——合规。
+   - 该 sha 无对应 workflow run，是 agent 直接推的——违规。
+
+3. **无法确认来源时不要判定违规**，也不要执行 revert。
+
+**不要只看「功能分支上有没有 PNG」**：重录工作流允许以功能分支为 `target_ref`，生成的基线 PR 也以该分支为目标，合规 PNG 合并后同样出现在功能分支上。按此判断并 revert 会撤掉合法基线，让 golden 测试再次失败。squash 合并还会重写作者署名，作者字段同样不可用作依据。
 
 2. **用 revert commit 撤销，不要 force-push** —— bot 持有分支，任何历史改写都会被它的下一轮 push 覆盖。
 
