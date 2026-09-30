@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/motion.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 
@@ -366,31 +367,48 @@ class const _CreatorProfileSection() extends StatelessWidget {
                 HapticFeedback.lightImpact();
                 context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
               },
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSubscribed
-                      ? $styles.colors.outline.withValues(alpha: 0.3)
-                      : $styles.colors.accentFill,
-                  foregroundColor: isSubscribed
-                      ? $styles.colors.onSurface
-                      : $styles.colors.onScrim,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: $styles.insets.xs,
-                    vertical: $styles.insets.xxs,
+              child: AnimatedContainer(
+                duration: Motion.standard,
+                curve: Motion.easingStandard,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isSubscribed
+                        ? $styles.colors.outline.withValues(alpha: 0.3)
+                        : $styles.colors.accentFill,
+                    foregroundColor: isSubscribed
+                        ? $styles.colors.onSurface
+                        : $styles.colors.onScrim,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: $styles.insets.xs,
+                      vertical: $styles.insets.xxs,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular($styles.corners.lg),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular($styles.corners.lg),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.read<VideoBloc>().add(
+                      const ToggleCreatorSubscribe(),
+                    );
+                  },
+                  icon: AnimatedSwitcher(
+                    duration: Motion.standard,
+                    switchInCurve: Motion.easingEmphasized,
+                    switchOutCurve: Motion.easingDecelerate,
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(scale: animation, child: child),
+                    child: Icon(
+                      isSubscribed ? Icons.check : Icons.add,
+                      key: ValueKey(isSubscribed),
+                      size: 16,
+                    ),
                   ),
-                ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
-                },
-                icon: Icon(isSubscribed ? Icons.check : Icons.add, size: 16),
-                label: Text(
-                  isSubscribed ? '已关注' : '关注',
-                  style: $styles.text.btn.copyWith(fontSize: 12),
+                  label: Text(
+                    isSubscribed ? '已关注' : '关注',
+                    style: $styles.text.btn.copyWith(fontSize: 12),
+                  ),
                 ),
               ),
             ),
@@ -611,8 +629,8 @@ class _SynopsisSectionState()
           ),
           const Gap(6),
           AnimatedSize(
-            duration: $styles.times.fast,
-            curve: Curves.easeInOut,
+            duration: Motion.standard,
+            curve: Motion.easingEmphasized,
             alignment: Alignment.topCenter,
             child: Text(
               desc != null && desc.isNotEmpty ? desc : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
@@ -841,7 +859,9 @@ class const _ActionButton({
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              AnimatedContainer(
+                duration: Motion.standard,
+                curve: Motion.easingStandard,
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
@@ -850,10 +870,18 @@ class const _ActionButton({
                       : $styles.colors.outline.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  isActive ? activeIcon : icon,
-                  size: 20,
-                  color: isActive ? color : $styles.colors.onSurfaceVariant,
+                child: AnimatedSwitcher(
+                  duration: Motion.standard,
+                  switchInCurve: Motion.easingEmphasized,
+                  switchOutCurve: Motion.easingDecelerate,
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: Icon(
+                    isActive ? activeIcon : icon,
+                    key: ValueKey(isActive),
+                    size: 20,
+                    color: isActive ? color : $styles.colors.onSurfaceVariant,
+                  ),
                 ),
               ),
               const Gap(4),

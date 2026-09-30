@@ -20,5 +20,18 @@ ThemeData appThemeData(AppColors colors) {
   return ThemeData.from(textTheme: textTheme, colorScheme: scheme).copyWith(
     textSelectionTheme: TextSelectionThemeData(cursorColor: colors.accentFill),
     highlightColor: colors.accentFill,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        // iOS 不在此表：material_ui 的 PageTransitionsTheme 对缺失键回落到
+        // CupertinoPageTransitionsBuilder（page_transitions_theme.dart 的
+        // `builders[platform] ?? switch (platform)`），该路径才带边缘滑动返回手势。
+        // 显式写 Zoom 会去掉手势；显式写 CupertinoPageTransitionsBuilder 则需
+        // import package:cupertino_ui（bili 未直接依赖，违反 AGENTS.md 第 58 行）。
+        TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+      },
+    ),
   );
 }
