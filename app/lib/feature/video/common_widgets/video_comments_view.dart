@@ -9,7 +9,7 @@ import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
-  String _formatCount(int count) {
+  static String _formatCount(int count) {
     if (count >= 10000) {
       return '${(count / 10000).toStringAsFixed(1)}万';
     }
@@ -18,9 +18,23 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<VideoCommentBloc, VideoCommentState>(
-      builder: (context, state) {
-        if (state.isLoading) {
+    // ⚡ Bolt Optimization: Use BlocSelector to isolate list container state
+    // (loading, error, comment count, hasMore) from individual comment item updates.
+    // Toggling likes or sub-reply states on a single comment will not force re-evaluating
+    // or re-instantiating the whole comment list viewport layout.
+    return BlocSelector<
+      VideoCommentBloc,
+      VideoCommentState,
+      ({bool isLoading, Object? error, int commentCount, bool hasMore})
+    >(
+      selector: (state) => (
+        isLoading: state.isLoading,
+        error: state.error,
+        commentCount: state.comments.length,
+        hasMore: state.hasMore,
+      ),
+      builder: (context, status) {
+        if (status.isLoading) {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
@@ -31,7 +45,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           );
         }
 
-        if (state.error != null) {
+        if (status.error != null) {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
@@ -45,7 +59,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           );
         }
 
-        if (state.comments.isEmpty) {
+        if (status.commentCount == 0) {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
@@ -71,13 +85,13 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           },
           child: ListView.separated(
             padding: EdgeInsets.all($styles.insets.sm),
-            itemCount: state.comments.length + (state.hasMore ? 1 : 0),
+            itemCount: status.commentCount + (status.hasMore ? 1 : 0),
             separatorBuilder: (_, _) => Divider(
               height: 20,
               color: $styles.colors.outline.withValues(alpha: 0.15),
             ),
             itemBuilder: (context, index) {
-              if (index >= state.comments.length) {
+              if (index >= status.commentCount) {
                 return Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
@@ -88,8 +102,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
                 );
               }
 
-              final comment = state.comments[index];
-              return _CommentItem(comment: comment, formatCount: _formatCount);
+              return _CommentItem(index: index, formatCount: _formatCount);
             },
           ),
         );
@@ -99,11 +112,26 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
 }
 
 class const _CommentItem({
-  required final VideoComment comment,
+  required final int index,
   required final String Function(int) formatCount,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // ⚡ Bolt Optimization: Selective state listener via context.select.
+    // Listens strictly to the VideoComment item at `index`.
+    // Includes bounds checking to safely return null if the comment list shrinks.
+    // Re-renders ONLY this specific _CommentItem when its state changes (e.g., like toggles),
+    // skipping build passes for all other visible comment items in the list.
+    final comment = context.select<VideoCommentBloc, VideoComment?>(
+      (bloc) => index < bloc.state.comments.length
+          ? bloc.state.comments[index]
+          : null,
+    );
+
+    if (comment == null) {
+      return const SizedBox.shrink();
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
