@@ -108,6 +108,24 @@ Future<void> main() async {
     );
     saveResponse('testing/search_suggest.json', suggest);
 
+    print('5. Fetching browse JSON...');
+    final browseResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'browseId': 'UCwXdFgeE9KYzlDUR7te5Suq',
+          }),
+        )
+        .timeout(requestTimeout);
+    final browse = _captureJson(
+      browseResponse,
+      'browse',
+      _validateBrowseResponse,
+    );
+    saveResponse('testing/browse.json', browse);
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -158,13 +176,9 @@ _CapturedResponse _captureJson(
   }
   validate(decoded);
   final redacted = _redactTrackingFields(decoded);
-  final prefix = response.body.startsWith('window.google.ac.h(')
-      ? 'window.google.ac.h('
-      : '';
-  final suffix = prefix.isEmpty ? '' : ')';
   return _CapturedResponse(
     response,
-    utf8.encode('$prefix${jsonEncode(redacted)}$suffix'),
+    utf8.encode(jsonEncode(redacted)),
   );
 }
 
@@ -282,6 +296,19 @@ bool _itemSectionsContain(
     }
     return items.any((item) => item is Map && containsItem(item.cast()));
   });
+}
+
+void _validateBrowseResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube browse response is not an object');
+  }
+  final header = json['header'];
+  final contents = json['contents'];
+  if (header is! Map && contents is! Map) {
+    throw const FormatException(
+      'InnerTube browse response has neither header nor contents',
+    );
+  }
 }
 
 void _validateSuggestResponse(dynamic json) {

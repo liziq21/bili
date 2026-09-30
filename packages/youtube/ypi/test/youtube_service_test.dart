@@ -283,6 +283,89 @@ void main() {
       service.close();
     });
 
+    test(
+      'browse sends request shape and returns typed browse envelope',
+      () async {
+        final mockJsonResponse = {
+          'header': {
+            'c4TabbedHeaderRenderer': {
+              'channelId': 'UC_BROWSE_1',
+              'title': 'Test Channel',
+              'avatar': {
+                'thumbnails': [
+                  {'url': 'https://img.youtube.com/avatar.jpg'},
+                ],
+              },
+            },
+          },
+          'contents': {
+            'twoColumnBrowseResultsRenderer': {
+              'tabs': [
+                {
+                  'tabRenderer': {
+                    'title': 'Home',
+                    'selected': true,
+                    'content': {
+                      'richGridRenderer': {
+                        'contents': [
+                          {
+                            'richItemRenderer': {
+                              'content': {
+                                'videoRenderer': {
+                                  'videoId': 'browse_vid_1',
+                                  'title': {'simpleText': 'Browse Video 1'},
+                                },
+                              },
+                            },
+                          },
+                          {
+                            'continuationItemRenderer': {
+                              'continuationEndpoint': {
+                                'continuationCommand': {
+                                  'token': 'cont_token_123',
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        };
+
+        final mockClient = MockClient((request) async {
+          expect(request.method, 'POST');
+          expect(request.url.path, '/youtubei/v1/browse');
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['browseId'], 'UC_BROWSE_1');
+          return http.Response(
+            json.encode(mockJsonResponse),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.browse(browseId: 'UC_BROWSE_1');
+
+        expect(response.header, isNotNull);
+        expect(response.header?.channelId, 'UC_BROWSE_1');
+        expect(response.header?.title, 'Test Channel');
+        expect(response.tabs, hasLength(1));
+        expect(response.tabs.first.title, 'Home');
+        expect(response.items, hasLength(1));
+        final item = response.items.single as NetworkYouTubeVideoSearchItem;
+        expect(item.renderer.videoId, 'browse_vid_1');
+        expect(response.continuationToken, 'cont_token_123');
+
+        service.close();
+      },
+    );
+
     test('getSearchSuggestions returns query and typed suggestions', () async {
       final client = MockClient(
         (_) async => http.Response(
@@ -312,6 +395,11 @@ void main() {
           expect(body['query'], 'flutter search');
           return http.Response(json.encode({'contents': {}}), 200);
         }
+        if (request.url.path.contains('browse')) {
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['browseId'], 'UC_TEST');
+          return http.Response(json.encode({'contents': {}}), 200);
+        }
         return http.Response('', 404);
       });
 
@@ -325,6 +413,7 @@ void main() {
       await service.searchVideos('flutter\r\n\x00 search\x1f');
       await service.searchChannels('flutter\r\n\x00 search\x1f');
       await service.searchPlaylists('flutter\r\n\x00 search\x1f');
+      await service.browse(browseId: 'UC\r\n\x00_TEST\x1f');
 
       service.close();
     });
@@ -341,6 +430,10 @@ void main() {
         httpService.searchPlaylists('flutter'),
         throwsA(isA<YpiHttpException>()),
       );
+      await expectLater(
+        httpService.browse(browseId: 'UC123'),
+        throwsA(isA<YpiHttpException>()),
+      );
       httpService.close();
 
       final innerTubeService = YoutubeService(
@@ -354,6 +447,16 @@ void main() {
               },
             }),
             200,
+          ),
+        ),
+      );
+      await expectLater(
+        innerTubeService.browse(browseId: 'UC123'),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (error) => error.code,
+            'code',
+            400,
           ),
         ),
       );
@@ -405,6 +508,10 @@ void main() {
       );
       await expectLater(
         networkService.searchPlaylists('flutter'),
+        throwsA(isA<YpiNetworkException>()),
+      );
+      await expectLater(
+        networkService.browse(browseId: 'UC123'),
         throwsA(isA<YpiNetworkException>()),
       );
       networkService.close();

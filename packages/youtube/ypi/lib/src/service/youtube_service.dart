@@ -7,6 +7,7 @@ import '../api/yt_api.dart';
 import '../api/yt_interceptor.dart';
 import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
+import '../models/network_youtube_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
@@ -123,6 +124,44 @@ final class YoutubeService {
       response,
       NetworkYouTubePlaylistSearchResponse.fromJson,
     );
+  }
+
+  Future<NetworkYouTubeBrowseResponse> browse({
+    String? browseId,
+    String? params,
+    String? continuation,
+  }) async {
+    final body = <String, dynamic>{};
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      if (browseId != null && browseId.isNotEmpty) {
+        body['browseId'] = browseId.replaceAll(_controlChars, '');
+      }
+      if (params != null && params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _sendBrowse(body);
+    return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
+  }
+
+  Future<Response<Map<String, dynamic>>> _sendBrowse(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final response = await _api.browse(body);
+      _throwForStatus(response);
+      return response;
+    } on YpiException {
+      rethrow;
+    } on Object catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        YpiNetworkException('YouTube browse request failed: $error'),
+        stackTrace,
+      );
+    }
   }
 
   Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(

@@ -10,6 +10,7 @@
 | `search_channel.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 频道搜索 | 原始抓取日期未保留 |
 | `search_playlist.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 200 | query=Flutter, hl=zh-CN, contentType=3（`params=QgIQAw==`） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00，播放列表搜索 | 2026-09-30 |
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
+| `browse.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=UCwXdFgeE9KYzlDUR7te5Suq, hl=zh-CN | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00，浏览（频道/首页） | 2026-09-30 |
 
 ## 抓取规则
 

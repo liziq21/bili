@@ -93,6 +93,15 @@ void main() {
     expect(section.contents, isEmpty);
   });
 
+  test('parses the real browse fixture into typed header and tabs DTO', () {
+    final response = NetworkYouTubeBrowseResponse.fromJson(
+      loadFixtureMap('browse.json'),
+    );
+    expect(response.header, isNotNull);
+    expect(response.header?.channelId, 'UCwXdFgeE9KYzlDUR7te5Suq');
+    expect(response.header?.avatar, isNotNull);
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);
