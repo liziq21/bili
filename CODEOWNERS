@@ -1,0 +1,14 @@
+# CODEOWNERS
+
+# 单一维护者仓库：默认归属仓库所有者。
+* @liziq21
+
+# 规范文件改动需要所有者过目——这些文件的改动面覆盖全仓库。
+/AGENTS.md @liziq21
+/CONTRIBUTING.md @liziq21
+/app/docs/design-system.md @liziq21
+/.github/workflows/ @liziq21
+/.coderabbit.yaml @liziq21
+
+# 当前 ruleset 的 require_code_owner_review 为 false，此文件只用于路由评审请求，
+# 不构成合并门禁。是否开启需另行评估：单人仓库开启后，PR 作者本人无法满足该要求。
