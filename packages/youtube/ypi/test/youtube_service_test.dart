@@ -168,6 +168,36 @@ void main() {
       service.close();
     });
 
+    test('sanitizes control characters in search queries', () async {
+      final client = MockClient((request) async {
+        if (request.url.path.contains('search')) {
+          if (request.method == 'GET') {
+            expect(request.url.queryParameters['q'], 'flutter search');
+            return http.Response(
+              'window.google.ac.h(["flutter search", [["flutter search tutorial"]]])',
+              200,
+            );
+          }
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['query'], 'flutter search');
+          return http.Response(json.encode({'contents': {}}), 200);
+        }
+        return http.Response('', 404);
+      });
+
+      final service = YoutubeService(httpClient: client);
+
+      final suggestResponse = await service.getSearchSuggestions(
+        'flutter\r\n\x00 search\x1f',
+      );
+      expect(suggestResponse.query, 'flutter search');
+
+      await service.searchVideos('flutter\r\n\x00 search\x1f');
+      await service.searchChannels('flutter\r\n\x00 search\x1f');
+
+      service.close();
+    });
+
     test('throws typed HTTP and InnerTube exceptions', () async {
       final httpService = YoutubeService(
         httpClient: MockClient((_) async => http.Response('unavailable', 503)),

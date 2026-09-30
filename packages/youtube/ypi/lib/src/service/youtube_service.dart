@@ -39,6 +39,8 @@ final class YoutubeService {
     }
   }
 
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   Future<NetworkYouTubeVideoSearchResponse> searchVideos(
     String query, {
     int? sort,
@@ -47,11 +49,12 @@ final class YoutubeService {
     Set<int> features = const {},
     String? continuation,
   }) async {
+    final sanitizedQuery = query.replaceAll(_controlChars, '');
     final body = <String, dynamic>{};
     if (continuation != null && continuation.isNotEmpty) {
       body['continuation'] = continuation;
     } else {
-      body['query'] = query;
+      body['query'] = sanitizedQuery;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
         uploadDate: uploadDate,
@@ -73,11 +76,12 @@ final class YoutubeService {
     int? sort,
     String? continuation,
   }) async {
+    final sanitizedQuery = query.replaceAll(_controlChars, '');
     final body = <String, dynamic>{};
     if (continuation != null && continuation.isNotEmpty) {
       body['continuation'] = continuation;
     } else {
-      body['query'] = query;
+      body['query'] = sanitizedQuery;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
         sort: sort,
         contentType: 2,
@@ -97,9 +101,10 @@ final class YoutubeService {
   Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(
     String query,
   ) async {
+    final sanitizedQuery = query.replaceAll(_controlChars, '');
     final Response<String> response;
     try {
-      response = await _api.getSearchSuggestions(query);
+      response = await _api.getSearchSuggestions(sanitizedQuery);
     } on YpiException {
       rethrow;
     } on Object catch (error, stackTrace) {
@@ -115,7 +120,7 @@ final class YoutubeService {
       throw const YpiJsonException('Google Suggest response body is empty');
     }
     return NetworkYouTubeSearchSuggestions.fromResponse(
-      query: query,
+      query: sanitizedQuery,
       responseBody: body,
     );
   }
