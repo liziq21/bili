@@ -127,7 +127,7 @@ class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
       return;
     }
 
-    await HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick().catchError((Object _) {}));
     _loadingTimer?.cancel();
     _successTimer?.cancel();
     setState(() {
