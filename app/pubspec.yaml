@@ -1,6 +1,10 @@
 name: app
 description: A starting point for Dart libraries or applications.
-version: 1.0.0
+# Runtime source of truth for the app version. The build name (X.Y.Z) is
+# user-facing and must match the release tag; the build number (+N) is injected
+# by CI (`--build-number=${{ github.run_number }}`) and is not committed per build.
+# See .github/workflows/release.yml for the tag/pubspec consistency check.
+version: 0.1.0+1
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # repository: https://github.com/my_org/my_repo
 

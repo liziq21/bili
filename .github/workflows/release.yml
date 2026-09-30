@@ -1,0 +1,105 @@
+name: Release
+
+# Triggered by pushing a vX.Y.Z tag. The tag is a release marker, not the source of
+# the version: app/pubspec.yaml holds the runtime truth because local `flutter build`
+# reads it too. This workflow's job is to prove the two agree before building.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify_version:
+    name: Verify tag matches pubspec
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - id: check
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          spec=$(grep -E '^version:' app/pubspec.yaml | head -1 | cut -d' ' -f2)
+          # Strip the build number: the tag carries X.Y.Z only.
+          name="${spec%%+*}"
+          if [ "$tag" != "$name" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match pubspec version $name"
+            exit 1
+          fi
+          echo "version=$name" >> "$GITHUB_OUTPUT"
+          echo "pubspec: $spec, tag: $tag"
+
+  build:
+    name: Build signed release APK
+    needs: verify_version
+    runs-on: ubuntu-latest
+    # Signing material is not in the repository. Until the upload keystore and its
+    # secrets exist, this job fails loudly rather than publishing an unsigned or
+    # debug-signed artifact.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: |
+            app/android/*.gradle*
+            app/android/**/gradle-wrapper.properties
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: 3.47.5
+          channel: stable
+          cache: true
+
+      - name: Check signing secrets are configured
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Secret $name is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Release signing secrets are incomplete; refusing to build."
+            exit 1
+          fi
+
+      - name: Materialise keystore
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/keystore"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/keystore/upload.jks"
+          # build.gradle.kts resolves the path as rootProject.file("key.properties"),
+          # and the Gradle root is app/android.
+          cat > app/android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=$RUNNER_TEMP/keystore/upload.jks
+          EOF
+
+      - name: Get Packages
+        run: flutter pub get
+
+      - name: Run build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs --verbose
+
+      - name: Build signed release APK
+        run: cd app && flutter build apk --release --pub
+
+      - name: Upload signed APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: bili-${{ needs.verify_version.outputs.version }}-release.apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
