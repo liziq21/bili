@@ -42,25 +42,38 @@ class const SearchResultScreen({
     );
   }
 
+  // ⚡ Bolt Optimization: Static item builders provide stable function references to
+  // PagedChildBuilderDelegate inside SearchResult<T>, preventing delegate identity mismatches
+  // and avoiding unnecessary grid child rebuilds during parent rebuilds or tab switches.
+  static Widget _buildVideoItem(
+    BuildContext context,
+    VideoModel videoInfoBase,
+    int index,
+  ) => VideoCard(videoInfoBase: videoInfoBase);
+
+  static Widget _buildCreatorProfileItem(
+    BuildContext context,
+    CreatorProfile creatorProfile,
+    int index,
+  ) => CreatorProfileItem(creatorProfile: creatorProfile);
+
   Widget? _videoResultView(BuildContext context) {
     final bloc = context.read<SearchResultBloc<VideoModel>?>();
     if (bloc == null) return null;
-    return SearchResult<VideoModel>(
+    return const SearchResult<VideoModel>(
       maxCrossAxisExtent: 200.0,
       itemAspectRatio: 0.8,
-      itemBuilder: (_, videoInfoBase, _) =>
-          VideoCard(videoInfoBase: videoInfoBase),
+      itemBuilder: _buildVideoItem,
     );
   }
 
   Widget? _creatorProfileResultView(BuildContext context) {
     final bloc = context.read<SearchResultBloc<CreatorProfile>?>();
     if (bloc == null) return null;
-    return SearchResult<CreatorProfile>(
+    return const SearchResult<CreatorProfile>(
       maxCrossAxisExtent: 400.0,
       itemAspectRatio: 3.5,
-      itemBuilder: (_, creatorProfile, _) =>
-          CreatorProfileItem(creatorProfile: creatorProfile),
+      itemBuilder: _buildCreatorProfileItem,
     );
   }
 }
