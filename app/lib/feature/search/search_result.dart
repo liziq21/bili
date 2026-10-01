@@ -34,6 +34,29 @@ class const SearchResult<T>({
                 newPageErrorIndicatorBuilder: (context) {
                   return const Center(child: Text('更多数据加载失败，请稍后重试'));
                 },
+                noItemsFoundIndicatorBuilder: (context) {
+                  final colorScheme = Theme.of(context).colorScheme;
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 48,
+                          color: colorScheme.outline,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '未找到内容',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: maxCrossAxisExtent,

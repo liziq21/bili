@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 class const FilterChipItem({
@@ -12,7 +13,10 @@ class const FilterChipItem({
       label: Text(label),
       selected: isSelected,
       tooltip: label,
-      onSelected: onSelected,
+      onSelected: (selected) {
+        HapticFeedback.selectionClick();
+        onSelected(selected);
+      },
     );
   }
 }
