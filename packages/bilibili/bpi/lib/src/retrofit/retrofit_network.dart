@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:chopper/chopper.dart';
@@ -360,7 +361,10 @@ class BiliNetworkSearch
     String? nextOffset,
   }) {
     if (nextOffset != null && nextOffset.isNotEmpty) {
-      final paginationStr = '{"offset":"${nextOffset.replaceAll('"', '\\"')}"}';
+      // Built through jsonEncode rather than interpolation: the offset comes
+      // from the server and may carry backslashes or control characters, and
+      // escaping quotes alone leaves those producing a malformed parameter.
+      final paginationStr = jsonEncode(<String, String>{'offset': nextOffset});
       return _networkApi.getReplyListMain(
         oid: oid,
         type: type,
