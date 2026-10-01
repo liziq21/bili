@@ -87,6 +87,34 @@ void main() {
 
       expect(playerInfo.subtitle?.subtitles?.single.lanDoc, equals('中文（中国）'));
     });
+
+    test('coerces a non-string lan_doc to null', () {
+      for (final retyped in <Object>[
+        42,
+        true,
+        <String>['中文'],
+        <String, String>{},
+      ]) {
+        final data = playerDataWithSubtitle([
+          <String, dynamic>{
+            'id': 3,
+            'lan': 'zh-CN',
+            'lan_doc': retyped,
+            'subtitle_url': 'https://example.com/c.vtt',
+          },
+        ]);
+
+        final playerInfo = NetworkBiliPlayerInfo.fromJson(data);
+
+        expect(
+          playerInfo.subtitle?.subtitles?.single.lanDoc,
+          isNull,
+          reason:
+              'lan_doc of type ${retyped.runtimeType} must not reach the model',
+        );
+        expect(playerInfo.subtitle?.subtitles?.single.lan, equals('zh-CN'));
+      }
+    });
   });
 
   group('BiliNetworkSearch.getPlayerInfo', () {

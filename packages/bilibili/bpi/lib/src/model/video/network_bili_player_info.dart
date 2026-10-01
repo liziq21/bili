@@ -39,8 +39,9 @@ class NetworkBiliSubtitleItem({
   required final String lan,
   // Non-core field: bpi's parsing guideline requires a missing or retyped
   // field to become null rather than rejecting the whole response, so this is
-  // nullable even though the Bilibili payload normally carries it.
-  final String? lanDoc,
+  // nullable even though the Bilibili payload normally carries it, and a
+  // non-string value is coerced to null instead of throwing.
+  @JsonKey(fromJson: _lanDocFromJson) final String? lanDoc,
   final bool? isMachine,
   required final String subtitleUrl,
   final int? type,
@@ -73,3 +74,7 @@ class NetworkBiliBgmInfo({
   factory NetworkBiliBgmInfo.fromJson(Map<String, dynamic> json) =>
       _$NetworkBiliBgmInfoFromJson(json);
 }
+
+/// Coerces upstream `lan_doc` to [String]: a string is kept as is, every other
+/// type (number, boolean, list, object) becomes null.
+String? _lanDocFromJson(Object? value) => value is String ? value : null;
