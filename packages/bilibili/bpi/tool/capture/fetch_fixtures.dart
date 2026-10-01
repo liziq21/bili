@@ -88,6 +88,19 @@ Future<void> main() async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_LIVE_ROOM_DETAIL_ONLY'] == '1') {
+      final liveRoomDetail = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/xlive/web-room/v1/index/getH5InfoByRoom?room_id=21144080',
+        ),
+        'live room detail',
+      );
+      _requireDataObject(liveRoomDetail.json, 'live room detail');
+      saveResponse('testing/live_room_detail.json', liveRoomDetail);
+      print('Live room detail fixture fetched successfully.');
+      return;
+    }
+
     mixinKey = await WbiUtils.fetchMixinKey(client);
 
     const sampleBvid = 'BV1GJ411x7vy';
@@ -266,6 +279,16 @@ Future<void> main() async {
       _requireDataObject(playerV2.json, 'player v2'),
     );
     saveResponse('testing/player_v2.json', playerV2);
+
+    // 12. Live room detail (H5 Room Info & Anchor Info)
+    final liveRoomDetail = await getJson(
+      Uri.parse(
+        'https://api.live.bilibili.com/xlive/web-room/v1/index/getH5InfoByRoom?room_id=21144080',
+      ),
+      'live room detail',
+    );
+    _requireDataObject(liveRoomDetail.json, 'live room detail');
+    saveResponse('testing/live_room_detail.json', liveRoomDetail);
 
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {

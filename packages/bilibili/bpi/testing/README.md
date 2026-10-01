@@ -17,6 +17,7 @@
 | `player_v2.json` | `/x/player/v2` | GET | `bvid=BV1GJ411x7vy&cid=137646676` | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-25 |
 | `popular.json` | `/x/web-interface/popular` | GET | `pn=1&ps=20` | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
 | `ranking.json` | `/x/web-interface/ranking/v2` | GET | `rid=0&type=all` | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
+| `live_room_detail.json` | `/xlive/web-room/v1/index/getH5InfoByRoom` | GET | `room_id=21144080` | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-30 |
 
 ## 抓取规则
 

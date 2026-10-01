@@ -7,6 +7,7 @@ import '../api.dart';
 import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
+import '../model/live/network_live_room_detail.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
@@ -16,9 +17,10 @@ import '../model/video/network_bili_player_info.dart';
 import '../model/video/network_related_video.dart';
 import '../model/video/network_video_relation.dart';
 import '../model/video/video_detail_data.dart';
+import '../network_feed_data_source.dart';
+import '../network_live_data_source.dart';
 import '../network_search_data_source.dart';
 import '../network_video_data_source.dart';
-import '../network_feed_data_source.dart';
 import '../search_type.dart';
 import 'api_interceptor.dart';
 import 'chopper_wbi_interceptor.dart';
@@ -127,6 +129,11 @@ abstract class BiliNetworkApi extends ChopperService {
     @query required int cid,
   });
 
+  @GET(path: LiveApi.roomDetail)
+  Future<NetworkLiveRoomDetail> getLiveRoomDetail({
+    @Query('room_id') required int roomId,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -135,7 +142,8 @@ class BiliNetworkSearch
     implements
         NetworkSearchDataSource,
         NetworkVideoDataSource,
-        NetworkBiliFeedDataSource {
+        NetworkBiliFeedDataSource,
+        NetworkLiveDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null {
@@ -150,6 +158,7 @@ class BiliNetworkSearch
         NetworkReplyReplyData: NetworkReplyReplyData.fromJson,
         NetworkPlayUrl: NetworkPlayUrl.fromJson,
         NetworkBiliPlayerInfo: NetworkBiliPlayerInfo.fromJson,
+        NetworkLiveRoomDetail: NetworkLiveRoomDetail.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -395,4 +404,8 @@ class BiliNetworkSearch
     required String bvid,
     required int cid,
   }) => _networkApi.getPlayerInfo(bvid: bvid, cid: cid);
+
+  @override
+  Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) =>
+      _networkApi.getLiveRoomDetail(roomId: roomId);
 }

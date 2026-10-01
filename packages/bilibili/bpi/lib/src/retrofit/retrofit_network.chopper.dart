@@ -334,4 +334,21 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkBiliPlayerInfo, NetworkBiliPlayerInfo>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) async {
+    final Uri $url = Uri.parse(
+      'https://api.live.bilibili.com/xlive/web-room/v1/index/getH5InfoByRoom',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'room_id': roomId};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkLiveRoomDetail> $response = await client
+        .send<NetworkLiveRoomDetail, NetworkLiveRoomDetail>($request);
+    return $response.bodyOrThrow;
+  }
 }
