@@ -59,3 +59,9 @@ Prevention: Always use `Uri.encodeQueryComponent` for query parameter values in 
 Vulnerability: `YoutubeService` passed raw search `query` parameters containing non-printable control characters (`\r\n`, `\x00`, `\x1f`) directly into HTTP GET query parameters and POST request body payloads, exposing outgoing YouTube/Google Suggest API requests to CRLF query injection and server request errors.
 Learning: Unsanitized search inputs sourced from user text fields or deep-link params can leak control characters into HTTP query strings and REST API bodies.
 Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from search query parameters in API services before executing outgoing network requests.
+
+## 2026-09-26 - Safely Encode Reply Pagination JSON Parameters via jsonEncode
+
+Vulnerability: `BiliNetworkSearch.getReplyList` constructed JSON parameter `pagination_str` via manual string replacement (`'{"offset":"${nextOffset.replaceAll('"', '\\"')}"}'`), failing to handle trailing backslashes or escaped quotes correctly and exposing query parameters to JSON payload injection or malformed JSON errors.
+Learning: Manual JSON string construction using `.replaceAll('"', '\\"')` does not escape backslashes or control characters properly according to RFC 8259, which can lead to broken JSON structures or parameter injection when sending API request parameters.
+Prevention: Always use standard `jsonEncode({'key': value})` from `dart:convert` for serializing JSON parameters instead of manual string interpolation.
