@@ -208,6 +208,8 @@ class FakeMediaSource({
   @override final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource,
 }) implements MediaSource {
   @override
+  MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
   @override
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>

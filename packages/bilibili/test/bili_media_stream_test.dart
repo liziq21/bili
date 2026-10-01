@@ -8,20 +8,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
 /// 只实现播放地址解析所需方法的桩，其余方法直接抛。
-class MockMediaStreamNetwork implements NetworkVideoDataSource {
-  MockMediaStreamNetwork({
-    required this.videoDetailJson,
-    required this.playUrlJson,
-  });
+class MockMediaStreamNetwork({
+  required final Map<String, dynamic> videoDetailJson,
+  required final Map<String, dynamic> playUrlJson,
 
-  final Map<String, dynamic> videoDetailJson;
-  final Map<String, dynamic> playUrlJson;
+  /// 为 true 时 `getVideoDetail` 抛异常，用于验证异常收敛路径。
+  final bool failDetailRequest = false,
+}) implements NetworkVideoDataSource {
 
   /// 记录最近一次 getPlayUrl 收到的 cid，用于验证接口按分P而非 bvid 取址。
   int? lastCid;
 
   @override
   Future<VideoDetailData> getVideoDetail({required String bvid}) async {
+    if (failDetailRequest) throw Exception('network down');
     return VideoDetailData.fromJson(
       videoDetailJson['data'] as Map<String, dynamic>,
     );
@@ -294,6 +294,21 @@ void main() {
       expect(stream.hasSeparateAudio, isFalse);
     });
 
+    test('真实 fixture：按码率最高挑出视频与音频流', () async {
+      final source = makeSource(playUrlJson);
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+
+      // fixture 实测两路视频（480p / 360p）、三路音频，无 durl。
+      expect(stream.height, 480);
+      expect(stream.videoUrl, contains('http'));
+      expect(stream.audioUrl, isNotNull);
+      expect(stream.hasSeparateAudio, isTrue);
+      expect(stream.duration, const Duration(milliseconds: 105));
+      // 音频取码率最高的一路（30280，321815）。
+      expect(stream.codecs, 'avc1.64001F');
+    });
+
     test('既无 dash 视频流也无 durl 时报不可播放', () async {
       final source = makeSource(<String, dynamic>{
         'code': 0,
@@ -317,7 +332,11 @@ void main() {
 
     test('网络异常收敛为 Result.error 而非抛出', () async {
       final source = BiliMediaStreamRemoteDataSource(
-        network: _ThrowingNetwork(),
+        network: MockMediaStreamNetwork(
+          videoDetailJson: videoDetailJson as Map<String, dynamic>,
+          playUrlJson: playUrlJson,
+          failDetailRequest: true,
+        ),
         browserUserAgent: 'Mozilla/5.0 Test UA',
       );
 
@@ -325,16 +344,4 @@ void main() {
       expect(result.isError, isTrue);
     });
   });
-}
-
-class _ThrowingNetwork extends MockMediaStreamNetwork {
-  _ThrowingNetwork()
-    : super(
-        videoDetailJson: <String, dynamic>{'data': <String, dynamic>{}},
-        playUrlJson: <String, dynamic>{'data': <String, dynamic>{}},
-      );
-
-  @override
-  Future<VideoDetailData> getVideoDetail({required String bvid}) =>
-      throw Exception('network down');
 }

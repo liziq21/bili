@@ -78,6 +78,8 @@ class FakeMediaSource(@override final String id, @override final String name)
   final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource = null;
 
   @override
+  MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
   @override
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
