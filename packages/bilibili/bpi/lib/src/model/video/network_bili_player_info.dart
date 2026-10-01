@@ -37,7 +37,10 @@ class NetworkBiliSubtitleContainer({
 class NetworkBiliSubtitleItem({
   required final int id,
   required final String lan,
-  required final String lanDoc,
+  // Non-core field: bpi's parsing guideline requires a missing or retyped
+  // field to become null rather than rejecting the whole response, so this is
+  // nullable even though the Bilibili payload normally carries it.
+  final String? lanDoc,
   final bool? isMachine,
   required final String subtitleUrl,
   final int? type,
