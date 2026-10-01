@@ -128,6 +128,39 @@ Future<void> main() async {
     );
     saveResponse('testing/browse.json', browse);
 
+    // The continuation page is a separate request carrying the token the first
+    // page hands back. Capturing it here keeps both pages on the same write
+    // path, so the redaction in _captureJson applies to it as well.
+    print('6. Fetching channel browse continuation JSON...');
+    final continuationToken = _continuationTokenFrom(
+      jsonDecode(utf8.decode(browse.bodyBytes)),
+    );
+    if (continuationToken == null) {
+      throw const FormatException(
+        'channel browse carried no continuation token: the second page could '
+        'not be captured, and testing/browse_continuation.json would keep '
+        'whatever it last held',
+      );
+    }
+    final continuationResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+          headers: _headers,
+          body: jsonEncode(<String, dynamic>{
+            'context': _clientContext,
+            'continuation': continuationToken,
+          }),
+        )
+        .timeout(requestTimeout);
+    final continuation = _captureJson(
+      continuationResponse,
+      'channel browse continuation',
+      (dynamic decoded) => _validateBrowseContinuationResponse(
+        Map<String, dynamic>.from(decoded as Map),
+      ),
+    );
+    saveResponse('testing/browse_continuation.json', continuation);
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -185,6 +218,74 @@ void _validateBrowseResponse(dynamic json) {
     throw const FormatException(
       'InnerTube browse yields no video items: the capture would record a '
       'channel the parser reads as empty',
+    );
+  }
+}
+
+/// Reads the continuation token out of a channel browse response.
+String? _continuationTokenFrom(Map<String, dynamic> json) {
+  final tabs = json['contents'] is Map
+      ? (json['contents']
+            as Map<String, dynamic>)['twoColumnBrowseResultsRenderer']
+      : null;
+  final tabList = tabs is Map ? tabs['tabs'] : null;
+  if (tabList is List) {
+    for (final rawTab in tabList) {
+      if (rawTab is! Map) continue;
+      final content = rawTab['tabRenderer'] is Map
+          ? (rawTab as Map<String, dynamic>)['tabRenderer']['content']
+          : null;
+      if (content is! Map) continue;
+      final grid = content['richGridRenderer'];
+      if (grid is! Map) continue;
+      final token = _continuationTokenIn(
+        grid as Map<String, dynamic>,
+        'contents',
+      );
+      if (token != null) return token;
+    }
+  }
+  for (final action in json['onResponseReceivedActions'] ?? const <Object>[]) {
+    if (action is! Map) continue;
+    final append = action['appendContinuationItemsAction'];
+    if (append is! Map) continue;
+    final token = _continuationTokenIn(
+      append as Map<String, dynamic>,
+      'continuationItems',
+    );
+    if (token != null) return token;
+  }
+  return null;
+}
+
+/// Finds the token among a page's items. A rich grid lists them under
+/// `contents`; a continuation page carries them under `continuationItems`.
+/// The command sits below `continuationEndpoint`, one level under the
+/// renderer, which is where the measured responses put it.
+String? _continuationTokenIn(Map<String, dynamic> node, String itemsKey) {
+  final contents = node[itemsKey];
+  if (contents is! List) return null;
+  for (final rawItem in contents) {
+    if (rawItem is! Map) continue;
+    final renderer = rawItem['continuationItemRenderer'];
+    if (renderer is! Map) continue;
+    final endpoint = (renderer as Map<String, dynamic>)['continuationEndpoint'];
+    if (endpoint is! Map) continue;
+    final token =
+        (endpoint as Map<String, dynamic>)['continuationCommand']?['token'];
+    if (token is String) return token;
+  }
+  return null;
+}
+
+/// Rejects a continuation page the parser would read as empty, using the same
+/// DTO the channel fixture is checked against.
+void _validateBrowseContinuationResponse(Map<String, dynamic> json) {
+  final items = NetworkYouTubeBrowseResponse.fromJson(json).items;
+  if (items.isEmpty) {
+    throw const FormatException(
+      'InnerTube browse continuation yields no video items: the capture would '
+      'record a page the parser reads as empty',
     );
   }
 }

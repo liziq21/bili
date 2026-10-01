@@ -410,7 +410,10 @@ void main() {
         final service = YoutubeService(
           httpClient: MockClient((_) async => http.Response('{}', 200)),
         );
-        expect(service.browseChannel(), throwsA(isA<YpiJsonException>()));
+        await expectLater(
+          service.browseChannel(),
+          throwsA(isA<YpiJsonException>()),
+        );
         service.close();
       },
     );
