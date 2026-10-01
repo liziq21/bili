@@ -341,22 +341,21 @@ Map<String, dynamic> _requireDataObject(
   throw FormatException('$label data is not an object');
 }
 
-/// Rejects a code-zero live room response that the DTO cannot parse.
+/// Rejects a code-zero live room response the DTO cannot parse.
 ///
 /// `getH5InfoByRoom` returns code 0 with `room_info` absent when the room is
 /// offline or gone, so a `data` object alone is not proof of a usable capture.
+/// Checking the types of `room_id`, `live_status` and `title` is not enough
+/// either: the check restates field types that the model already declares, so
+/// it drifts whenever the model changes. Parse the DTO instead, so this guard
+/// cannot disagree with what `fromJson` accepts.
 void _requireLiveRoomDetail(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
-  final roomInfo = data['room_info'];
-  if (roomInfo is! Map) {
-    throw FormatException('$label data.room_info is not an object');
-  }
-  if (roomInfo['room_id'] is! int) {
-    throw FormatException('$label data.room_info.room_id is not an integer');
-  }
-  if (roomInfo['live_status'] is! int) {
+  try {
+    NetworkLiveRoomDetail.fromJson(data);
+  } on Object catch (error) {
     throw FormatException(
-      '$label data.room_info.live_status is not an integer',
+      '$label data does not parse as NetworkLiveRoomDetail: $error',
     );
   }
 }
