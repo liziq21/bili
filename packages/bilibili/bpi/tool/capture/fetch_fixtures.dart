@@ -349,10 +349,21 @@ Map<String, dynamic> _requireDataObject(
 /// either: the check restates field types that the model already declares, so
 /// it drifts whenever the model changes. Parse the DTO instead, so this guard
 /// cannot disagree with what `fromJson` accepts.
+///
+/// Parsing alone is still not enough, because `room_info` is nullable: an empty
+/// `data` or an explicit `room_info: null` parses cleanly and would leave a
+/// fixture no test can read anything from. Require the field itself.
 void _requireLiveRoomDetail(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
   try {
-    NetworkLiveRoomDetail.fromJson(data);
+    final detail = NetworkLiveRoomDetail.fromJson(data);
+    if (detail.roomInfo == null) {
+      throw const FormatException('data.room_info is missing');
+    }
+  } on FormatException catch (error) {
+    throw FormatException(
+      '$label data is not a usable live room: ${error.message}',
+    );
   } on Object catch (error) {
     throw FormatException(
       '$label data does not parse as NetworkLiveRoomDetail: $error',
