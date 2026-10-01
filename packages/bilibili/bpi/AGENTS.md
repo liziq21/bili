@@ -24,8 +24,9 @@
 | 视频播放器信息/字幕 | `GET /x/player/v2` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/player_v2.json` | 2026-09-25 |
 | 热门视频 | `GET /x/web-interface/popular` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/popular.json` | 2026-09-25 |
 | 排行榜 | `GET /x/web-interface/ranking/v2` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/ranking.json` | 2026-09-25 |
+| 直播间详情 | `GET /xlive/web-room/v1/index/getH5InfoByRoom` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/live_room_detail.json` | 2026-09-30 |
 
-`ranking/v2` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以 `testing/ranking.json` 为准。
+`getH5InfoByRoom` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以 `testing/live_room_detail.json` 为准。
 
 ## Bili DTO 与异常
 

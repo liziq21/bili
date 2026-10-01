@@ -36,3 +36,14 @@ final class WbiApiPath {
   static const String searchAll = '/x/web-interface/wbi/search/all/v2';
   static const String playUrl = '/x/player/wbi/playurl';
 }
+
+final class LiveApi {
+  static const host = 'api.live.bilibili.com';
+  static const base = 'https://$host';
+
+  static const roomDetail = '$base${LiveApiPath.roomDetail}';
+}
+
+final class LiveApiPath {
+  static const String roomDetail = '/xlive/web-room/v1/index/getH5InfoByRoom';
+}
