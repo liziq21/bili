@@ -25,7 +25,6 @@ class const FilterChipItem({
   required final ValueChanged<bool> onSelected,
 }) extends StatelessWidget {
   @override
-  @override
   Widget build(BuildContext context) {
     return ChoiceChip(
       label: Text(label),
