@@ -15,7 +15,9 @@ NetworkLiveRoomDetail _$NetworkLiveRoomDetailFromJson(
     final val = NetworkLiveRoomDetail(
       roomInfo: $checkedConvert(
         'room_info',
-        (v) => NetworkLiveRoomInfo.fromJson(v as Map<String, dynamic>),
+        (v) => v == null
+            ? null
+            : NetworkLiveRoomInfo.fromJson(v as Map<String, dynamic>),
       ),
       anchorInfo: $checkedConvert(
         'anchor_info',
@@ -39,48 +41,46 @@ NetworkLiveRoomDetail _$NetworkLiveRoomDetailFromJson(
   },
 );
 
-NetworkLiveRoomInfo _$NetworkLiveRoomInfoFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      'NetworkLiveRoomInfo',
-      json,
-      ($checkedConvert) {
-        final val = NetworkLiveRoomInfo(
-          roomId: $checkedConvert('room_id', (v) => (v as num).toInt()),
-          uid: $checkedConvert('uid', (v) => (v as num).toInt()),
-          title: $checkedConvert('title', (v) => v as String),
-          cover: $checkedConvert('cover', (v) => v as String),
-          description: $checkedConvert('description', (v) => v as String?),
-          liveStatus: $checkedConvert('live_status', (v) => (v as num).toInt()),
-          liveStartTime: $checkedConvert(
-            'live_start_time',
-            (v) => (v as num?)?.toInt(),
-          ),
-          areaId: $checkedConvert('area_id', (v) => (v as num?)?.toInt()),
-          areaName: $checkedConvert('area_name', (v) => v as String?),
-          parentAreaId: $checkedConvert(
-            'parent_area_id',
-            (v) => (v as num?)?.toInt(),
-          ),
-          parentAreaName: $checkedConvert(
-            'parent_area_name',
-            (v) => v as String?,
-          ),
-          online: $checkedConvert('online', (v) => (v as num?)?.toInt()),
-          keyframe: $checkedConvert('keyframe', (v) => v as String?),
-          background: $checkedConvert('background', (v) => v as String?),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'roomId': 'room_id',
-        'liveStatus': 'live_status',
-        'liveStartTime': 'live_start_time',
-        'areaId': 'area_id',
-        'areaName': 'area_name',
-        'parentAreaId': 'parent_area_id',
-        'parentAreaName': 'parent_area_name',
-      },
+NetworkLiveRoomInfo _$NetworkLiveRoomInfoFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'NetworkLiveRoomInfo',
+  json,
+  ($checkedConvert) {
+    final val = NetworkLiveRoomInfo(
+      roomId: $checkedConvert('room_id', (v) => (v as num).toInt()),
+      uid: $checkedConvert('uid', (v) => (v as num?)?.toInt()),
+      title: $checkedConvert('title', (v) => v as String?),
+      cover: $checkedConvert('cover', (v) => v as String?),
+      description: $checkedConvert('description', (v) => v as String?),
+      liveStatus: $checkedConvert('live_status', (v) => (v as num?)?.toInt()),
+      liveStartTime: $checkedConvert(
+        'live_start_time',
+        (v) => (v as num?)?.toInt(),
+      ),
+      areaId: $checkedConvert('area_id', (v) => (v as num?)?.toInt()),
+      areaName: $checkedConvert('area_name', (v) => v as String?),
+      parentAreaId: $checkedConvert(
+        'parent_area_id',
+        (v) => (v as num?)?.toInt(),
+      ),
+      parentAreaName: $checkedConvert('parent_area_name', (v) => v as String?),
+      online: $checkedConvert('online', (v) => (v as num?)?.toInt()),
+      keyframe: $checkedConvert('keyframe', (v) => v as String?),
+      background: $checkedConvert('background', (v) => v as String?),
     );
+    return val;
+  },
+  fieldKeyMap: const {
+    'roomId': 'room_id',
+    'liveStatus': 'live_status',
+    'liveStartTime': 'live_start_time',
+    'areaId': 'area_id',
+    'areaName': 'area_name',
+    'parentAreaId': 'parent_area_id',
+    'parentAreaName': 'parent_area_name',
+  },
+);
 
 NetworkLiveAnchorInfo _$NetworkLiveAnchorInfoFromJson(
   Map<String, dynamic> json,
@@ -111,8 +111,8 @@ NetworkLiveAnchorBaseInfo _$NetworkLiveAnchorBaseInfoFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate('NetworkLiveAnchorBaseInfo', json, ($checkedConvert) {
   final val = NetworkLiveAnchorBaseInfo(
-    uname: $checkedConvert('uname', (v) => v as String),
-    face: $checkedConvert('face', (v) => v as String),
+    uname: $checkedConvert('uname', (v) => v as String?),
+    face: $checkedConvert('face', (v) => v as String?),
     officialInfo: $checkedConvert(
       'official_info',
       (v) => v == null

@@ -95,7 +95,7 @@ Future<void> main() async {
         ),
         'live room detail',
       );
-      _requireDataObject(liveRoomDetail.json, 'live room detail');
+      _requireLiveRoomDetail(liveRoomDetail.json, 'live room detail');
       saveResponse('testing/live_room_detail.json', liveRoomDetail);
       print('Live room detail fixture fetched successfully.');
       return;
@@ -287,7 +287,7 @@ Future<void> main() async {
       ),
       'live room detail',
     );
-    _requireDataObject(liveRoomDetail.json, 'live room detail');
+    _requireLiveRoomDetail(liveRoomDetail.json, 'live room detail');
     saveResponse('testing/live_room_detail.json', liveRoomDetail);
 
     print('All Bili fixtures fetched and saved successfully!');
@@ -339,6 +339,36 @@ Map<String, dynamic> _requireDataObject(
     return Map<String, dynamic>.from(data);
   }
   throw FormatException('$label data is not an object');
+}
+
+/// Rejects a code-zero live room response the DTO cannot parse.
+///
+/// `getH5InfoByRoom` returns code 0 with `room_info` absent when the room is
+/// offline or gone, so a `data` object alone is not proof of a usable capture.
+/// Checking the types of `room_id`, `live_status` and `title` is not enough
+/// either: the check restates field types that the model already declares, so
+/// it drifts whenever the model changes. Parse the DTO instead, so this guard
+/// cannot disagree with what `fromJson` accepts.
+///
+/// Parsing alone is still not enough, because `room_info` is nullable: an empty
+/// `data` or an explicit `room_info: null` parses cleanly and would leave a
+/// fixture no test can read anything from. Require the field itself.
+void _requireLiveRoomDetail(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  try {
+    final detail = NetworkLiveRoomDetail.fromJson(data);
+    if (detail.roomInfo == null) {
+      throw const FormatException('data.room_info is missing');
+    }
+  } on FormatException catch (error) {
+    throw FormatException(
+      '$label data is not a usable live room: ${error.message}',
+    );
+  } on Object catch (error) {
+    throw FormatException(
+      '$label data does not parse as NetworkLiveRoomDetail: $error',
+    );
+  }
 }
 
 void _requirePopularItems(Map<String, dynamic> json, String label) {

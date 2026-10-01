@@ -6,7 +6,7 @@ part 'network_live_room_detail.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class NetworkLiveRoomDetail {
   const NetworkLiveRoomDetail({
-    required this.roomInfo,
+    this.roomInfo,
     this.anchorInfo,
     this.watchedShow,
   });
@@ -14,7 +14,7 @@ class NetworkLiveRoomDetail {
   factory NetworkLiveRoomDetail.fromJson(Map<String, dynamic> json) =>
       _$NetworkLiveRoomDetailFromJson(json);
 
-  final NetworkLiveRoomInfo roomInfo;
+  final NetworkLiveRoomInfo? roomInfo;
   final NetworkLiveAnchorInfo? anchorInfo;
   final NetworkLiveWatchedShow? watchedShow;
 }
@@ -24,11 +24,11 @@ class NetworkLiveRoomDetail {
 class NetworkLiveRoomInfo {
   const NetworkLiveRoomInfo({
     required this.roomId,
-    required this.uid,
-    required this.title,
-    required this.cover,
+    this.uid,
+    this.title,
+    this.cover,
     this.description,
-    required this.liveStatus,
+    this.liveStatus,
     this.liveStartTime,
     this.areaId,
     this.areaName,
@@ -42,12 +42,13 @@ class NetworkLiveRoomInfo {
   factory NetworkLiveRoomInfo.fromJson(Map<String, dynamic> json) =>
       _$NetworkLiveRoomInfoFromJson(json);
 
+  // roomId 是调用方请求时传入的标识，缺失意味着响应与请求无关，保留必填。
   final int roomId;
-  final int uid;
-  final String title;
-  final String cover;
+  final int? uid;
+  final String? title;
+  final String? cover;
   final String? description;
-  final int liveStatus;
+  final int? liveStatus;
   final int? liveStartTime;
   final int? areaId;
   final String? areaName;
@@ -73,17 +74,13 @@ class NetworkLiveAnchorInfo {
 /// 主播基础资料
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class NetworkLiveAnchorBaseInfo {
-  const NetworkLiveAnchorBaseInfo({
-    required this.uname,
-    required this.face,
-    this.officialInfo,
-  });
+  const NetworkLiveAnchorBaseInfo({this.uname, this.face, this.officialInfo});
 
   factory NetworkLiveAnchorBaseInfo.fromJson(Map<String, dynamic> json) =>
       _$NetworkLiveAnchorBaseInfoFromJson(json);
 
-  final String uname;
-  final String face;
+  final String? uname;
+  final String? face;
   final NetworkLiveOfficialInfo? officialInfo;
 }
 
