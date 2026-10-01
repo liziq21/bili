@@ -57,6 +57,7 @@ class const _SingleFilterView({
             key: ValueKey(option.value),
             label: option.label,
             isSelected: isSelected,
+            selectionMode: FilterChipSelectionMode.single,
             onSelected: (selected) {
               if (selected) {
                 onChanged(group.copyWith(selection: option));
@@ -85,6 +86,7 @@ class const _MultiFilterView({
             key: ValueKey(option.value),
             label: option.label,
             isSelected: isSelected,
+            selectionMode: FilterChipSelectionMode.multiple,
             onSelected: (selected) {
               final newSet = Set<FilterOption>.from(filter.selections);
               if (selected) {
