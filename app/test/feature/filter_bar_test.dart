@@ -1,4 +1,5 @@
 import 'package:app/feature/search/common_widgets/filter_bar.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -52,6 +53,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(selectedValue, isTrue);
+    },
+  );
+
+  testWidgets(
+    'FilterChipItem taps the selected chip without a confirmation haptic',
+    (WidgetTester tester) async {
+      final haptics = <String>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+            if (call.method == 'HapticFeedback.vibrate') {
+              haptics.add(call.arguments as String);
+            }
+            return null;
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FilterChipItem(
+              label: '最新上传',
+              isSelected: true,
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final chipFinder = find.byType(ChoiceChip);
+      await tester.tap(chipFinder);
+      await tester.pumpAndSettle();
+
+      // Tapping the already-selected single-choice chip reports `false` and
+      // changes nothing, so it must not produce a selection haptic.
+      expect(haptics, isNot(contains('HapticFeedbackType.selectionClick')));
     },
   );
 }

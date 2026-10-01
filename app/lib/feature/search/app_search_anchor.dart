@@ -170,7 +170,11 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
         onTap: () => _handleSearch(item),
         trailing: IconButton(
           icon: const Icon(Icons.north_west),
-          tooltip: '输入到搜索框',
+          // The tooltip names the suggestion it fills, so a screen-reader user
+          // moving between rows can tell them apart. Wording stays inside the
+          // golden font subset (app/test/fonts/subset-characters.txt); adding a
+          // character outside it fails golden_font_contract_test.
+          tooltip: '$item 放入搜索框',
           onPressed: () {
             HapticFeedback.lightImpact();
             _controller.text = item;
