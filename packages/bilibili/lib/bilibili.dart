@@ -3,6 +3,7 @@ library;
 export 'l10n/localization_file/bilibili_localizations.dart';
 export 'src/bili.dart';
 export 'src/category.dart';
+export 'src/data/source/bili_media_stream_remote_data_source.dart';
 export 'src/data/source/bili_remote_data_source.dart';
 export 'src/data/source/bili_popular_video_feed_remote_data_source.dart';
 export 'src/data/source/bili_ranking_video_feed_remote_data_source.dart';
