@@ -93,6 +93,33 @@ void main() {
     expect(section.contents, isEmpty);
   });
 
+  test(
+    'parses the real playlist browse fixture into typed items and header',
+    () {
+      final response = NetworkYouTubePlaylistBrowseResponse.fromJson(
+        loadFixtureMap('browse_playlist.json'),
+        requestedPlaylistId: 'PL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ',
+      );
+
+      expect(response.header?.playlistId, 'PL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ');
+      expect(response.header?.title, isNotNull);
+      expect(response.header?.owner?.text.value, 'Net Ninja');
+      expect(response.header?.owner?.browseId, 'UCW5YeuERMmlnqo4oq8vwUpg');
+
+      expect(response.items, isNotEmpty);
+      final first = response.items.first;
+      expect(first.videoId, isNotEmpty);
+      expect(first.title, isNotNull);
+      expect(first.thumbnail?.thumbnails, isNotEmpty);
+      expect(first.thumbnail?.thumbnails.first.url, isNotNull);
+
+      for (final item in response.items) {
+        expect(item.videoId, isNotEmpty);
+        expect(item.title, isNotNull);
+      }
+    },
+  );
+
   test('parses the real channel browse fixture into lockup items', () {
     final response = NetworkYouTubeBrowseResponse.fromJson(
       loadFixtureMap('browse.json'),

@@ -186,6 +186,44 @@ final class YoutubeService {
     return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
   }
 
+  /// Fetches a playlist page, or the next page of one.
+  ///
+  /// Pass a [continuation] from a previous response instead of [playlistId] or
+  /// [browseId] to page through a playlist's items.
+  Future<NetworkYouTubePlaylistBrowseResponse> browsePlaylist({
+    String? playlistId,
+    String? browseId,
+    String? continuation,
+    String? params,
+  }) async {
+    final body = <String, dynamic>{};
+    final targetId = playlistId ?? browseId;
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      final id = targetId?.replaceAll(_controlChars, '');
+      if (id == null || id.isEmpty) {
+        throw const YpiJsonException(
+          'browsePlaylist requires either playlistId, browseId, or continuation',
+        );
+      }
+      final formattedBrowseId = id.startsWith('VL') ? id : 'VL$id';
+      body['browseId'] = formattedBrowseId;
+      if (params != null && params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _send(_api.browse, body);
+    return _parseResponse(
+      response,
+      (json) => NetworkYouTubePlaylistBrowseResponse.fromJson(
+        json,
+        requestedPlaylistId: targetId,
+      ),
+    );
+  }
+
   /// Runs an InnerTube POST against a path that takes the shared client body.
   Future<Response<Map<String, dynamic>>> _send(
     Future<Response<Map<String, dynamic>>> Function(Map<String, dynamic>) call,

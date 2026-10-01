@@ -12,6 +12,7 @@
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
 | `browse.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`UCuAXFkgsw1L7xaCfnd5JJOw`, params=`EgZ2aWRlb3PyBgQKAjoA`（视频 tab） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
 | `browse_continuation.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | continuation=取自 `browse.json` 的 richGrid 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
+| `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN，播放列表浏览 | 2026-09-30 |
 
 
 ## 频道浏览的 renderer 形态

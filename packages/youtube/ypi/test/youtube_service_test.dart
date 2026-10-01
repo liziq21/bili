@@ -98,6 +98,154 @@ void main() {
       },
     );
 
+    test(
+      'browsePlaylist posts to browse with VL prefix and returns items',
+      () async {
+        final mockClient = MockClient((request) async {
+          expect(request.method, 'POST');
+          expect(request.url.path, '/youtubei/v1/browse');
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['browseId'], 'VLPL_TEST_123');
+          expect(body['continuation'], isNull);
+          expect(body['context'], isA<Map<String, dynamic>>());
+          return http.Response(
+            json.encode({
+              'header': {
+                'playlistHeaderRenderer': {
+                  'playlistId': 'PL_TEST_123',
+                  'title': {'simpleText': 'Test Playlist'},
+                  'numVideosText': {'simpleText': '10 videos'},
+                },
+              },
+              'contents': {
+                'twoColumnBrowseResultsRenderer': {
+                  'tabs': [
+                    {
+                      'tabRenderer': {
+                        'content': {
+                          'sectionListRenderer': {
+                            'contents': [
+                              {
+                                'itemSectionRenderer': {
+                                  'contents': [
+                                    {
+                                      'playlistVideoListRenderer': {
+                                        'contents': [
+                                          {
+                                            'playlistVideoRenderer': {
+                                              'videoId': 'VIDEO_1',
+                                              'title': {
+                                                'runs': [
+                                                  {
+                                                    'text':
+                                                        'Playlist Video One',
+                                                  },
+                                                ],
+                                              },
+                                              'lengthText': {
+                                                'simpleText': '05:00',
+                                              },
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.browsePlaylist(
+          playlistId: 'PL_TEST_123',
+        );
+        expect(response.header?.playlistId, 'PL_TEST_123');
+        expect(response.header?.title, 'Test Playlist');
+        expect(response.header?.videoCountText, '10 videos');
+        expect(response.items.single.videoId, 'VIDEO_1');
+        expect(response.items.single.title, 'Playlist Video One');
+        service.close();
+      },
+    );
+
+    test(
+      'browsePlaylist pages with a continuation instead of a playlistId',
+      () async {
+        final mockClient = MockClient((request) async {
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['continuation'], 'PLAYLIST_TOKEN_1');
+          expect(body['browseId'], isNull);
+          return http.Response(
+            json.encode({
+              'onResponseReceivedActions': [
+                {
+                  'appendContinuationItemsAction': {
+                    'continuationItems': [
+                      {
+                        'playlistVideoRenderer': {
+                          'videoId': 'VIDEO_PAGE_2',
+                          'title': {
+                            'runs': [
+                              {'text': 'Video Page Two'},
+                            ],
+                          },
+                        },
+                      },
+                      {
+                        'continuationItemRenderer': {
+                          'continuationEndpoint': {
+                            'continuationCommand': {
+                              'token': 'PLAYLIST_TOKEN_2',
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.browsePlaylist(
+          continuation: 'PLAYLIST_TOKEN_1',
+        );
+        expect(response.items.single.videoId, 'VIDEO_PAGE_2');
+        expect(response.continuationToken, 'PLAYLIST_TOKEN_2');
+        service.close();
+      },
+    );
+
+    test(
+      'browsePlaylist raises when neither playlistId nor continuation is given',
+      () async {
+        final service = YoutubeService(
+          httpClient: MockClient((_) async => http.Response('{}', 200)),
+        );
+        await expectLater(
+          service.browsePlaylist(),
+          throwsA(isA<YpiJsonException>()),
+        );
+        service.close();
+      },
+    );
+
     test('searchChannels returns a typed channel envelope', () async {
       final mockJsonResponse = {
         'contents': {
