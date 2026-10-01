@@ -105,9 +105,10 @@ class const _LiveRoomCard({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
+    // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
+    // Eliminates redundant Card element node allocations and unifies surface background,
+    // rounded corner clipping, and border stroke painting into a single canvas pass.
+    return Material(
       color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular($styles.corners.md),
@@ -115,6 +116,7 @@ class const _LiveRoomCard({
           color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Column(

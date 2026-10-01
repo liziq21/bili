@@ -88,8 +88,10 @@ class const _VideoContent({required final String videoId})
   }
 
   Widget _buildNarrowTabContainer() {
+    // ⚡ Bolt Optimization: Match DefaultTabController length to the 2 actual tabs
+    // ('简介与相关' and '评论区') to eliminate out-of-bounds tab index state tracking and invalid animation math.
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Column(
         children: [
           Container(
