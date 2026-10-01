@@ -9,6 +9,11 @@ abstract class YoutubeApi extends ChopperService {
     @body Map<String, dynamic> body,
   );
 
+  @POST(path: '/youtubei/v1/browse')
+  Future<Response<Map<String, dynamic>>> browse(
+    @body Map<String, dynamic> body,
+  );
+
   @GET(path: 'https://suggestqueries.google.com/complete/search')
   Future<Response<String>> getSearchSuggestions(
     @Query('q') String query, {
