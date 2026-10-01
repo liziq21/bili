@@ -61,14 +61,14 @@ Autonomous mode turned cause 2 into cause 3's symptom: a CI failure triggers aut
 
 ## Action items
 
-| # | Class | Action | Tracking |
-|---|---|---|---|
-| 1 | Prevention | Give `rerecord-goldens.yml` a feature-branch path so a golden task on a branch has a compliant way to go green. **Done** — `988a880`. | [PR #156](https://github.com/liziq21/bili/pull/156) |
-| 2 | Prevention | Record in `AGENTS.md` the three things a dispatch brief must state for any golden task: CI on the branch will be red before the baseline lands, the compliant way to record it, and which workflow constraints apply. `AGENTS.md` is read by the agent, so a rule there is a rule the agent sees. **Open.** | this directory, tracked as a follow-up |
-| 3 | Prevention | Record the pre-dispatch check: read `AGENTS.md` rules against `.github/workflows/` capabilities and confirm they intersect satisfiably before dispatching any task. **Open.** | as above |
-| 4 | Detection | Add a CI check that fails when a PR touches `app/test/golden/goldens/ci/*.png` and no Actions run of `rerecord-goldens.yml` exists for that commit. Provenance is the correct test — neither "the branch has a PNG" nor "the author is not the agent" identifies a violation on its own. **Open.** | as above |
-| 5 | Mitigation | Keep the revert-not-force-push path. It is already documented and it worked. | [`docs/runbook.md`](../runbook.md) |
-| 6 | Fixes | The revert, then the compliant baseline. | `9434b5eff`, `a76444ae5` |
+| # | Class | Action | Owner | Tracking |
+|---|---|---|---|---|
+| 1 | Prevention | Give `rerecord-goldens.yml` a feature-branch path so a golden task on a branch has a compliant way to go green. **Done** — `988a880`. | liziq21 | [PR #156](https://github.com/liziq21/bili/pull/156) |
+| 2 | Prevention | Record in `AGENTS.md` the three things a dispatch brief must state for any golden task: CI on the branch will be red before the baseline lands, the compliant way to record it, and which workflow constraints apply. `AGENTS.md` is read by the agent, so a rule there is a rule the agent sees. **Open.** | liziq21 | this directory, tracked as a follow-up |
+| 3 | Prevention | Record the pre-dispatch check: read `AGENTS.md` rules against `.github/workflows/` capabilities and confirm they intersect satisfiably before dispatching any task. **Open.** | liziq21 | as above |
+| 4 | Detection | Add a CI check that fails when a PR touches `app/test/golden/goldens/ci/*.png` and no Actions run of `rerecord-goldens.yml` produced that commit. Provenance is the correct test — neither "the branch has a PNG" nor "the author is not the agent" identifies a violation on its own. The association key is the two markers `rerecord-goldens.yml` already writes: the branch name `ci/rerecord-goldens-<slug>-<github.run_id>` (`slug` is the `target_ref` with `/` replaced by `-`, set by the preceding step) and the PR body line `Recorded on: <target_ref>`. A check resolves `github.run_id` from the branch name, finds that run, and confirms it recorded the ref the PNGs landed on. **Open.** | liziq21 | as above |
+| 5 | Mitigation | Keep the revert-not-force-push path. It is already documented and it worked. | liziq21 | [`docs/runbook.md`](../runbook.md) |
+| 6 | Fixes | The revert, then the compliant baseline. | liziq21 | `9434b5eff`, `a76444ae5` |
 
 ## Appendix
 

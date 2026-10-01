@@ -21,8 +21,8 @@ PR number, a workflow run ID, or an Actions log URL. Do not write "around 3pm".
 ### YYYY-MM-DD
 
 - HH:MM — {what happened} `{evidence}`
-- HH:MM — {next thing} `<START OF IMPACT>`
-- HH:MM — {mitigation applied} `<END OF IMPACT>`
+- HH:MM — {next thing} `{evidence}` `<START OF IMPACT>`
+- HH:MM — {mitigation applied} `{evidence}` `<END OF IMPACT>`
 
 ## Impact
 
@@ -54,13 +54,13 @@ what turns a lucky escape into a planned one.}
 
 Every item needs an owner and a link. An item with no issue is a wish.
 
-| # | Class | Action | Tracking |
-|---|---|---|---|
-| 1 | Prevention | {what would have stopped this happening} | {issue or PR} |
-| 2 | Detection | {what would have caught it earlier} | {issue or PR} |
-| 3 | Mitigation | {what would have reduced severity} | {issue or PR} |
-| 4 | Process | {what would have sped up resolution} | {issue or PR} |
-| 5 | Fixes | {the actual change that resolved it} | {PR or commit} |
+| # | Class | Action | Owner | Tracking |
+|---|---|---|---|---|
+| 1 | Prevention | {what would have stopped this happening} | {who or which team} | {issue or PR} |
+| 2 | Detection | {what would have caught it earlier} | {who or which team} | {issue or PR} |
+| 3 | Mitigation | {what would have reduced severity} | {who or which team} | {issue or PR} |
+| 4 | Process | {what would have sped up resolution} | {who or which team} | {issue or PR} |
+| 5 | Fixes | {the actual change that resolved it} | {who or which team} | {PR or commit} |
 
 The four classes are not interchangeable, and an incident usually needs more than one:
 
