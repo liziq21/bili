@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bpi/bpi.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
@@ -19,13 +20,45 @@ void main() {
     final data = json['data'] as Map<String, dynamic>;
     final detail = NetworkLiveRoomDetail.fromJson(data);
 
-    expect(detail.roomInfo.roomId, equals(21144080));
-    expect(detail.roomInfo.uid, equals(392836434));
-    expect(detail.roomInfo.title, contains('广州TTG vs 深圳DYG'));
-    expect(detail.roomInfo.liveStatus, equals(1));
-    expect(detail.roomInfo.areaName, equals('游戏赛事'));
+    expect(detail.roomInfo?.roomId, equals(21144080));
+    expect(detail.roomInfo?.uid, equals(392836434));
+    expect(detail.roomInfo?.title, contains('广州TTG vs 深圳DYG'));
+    expect(detail.roomInfo?.liveStatus, equals(1));
+    expect(detail.roomInfo?.areaName, equals('游戏赛事'));
     expect(detail.anchorInfo, isNotNull);
     expect(detail.anchorInfo?.baseInfo?.uname, equals('哔哩哔哩王者荣耀赛事'));
+  });
+
+  group('missing non-core fields', () {
+    test('room_info absent leaves the model empty instead of throwing', () {
+      final detail = NetworkLiveRoomDetail.fromJson(<String, dynamic>{});
+
+      expect(detail.roomInfo, isNull);
+      expect(detail.anchorInfo, isNull);
+    });
+
+    test('missing title, cover, live_status and anchor names become null', () {
+      final detail = NetworkLiveRoomDetail.fromJson(<String, dynamic>{
+        'room_info': <String, dynamic>{'room_id': 21144080},
+        'anchor_info': <String, dynamic>{'base_info': <String, dynamic>{}},
+      });
+
+      expect(detail.roomInfo?.roomId, equals(21144080));
+      expect(detail.roomInfo?.title, isNull);
+      expect(detail.roomInfo?.cover, isNull);
+      expect(detail.roomInfo?.liveStatus, isNull);
+      expect(detail.anchorInfo?.baseInfo?.uname, isNull);
+      expect(detail.anchorInfo?.baseInfo?.face, isNull);
+    });
+
+    test('a missing room_id still rejects the response', () {
+      expect(
+        () => NetworkLiveRoomDetail.fromJson(<String, dynamic>{
+          'room_info': <String, dynamic>{'title': '预告'},
+        }),
+        throwsA(isA<CheckedFromJsonException>()),
+      );
+    });
   });
 
   group('BiliNetworkSearch.getLiveRoomDetail', () {
@@ -53,8 +86,8 @@ void main() {
         ),
       );
       expect(requests.single.url.queryParameters, {'room_id': '21144080'});
-      expect(response.roomInfo.roomId, equals(21144080));
-      expect(response.roomInfo.uid, equals(392836434));
+      expect(response.roomInfo?.roomId, equals(21144080));
+      expect(response.roomInfo?.uid, equals(392836434));
     });
 
     test('maps non-2xx responses to BpiHttpException', () async {

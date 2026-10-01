@@ -95,7 +95,7 @@ Future<void> main() async {
         ),
         'live room detail',
       );
-      _requireDataObject(liveRoomDetail.json, 'live room detail');
+      _requireLiveRoomDetail(liveRoomDetail.json, 'live room detail');
       saveResponse('testing/live_room_detail.json', liveRoomDetail);
       print('Live room detail fixture fetched successfully.');
       return;
@@ -287,7 +287,7 @@ Future<void> main() async {
       ),
       'live room detail',
     );
-    _requireDataObject(liveRoomDetail.json, 'live room detail');
+    _requireLiveRoomDetail(liveRoomDetail.json, 'live room detail');
     saveResponse('testing/live_room_detail.json', liveRoomDetail);
 
     print('All Bili fixtures fetched and saved successfully!');
@@ -339,6 +339,26 @@ Map<String, dynamic> _requireDataObject(
     return Map<String, dynamic>.from(data);
   }
   throw FormatException('$label data is not an object');
+}
+
+/// Rejects a code-zero live room response that the DTO cannot parse.
+///
+/// `getH5InfoByRoom` returns code 0 with `room_info` absent when the room is
+/// offline or gone, so a `data` object alone is not proof of a usable capture.
+void _requireLiveRoomDetail(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final roomInfo = data['room_info'];
+  if (roomInfo is! Map) {
+    throw FormatException('$label data.room_info is not an object');
+  }
+  if (roomInfo['room_id'] is! int) {
+    throw FormatException('$label data.room_info.room_id is not an integer');
+  }
+  if (roomInfo['live_status'] is! int) {
+    throw FormatException(
+      '$label data.room_info.live_status is not an integer',
+    );
+  }
 }
 
 void _requirePopularItems(Map<String, dynamic> json, String label) {
