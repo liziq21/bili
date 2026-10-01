@@ -144,6 +144,67 @@ void main() {
     expect(response.items.any((item) => item.metadataRows.isNotEmpty), isTrue);
   });
 
+  test(
+    'a lockup without a content ID is dropped, and its neighbours survive',
+    () {
+      Map<String, dynamic> lockup(String? contentId) => <String, dynamic>{
+        'lockupViewModel': <String, dynamic>{
+          'contentId': ?contentId,
+          'metadata': <String, dynamic>{
+            'lockupMetadataViewModel': <String, dynamic>{
+              'title': <String, dynamic>{'content': 'Video $contentId'},
+            },
+          },
+        },
+      };
+
+      final response = NetworkYouTubeBrowseResponse.fromJson(<String, dynamic>{
+        'metadata': <String, dynamic>{
+          'channelMetadataRenderer': <String, dynamic>{'externalId': 'UC_X'},
+        },
+        'contents': <String, dynamic>{
+          'twoColumnBrowseResultsRenderer': <String, dynamic>{
+            'tabs': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'tabRenderer': <String, dynamic>{
+                  'title': '视频',
+                  'content': <String, dynamic>{
+                    'richGridRenderer': <String, dynamic>{
+                      'contents': <Map<String, dynamic>>[
+                        <String, dynamic>{
+                          'richItemRenderer': <String, dynamic>{
+                            'content': lockup('PXC_KEEP_FIRST'),
+                          },
+                        },
+                        <String, dynamic>{
+                          'richItemRenderer': <String, dynamic>{
+                            'content': lockup(null),
+                          },
+                        },
+                        <String, dynamic>{
+                          'richItemRenderer': <String, dynamic>{
+                            'content': lockup('PXC_KEEP_LAST'),
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      // An empty ID would leave the caller unable to open or deduplicate the
+      // entry, so the entry is dropped and collection continues.
+      expect(response.items.map((item) => item.contentId), [
+        'PXC_KEEP_FIRST',
+        'PXC_KEEP_LAST',
+      ]);
+    },
+  );
+
   test('an ERROR alert is raised instead of parsing as an empty channel', () {
     // YouTube answers HTTP 200 with `alerts[].alertRenderer.type == ERROR`
     // when a channel is gone. This is the response the previous

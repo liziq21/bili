@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:ypi/ypi.dart';
 
 import 'package:ypi/src/protobuf/yt_protobuf_encoder.dart';
 
@@ -175,33 +176,18 @@ void _validateBrowseResponse(dynamic json) {
       );
     }
   }
-  final tabs = _map(
-    json['contents'],
-  )?['twoColumnBrowseResultsRenderer']?['tabs'];
-  final items = <Map<String, dynamic>>[];
-  if (tabs is List) {
-    for (final rawTab in tabs) {
-      if (rawTab is! Map) continue;
-      final content = rawTab['tabRenderer']?['content'];
-      if (content is! Map) continue;
-      final richGrid = content['richGridRenderer'];
-      if (richGrid is! Map) continue;
-      for (final rawItem in (richGrid['contents'] as List? ?? const [])) {
-        final item = _map(rawItem);
-        if (item != null) items.add(item);
-      }
-    }
-  }
+  // Count what the parser will actually return, not what the grid holds. A
+  // grid of unknown renderers, or one holding only a continuation entry, is
+  // non-empty on the wire yet yields no items, so counting raw objects would
+  // admit a capture the parser reads as an empty channel.
+  final items = NetworkYouTubeBrowseResponse.fromJson(json).items;
   if (items.isEmpty) {
     throw const FormatException(
-      'InnerTube browse has no richGridRenderer contents: the capture would '
-      'record an empty channel',
+      'InnerTube browse yields no video items: the capture would record a '
+      'channel the parser reads as empty',
     );
   }
 }
-
-Map<String, dynamic>? _map(Object? value) =>
-    value is Map ? value.map((k, v) => MapEntry(k.toString(), v)) : null;
 
 const _headers = <String, String>{
   'Content-Type': 'application/json',

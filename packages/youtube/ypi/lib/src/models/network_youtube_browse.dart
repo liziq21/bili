@@ -116,6 +116,15 @@ final class NetworkYouTubeLockupItem {
       throw const FormatException('lockupViewModel is missing a title');
     }
 
+    // A caller cannot open, deduplicate or request an entry without this ID,
+    // so an entry lacking it is discarded rather than reported with an empty
+    // one. Throwing is what drops it: `_lockupFromJson` catches this and the
+    // surrounding collection keeps going.
+    final contentId = _string(json['contentId']);
+    if (contentId == null) {
+      throw const FormatException('lockupViewModel is missing a contentId');
+    }
+
     final rows = <String>[];
     final metadataRows = _map(
       _map(metadataViewModel?['metadata'])?['contentMetadataViewModel'],
@@ -128,7 +137,7 @@ final class NetworkYouTubeLockupItem {
     }
 
     return NetworkYouTubeLockupItem(
-      contentId: _string(json['contentId']) ?? '',
+      contentId: contentId,
       contentType: _string(json['contentType']) ?? '',
       title: title,
       thumbnail: _lockupThumbnail(json['contentImage']),
