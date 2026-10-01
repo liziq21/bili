@@ -144,6 +144,51 @@ void main() {
     expect(response.items.any((item) => item.metadataRows.isNotEmpty), isTrue);
   });
 
+  test('an unrecognized tab renderer does not discard the other tabs', () {
+    final response = NetworkYouTubeBrowseResponse.fromJson(<String, dynamic>{
+      'metadata': <String, dynamic>{
+        'channelMetadataRenderer': <String, dynamic>{'externalId': 'UC_X'},
+      },
+      'contents': <String, dynamic>{
+        'twoColumnBrowseResultsRenderer': <String, dynamic>{
+          'tabs': <Map<String, dynamic>>[
+            <String, dynamic>{'someFutureTabRenderer': <String, dynamic>{}},
+            <String, dynamic>{
+              'tabRenderer': <String, dynamic>{
+                'title': '视频',
+                'content': <String, dynamic>{
+                  'richGridRenderer': <String, dynamic>{
+                    'contents': <Map<String, dynamic>>[
+                      <String, dynamic>{
+                        'richItemRenderer': <String, dynamic>{
+                          'content': <String, dynamic>{
+                            'lockupViewModel': <String, dynamic>{
+                              'contentId': 'PXC_SURVIVES',
+                              'contentType': 'LOCKUP_CONTENT_TYPE_VIDEO',
+                              'metadata': <String, dynamic>{
+                                'lockupMetadataViewModel': <String, dynamic>{
+                                  'title': <String, dynamic>{'content': 'Kept'},
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // YouTube introduces new tab shapes; one of them must not take the video
+    // entries the remaining tabs already yielded down with it.
+    expect(response.tabs.map((tab) => tab.title), ['视频']);
+    expect(response.items.map((item) => item.contentId), ['PXC_SURVIVES']);
+  });
   test(
     'a lockup without a content ID is dropped, and its neighbours survive',
     () {

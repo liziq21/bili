@@ -194,7 +194,15 @@ final class NetworkYouTubeBrowseResponse {
       final activeCol = twoCol ?? singleCol;
 
       for (final rawTab in _list(activeCol?['tabs']).map(_map).nonNulls) {
-        final tab = NetworkYouTubeTab.fromJson(rawTab);
+        // An unrecognized tab renderer is skipped rather than propagated:
+        // YouTube adds tab shapes without notice, and one of them must not
+        // discard the video entries the other tabs already yielded.
+        final NetworkYouTubeTab tab;
+        try {
+          tab = NetworkYouTubeTab.fromJson(rawTab);
+        } on FormatException {
+          continue;
+        }
         tabs.add(tab);
 
         final tabContent = tab.content;
