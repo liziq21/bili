@@ -15,7 +15,9 @@
 
 `searchPlaylists` 解析 `lockupViewModel`，不解析 `playlistRenderer`。依据是实测：`contentType: 3` 的搜索响应里 **`playlistRenderer` 出现 0 次**，播放列表以 `contentId` 带 `PL` 前缀的 `lockupViewModel` 到达。2026-09-30 跨三个 client（WEB 2.20230818.00.00、WEB 2.20240726.00.00、ANDROID 19.09.37）各测一次，结论一致；2026-10-01 用 WEB 2.20230818.00.00 复测，`playlistRenderer` 仍为 0、`lockupViewModel` 为 2、`estimatedResults` 为 3628246（`search_playlist.json` 记录的是 3628154，同期取值，结果数随时间漂移）。
 
-若改回解析 `playlistRenderer`，`from_json_test.dart` 的 fixture 用例仍会全绿而真实响应解析出空列表——这正是 `0c11d88` 之前的缺陷形态：fixture 是按假定结构手写的，而非抓取所得。判断 fixture 是否为实抓，看 `from_json_test.dart` 中断言的具体 `playlistId`、owner `browseId` 与 `videoCountText` 是否三者自洽，手写数据无法同时对上真实播放列表的这三项。
+fixture 本身是 `0c11d88` 落盘的：该提交经 `tool/capture/fetch_fixtures.dart` 抓取并写入 `testing/search_playlist.json`，上表的请求方法、client、参数与抓取日期即该提交的记录。
+
+若改回解析 `playlistRenderer`，`from_json_test.dart` 的 fixture 用例仍会全绿而真实响应解析出空列表——这正是 `0c11d88` 之前的缺陷形态：fixture 是按假定结构手写的，而非抓取所得。除查提交记录外，还可在不依赖提交历史的情况下复核：`from_json_test.dart` 中断言的具体 `playlistId`、owner `browseId` 与 `videoCountText` 是否三者自洽，手写数据无法同时对上真实播放列表的这三项。
 
 ## 抓取规则
 
