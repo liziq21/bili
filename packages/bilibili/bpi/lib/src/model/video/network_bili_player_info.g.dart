@@ -80,7 +80,7 @@ NetworkBiliSubtitleItem _$NetworkBiliSubtitleItemFromJson(
     final val = NetworkBiliSubtitleItem(
       id: $checkedConvert('id', (v) => (v as num).toInt()),
       lan: $checkedConvert('lan', (v) => v as String),
-      lanDoc: $checkedConvert('lan_doc', (v) => v as String),
+      lanDoc: $checkedConvert('lan_doc', (v) => _lanDocFromJson(v)),
       isMachine: $checkedConvert('is_machine', (v) => v as bool?),
       subtitleUrl: $checkedConvert('subtitle_url', (v) => v as String),
       type: $checkedConvert('type', (v) => (v as num?)?.toInt()),
