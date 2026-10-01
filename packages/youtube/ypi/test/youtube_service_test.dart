@@ -283,6 +283,138 @@ void main() {
       service.close();
     });
 
+    test('browseChannel posts to browse and returns lockup items', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/youtubei/v1/browse');
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['browseId'], 'UC_CHANNEL_1');
+        expect(body['params'], 'EgZ2aWRlb3PyBgQKAjoA');
+        expect(body['continuation'], isNull);
+        expect(body['context'], isA<Map<String, dynamic>>());
+        return http.Response(
+          json.encode({
+            'header': {
+              'pageHeaderRenderer': {'pageTitle': 'Channel One'},
+            },
+            'metadata': {
+              'channelMetadataRenderer': {'externalId': 'UC_CHANNEL_1'},
+            },
+            'contents': {
+              'twoColumnBrowseResultsRenderer': {
+                'tabs': [
+                  {
+                    'tabRenderer': {
+                      'title': '视频',
+                      'selected': true,
+                      'content': {
+                        'richGridRenderer': {
+                          'contents': [
+                            {
+                              'richItemRenderer': {
+                                'content': {
+                                  'lockupViewModel': {
+                                    'contentId': 'PXC_ONE',
+                                    'contentType': 'LOCKUP_CONTENT_TYPE_VIDEO',
+                                    'metadata': {
+                                      'lockupMetadataViewModel': {
+                                        'title': {'content': 'Video One'},
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      final response = await service.browseChannel(
+        browseId: 'UC_CHANNEL_1',
+        params: 'EgZ2aWRlb3PyBgQKAjoA',
+      );
+      expect(response.header?.channelId, 'UC_CHANNEL_1');
+      expect(response.header?.title, 'Channel One');
+      expect(response.items.single.contentId, 'PXC_ONE');
+      expect(response.items.single.title, 'Video One');
+      service.close();
+    });
+
+    test(
+      'browseChannel pages with a continuation instead of a browseId',
+      () async {
+        final mockClient = MockClient((request) async {
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['continuation'], 'TOKEN_1');
+          expect(body['browseId'], isNull);
+          return http.Response(
+            json.encode({
+              'onResponseReceivedActions': [
+                {
+                  'appendContinuationItemsAction': {
+                    'continuationItems': [
+                      {
+                        'richItemRenderer': {
+                          'content': {
+                            'lockupViewModel': {
+                              'contentId': 'PXC_PAGE2',
+                              'contentType': 'LOCKUP_CONTENT_TYPE_VIDEO',
+                              'metadata': {
+                                'lockupMetadataViewModel': {
+                                  'title': {'content': 'Video Two'},
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      {
+                        'continuationItemRenderer': {
+                          'continuationEndpoint': {
+                            'continuationCommand': {'token': 'TOKEN_2'},
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.browseChannel(continuation: 'TOKEN_1');
+        expect(response.items.single.contentId, 'PXC_PAGE2');
+        expect(response.continuationToken, 'TOKEN_2');
+        service.close();
+      },
+    );
+
+    test(
+      'browseChannel raises when neither browseId nor continuation is given',
+      () async {
+        final service = YoutubeService(
+          httpClient: MockClient((_) async => http.Response('{}', 200)),
+        );
+        expect(service.browseChannel(), throwsA(isA<YpiJsonException>()));
+        service.close();
+      },
+    );
+
     test('getSearchSuggestions returns query and typed suggestions', () async {
       final client = MockClient(
         (_) async => http.Response(

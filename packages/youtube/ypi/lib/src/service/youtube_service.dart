@@ -7,6 +7,7 @@ import '../api/yt_api.dart';
 import '../api/yt_interceptor.dart';
 import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
+import '../models/network_youtube_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
@@ -152,21 +153,61 @@ final class YoutubeService {
     );
   }
 
-  Future<Response<Map<String, dynamic>>> _sendSearch(
+  /// Fetches a channel page, or the next page of one.
+  ///
+  /// Pass a [continuation] from a previous response instead of [browseId] to
+  /// page through a channel's videos. The response merges the first page's
+  /// `richGridRenderer` entries with those in
+  /// `appendContinuationItemsAction.continuationItems`, because a continuation
+  /// page returns the same entry shape the grid it came from uses.
+  Future<NetworkYouTubeBrowseResponse> browseChannel({
+    String? browseId,
+    String? continuation,
+    String? params,
+  }) async {
+    final body = <String, dynamic>{};
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      final id = browseId?.replaceAll(_controlChars, '');
+      if (id == null || id.isEmpty) {
+        throw const YpiJsonException(
+          'browseChannel requires either browseId or continuation',
+        );
+      }
+      body['browseId'] = id;
+      if (params != null && params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _send(_api.browse, body);
+    return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
+  }
+
+  /// Runs an InnerTube POST against a path that takes the shared client body.
+  Future<Response<Map<String, dynamic>>> _send(
+    Future<Response<Map<String, dynamic>>> Function(Map<String, dynamic>) call,
     Map<String, dynamic> body,
   ) async {
     try {
-      final response = await _api.search(body);
+      final response = await call(body);
       _throwForStatus(response);
       return response;
     } on YpiException {
       rethrow;
     } on Object catch (error, stackTrace) {
       Error.throwWithStackTrace(
-        YpiNetworkException('YouTube search request failed: $error'),
+        YpiNetworkException('YouTube request failed: $error'),
         stackTrace,
       );
     }
+  }
+
+  Future<Response<Map<String, dynamic>>> _sendSearch(
+    Map<String, dynamic> body,
+  ) async {
+    return _send(_api.search, body);
   }
 
   T _parseResponse<T>(

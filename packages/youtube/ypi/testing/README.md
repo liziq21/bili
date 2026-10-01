@@ -10,6 +10,19 @@
 | `search_channel.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 频道搜索 | 原始抓取日期未保留 |
 | `search_playlist.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 200 | query=Flutter, hl=zh-CN, contentType=3（`params=QgIQAw==`） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00，播放列表搜索 | 2026-09-30 |
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
+| `browse.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`UCuAXFkgsw1L7xaCfnd5JJOw`, params=`EgZ2aWRlb3PyBgQKAjoA`（视频 tab） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
+| `browse_continuation.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | continuation=取自 `browse.json` 的 richGrid 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
+
+
+## 频道浏览的 renderer 形态
+
+`browseChannel` 解析 `richGridRenderer` 下的 `richItemRenderer.content.lockupViewModel`，不解析 `videoRenderer`。依据是 2026-10-01 的实测：`UCuAXFkgsw1L7xaCfnd5JJOw` 视频 tab 的响应里 30 条条目**全部**是 `lockupViewModel`（`contentType: LOCKUP_CONTENT_TYPE_VIDEO`），`videoRenderer` 出现 0 次。`lockupViewModel` 的 `contentId` 是 `PXC_` 前缀而非 `dQw4w9WgXcQ` 形式的视频 ID，是 YouTube 的内部 ID，不保证等于 watch 页 URL 里的 ID。
+
+header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRenderer` 只有 `pageTitle` 和 `content`，**不含 channel ID**；ID 要从 `metadata.channelMetadataRenderer.externalId` 取。已失效频道返回 `c4TabbedHeaderRenderer` 且 `alerts[].alertRenderer.type` 为 `ERROR`。
+
+失效频道的响应值得单独记一笔：它 HTTP 200、没有顶层 `error` 字段，`contents` 也是对象，只看这两处会把它当成一次成功的空响应。判定必须查 `alerts`。前一版 `browse.json` 存的就是这种响应（`browseId=UCwXdFgeE9KYzlDUR7te5Suq`，已失效），所以 `fetch_fixtures.dart` 现在有 `_validateBrowseResponse` 在写盘前拦它。
+
+续页（`onResponseReceivedActions[].appendContinuationItemsAction.continuationItems`）返回与首屏 rich grid 相同的 `richItemRenderer` 条目，不是 section 结构。实测续页同样是 30 条 `richItemRenderer` + 1 个 `continuationItemRenderer`。
 
 ## 播放列表搜索的 renderer 形态
 

@@ -108,6 +108,25 @@ Future<void> main() async {
     );
     saveResponse('testing/search_suggest.json', suggest);
 
+    print('5. Fetching channel browse JSON...');
+    final browseResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+          headers: _headers,
+          body: jsonEncode(<String, dynamic>{
+            'context': _clientContext,
+            'browseId': _browseChannelId,
+            'params': _browseVideosParams,
+          }),
+        )
+        .timeout(requestTimeout);
+    final browse = _captureJson(
+      browseResponse,
+      'channel browse',
+      _validateBrowseResponse,
+    );
+    saveResponse('testing/browse.json', browse);
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -122,6 +141,67 @@ Future<void> main() async {
     client.close();
   }
 }
+
+/// Channel whose `/videos` tab is captured into `testing/browse.json`.
+///
+/// The previous capture used `UCwXdFgeE9KYzlDUR7te5Suq`, which by 2026-10-01
+/// answers HTTP 200 with an `alerts[].alertRenderer` of type `ERROR`. The
+/// validator below rejected it only after the fact, so the failure had already
+/// been written to disk by then.
+const _browseChannelId = 'UCuAXFkgsw1L7xaCfnd5JJOw';
+
+/// `params` that selects the Videos tab, whose content is a `richGridRenderer`.
+const _browseVideosParams = 'EgZ2aWRlb3PyBgQKAjoA';
+
+/// Rejects a browse capture the DTO cannot parse.
+///
+/// Two shapes pass a naive "is `contents` an object" check and must not be
+/// saved: a missing channel answers HTTP 200 with an `ERROR` alert and no
+/// content, and a channel that no longer uses the rich grid has no video
+/// entries at all.
+void _validateBrowseResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube browse response is not an object');
+  }
+  for (final rawAlert in (json['alerts'] as List? ?? const [])) {
+    if (rawAlert is! Map) continue;
+    final alert = rawAlert['alertRenderer'];
+    if (alert is! Map) continue;
+    final type = alert['type'];
+    if (type is String && type.isNotEmpty && type != 'OK') {
+      throw FormatException(
+        'InnerTube browse returned alert type "$type": '
+        '${alert['text']}',
+      );
+    }
+  }
+  final tabs = _map(
+    json['contents'],
+  )?['twoColumnBrowseResultsRenderer']?['tabs'];
+  final items = <Map<String, dynamic>>[];
+  if (tabs is List) {
+    for (final rawTab in tabs) {
+      if (rawTab is! Map) continue;
+      final content = rawTab['tabRenderer']?['content'];
+      if (content is! Map) continue;
+      final richGrid = content['richGridRenderer'];
+      if (richGrid is! Map) continue;
+      for (final rawItem in (richGrid['contents'] as List? ?? const [])) {
+        final item = _map(rawItem);
+        if (item != null) items.add(item);
+      }
+    }
+  }
+  if (items.isEmpty) {
+    throw const FormatException(
+      'InnerTube browse has no richGridRenderer contents: the capture would '
+      'record an empty channel',
+    );
+  }
+}
+
+Map<String, dynamic>? _map(Object? value) =>
+    value is Map ? value.map((k, v) => MapEntry(k.toString(), v)) : null;
 
 const _headers = <String, String>{
   'Content-Type': 'application/json',
