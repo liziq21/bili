@@ -159,7 +159,9 @@ void main() {
       );
       expect(fillButtonFinder, findsOneWidget);
       final buttonWidget = tester.widget<IconButton>(fillButtonFinder);
-      expect(buttonWidget.tooltip, '输入到搜索框');
+      // The tooltip names the suggestion it fills, so that a screen-reader user
+      // moving between rows can tell the buttons apart.
+      expect(buttonWidget.tooltip, 'Flutter 教程 放入搜索框');
 
       // Tap fill button and check controller text
       await tester.tap(fillButtonFinder);
