@@ -11,10 +11,10 @@ import 'media_edl.dart';
 /// 播放层不暴露 media_kit 的类型：具体播放器库的 API 变化不应该波及
 /// 业务代码，UI 只消费本状态。
 class PlaybackState({
-  /// 是否正在播放。缓冲中按「非播放」报，避免进度条继续走。
+  /// 是否正在播放。缓冲中为 false——此时进度并未推进，进度条不该继续走。
   required final bool isPlaying,
 
-  /// 是否处于缓冲。缓冲期间 [isPlaying] 为 false。
+  /// 是否处于缓冲。
   required final bool isBuffering,
 
   /// 当前播放位置。
@@ -68,9 +68,17 @@ PlaybackState _initialPlaybackState() => PlaybackState(
 /// 关心源侧差异。
 ///
 /// 本类持有原生播放器资源，调用方必须在生命周期结束时 [dispose]。
-class MediaPlaybackController() {
+class MediaPlaybackController([
+  // 声明式参数不能引用私有字段（`initializing_formal_for_non_existent_field`），
+  // 故此处用位置参数 + 字段声明，并压掉随之而来的建议。
+  // ignore: use_declaring_parameters
+  PlatformPlayer? platformPlayer,
+]) {
+  /// 测试注入的播放器实现，为 null 时用真实的原生播放器。
+  final PlatformPlayer? _platformPlayer = platformPlayer;
+
   /// 惰性建 Player：原生库须先初始化，故由 [_createPlayer] 承担。
-  late final Player _player = _createPlayer();
+  late final Player _player = _createPlayer(_platformPlayer);
 
   late final VideoController _videoController = VideoController(_player);
 
@@ -80,7 +88,15 @@ class MediaPlaybackController() {
 
   PlaybackState _state = _initialPlaybackState();
 
-  static Player _createPlayer() {
+  /// 播放器的播放与缓冲开关各自的状态。
+  ///
+  /// 两者分开存而非只存派生结果：缓冲结束时播放器的播放开关并未变化，
+  /// 其播放状态流不会再发一次事件，只存派生结果会永久卡在「未播放」。
+  bool _isPlaying = false;
+  bool _isBuffering = false;
+
+  static Player _createPlayer(PlatformPlayer? platformPlayer) {
+    if (platformPlayer != null) return Player(platformPlayer: platformPlayer);
     MediaKit.ensureInitialized();
     return Player();
   }
@@ -103,6 +119,8 @@ class MediaPlaybackController() {
   /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
   Future<void> open(MediaStream stream) async {
     _subscribe();
+    _isPlaying = false;
+    _isBuffering = false;
     _emit(_initialPlaybackState());
     await _player.open(
       Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
@@ -143,11 +161,14 @@ class MediaPlaybackController() {
     if (_subscriptions.isNotEmpty) return;
     _subscriptions.addAll([
       _player.stream.playing.listen((playing) {
-        _emit(_state.copyWith(isPlaying: playing));
+        _isPlaying = playing;
+        _emit(_state.copyWith(isPlaying: _reportedPlaying));
       }),
       _player.stream.buffering.listen((buffering) {
-        // 缓冲期按未播放报：播放器此时并未推进，进度条不该继续走。
-        _emit(_state.copyWith(isBuffering: buffering, isPlaying: false));
+        _isBuffering = buffering;
+        _emit(
+          _state.copyWith(isBuffering: buffering, isPlaying: _reportedPlaying),
+        );
       }),
       _player.stream.position.listen((position) {
         _emit(_state.copyWith(position: position));
@@ -160,6 +181,9 @@ class MediaPlaybackController() {
       }),
     ]);
   }
+
+  /// 对外报的播放状态：播放开关打开且不在缓冲才算在播。
+  bool get _reportedPlaying => _isPlaying && !_isBuffering;
 
   void _emit(PlaybackState next) {
     _state = next;
