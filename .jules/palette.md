@@ -39,3 +39,9 @@
 **Learning:** When adding empty state copy or localized text in Flutter widgets, all Chinese string literals must strictly exist in `test/fonts/subset-characters.txt` to pass `golden_font_contract_test.dart`. Combining empty state icons (`Icons.search_off_rounded`) with supported Chinese text (`未找到内容`) prevents rendering tofu in golden tests while delivering clear visual empty state feedback.
 
 **Action:** Before introducing new Chinese UI text, check `test/fonts/subset-characters.txt` to ensure all characters are present in the test font subset.
+
+## 2026-10-01 - Live Room Feed Card Semantics & Tactile Feedback
+
+**Learning:** Live room feed cards (`_LiveRoomCard`) that wrap `InkWell` directly without `Semantics` or `Tooltip` leave screen readers to announce unformatted child text fragments without button roles, while taps lack physical feedback. Wrapping card content in `Tooltip` and `Semantics(button: true, label: semanticLabel)` with `ExcludeSemantics` on inner layout produces clean screen reader announcements and provides desktop hover hints, while `HapticFeedback.lightImpact()` on tap matches video feed card feedback.
+
+**Action:** Combine `Tooltip`, `Semantics(button: true, label: ...)` with `ExcludeSemantics` on inner layout, and `HapticFeedback.lightImpact()` on tap when building custom feed item cards.
