@@ -7,39 +7,12 @@ part of 'router.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
-  $homeRouteData,
   $liveRouteData,
   $notFoundRouteData,
   $searchRouteData,
   $spaceRouteData,
   $videoRouteData,
 ];
-
-RouteBase get $homeRouteData => GoRouteData.$route(
-  path: '/',
-  hasOverriddenOnExit: false,
-  factory: $HomeRouteData._fromState,
-);
-
-mixin $HomeRouteData on GoRouteData {
-  static HomeRouteData _fromState(GoRouterState state) => const HomeRouteData();
-
-  @override
-  String get location => GoRouteData.$location('/');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
 
 RouteBase get $liveRouteData => GoRouteData.$route(
   path: '/live/:roomId',
