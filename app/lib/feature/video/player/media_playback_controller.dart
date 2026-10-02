@@ -26,15 +26,13 @@ class PlaybackState({
   /// 播放错误信息，无错误时为 null。
   ///
   /// 播放器库以流的形式异步抛出错误，加载完成后才能拿到，因此打开成功
-  /// 不代表一定能播下去。
+  /// 不代表一定能播下去。错误一经产生就保持到下次 [MediaPlaybackController.open]，
+  /// 不被后续位置、时长等状态更新冲掉。
   final String? error,
 });
 
 extension on PlaybackState {
   /// 复制本状态，未显式给出的字段沿用原值。
-  ///
-  /// [error] 传 null 表示「清空错误」，与「保持原值」不同，故不参与
-  /// null 合并，由调用方显式选择。
   PlaybackState copyWith({
     bool? isPlaying,
     bool? isBuffering,
@@ -47,10 +45,21 @@ extension on PlaybackState {
       isBuffering: isBuffering ?? this.isBuffering,
       position: position ?? this.position,
       duration: duration ?? this.duration,
-      error: error,
+      error: error ?? this.error,
     );
   }
+
 }
+
+/// 会话初始状态：未播放、未缓冲、位置与时长归零、无错误。
+///
+/// 换媒体时用：上一条媒体的错误、位置、时长都不该带进新会话。
+PlaybackState _initialPlaybackState() => PlaybackState(
+  isPlaying: false,
+  isBuffering: false,
+  position: Duration.zero,
+  duration: Duration.zero,
+);
 
 /// 一条可播放媒体的会话。
 ///
@@ -69,12 +78,7 @@ class MediaPlaybackController() {
       StreamController<PlaybackState>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
-  PlaybackState _state = PlaybackState(
-    isPlaying: false,
-    isBuffering: false,
-    position: Duration.zero,
-    duration: Duration.zero,
-  );
+  PlaybackState _state = _initialPlaybackState();
 
   static Player _createPlayer() {
     MediaKit.ensureInitialized();
@@ -95,10 +99,11 @@ class MediaPlaybackController() {
   /// 打开一条媒体并开始播放。
   ///
   /// [stream] 携带的地址可能已失效（各服务的地址签名都有时效），此时
-  /// 错误经 [states] 的 [PlaybackState.error] 报出。
+  /// 错误经 [states] 的 [PlaybackState.error] 报出。重复打开会先把状态
+  /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
   Future<void> open(MediaStream stream) async {
     _subscribe();
-    _emit(_state.copyWith());
+    _emit(_initialPlaybackState());
     await _player.open(
       Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
     );
@@ -117,7 +122,9 @@ class MediaPlaybackController() {
   Future<void> seek(Duration position) => _player.seek(position);
 
   /// 设置音量，取值 0 到 1。
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
+  ///
+  /// 播放器库的量程是 0 到 100，此处对外用 0 到 1 并在转发前换算。
+  Future<void> setVolume(double volume) => _player.setVolume(volume * 100);
 
   /// 释放原生播放器资源。
   Future<void> dispose() async {
@@ -139,7 +146,8 @@ class MediaPlaybackController() {
         _emit(_state.copyWith(isPlaying: playing));
       }),
       _player.stream.buffering.listen((buffering) {
-        _emit(_state.copyWith(isBuffering: buffering));
+        // 缓冲期按未播放报：播放器此时并未推进，进度条不该继续走。
+        _emit(_state.copyWith(isBuffering: buffering, isPlaying: false));
       }),
       _player.stream.position.listen((position) {
         _emit(_state.copyWith(position: position));
