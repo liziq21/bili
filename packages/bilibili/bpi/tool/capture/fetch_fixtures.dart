@@ -65,6 +65,12 @@ Future<void> main(List<String> args) async {
     print('Saved: $path (HTTP ${captured.response.statusCode})');
   }
 
+  bool shouldFetch(String path) => !File(path).existsSync() || force;
+
+  void skipNote(String path) {
+    print('Skipped (already exists, pass --force to overwrite): $path');
+  }
+
   try {
     if (Platform.environment['CAPTURE_POPULAR_ONLY'] == '1') {
       final popular = await getJson(
@@ -114,25 +120,33 @@ Future<void> main(List<String> args) async {
     const sampleCid = 137646676;
 
     // 1. Search suggest
+    if (!shouldFetch('testing/search_suggest.json')) {
+      skipNote('testing/search_suggest.json');
+    } else {
     final suggest = await getJson(
       Uri.parse(
         'https://s.search.bilibili.com/main/suggest?term=free&highlight=free&main_ver=v1',
       ),
       'search suggest',
     );
-    NetworkSearchSuggest.fromJson(suggest.json);
-    saveResponse('testing/search_suggest.json', suggest);
+      NetworkSearchSuggest.fromJson(suggest.json);
+      saveResponse('testing/search_suggest.json', suggest);
+    }
 
     // 2. Search all
+    if (!shouldFetch('testing/search_all.json')) {
+      skipNote('testing/search_all.json');
+    } else {
     final searchAll = await getWbiJson(
       'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
       {'keyword': 'Flutter'},
       'search all',
     );
-    NetworkSearchResult.fromJson(
-      _requireDataObject(searchAll.json, 'search all'),
-    );
-    saveResponse('testing/search_all.json', searchAll);
+      NetworkSearchResult.fromJson(
+        _requireDataObject(searchAll.json, 'search all'),
+      );
+      saveResponse('testing/search_all.json', searchAll);
+    }
 
     // 3. Search type endpoints
     final searchTypes = <String, String>{
@@ -159,6 +173,10 @@ Future<void> main(List<String> args) async {
       final fileName = entry.key;
       final type = entry.value;
       final label = 'search $type';
+      if (!shouldFetch('testing/$fileName')) {
+        skipNote('testing/$fileName');
+        continue;
+      }
       final captured = await getWbiJson(
         'https://api.bilibili.com/x/web-interface/wbi/search/type',
         {'keyword': keywords[type] ?? 'Flutter', 'search_type': type},
@@ -169,28 +187,39 @@ Future<void> main(List<String> args) async {
     }
 
     // 4. Video detail
+    if (!shouldFetch('testing/video_detail.json')) {
+      skipNote('testing/video_detail.json');
+    } else {
     final videoDetail = await getJson(
       Uri.parse(
         'https://api.bilibili.com/x/web-interface/view?bvid=$sampleBvid',
       ),
       'video detail',
     );
-    BaseResponse.fromJson(videoDetail.json);
-    saveResponse('testing/video_detail.json', videoDetail);
+      BaseResponse.fromJson(videoDetail.json);
+      saveResponse('testing/video_detail.json', videoDetail);
+    }
 
     // 5. Video relation
+    if (!shouldFetch('testing/video_relation.json')) {
+      skipNote('testing/video_relation.json');
+    } else {
     final videoRelation = await getJson(
       Uri.parse(
         'https://api.bilibili.com/x/web-interface/archive/relation?bvid=$sampleBvid',
       ),
       'video relation',
     );
-    NetworkVideoRelation.fromJson(
-      _requireDataObject(videoRelation.json, 'video relation'),
-    );
-    saveResponse('testing/video_relation.json', videoRelation);
+      NetworkVideoRelation.fromJson(
+        _requireDataObject(videoRelation.json, 'video relation'),
+      );
+      saveResponse('testing/video_relation.json', videoRelation);
+    }
 
     // 6. Related videos
+    if (!shouldFetch('testing/related_videos.json')) {
+      skipNote('testing/related_videos.json');
+    } else {
     final relatedVideos = await getJson(
       Uri.parse(
         'https://api.bilibili.com/x/web-interface/archive/related?bvid=$sampleBvid',
@@ -201,47 +230,68 @@ Future<void> main(List<String> args) async {
     if (relatedItems is! List) {
       throw const FormatException('related videos data is not a list');
     }
-    NetworkRelatedVideosList.fromJson({'items': relatedItems});
-    saveResponse('testing/related_videos.json', relatedVideos);
+      NetworkRelatedVideosList.fromJson({'items': relatedItems});
+      saveResponse('testing/related_videos.json', relatedVideos);
+    }
 
     // 7. Reply list main
+    if (!shouldFetch('testing/reply_list_main.json')) {
+      skipNote('testing/reply_list_main.json');
+    } else {
     final replyMain = await getJson(
       Uri.parse(
         'https://api.bilibili.com/x/v2/reply/main?oid=$sampleAid&type=1',
       ),
       'reply list main',
     );
-    NetworkReplyData.fromJson(
-      _requireDataObject(replyMain.json, 'reply list main'),
-    );
-    saveResponse('testing/reply_list_main.json', replyMain);
+      NetworkReplyData.fromJson(
+        _requireDataObject(replyMain.json, 'reply list main'),
+      );
+      saveResponse('testing/reply_list_main.json', replyMain);
+    }
 
     // 8. Reply list
-    final replyList = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/v2/reply?oid=$sampleAid&type=1&pn=1&sort=1',
-      ),
-      'reply list',
-    );
-    final replyData = NetworkReplyData.fromJson(
-      _requireDataObject(replyList.json, 'reply list'),
-    );
-    final rootRpid = replyData.replies?.firstOrNull?.rpid ?? 2202965009;
-    saveResponse('testing/reply_list.json', replyList);
+    // rootRpid is extracted from the reply list and feeds the reply-reply
+    // request below. When reply_list.json is skipped (already exists), we
+    // fall back to the default rpid so the reply-reply fetch still works.
+    late int rootRpid;
+    if (!shouldFetch('testing/reply_list.json')) {
+      skipNote('testing/reply_list.json');
+      rootRpid = 2202965009;
+    } else {
+      final replyList = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/v2/reply?oid=$sampleAid&type=1&pn=1&sort=1',
+        ),
+        'reply list',
+      );
+      final replyData = NetworkReplyData.fromJson(
+        _requireDataObject(replyList.json, 'reply list'),
+      );
+      rootRpid = replyData.replies?.firstOrNull?.rpid ?? 2202965009;
+      saveResponse('testing/reply_list.json', replyList);
+    }
 
     // 9. Reply reply list
-    final replyReply = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/v2/reply/reply?oid=$sampleAid&type=1&root=$rootRpid&pn=1&sort=1',
-      ),
-      'reply reply list',
-    );
-    NetworkReplyReplyData.fromJson(
-      _requireDataObject(replyReply.json, 'reply reply list'),
-    );
-    saveResponse('testing/reply_reply_list.json', replyReply);
+    if (!shouldFetch('testing/reply_reply_list.json')) {
+      skipNote('testing/reply_reply_list.json');
+    } else {
+      final replyReply = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/v2/reply/reply?oid=$sampleAid&type=1&root=$rootRpid&pn=1&sort=1',
+        ),
+        'reply reply list',
+      );
+      NetworkReplyReplyData.fromJson(
+        _requireDataObject(replyReply.json, 'reply reply list'),
+      );
+      saveResponse('testing/reply_reply_list.json', replyReply);
+    }
 
     // 10. Play URL (WBI)
+    if (!shouldFetch('testing/play_url.json')) {
+      skipNote('testing/play_url.json');
+    } else {
     final playUrl = await getWbiJson(
       'https://api.bilibili.com/x/player/wbi/playurl',
       {
@@ -269,22 +319,27 @@ Future<void> main(List<String> args) async {
           (stream) => stream.playUrls.any((url) => url.isNotEmpty),
         ) ??
         false;
-    if (!hasDash && !hasDurl) {
-      throw const FormatException('play URL has no playable streams');
+      if (!hasDash && !hasDurl) {
+        throw const FormatException('play URL has no playable streams');
+      }
+      saveResponse('testing/play_url.json', playUrl);
     }
-    saveResponse('testing/play_url.json', playUrl);
 
     // 11. Player v2 (Video Player Info & Subtitles)
+    if (!shouldFetch('testing/player_v2.json')) {
+      skipNote('testing/player_v2.json');
+    } else {
     final playerV2 = await getJson(
       Uri.parse(
         'https://api.bilibili.com/x/player/v2?bvid=$sampleBvid&cid=$sampleCid',
       ),
       'player v2',
     );
-    NetworkBiliPlayerInfo.fromJson(
-      _requireDataObject(playerV2.json, 'player v2'),
-    );
-    saveResponse('testing/player_v2.json', playerV2);
+      NetworkBiliPlayerInfo.fromJson(
+        _requireDataObject(playerV2.json, 'player v2'),
+      );
+      saveResponse('testing/player_v2.json', playerV2);
+    }
 
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {

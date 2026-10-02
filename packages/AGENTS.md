@@ -24,9 +24,9 @@ This directory contains shared packages and modules (`packages/*`).
 | `packages/data` | Dart-only | `dart analyze` | `dart test` | Shared models & RemoteDataSource abstraction |
 | `packages/model` | Dart-only | `dart analyze` | `dart test` | Shared models (`UserData`, `Result<T>`) |
 
-**Rule**: For Dart-only packages (`model`, `data`, `bilibili/bpi`, `youtube/ypi`), use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands. The two API sub-packages must not gain a Flutter dependency; needing `flutter test` there is a signal the boundary has been broken.
+**Rule**: For Dart-only packages (`model`, `data`, `bilibili/bpi`, `youtube/ypi`), use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands. The two API sub-packages must not declare a Flutter SDK dependency in their `pubspec.yaml`; a new `flutter:` key under `environment` or a `flutter` entry under `dependencies` is the signal the boundary has been broken. CI using `flutter test` as the workspace runner is a convenience, not a package-level requirement.
 
-**CI scope**: The CI test step runs `app/` plus all four package test suites (`packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`) — see `.github/workflows/ci.yml` for the authoritative list. Every change to a package must pass its own test command locally before being considered done. CI invokes `flutter test` in every package directory; for the two Dart-only API sub-packages that is the slower superset of what `dart test` runs locally over the same test set.
+**CI scope**: The CI test step runs `app/` plus all four package test suites (`packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`) — see `.github/workflows/ci.yml` for the authoritative list. Every change to a package must pass its own test command locally before being considered done. CI invokes `flutter test` in every package directory as the workspace runner; for the two Dart-only API sub-packages this is the slower superset of what `dart test` runs locally over the same test set — the runner choice does not imply a Flutter SDK dependency.
 
 ## Data Layer & Remote Data Source Conventions
 
