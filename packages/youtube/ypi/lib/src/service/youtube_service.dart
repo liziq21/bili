@@ -8,6 +8,7 @@ import '../api/yt_interceptor.dart';
 import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
 import '../models/network_youtube_browse.dart';
+import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
@@ -183,6 +184,46 @@ final class YoutubeService {
 
     final response = await _send(_api.browse, body);
     return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
+  }
+
+  /// Fetches a playlist page, or the next page of one.
+  ///
+  /// Pass a [continuation] from a previous response instead of [playlistId] or
+  /// [browseId] to page through a playlist's items.
+  Future<NetworkYouTubePlaylistBrowseResponse> browsePlaylist({
+    String? playlistId,
+    String? browseId,
+    String? continuation,
+    String? params,
+  }) async {
+    final body = <String, dynamic>{};
+    // Sanitise once here so the id echoed back through `requestedPlaylistId`
+    // is the same one actually sent to the endpoint.
+    final targetId = (playlistId ?? browseId)?.replaceAll(_controlChars, '');
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      if (targetId == null || targetId.isEmpty) {
+        throw const YpiJsonException(
+          'browsePlaylist requires either playlistId, browseId, or continuation',
+        );
+      }
+      final formattedBrowseId =
+          targetId.startsWith('VL') ? targetId : 'VL$targetId';
+      body['browseId'] = formattedBrowseId;
+      if (params != null && params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _send(_api.browse, body);
+    return _parseResponse(
+      response,
+      (json) => NetworkYouTubePlaylistBrowseResponse.fromJson(
+        json,
+        requestedPlaylistId: targetId,
+      ),
+    );
   }
 
   /// Runs an InnerTube POST against a path that takes the shared client body.
