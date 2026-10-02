@@ -12,7 +12,8 @@ final class _CapturedResponse {
   final Map<String, dynamic> json;
 }
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  final force = args.contains('--force');
   final client = http.Client();
 
   final testingDir = Directory('testing');
@@ -55,6 +56,14 @@ Future<void> main() async {
 
   void saveResponse(String path, _CapturedResponse captured) {
     final file = File(path);
+    if (file.existsSync() && !force) {
+      stderr.writeln(
+        'Refusing to overwrite existing fixture: $path '
+        '(rerun with --force to overwrite)',
+      );
+      throw FileSystemException('fixture already exists', path);
+    }
+    _requireNoSensitiveFields(captured.json, path);
     file.writeAsBytesSync(captured.response.bodyBytes);
     print('Saved: $path (HTTP ${captured.response.statusCode})');
   }
@@ -280,16 +289,6 @@ Future<void> main() async {
     );
     saveResponse('testing/player_v2.json', playerV2);
 
-    // 12. Live room detail (H5 Room Info & Anchor Info)
-    final liveRoomDetail = await getJson(
-      Uri.parse(
-        'https://api.live.bilibili.com/xlive/web-room/v1/index/getH5InfoByRoom?room_id=21144080',
-      ),
-      'live room detail',
-    );
-    _requireLiveRoomDetail(liveRoomDetail.json, 'live room detail');
-    saveResponse('testing/live_room_detail.json', liveRoomDetail);
-
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -302,6 +301,36 @@ Future<void> main() async {
     exitCode = 1;
   } finally {
     client.close();
+  }
+}
+
+const _sensitiveKeys = <String>{
+  'access_key',
+  'access_token',
+  'authorization',
+  'bili_jct',
+  'cookie',
+  'csrf',
+  'img_key',
+  'sessdata',
+  'sub_key',
+};
+
+void _requireNoSensitiveFields(Object? value, String path) {
+  if (value is Map) {
+    for (final entry in value.entries) {
+      final key = '${entry.key}'.toLowerCase();
+      if (_sensitiveKeys.contains(key)) {
+        throw FormatException(
+          'refusing to write $path: response contains sensitive key "$key"',
+        );
+      }
+      _requireNoSensitiveFields(entry.value, path);
+    }
+  } else if (value is List) {
+    for (final item in value) {
+      _requireNoSensitiveFields(item, path);
+    }
   }
 }
 

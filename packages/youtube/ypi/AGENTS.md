@@ -35,8 +35,21 @@
 
 ## 抓取与测试
 
-- 真实抓取脚本放在 `tool/capture/`，从 `packages/youtube/ypi/` 目录手动运行；输出到 `testing/<endpoint>.json`。
+- 真实抓取脚本放在 `tool/capture/`，从 `packages/youtube/ypi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
 - fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。
+- 写盘前脚本递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
+- 目标 fixture 已存在时脚本拒绝覆盖，须显式传 `--force`。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）仍须人工确认后才可覆盖。
 - 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
+- fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
 - 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的测试步骤只跑 `app/`，不覆盖本包，因此每次改动本包都要在包目录本地跑 `dart test` 并确认全绿。
+- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的 `Run Flutter Test` check 覆盖本包（`flutter test test/`），本地自查用同一命令。
+
+## 新增 endpoint 流程
+
+1. 确认来源：InnerTube 客户端实际请求为最高事实来源，可复核开源实现只作请求格式参考。无来源不实现。
+2. 在 `tool/capture/fetch_fixtures.dart` 增加抓取分支与 `_validate*` 结构校验函数；业务语义无效的 200 响应（如失效频道）必须在校验层拦下。
+3. 在本文件「已确认的来源与端点」表格加一行：Endpoint、Method/Path、请求/鉴权、来源、Fixture、实测日期。未实测的端点可登记但标注「尚无 / 未实测」，不实现。
+4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐 HTTP status、非敏感请求参数、client context、来源与抓取日期；响应形态的特殊之处写进该文件的说明段。
+5. 实现 service 方法与 DTO，一个 endpoint 对应 `YoutubeService` 上的一个方法；DTO 用 `NetworkYouTube` 前缀加端点或角色语义命名。
+6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
+7. 从包目录跑 `flutter test test/` 与 `flutter analyze`，两者全绿。

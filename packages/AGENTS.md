@@ -53,7 +53,7 @@ This directory contains shared packages and modules (`packages/*`).
 
 ### DTO 与响应解析
 
-- DTO 使用 `Network` 前缀，并按平台和端点命名，例如 `NetworkBiliPopularVideo`、`NetworkYouTubeBrowseVideo`；不得强行合并不同平台或不同端点的模型。
+- DTO 使用 `Network` 前缀加平台或域标识加端点语义命名，例如 `NetworkBiliPopularVideo`、`NetworkYouTubeBrowseResponse`；不得强行合并不同平台或不同端点的模型。平台标识可按域拆分：`bpi` 用 `NetworkBili*`（通用端点）、`NetworkLive*`（直播）、`NetworkReply*`（回复），`ypi` 统一用 `NetworkYouTube*`。
 - DTO 尽量保持平台 JSON 的语义和层级，包括 envelope、`owner`、`stat` 等嵌套对象；不得在 API 包内提前转换为领域模型。
 - DTO 只声明已确认的稳定业务字段，不在 DTO 中保存完整 raw JSON Map；未知字段允许被忽略。
 - 稳定且扁平的字段可以使用 `json_serializable`；复杂 renderer、平台嵌套结构和不稳定字段使用手写 `fromJson` factory。生成代码只能由生成命令更新。
@@ -67,4 +67,6 @@ This directory contains shared packages and modules (`packages/*`).
 - 真实请求只能通过 `tool/capture/` 下的抓取脚本手动执行，输出到 `testing/<endpoint>.json`；脚本不得进入 CI。
 - fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
 - 抓取遇到非 2xx、业务失败或无法识别的响应结构时不得写入或覆盖 fixture，必须返回非零并打印状态。
+- 已存在的 fixture 默认不被覆盖，抓取脚本须显式传 `--force` 才能覆盖。校验通过只代表结构可识别，结构合法但业务无效的响应覆盖前须人工确认。
+- 抓取脚本写盘前必须拦截凭据字段：B站侧拒绝写入含 WBI key、Token、Cookie 的响应，YouTube 侧递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
 - 抓取元数据、来源和非敏感请求参数记录在包级 `testing/README.md`，不得记录秘密。
