@@ -20,6 +20,14 @@ final class MediaEdl() {
   /// 其后——这正是音视频分离需要的语义。
   static const String _newStream = '!new_stream';
 
+  /// 地址中的控制字符。
+  ///
+  /// 长度前缀转义挡不住这些字符：播放器库把地址按行写进播放列表，切分
+  /// 发生在 mpv 读到 EDL 之前，故换行会先把地址劈成两行。实测含原始换行
+  /// 的地址转义后仍带换行（`%N%` 只约束 mpv 怎么读，不约束列表怎么切）。
+  /// 控制字符本就不该出现在地址里，直接剔除。
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   /// 构造可交给播放器的地址。
   ///
   /// 三种输入形态对应三种输出：
@@ -52,24 +60,25 @@ final class MediaEdl() {
     return parts.join(_separator);
   }
 
-  /// 按 EDL 的 `%字节数%内容` 语法转义单个参数值。
+  /// 剔除控制字符后，按 EDL 的 `%字节数%内容` 语法转义单个参数值。
   ///
-  /// 参数值里不能裸含 `,;\n!`（语法把它们当结构符号，见 `edl-mpv.rst`
-  /// 的 param 规则）。本服务的 CDN 地址普遍带 `uparams=e,oi,platform,...`
-  /// 这类查询串，含逗号是常态而非特例，不转义会直接 `EDL parsing failed`。
+  /// 参数值里不能裸含 `,;!%`（语法把它们当结构符号，见 `edl-mpv.rst` 的
+  /// param 规则）。本服务的 CDN 地址普遍带 `uparams=e,oi,platform,...` 这类
+  /// 查询串，含逗号是常态而非特例，不转义会直接 `EDL parsing failed`。
   ///
-  /// 按字节数而非字符数计算：语法定义的是字节。
+  /// 按字节数而非字符数计算：语法定义的是字节。剔除控制字符在前，转义在
+  /// 后——长度前缀必须按剔除后的内容算。
   static String _escapeParam(String value) {
-    if (!_needsEscaping(value)) return value;
-    final bytes = _utf8Length(value);
-    return '%$bytes%$value';
+    final clean = value.replaceAll(_controlChars, '');
+    if (!_needsEscaping(clean)) return clean;
+    final bytes = _utf8Length(clean);
+    return '%$bytes%$clean';
   }
 
   static bool _needsEscaping(String value) {
     for (final rune in value.runes) {
       if (rune == 0x2C || // ,
           rune == 0x3B || // ;
-          rune == 0x0A || // \n
           rune == 0x21 || // !
           rune == 0x25) {
         // %

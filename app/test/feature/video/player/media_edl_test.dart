@@ -113,6 +113,43 @@ void main() {
       }
     });
 
+    test('an address with a raw line break is stripped of control characters', () {
+      // 长度前缀转义挡不住这个：切分发生在 mpv 读到 EDL 之前。
+      final uri = MediaEdl.uriOf(
+        MediaStream(videoUrl: 'https://cdn.example.com/v\n.m4s'),
+      );
+
+      expect(uri, isNot(contains('\n')));
+      expect(uri, 'edl://https://cdn.example.com/v.m4s');
+    });
+
+    test('control characters in an address never reach the playlist line', () {
+      // 播放列表按行解析，任何控制字符都可能改变行的边界或内容。
+      for (final url in [
+        'https://cdn.example.com/a\rb.m4s',
+        'https://cdn.example.com/a\tb.m4s',
+        'https://cdn.example.com/a\u0000b.m4s',
+        'https://cdn.example.com/a\u007fb.m4s',
+      ]) {
+        expect(
+          MediaEdl.uriOf(MediaStream(videoUrl: url)),
+          isNot(matches(RegExp(r'[\x00-\x1F\x7F]'))),
+          reason: '$url should have been stripped',
+        );
+      }
+    });
+
+    test('the length prefix counts the stripped address, not the raw one', () {
+      // 先剔除再转义：长度前缀必须按剔除后的内容算，否则 mpv 会截断。
+      const url = 'https://cdn.example.com/中文,\na.m4s';
+      final uri = MediaEdl.uriOf(MediaStream(videoUrl: url));
+
+      final escaped = uri.substring('edl://'.length);
+      final declared = int.parse(escaped.split('%').elementAt(1));
+      expect(escaped, '%$declared%https://cdn.example.com/中文,a.m4s');
+      expect(declared, 'https://cdn.example.com/中文,a.m4s'.length + 4);
+    });
+
     test('the EDL header line is omitted', () {
       // 首行 # mpv EDL v0 必须独占一行，而换行无法穿过播放列表，
       // 故整体省略——该行在规范中是可选注释。
