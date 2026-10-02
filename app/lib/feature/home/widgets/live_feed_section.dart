@@ -124,6 +124,7 @@ class const _LiveRoomCard({
       ),
       child: Tooltip(
         message: liveRoom.title,
+        excludeFromSemantics: true,
         child: Semantics(
           button: true,
           label: semanticLabel,
