@@ -58,17 +58,14 @@ void main() {
     );
 
     test(
-      'strips HTML tags and control characters from returned suggest terms',
+      'keeps literal angle brackets in suggest terms intact',
       () async {
         mockNetwork.suggestResponse = const NetworkSearchSuggest(
           tag: [
-            NetworkSearchSuggestItem(
-              term: '<em class="keyword">flutter</em>\r\n',
-              name: 'flutter',
-            ),
+            NetworkSearchSuggestItem(term: 'a < b > c', name: 'a &lt; b'),
             NetworkSearchSuggestItem(
               term: '<b>dart</b>\x00',
-              name: 'dart',
+              name: '<b>dart</b>',
             ),
           ],
         );
@@ -76,7 +73,19 @@ void main() {
         final result = await dataSource.getSuggests('flutter');
         expect(result, isA<Ok<List<String>>>());
         if (result case Ok(:final value)) {
-          expect(value, equals(['flutter', 'dart']));
+          expect(value, equals(['a < b > c', '<b>dart</b>']));
+        }
+      },
+    );
+
+    test(
+      'returns empty list immediately when query only contains spaces',
+      () async {
+        final result = await dataSource.getSuggests('   ');
+        expect(result, isA<Ok<List<String>>>());
+        expect(mockNetwork.lastCapturedTerm, isNull);
+        if (result case Ok(:final value)) {
+          expect(value, isEmpty);
         }
       },
     );

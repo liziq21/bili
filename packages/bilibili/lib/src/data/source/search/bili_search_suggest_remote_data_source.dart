@@ -10,11 +10,10 @@ final class const BiliSearchSuggestRemoteDataSource({
   required final NetworkSearchDataSource network,
 }) extends SearchSuggestRemoteDataSource with BiliRemoteDataSource {
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
-  static final RegExp _htmlTags = RegExp(r'<[^>]*>');
 
   @override
   Future<Result<List<String>>> getSuggests(String query) {
-    final sanitizedQuery = query.replaceAll(_controlChars, '');
+    final sanitizedQuery = query.replaceAll(_controlChars, '').trim();
     if (sanitizedQuery.isEmpty) {
       return Future.value(const Result.ok([]));
     }
@@ -23,9 +22,11 @@ final class const BiliSearchSuggestRemoteDataSource({
         .then(
           (value) => value.tag
               .map(
-                (e) => e.term
-                    .replaceAll(_htmlTags, '')
-                    .replaceAll(_controlChars, ''),
+                // `term` is plain text: in the captured `search_suggest.json`
+                // response all 10 entries carry HTML highlight markup in `name`
+                // and none in `term`. Stripping tags from `term` would instead
+                // corrupt literal queries such as `a < b > c`.
+                (e) => e.term.replaceAll(_controlChars, ''),
               )
               .where((term) => term.isNotEmpty)
               .toList(),
