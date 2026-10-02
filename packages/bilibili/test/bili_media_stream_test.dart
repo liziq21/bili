@@ -103,7 +103,7 @@ void main() {
   /// 造一份 play_url 响应。键名与 bpi 的解析层对齐，避免手写键名漂移。
   Map<String, dynamic> buildPlayUrl({
     List<Map<String, dynamic>> video = const [],
-    List<Map<String, dynamic>> audio = const [],
+    List<Map<String, dynamic>>? audio,
     List<Map<String, dynamic>> durl = const [],
     int duration = 105,
   }) => <String, dynamic>{
@@ -112,7 +112,16 @@ void main() {
       'dash': <String, dynamic>{
         'duration': duration,
         'video': video,
-        'audio': audio,
+        // 缺省给一条可用音轨：多数用例只关心选流，显式传空列表才是
+        // 「无音轨」这个待测场景。
+        'audio': audio ??
+            [
+              {
+                'id': 30280,
+                'baseUrl': 'https://cdn.example/audio-default.m4s',
+                'bandwidth': 192000,
+              },
+            ],
       },
       'durl': durl,
     },
@@ -159,7 +168,7 @@ void main() {
       expect(stream.height, 720);
       expect(stream.bitrate, 1200000);
       expect(stream.codecs, 'avc1.640028');
-      expect(stream.duration, const Duration(milliseconds: 105));
+      expect(stream.duration, const Duration(seconds: 105));
     });
 
     test('请求头带浏览器标识与 Referer', () async {
@@ -255,14 +264,14 @@ void main() {
       expect(stream.videoUrl, 'https://cdn.example/v-high.m4s');
     });
 
-    test('durl 形态：无分离音轨，地址直接进 videoUrl', () async {
+    test('durl 单段：无分离音轨，地址可直放', () async {
       final source = makeSource(<String, dynamic>{
         'code': 0,
         'data': <String, dynamic>{
           'durl': [
             {
               'order': 1,
-              'length': 105,
+              'length': 105000,
               'size': 123456,
               'url': 'https://cdn.example/muxed.mp4',
               'backupUrl': ['https://backup.example/muxed.mp4'],
@@ -275,7 +284,81 @@ void main() {
       expect(stream.videoUrl, 'https://cdn.example/muxed.mp4');
       expect(stream.audioUrl, isNull);
       expect(stream.hasSeparateAudio, isFalse);
-      expect(stream.duration, const Duration(seconds: 105));
+      // 备选地址是同一段的镜像，不算新片段。
+      expect(stream.segments, hasLength(1));
+      expect(stream.segments.first.url, 'https://cdn.example/muxed.mp4');
+      expect(stream.segments.first.duration, const Duration(milliseconds: 105000));
+    });
+
+    test('durl 多段：保留全部片段并按 order 排序', () async {
+      final source = makeSource(<String, dynamic>{
+        'code': 0,
+        'data': <String, dynamic>{
+          'durl': [
+            {'order': 2, 'length': 40000, 'url': 'https://cdn.example/p2.mp4'},
+            {'order': 1, 'length': 60000, 'url': 'https://cdn.example/p1.mp4'},
+            {'order': 3, 'length': 30000, 'url': 'https://cdn.example/p3.mp4'},
+          ],
+        },
+      });
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+      expect(stream.isSegmented, isTrue);
+      expect(
+        stream.segments.map((segment) => segment.url).toList(),
+        ['https://cdn.example/p1.mp4', 'https://cdn.example/p2.mp4', 'https://cdn.example/p3.mp4'],
+        reason: '响应乱序返回，必须按 order 升序拼，否则播放顺序错乱',
+      );
+      expect(stream.videoUrl, 'https://cdn.example/p1.mp4');
+    });
+
+    test('DASH 有视频但无可用音轨时报错，不返回无声流', () async {
+      final source = makeSource(buildPlayUrl(
+        video: [
+          {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
+        ],
+        audio: [
+          {'id': 30280, 'bandwidth': 192000},
+        ],
+      ));
+
+      final result = await source.getMediaStream('BV1GJ411x7vy');
+      expect(result.isError, isTrue);
+      expect(
+        '$result',
+        contains('音轨'),
+        reason: 'audioUrl 为空会被播放层当作自带声音，必然无声',
+      );
+    });
+
+    test('最高档视频缺地址时降级到可用档', () async {
+      final source = makeSource(buildPlayUrl(
+        video: [
+          {'id': 120, 'baseUrl': '', 'height': 2160, 'bandwidth': 9000000},
+          {'id': 80, 'baseUrl': 'https://cdn.example/v-1080.m4s', 'height': 1080, 'bandwidth': 2000000},
+        ],
+        audio: [
+          {'id': 30280, 'baseUrl': 'https://cdn.example/a.m4s', 'bandwidth': 192000},
+        ],
+      ));
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+      expect(stream.videoUrl, 'https://cdn.example/v-1080.m4s');
+    });
+
+    test('最高码率音轨缺地址时降级到可用音轨', () async {
+      final source = makeSource(buildPlayUrl(
+        video: [
+          {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
+        ],
+        audio: [
+          {'id': 30280, 'baseUrl': '', 'bandwidth': 999000},
+          {'id': 30216, 'baseUrl': 'https://cdn.example/a-low.m4s', 'bandwidth': 67000},
+        ],
+      ));
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+      expect(stream.audioUrl, 'https://cdn.example/a-low.m4s');
     });
 
     test('dash 为空时走 durl 分支', () async {
@@ -304,7 +387,7 @@ void main() {
       expect(stream.videoUrl, contains('http'));
       expect(stream.audioUrl, isNotNull);
       expect(stream.hasSeparateAudio, isTrue);
-      expect(stream.duration, const Duration(milliseconds: 105));
+      expect(stream.duration, const Duration(seconds: 105));
       // 音频取码率最高的一路（30280，321815）。
       expect(stream.codecs, 'avc1.64001F');
     });

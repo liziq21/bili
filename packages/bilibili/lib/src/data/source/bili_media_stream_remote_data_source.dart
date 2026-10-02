@@ -7,8 +7,8 @@ import 'bili_remote_data_source.dart';
 /// B站播放地址数据源
 ///
 /// 把 B站的两类地址形态（DASH 分离流与 durl 分段）收敛成中立的
-/// [MediaStream]：分离流给出 audioUrl 由播放层拼虚拟媒体；durl 形态取
-/// 首段并把已含声音的地址放进 videoUrl，播放层无需区分。
+/// [MediaStream]：分离流给出 audioUrl 由播放层拼虚拟媒体；durl 形态保留
+/// 全部片段供播放层按序播放。
 final class BiliMediaStreamRemoteDataSource({
   required final NetworkVideoDataSource network,
   required final String browserUserAgent,
@@ -33,49 +33,21 @@ final class BiliMediaStreamRemoteDataSource({
       final playUrl = await network.getPlayUrl(bvid: videoId, cid: cid);
 
       final dash = playUrl.dash;
-      final durl = playUrl.durl;
-
-      if (dash != null && (dash.video?.isNotEmpty ?? false)) {
-        final video = _pickVideo(dash.video!, preferHeight);
-        final audio = _pickAudio(dash.audio);
-        if (video == null) {
-          return Result.error(Exception('视频 $videoId 没有可用的视频流'));
+      if (dash != null) {
+        final videoItems = _playable(dash.video);
+        if (videoItems.isNotEmpty) {
+          return _fromDash(videoId, dash, videoItems, preferHeight);
         }
-        final videoUrls = video.playUrls.toList();
-        if (videoUrls.isEmpty) {
-          return Result.error(Exception('视频 $videoId 的视频流缺少地址'));
-        }
-        return Result.ok(
-          MediaStream(
-            videoUrl: videoUrls.first,
-            audioUrl: audio?.playUrls.firstOrNull,
-            headers: _headers,
-            width: video.width,
-            height: video.height,
-            bitrate: video.bandwidth,
-            codecs: video.codecs,
-            duration: dash.duration == null
-                ? null
-                : Duration(milliseconds: dash.duration!),
-          ),
-        );
       }
 
-      if (durl != null && durl.isNotEmpty) {
-        final urls = durl
-            .expand((item) => item.playUrls)
-            .where((url) => url.isNotEmpty)
-            .toList();
-        if (urls.isEmpty) {
-          return Result.error(Exception('视频 $videoId 没有可用的播放地址'));
-        }
+      final segments = _segmentsOf(playUrl.durl);
+      if (segments.isNotEmpty) {
         return Result.ok(
           MediaStream(
-            videoUrl: urls.first,
+            videoUrl: segments.first.url,
             headers: _headers,
-            duration: durl.first.length == null
-                ? null
-                : Duration(seconds: durl.first.length!),
+            segments: segments,
+            duration: _milliseconds(playUrl.timelength),
           ),
         );
       }
@@ -91,37 +63,107 @@ final class BiliMediaStreamRemoteDataSource({
     'Referer': 'https://www.bilibili.com/',
   };
 
-  /// 按期望高度就近选取视频流，缺省取码率最高的一路。
-  MediaStreamItem? _pickVideo(List<MediaStreamItem> items, int? preferHeight) {
-    if (items.isEmpty) return null;
-    if (preferHeight != null) {
-      final notTaller = items
-          .where((item) => (item.height ?? 0) <= preferHeight)
-          .toList();
-      if (notTaller.isNotEmpty) {
-        notTaller.sort((a, b) => (a.height ?? 0).compareTo(b.height ?? 0));
-        return notTaller.last;
-      }
-      // 全部高于期望时退而求其次取最低的一路。
-      final sorted = [...items]
-        ..sort((a, b) => (a.height ?? 0).compareTo(b.height ?? 0));
-      return sorted.first;
+  /// DASH 分离流。响应里有视频流却无可用音轨时报错而非降级：此时
+  /// `audioUrl` 为空会让播放层把纯视频当作自带声音的文件，必然无声。
+  Result<MediaStream> _fromDash(
+    String videoId,
+    DashData dash,
+    List<MediaStreamItem> videoItems,
+    int? preferHeight,
+  ) {
+    final audioItems = _playable(dash.audio);
+    if (audioItems.isEmpty) {
+      return Result.error(Exception('视频 $videoId 的分离流缺少可用音轨'));
     }
-    final byBandwidth = [...items]
-      ..sort(
-        (a, b) => (a.bandwidth ?? 0).compareTo(b.bandwidth ?? 0),
-      );
-    return byBandwidth.last;
+
+    final video = _pickVideo(videoItems, preferHeight);
+    final audio = _pickAudio(audioItems);
+
+    return Result.ok(
+      MediaStream(
+        videoUrl: video.playUrls.first,
+        audioUrl: audio.playUrls.first,
+        headers: _headers,
+        width: video.width,
+        height: video.height,
+        bitrate: video.bandwidth,
+        codecs: video.codecs,
+        // dash.duration 以秒计，与视频详情的 duration 同量纲。
+        duration: dash.duration == null
+            ? null
+            : Duration(seconds: dash.duration!),
+      ),
+    );
   }
 
-  /// 取音频流；有 Dolby/FLAC 等更高级编码时仍优先取主音轨，此处按码率
-  /// 最高择一，保证在解码能力有限的设备上能出声。
-  MediaStreamItem? _pickAudio(List<MediaStreamItem>? items) {
-    if (items == null || items.isEmpty) return null;
-    final sorted = [...items]
-      ..sort(
-        (a, b) => (a.bandwidth ?? 0).compareTo(b.bandwidth ?? 0),
+  /// 只保留带可用地址的条目。缺地址的条目不能参与择优，否则会选中一条
+  /// 不可播放的流而放弃同响应里可用的低档流。
+  List<MediaStreamItem> _playable(List<MediaStreamItem>? items) {
+    if (items == null) return [];
+    return items.where((item) => item.playUrls.isNotEmpty).toList();
+  }
+
+  /// 按期望高度就近选取视频流，缺省取码率最高的一路。
+  ///
+  /// 就近 = 与期望高度绝对差最小的一档，故期望高于全部可用档时自然落到
+  /// 最高档、低于全部时落到最低档，无需为两种边界另写分支。缺高度的条目
+  /// 视为不可比（差值无穷大），只在所有条目都缺高度时才被选中。
+  MediaStreamItem _pickVideo(
+    List<MediaStreamItem> items,
+    int? preferHeight,
+  ) {
+    if (preferHeight == null) return _highestBandwidth(items);
+    return items.reduce((best, item) {
+      final candidateGap = _heightGap(item, preferHeight);
+      final bestGap = _heightGap(best, preferHeight);
+      return candidateGap < bestGap ? item : best;
+    });
+  }
+
+  int _heightGap(MediaStreamItem item, int preferHeight) {
+    final height = item.height;
+    return height == null ? 1 << 30 : (height - preferHeight).abs();
+  }
+
+  /// 取音频流。按码率最高择一，保证在解码能力有限的设备上能出声。
+  MediaStreamItem _pickAudio(List<MediaStreamItem> items) =>
+      _highestBandwidth(items);
+
+  MediaStreamItem _highestBandwidth(List<MediaStreamItem> items) =>
+      (items.toList()
+            ..sort(
+              (a, b) => (a.bandwidth ?? 0).compareTo(b.bandwidth ?? 0),
+            ))
+          .last;
+
+  /// durl 分段按 order 升序组装，缺 order 时保持响应顺序。每个片段只取首个
+  /// 可用地址，备选地址是同一段的镜像而非新片段。
+  Duration? _milliseconds(int? value) =>
+      value == null ? null : Duration(milliseconds: value);
+
+  List<MediaSegment> _segmentsOf(List<DurlData>? durl) {
+    if (durl == null || durl.isEmpty) return [];
+    final ordered = durl.toList()
+      ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    final segments = <MediaSegment>[];
+    for (final item in ordered) {
+      final url = item.playUrls.firstWhere(
+        (candidate) => candidate.isNotEmpty,
+        orElse: () => '',
       );
-    return sorted.last;
+      if (url.isEmpty) continue;
+      segments.add(
+        MediaSegment(
+          url: url,
+          // B站接口文档记 durl.length 为毫秒（与同响应的 timelength 同
+          // 量纲）。仓内 fixture 的 durl 为空，该单位未经实响应验证，故
+          // 为 null 时播放层须能退化为不声明时长。
+          duration: item.length == null
+              ? null
+              : Duration(milliseconds: item.length!),
+        ),
+      );
+    }
+    return segments;
   }
 }
