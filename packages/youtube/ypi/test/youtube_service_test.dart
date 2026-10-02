@@ -233,6 +233,55 @@ void main() {
     );
 
     test(
+      'browsePlaylist strips control characters before the fallback header id',
+      () async {
+        final mockClient = MockClient((request) async {
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          // 请求侧必须已经是清洗后的 ID。
+          expect(body['browseId'], 'VLPL_TEST_123');
+          // 响应头不含 playlistId，解析器要用请求值兜底。
+          return http.Response(
+            json.encode({
+              'header': {
+                'pageHeaderRenderer': {
+                  'pageTitle': 'Test Playlist',
+                },
+              },
+              'contents': {
+                'twoColumnBrowseResultsRenderer': {
+                  'tabs': [
+                    {
+                      'tabRenderer': {
+                        'content': {
+                          'sectionListRenderer': {
+                            'contents': <Object>[],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.browsePlaylist(
+          playlistId: 'PL_TEST_123\n',
+        );
+        expect(
+          response.header?.playlistId,
+          'PL_TEST_123',
+          reason: '回填的 ID 必须与实际请求的一致，不能带原始控制字符',
+        );
+        service.close();
+      },
+    );
+
+    test(
       'browsePlaylist raises when neither playlistId nor continuation is given',
       () async {
         final service = YoutubeService(
