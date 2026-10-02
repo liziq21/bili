@@ -3,6 +3,7 @@ import 'package:model/model.dart';
 import 'model/creator_profile_model.dart';
 import 'model/filter_group.dart';
 import 'model/live_room_model.dart';
+import 'model/media_stream.dart';
 import 'model/paged_result.dart';
 import 'model/search_results.dart';
 import 'model/sort_option.dart';
@@ -85,6 +86,22 @@ abstract class const VideoDetailRemoteDataSource() extends RemoteDataSource {
     String creatorId,
     bool isSubscribed,
   ) async => Result.ok(!isSubscribed);
+}
+
+/// 媒体流可选能力接口
+///
+/// 提供「把一个媒体标识解析为可播放地址」的能力。各源在此消解自身对
+/// 地址、清晰度与鉴权头的差异，返回中立的 [MediaStream]；播放层不认识
+/// 具体服务。
+abstract class const MediaStreamRemoteDataSource() extends RemoteDataSource {
+  /// 解析指定媒体的播放地址
+  ///
+  /// [videoId] 为该源体系内的媒体标识。[preferHeight] 为期望的画面高度，
+  /// 源按自身可用清晰度就近选取；为 null 时由源取默认档。
+  Future<Result<MediaStream>> getMediaStream(
+    String videoId, {
+    int? preferHeight,
+  });
 }
 
 /// 视频评论可选能力接口
