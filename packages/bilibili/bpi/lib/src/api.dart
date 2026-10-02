@@ -42,8 +42,10 @@ final class LiveApi {
   static const base = 'https://$host';
 
   static const roomDetail = '$base${LiveApiPath.roomDetail}';
+  static const roomPlayInfo = '$base${LiveApiPath.roomPlayInfo}';
 }
 
 final class LiveApiPath {
   static const String roomDetail = '/xlive/web-room/v1/index/getH5InfoByRoom';
+  static const String roomPlayInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
 }

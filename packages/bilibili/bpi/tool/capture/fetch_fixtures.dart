@@ -113,6 +113,19 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_LIVE_ROOM_PLAY_INFO_ONLY'] == '1') {
+      final liveRoomPlayInfo = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8',
+        ),
+        'live room play info',
+      );
+      _requireLiveRoomPlayInfo(liveRoomPlayInfo.json, 'live room play info');
+      saveResponse('testing/live_room_play_info.json', liveRoomPlayInfo);
+      print('Live room play info fixture fetched successfully.');
+      return;
+    }
+
     mixinKey = await WbiUtils.fetchMixinKey(client);
 
     const sampleBvid = 'BV1GJ411x7vy';
@@ -123,12 +136,12 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/search_suggest.json')) {
       skipNote('testing/search_suggest.json');
     } else {
-    final suggest = await getJson(
-      Uri.parse(
-        'https://s.search.bilibili.com/main/suggest?term=free&highlight=free&main_ver=v1',
-      ),
-      'search suggest',
-    );
+      final suggest = await getJson(
+        Uri.parse(
+          'https://s.search.bilibili.com/main/suggest?term=free&highlight=free&main_ver=v1',
+        ),
+        'search suggest',
+      );
       NetworkSearchSuggest.fromJson(suggest.json);
       saveResponse('testing/search_suggest.json', suggest);
     }
@@ -137,11 +150,11 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/search_all.json')) {
       skipNote('testing/search_all.json');
     } else {
-    final searchAll = await getWbiJson(
-      'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
-      {'keyword': 'Flutter'},
-      'search all',
-    );
+      final searchAll = await getWbiJson(
+        'https://api.bilibili.com/x/web-interface/wbi/search/all/v2',
+        {'keyword': 'Flutter'},
+        'search all',
+      );
       NetworkSearchResult.fromJson(
         _requireDataObject(searchAll.json, 'search all'),
       );
@@ -190,12 +203,12 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/video_detail.json')) {
       skipNote('testing/video_detail.json');
     } else {
-    final videoDetail = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/web-interface/view?bvid=$sampleBvid',
-      ),
-      'video detail',
-    );
+      final videoDetail = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/web-interface/view?bvid=$sampleBvid',
+        ),
+        'video detail',
+      );
       BaseResponse.fromJson(videoDetail.json);
       saveResponse('testing/video_detail.json', videoDetail);
     }
@@ -204,12 +217,12 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/video_relation.json')) {
       skipNote('testing/video_relation.json');
     } else {
-    final videoRelation = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/web-interface/archive/relation?bvid=$sampleBvid',
-      ),
-      'video relation',
-    );
+      final videoRelation = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/web-interface/archive/relation?bvid=$sampleBvid',
+        ),
+        'video relation',
+      );
       NetworkVideoRelation.fromJson(
         _requireDataObject(videoRelation.json, 'video relation'),
       );
@@ -220,16 +233,16 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/related_videos.json')) {
       skipNote('testing/related_videos.json');
     } else {
-    final relatedVideos = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/web-interface/archive/related?bvid=$sampleBvid',
-      ),
-      'related videos',
-    );
-    final relatedItems = relatedVideos.json['data'];
-    if (relatedItems is! List) {
-      throw const FormatException('related videos data is not a list');
-    }
+      final relatedVideos = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/web-interface/archive/related?bvid=$sampleBvid',
+        ),
+        'related videos',
+      );
+      final relatedItems = relatedVideos.json['data'];
+      if (relatedItems is! List) {
+        throw const FormatException('related videos data is not a list');
+      }
       NetworkRelatedVideosList.fromJson({'items': relatedItems});
       saveResponse('testing/related_videos.json', relatedVideos);
     }
@@ -238,12 +251,12 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/reply_list_main.json')) {
       skipNote('testing/reply_list_main.json');
     } else {
-    final replyMain = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/v2/reply/main?oid=$sampleAid&type=1',
-      ),
-      'reply list main',
-    );
+      final replyMain = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/v2/reply/main?oid=$sampleAid&type=1',
+        ),
+        'reply list main',
+      );
       NetworkReplyData.fromJson(
         _requireDataObject(replyMain.json, 'reply list main'),
       );
@@ -292,33 +305,35 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/play_url.json')) {
       skipNote('testing/play_url.json');
     } else {
-    final playUrl = await getWbiJson(
-      'https://api.bilibili.com/x/player/wbi/playurl',
-      {
-        'bvid': sampleBvid,
-        'cid': sampleCid,
-        'qn': 80,
-        'fnval': 4048,
-        'fourk': 1,
-      },
-      'play URL',
-    );
-    final parsedPlayUrl = NetworkPlayUrl.fromJson(
-      _requireDataObject(playUrl.json, 'play URL'),
-    );
-    final dashVideo = parsedPlayUrl.dash?.video;
-    final dashAudio = parsedPlayUrl.dash?.audio;
-    final hasDash =
-        dashVideo != null &&
-        dashVideo.isNotEmpty &&
-        dashAudio != null &&
-        dashAudio.isNotEmpty &&
-        dashVideo.any((stream) => stream.playUrls.any((url) => url.isNotEmpty));
-    final hasDurl =
-        parsedPlayUrl.durl?.any(
-          (stream) => stream.playUrls.any((url) => url.isNotEmpty),
-        ) ??
-        false;
+      final playUrl = await getWbiJson(
+        'https://api.bilibili.com/x/player/wbi/playurl',
+        {
+          'bvid': sampleBvid,
+          'cid': sampleCid,
+          'qn': 80,
+          'fnval': 4048,
+          'fourk': 1,
+        },
+        'play URL',
+      );
+      final parsedPlayUrl = NetworkPlayUrl.fromJson(
+        _requireDataObject(playUrl.json, 'play URL'),
+      );
+      final dashVideo = parsedPlayUrl.dash?.video;
+      final dashAudio = parsedPlayUrl.dash?.audio;
+      final hasDash =
+          dashVideo != null &&
+          dashVideo.isNotEmpty &&
+          dashAudio != null &&
+          dashAudio.isNotEmpty &&
+          dashVideo.any(
+            (stream) => stream.playUrls.any((url) => url.isNotEmpty),
+          );
+      final hasDurl =
+          parsedPlayUrl.durl?.any(
+            (stream) => stream.playUrls.any((url) => url.isNotEmpty),
+          ) ??
+          false;
       if (!hasDash && !hasDurl) {
         throw const FormatException('play URL has no playable streams');
       }
@@ -329,16 +344,30 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/player_v2.json')) {
       skipNote('testing/player_v2.json');
     } else {
-    final playerV2 = await getJson(
-      Uri.parse(
-        'https://api.bilibili.com/x/player/v2?bvid=$sampleBvid&cid=$sampleCid',
-      ),
-      'player v2',
-    );
+      final playerV2 = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/player/v2?bvid=$sampleBvid&cid=$sampleCid',
+        ),
+        'player v2',
+      );
       NetworkBiliPlayerInfo.fromJson(
         _requireDataObject(playerV2.json, 'player v2'),
       );
       saveResponse('testing/player_v2.json', playerV2);
+    }
+
+    // 12. Live Room Play Info
+    if (!shouldFetch('testing/live_room_play_info.json')) {
+      skipNote('testing/live_room_play_info.json');
+    } else {
+      final liveRoomPlayInfo = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8',
+        ),
+        'live room play info',
+      );
+      _requireLiveRoomPlayInfo(liveRoomPlayInfo.json, 'live room play info');
+      saveResponse('testing/live_room_play_info.json', liveRoomPlayInfo);
     }
 
     print('All Bili fixtures fetched and saved successfully!');
@@ -468,6 +497,14 @@ void _requirePopularItems(Map<String, dynamic> json, String label) {
   });
   if (!hasVideo) {
     throw FormatException('$label has no item with bvid or aid');
+  }
+}
+
+void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final playurlInfo = data['playurl_info'];
+  if (playurlInfo is! Map) {
+    throw FormatException('$label data.playurl_info is not an object');
   }
 }
 
