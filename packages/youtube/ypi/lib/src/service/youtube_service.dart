@@ -197,20 +197,17 @@ final class YoutubeService {
     String? params,
   }) async {
     final body = <String, dynamic>{};
-    // 请求与响应头回填必须共用同一个已清洗的 ID：清洗后的值发给 YouTube，
-    // 若回填时用原值，调用方拿到的 ID 与实际拉取的不一致。
-    final targetId = (playlistId ?? browseId)?.replaceAll(_controlChars, '');
+    final targetId = playlistId ?? browseId;
     if (continuation != null && continuation.isNotEmpty) {
       body['continuation'] = continuation;
     } else {
-      if (targetId == null || targetId.isEmpty) {
+      final id = targetId?.replaceAll(_controlChars, '');
+      if (id == null || id.isEmpty) {
         throw const YpiJsonException(
           'browsePlaylist requires either playlistId, browseId, or continuation',
         );
       }
-      final formattedBrowseId = targetId.startsWith('VL')
-          ? targetId
-          : 'VL$targetId';
+      final formattedBrowseId = id.startsWith('VL') ? id : 'VL$id';
       body['browseId'] = formattedBrowseId;
       if (params != null && params.isNotEmpty) {
         body['params'] = params;
