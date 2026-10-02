@@ -55,6 +55,9 @@ dependencies:
   sqlite3: "<3.7.0"
   http: ^1.6.0
   internet_connection_checker: ^3.0.1
+  media_kit: ^1.2.6
+  media_kit_libs_video: ^1.0.7
+  media_kit_video: ^2.0.1
   sized_context: ^1.0.0+4
   flutter_animate: ^4.5.2
   gap: ^3.0.1
