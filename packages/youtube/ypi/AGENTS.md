@@ -4,7 +4,7 @@
 
 ## 范围与依赖
 
-- `ypi` 的目标边界是纯 Dart YouTube InnerTube 网络包，不依赖任何 workspace 包。
+- `ypi` 的目标边界是纯 Dart YouTube InnerTube 网络包，不依赖任何 workspace 包，也不依赖 Flutter SDK。
 - `ypi` 不得返回或接收外层领域模型、分页状态或 continuation 状态；这些由 `packages/youtube` 适配层负责。
 - `lib/ypi.dart` 只导出正式 service、网络 DTO、typed exception 和客户端配置；parser、fixture、tool 和测试代码保持内部。
 - InnerTube 是 YouTube 客户端使用的内部协议，不是官方公开 SDK；来源以实际请求、响应 fixture 和可复核开源实现为准。
@@ -42,7 +42,7 @@
 - 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
 - fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
 - 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的 `Run Flutter Test` check 覆盖本包（`flutter test test/`），本地自查用同一命令。
+- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
 
 ## 新增 endpoint 流程
 
@@ -52,4 +52,4 @@
 4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐 HTTP status、非敏感请求参数、client context、来源与抓取日期；响应形态的特殊之处写进该文件的说明段。
 5. 实现 service 方法与 DTO，一个 endpoint 对应 `YoutubeService` 上的一个方法；DTO 用 `NetworkYouTube` 前缀加端点或角色语义命名。
 6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
-7. 从包目录跑 `flutter test test/` 与 `flutter analyze`，两者全绿。
+7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。

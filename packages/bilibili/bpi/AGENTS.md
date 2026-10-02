@@ -4,7 +4,7 @@
 
 ## 范围与依赖
 
-- `bpi` 是纯 Dart Bilibili Web API 网络包，不依赖任何 workspace 包。
+- `bpi` 是纯 Dart Bilibili Web API 网络包，不依赖任何 workspace 包，也不依赖 Flutter SDK。
 - `bpi` 只提供 Bilibili 响应 envelope、平台 DTO、HTTP client、WBI 签名和包级异常；不依赖 `data`、`model`、平台 wrapper 或 UI。
 - `lib/bpi.dart` 只导出正式 service、DTO、typed exception、Token/客户端配置；parser、fixture、tool 和测试代码保持内部。
 - 现有 API 行为以已保存的真实响应 fixture 和 Bilibili Web 客户端实际请求为准；社区逆向文档只作参考。
@@ -45,7 +45,7 @@
 - 抓取遇到非 2xx、Bilibili 业务失败或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
 - fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`（如 `search_<type>.json`、`reply_<variant>.json`）；分页续页单独存 `<endpoint>_continuation.json`。
 - 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 Bilibili 服务。CI 的 `Run Flutter Test` check 覆盖本包（`flutter test test/`），本地自查用同一命令。
+- 本包测试必须完全离线：禁止在测试中访问真实 Bilibili 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
 
 ## 新增 endpoint 流程
 
@@ -55,4 +55,4 @@
 4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐非敏感请求参数、HTTP status、来源与抓取日期。
 5. 实现 service 与 DTO，一个 endpoint 对应一个 service 方法；DTO 用 `Network` 前缀加平台或域标识加端点语义命名（`NetworkBili*` / `NetworkLive*` / `NetworkReply*`）。service 按域拆分为 `NetworkSearchDataSource`、`NetworkVideoDataSource`、`NetworkLiveDataSource`、`NetworkFeedDataSource`。
 6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
-7. 从包目录跑 `flutter test test/` 与 `flutter analyze`，两者全绿。
+7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。
