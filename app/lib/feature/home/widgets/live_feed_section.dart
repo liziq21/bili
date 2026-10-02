@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
@@ -104,6 +105,12 @@ class const _LiveRoomCard({
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final streamerName = liveRoom.creatorProfileName ?? '未知主播';
+    final semanticLabel = <String>[
+      liveRoom.title,
+      '主播: $streamerName',
+      if (liveRoom.isLive) '直播中',
+    ].join('，');
 
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
@@ -117,81 +124,95 @@ class const _LiveRoomCard({
           color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: switch (liveRoom.thumbnailUrl) {
-                    final String url when url.isNotEmpty => CachedNetworkImage(
-                      imageUrl: url,
-                      memCacheWidth: 320,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, url, error) =>
-                          _thumbnailPlaceholder(colorScheme),
-                    ),
-                    _ => _thumbnailPlaceholder(colorScheme),
-                  },
-                ),
-                if (liveRoom.isLive)
-                  Positioned(
-                    top: $styles.insets.xs,
-                    left: $styles.insets.xs,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: $styles.insets.xs,
-                        vertical: $styles.insets.xxs / 2,
+      child: Tooltip(
+        message: liveRoom.title,
+        child: Semantics(
+          button: true,
+          label: semanticLabel,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTap();
+            },
+            child: ExcludeSemantics(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: switch (liveRoom.thumbnailUrl) {
+                          final String url when url.isNotEmpty =>
+                            CachedNetworkImage(
+                              imageUrl: url,
+                              memCacheWidth: 320,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, url, error) =>
+                                  _thumbnailPlaceholder(colorScheme),
+                            ),
+                          _ => _thumbnailPlaceholder(colorScheme),
+                        },
                       ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.error,
-                        borderRadius: BorderRadius.circular($styles.corners.sm),
-                      ),
-                      child: Text(
-                        '直播中',
-                        style: $styles.text.bodySmallBold.copyWith(
-                          color: colorScheme.onError,
+                      if (liveRoom.isLive)
+                        Positioned(
+                          top: $styles.insets.xs,
+                          left: $styles.insets.xs,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: $styles.insets.xs,
+                              vertical: $styles.insets.xxs / 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.error,
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.sm,
+                              ),
+                            ),
+                            child: Text(
+                              '直播中',
+                              style: $styles.text.bodySmallBold.copyWith(
+                                color: colorScheme.onError,
+                              ),
+                            ),
+                          ),
                         ),
+                    ],
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all($styles.insets.xs),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              liveRoom.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: $styles.text.bodySmallBold.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              liveRoom.creatorProfileName ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: $styles.text.bodySmall.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all($styles.insets.xs),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        liveRoom.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: $styles.text.bodySmallBold.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        liveRoom.creatorProfileName ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: $styles.text.bodySmall.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
