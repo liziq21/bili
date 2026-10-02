@@ -8,7 +8,6 @@ import '../api/yt_interceptor.dart';
 import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
 import '../models/network_youtube_browse.dart';
-import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
