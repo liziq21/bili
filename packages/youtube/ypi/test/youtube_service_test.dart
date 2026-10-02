@@ -660,7 +660,10 @@ void main() {
                                               'videoId': 'VIDEO_1',
                                               'title': {
                                                 'runs': [
-                                                  {'text': 'Playlist Video One'},
+                                                  {
+                                                    'text':
+                                                        'Playlist Video One',
+                                                  },
                                                 ],
                                               },
                                               'lengthText': {

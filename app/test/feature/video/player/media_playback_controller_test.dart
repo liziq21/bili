@@ -9,8 +9,8 @@ import 'package:media_kit/media_kit.dart';
 ///
 /// 播放器库以「事件流」而非轮询状态的方式通知变化，故测试要复现真实的
 /// 事件序列——包括某些状态变化**不会**再次发事件这一点。
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
-  _FakePlatformPlayer() {
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
+  this {
     state = PlayerState();
     // 位置参数顺序取自 PlayerStream 构造器签名，未被观察的流给空流。
     stream = PlayerStream(
@@ -42,30 +42,55 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
     );
   }
 
+  // ignore: close_sinks
   final _playlist = StreamController<Playlist>.broadcast();
+  // ignore: close_sinks
   final _playing = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _completed = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _position = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _duration = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _volume = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _rate = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _pitch = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _buffering = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _buffer = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _bufferingPercentage = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _playlistMode = StreamController<PlaylistMode>.broadcast();
+  // ignore: close_sinks
   final _shuffle = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _audioParams = StreamController<AudioParams>.broadcast();
+  // ignore: close_sinks
   final _videoParams = StreamController<VideoParams>.broadcast();
+  // ignore: close_sinks
   final _audioBitrate = StreamController<double?>.broadcast();
+  // ignore: close_sinks
   final _audioDevice = StreamController<AudioDevice>.broadcast();
+  // ignore: close_sinks
   final _audioDevices = StreamController<List<AudioDevice>>.broadcast();
+  // ignore: close_sinks
   final _track = StreamController<Track>.broadcast();
+  // ignore: close_sinks
   final _tracks = StreamController<Tracks>.broadcast();
+  // ignore: close_sinks
   final _width = StreamController<int?>.broadcast();
+  // ignore: close_sinks
   final _height = StreamController<int?>.broadcast();
+  // ignore: close_sinks
   final _subtitle = StreamController<List<String>>.broadcast();
+  // ignore: close_sinks
   final _log = StreamController<PlayerLog>.broadcast();
+  // ignore: close_sinks
   final _error = StreamController<String>.broadcast();
 
   @override
@@ -150,7 +175,7 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
 }
 
 /// 收集状态流，供断言用。
-class _Recorder {
+class _Recorder() {
   final List<PlaybackState> states = [];
   late final StreamSubscription<PlaybackState> _subscription;
 
@@ -180,42 +205,45 @@ void main() {
   });
 
   group('MediaPlaybackController.open', () {
-    test('passes the EDL address and the request headers to the player', () async {
-      await controller.open(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/v.m4s',
-          audioUrl: 'https://cdn.example.com/a.m4s',
-          headers: {'Referer': 'https://www.bilibili.com'},
-        ),
-      );
-
-      expect(fake.openedUris, hasLength(1));
-      expect(fake.openedUris.single, startsWith('edl://'));
-      expect(fake.openedUris.single, isNot(contains('\n')));
-      expect(fake.openedHeaders.single['Referer'], 'https://www.bilibili.com');
-    });
-
     test(
-      'the state after opening is reset, not carried over from the previous media',
+      'passes the EDL address and the request headers to the player',
       () async {
         await controller.open(
-          MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/v.m4s',
+            audioUrl: 'https://cdn.example.com/a.m4s',
+            headers: {'Referer': 'https://www.bilibili.com'},
+          ),
         );
-        fake.emitPosition(const Duration(seconds: 30));
-        fake.emitDuration(const Duration(minutes: 5));
-        fake.emitPlaying(true);
-        await pumpEventQueue();
 
-        await controller.open(
-          MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+        expect(fake.openedUris, hasLength(1));
+        expect(fake.openedUris.single, startsWith('edl://'));
+        expect(fake.openedUris.single, isNot(contains('\n')));
+        expect(
+          fake.openedHeaders.single['Referer'],
+          'https://www.bilibili.com',
         );
-        await pumpEventQueue();
-
-        expect(recorder.last.position, Duration.zero);
-        expect(recorder.last.duration, Duration.zero);
-        expect(recorder.last.isPlaying, isFalse);
       },
     );
+
+    test('the state after opening is reset, not carried over from the previous media', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitPosition(const Duration(seconds: 30));
+      fake.emitDuration(const Duration(minutes: 5));
+      fake.emitPlaying(true);
+      await pumpEventQueue();
+
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      );
+      await pumpEventQueue();
+
+      expect(recorder.last.position, Duration.zero);
+      expect(recorder.last.duration, Duration.zero);
+      expect(recorder.last.isPlaying, isFalse);
+    });
 
     test('opening again clears the error of the previous media', () async {
       await controller.open(
@@ -238,39 +266,45 @@ void main() {
     // 播放器的播放开关在整个缓冲期间不变，因此缓冲结束时其播放状态流
     // 不会再发一次事件。只在缓冲事件里把播放状态置 false，会让状态永久
     // 卡在「未播放」。
-    test('recovers to playing when buffering ends without a new playing event', () async {
-      await controller.open(
-        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
-      );
+    test(
+      'recovers to playing when buffering ends without a new playing event',
+      () async {
+        await controller.open(
+          MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+        );
 
-      fake.emitPlaying(true);
-      await pumpEventQueue();
-      expect(recorder.last.isPlaying, isTrue);
+        fake.emitPlaying(true);
+        await pumpEventQueue();
+        expect(recorder.last.isPlaying, isTrue);
 
-      fake.emitBuffering(true);
-      await pumpEventQueue();
-      expect(recorder.last.isPlaying, isFalse);
-      expect(recorder.last.isBuffering, isTrue);
+        fake.emitBuffering(true);
+        await pumpEventQueue();
+        expect(recorder.last.isPlaying, isFalse);
+        expect(recorder.last.isBuffering, isTrue);
 
-      // 缓冲结束，但播放开关未变，故这里没有新的 playing 事件。
-      fake.emitBuffering(false);
-      await pumpEventQueue();
-      expect(recorder.last.isBuffering, isFalse);
-      expect(recorder.last.isPlaying, isTrue);
-    });
+        // 缓冲结束，但播放开关未变，故这里没有新的 playing 事件。
+        fake.emitBuffering(false);
+        await pumpEventQueue();
+        expect(recorder.last.isBuffering, isFalse);
+        expect(recorder.last.isPlaying, isTrue);
+      },
+    );
 
-    test('is not playing while buffering even if the playing switch stays on', () async {
-      await controller.open(
-        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
-      );
+    test(
+      'is not playing while buffering even if the playing switch stays on',
+      () async {
+        await controller.open(
+          MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+        );
 
-      fake.emitPlaying(true);
-      fake.emitBuffering(true);
-      await pumpEventQueue();
+        fake.emitPlaying(true);
+        fake.emitBuffering(true);
+        await pumpEventQueue();
 
-      expect(recorder.last.isPlaying, isFalse);
-      expect(recorder.last.isBuffering, isTrue);
-    });
+        expect(recorder.last.isPlaying, isFalse);
+        expect(recorder.last.isBuffering, isTrue);
+      },
+    );
 
     test('is not playing when the player is paused', () async {
       await controller.open(
