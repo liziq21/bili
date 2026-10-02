@@ -59,3 +59,9 @@ Prevention: Always use `Uri.encodeQueryComponent` for query parameter values in 
 Vulnerability: `YoutubeService` passed raw search `query` parameters containing non-printable control characters (`\r\n`, `\x00`, `\x1f`) directly into HTTP GET query parameters and POST request body payloads, exposing outgoing YouTube/Google Suggest API requests to CRLF query injection and server request errors.
 Learning: Unsanitized search inputs sourced from user text fields or deep-link params can leak control characters into HTTP query strings and REST API bodies.
 Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from search query parameters in API services before executing outgoing network requests.
+
+## 2026-09-26 - Sanitize Control Characters in Query Inputs and HTML Tags in Bilibili Search Suggestions
+
+Vulnerability: `BiliSearchSuggestRemoteDataSource.getSuggests` passed raw `query` strings containing non-printable ASCII control characters (`\r\n`, `\x00`, `\x1f`) directly to the Bilibili suggest endpoint, and returned unsanitized search suggestion terms containing raw HTML tags (`<em class="keyword">`) and control characters directly to the UI layer.
+Learning: Search suggest endpoints accept user inputs and return server-formatted strings that may contain control characters and embedded HTML markup, requiring sanitization at the remote data source boundary.
+Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from incoming search queries and strip HTML markup (`<[^>]*>`) and control characters from returned search suggest terms.
