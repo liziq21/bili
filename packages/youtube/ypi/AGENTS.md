@@ -38,7 +38,7 @@
 - 真实抓取脚本放在 `tool/capture/`，从 `packages/youtube/ypi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
 - fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。
 - 写盘前脚本递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
-- 目标 fixture 已存在时脚本拒绝覆盖，须显式传 `--force`。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）仍须人工确认后才可覆盖。
+- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）仍属业务失败，不得写入，人工确认也不能例外。
 - 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
 - fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
 - 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。

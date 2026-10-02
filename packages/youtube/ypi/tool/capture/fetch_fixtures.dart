@@ -25,11 +25,8 @@ Future<void> main(List<String> args) async {
   void saveResponse(String path, _CapturedResponse captured) {
     final file = File(path);
     if (file.existsSync() && !force) {
-      stderr.writeln(
-        'Refusing to overwrite existing fixture: $path '
-        '(rerun with --force to overwrite)',
-      );
-      throw FileSystemException('fixture already exists', path);
+      print('Skipped (already exists, pass --force to overwrite): $path');
+      return;
     }
     file.writeAsBytesSync(captured.bodyBytes);
     print('Saved: $path (HTTP ${captured.response.statusCode})');

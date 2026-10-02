@@ -67,8 +67,8 @@ This directory contains shared packages and modules (`packages/*`).
 - 单元测试和 CI 不得访问真实网络；使用固定 JSON fixture、fake client 或 `MockClient`。
 - 每个新增 endpoint 固定包含四项测试：真实响应 fixture、MockClient 请求形状测试、fixture 解析测试、失败路径测试。
 - 真实请求只能通过 `tool/capture/` 下的抓取脚本手动执行，输出到 `testing/<endpoint>.json`；脚本不得进入 CI。
-- fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
+- fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token 或追踪凭据。媒体流 URL 自带的时效签名参数（`e=`、`uparams`、`equery`）必须原样保留，DASH/durl 的解析测试依赖完整查询串；账号级凭据（WBI key、Cookie、SESSDATA、access_key）仍然禁止。
 - 抓取遇到非 2xx、业务失败或无法识别的响应结构时不得写入或覆盖 fixture，必须返回非零并打印状态。
-- 已存在的 fixture 默认不被覆盖，抓取脚本须显式传 `--force` 才能覆盖。校验通过只代表结构可识别，结构合法但业务无效的响应覆盖前须人工确认。
-- 抓取脚本写盘前必须拦截凭据字段：B站侧拒绝写入含 WBI key、Token、Cookie 的响应，YouTube 侧递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
+- 抓取脚本默认跳过已存在的 fixture 并打印跳过清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验通过只代表结构可识别；结构合法但业务无效的响应仍属业务失败，即使人工确认也不得写入或覆盖。
+- 抓取脚本写盘前必须拦截凭据字段：B站侧按 JSON 键拒绝写入含 WBI key、Token、Cookie 的响应且不改写响应内容，YouTube 侧递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
 - 抓取元数据、来源和非敏感请求参数记录在包级 `testing/README.md`，不得记录秘密。
