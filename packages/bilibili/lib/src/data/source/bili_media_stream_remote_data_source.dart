@@ -136,15 +136,26 @@ final class BiliMediaStreamRemoteDataSource({
             ))
           .last;
 
-  /// durl 分段按 order 升序组装，缺 order 时保持响应顺序。每个片段只取首个
-  /// 可用地址，备选地址是同一段的镜像而非新片段。
   Duration? _milliseconds(int? value) =>
       value == null ? null : Duration(milliseconds: value);
 
+  /// durl 分段在所有条目都有 order 时按 order 升序组装，相同 order 按响应
+  /// 顺序处理；任一缺失 order 时保持响应顺序。每个片段只取首个可用地址，
+  /// 备选地址是同一段的镜像而非新片段。
   List<MediaSegment> _segmentsOf(List<DurlData>? durl) {
     if (durl == null || durl.isEmpty) return [];
-    final ordered = durl.toList()
-      ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    final allHaveOrder = durl.every((item) => item.order != null);
+    final List<DurlData> ordered;
+    if (allHaveOrder) {
+      final indexed = [for (var i = 0; i < durl.length; i++) (i, durl[i])];
+      indexed.sort((a, b) {
+        final byOrder = a.$2.order!.compareTo(b.$2.order!);
+        return byOrder != 0 ? byOrder : a.$1.compareTo(b.$1);
+      });
+      ordered = [for (final entry in indexed) entry.$2];
+    } else {
+      ordered = List<DurlData>.from(durl);
+    }
     final segments = <MediaSegment>[];
     for (final item in ordered) {
       final url = item.playUrls.firstWhere(
