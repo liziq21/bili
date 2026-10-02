@@ -19,12 +19,14 @@ This directory contains shared packages and modules (`packages/*`).
 |---------|------|------------------|--------------|-------|
 | `packages/bilibili` | Flutter | `flutter analyze` | `flutter test` | API client & l10n (imports Flutter SDK) |
 | `packages/youtube` | Flutter | `flutter analyze` | `flutter test` | API client (`ypi`), l10n, Chopper & Protobuf encoder |
+| `packages/bilibili/bpi` | Dart-only | `dart analyze` | `dart test` | Bilibili Web API client, no Flutter SDK dependency |
+| `packages/youtube/ypi` | Dart-only | `dart analyze` | `dart test` | YouTube InnerTube API client, no Flutter SDK dependency |
 | `packages/data` | Dart-only | `dart analyze` | `dart test` | Shared models & RemoteDataSource abstraction |
 | `packages/model` | Dart-only | `dart analyze` | `dart test` | Shared models (`UserData`, `Result<T>`) |
 
-**Rule**: For Dart-only packages, use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands.
+**Rule**: For Dart-only packages (`model`, `data`, `bilibili/bpi`, `youtube/ypi`), use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands. The two API sub-packages must not declare a Flutter SDK dependency in their `pubspec.yaml`; a new `flutter:` key under `environment` or a `flutter` entry under `dependencies` is the signal the boundary has been broken. CI using `flutter test` as the workspace runner is a convenience, not a package-level requirement.
 
-**CI scope**: The CI test step runs `app/` plus all four package test suites (`packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`) — see `.github/workflows/ci.yml` for the authoritative list. Every change to a package must pass its own test command locally before being considered done.
+**CI scope**: The CI test step runs `app/` plus all four package test suites (`packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`) — see `.github/workflows/ci.yml` for the authoritative list. Every change to a package must pass its own test command locally before being considered done. CI invokes `flutter test` in every package directory as the workspace runner; for the two Dart-only API sub-packages this is the slower superset of what `dart test` runs locally over the same test set — the runner choice does not imply a Flutter SDK dependency.
 
 ## Data Layer & Remote Data Source Conventions
 
@@ -53,7 +55,7 @@ This directory contains shared packages and modules (`packages/*`).
 
 ### DTO 与响应解析
 
-- DTO 使用 `Network` 前缀，并按平台和端点命名，例如 `NetworkBiliPopularVideo`、`NetworkYouTubeBrowseVideo`；不得强行合并不同平台或不同端点的模型。
+- DTO 使用 `Network` 前缀加平台或域标识加端点语义命名，例如 `NetworkBiliPopularVideo`、`NetworkYouTubeBrowseResponse`；不得强行合并不同平台或不同端点的模型。平台标识可按域拆分：`bpi` 用 `NetworkBili*`（通用端点）、`NetworkLive*`（直播）、`NetworkReply*`（回复），`ypi` 统一用 `NetworkYouTube*`。
 - DTO 尽量保持平台 JSON 的语义和层级，包括 envelope、`owner`、`stat` 等嵌套对象；不得在 API 包内提前转换为领域模型。
 - DTO 只声明已确认的稳定业务字段，不在 DTO 中保存完整 raw JSON Map；未知字段允许被忽略。
 - 稳定且扁平的字段可以使用 `json_serializable`；复杂 renderer、平台嵌套结构和不稳定字段使用手写 `fromJson` factory。生成代码只能由生成命令更新。
@@ -65,6 +67,8 @@ This directory contains shared packages and modules (`packages/*`).
 - 单元测试和 CI 不得访问真实网络；使用固定 JSON fixture、fake client 或 `MockClient`。
 - 每个新增 endpoint 固定包含四项测试：真实响应 fixture、MockClient 请求形状测试、fixture 解析测试、失败路径测试。
 - 真实请求只能通过 `tool/capture/` 下的抓取脚本手动执行，输出到 `testing/<endpoint>.json`；脚本不得进入 CI。
-- fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据。
+- fixture 只保存按包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token 或追踪凭据。媒体流 URL 自带的时效签名参数（`e=`、`uparams`、`equery`）必须原样保留，DASH/durl 的解析测试依赖完整查询串；账号级凭据（WBI key、Cookie、SESSDATA、access_key）仍然禁止。
 - 抓取遇到非 2xx、业务失败或无法识别的响应结构时不得写入或覆盖 fixture，必须返回非零并打印状态。
+- 抓取脚本默认跳过已存在的 fixture 并打印跳过清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验通过只代表结构可识别；结构合法但业务无效的响应仍属业务失败，即使人工确认也不得写入或覆盖。
+- 抓取脚本写盘前必须拦截凭据字段：B站侧按 JSON 键拒绝写入含 WBI key、Token、Cookie 的响应且不改写响应内容，YouTube 侧递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
 - 抓取元数据、来源和非敏感请求参数记录在包级 `testing/README.md`，不得记录秘密。

@@ -13,7 +13,8 @@ final class _CapturedResponse {
   final List<int> bodyBytes;
 }
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  final force = args.contains('--force');
   final client = http.Client();
 
   final testingDir = Directory('testing');
@@ -23,14 +24,27 @@ Future<void> main() async {
 
   void saveResponse(String path, _CapturedResponse captured) {
     final file = File(path);
+    if (file.existsSync() && !force) {
+      print('Skipped (already exists, pass --force to overwrite): $path');
+      return;
+    }
     file.writeAsBytesSync(captured.bodyBytes);
     print('Saved: $path (HTTP ${captured.response.statusCode})');
+  }
+
+  bool shouldFetch(String path) => !File(path).existsSync() || force;
+
+  void skipNote(String path) {
+    print('Skipped (already exists, pass --force to overwrite): $path');
   }
 
   try {
     const requestTimeout = Duration(seconds: 30);
 
     print('1. Fetching search video JSON...');
+    if (!shouldFetch('testing/search_video.json')) {
+      skipNote('testing/search_video.json');
+    } else {
     final videoSearchResponse = await client
         .post(
           Uri.parse('https://www.youtube.com/youtubei/v1/search'),
@@ -51,8 +65,12 @@ Future<void> main() async {
       ),
     );
     saveResponse('testing/search_video.json', video);
+    }
 
     print('2. Fetching search channel JSON...');
+    if (!shouldFetch('testing/search_channel.json')) {
+      skipNote('testing/search_channel.json');
+    } else {
     final channelSearchResponse = await client
         .post(
           Uri.parse('https://www.youtube.com/youtubei/v1/search'),
@@ -73,8 +91,12 @@ Future<void> main() async {
       ),
     );
     saveResponse('testing/search_channel.json', channel);
+    }
 
     print('3. Fetching search playlist JSON...');
+    if (!shouldFetch('testing/search_playlist.json')) {
+      skipNote('testing/search_playlist.json');
+    } else {
     final playlistSearchResponse = await client
         .post(
           Uri.parse('https://www.youtube.com/youtubei/v1/search'),
@@ -93,8 +115,12 @@ Future<void> main() async {
           _validateSearchResponse(json, containsItem: _containsPlaylistLockup),
     );
     saveResponse('testing/search_playlist.json', playlist);
+    }
 
     print('4. Fetching search suggest JSON...');
+    if (!shouldFetch('testing/search_suggest.json')) {
+      skipNote('testing/search_suggest.json');
+    } else {
     final suggestResponse = await client
         .get(
           Uri.parse(
@@ -108,58 +134,74 @@ Future<void> main() async {
       _validateSuggestResponse,
     );
     saveResponse('testing/search_suggest.json', suggest);
-
-    print('5. Fetching channel browse JSON...');
-    final browseResponse = await client
-        .post(
-          Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
-          headers: _headers,
-          body: jsonEncode(<String, dynamic>{
-            'context': _clientContext,
-            'browseId': _browseChannelId,
-            'params': _browseVideosParams,
-          }),
-        )
-        .timeout(requestTimeout);
-    final browse = _captureJson(
-      browseResponse,
-      'channel browse',
-      _validateBrowseResponse,
-    );
-    saveResponse('testing/browse.json', browse);
-
-    // The continuation page is a separate request carrying the token the first
-    // page hands back. Capturing it here keeps both pages on the same write
-    // path, so the redaction in _captureJson applies to it as well.
-    print('6. Fetching channel browse continuation JSON...');
-    final continuationToken = _continuationTokenFrom(
-      jsonDecode(utf8.decode(browse.bodyBytes)),
-    );
-    if (continuationToken == null) {
-      throw const FormatException(
-        'channel browse carried no continuation token: the second page could '
-        'not be captured, and testing/browse_continuation.json would keep '
-        'whatever it last held',
-      );
     }
-    final continuationResponse = await client
-        .post(
-          Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
-          headers: _headers,
-          body: jsonEncode(<String, dynamic>{
-            'context': _clientContext,
-            'continuation': continuationToken,
-          }),
-        )
-        .timeout(requestTimeout);
-    final continuation = _captureJson(
-      continuationResponse,
-      'channel browse continuation',
-      (dynamic decoded) => _validateBrowseContinuationResponse(
-        Map<String, dynamic>.from(decoded as Map),
-      ),
-    );
-    saveResponse('testing/browse_continuation.json', continuation);
+
+    // Browse + continuation are captured as a pair: the continuation token
+    // comes from the same response body that is saved to browse.json.
+    // If browse.json is skipped (already exists, no --force), the
+    // continuation fetch is skipped too so the two fixtures stay consistent.
+    final browseNeedsFetch = shouldFetch('testing/browse.json');
+    final contNeedsFetch = shouldFetch('testing/browse_continuation.json');
+
+    if (!browseNeedsFetch && !contNeedsFetch) {
+      skipNote('testing/browse.json');
+      skipNote('testing/browse_continuation.json');
+    } else {
+      print('5. Fetching channel browse JSON...');
+      final browseResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'browseId': _browseChannelId,
+              'params': _browseVideosParams,
+            }),
+          )
+          .timeout(requestTimeout);
+      final browse = _captureJson(
+        browseResponse,
+        'channel browse',
+        _validateBrowseResponse,
+      );
+      saveResponse('testing/browse.json', browse);
+
+      // The continuation page is a separate request carrying the token the
+      // same response body hands back. Capturing it here keeps both pages on
+      // the same write path, so the redaction in _captureJson applies to it
+      // as well. When browse.json was just saved (or --force), the token
+      // below is extracted from the freshly fetched body, matching what was
+      // written to disk.
+      print('6. Fetching channel browse continuation JSON...');
+      final continuationToken = _continuationTokenFrom(
+        jsonDecode(utf8.decode(browse.bodyBytes)),
+      );
+      if (continuationToken == null) {
+        throw const FormatException(
+          'channel browse carried no continuation token: the second page '
+          'could not be captured, and testing/browse_continuation.json '
+          'would keep whatever it last held',
+        );
+      }
+      final continuationResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'continuation': continuationToken,
+            }),
+          )
+          .timeout(requestTimeout);
+      final continuation = _captureJson(
+        continuationResponse,
+        'channel browse continuation',
+        (dynamic decoded) => _validateBrowseContinuationResponse(
+          Map<String, dynamic>.from(decoded as Map),
+        ),
+      );
+      saveResponse('testing/browse_continuation.json', continuation);
+    }
 
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
