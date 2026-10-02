@@ -1,5 +1,5 @@
 {
-  "autoReview": ["open"],
+  "autoReview": ["open", "push"],
   "strictness": 2,
   "commentTypes": ["logic", "syntax"],
   "ignorePatterns": "**/*.g.dart"

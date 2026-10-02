@@ -162,7 +162,9 @@ final class BiliMediaStreamRemoteDataSource({
         (candidate) => candidate.isNotEmpty,
         orElse: () => '',
       );
-      if (url.isEmpty) continue;
+      // 任一片段无可用地址都会让播放层拿到残缺序列却无从察觉（播到该段
+      // 才断），故整条流判为不可用，而不是跳过后返回缺片的列表。
+      if (url.isEmpty) return [];
       segments.add(
         MediaSegment(
           url: url,

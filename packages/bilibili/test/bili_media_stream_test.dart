@@ -331,6 +331,24 @@ void main() {
       );
     });
 
+    test('durl 中间片段无地址时报错，不返回缺片的序列', () async {
+      final source = makeSource(buildPlayUrl(
+        durl: [
+          {'order': 1, 'length': 30000, 'url': 'https://cdn.example/p1.mp4'},
+          // 该片段既无 url 也无 backupUrl，整段不可用。
+          {'order': 2, 'length': 30000},
+          {'order': 3, 'length': 30000, 'url': 'https://cdn.example/p3.mp4'},
+        ],
+      ));
+
+      final result = await source.getMediaStream('BV1GJ411x7vy');
+      expect(
+        result.isError,
+        isTrue,
+        reason: '静默跳过会交给播放层一段残缺序列，播放中途断掉且无从察觉',
+      );
+    });
+
     test('最高档视频缺地址时降级到可用档', () async {
       final source = makeSource(buildPlayUrl(
         video: [
