@@ -532,7 +532,9 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
   }
   final stream = playurl['stream'];
   if (stream is! List || stream.isEmpty) {
-    throw FormatException('$label has no playable stream in data.playurl_info.playurl');
+    throw FormatException(
+      '$label has no playable stream in data.playurl_info.playurl',
+    );
   }
   final hasPlayable = stream.any((entry) {
     if (entry is! Map) return false;
@@ -561,7 +563,9 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
     });
   });
   if (!hasPlayable) {
-    throw FormatException('$label has no playable stream codec with a base URL and host');
+    throw FormatException(
+      '$label has no playable stream codec with a base URL and host',
+    );
   }
 }
 

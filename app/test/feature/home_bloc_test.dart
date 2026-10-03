@@ -483,10 +483,10 @@ void main() {
       // 只有两个真实 Feed：筛选项即 Feed，聚合项与本地功能占位项都已移除。
       // 命名空间前缀的契约不变——两个 Feed 的 rawId 同为 'shared'，
       // 前缀保证 video:shared 与 live:shared 是两个不同的筛选项。
-      expect(
-        state.filters.map((filter) => filter.id).toSet(),
-        {'video:shared', 'live:shared'},
-      );
+      expect(state.filters.map((filter) => filter.id).toSet(), {
+        'video:shared',
+        'live:shared',
+      });
       expect(
         state
             .copyWith(filterId: HomeState.videoFilterId('shared'))
@@ -580,7 +580,11 @@ void main() {
       expect(find.text('推荐直播'), findsOneWidget);
 
       // 一次只展示一个 Feed：默认选中筛选栏里的第一项，列表里不再重复区块标题。
-      expect(bloc.state.visibleVideoSections.length + bloc.state.visibleLiveSections.length, 1);
+      expect(
+        bloc.state.visibleVideoSections.length +
+            bloc.state.visibleLiveSections.length,
+        1,
+      );
     });
 
     testWidgets('Hides the live entry for sources without live support', (
@@ -616,12 +620,7 @@ void main() {
       // 本地功能（收藏 / 下载 / 订阅 / 历史）在仓内没有对应实现，不该出现在
       // 筛选栏里：点开只能得到「暂未开放」，那不是筛选项该有的形态。
       // 观看历史走底部导航的「我的」页。
-      for (final label in const [
-        '我的收藏',
-        '已下载',
-        '订阅更新',
-        '观看历史',
-      ]) {
+      for (final label in const ['我的收藏', '已下载', '订阅更新', '观看历史']) {
         expect(find.text(label), findsNothing);
       }
       // 筛选项数量与真实 Feed 数量一致，不多不少。

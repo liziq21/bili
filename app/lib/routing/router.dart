@@ -72,17 +72,12 @@ final GoRouter router = GoRouter(
     // 底部导航的三个主分支。用 indexedStack 而非普通 ShellRoute：切分支时
     // 保留各分支的导航栈，从详情页返回时回到离开前的那一屏而不是分支根。
     StatefulShellRoute.indexedStack(
-      builder:
-          (
-            context,
-            state,
-            navigationShell,
-          ) => AppScaffold(
-            child: AppNavigationShell(
-              navigationShell: navigationShell,
-              destinations: _navDestinations,
-            ),
-          ),
+      builder: (context, state, navigationShell) => AppScaffold(
+        child: AppNavigationShell(
+          navigationShell: navigationShell,
+          destinations: _navDestinations,
+        ),
+      ),
       branches: [
         StatefulShellBranch(
           routes: [
@@ -239,12 +234,12 @@ Widget _buildSearchEntry(BuildContext context) {
         return BlocProvider<SearchBloc>(
           create: (context) =>
               SearchBloc(
-                searchSuggestRepository: context.read(),
-                recentSearchQueryRepository: context.read(),
-                getRentSearchQueriesUseCase: context.read(),
-              )
-              // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
-              ..add(MonitorRecentSearches()),
+                  searchSuggestRepository: context.read(),
+                  recentSearchQueryRepository: context.read(),
+                  getRentSearchQueriesUseCase: context.read(),
+                )
+                // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
+                ..add(MonitorRecentSearches()),
           child: SearchScreen(
             onSearch: (query) =>
                 context.navigateToSearchResult(query, source: sourceId),

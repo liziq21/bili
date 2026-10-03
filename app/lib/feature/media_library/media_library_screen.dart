@@ -21,10 +21,8 @@ import 'media_history_cubit.dart';
 ///
 /// [MediaHistoryCubit] 由路由提供：本页若自己再建一个，加载第一页会查询两次，
 /// 而列表与翻页状态在两处实例上会各走各的。
-class const MediaLibraryScreen({
-  super.key,
-  required this.onVideoTap,
-}) extends StatelessWidget {
+class const MediaLibraryScreen({super.key, required this.onVideoTap})
+    extends StatelessWidget {
   /// 点按历史条目时的回调
   final void Function(MediaHistoryItem item) onVideoTap;
 
@@ -104,8 +102,7 @@ class const MediaLibraryScreen({
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
-                    onPressed:
-                        state.hasMore && !state.isLoading
+                    onPressed: state.hasMore && !state.isLoading
                         ? () => context.read<MediaHistoryCubit>().loadMore()
                         : null,
                     child: Text(state.hasMore ? '加载更多' : '没有更多了'),
@@ -152,10 +149,7 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
         if (state.items.isEmpty) {
           return const SliverFillRemaining(
             hasScrollBody: false,
-            child: _Message(
-              icon: Icons.history_rounded,
-              message: '还没有观看记录',
-            ),
+            child: _Message(icon: Icons.history_rounded, message: '还没有观看记录'),
           );
         }
 
@@ -169,10 +163,8 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
 ///
 /// 缩略图尺寸按可用宽度算并封顶：宽屏下固定尺寸会在行首留一大片空白，
 /// 而封顶后条目宽度仍跟着窗口走，分隔线与标题左边缘始终对齐。
-class const _HistoryRows({
-  required this.items,
-  required this.onVideoTap,
-}) extends StatelessWidget {
+class const _HistoryRows({required this.items, required this.onVideoTap})
+    extends StatelessWidget {
   final List<MediaHistoryItem> items;
   final void Function(MediaHistoryItem item) onVideoTap;
 
@@ -387,6 +379,7 @@ class const _HistoryRow({
     return sameYear ? '$month-$day' : '${viewedAt.year}-$month-$day';
   }
 }
+
 /// 空态 / 错误态的统一版式
 class const _Message({
   required this.icon,

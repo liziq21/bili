@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/model/recent_search_query.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
@@ -108,9 +109,17 @@ class const _RecentSearches({
     final bloc = context.read<SearchBloc?>();
     if (bloc == null) return const SliverToBoxAdapter();
 
-    return BlocBuilder<SearchBloc, SearchState>(
-      builder: (context, state) {
-        final queries = state.recentSearchQueries;
+    // ⚡ Bolt Optimization: Use BlocSelector to select only `recentSearchQueries`.
+    // Rebuilding `_RecentSearches` strictly when search history changes isolates
+    // this subtree from high-frequency typing/suggestion state updates (e.g. `currentQuery` or
+    // `suggests` emissions) as users type into the search bar.
+    return BlocSelector<
+      SearchBloc,
+      SearchState,
+      List<RecentSearchQuery>
+    >(
+      selector: (state) => state.recentSearchQueries,
+      builder: (context, queries) {
         if (queries.isEmpty) return const SliverToBoxAdapter();
 
         final theme = Theme.of(context);
@@ -128,7 +137,7 @@ class const _RecentSearches({
                   Expanded(
                     child: Text(
                       '最近搜索',
-                      style: $styles.text.title2?.copyWith(
+                      style: $styles.text.title2.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
