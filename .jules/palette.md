@@ -45,3 +45,9 @@
 **Learning:** Live room feed cards (`_LiveRoomCard`) that wrap `InkWell` directly without `Semantics` or `Tooltip` leave screen readers to announce unformatted child text fragments without button roles, while taps lack physical feedback. Wrapping card content in `Tooltip` and `Semantics(button: true, label: semanticLabel)` with `ExcludeSemantics` on inner layout produces clean screen reader announcements and provides desktop hover hints, while `HapticFeedback.lightImpact()` on tap matches video feed card feedback.
 
 **Action:** Combine `Tooltip`, `Semantics(button: true, label: ...)` with `ExcludeSemantics` on inner layout, and `HapticFeedback.lightImpact()` on tap when building custom feed item cards.
+
+## 2026-10-02 - Video Player Controls State Tooltips & Font Subset Contract
+
+**Learning:** Media player controls without explicit `tooltip` attributes leave hover/desktop users without feedback and screen reader users without state transitions (e.g. toggling between play/pause). Adding dynamic tooltips (`_isPlaying ? '暂停' : '播放'`) and popup menu tooltips (`切换`) improves accessibility while staying strictly within the test font subset (`test/fonts/subset-characters.txt`).
+
+**Action:** Always provide state-aware dynamic tooltips for media control toggles and verify all tooltip string characters exist in `test/fonts/subset-characters.txt`.
