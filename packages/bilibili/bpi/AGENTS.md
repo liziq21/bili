@@ -26,6 +26,7 @@
 | 排行榜 | `GET /x/web-interface/ranking/v2` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/ranking.json` | 2026-09-25 |
 | 直播间详情 | `GET /xlive/web-room/v1/index/getH5InfoByRoom` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/live_room_detail.json` | 2026-09-30 |
 | 直播间播放流信息 | `GET /xlive/web-room/v2/index/getRoomPlayInfo` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/live_room_play_info.json` | 2026-10-02 |
+| 用户名片/信息 | `GET /x/web-interface/card` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/user_card.json` | 2026-10-03 |
 
 `getH5InfoByRoom` 和 `getRoomPlayInfo` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以对应的 fixture 为准。
 

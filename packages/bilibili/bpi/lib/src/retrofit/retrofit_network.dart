@@ -14,6 +14,7 @@ import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
+import '../model/user/network_bili_user_card.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_bili_player_info.dart';
 import '../model/video/network_related_video.dart';
@@ -22,6 +23,7 @@ import '../model/video/video_detail_data.dart';
 import '../network_feed_data_source.dart';
 import '../network_live_data_source.dart';
 import '../network_search_data_source.dart';
+import '../network_user_data_source.dart';
 import '../network_video_data_source.dart';
 import '../search_type.dart';
 import 'api_interceptor.dart';
@@ -147,6 +149,9 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ptype') int ptype = 8,
   });
 
+  @GET(path: ApiPath.userCard)
+  Future<NetworkBiliUserCardData> getUserCard({@query required int mid});
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -156,7 +161,8 @@ class BiliNetworkSearch
         NetworkSearchDataSource,
         NetworkVideoDataSource,
         NetworkBiliFeedDataSource,
-        NetworkLiveDataSource {
+        NetworkLiveDataSource,
+        NetworkUserDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null {
@@ -173,6 +179,7 @@ class BiliNetworkSearch
         NetworkBiliPlayerInfo: NetworkBiliPlayerInfo.fromJson,
         NetworkLiveRoomDetail: NetworkLiveRoomDetail.fromJson,
         NetworkLiveRoomPlayInfo: NetworkLiveRoomPlayInfo.fromJson,
+        NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -444,4 +451,8 @@ class BiliNetworkSearch
     platform: platform,
     ptype: ptype,
   );
+
+  @override
+  Future<NetworkBiliUserCardData> getUserCard({required int mid}) =>
+      _networkApi.getUserCard(mid: mid);
 }
