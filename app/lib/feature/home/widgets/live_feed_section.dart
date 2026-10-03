@@ -39,7 +39,6 @@ class const LiveFeedSection({
         SliverToBoxAdapter(
           child: FeedSectionHeader(
             title: section.title,
-            subtitle: '$sourceName 正在直播',
             icon: Icons.sensors_rounded,
             iconColor: Theme.of(context).colorScheme.error,
           ),

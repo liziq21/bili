@@ -122,7 +122,7 @@ class const HomeScreen({
                 context.read<SearchSuggestRepository?>() != null;
 
             return AppBar(
-              titleSpacing: $styles.insets.xs,
+              titleSpacing: $styles.insets.sm,
               title: HomeSourceSelector(
                 sources: sources,
                 activeSourceId: activeSource.id,
@@ -184,17 +184,20 @@ class const HomeScreen({
             onRefresh: () => _onRefresh(context),
             child: CustomScrollView(
               slivers: [
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: HomeFilterBar(
-                    filters: state.filters,
-                    activeFilterId: state.activeFilter.id,
-                    onSelected: (filter) => _onFilterSelected(context, filter),
-                    height: HomeFilterBar.preferredHeight(context),
+                // 数据源没有提供任何 Feed 时不挂筛选栏：空列表配一排空 chip
+                // 比什么都不显示更像故障。
+                if (state.filters.isNotEmpty)
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: HomeFilterBar(
+                      filters: state.filters,
+                      activeFilterId: state.activeFilter!.id,
+                      onSelected: (filter) =>
+                          _onFilterSelected(context, filter),
+                      height: HomeFilterBar.preferredHeight(context),
+                    ),
                   ),
-                ),
                 ..._buildContentSlivers(context, state, activeSource.name),
-                SliverToBoxAdapter(child: SizedBox(height: $styles.insets.lg)),
               ],
             ),
           );
@@ -208,13 +211,16 @@ class const HomeScreen({
     HomeState state,
     String sourceName,
   ) {
-    if (state.activeFilter.kind == HomeFilterKind.placeholder) {
+    final filter = state.activeFilter;
+    if (filter == null) {
       return [
-        SliverToBoxAdapter(
+        SliverFillRemaining(
+          hasScrollBody: false,
           child: FeedStatusView(
-            icon: Icons.construction_rounded,
-            message: '${state.activeFilter.label} 暂未开放',
-            description: '该功能基于本地数据，仍在开发中',
+            icon: Icons.inbox_rounded,
+            message: '$sourceName 暂无可用推荐',
+            description: '该数据源未提供首页 Feed',
+            onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           ),
         ),
       ];
@@ -225,7 +231,8 @@ class const HomeScreen({
 
     if (liveSections.isEmpty && videoSections.isEmpty) {
       return [
-        SliverToBoxAdapter(
+        SliverFillRemaining(
+          hasScrollBody: false,
           child: FeedStatusView(
             icon: Icons.inbox_rounded,
             message: '$sourceName 暂无可用推荐',

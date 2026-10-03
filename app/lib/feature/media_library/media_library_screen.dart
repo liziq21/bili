@@ -1,19 +1,23 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
-import '../../ui/common/utils/layout_breakpoints.dart';
 import '../../ui/video_card.dart';
 import 'media_history_cubit.dart';
 
-/// 媒体资产页（底部导航第三项）
+/// 「我的」页（底部导航第三项）
 ///
-/// 当前只承载「观看历史」。收藏与下载不做：仓内既无对应表也无 DAO
-///（`database/table/` 只有 media / video / article / post / creator_profile /
-/// media_history / recent_search_query），主页的 `bookmarks` / `downloaded`
-/// 筛选项至今仍是 [HomeFilterKind.placeholder]。给不出内容的导航项不做，
-/// 避免点进去是空页。
+/// 当前只承载「观看历史」。设计稿上的收藏 / 下载两个分段不搬：仓内既无对应表也无
+/// DAO（`database/table/` 只有 media / video / article / post / creator_profile /
+/// media_history / recent_search_query），做出来是两个点开空的分段。设计稿上的
+/// 「批量管理」同样不搬——它绑定的是删除 / 移动操作，而历史表没有任何写接口，
+/// 留一个按下去没反应的工具条比不给更差。等 LIZ-30 落地本地库再一起补。
+///
+/// 列表用行式而非网格：历史的语义是「按时间回看」，每条都要看清标题、来源与
+/// 观看时间，行式一屏能放下条数更多；网格把每条压成小方块，时间信息挤在一行里。
 ///
 /// [MediaHistoryCubit] 由路由提供：本页若自己再建一个，加载第一页会查询两次，
 /// 而列表与翻页状态在两处实例上会各走各的。
@@ -39,6 +43,8 @@ class const MediaLibraryScreen({
   }
 
   Widget _header(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -46,16 +52,14 @@ class const MediaLibraryScreen({
         $styles.insets.sm,
         $styles.insets.xs,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              '观看历史',
-              style: $styles.text.h3?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
+          Text(
+            '我的',
+            style: $styles.text.h3.copyWith(color: colorScheme.onSurface),
           ),
+          SizedBox(height: $styles.insets.sm),
           BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
             builder: (context, state) {
               if (state.isLoading) {
@@ -64,13 +68,29 @@ class const MediaLibraryScreen({
                   child: CircularProgressIndicator(strokeWidth: 2),
                 );
               }
-              // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
-              // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
-              return TextButton(
-                onPressed: state.hasMore
-                    ? () => context.read<MediaHistoryCubit>().loadMore()
-                    : null,
-                child: Text(state.hasMore ? '加载更多' : '没有更多了'),
+              // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
+              // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
+              return Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.items.isEmpty
+                          ? '观看历史'
+                          : '观看历史 · 已载入 ${state.items.length} 条',
+                      style: $styles.text.bodySmall.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
+                  // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
+                  TextButton(
+                    onPressed: state.hasMore
+                        ? () => context.read<MediaHistoryCubit>().loadMore()
+                        : null,
+                    child: Text(state.hasMore ? '加载更多' : '没有更多了'),
+                  ),
+                ],
               );
             },
           ),
@@ -119,93 +139,232 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
           );
         }
 
-        return _MediaGrid(items: state.items, onVideoTap: onVideoTap);
+        return _HistoryRows(items: state.items, onVideoTap: onVideoTap);
       },
     );
   }
 }
 
-/// 历史条目的响应式网格
-class const _MediaGrid({
+/// 行式历史条目列表
+///
+/// 缩略图尺寸按可用宽度算并封顶：宽屏下固定尺寸会在行首留一大片空白，
+/// 而封顶后条目宽度仍跟着窗口走，分隔线与标题左边缘始终对齐。
+class const _HistoryRows({
   required this.items,
   required this.onVideoTap,
 }) extends StatelessWidget {
   final List<MediaHistoryItem> items;
   final void Function(MediaHistoryItem item) onVideoTap;
 
-  /// 单张视频卡片高度：封面 16:9 + 文字区块，随字体缩放变化
-  ///
-  /// 与 `home/widgets/video_feed_section.dart` 的同名静态方法同一套算法，两处各算
-  /// 一次：共用需要把度量从 home 的部件里挪到公共位置，不在本页顺手做。
-  static double cardExtent(BuildContext context, double cardWidth) {
-    final textScaler = MediaQuery.textScalerOf(context);
-    final titleHeight =
-        textScaler.scale($styles.text.title2.fontSize ?? 14) * 1.25 * 2;
-    final subtitleHeight =
-        textScaler.scale($styles.text.bodySmall.fontSize ?? 14) * 1.4;
-    return cardWidth * 9 / 16 +
-        titleHeight +
-        subtitleHeight +
-        $styles.insets.sm * 2 +
-        $styles.insets.xxs;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SliverPadding(
-      padding: EdgeInsets.fromLTRB(
-        $styles.insets.sm,
-        $styles.insets.xs,
-        $styles.insets.sm,
-        $styles.insets.xl,
-      ),
-      // 列数按网格的实际可用宽度算：宽屏下侧边导航栏与分隔线已经占掉一部分宽度，
-      // 用整屏宽度会在临界点多选一列，卡片被挤窄。
-      sliver: SliverLayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.crossAxisExtent;
-          final columns = LayoutSize.fromWidth(width).feedColumnsFor(width);
-          final spacing = $styles.insets.sm;
-          final cardWidth = (width - spacing * (columns - 1)) / columns;
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.crossAxisExtent;
+        final thumbWidth = (width * 0.32).clamp(96.0, 200.0);
 
-          return SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              mainAxisSpacing: spacing,
-              crossAxisSpacing: spacing,
-              // 高度由封面 16:9 + 文字区块推导，不写固定宽高比：字体放大后
-              // 固定比例会把标题裁掉。
-              mainAxisExtent: cardExtent(context, cardWidth),
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final item = items[index];
-                return VideoCard(
-                  // 用 feed 变体：历史条目没有播放量与时长（media 表无对应列），
-                  // defaultCard 会把 null 直接拼进副标题渲染成「null 观看」。
-                  variant: VideoCardVariant.feed,
-                  videoInfoBase: item.video,
-                  sourceBadge: _sourceLabel(context, item.sourceId),
-                  onTap: () => onVideoTap(item),
-                );
-              },
-              childCount: items.length,
-            ),
-          );
-        },
-      ),
+        return SliverList.separated(
+          itemCount: items.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: MediaQuery.textScalerOf(context).scale(1),
+            // 分隔线自标题左边缘起（缩略图宽度 + 间距），不贯穿整行：
+            // 贯穿会让每行读起来像表格，缩略图与文字之间的关系反而被切断。
+            indent: thumbWidth + $styles.insets.sm,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return _HistoryRow(
+              item: item,
+              thumbWidth: thumbWidth,
+              sourceLabel: _sourceLabel(context, item.sourceId),
+              onTap: () => onVideoTap(item),
+            );
+          },
+        );
+      },
     );
   }
 
   /// 数据源展示名
   ///
-  /// 历史跨源存放，卡片上标出来源才看得出这条是哪个服务的；标识对不上任何已注册
-  /// 数据源时留空，由 [VideoCard] 跳过徽章而不是显示原始标识。
+  /// 历史跨源存放，行上标出来源才看得出这条是哪个服务的；标识对不上任何已注册
+  /// 数据源时留空，由 [_HistoryRow] 跳过徽章而不是显示原始标识。
   static String? _sourceLabel(BuildContext context, String sourceId) {
     for (final source in context.mediaSources) {
       if (source.id == sourceId) return source.name;
     }
     return null;
+  }
+}
+
+/// 单条历史：左缩略图 + 右标题 / 来源 / 时间
+class const _HistoryRow({
+  required this.item,
+  required this.thumbWidth,
+  required this.onTap,
+  this.sourceLabel,
+}) extends StatelessWidget {
+  final MediaHistoryItem item;
+  final double thumbWidth;
+  final VoidCallback onTap;
+  final String? sourceLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final video = item.video;
+    final duration = VideoCard.formatDuration(video.duration);
+    final viewedAtLabel = _formatViewedAt(item.viewedAt);
+
+    return Tooltip(
+      message: video.title,
+      child: Semantics(
+        button: true,
+        label: <String>[
+          if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
+          video.title,
+          if (duration.isNotEmpty) '时长 $duration',
+          '观看于 $viewedAtLabel',
+        ].join('，'),
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: $styles.insets.sm,
+              vertical: $styles.insets.xs,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(
+                  child: SizedBox(
+                    width: thumbWidth,
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular($styles.corners.sm),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            _thumbnail(video.thumbnailUrl, colorScheme),
+                            if (duration.isNotEmpty)
+                              Positioned(
+                                bottom: $styles.insets.xxs,
+                                right: $styles.insets.xxs,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: $styles.insets.xxs,
+                                    vertical: 1,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: $styles.colors.scrim.withValues(
+                                      alpha: 0.75,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      $styles.corners.sm,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    duration,
+                                    style: $styles.text.bodySmall.copyWith(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: $styles.colors.onScrim,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: $styles.insets.sm),
+                Expanded(
+                  child: ExcludeSemantics(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          video.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: $styles.text.title2.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                            height: 1.25,
+                          ),
+                        ),
+                        SizedBox(height: $styles.insets.xxs),
+                        Text(
+                          _subtitle(video, viewedAtLabel),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: $styles.text.bodySmall.copyWith(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _thumbnail(String? url, ColorScheme colorScheme) => switch (url) {
+    final String value when value.isNotEmpty => CachedNetworkImage(
+      imageUrl: value,
+      memCacheWidth: 240,
+      fit: BoxFit.cover,
+      errorBuilder: (context, url, error) => _placeholder(colorScheme),
+    ),
+    _ => _placeholder(colorScheme),
+  };
+
+  Widget _placeholder(ColorScheme colorScheme) => Container(
+    color: colorScheme.surfaceContainerHighest,
+    child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
+  );
+
+  /// 副标题：来源 · 观看时间
+  ///
+  /// 历史条目没有播放量（media 表无该列），播放量与上传时间都不适用于「回看」
+  /// 这个语境，因此只留来源与观看时间。
+  String _subtitle(VideoModel video, String viewedAt) {
+    final creator = video.creatorProfileName;
+    final parts = <String>[
+      if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
+      if (creator != null && creator.isNotEmpty) creator,
+      viewedAt,
+    ];
+    return parts.join(' · ');
+  }
+
+  /// 观看时间的相对表述
+  ///
+  /// 用相对表述而不是绝对日期：历史是「回看」场景，「昨天 / 3 天前」比
+  /// 「2026-10-02」更快传达新旧顺序。超过一周落到日期，跨年补上年份。
+  static String _formatViewedAt(DateTime viewedAt) {
+    final difference = DateTime.now().difference(viewedAt);
+    if (difference.inMinutes < 1) return '刚刚';
+    if (difference.inHours < 1) return '${difference.inMinutes} 分钟前';
+    if (difference.inDays < 1) return '${difference.inHours} 小时前';
+    if (difference.inDays < 7) return '${difference.inDays} 天前';
+    final now = DateTime.now();
+    final sameYear = viewedAt.year == now.year;
+    final month = viewedAt.month.toString().padLeft(2, '0');
+    final day = viewedAt.day.toString().padLeft(2, '0');
+    return sameYear ? '$month-$day' : '${viewedAt.year}-$month-$day';
   }
 }
 
