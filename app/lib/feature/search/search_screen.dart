@@ -17,13 +17,9 @@ import 'bloc/search_bloc.dart';
 /// 底栏每个目的地都能被直接唤起（导航语义：点按当前项回到该分支根）。
 class const SearchScreen({
   super.key,
-  required this.onSearch,
-  this.recentQueryLimit = 20,
+  required final void Function(String query) onSearch,
+  final int recentQueryLimit = 20,
 }) extends StatelessWidget {
-  final void Function(String query) onSearch;
-
-  /// 最近搜索最多展示的条数
-  final int recentQueryLimit;
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +94,9 @@ class const SearchScreen({
 /// [SearchBloc] 通过 [MonitorRecentSearches] 订阅仓库的变更流，这里只渲染
 /// 快照。bloc 缺失时（数据源不支持建议）整块不渲染。
 class const _RecentSearches({
-  required this.limit,
-  required this.onSearch,
+  required final int limit,
+  required final void Function(String query) onSearch,
 }) extends StatelessWidget {
-  final int limit;
-  final void Function(String query) onSearch;
 
   @override
   Widget build(BuildContext context) {

@@ -31,7 +31,9 @@ void main() {
       'strips control characters from input query and fetches suggestions',
       () async {
         mockNetwork.suggestResponse = const NetworkSearchSuggest(
-          tag: [NetworkSearchSuggestItem(term: 'flutter', name: 'flutter')],
+          tag: [
+            NetworkSearchSuggestItem(term: 'flutter', name: 'flutter'),
+          ],
         );
 
         final result = await dataSource.getSuggests('flut\r\nter\x00');
@@ -55,23 +57,26 @@ void main() {
       },
     );
 
-    test('keeps literal angle brackets in suggest terms intact', () async {
-      mockNetwork.suggestResponse = const NetworkSearchSuggest(
-        tag: [
-          NetworkSearchSuggestItem(term: 'a < b > c', name: 'a &lt; b'),
-          NetworkSearchSuggestItem(
-            term: '<b>dart</b>\x00',
-            name: '<b>dart</b>',
-          ),
-        ],
-      );
+    test(
+      'keeps literal angle brackets in suggest terms intact',
+      () async {
+        mockNetwork.suggestResponse = const NetworkSearchSuggest(
+          tag: [
+            NetworkSearchSuggestItem(term: 'a < b > c', name: 'a &lt; b'),
+            NetworkSearchSuggestItem(
+              term: '<b>dart</b>\x00',
+              name: '<b>dart</b>',
+            ),
+          ],
+        );
 
-      final result = await dataSource.getSuggests('flutter');
-      expect(result, isA<Ok<List<String>>>());
-      if (result case Ok(:final value)) {
-        expect(value, equals(['a < b > c', '<b>dart</b>']));
-      }
-    });
+        final result = await dataSource.getSuggests('flutter');
+        expect(result, isA<Ok<List<String>>>());
+        if (result case Ok(:final value)) {
+          expect(value, equals(['a < b > c', '<b>dart</b>']));
+        }
+      },
+    );
 
     test(
       'returns empty list immediately when query only contains spaces',

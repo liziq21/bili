@@ -93,14 +93,19 @@ void main() {
         .timeout(const Duration(seconds: 10));
   }
 
-  Future<void> pumpLibrary(WidgetTester tester, MediaHistoryCubit cubit) async {
+  Future<void> pumpLibrary(
+    WidgetTester tester,
+    MediaHistoryCubit cubit,
+  ) async {
     final tapped = <MediaHistoryItem>[];
     await tester.pumpWidget(
       Provider<List<MediaSource>>.value(
         value: [_FakeMediaSource(id: 'bilibili', name: 'Bilibili')],
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
-          child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),
+          child: MaterialApp(
+            home: MediaLibraryScreen(onVideoTap: tapped.add),
+          ),
         ),
       ),
     );
@@ -222,8 +227,9 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Text &&
-            RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$')
-                .hasMatch(widget.data ?? ''),
+            RegExp(
+              r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$',
+            ).hasMatch(widget.data ?? ''),
       ),
       findsOneWidget,
     );
@@ -248,7 +254,9 @@ void main() {
         value: [_FakeMediaSource(id: 'bilibili', name: 'Bilibili')],
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
-          child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),
+          child: MaterialApp(
+            home: MediaLibraryScreen(onVideoTap: tapped.add),
+          ),
         ),
       ),
     );

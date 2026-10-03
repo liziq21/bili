@@ -35,9 +35,7 @@ void main() {
     await db.mediaHistoryDao.insertMediaHistory(
       MediaHistoryCompanion(
         mediaId: Value(media!.$1.internalId),
-        accessedAt: Value(
-          DateTime(2026).subtract(Duration(minutes: minutesAgo)),
-        ),
+        accessedAt: Value(DateTime(2026).subtract(Duration(minutes: minutesAgo))),
       ),
     );
   }
@@ -60,9 +58,7 @@ void main() {
     await db.mediaHistoryDao.insertMediaHistory(
       MediaHistoryCompanion(
         mediaId: Value(media!.$1.internalId),
-        accessedAt: Value(
-          DateTime(2026).subtract(Duration(minutes: minutesAgo)),
-        ),
+        accessedAt: Value(DateTime(2026).subtract(Duration(minutes: minutesAgo))),
       ),
     );
   }
@@ -75,11 +71,11 @@ void main() {
         .timeout(const Duration(seconds: 10));
   }
 
-  List<String> idsOf(MediaHistoryCubit cubit) => [
-    for (final item in cubit.state.items) item.video.id,
-  ];
+  List<String> idsOf(MediaHistoryCubit cubit) =>
+      [for (final item in cubit.state.items) item.video.id];
 
-  test('the next page starts after every consumed row, not after every shown video', () async {
+  test('the next page starts after every consumed row, not after every shown video',
+      () async {
     // Rows newest first: article, video1, article, article, video2, article.
     // The first page of three rows holds a single video, so a second page
     // requested at offset 1 (one shown video) would hand back video1 again.
@@ -90,10 +86,7 @@ void main() {
     await addVideo('v2', sourceId: 'bilibili', minutesAgo: 5);
     await addArticle('a4', sourceId: 'bilibili', minutesAgo: 6);
 
-    final cubit = MediaHistoryCubit(
-      mediaHistoryDao: db.mediaHistoryDao,
-      pageSize: 3,
-    );
+    final cubit = MediaHistoryCubit(mediaHistoryDao: db.mediaHistoryDao, pageSize: 3);
     await settle(cubit);
     expect(idsOf(cubit), ['v1']);
 
@@ -112,41 +105,34 @@ void main() {
     await cubit.close();
   });
 
-  test(
-    'a page without videos keeps loading until it reaches the videos',
-    () async {
-      await addArticle('a1', sourceId: 'bilibili', minutesAgo: 1);
-      await addArticle('a2', sourceId: 'bilibili', minutesAgo: 2);
-      await addArticle('a3', sourceId: 'bilibili', minutesAgo: 3);
-      await addArticle('a4', sourceId: 'bilibili', minutesAgo: 4);
-      await addVideo('v1', sourceId: 'bilibili', minutesAgo: 5);
+  test('a page without videos keeps loading until it reaches the videos',
+      () async {
+    await addArticle('a1', sourceId: 'bilibili', minutesAgo: 1);
+    await addArticle('a2', sourceId: 'bilibili', minutesAgo: 2);
+    await addArticle('a3', sourceId: 'bilibili', minutesAgo: 3);
+    await addArticle('a4', sourceId: 'bilibili', minutesAgo: 4);
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 5);
 
-      final cubit = MediaHistoryCubit(
-        mediaHistoryDao: db.mediaHistoryDao,
-        pageSize: 2,
-      );
-      await settle(cubit);
+    final cubit = MediaHistoryCubit(mediaHistoryDao: db.mediaHistoryDao, pageSize: 2);
+    await settle(cubit);
 
-      // Stopping at the first empty page would leave the list empty while later
-      // pages hold a video, and the load-more button is disabled on an empty list.
-      expect(idsOf(cubit), ['v1']);
-      expect(cubit.state.hasMore, isFalse);
+    // Stopping at the first empty page would leave the list empty while later
+    // pages hold a video, and the load-more button is disabled on an empty list.
+    expect(idsOf(cubit), ['v1']);
+    expect(cubit.state.hasMore, isFalse);
 
-      await cubit.close();
-    },
-  );
+    await cubit.close();
+  });
 
-  test('a source id shared by two sources stays attached to its own item', () async {
+  test('a source id shared by two sources stays attached to its own item',
+      () async {
     // media's unique key is {sourceId, type, originalId}, so the same originalId
     // can be stored once per source. Keying a map by originalId alone would let
     // the later row overwrite the earlier one.
     await addVideo('shared', sourceId: 'bilibili', minutesAgo: 1);
     await addVideo('shared', sourceId: 'youtube', minutesAgo: 2);
 
-    final cubit = MediaHistoryCubit(
-      mediaHistoryDao: db.mediaHistoryDao,
-      pageSize: 10,
-    );
+    final cubit = MediaHistoryCubit(mediaHistoryDao: db.mediaHistoryDao, pageSize: 10);
     await settle(cubit);
 
     expect(
@@ -157,30 +143,24 @@ void main() {
     await cubit.close();
   });
 
-  test(
-    'refresh drops the later pages and restarts from the first row',
-    () async {
-      await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
-      await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
-      await addVideo('v3', sourceId: 'bilibili', minutesAgo: 3);
-      await addVideo('v4', sourceId: 'bilibili', minutesAgo: 4);
+  test('refresh drops the later pages and restarts from the first row', () async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+    await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+    await addVideo('v3', sourceId: 'bilibili', minutesAgo: 3);
+    await addVideo('v4', sourceId: 'bilibili', minutesAgo: 4);
 
-      final cubit = MediaHistoryCubit(
-        mediaHistoryDao: db.mediaHistoryDao,
-        pageSize: 2,
-      );
-      await settle(cubit);
-      expect(idsOf(cubit), ['v1', 'v2']);
+    final cubit = MediaHistoryCubit(mediaHistoryDao: db.mediaHistoryDao, pageSize: 2);
+    await settle(cubit);
+    expect(idsOf(cubit), ['v1', 'v2']);
 
-      await cubit.loadMore();
-      await settle(cubit);
-      expect(idsOf(cubit), ['v1', 'v2', 'v3', 'v4']);
+    await cubit.loadMore();
+    await settle(cubit);
+    expect(idsOf(cubit), ['v1', 'v2', 'v3', 'v4']);
 
-      await cubit.refresh();
-      await settle(cubit);
-      expect(idsOf(cubit), ['v1', 'v2']);
+    await cubit.refresh();
+    await settle(cubit);
+    expect(idsOf(cubit), ['v1', 'v2']);
 
-      await cubit.close();
-    },
-  );
+    await cubit.close();
+  });
 }

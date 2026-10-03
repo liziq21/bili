@@ -65,7 +65,10 @@ class const HomeState({
     if (all.isEmpty) return null;
     final id = filterId;
     if (id == null) return all.first;
-    return all.firstWhere((filter) => filter.id == id, orElse: () => all.first);
+    return all.firstWhere(
+      (filter) => filter.id == id,
+      orElse: () => all.first,
+    );
   }
 
   /// 当前筛选下应展示的视频区块

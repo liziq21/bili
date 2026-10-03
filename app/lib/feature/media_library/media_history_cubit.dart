@@ -31,8 +31,7 @@ class MediaHistoryCubit({
   required final MediaHistoryDao mediaHistoryDao,
   final int pageSize = 20,
 }) extends Cubit<MediaHistoryState> {
-  this
-    : _mediaHistoryDao = mediaHistoryDao,
+  this : _mediaHistoryDao = mediaHistoryDao,
       _pageSize = pageSize,
       super(const MediaHistoryState()) {
     loadMore();

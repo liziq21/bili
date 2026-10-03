@@ -30,22 +30,14 @@ List<({String fullPath, int? branchIndex})> _collectRoutes(
     if (route is! GoRoute) {
       // Plain ShellRoute: contributes no path segment of its own.
       collected.addAll(
-        _collectRoutes(
-          route.routes,
-          parentPath: parentPath,
-          branchIndex: branchIndex,
-        ),
+        _collectRoutes(route.routes, parentPath: parentPath, branchIndex: branchIndex),
       );
       continue;
     }
     final fullPath = _join(parentPath, route.path);
     collected.add((fullPath: fullPath, branchIndex: branchIndex));
     collected.addAll(
-      _collectRoutes(
-        route.routes,
-        parentPath: fullPath,
-        branchIndex: branchIndex,
-      ),
+      _collectRoutes(route.routes, parentPath: fullPath, branchIndex: branchIndex),
     );
   }
   return collected;
@@ -75,9 +67,7 @@ void main() {
 
     test('the three bottom bar destinations are branch roots', () {
       final branchRoots = table
-          .where(
-            (({String fullPath, int? branchIndex}) e) => e.branchIndex != null,
-          )
+          .where((({String fullPath, int? branchIndex}) e) => e.branchIndex != null)
           .map((({String fullPath, int? branchIndex}) e) => e.fullPath)
           .toSet();
       expect(
@@ -88,14 +78,12 @@ void main() {
 
     test('search result page stays a root level route outside every branch', () {
       final searchResult = table.firstWhere(
-        (({String fullPath, int? branchIndex}) e) =>
-            e.fullPath == Routes.search,
+        (({String fullPath, int? branchIndex}) e) => e.fullPath == Routes.search,
       );
       expect(
         searchResult.branchIndex,
         isNull,
-        reason:
-            'search result page must stay outside StatefulShellRoute branches',
+        reason: 'search result page must stay outside StatefulShellRoute branches',
       );
     });
 
@@ -121,14 +109,12 @@ void main() {
     test('search entry branch does not own the search result page', () {
       final searchBranchIndex = table
           .firstWhere(
-            (({String fullPath, int? branchIndex}) e) =>
-                e.fullPath == Routes.searchEntry,
+            (({String fullPath, int? branchIndex}) e) => e.fullPath == Routes.searchEntry,
           )
           .branchIndex;
       final owned = table
           .where(
-            (({String fullPath, int? branchIndex}) e) =>
-                e.branchIndex == searchBranchIndex,
+            (({String fullPath, int? branchIndex}) e) => e.branchIndex == searchBranchIndex,
           )
           .map((({String fullPath, int? branchIndex}) e) => e.fullPath)
           .toSet();
@@ -150,8 +136,7 @@ void main() {
             continue;
           }
           for (final child in route.routes.whereType<GoRoute>()) {
-            if (child.path.startsWith('/'))
-              offender = '${route.path} -> ${child.path}';
+            if (child.path.startsWith('/')) offender = '${route.path} -> ${child.path}';
           }
           walk(route.routes);
         }

@@ -55,7 +55,8 @@ final class const AppNavigationShell({
   @override
   Widget build(BuildContext context) {
     final resolvedWidth = width ?? MediaQuery.sizeOf(context).width;
-    final useRail = LayoutSize.fromWidth(resolvedWidth) == LayoutSize.expanded;
+    final useRail =
+        LayoutSize.fromWidth(resolvedWidth) == LayoutSize.expanded;
 
     if (useRail) {
       return Scaffold(

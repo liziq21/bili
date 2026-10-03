@@ -1,3 +1,4 @@
+
 import '../exception/ypi_exception.dart';
 import 'network_youtube_search.dart';
 
@@ -180,9 +181,7 @@ final class NetworkYouTubeWatchNextResponse {
 /// `{"appendContinuationItemsAction": {"continuationItems": [...]}}`；reload
 /// 条目走 `reloadContinuationItemsCommand`，同样带 `continuationItems`。
 List<dynamic> _continuationItems(Map<String, dynamic> json) {
-  for (final rawAction in _list(
-    json['onResponseReceivedActions'],
-  ).map(_map).nonNulls) {
+  for (final rawAction in _list(json['onResponseReceivedActions']).map(_map).nonNulls) {
     for (final key in const [
       'appendContinuationItemsAction',
       'reloadContinuationItemsCommand',
