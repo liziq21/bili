@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app_bloc.dart';
 import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
@@ -88,7 +89,6 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Routes.home,
               builder: (context, state) => _buildHome(context),
-              routes: [$searchRouteData],
             ),
           ],
         ),
@@ -111,13 +111,21 @@ final GoRouter router = GoRouter(
       ],
     ),
 
-    // 根级路由：从任意页面推入的次级页面（视频详情 / 直播 / 空间 / 404），
-    // 覆盖在导航骨架之上，不出现在底栏里。
+    // 根级路由：从任意页面推入的次级页面（视频详情 / 直播 / 空间 / 搜索结果 /
+    // 404），覆盖在导航骨架之上，不出现在底栏里。搜索结果页放在这里而不是挂成
+    // 首页分支的子路由：它是推入的次级页面，从搜索分支提交时不应把底栏高亮带回
+    // 首页分支，退栈后也应回到搜索入口而不是首页。
     ShellRoute(
       builder: (_, _, navigator) {
         return AppScaffold(child: navigator);
       },
-      routes: [$liveRouteData, $spaceRouteData, $videoRouteData, $notFoundRouteData],
+      routes: [
+        $liveRouteData,
+        $spaceRouteData,
+        $videoRouteData,
+        $searchRouteData,
+        $notFoundRouteData,
+      ],
     ),
   ],
   initialLocation: Routes.home,
@@ -200,8 +208,21 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
 }
 
 /// 搜索分支
+///
+/// 数据源跟随 app 全局选择：用户的选择持久化在 [UserData]，首页由 HomeBloc 读它，
+/// 搜索分支不在 HomeBloc 之下，因此自己从 [AppBloc] 读同一份数据再解析。
+/// 少了这一步，用户在首页选了 YouTube、点进搜索页仍会搜 B 站。
 Widget _buildSearchEntry(BuildContext context) {
-  final sourceId = _resolveSource(context);
+  final persistedSourceId = context.select<AppBloc, String?>(
+    (bloc) => switch (bloc.state) {
+      LoadSuccess(:final userData) => userData.sourceId,
+      _ => null,
+    },
+  );
+  final sourceId = resolveMediaSourceId(
+    context.read<List<MediaSource>>(),
+    persistedSourceId,
+  );
   return ServiceSourceProviders(
     source: sourceId,
     child: Builder(
@@ -238,11 +259,15 @@ Widget _buildSearchEntry(BuildContext context) {
 Widget _buildLibrary(BuildContext context) {
   return BlocProvider<MediaHistoryCubit>(
     create: (context) => MediaHistoryCubit(mediaHistoryDao: context.read()),
-    child: MediaLibraryScreen(
-      onVideoTap: (video) => context.navigateToVideo(
-        video.id,
-        // 历史跨源存放，不带 source 会落到当前默认源，用错源的接口取详情会失败。
-        source: context.read<MediaHistoryCubit>().sourceOf(video.id),
+    // 回调必须在 provider 之下创建：它读的是承载列表与分页的那个 cubit，用 provider
+    // 之上的 context 去 read 会抛 ProviderNotFoundException。
+    child: Builder(
+      builder: (context) => MediaLibraryScreen(
+        onVideoTap: (item) => context.navigateToVideo(
+          item.video.id,
+          // 历史跨源存放，不带 source 会落到当前默认源，用错源的接口取详情会失败。
+          source: item.sourceId,
+        ),
       ),
     ),
   );

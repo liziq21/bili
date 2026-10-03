@@ -9,7 +9,7 @@ class const MediaHistoryState({
   this.error,
 }) {
   /// 已加载的历史条目（按访问时间倒序）
-  final List<VideoModel> items;
+  final List<MediaHistoryItem> items;
 
   /// 是否有请求在飞
   final bool isLoading;
@@ -21,7 +21,7 @@ class const MediaHistoryState({
   final String? error;
 
   MediaHistoryState copyWith({
-    List<VideoModel>? items,
+    List<MediaHistoryItem>? items,
     bool? isLoading,
     bool? hasMore,
     String? error,
