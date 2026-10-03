@@ -10,19 +10,13 @@ import 'utils/layout_breakpoints.dart';
 /// 不会跟着变。
 @immutable
 final class const AppNavDestination({
-  required this.label,
-  required this.icon,
-  this.railIcon,
-}) {
   /// 目的地文案，底部与侧边导航共用
-  final String label;
-
+  required final String label,
   /// 底部导航图标
-  final IconData icon;
-
+  required final IconData icon,
   /// 侧边导航图标，留空时回落到 [icon]
-  final IconData? railIcon;
-}
+  final IconData? railIcon,
+});
 
 /// 应用的导航骨架容器
 ///
@@ -31,19 +25,14 @@ final class const AppNavDestination({
 /// go_router 的 shell 分支自己维护。
 final class const AppNavigationShell({
   super.key,
-  required this.navigationShell,
-  required this.destinations,
-  this.width,
-}) extends StatelessWidget {
-  final StatefulNavigationShell navigationShell;
-  final List<AppNavDestination> destinations;
-
+  required final StatefulNavigationShell navigationShell,
+  required final List<AppNavDestination> destinations,
   /// 判定用宽度，缺省时取整屏宽度
   ///
   /// 显式传入是为了让侧边导航的判定基于「导航栏 + 内容」的实际排版宽度：
   /// 按整屏宽度判会在临界宽度附近反复横跳。
-  final double? width;
-
+  final double? width,
+}) extends StatelessWidget {
   void _goBranch(int index) {
     // 重复点当前目的地时回到该分支的根，而不是什么都不做。
     navigationShell.goBranch(
