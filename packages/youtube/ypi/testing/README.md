@@ -30,9 +30,10 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 `getWatchNext` 解析 `twoColumnWatchNextResults.results.results.contents` 中的 `videoPrimaryInfoRenderer`（主视频标题、播放量、发布时间）和 `videoSecondaryInfoRenderer`（频道作者 ID、频道名称、头像、订阅数、视频简介）。续页响应的条目在 `onResponseReceivedActions[].appendContinuationItemsAction.continuationItems`，解析器两条路径都读。
 
-抛错行为按实现分三种，不要照着文档想当然：
+抛错行为按实现分四种，不要照着文档想当然：
 
 - 顶层有 `error` 字段 → `YpiInnerTubeException`（带 code / continuation / reason）。
+- `alerts[].alertRenderer.type` 有值且非 `OK`（如 `ERROR`）→ `YpiInnerTubeException`，`reason` 取 alert 文本（`simpleText` 与 `runs` 两种形态都认；都取不到时退化为 `InnerTube alert: <type>`）。与 `network_youtube_browse.dart` 对失效频道的口径一致。
 - 缺 `videoId` 或缺 `videoPrimaryInfoRenderer` 标题 → `FormatException`。标题是必填项：失效或受限视频会返回 HTTP 200 且 `results.results.contents` 非空，但两个 renderer 循环全程空转，只靠 `videoId` 兜底就会放行一个标题与作者全 null 的「成功」响应。
 - `owner` 解析失败（`FormatException`）→ 忽略，`owner` 置 null。播放量、发布时间、视频简介缺失同理，都是可空字段。
 
