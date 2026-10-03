@@ -57,4 +57,16 @@ final class YoutubeRequestConverter extends JsonConverter {
     }
     return super.convertRequest(request.copyWith(body: body));
   }
+
+  @override
+  FutureOr<Response<BodyType>> convertResponse<BodyType, InnerType>(
+    Response response,
+  ) {
+    if (BodyType == String) {
+      return response.copyWith<BodyType>(
+        body: response.body?.toString() as BodyType?,
+      );
+    }
+    return super.convertResponse<BodyType, InnerType>(response);
+  }
 }
