@@ -34,7 +34,6 @@ void main() {
               slivers: [
                 LiveFeedSection(
                   section: section,
-                  sourceName: 'Bilibili',
                   onLiveTap: (r) => tappedRoom = r,
                   onRetry: () {},
                 ),
@@ -52,7 +51,7 @@ void main() {
       final inkWellFinder = find.byType(InkWell);
       expect(inkWellFinder, findsOneWidget);
       final semanticsData = tester.getSemantics(inkWellFinder).getSemanticsData();
-      expect(semanticsData.label, equals('直播，主播: 未知主播，直播中'));
+      expect(semanticsData.label, equals('直播，主播: 未知主播'));
       expect(semanticsData.flagsCollection.isButton, isTrue);
 
       // Tap live room card

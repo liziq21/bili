@@ -13,7 +13,6 @@ import 'feed_status_view.dart';
 class const LiveFeedSection({
   super.key,
   required final FeedSectionState<LiveRoomModel> section,
-  required final String sourceName,
   required final ValueChanged<LiveRoomModel> onLiveTap,
   required final VoidCallback onRetry,
 }) extends StatelessWidget {
@@ -105,11 +104,9 @@ class const _LiveRoomCard({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final streamerName = liveRoom.creatorProfileName ?? '未知主播';
-    final semanticLabel = <String>[
-      liveRoom.title,
-      '主播: $streamerName',
-      if (liveRoom.isLive) '直播中',
-    ].join('，');
+    final semanticLabel = <String>[liveRoom.title, '主播: $streamerName'].join(
+      '，',
+    );
 
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
@@ -137,46 +134,18 @@ class const _LiveRoomCard({
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Stack(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: switch (liveRoom.thumbnailUrl) {
-                          final String url when url.isNotEmpty =>
-                            CachedNetworkImage(
-                              imageUrl: url,
-                              memCacheWidth: 320,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, url, error) =>
-                                  _thumbnailPlaceholder(colorScheme),
-                            ),
-                          _ => _thumbnailPlaceholder(colorScheme),
-                        },
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: switch (liveRoom.thumbnailUrl) {
+                      final String url when url.isNotEmpty => CachedNetworkImage(
+                        imageUrl: url,
+                        memCacheWidth: 320,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, url, error) =>
+                            _thumbnailPlaceholder(colorScheme),
                       ),
-                      if (liveRoom.isLive)
-                        Positioned(
-                          top: $styles.insets.xs,
-                          left: $styles.insets.xs,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: $styles.insets.xs,
-                              vertical: $styles.insets.xxs / 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.error,
-                              borderRadius: BorderRadius.circular(
-                                $styles.corners.sm,
-                              ),
-                            ),
-                            child: Text(
-                              '直播中',
-                              style: $styles.text.bodySmallBold.copyWith(
-                                color: colorScheme.onError,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                      _ => _thumbnailPlaceholder(colorScheme),
+                    },
                   ),
                   Expanded(
                     child: Padding(

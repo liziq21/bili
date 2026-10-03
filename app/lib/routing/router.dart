@@ -33,6 +33,19 @@ part 'route_data/space_route_data.dart';
 part 'route_data/video_route_data.dart';
 part 'router.g.dart';
 
+/// 搜索分支输入框的聚焦入口，由 [SearchScreen] 在挂载时写入、销毁时清空
+///
+/// 底栏重复点「搜索」时用它：已经在搜索页就把焦点交回输入框，让用户直接继续
+/// 打字。放在这里而不是搜索页内部，是因为导航目的地（[_navDestinations]）
+/// 与搜索页由不同的构建路径产出，两者之间没有共同的祖先状态可挂。
+void Function()? _focusSearchInput;
+
+/// 底栏搜索目的地的重复点按动作
+void requestSearchFocus() => _focusSearchInput?.call();
+
+/// [SearchScreen] 挂载/销毁时回调它，登记或注销聚焦入口
+void _registerSearchFocus(void Function()? focus) => _focusSearchInput = focus;
+
 String _resolveSource(BuildContext context) {
   // 未注册 String provider 时回落到配置的默认数据源，不在此处写死服务标识。
   try {
@@ -46,18 +59,19 @@ String _resolveSource(BuildContext context) {
 
 /// 底部导航目的地
 ///
-/// 只列仓内已有数据支撑的三项。设计稿里的「订阅更新」与「我的」不做：前者需要
-/// 订阅表（`database/table/` 无此表），后者需要登录（项目明确不实现登录），
-/// 给出点开是空的导航项比不给更差。
+/// 只列仓内已有数据支撑的三项。设计稿里的「订阅更新」不做：它需要订阅表
+/// （`database/table/` 无此表），给出点开是空的导航项比不给更差。
 List<AppNavDestination> get _navDestinations => [
   const AppNavDestination(label: '首页', icon: Icons.home_rounded),
-  const AppNavDestination(
+  AppNavDestination(
     label: '搜索',
     icon: Icons.search_rounded,
     railIcon: Icons.search_rounded,
+    // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
+    onReselect: requestSearchFocus,
   ),
   const AppNavDestination(
-    label: '媒体资产',
+    label: '我的',
     icon: Icons.video_library_rounded,
     railIcon: Icons.video_library_rounded,
   ),
@@ -164,16 +178,6 @@ Widget _buildHome(BuildContext context) {
                     if (sourceId == null) return;
                     context.navigateToLive(roomId, source: sourceId);
                   },
-                  navigateToSearchResult: (keyword) {
-                    final sourceId = context.read<HomeBloc>().activeSource?.id;
-                    if (sourceId == null) return;
-                    context.navigateToSearchResult(keyword, source: sourceId);
-                  },
-                  onSpace: (mid) {
-                    final sourceId = context.read<HomeBloc>().activeSource?.id;
-                    if (sourceId == null) return;
-                    context.navigateToSpace(mid, source: sourceId);
-                  },
                   onVideo: (id) {
                     final sourceId = context.read<HomeBloc>().activeSource?.id;
                     if (sourceId == null) return;
@@ -232,6 +236,7 @@ Widget _buildSearchEntry(BuildContext context) {
         // 并在首次搜索时崩。
         if (context.read<SearchSuggestRepository?>() == null) {
           return SearchScreen(
+            onFocusInputReady: _registerSearchFocus,
             onSearch: (query) =>
                 context.navigateToSearchResult(query, source: sourceId),
           );
@@ -246,6 +251,7 @@ Widget _buildSearchEntry(BuildContext context) {
               // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
               ..add(MonitorRecentSearches()),
           child: SearchScreen(
+            onFocusInputReady: _registerSearchFocus,
             onSearch: (query) =>
                 context.navigateToSearchResult(query, source: sourceId),
           ),

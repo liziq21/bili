@@ -2,10 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
-import '../search/app_search_anchor.dart';
 import 'bloc/home_bloc.dart';
 import 'widgets/feed_status_view.dart';
 import 'widgets/home_filter_bar.dart';
@@ -16,14 +14,9 @@ import 'widgets/video_feed_section.dart';
 class const HomeScreen({
   super.key,
   required final Function(String roomId) _onLive,
-  required final Function(String searchQuery) _navigateToSearchResult,
-  required final Function(String mid) _onSpace,
   required final Function(String id) _onVideo,
 }) extends StatelessWidget {
   Function(String roomId) get onLive => _onLive;
-  Function(String searchQuery) get navigateToSearchResult =>
-      _navigateToSearchResult;
-  Function(String mid) get onSpace => _onSpace;
   Function(String id) get onVideo => _onVideo;
 
   void _onFilterSelected(BuildContext context, HomeFilter filter) {
@@ -36,66 +29,6 @@ class const HomeScreen({
       await bloc.stream.firstWhere((state) => !state.isRefreshing);
     } on StateError {
       // The bloc can close while this route is being disposed.
-    }
-  }
-
-  Future<void> _showIdInputDialog({
-    required BuildContext context,
-    required String title,
-    required String labelText,
-    required String hintText,
-    required ValueChanged<String> onSubmit,
-  }) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          title,
-          style: $styles.text.h3.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              labelText,
-              style: $styles.text.bodySmall.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            SizedBox(height: $styles.insets.xs),
-            TextField(
-              controller: controller,
-              maxLength: 100,
-              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: hintText,
-                border: const OutlineInputBorder(),
-              ),
-              autofocus: true,
-              onSubmitted: (val) => Navigator.of(context).pop(val.trim()),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (result != null && result.isNotEmpty) {
-      onSubmit(result);
     }
   }
 
@@ -115,11 +48,6 @@ class const HomeScreen({
           selector: (state) => state.sourceId,
           builder: (context, sourceId) {
             final activeSource = context.read<HomeBloc>().activeSource!;
-            final hasLiveEntry = activeSource.liveRoomSearchDataSource != null;
-            // 搜索入口复用 AppSearchAnchor 的建议浮层，它依赖 SearchBloc；
-            // 数据源没有建议能力时不提供该 bloc，因此这里也不显示搜索入口。
-            final hasSearchSuggest =
-                context.read<SearchSuggestRepository?>() != null;
 
             return AppBar(
               titleSpacing: $styles.insets.sm,
@@ -127,48 +55,17 @@ class const HomeScreen({
                 sources: sources,
                 activeSourceId: activeSource.id,
               ),
+              // 应用栏右侧只留设置入口。搜索走底栏第二项，直播间与创作者
+              // 空间直达是按 ID 跳的调试入口，日常路径里没有使用价值。
               actions: [
-                if (hasSearchSuggest)
-                  AppSearchAnchor(
-                    // 搜索历史写入尚无 API，与搜索结果页保持一致。
-                    onSearch: (String _) {},
-                    navigateToSearchResult: navigateToSearchResult,
-                    builder: (context, controller) => IconButton(
-                      icon: Icon(
-                        Icons.search_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip: '搜索',
-                      onPressed: controller.openView,
-                    ),
-                  ),
-                if (hasLiveEntry)
-                  IconButton(
-                    icon: Icon(
-                      Icons.live_tv,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    tooltip: '直达直播间',
-                    onPressed: () => _showIdInputDialog(
-                      context: context,
-                      title: '直达直播间',
-                      labelText: '请输入直播间 Room ID：',
-                      hintText: '直播间号',
-                      onSubmit: onLive,
-                    ),
-                  ),
                 IconButton(
                   icon: Icon(
-                    Icons.account_circle_outlined,
+                    Icons.settings_outlined,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  tooltip: '访问创作者空间',
-                  onPressed: () => _showIdInputDialog(
-                    context: context,
-                    title: '访问创作者空间',
-                    labelText: '请输入创作者 ID：',
-                    hintText: '创作者 ID',
-                    onSubmit: onSpace,
+                  tooltip: '设置',
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('设置开发中')),
                   ),
                 ),
                 SizedBox(width: $styles.insets.xs),
@@ -247,7 +144,6 @@ class const HomeScreen({
       for (final section in liveSections)
         LiveFeedSection(
           section: section,
-          sourceName: sourceName,
           onLiveTap: (liveRoom) => onLive('${liveRoom.id}'),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
         ),
