@@ -506,6 +506,11 @@ void _requirePopularItems(Map<String, dynamic> json, String label) {
 
 void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
+  // room_id 是 NetworkLiveRoomPlayInfo 唯一的必填字段（其余都有默认值），
+  // 缺它时 DTO 解析会直接抛，fixture 却已经写进仓库了。
+  if (data['room_id'] is! num) {
+    throw FormatException('$label data.room_id is missing or not a number');
+  }
   final playurlInfo = data['playurl_info'];
   if (playurlInfo is! Map) {
     throw FormatException('$label data.playurl_info is not an object');
