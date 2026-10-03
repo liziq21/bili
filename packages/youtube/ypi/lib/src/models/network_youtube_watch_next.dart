@@ -210,8 +210,11 @@ void _throwAlertError(Map<String, dynamic> json) {
     throw YpiInnerTubeException(
       code: null,
       continuation: null,
+      // alert 的文本有两种形态：simpleText 与 runs。NetworkYouTubeText 两种都
+      // 认，手工只读 simpleText 会在 runs 形态下退化成 'InnerTube alert: ERROR'，
+      // 把具体原因丢掉。
       reason:
-          _string(_map(alert['text'])?['simpleText']) ??
+          NetworkYouTubeText.fromJson(alert['text']).value ??
           _string(alert['text']) ??
           'InnerTube alert: $type',
     );

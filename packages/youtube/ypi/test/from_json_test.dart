@@ -408,6 +408,34 @@ void main() {
     expect(response.description, 'Continued description');
   });
 
+  test('watch next reads an ERROR alert reason expressed as runs', () {
+    // alert 文本有两种形态。只读 simpleText 的实现，在 runs 形态下 reason 会
+    // 退化成 'InnerTube alert: ERROR'，具体原因丢掉。
+    expect(
+      () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+        'alerts': <dynamic>[
+          <String, dynamic>{
+            'alertRenderer': <String, dynamic>{
+              'type': 'ERROR',
+              'text': <String, dynamic>{
+                'runs': <dynamic>[
+                  <String, dynamic>{'text': 'Video is unavailable'},
+                ],
+              },
+            },
+          },
+        ],
+      }),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'reason',
+          'Video is unavailable',
+        ),
+      ),
+    );
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);
