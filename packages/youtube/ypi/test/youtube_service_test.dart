@@ -98,6 +98,49 @@ void main() {
       },
     );
 
+    test('getWatchNext maps a non-2xx response to YpiHttpException', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response('unavailable', 503);
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      await expectLater(
+        service.getWatchNext(videoId: 'VIDEO_NEXT_123'),
+        throwsA(isA<YpiHttpException>()),
+      );
+    });
+
+    test('getWatchNext maps an ERROR alert to YpiInnerTubeException', () async {
+      // YouTube 对失效或受限视频返回 HTTP 200、无顶层 error，但带
+      // alerts[].alertRenderer(type: ERROR)。不归类成业务错误的话，调用方只会
+      // 看到一个「缺标题」的 FormatException，分不清是业务拒绝还是结构损坏。
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          json.encode({
+            'alerts': [
+              {
+                'alertRenderer': {
+                  'type': 'ERROR',
+                  'text': {'simpleText': 'Video unavailable'},
+                },
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      await expectLater(
+        service.getWatchNext(videoId: 'VIDEO_NEXT_123'),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (e) => e.reason,
+            'reason',
+            'Video unavailable',
+          ),
+        ),
+      );
+    });
+
     test(
       'getWatchNext posts to next and returns typed video details',
       () async {

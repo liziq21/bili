@@ -64,6 +64,7 @@ final class NetworkYouTubeWatchNextResponse {
     String? requestedVideoId,
   }) {
     _throwInnerTubeError(json);
+    _throwAlertError(json);
 
     // 首屏是 twoColumnWatchNextResults.results.results.contents；续页走
     // onResponseReceivedActions[].appendContinuationItemsAction.continuationItems，
@@ -190,6 +191,31 @@ List<dynamic> _continuationItems(Map<String, dynamic> json) {
     }
   }
   return const [];
+}
+
+/// Turns an `alerts[]` ERROR block into a typed business error.
+///
+/// YouTube answers a removed or restricted video with HTTP 200, no top-level
+/// `error`, and `alerts[].alertRenderer` of type `ERROR`. Without this the
+/// response fails later with a `FormatException` about the missing title, and
+/// the caller cannot tell an InnerTube refusal from a malformed response.
+/// Same classification `network_youtube_browse.dart` applies to a missing
+/// channel.
+void _throwAlertError(Map<String, dynamic> json) {
+  for (final rawAlert in _list(json['alerts']).map(_map).nonNulls) {
+    final alert = _map(rawAlert['alertRenderer']);
+    if (alert == null) continue;
+    final type = _string(alert['type']);
+    if (type == null || type == 'OK') continue;
+    throw YpiInnerTubeException(
+      code: null,
+      continuation: null,
+      reason:
+          _string(_map(alert['text'])?['simpleText']) ??
+          _string(alert['text']) ??
+          'InnerTube alert: $type',
+    );
+  }
 }
 
 void _throwInnerTubeError(Map<String, dynamic> json) {
