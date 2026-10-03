@@ -9,9 +9,10 @@ import 'package:media_kit/media_kit.dart';
 ///
 /// 播放器库以「事件流」而非轮询状态的方式通知变化，故测试要复现真实的
 /// 事件序列——包括某些状态变化**不会**再次发事件这一点。
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
-  _FakePlatformPlayer() {
-    state = PlayerState();
+// ignore_for_file: close_sinks
+
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
+  this {
     // 位置参数顺序取自 PlayerStream 构造器签名，未被观察的流给空流。
     stream = PlayerStream(
       _playlist.stream,
@@ -150,7 +151,7 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
 }
 
 /// 收集状态流，供断言用。
-class _Recorder {
+class _Recorder() {
   final List<PlaybackState> states = [];
   late final StreamSubscription<PlaybackState> _subscription;
 
