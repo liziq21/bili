@@ -506,8 +506,16 @@ void _requirePopularItems(Map<String, dynamic> json, String label) {
 
 void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
+  // 逐字段手写断言覆盖不全：DTO 里任何已声明字段类型不符（如 g_qn_desc 不是
+  // 列表）都要等到 fixture 落盘后解析时才炸，而那时 `--force` 已经把无法通过
+  // 离线测试的响应写进仓库了。直接用 DTO 解析一次，一次覆盖全部字段。
+  try {
+    NetworkLiveRoomPlayInfo.fromJson(data);
+  } on Object catch (error) {
+    throw FormatException('$label is not a parsable play info: $error');
+  }
   // room_id 是 NetworkLiveRoomPlayInfo 唯一的必填字段（其余都有默认值），
-  // 缺它时 DTO 解析会直接抛，fixture 却已经写进仓库了。
+  // 缺它时上面的解析就会抛。
   if (data['room_id'] is! num) {
     throw FormatException('$label data.room_id is missing or not a number');
   }
@@ -538,12 +546,22 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
         if (codec is! Map) return false;
         // 原始 JSON 走 snake_case（DTO 的 fieldRename 发生在解析层，不在这里）：base_url
         final baseUrl = codec['base_url'];
-        return baseUrl is String && baseUrl.isNotEmpty;
+        if (baseUrl is! String || baseUrl.isEmpty) return false;
+        // base_url 是相对路径（如 /live-bvc/100606/live_xxx.flv?），播放地址要
+        // 由 url_info.host + base_url + extra 拼出来。没有 host 的 codec 业务上
+        // 不可播放，光看 base_url 非空会放行。
+        final urlInfo = codec['url_info'];
+        if (urlInfo is! List || urlInfo.isEmpty) return false;
+        return urlInfo.any((info) {
+          if (info is! Map) return false;
+          final host = info['host'];
+          return host is String && host.isNotEmpty;
+        });
       });
     });
   });
   if (!hasPlayable) {
-    throw FormatException('$label has no playable stream codec with a base URL');
+    throw FormatException('$label has no playable stream codec with a base URL and host');
   }
 }
 
