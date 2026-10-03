@@ -289,6 +289,125 @@ void main() {
     );
   });
 
+  test('parses the real watch next fixture into typed video details', () {
+    final response = NetworkYouTubeWatchNextResponse.fromJson(
+      loadFixtureMap('watch_next.json'),
+    );
+    expect(response.videoId, 'dQw4w9WgXcQ');
+    expect(response.title, contains('Rick Astley'));
+    expect(response.viewCountText, isNotNull);
+    expect(response.publishedTimeText, isNotNull);
+    expect(response.owner?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
+    expect(response.owner?.title, 'Rick Astley');
+    expect(response.description, isNotNull);
+  });
+
+  test('watch next missing videoId throws FormatException', () {
+    expect(
+      () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+        'contents': <String, dynamic>{},
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('watch next with a usable contents list but no title throws', () {
+    // 失效/受限视频的响应形态：HTTP 200、results.results.contents 非空，
+    // 但里面没有 videoPrimaryInfoRenderer。兜底的 videoId 会让非空检查通过，
+    // 于是返回一个标题与作者全 null 的「成功」响应。
+    expect(
+      () => NetworkYouTubeWatchNextResponse.fromJson(
+        <String, dynamic>{
+          'contents': <String, dynamic>{
+            'twoColumnWatchNextResults': <String, dynamic>{
+              'results': <String, dynamic>{
+                'results': <String, dynamic>{
+                  'contents': <dynamic>[
+                    <String, dynamic>{
+                      'videoSecondaryInfoRenderer': <String, dynamic>{
+                        'owner': <String, dynamic>{
+                          'videoOwnerRenderer': <String, dynamic>{
+                            'navigationEndpoint': <String, dynamic>{
+                              'browseEndpoint': <String, dynamic>{
+                                'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        requestedVideoId: 'dQw4w9WgXcQ',
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('watch next parses items from a continuation response', () {
+    // 续页结构与首屏完全不同：条目在
+    // onResponseReceivedActions[].appendContinuationItemsAction.continuationItems。
+    // 只读首屏路径的话，续页响应会被当成「没有内容」。
+    final response = NetworkYouTubeWatchNextResponse.fromJson(
+      <String, dynamic>{
+        'onResponseReceivedActions': <dynamic>[
+          <String, dynamic>{
+            'appendContinuationItemsAction': <String, dynamic>{
+              'continuationItems': <dynamic>[
+                <String, dynamic>{
+                  'videoPrimaryInfoRenderer': <String, dynamic>{
+                    'title': <String, dynamic>{
+                      'runs': <dynamic>[
+                        <String, dynamic>{'text': 'Continued Title'},
+                      ],
+                    },
+                    'viewCount': <String, dynamic>{
+                      'videoViewCountRenderer': <String, dynamic>{
+                        'viewCount': <String, dynamic>{
+                          'simpleText': '1,000次观看',
+                        },
+                      },
+                    },
+                  },
+                },
+                <String, dynamic>{
+                  'videoSecondaryInfoRenderer': <String, dynamic>{
+                    'owner': <String, dynamic>{
+                      'videoOwnerRenderer': <String, dynamic>{
+                        'navigationEndpoint': <String, dynamic>{
+                          'browseEndpoint': <String, dynamic>{
+                            'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
+                          },
+                        },
+                        'title': <String, dynamic>{
+                          'runs': <dynamic>[
+                            <String, dynamic>{'text': 'Continued Owner'},
+                          ],
+                        },
+                      },
+                    },
+                    'attributedDescription': <String, dynamic>{
+                      'content': 'Continued description',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      requestedVideoId: 'dQw4w9WgXcQ',
+    );
+    expect(response.title, 'Continued Title');
+    expect(response.viewCountText, '1,000次观看');
+    expect(response.owner?.title, 'Continued Owner');
+    expect(response.description, 'Continued description');
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);
