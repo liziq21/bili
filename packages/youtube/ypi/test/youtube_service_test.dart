@@ -98,6 +98,144 @@ void main() {
       },
     );
 
+    test('getWatchNext maps a non-2xx response to YpiHttpException', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response('unavailable', 503);
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      await expectLater(
+        service.getWatchNext(videoId: 'VIDEO_NEXT_123'),
+        throwsA(isA<YpiHttpException>()),
+      );
+    });
+
+    test('getWatchNext maps an ERROR alert to YpiInnerTubeException', () async {
+      // YouTube 对失效或受限视频返回 HTTP 200、无顶层 error，但带
+      // alerts[].alertRenderer(type: ERROR)。不归类成业务错误的话，调用方只会
+      // 看到一个「缺标题」的 FormatException，分不清是业务拒绝还是结构损坏。
+      final mockClient = MockClient((request) async {
+        return http.Response(
+          json.encode({
+            'alerts': [
+              {
+                'alertRenderer': {
+                  'type': 'ERROR',
+                  'text': {'simpleText': 'Video unavailable'},
+                },
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      await expectLater(
+        service.getWatchNext(videoId: 'VIDEO_NEXT_123'),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (e) => e.reason,
+            'reason',
+            'Video unavailable',
+          ),
+        ),
+      );
+    });
+
+    test(
+      'getWatchNext posts to next and returns typed video details',
+      () async {
+        final mockClient = MockClient((request) async {
+          expect(request.method, 'POST');
+          expect(request.url.path, '/youtubei/v1/next');
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['videoId'], 'VIDEO_NEXT_123');
+          expect(body['context'], isA<Map<String, dynamic>>());
+          return http.Response(
+            json.encode({
+              'currentVideoEndpoint': {
+                'watchEndpoint': {'videoId': 'VIDEO_NEXT_123'},
+              },
+              'contents': {
+                'twoColumnWatchNextResults': {
+                  'results': {
+                    'results': {
+                      'contents': [
+                        {
+                          'videoPrimaryInfoRenderer': {
+                            'title': {
+                              'runs': [
+                                {'text': 'Sample Video Title'},
+                              ],
+                            },
+                            'viewCount': {
+                              'videoViewCountRenderer': {
+                                'viewCount': {'simpleText': '1,000 views'},
+                              },
+                            },
+                            'relativeDateText': {'simpleText': '1 day ago'},
+                          },
+                        },
+                        {
+                          'videoSecondaryInfoRenderer': {
+                            'owner': {
+                              'videoOwnerRenderer': {
+                                'title': {
+                                  'runs': [
+                                    {'text': 'Sample Creator'},
+                                  ],
+                                },
+                                'navigationEndpoint': {
+                                  'browseEndpoint': {
+                                    'browseId': 'UC_CREATOR_1',
+                                  },
+                                },
+                              },
+                            },
+                            'description': {
+                              'runs': [
+                                {'text': 'Video Description text'},
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.getWatchNext(videoId: 'VIDEO_NEXT_123');
+        expect(response.videoId, 'VIDEO_NEXT_123');
+        expect(response.title, 'Sample Video Title');
+        expect(response.viewCountText, '1,000 views');
+        expect(response.publishedTimeText, '1 day ago');
+        expect(response.owner?.channelId, 'UC_CREATOR_1');
+        expect(response.owner?.title, 'Sample Creator');
+        expect(response.description, 'Video Description text');
+        service.close();
+      },
+    );
+
+    test(
+      'getWatchNext raises when neither videoId nor continuation is given',
+      () async {
+        final service = YoutubeService(
+          httpClient: MockClient((_) async => http.Response('{}', 200)),
+        );
+        await expectLater(
+          service.getWatchNext(),
+          throwsA(isA<YpiJsonException>()),
+        );
+        service.close();
+      },
+    );
+
     test('searchChannels returns a typed channel envelope', () async {
       final mockJsonResponse = {
         'contents': {
@@ -660,7 +798,10 @@ void main() {
                                               'videoId': 'VIDEO_1',
                                               'title': {
                                                 'runs': [
-                                                  {'text': 'Playlist Video One'},
+                                                  {
+                                                    'text':
+                                                        'Playlist Video One',
+                                                  },
                                                 ],
                                               },
                                               'lengthText': {

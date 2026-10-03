@@ -203,6 +203,28 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/browse_continuation.json', continuation);
     }
 
+    print('7. Fetching watch next JSON...');
+    if (!shouldFetch('testing/watch_next.json')) {
+      skipNote('testing/watch_next.json');
+    } else {
+      final nextResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/next'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'videoId': _watchNextVideoId,
+            }),
+          )
+          .timeout(requestTimeout);
+      final next = _captureJson(
+        nextResponse,
+        'watch next',
+        _validateNextResponse,
+      );
+      saveResponse('testing/watch_next.json', next);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -228,6 +250,9 @@ const _browseChannelId = 'UCuAXFkgsw1L7xaCfnd5JJOw';
 
 /// `params` that selects the Videos tab, whose content is a `richGridRenderer`.
 const _browseVideosParams = 'EgZ2aWRlb3PyBgQKAjoA';
+
+/// Sample video ID captured into `testing/watch_next.json`.
+const _watchNextVideoId = 'dQw4w9WgXcQ';
 
 /// Rejects a browse capture the DTO cannot parse.
 ///
@@ -491,6 +516,42 @@ bool _itemSectionsContain(
     }
     return items.any((item) => item is Map && containsItem(item.cast()));
   });
+}
+
+/// Rejects a watch-next capture the DTO cannot turn into a usable detail.
+///
+/// 只查结构形状挡不住两类响应：① YouTube 对失效/受限视频返回 HTTP 200 且
+/// `results.results.contents` 非空，但里面全是无关 renderer、没有
+/// `videoPrimaryInfoRenderer`；② `alerts` 里带 `ERROR` 的告警块。两者都会
+/// 通过纯结构检查被写进 fixture，之后 `from_json_test.dart` 读出全 null 的
+/// 标题与作者才对上——但那是错误响应，不该成为基线。
+///
+/// 判据直接用解析器的输出：`title` 与 `owner` 都必须非空，它们正是
+/// `videoPrimaryInfoRenderer` / `videoSecondaryInfoRenderer` 唯一能贡献的
+/// 两个业务字段。这比逐个 renderer 名字硬编码更贴近「fixture 要能被 DTO
+/// 解析出真实内容」这个目的。
+void _validateNextResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube next response is not an object');
+  }
+  final alerts = json['alerts'];
+  if (alerts is List && alerts.isNotEmpty) {
+    throw const FormatException(
+      'InnerTube next response carries alerts, which means YouTube refused '
+      'the request; an error response must not become a fixture',
+    );
+  }
+  final parsed = NetworkYouTubeWatchNextResponse.fromJson(json);
+  if (parsed.title == null || parsed.title!.isEmpty) {
+    throw const FormatException(
+      'InnerTube next response has no videoPrimaryInfoRenderer title',
+    );
+  }
+  if (parsed.owner == null) {
+    throw const FormatException(
+      'InnerTube next response has no videoSecondaryInfoRenderer owner',
+    );
+  }
 }
 
 void _validateSuggestResponse(dynamic json) {
