@@ -1,4 +1,3 @@
-
 import '../exception/ypi_exception.dart';
 import 'network_youtube_search.dart';
 
@@ -57,6 +56,7 @@ final class NetworkYouTubeWatchNextResponse {
     this.publishedTimeText,
     this.owner,
     this.description,
+    this.commentsContinuationToken,
   });
 
   factory NetworkYouTubeWatchNextResponse.fromJson(
@@ -66,10 +66,6 @@ final class NetworkYouTubeWatchNextResponse {
     _throwInnerTubeError(json);
     _throwAlertError(json);
 
-    // 首屏是 twoColumnWatchNextResults.results.results.contents；续页走
-    // onResponseReceivedActions[].appendContinuationItemsAction.continuationItems，
-    // 结构完全不同。只读首屏那条路径，续页响应会被当成「没有内容」——而续页
-    // 请求本身不带 videoId，videoId 只能靠调用方兜底，于是内容为空却解析成功。
     final contentsMap = _map(json['contents']);
     final twoCol = _map(contentsMap?['twoColumnWatchNextResults']);
     final results = _map(twoCol?['results']);
@@ -85,6 +81,7 @@ final class NetworkYouTubeWatchNextResponse {
     String? publishedTimeText;
     NetworkYouTubeVideoOwner? owner;
     String? description;
+    String? commentsContinuationToken;
 
     for (final rawItem in contentsList.map(_map).nonNulls) {
       final primary = _map(rawItem['videoPrimaryInfoRenderer']);
@@ -116,18 +113,36 @@ final class NetworkYouTubeWatchNextResponse {
           }
         }
 
-        // 简介有两个位置，且都不走 NetworkYouTubeText 的两种形态：
-        // `description` 是 runs/simpleText，而 `attributedDescription` 是
-        // `{commandRuns, content, styleRuns}`——文本在 `content` 键上，既不是
-        // simpleText 也不是 runs。只喂给 NetworkYouTubeText 会解析出 null，
-        // 于是 `from_json_test.dart` 对真实 fixture 断言 description 非空直接
-        // 失败（这条断言最初就是这么红的）。
         final descText =
             NetworkYouTubeText.fromJson(secondary['description']).value ??
             NetworkYouTubeText.fromJson(secondary['attributedDescription'])
                 .value ??
             _string(_map(secondary['attributedDescription'])?['content']);
         description ??= descText;
+      }
+
+      final itemSection = _map(rawItem['itemSectionRenderer']);
+      if (itemSection != null) {
+        final targetId =
+            _string(itemSection['targetId']) ??
+            _string(itemSection['sectionId']);
+        if (targetId == 'comments-section' ||
+            commentsContinuationToken == null) {
+          for (final rawContent in _list(
+            itemSection['contents'],
+          ).map(_map).nonNulls) {
+            final contItem = _map(rawContent['continuationItemRenderer']);
+            if (contItem != null) {
+              final endpoint = _map(contItem['continuationEndpoint']);
+              final command = _map(endpoint?['continuationCommand']);
+              final token = _string(command?['token']);
+              if (token != null) {
+                commentsContinuationToken ??= token;
+                break;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -141,10 +156,6 @@ final class NetworkYouTubeWatchNextResponse {
     if (videoId == null || videoId.isEmpty) {
       throw const FormatException('WatchNext response is missing videoId');
     }
-    // videoId 可以由调用方兜底，但内容字段不行。HTTP 200 + 非空 results 的
-    // 无效响应（失效/受限视频）会让上面两个 renderer 循环全程空转，只靠
-    // videoId 检查就放行，调用方拿到的是标题/作者/简介全 null 的「成功」
-    // 响应，而不是一个错误。至少要有标题才说明确实解析到了主信息。
     if (title == null || title.isEmpty) {
       throw const FormatException(
         'WatchNext response has no videoPrimaryInfoRenderer title',
@@ -163,6 +174,7 @@ final class NetworkYouTubeWatchNextResponse {
       publishedTimeText: publishedTimeText,
       owner: owner,
       description: description,
+      commentsContinuationToken: commentsContinuationToken,
     );
   }
 
@@ -173,15 +185,13 @@ final class NetworkYouTubeWatchNextResponse {
   final String? publishedTimeText;
   final NetworkYouTubeVideoOwner? owner;
   final String? description;
+  final String? commentsContinuationToken;
 }
 
-/// Pulls `continuationItems` out of a paginated `next` response.
-///
-/// YouTube 续页把追加条目放在 `onResponseReceivedActions[]` 里，每项形如
-/// `{"appendContinuationItemsAction": {"continuationItems": [...]}}`；reload
-/// 条目走 `reloadContinuationItemsCommand`，同样带 `continuationItems`。
 List<dynamic> _continuationItems(Map<String, dynamic> json) {
-  for (final rawAction in _list(json['onResponseReceivedActions']).map(_map).nonNulls) {
+  for (final rawAction in _list(
+    json['onResponseReceivedActions'],
+  ).map(_map).nonNulls) {
     for (final key in const [
       'appendContinuationItemsAction',
       'reloadContinuationItemsCommand',
@@ -193,14 +203,6 @@ List<dynamic> _continuationItems(Map<String, dynamic> json) {
   return const [];
 }
 
-/// Turns an `alerts[]` ERROR block into a typed business error.
-///
-/// YouTube answers a removed or restricted video with HTTP 200, no top-level
-/// `error`, and `alerts[].alertRenderer` of type `ERROR`. Without this the
-/// response fails later with a `FormatException` about the missing title, and
-/// the caller cannot tell an InnerTube refusal from a malformed response.
-/// Same classification `network_youtube_browse.dart` applies to a missing
-/// channel.
 void _throwAlertError(Map<String, dynamic> json) {
   for (final rawAlert in _list(json['alerts']).map(_map).nonNulls) {
     final alert = _map(rawAlert['alertRenderer']);
@@ -210,9 +212,6 @@ void _throwAlertError(Map<String, dynamic> json) {
     throw YpiInnerTubeException(
       code: null,
       continuation: null,
-      // alert 的文本有两种形态：simpleText 与 runs。NetworkYouTubeText 两种都
-      // 认，手工只读 simpleText 会在 runs 形态下退化成 'InnerTube alert: ERROR'，
-      // 把具体原因丢掉。
       reason:
           NetworkYouTubeText.fromJson(alert['text']).value ??
           _string(alert['text']) ??

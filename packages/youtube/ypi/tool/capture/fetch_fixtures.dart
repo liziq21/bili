@@ -45,101 +45,105 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/search_video.json')) {
       skipNote('testing/search_video.json');
     } else {
-    final videoSearchResponse = await client
-        .post(
-          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-          headers: _headers,
-          body: jsonEncode({
-            'context': _clientContext,
-            'query': 'Flutter',
-            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 1),
-          }),
-        )
-        .timeout(requestTimeout);
-    final video = _captureJson(
-      videoSearchResponse,
-      'search video',
-      (json) => _validateSearchResponse(
-        json,
-        containsItem: _rendererItem('videoRenderer'),
-      ),
-    );
-    saveResponse('testing/search_video.json', video);
+      final videoSearchResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+            headers: _headers,
+            body: jsonEncode({
+              'context': _clientContext,
+              'query': 'Flutter',
+              'params': YoutubeProtobufEncoder.encodeSearchParams(
+                contentType: 1,
+              ),
+            }),
+          )
+          .timeout(requestTimeout);
+      final video = _captureJson(
+        videoSearchResponse,
+        'search video',
+        (json) => _validateSearchResponse(
+          json,
+          containsItem: _rendererItem('videoRenderer'),
+        ),
+      );
+      saveResponse('testing/search_video.json', video);
     }
 
     print('2. Fetching search channel JSON...');
     if (!shouldFetch('testing/search_channel.json')) {
       skipNote('testing/search_channel.json');
     } else {
-    final channelSearchResponse = await client
-        .post(
-          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-          headers: _headers,
-          body: jsonEncode({
-            'context': _clientContext,
-            'query': 'Flutter',
-            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
-          }),
-        )
-        .timeout(requestTimeout);
-    final channel = _captureJson(
-      channelSearchResponse,
-      'search channel',
-      (json) => _validateSearchResponse(
-        json,
-        containsItem: _rendererItem('channelRenderer'),
-      ),
-    );
-    saveResponse('testing/search_channel.json', channel);
+      final channelSearchResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+            headers: _headers,
+            body: jsonEncode({
+              'context': _clientContext,
+              'query': 'Flutter',
+              'params': YoutubeProtobufEncoder.encodeSearchParams(
+                contentType: 2,
+              ),
+            }),
+          )
+          .timeout(requestTimeout);
+      final channel = _captureJson(
+        channelSearchResponse,
+        'search channel',
+        (json) => _validateSearchResponse(
+          json,
+          containsItem: _rendererItem('channelRenderer'),
+        ),
+      );
+      saveResponse('testing/search_channel.json', channel);
     }
 
     print('3. Fetching search playlist JSON...');
     if (!shouldFetch('testing/search_playlist.json')) {
       skipNote('testing/search_playlist.json');
     } else {
-    final playlistSearchResponse = await client
-        .post(
-          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-          headers: _headers,
-          body: jsonEncode({
-            'context': _clientContext,
-            'query': 'Flutter',
-            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 3),
-          }),
-        )
-        .timeout(requestTimeout);
-    final playlist = _captureJson(
-      playlistSearchResponse,
-      'search playlist',
-      (json) =>
-          _validateSearchResponse(json, containsItem: _containsPlaylistLockup),
-    );
-    saveResponse('testing/search_playlist.json', playlist);
+      final playlistSearchResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+            headers: _headers,
+            body: jsonEncode({
+              'context': _clientContext,
+              'query': 'Flutter',
+              'params': YoutubeProtobufEncoder.encodeSearchParams(
+                contentType: 3,
+              ),
+            }),
+          )
+          .timeout(requestTimeout);
+      final playlist = _captureJson(
+        playlistSearchResponse,
+        'search playlist',
+        (json) => _validateSearchResponse(
+          json,
+          containsItem: _containsPlaylistLockup,
+        ),
+      );
+      saveResponse('testing/search_playlist.json', playlist);
     }
 
     print('4. Fetching search suggest JSON...');
     if (!shouldFetch('testing/search_suggest.json')) {
       skipNote('testing/search_suggest.json');
     } else {
-    final suggestResponse = await client
-        .get(
-          Uri.parse(
-            'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
-          ),
-        )
-        .timeout(requestTimeout);
-    final suggest = _captureJson(
-      suggestResponse,
-      'search suggest',
-      _validateSuggestResponse,
-    );
-    saveResponse('testing/search_suggest.json', suggest);
+      final suggestResponse = await client
+          .get(
+            Uri.parse(
+              'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
+            ),
+          )
+          .timeout(requestTimeout);
+      final suggest = _captureJson(
+        suggestResponse,
+        'search suggest',
+        _validateSuggestResponse,
+      );
+      saveResponse('testing/search_suggest.json', suggest);
     }
 
-    // Browse + continuation are captured as a pair: the continuation token
-    // comes from the same response body that is saved to browse.json.
-    // If browse.json is skipped (already exists, no --force), the
-    // continuation fetch is skipped too so the two fixtures stay consistent.
     final browseNeedsFetch = shouldFetch('testing/browse.json');
     final contNeedsFetch = shouldFetch('testing/browse_continuation.json');
 
@@ -166,12 +170,6 @@ Future<void> main(List<String> args) async {
       );
       saveResponse('testing/browse.json', browse);
 
-      // The continuation page is a separate request carrying the token the
-      // same response body hands back. Capturing it here keeps both pages on
-      // the same write path, so the redaction in _captureJson applies to it
-      // as well. When browse.json was just saved (or --force), the token
-      // below is extracted from the freshly fetched body, matching what was
-      // written to disk.
       print('6. Fetching channel browse continuation JSON...');
       final continuationToken = _continuationTokenFrom(
         jsonDecode(utf8.decode(browse.bodyBytes)),
@@ -225,6 +223,39 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/watch_next.json', next);
     }
 
+    print('8. Fetching video comments JSON...');
+    if (!shouldFetch('testing/comments.json')) {
+      skipNote('testing/comments.json');
+    } else {
+      final watchNextJson = jsonDecode(
+        File('testing/watch_next.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final commentsToken = NetworkYouTubeWatchNextResponse.fromJson(
+        watchNextJson,
+      ).commentsContinuationToken;
+      if (commentsToken == null || commentsToken.isEmpty) {
+        throw const FormatException(
+          'watch_next.json carried no comments continuation token',
+        );
+      }
+      final commentsResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/next'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'continuation': commentsToken,
+            }),
+          )
+          .timeout(requestTimeout);
+      final comments = _captureJson(
+        commentsResponse,
+        'video comments',
+        _validateCommentsResponse,
+      );
+      saveResponse('testing/comments.json', comments);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -240,26 +271,10 @@ Future<void> main(List<String> args) async {
   }
 }
 
-/// Channel whose `/videos` tab is captured into `testing/browse.json`.
-///
-/// The previous capture used `UCwXdFgeE9KYzlDUR7te5Suq`, which by 2026-10-01
-/// answers HTTP 200 with an `alerts[].alertRenderer` of type `ERROR`. The
-/// validator below rejected it only after the fact, so the failure had already
-/// been written to disk by then.
 const _browseChannelId = 'UCuAXFkgsw1L7xaCfnd5JJOw';
-
-/// `params` that selects the Videos tab, whose content is a `richGridRenderer`.
 const _browseVideosParams = 'EgZ2aWRlb3PyBgQKAjoA';
-
-/// Sample video ID captured into `testing/watch_next.json`.
 const _watchNextVideoId = 'dQw4w9WgXcQ';
 
-/// Rejects a browse capture the DTO cannot parse.
-///
-/// Two shapes pass a naive "is `contents` an object" check and must not be
-/// saved: a missing channel answers HTTP 200 with an `ERROR` alert and no
-/// content, and a channel that no longer uses the rich grid has no video
-/// entries at all.
 void _validateBrowseResponse(dynamic json) {
   if (json is! Map<String, dynamic>) {
     throw const FormatException('InnerTube browse response is not an object');
@@ -271,15 +286,10 @@ void _validateBrowseResponse(dynamic json) {
     final type = alert['type'];
     if (type is String && type.isNotEmpty && type != 'OK') {
       throw FormatException(
-        'InnerTube browse returned alert type "$type": '
-        '${alert['text']}',
+        'InnerTube browse returned alert type "$type": ${alert['text']}',
       );
     }
   }
-  // Count what the parser will actually return, not what the grid holds. A
-  // grid of unknown renderers, or one holding only a continuation entry, is
-  // non-empty on the wire yet yields no items, so counting raw objects would
-  // admit a capture the parser reads as an empty channel.
   final items = NetworkYouTubeBrowseResponse.fromJson(json).items;
   if (items.isEmpty) {
     throw const FormatException(
@@ -289,7 +299,6 @@ void _validateBrowseResponse(dynamic json) {
   }
 }
 
-/// Reads the continuation token out of a channel browse response.
 String? _continuationTokenFrom(Map<String, dynamic> json) {
   final tabs = json['contents'] is Map
       ? (json['contents']
@@ -325,10 +334,6 @@ String? _continuationTokenFrom(Map<String, dynamic> json) {
   return null;
 }
 
-/// Finds the token among a page's items. A rich grid lists them under
-/// `contents`; a continuation page carries them under `continuationItems`.
-/// The command sits below `continuationEndpoint`, one level under the
-/// renderer, which is where the measured responses put it.
 String? _continuationTokenIn(Map<String, dynamic> node, String itemsKey) {
   final contents = node[itemsKey];
   if (contents is! List) return null;
@@ -345,8 +350,6 @@ String? _continuationTokenIn(Map<String, dynamic> node, String itemsKey) {
   return null;
 }
 
-/// Rejects a continuation page the parser would read as empty, using the same
-/// DTO the channel fixture is checked against.
 void _validateBrowseContinuationResponse(Map<String, dynamic> json) {
   final items = NetworkYouTubeBrowseResponse.fromJson(json).items;
   if (items.isEmpty) {
@@ -483,9 +486,6 @@ bool Function(Map<String, dynamic> item) _rendererItem(String renderer) {
   return (item) => item[renderer] is Map;
 }
 
-/// Playlist results arrive as `lockupViewModel` with a `PL`-prefixed
-/// [contentId], not as `playlistRenderer` (verified against the live
-/// InnerTube WEB endpoint on 2026-09-30: 0 occurrences of `playlistRenderer`).
 bool _containsPlaylistLockup(Map<String, dynamic> item) {
   final lockup = item['lockupViewModel'];
   if (lockup is! Map) {
@@ -518,18 +518,6 @@ bool _itemSectionsContain(
   });
 }
 
-/// Rejects a watch-next capture the DTO cannot turn into a usable detail.
-///
-/// 只查结构形状挡不住两类响应：① YouTube 对失效/受限视频返回 HTTP 200 且
-/// `results.results.contents` 非空，但里面全是无关 renderer、没有
-/// `videoPrimaryInfoRenderer`；② `alerts` 里带 `ERROR` 的告警块。两者都会
-/// 通过纯结构检查被写进 fixture，之后 `from_json_test.dart` 读出全 null 的
-/// 标题与作者才对上——但那是错误响应，不该成为基线。
-///
-/// 判据直接用解析器的输出：`title` 与 `owner` 都必须非空，它们正是
-/// `videoPrimaryInfoRenderer` / `videoSecondaryInfoRenderer` 唯一能贡献的
-/// 两个业务字段。这比逐个 renderer 名字硬编码更贴近「fixture 要能被 DTO
-/// 解析出真实内容」这个目的。
 void _validateNextResponse(dynamic json) {
   if (json is! Map<String, dynamic>) {
     throw const FormatException('InnerTube next response is not an object');
@@ -550,6 +538,18 @@ void _validateNextResponse(dynamic json) {
   if (parsed.owner == null) {
     throw const FormatException(
       'InnerTube next response has no videoSecondaryInfoRenderer owner',
+    );
+  }
+}
+
+void _validateCommentsResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube comments response is not an object');
+  }
+  final items = NetworkYouTubeCommentsResponse.fromJson(json).items;
+  if (items.isEmpty) {
+    throw const FormatException(
+      'InnerTube comments response yields no comment items',
     );
   }
 }

@@ -98,8 +98,6 @@ void main() {
       loadFixtureMap('browse.json'),
     );
 
-    // The channel ID is not in the header renderer YouTube now returns; it
-    // lives in `metadata.channelMetadataRenderer.externalId`.
     expect(response.header?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
     expect(response.header?.title, 'Rick Astley');
 
@@ -108,8 +106,6 @@ void main() {
       '视频',
     ]);
 
-    // A 2026 channel grid carries 30 lockups; the previous implementation
-    // expected `videoRenderer` and produced an empty list here.
     expect(response.items, hasLength(30));
     final first = response.items.first;
     expect(first.contentId, 'PXC_PYeB6F8');
@@ -131,9 +127,6 @@ void main() {
   });
 
   test('keeps the entries a continuation page returns', () {
-    // A continuation response holds the same `richItemRenderer` entries the
-    // grid came from, wrapped in `appendContinuationItemsAction`. Reading only
-    // sections there kept the token and dropped every entry.
     final response = NetworkYouTubeBrowseResponse.fromJson(
       loadFixtureMap('browse_continuation.json'),
     );
@@ -184,11 +177,10 @@ void main() {
       },
     });
 
-    // YouTube introduces new tab shapes; one of them must not take the video
-    // entries the remaining tabs already yielded down with it.
     expect(response.tabs.map((tab) => tab.title), ['视频']);
     expect(response.items.map((item) => item.contentId), ['PXC_SURVIVES']);
   });
+
   test(
     'a lockup without a content ID is dropped, and its neighbours survive',
     () {
@@ -241,8 +233,6 @@ void main() {
         },
       });
 
-      // An empty ID would leave the caller unable to open or deduplicate the
-      // entry, so the entry is dropped and collection continues.
       expect(response.items.map((item) => item.contentId), [
         'PXC_KEEP_FIRST',
         'PXC_KEEP_LAST',
@@ -251,9 +241,6 @@ void main() {
   );
 
   test('an ERROR alert is raised instead of parsing as an empty channel', () {
-    // YouTube answers HTTP 200 with `alerts[].alertRenderer.type == ERROR`
-    // when a channel is gone. This is the response the previous
-    // `browse.json` fixture held.
     expect(
       () => NetworkYouTubeBrowseResponse.fromJson(<String, dynamic>{
         'alerts': <Map<String, dynamic>>[
@@ -270,10 +257,6 @@ void main() {
   });
 
   test('a header lacking a channel ID does not yield an empty channel ID', () {
-    // `pageHeaderRenderer` carries no channel ID, so one must come from
-    // `metadata.channelMetadataRenderer.externalId`. The previous code
-    // substituted an empty string, which then failed the next request against
-    // the same channel.
     final withoutId = NetworkYouTubeBrowseResponse.fromJson(<String, dynamic>{
       'header': <String, dynamic>{
         'pageHeaderRenderer': <String, dynamic>{'pageTitle': 'No ID'},
@@ -300,6 +283,8 @@ void main() {
     expect(response.owner?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
     expect(response.owner?.title, 'Rick Astley');
     expect(response.description, isNotNull);
+    expect(response.commentsContinuationToken, isNotNull);
+    expect(response.commentsContinuationToken, isNotEmpty);
   });
 
   test('watch next missing videoId throws FormatException', () {
@@ -312,96 +297,82 @@ void main() {
   });
 
   test('watch next with a usable contents list but no title throws', () {
-    // 失效/受限视频的响应形态：HTTP 200、results.results.contents 非空，
-    // 但里面没有 videoPrimaryInfoRenderer。兜底的 videoId 会让非空检查通过，
-    // 于是返回一个标题与作者全 null 的「成功」响应。
     expect(
-      () => NetworkYouTubeWatchNextResponse.fromJson(
-        <String, dynamic>{
-          'contents': <String, dynamic>{
-            'twoColumnWatchNextResults': <String, dynamic>{
+      () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+        'contents': <String, dynamic>{
+          'twoColumnWatchNextResults': <String, dynamic>{
+            'results': <String, dynamic>{
               'results': <String, dynamic>{
-                'results': <String, dynamic>{
-                  'contents': <dynamic>[
-                    <String, dynamic>{
-                      'videoSecondaryInfoRenderer': <String, dynamic>{
-                        'owner': <String, dynamic>{
-                          'videoOwnerRenderer': <String, dynamic>{
-                            'navigationEndpoint': <String, dynamic>{
-                              'browseEndpoint': <String, dynamic>{
-                                'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
-                              },
+                'contents': <dynamic>[
+                  <String, dynamic>{
+                    'videoSecondaryInfoRenderer': <String, dynamic>{
+                      'owner': <String, dynamic>{
+                        'videoOwnerRenderer': <String, dynamic>{
+                          'navigationEndpoint': <String, dynamic>{
+                            'browseEndpoint': <String, dynamic>{
+                              'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
                             },
                           },
                         },
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
         },
-        requestedVideoId: 'dQw4w9WgXcQ',
-      ),
+      }, requestedVideoId: 'dQw4w9WgXcQ'),
       throwsA(isA<FormatException>()),
     );
   });
 
   test('watch next parses items from a continuation response', () {
-    // 续页结构与首屏完全不同：条目在
-    // onResponseReceivedActions[].appendContinuationItemsAction.continuationItems。
-    // 只读首屏路径的话，续页响应会被当成「没有内容」。
-    final response = NetworkYouTubeWatchNextResponse.fromJson(
-      <String, dynamic>{
-        'onResponseReceivedActions': <dynamic>[
-          <String, dynamic>{
-            'appendContinuationItemsAction': <String, dynamic>{
-              'continuationItems': <dynamic>[
-                <String, dynamic>{
-                  'videoPrimaryInfoRenderer': <String, dynamic>{
-                    'title': <String, dynamic>{
-                      'runs': <dynamic>[
-                        <String, dynamic>{'text': 'Continued Title'},
-                      ],
-                    },
-                    'viewCount': <String, dynamic>{
-                      'videoViewCountRenderer': <String, dynamic>{
-                        'viewCount': <String, dynamic>{
-                          'simpleText': '1,000次观看',
-                        },
-                      },
+    final response = NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+      'onResponseReceivedActions': <dynamic>[
+        <String, dynamic>{
+          'appendContinuationItemsAction': <String, dynamic>{
+            'continuationItems': <dynamic>[
+              <String, dynamic>{
+                'videoPrimaryInfoRenderer': <String, dynamic>{
+                  'title': <String, dynamic>{
+                    'runs': <dynamic>[
+                      <String, dynamic>{'text': 'Continued Title'},
+                    ],
+                  },
+                  'viewCount': <String, dynamic>{
+                    'videoViewCountRenderer': <String, dynamic>{
+                      'viewCount': <String, dynamic>{'simpleText': '1,000次观看'},
                     },
                   },
                 },
-                <String, dynamic>{
-                  'videoSecondaryInfoRenderer': <String, dynamic>{
-                    'owner': <String, dynamic>{
-                      'videoOwnerRenderer': <String, dynamic>{
-                        'navigationEndpoint': <String, dynamic>{
-                          'browseEndpoint': <String, dynamic>{
-                            'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
-                          },
-                        },
-                        'title': <String, dynamic>{
-                          'runs': <dynamic>[
-                            <String, dynamic>{'text': 'Continued Owner'},
-                          ],
+              },
+              <String, dynamic>{
+                'videoSecondaryInfoRenderer': <String, dynamic>{
+                  'owner': <String, dynamic>{
+                    'videoOwnerRenderer': <String, dynamic>{
+                      'navigationEndpoint': <String, dynamic>{
+                        'browseEndpoint': <String, dynamic>{
+                          'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
                         },
                       },
-                    },
-                    'attributedDescription': <String, dynamic>{
-                      'content': 'Continued description',
+                      'title': <String, dynamic>{
+                        'runs': <dynamic>[
+                          <String, dynamic>{'text': 'Continued Owner'},
+                        ],
+                      },
                     },
                   },
+                  'attributedDescription': <String, dynamic>{
+                    'content': 'Continued description',
+                  },
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      },
-      requestedVideoId: 'dQw4w9WgXcQ',
-    );
+        },
+      ],
+    }, requestedVideoId: 'dQw4w9WgXcQ');
     expect(response.title, 'Continued Title');
     expect(response.viewCountText, '1,000次观看');
     expect(response.owner?.title, 'Continued Owner');
@@ -409,8 +380,6 @@ void main() {
   });
 
   test('watch next reads an ERROR alert reason expressed as runs', () {
-    // alert 文本有两种形态。只读 simpleText 的实现，在 runs 形态下 reason 会
-    // 退化成 'InnerTube alert: ERROR'，具体原因丢掉。
     expect(
       () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
         'alerts': <dynamic>[
@@ -434,6 +403,106 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('parses the real comments fixture into typed comment threads', () {
+    final response = NetworkYouTubeCommentsResponse.fromJson(
+      loadFixtureMap('comments.json'),
+    );
+    expect(response.headerCountText, isNotNull);
+    expect(response.headerCountText, isNotEmpty);
+    expect(response.items, isNotEmpty);
+
+    final first = response.items.first;
+    expect(first.commentId, isNotEmpty);
+    expect(first.text, isNotNull);
+    expect(first.text, isNotEmpty);
+    expect(first.author?.displayName, isNotNull);
+    expect(first.author?.channelId, isNotNull);
+    expect(first.author?.avatar?.thumbnails, isNotEmpty);
+    expect(first.publishedTimeText, isNotNull);
+    expect(first.likeCountText, isNotNull);
+
+    expect(response.continuationToken, isNotNull);
+    expect(response.continuationToken, isNotEmpty);
+  });
+
+  test('parses legacy commentRenderer structure in commentThreadRenderer', () {
+    final response = NetworkYouTubeCommentsResponse.fromJson({
+      'onResponseReceivedEndpoints': [
+        {
+          'reloadContinuationItemsCommand': {
+            'continuationItems': [
+              {
+                'commentsHeaderRenderer': {
+                  'countText': {'simpleText': '100'},
+                },
+              },
+              {
+                'commentThreadRenderer': {
+                  'comment': {
+                    'commentRenderer': {
+                      'commentId': 'LEGACY_COMMENT_1',
+                      'authorText': {'simpleText': 'Legacy Author'},
+                      'authorEndpoint': {
+                        'browseEndpoint': {'browseId': 'UC_LEGACY_1'},
+                      },
+                      'authorThumbnail': {
+                        'thumbnails': [
+                          {'url': 'https://yt.com/avatar.jpg'},
+                        ],
+                      },
+                      'contentText': {'simpleText': 'Legacy Comment Text'},
+                      'publishedTimeText': {'simpleText': '2 hours ago'},
+                      'voteCount': {'simpleText': '42'},
+                      'replyCount': 5,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(response.headerCountText, '100');
+    expect(response.items, hasLength(1));
+    final comment = response.items.single;
+    expect(comment.commentId, 'LEGACY_COMMENT_1');
+    expect(comment.author?.displayName, 'Legacy Author');
+    expect(comment.author?.channelId, 'UC_LEGACY_1');
+    expect(
+      comment.author?.avatar?.thumbnails.first.url,
+      'https://yt.com/avatar.jpg',
+    );
+    expect(comment.text, 'Legacy Comment Text');
+    expect(comment.publishedTimeText, '2 hours ago');
+    expect(comment.likeCountText, '42');
+    expect(comment.replyCount, 5);
+  });
+
+  test('commentThread missing commentId is dropped', () {
+    final response = NetworkYouTubeCommentsResponse.fromJson({
+      'onResponseReceivedEndpoints': [
+        {
+          'reloadContinuationItemsCommand': {
+            'continuationItems': [
+              {
+                'commentThreadRenderer': {
+                  'comment': {
+                    'commentRenderer': {
+                      'contentText': {'simpleText': 'No commentId'},
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(response.items, isEmpty);
   });
 
   test('parses the real suggest fixture into a typed suggestion DTO', () {
