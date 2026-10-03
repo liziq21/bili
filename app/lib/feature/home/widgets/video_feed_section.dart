@@ -5,7 +5,6 @@ import '../../../main.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../../../ui/video_card.dart';
 import '../bloc/home_bloc.dart';
-import 'feed_section_header.dart';
 import 'feed_status_view.dart';
 
 /// 单个视频 Feed 区块（标题 + 响应式网格 + 加载更多）
@@ -35,15 +34,10 @@ class const VideoFeedSection({
 
   @override
   Widget build(BuildContext context) {
+    // 筛选项已经标出当前是哪个 Feed，列表里再放一次区块标题是重复信息；
+    // 翻页入口也按设计稿收到列表末尾居中，不挂在区块头上。
     return SliverMainAxisGroup(
       slivers: [
-        SliverToBoxAdapter(
-          child: FeedSectionHeader(
-            title: section.title,
-            subtitle: '$sourceName 推荐内容',
-            icon: Icons.recommend_rounded,
-          ),
-        ),
         SliverPadding(
           padding: EdgeInsets.symmetric(
             horizontal: $styles.insets.sm,
@@ -98,22 +92,57 @@ class const VideoFeedSection({
             },
           ),
         ),
-        if (section.hasMore || section.isLoadingMore)
+        // 只有真的列出了条目才谈得上「还有没有下一页」：骨架屏、失败与空列表
+        // 之下挂一条「没有更多了」是在陈述一个并不存在的加载结果。
+        if (!section.isInitialLoading && !section.isFailure && !section.isEmpty)
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: $styles.insets.xs),
-              child: Center(
-                child: section.isLoadingMore
-                    ? const CircularProgressIndicator()
-                    : TextButton.icon(
-                        onPressed: onLoadMore,
-                        icon: const Icon(Icons.expand_more_rounded),
-                        label: const Text('加载更多'),
-                      ),
-              ),
-            ),
+            child: _FeedFooter(section: section, onLoadMore: onLoadMore),
           ),
       ],
+    );
+  }
+}
+
+/// Feed 列表末尾的同步状态提示
+///
+/// 翻页入口与「已到底」提示合并成一处居中文案：独立按钮会占掉一整行高度，
+/// 而这两条信息都只在列表末尾出现一次。
+class const _FeedFooter({
+  required final FeedSectionState<VideoModel> section,
+  required final VoidCallback onLoadMore,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (section.isLoadingMore) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.primary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final label = section.hasMore ? '继续加载' : '没有更多了';
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
+      child: Center(
+        child: section.hasMore
+            ? TextButton(onPressed: onLoadMore, child: Text(label))
+            : Text(
+                label,
+                style: $styles.text.bodySmall.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+      ),
     );
   }
 }

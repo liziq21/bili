@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
 import 'app_search_anchor.dart';
@@ -48,13 +51,41 @@ class const SearchScreen({
     // 建议时（provider 未注入）传空仓库，让输入与提交照常工作而不是抛
     // ProviderNotFoundException。
     final suggest = context.read<SearchSuggestRepository?>();
+    // 最近搜索写入走 repository 而不是 SearchBloc：数据源不支持建议时
+    // `_withSearchBloc` 不注入该 bloc（SearchBloc 的存在只为建议浮层），
+    // 若把写入挂在 bloc 上，这条路径下的提交就永远不会被记录——而历史本身与
+    // 建议能力无关。
+    void record(String query) {
+      if (query.isEmpty) return;
+      final repository = context.read<RecentSearchQueryRepository?>();
+      if (repository == null) return;
+      // 不 await：搜索跳转不该等写库。但必须挂错误处理——写失败不该变成
+      // 未处理的异步错误，把用户的检索动作一起带走。
+      unawaited(
+        repository.insertOrReplaceRecentSearch(query).onError((error, _) {
+          // 历史只是辅助信息，记不上不该影响本次搜索。
+        }),
+      );
+    }
+
     if (suggest == null) {
-      return AppSearchAnchor(onSearch: onSearch, navigateToSearchResult: null);
+      return AppSearchAnchor(
+        // 数据源无建议能力时 navigateToSearchResult 必须留空：
+        // AppSearchAnchor._handleSearch 会把 onSearch 与 navigateToSearchResult
+        // 两个都调一遍，两者指同一个函数就会跳两次结果页。
+        onSearch: (query) {
+          record(query);
+          onSearch(query);
+        },
+      );
     }
     return AppSearchAnchor(
-      onSearch: (query) {
-        // 提交时补记最近搜索：AppSearchAnchor 只负责关闭建议浮层，不写历史。
-        context.read<SearchBloc?>()?.add(RecentSearchUpdated(query));
+      // 有建议时走 navigateToSearchResult（它负责关闭浮层）。onSearch 留空：
+      // 它与 navigateToSearchResult 在 _handleSearch 里都会被调一遍，
+      // 给它一个真实现等于把同一次提交执行两次。
+      onSearch: (_) {},
+      navigateToSearchResult: (query) {
+        record(query);
         onSearch(query);
       },
     );

@@ -13,7 +13,15 @@ part 'media_history_state.dart';
 /// `{sourceId, type, originalId}`（`database/table/media.dart`），同一个
 /// `originalId` 在两个数据源下可以各存一行，用 id 索引的映射会让后载入的那条
 /// 覆盖前一条，点开就会跳到错的服务。
-typedef MediaHistoryItem = ({VideoModel video, String sourceId});
+///
+/// [viewedAt] 是 `media_history.accessedAt`：播放器的观看进度写回属于 LIZ-28
+/// 第 3 项，尚未实现，该列目前只有写入没有更新，值恒为入库时刻。列表照样显示
+/// 它——它至少是这条记录入库的时间，不显示等于丢掉唯一可用的时间信息。
+typedef MediaHistoryItem = ({
+  VideoModel video,
+  String sourceId,
+  DateTime viewedAt,
+});
 
 /// 观看历史加载器
 ///
@@ -93,6 +101,7 @@ class MediaHistoryCubit({
           items.add((
             video: _toVideoModel(row.media),
             sourceId: row.media.sourceId,
+            viewedAt: row.history.accessedAt,
           ));
           added++;
         }
@@ -103,8 +112,12 @@ class MediaHistoryCubit({
       }
 
       _rowOffset = cursor;
+      if (isClosed) return;
       emit(state.copyWith(isLoading: false, items: items, hasMore: hasMore));
     } catch (e) {
+      // cubit 已关闭时 emit 会抛 StateError，这个 catch 会把它吞掉、再抛一次，
+      // 于是「页面已离开」这种正常收尾变成未捕获异常。
+      if (isClosed) return;
       emit(state.copyWith(isLoading: false, error: '$e'));
     }
   }

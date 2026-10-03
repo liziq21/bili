@@ -79,10 +79,11 @@ class HomeBloc({
     final resolved = _resolveSourceId(userData.sourceId);
     if (resolved == state.sourceId) return;
     // 数据源切换后旧 Feed 不再适用，清空并重新拉取。
+    // 清掉选中项：各源的 Feed id 不同，旧 id 在新源下必然失效。
     emit(
       state.copyWith(
         sourceId: resolved,
-        filterId: HomeState.allFilterId,
+        clearFilter: true,
         videoSections: const [],
         liveSections: const [],
       ),

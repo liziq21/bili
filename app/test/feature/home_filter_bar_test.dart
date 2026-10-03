@@ -8,18 +8,19 @@ void main() {
     'HomeFilterBar renders chips with tooltips and triggers selection',
     (WidgetTester tester) async {
       HomeFilter? selectedFilter;
+      // 只列真实存在的 Feed：筛选项即 Feed 本身，没有聚合项也没有本地功能占位项。
       const filters = [
         HomeFilter(
-          id: 'aggregate:all',
-          rawId: 'all',
-          label: '全部推荐',
-          kind: HomeFilterKind.all,
+          id: 'video:popular',
+          rawId: 'popular',
+          label: '热门',
+          kind: HomeFilterKind.videoFeed,
         ),
         HomeFilter(
-          id: 'placeholder:sub',
-          rawId: 'sub',
-          label: '订阅更新',
-          kind: HomeFilterKind.placeholder,
+          id: 'live:liveFeed',
+          rawId: 'liveFeed',
+          label: '直播',
+          kind: HomeFilterKind.liveFeed,
         ),
       ];
 
@@ -31,7 +32,7 @@ void main() {
                 SliverPersistentHeader(
                   delegate: HomeFilterBar(
                     filters: filters,
-                    activeFilterId: 'aggregate:all',
+                    activeFilterId: 'video:popular',
                     onSelected: (filter) {
                       selectedFilter = filter;
                     },
@@ -46,11 +47,11 @@ void main() {
 
       expect(find.byType(FilterChip), findsNWidgets(2));
 
-      final chipFinder = find.widgetWithText(FilterChip, '订阅更新');
+      final chipFinder = find.widgetWithText(FilterChip, '直播');
       expect(chipFinder, findsOneWidget);
 
       final filterChip = tester.widget<FilterChip>(chipFinder);
-      expect(filterChip.tooltip, '订阅更新');
+      expect(filterChip.tooltip, '直播');
 
       await tester.tap(chipFinder);
       await tester.pump();
