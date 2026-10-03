@@ -9,6 +9,7 @@ import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
 import '../model/live/network_live_room_detail.dart';
+import '../model/live/network_live_room_play_info.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
@@ -135,6 +136,17 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('room_id') required int roomId,
   });
 
+  @GET(path: LiveApi.roomPlayInfo)
+  Future<NetworkLiveRoomPlayInfo> getLiveRoomPlayInfo({
+    @Query('room_id') required int roomId,
+    @Query('qn') int qn = 10000,
+    @Query('protocol') String protocol = '0,1',
+    @Query('format') String format = '0,1,2',
+    @Query('codec') String codec = '0,1',
+    @Query('platform') String platform = 'web',
+    @Query('ptype') int ptype = 8,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -160,6 +172,7 @@ class BiliNetworkSearch
         NetworkPlayUrl: NetworkPlayUrl.fromJson,
         NetworkBiliPlayerInfo: NetworkBiliPlayerInfo.fromJson,
         NetworkLiveRoomDetail: NetworkLiveRoomDetail.fromJson,
+        NetworkLiveRoomPlayInfo: NetworkLiveRoomPlayInfo.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -412,4 +425,23 @@ class BiliNetworkSearch
   @override
   Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) =>
       _networkApi.getLiveRoomDetail(roomId: roomId);
+
+  @override
+  Future<NetworkLiveRoomPlayInfo> getLiveRoomPlayInfo({
+    required int roomId,
+    int qn = 10000,
+    String protocol = '0,1',
+    String format = '0,1,2',
+    String codec = '0,1',
+    String platform = 'web',
+    int ptype = 8,
+  }) => _networkApi.getLiveRoomPlayInfo(
+    roomId: roomId,
+    qn: qn,
+    protocol: protocol,
+    format: format,
+    codec: codec,
+    platform: platform,
+    ptype: ptype,
+  );
 }
