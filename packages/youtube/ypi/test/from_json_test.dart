@@ -289,6 +289,28 @@ void main() {
     );
   });
 
+  test('parses the real watch next fixture into typed video details', () {
+    final response = NetworkYouTubeWatchNextResponse.fromJson(
+      loadFixtureMap('watch_next.json'),
+    );
+    expect(response.videoId, 'dQw4w9WgXcQ');
+    expect(response.title, contains('Rick Astley'));
+    expect(response.viewCountText, isNotNull);
+    expect(response.publishedTimeText, isNotNull);
+    expect(response.owner?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
+    expect(response.owner?.title, 'Rick Astley');
+    expect(response.description, isNotNull);
+  });
+
+  test('watch next missing videoId throws FormatException', () {
+    expect(
+      () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+        'contents': <String, dynamic>{},
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);

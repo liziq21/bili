@@ -98,6 +98,101 @@ void main() {
       },
     );
 
+    test(
+      'getWatchNext posts to next and returns typed video details',
+      () async {
+        final mockClient = MockClient((request) async {
+          expect(request.method, 'POST');
+          expect(request.url.path, '/youtubei/v1/next');
+          final body = json.decode(request.body) as Map<String, dynamic>;
+          expect(body['videoId'], 'VIDEO_NEXT_123');
+          expect(body['context'], isA<Map<String, dynamic>>());
+          return http.Response(
+            json.encode({
+              'currentVideoEndpoint': {
+                'watchEndpoint': {'videoId': 'VIDEO_NEXT_123'},
+              },
+              'contents': {
+                'twoColumnWatchNextResults': {
+                  'results': {
+                    'results': {
+                      'contents': [
+                        {
+                          'videoPrimaryInfoRenderer': {
+                            'title': {
+                              'runs': [
+                                {'text': 'Sample Video Title'},
+                              ],
+                            },
+                            'viewCount': {
+                              'videoViewCountRenderer': {
+                                'viewCount': {'simpleText': '1,000 views'},
+                              },
+                            },
+                            'relativeDateText': {'simpleText': '1 day ago'},
+                          },
+                        },
+                        {
+                          'videoSecondaryInfoRenderer': {
+                            'owner': {
+                              'videoOwnerRenderer': {
+                                'title': {
+                                  'runs': [
+                                    {'text': 'Sample Creator'},
+                                  ],
+                                },
+                                'navigationEndpoint': {
+                                  'browseEndpoint': {
+                                    'browseId': 'UC_CREATOR_1',
+                                  },
+                                },
+                              },
+                            },
+                            'description': {
+                              'runs': [
+                                {'text': 'Video Description text'},
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        });
+
+        final service = YoutubeService(httpClient: mockClient);
+        final response = await service.getWatchNext(videoId: 'VIDEO_NEXT_123');
+        expect(response.videoId, 'VIDEO_NEXT_123');
+        expect(response.title, 'Sample Video Title');
+        expect(response.viewCountText, '1,000 views');
+        expect(response.publishedTimeText, '1 day ago');
+        expect(response.owner?.channelId, 'UC_CREATOR_1');
+        expect(response.owner?.title, 'Sample Creator');
+        expect(response.description, 'Video Description text');
+        service.close();
+      },
+    );
+
+    test(
+      'getWatchNext raises when neither videoId nor continuation is given',
+      () async {
+        final service = YoutubeService(
+          httpClient: MockClient((_) async => http.Response('{}', 200)),
+        );
+        await expectLater(
+          service.getWatchNext(),
+          throwsA(isA<YpiJsonException>()),
+        );
+        service.close();
+      },
+    );
+
     test('searchChannels returns a typed channel envelope', () async {
       final mockJsonResponse = {
         'contents': {
@@ -660,7 +755,10 @@ void main() {
                                               'videoId': 'VIDEO_1',
                                               'title': {
                                                 'runs': [
-                                                  {'text': 'Playlist Video One'},
+                                                  {
+                                                    'text':
+                                                        'Playlist Video One',
+                                                  },
                                                 ],
                                               },
                                               'lengthText': {

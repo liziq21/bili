@@ -83,7 +83,7 @@ final class NetworkYouTubeText {
     }
     final rawRuns = _list(json['runs']);
     return NetworkYouTubeText(
-      simpleText: _string(json['simpleText']),
+      simpleText: _string(json['simpleText']) ?? _string(json['content']),
       runs: List.unmodifiable(
         rawRuns
             .map(_map)

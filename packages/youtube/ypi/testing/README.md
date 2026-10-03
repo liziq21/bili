@@ -12,6 +12,8 @@
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
 | `browse.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`UCuAXFkgsw1L7xaCfnd5JJOw`, params=`EgZ2aWRlb3PyBgQKAjoA`（视频 tab） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
 | `browse_continuation.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | continuation=取自 `browse.json` 的 richGrid 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
+| `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-09-30 |
+| `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
 
 
 ## 频道浏览的 renderer 形态
@@ -23,6 +25,10 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 失效频道的响应值得单独记一笔：它 HTTP 200、没有顶层 `error` 字段，`contents` 也是对象，只看这两处会把它当成一次成功的空响应。判定必须查 `alerts`。前一版 `browse.json` 存的就是这种响应（`browseId=UCwXdFgeE9KYzlDUR7te5Suq`，已失效），所以 `fetch_fixtures.dart` 现在有 `_validateBrowseResponse` 在写盘前拦它。
 
 续页（`onResponseReceivedActions[].appendContinuationItemsAction.continuationItems`）返回与首屏 rich grid 相同的 `richItemRenderer` 条目，不是 section 结构。实测续页同样是 30 条 `richItemRenderer` + 1 个 `continuationItemRenderer`。
+
+## 视频 Watch Next 的 renderer 形态
+
+`getWatchNext` 解析 `twoColumnWatchNextResults.results.results.contents` 中的 `videoPrimaryInfoRenderer`（主视频标题、播放量、发布时间）和 `videoSecondaryInfoRenderer`（频道作者 ID、频道名称、头像、订阅数、视频简介）。对于缺少必填字段（如标题或作者 ID）的格式错误响应，抛出 `YpiJsonException`。
 
 ## 播放列表搜索的 renderer 形态
 

@@ -10,6 +10,7 @@ import '../exception/ypi_exception.dart';
 import '../models/network_youtube_browse.dart';
 import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
+import '../models/network_youtube_watch_next.dart';
 import '../protobuf/yt_protobuf_encoder.dart';
 
 final class YoutubeService {
@@ -208,8 +209,9 @@ final class YoutubeService {
           'browsePlaylist requires either playlistId, browseId, or continuation',
         );
       }
-      final formattedBrowseId =
-          targetId.startsWith('VL') ? targetId : 'VL$targetId';
+      final formattedBrowseId = targetId.startsWith('VL')
+          ? targetId
+          : 'VL$targetId';
       body['browseId'] = formattedBrowseId;
       if (params != null && params.isNotEmpty) {
         body['params'] = params;
@@ -222,6 +224,42 @@ final class YoutubeService {
       (json) => NetworkYouTubePlaylistBrowseResponse.fromJson(
         json,
         requestedPlaylistId: targetId,
+      ),
+    );
+  }
+
+  /// Fetches video watch next information (metadata, owner, description).
+  Future<NetworkYouTubeWatchNextResponse> getWatchNext({
+    String? videoId,
+    String? playlistId,
+    String? params,
+    String? continuation,
+  }) async {
+    final body = <String, dynamic>{};
+    final sanitizedVideoId = videoId?.replaceAll(_controlChars, '');
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      if (sanitizedVideoId == null || sanitizedVideoId.isEmpty) {
+        throw const YpiJsonException(
+          'getWatchNext requires either videoId or continuation',
+        );
+      }
+      body['videoId'] = sanitizedVideoId;
+      if (playlistId != null && playlistId.isNotEmpty) {
+        body['playlistId'] = playlistId;
+      }
+      if (params != null && params.isNotEmpty) {
+        body['params'] = params;
+      }
+    }
+
+    final response = await _send(_api.next, body);
+    return _parseResponse(
+      response,
+      (json) => NetworkYouTubeWatchNextResponse.fromJson(
+        json,
+        requestedVideoId: sanitizedVideoId,
       ),
     );
   }

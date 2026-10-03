@@ -3,4 +3,5 @@ export 'src/exception/ypi_exception.dart';
 export 'src/models/network_youtube_browse.dart';
 export 'src/models/network_youtube_playlist_browse.dart';
 export 'src/models/network_youtube_search.dart';
+export 'src/models/network_youtube_watch_next.dart';
 export 'src/service/youtube_service.dart';
