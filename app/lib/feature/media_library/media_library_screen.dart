@@ -44,7 +44,6 @@ class const MediaLibraryScreen({
 
   Widget _header(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -388,7 +387,6 @@ class const _HistoryRow({
     return sameYear ? '$month-$day' : '${viewedAt.year}-$month-$day';
   }
 }
-
 /// 空态 / 错误态的统一版式
 class const _Message({
   required this.icon,
