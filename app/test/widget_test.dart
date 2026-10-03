@@ -153,7 +153,10 @@ void main() {
       // widget that actually needs localizations is the BackButton inside the
       // view it opens -- that is where #96 blew up. So open the view and check
       // the BackButton.
-      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.tap(find.descendant(
+        of: find.byType(AppScaffold),
+        matching: find.byIcon(Icons.search_rounded),
+      ).first);
       await tester.pumpAndSettle();
 
       final backButton = find.byType(BackButton);
