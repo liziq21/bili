@@ -343,6 +343,36 @@ void main() {
       expect(bloc.state.videoSections.first.isFailure, isTrue);
     });
 
+    testWidgets('Never shows the pagination footer under a failure', (
+      tester,
+    ) async {
+      // The footer used to render whenever `hasMore` was false, which includes
+      // a feed that failed to load: it printed "no more items" beneath the
+      // error message, stating a load result that never happened.
+      mediaSources = [
+        FakeMediaSource(
+          id: 'bilibili',
+          name: 'Bilibili',
+          videoFeedDataSources: [
+            FakeVideoFeed(
+              id: 'recommend',
+              title: '推荐视频',
+              pages: 1,
+              failure: true,
+            ),
+          ],
+        ),
+      ];
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.text('没有更多了'), findsNothing);
+      expect(find.text('继续加载'), findsNothing);
+    });
+
     test('Emits updated sourceId when UserData changes', () async {
       final bloc = buildBloc();
       addTearDown(bloc.close);

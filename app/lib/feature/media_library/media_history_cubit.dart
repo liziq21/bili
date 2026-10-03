@@ -112,8 +112,12 @@ class MediaHistoryCubit({
       }
 
       _rowOffset = cursor;
+      if (isClosed) return;
       emit(state.copyWith(isLoading: false, items: items, hasMore: hasMore));
     } catch (e) {
+      // cubit 已关闭时 emit 会抛 StateError，这个 catch 会把它吞掉、再抛一次，
+      // 于是「页面已离开」这种正常收尾变成未捕获异常。
+      if (isClosed) return;
       emit(state.copyWith(isLoading: false, error: '$e'));
     }
   }

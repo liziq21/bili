@@ -62,21 +62,41 @@ class const MediaLibraryScreen({
           SizedBox(height: $styles.insets.sm),
           BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
             builder: (context, state) {
-              if (state.isLoading) {
-                return const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                );
-              }
               // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
               // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
+              final label = state.items.isEmpty
+                  ? '观看历史'
+                  : '观看历史 · 已载入 ${state.items.length} 条';
+
+              // 出错且已经有条目时不整页替换：列表内容比错误更该被看见，
+              // 但错误不能因此消失，所以在这里补一条。
+              if (state.error != null && state.items.isNotEmpty) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '$label · 加载失败',
+                        style: $styles.text.bodySmall.copyWith(
+                          color: colorScheme.error,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          context.read<MediaHistoryCubit>().loadMore(),
+                      child: const Text('重试'),
+                    ),
+                  ],
+                );
+              }
+
+              // 加载期间保留按钮、只把它禁用：换成进度圈会让翻页入口
+              // 忽隐忽现（列表为空时页内还有一个），读者刚要按就找不到。
               return Row(
                 children: [
                   Expanded(
                     child: Text(
-                      state.items.isEmpty
-                          ? '观看历史'
-                          : '观看历史 · 已载入 ${state.items.length} 条',
+                      label,
                       style: $styles.text.bodySmall.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -85,7 +105,8 @@ class const MediaLibraryScreen({
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
-                    onPressed: state.hasMore
+                    onPressed:
+                        state.hasMore && !state.isLoading
                         ? () => context.read<MediaHistoryCubit>().loadMore()
                         : null,
                     child: Text(state.hasMore ? '加载更多' : '没有更多了'),
