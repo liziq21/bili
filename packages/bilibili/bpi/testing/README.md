@@ -4,20 +4,21 @@
 
 ## Fixture 记录
 
-| Fixture | Endpoint | Method | 请求参数 | 来源 | 鉴权 | 抓取日期 |
-|---|---|---|---|---|---|---|
-| `search_suggest.json` | `/main/suggest` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `search_all.json` | `/x/web-interface/wbi/search/all/v2` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
-| `search_*.json` | `/x/web-interface/wbi/search/type` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
-| `video_detail.json` | `/x/web-interface/view` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `video_relation.json` | `/x/web-interface/archive/relation` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `related_videos.json` | `/x/web-interface/archive/related` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `reply_*.json` | `/x/v2/reply/*` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `play_url.json` | `/x/player/wbi/playurl` | GET | 未保留（原始记录未保留） | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
-| `player_v2.json` | `/x/player/v2` | GET | `bvid=BV1GJ411x7vy&cid=137646676` | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-25 |
-| `popular.json` | `/x/web-interface/popular` | GET | `pn=1&ps=20` | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
-| `ranking.json` | `/x/web-interface/ranking/v2` | GET | `rid=0&type=all` | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
-| `live_room_detail.json` | `/xlive/web-room/v1/index/getH5InfoByRoom` | GET | `room_id=21144080` | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-30 |
+| Fixture | Endpoint | Method | 请求参数 | HTTP status | 来源 | 鉴权 | 抓取日期 |
+|---|---|---|---|---|---|---|---|
+| `search_suggest.json` | `/main/suggest` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
+| `search_all.json` | `/x/web-interface/wbi/search/all/v2` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
+| `search_*.json` | `/x/web-interface/wbi/search/type` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
+| `video_detail.json` | `/x/web-interface/view` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
+| `video_relation.json` | `/x/web-interface/archive/relation` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
+| `related_videos.json` | `/x/web-interface/archive/related` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
+| `reply_*.json` | `/x/v2/reply/*` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
+| `play_url.json` | `/x/player/wbi/playurl` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
+| `player_v2.json` | `/x/player/v2` | GET | `bvid=BV1GJ411x7vy&cid=137646676` | 未记录 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-25 |
+| `popular.json` | `/x/web-interface/popular` | GET | `pn=1&ps=20` | 未记录 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
+| `ranking.json` | `/x/web-interface/ranking/v2` | GET | `rid=0&type=all` | 未记录 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
+| `live_room_detail.json` | `/xlive/web-room/v1/index/getH5InfoByRoom` | GET | `room_id=21144080` | 未记录 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-30 |
+| `live_room_play_info.json` | `/xlive/web-room/v2/index/getRoomPlayInfo` | GET | `room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-02 |
 
 ## 抓取规则
 
