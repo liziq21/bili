@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/user_data/user_data_repository.dart';
+import '../../../providers/media_sources_provider.dart';
 import 'feed_section_state.dart';
 
 export 'feed_section_state.dart';
@@ -23,7 +24,7 @@ class HomeBloc({
     : _userDataRepository = userDataRepository,
       _mediaSources = mediaSources,
       // 数据源清单由 DI 注入，可能为空；此时用空标识而不是崩溃或写死某个服务名。
-      super(HomeState(sourceId: _fallbackId(mediaSources))) {
+      super(HomeState(sourceId: resolveMediaSourceId(mediaSources, null))) {
     on<_UserDataChanged>(_onUserDataChanged);
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
@@ -48,22 +49,12 @@ class HomeBloc({
   int _nextRequestVersion = 0;
   StreamSubscription<UserData>? _userDataSubscription;
 
-  /// 服务源清单非空时取首项，为空时返回空标识。清单本身是 app 配置，不含服务名硬编码。
-  static String _fallbackId(List<MediaSource> mediaSources) =>
-      mediaSources.isEmpty ? '' : mediaSources.first.id;
-
-  /// 把持久化的 [UserData.sourceId] 解析成当前生效的标识——这是全 app 唯一一处
-  /// 「未选择过 / 脏值」与「生效值」之间的转换点。
+  /// 把持久化的 [UserData.sourceId] 解析成当前生效的标识
   ///
-  /// [persisted] 为 null（用户尚未选择过）或不在当前 [_mediaSources] 清单内时，
-  /// 回退到清单首项。model 层不再持有服务名默认值，R8 由此在结构上满足，
-  /// 而不依赖注释声明。
-  String _resolveSourceId(String? persisted) {
-    if (persisted != null && _mediaSources.any((s) => s.id == persisted)) {
-      return persisted;
-    }
-    return _fallbackId(_mediaSources);
-  }
+  /// 转换规则本身在 [resolveMediaSourceId]：搜索分支不在本 bloc 之下，由路由自行
+  /// 解析同一份持久化数据，两处共用同一函数才不会解析出不同的源。
+  String _resolveSourceId(String? persisted) =>
+      resolveMediaSourceId(_mediaSources, persisted);
 
   /// 当前生效的数据源，`sourceId` 不可用时回退到首个可用数据源
   MediaSource? get activeSource {
