@@ -181,42 +181,45 @@ void main() {
   });
 
   group('MediaPlaybackController.open', () {
-    test('passes the EDL address and the request headers to the player', () async {
-      await controller.open(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/v.m4s',
-          audioUrl: 'https://cdn.example.com/a.m4s',
-          headers: {'Referer': 'https://www.bilibili.com'},
-        ),
-      );
-
-      expect(fake.openedUris, hasLength(1));
-      expect(fake.openedUris.single, startsWith('edl://'));
-      expect(fake.openedUris.single, isNot(contains('\n')));
-      expect(fake.openedHeaders.single['Referer'], 'https://www.bilibili.com');
-    });
-
     test(
-      'the state after opening is reset, not carried over from the previous media',
+      'passes the EDL address and the request headers to the player',
       () async {
         await controller.open(
-          MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/v.m4s',
+            audioUrl: 'https://cdn.example.com/a.m4s',
+            headers: {'Referer': 'https://www.bilibili.com'},
+          ),
         );
-        fake.emitPosition(const Duration(seconds: 30));
-        fake.emitDuration(const Duration(minutes: 5));
-        fake.emitPlaying(true);
-        await pumpEventQueue();
 
-        await controller.open(
-          MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+        expect(fake.openedUris, hasLength(1));
+        expect(fake.openedUris.single, startsWith('edl://'));
+        expect(fake.openedUris.single, isNot(contains('\n')));
+        expect(
+          fake.openedHeaders.single['Referer'],
+          'https://www.bilibili.com',
         );
-        await pumpEventQueue();
-
-        expect(recorder.last.position, Duration.zero);
-        expect(recorder.last.duration, Duration.zero);
-        expect(recorder.last.isPlaying, isFalse);
       },
     );
+
+    test('the state after opening is reset, not carried over from the previous media', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitPosition(const Duration(seconds: 30));
+      fake.emitDuration(const Duration(minutes: 5));
+      fake.emitPlaying(true);
+      await pumpEventQueue();
+
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      );
+      await pumpEventQueue();
+
+      expect(recorder.last.position, Duration.zero);
+      expect(recorder.last.duration, Duration.zero);
+      expect(recorder.last.isPlaying, isFalse);
+    });
 
     test('opening again clears the error of the previous media', () async {
       await controller.open(
@@ -239,39 +242,45 @@ void main() {
     // 播放器的播放开关在整个缓冲期间不变，因此缓冲结束时其播放状态流
     // 不会再发一次事件。只在缓冲事件里把播放状态置 false，会让状态永久
     // 卡在「未播放」。
-    test('recovers to playing when buffering ends without a new playing event', () async {
-      await controller.open(
-        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
-      );
+    test(
+      'recovers to playing when buffering ends without a new playing event',
+      () async {
+        await controller.open(
+          MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+        );
 
-      fake.emitPlaying(true);
-      await pumpEventQueue();
-      expect(recorder.last.isPlaying, isTrue);
+        fake.emitPlaying(true);
+        await pumpEventQueue();
+        expect(recorder.last.isPlaying, isTrue);
 
-      fake.emitBuffering(true);
-      await pumpEventQueue();
-      expect(recorder.last.isPlaying, isFalse);
-      expect(recorder.last.isBuffering, isTrue);
+        fake.emitBuffering(true);
+        await pumpEventQueue();
+        expect(recorder.last.isPlaying, isFalse);
+        expect(recorder.last.isBuffering, isTrue);
 
-      // 缓冲结束，但播放开关未变，故这里没有新的 playing 事件。
-      fake.emitBuffering(false);
-      await pumpEventQueue();
-      expect(recorder.last.isBuffering, isFalse);
-      expect(recorder.last.isPlaying, isTrue);
-    });
+        // 缓冲结束，但播放开关未变，故这里没有新的 playing 事件。
+        fake.emitBuffering(false);
+        await pumpEventQueue();
+        expect(recorder.last.isBuffering, isFalse);
+        expect(recorder.last.isPlaying, isTrue);
+      },
+    );
 
-    test('is not playing while buffering even if the playing switch stays on', () async {
-      await controller.open(
-        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
-      );
+    test(
+      'is not playing while buffering even if the playing switch stays on',
+      () async {
+        await controller.open(
+          MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+        );
 
-      fake.emitPlaying(true);
-      fake.emitBuffering(true);
-      await pumpEventQueue();
+        fake.emitPlaying(true);
+        fake.emitBuffering(true);
+        await pumpEventQueue();
 
-      expect(recorder.last.isPlaying, isFalse);
-      expect(recorder.last.isBuffering, isTrue);
-    });
+        expect(recorder.last.isPlaying, isFalse);
+        expect(recorder.last.isBuffering, isTrue);
+      },
+    );
 
     test('is not playing when the player is paused', () async {
       await controller.open(

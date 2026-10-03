@@ -9,25 +9,12 @@ import '../../ui/video_card.dart';
 import 'media_history_cubit.dart';
 
 /// 「我的」页（底部导航第三项）
-///
-/// 当前只承载「观看历史」。设计稿上的收藏 / 下载两个分段不搬：仓内既无对应表也无
-/// DAO（`database/table/` 只有 media / video / article / post / creator_profile /
-/// media_history / recent_search_query），做出来是两个点开空的分段。设计稿上的
-/// 「批量管理」同样不搬——它绑定的是删除 / 移动操作，而历史表没有任何写接口，
-/// 留一个按下去没反应的工具条比不给更差。等 LIZ-30 落地本地库再一起补。
-///
-/// 列表用行式而非网格：历史的语义是「按时间回看」，每条都要看清标题、来源与
-/// 观看时间，行式一屏能放下条数更多；网格把每条压成小方块，时间信息挤在一行里。
-///
-/// [MediaHistoryCubit] 由路由提供：本页若自己再建一个，加载第一页会查询两次，
-/// 而列表与翻页状态在两处实例上会各走各的。
 class const MediaLibraryScreen({
   super.key,
-  required this.onVideoTap,
-}) extends StatelessWidget {
-  /// 点按历史条目时的回调
-  final void Function(MediaHistoryItem item) onVideoTap;
 
+  /// 点按历史条目时的回调
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,14 +48,10 @@ class const MediaLibraryScreen({
           SizedBox(height: $styles.insets.sm),
           BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
             builder: (context, state) {
-              // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
-              // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
               final label = state.items.isEmpty
                   ? '观看历史'
                   : '观看历史 · 已载入 ${state.items.length} 条';
 
-              // 出错且已经有条目时不整页替换：列表内容比错误更该被看见，
-              // 但错误不能因此消失，所以在这里补一条。
               if (state.error != null && state.items.isNotEmpty) {
                 return Row(
                   children: [
@@ -89,8 +72,6 @@ class const MediaLibraryScreen({
                 );
               }
 
-              // 加载期间保留按钮、只把它禁用：换成进度圈会让翻页入口
-              // 忽隐忽现（列表为空时页内还有一个），读者刚要按就找不到。
               return Row(
                 children: [
                   Expanded(
@@ -101,11 +82,8 @@ class const MediaLibraryScreen({
                       ),
                     ),
                   ),
-                  // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
-                  // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
-                    onPressed:
-                        state.hasMore && !state.isLoading
+                    onPressed: state.hasMore && !state.isLoading
                         ? () => context.read<MediaHistoryCubit>().loadMore()
                         : null,
                     child: Text(state.hasMore ? '加载更多' : '没有更多了'),
@@ -121,11 +99,9 @@ class const MediaLibraryScreen({
 }
 
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
-///
-/// 历史为空是正常状态（新装用户）而不是故障，所以与错误态分开表达。
-class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
-  final void Function(MediaHistoryItem item) onVideoTap;
-
+class const _HistoryList({
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
@@ -152,10 +128,7 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
         if (state.items.isEmpty) {
           return const SliverFillRemaining(
             hasScrollBody: false,
-            child: _Message(
-              icon: Icons.history_rounded,
-              message: '还没有观看记录',
-            ),
+            child: _Message(icon: Icons.history_rounded, message: '还没有观看记录'),
           );
         }
 
@@ -166,16 +139,10 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
 }
 
 /// 行式历史条目列表
-///
-/// 缩略图尺寸按可用宽度算并封顶：宽屏下固定尺寸会在行首留一大片空白，
-/// 而封顶后条目宽度仍跟着窗口走，分隔线与标题左边缘始终对齐。
 class const _HistoryRows({
-  required this.items,
-  required this.onVideoTap,
+  required final List<MediaHistoryItem> items,
+  required final void Function(MediaHistoryItem item) onVideoTap,
 }) extends StatelessWidget {
-  final List<MediaHistoryItem> items;
-  final void Function(MediaHistoryItem item) onVideoTap;
-
   @override
   Widget build(BuildContext context) {
     return SliverLayoutBuilder(
@@ -188,8 +155,6 @@ class const _HistoryRows({
           separatorBuilder: (context, index) => Divider(
             height: 1,
             thickness: MediaQuery.textScalerOf(context).scale(1),
-            // 分隔线自标题左边缘起（缩略图宽度 + 间距），不贯穿整行：
-            // 贯穿会让每行读起来像表格，缩略图与文字之间的关系反而被切断。
             indent: thumbWidth + $styles.insets.sm,
             color: Theme.of(context).colorScheme.outlineVariant,
           ),
@@ -207,10 +172,6 @@ class const _HistoryRows({
     );
   }
 
-  /// 数据源展示名
-  ///
-  /// 历史跨源存放，行上标出来源才看得出这条是哪个服务的；标识对不上任何已注册
-  /// 数据源时留空，由 [_HistoryRow] 跳过徽章而不是显示原始标识。
   static String? _sourceLabel(BuildContext context, String sourceId) {
     for (final source in context.mediaSources) {
       if (source.id == sourceId) return source.name;
@@ -221,16 +182,11 @@ class const _HistoryRows({
 
 /// 单条历史：左缩略图 + 右标题 / 来源 / 时间
 class const _HistoryRow({
-  required this.item,
-  required this.thumbWidth,
-  required this.onTap,
-  this.sourceLabel,
+  required final MediaHistoryItem item,
+  required final double thumbWidth,
+  required final VoidCallback onTap,
+  final String? sourceLabel,
 }) extends StatelessWidget {
-  final MediaHistoryItem item;
-  final double thumbWidth;
-  final VoidCallback onTap;
-  final String? sourceLabel;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -356,10 +312,6 @@ class const _HistoryRow({
     child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
   );
 
-  /// 副标题：来源 · 观看时间
-  ///
-  /// 历史条目没有播放量（media 表无该列），播放量与上传时间都不适用于「回看」
-  /// 这个语境，因此只留来源与观看时间。
   String _subtitle(VideoModel video, String viewedAt) {
     final creator = video.creatorProfileName;
     final parts = <String>[
@@ -370,10 +322,6 @@ class const _HistoryRow({
     return parts.join(' · ');
   }
 
-  /// 观看时间的相对表述
-  ///
-  /// 用相对表述而不是绝对日期：历史是「回看」场景，「昨天 / 3 天前」比
-  /// 「2026-10-02」更快传达新旧顺序。超过一周落到日期，跨年补上年份。
   static String _formatViewedAt(DateTime viewedAt) {
     final difference = DateTime.now().difference(viewedAt);
     if (difference.inMinutes < 1) return '刚刚';
@@ -387,18 +335,14 @@ class const _HistoryRow({
     return sameYear ? '$month-$day' : '${viewedAt.year}-$month-$day';
   }
 }
+
 /// 空态 / 错误态的统一版式
 class const _Message({
-  required this.icon,
-  required this.message,
-  this.actionLabel,
-  this.onAction,
+  required final IconData icon,
+  required final String message,
+  final String? actionLabel,
+  final VoidCallback? onAction,
 }) extends StatelessWidget {
-  final IconData icon;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -410,7 +354,7 @@ class const _Message({
           SizedBox(height: $styles.insets.sm),
           Text(
             message,
-            style: $styles.text.body?.copyWith(
+            style: $styles.text.body.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
