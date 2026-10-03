@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
 import 'app_search_anchor.dart';
@@ -48,15 +49,28 @@ class const SearchScreen({
     // 建议时（provider 未注入）传空仓库，让输入与提交照常工作而不是抛
     // ProviderNotFoundException。
     final suggest = context.read<SearchSuggestRepository?>();
+    // 最近搜索写入走 repository 而不是 SearchBloc：数据源不支持建议时
+    // `_withSearchBloc` 不注入该 bloc（SearchBloc 的存在只为建议浮层），
+    // 若把写入挂在 bloc 上，这条路径下的提交就永远不会被记录——而历史本身与
+    // 建议能力无关。
+    void recordAndSearch(String query) {
+      final repository = context.read<RecentSearchQueryRepository?>();
+      if (query.isNotEmpty) {
+        repository?.insertOrReplaceRecentSearch(query);
+      }
+      onSearch(query);
+    }
+
     if (suggest == null) {
-      return AppSearchAnchor(onSearch: onSearch, navigateToSearchResult: null);
+      return AppSearchAnchor(
+        onSearch: recordAndSearch,
+        navigateToSearchResult: null,
+      );
     }
     return AppSearchAnchor(
-      onSearch: (query) {
-        // 提交时补记最近搜索：AppSearchAnchor 只负责关闭建议浮层，不写历史。
-        context.read<SearchBloc?>()?.add(RecentSearchUpdated(query));
-        onSearch(query);
-      },
+      onSearch: recordAndSearch,
+      // 建议浮层选中一项时直接进结果页，同样要落历史。
+      navigateToSearchResult: recordAndSearch,
     );
   }
 }

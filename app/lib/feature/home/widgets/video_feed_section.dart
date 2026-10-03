@@ -92,13 +92,12 @@ class const VideoFeedSection({
             },
           ),
         ),
-        SliverToBoxAdapter(
-          child: _FeedFooter(
-            section: section,
-            onLoadMore: onLoadMore,
-            sourceName: sourceName,
+        // 只有真的列出了条目才谈得上「还有没有下一页」：骨架屏、失败与空列表
+        // 之下挂一条「没有更多了」是在陈述一个并不存在的加载结果。
+        if (!section.isInitialLoading && !section.isFailure && !section.isEmpty)
+          SliverToBoxAdapter(
+            child: _FeedFooter(section: section, onLoadMore: onLoadMore),
           ),
-        ),
       ],
     );
   }
@@ -111,7 +110,6 @@ class const VideoFeedSection({
 class const _FeedFooter({
   required final FeedSectionState<VideoModel> section,
   required final VoidCallback onLoadMore,
-  required final String sourceName,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
