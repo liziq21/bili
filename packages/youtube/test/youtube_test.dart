@@ -146,5 +146,39 @@ void main() {
       expect(featureGroup.labelWithL10n(zh), equals('功能特性'));
       expect(featureGroup.labelWithL10n(en), equals('Features'));
     });
+
+    test('searchSuggestDataSource sanitizes control characters and returns empty list on blank queries', () async {
+      var requestMade = false;
+      final youtube = YouTube(
+        httpClient: MockClient((request) async {
+          requestMade = true;
+          expect(request.url.queryParameters['q'], equals('flutter'));
+          return http.Response(
+            '["flutter", [["flutter tutorial", 0], ["flutter course", 0]]]',
+            200,
+            headers: {'content-type': 'text/plain'},
+          );
+        }),
+      );
+
+      final suggestDS = youtube.searchSuggestDataSource;
+
+      // Blank or control-character-only query fast returns Result.ok([])
+      final blankResult = await suggestDS.getSuggests('   \r\n\x00 ');
+      expect(blankResult, isA<Ok<List<String>>>());
+      expect((blankResult as Ok<List<String>>).value, isEmpty);
+      expect(requestMade, isFalse);
+
+      // Query with control characters sanitizes query input and suggestion outputs
+      final result = await suggestDS.getSuggests('flut\r\nter\x00');
+      expect(requestMade, isTrue);
+      expect(result, isA<Ok<List<String>>>());
+      expect(
+        (result as Ok<List<String>>).value,
+        equals(['flutter tutorial', 'flutter course']),
+      );
+
+      await youtube.close();
+    });
   });
 }
