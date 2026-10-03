@@ -12,7 +12,7 @@ final class const BiliRecommendLiveRoomFeedRemoteDataSource({
   String get id => 'live';
 
   @override
-  String get title => '正在直播';
+  String get title => '直播';
 
   @override
   Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) {

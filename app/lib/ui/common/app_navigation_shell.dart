@@ -13,6 +13,7 @@ final class const AppNavDestination({
   required this.label,
   required this.icon,
   this.railIcon,
+  this.onReselect,
 }) {
   /// 目的地文案，底部与侧边导航共用
   final String label;
@@ -22,6 +23,12 @@ final class const AppNavDestination({
 
   /// 侧边导航图标，留空时回落到 [icon]
   final IconData? railIcon;
+
+  /// 重复点按当前目的地时额外执行的动作
+  ///
+  /// 默认无动作：回到分支根已经够了。搜索分支用它把焦点交回输入框 ——
+  /// 已经在搜索页时再点「搜索」，用户期待的是能直接打字，而不是页面毫无反应。
+  final VoidCallback? onReselect;
 }
 
 /// 应用的导航骨架容器
@@ -45,11 +52,10 @@ final class const AppNavigationShell({
   final double? width;
 
   void _goBranch(int index) {
+    final isReselect = index == navigationShell.currentIndex;
     // 重复点当前目的地时回到该分支的根，而不是什么都不做。
-    navigationShell.goBranch(
-      index,
-      initialLocation: index == navigationShell.currentIndex,
-    );
+    navigationShell.goBranch(index, initialLocation: isReselect);
+    if (isReselect) destinations[index].onReselect?.call();
   }
 
   @override

@@ -17,9 +17,15 @@ import 'bloc/search_bloc.dart';
 class const SearchScreen({
   super.key,
   required this.onSearch,
+  this.onFocusInputReady,
   this.recentQueryLimit = 20,
 }) extends StatelessWidget {
   final void Function(String query) onSearch;
+
+  /// 登记聚焦入口的回调，由页面内的搜索框在挂载时以聚焦函数调用、销毁时以 null 调用
+  ///
+  /// 底栏重复点「搜索」时用它：已经在搜索页就继续打字，而不是回到页首。
+  final void Function(void Function()? focus)? onFocusInputReady;
 
   /// 最近搜索最多展示的条数
   final int recentQueryLimit;
@@ -70,6 +76,7 @@ class const SearchScreen({
 
     if (suggest == null) {
       return AppSearchAnchor(
+        onFocusInputReady: onFocusInputReady,
         // 数据源无建议能力时 navigateToSearchResult 必须留空：
         // AppSearchAnchor._handleSearch 会把 onSearch 与 navigateToSearchResult
         // 两个都调一遍，两者指同一个函数就会跳两次结果页。
@@ -80,6 +87,7 @@ class const SearchScreen({
       );
     }
     return AppSearchAnchor(
+      onFocusInputReady: onFocusInputReady,
       // 有建议时走 navigateToSearchResult（它负责关闭浮层）。onSearch 留空：
       // 它与 navigateToSearchResult 在 _handleSearch 里都会被调一遍，
       // 给它一个真实现等于把同一次提交执行两次。
