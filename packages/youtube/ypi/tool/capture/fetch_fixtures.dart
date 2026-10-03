@@ -45,103 +45,95 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/search_video.json')) {
       skipNote('testing/search_video.json');
     } else {
-      final videoSearchResponse = await client
-          .post(
-            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-            headers: _headers,
-            body: jsonEncode({
-              'context': _clientContext,
-              'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 1,
-              ),
-            }),
-          )
-          .timeout(requestTimeout);
-      final video = _captureJson(
-        videoSearchResponse,
-        'search video',
-        (json) => _validateSearchResponse(
-          json,
-          containsItem: _rendererItem('videoRenderer'),
-        ),
-      );
-      saveResponse('testing/search_video.json', video);
+    final videoSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 1),
+          }),
+        )
+        .timeout(requestTimeout);
+    final video = _captureJson(
+      videoSearchResponse,
+      'search video',
+      (json) => _validateSearchResponse(
+        json,
+        containsItem: _rendererItem('videoRenderer'),
+      ),
+    );
+    saveResponse('testing/search_video.json', video);
     }
 
     print('2. Fetching search channel JSON...');
     if (!shouldFetch('testing/search_channel.json')) {
       skipNote('testing/search_channel.json');
     } else {
-      final channelSearchResponse = await client
-          .post(
-            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-            headers: _headers,
-            body: jsonEncode({
-              'context': _clientContext,
-              'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 2,
-              ),
-            }),
-          )
-          .timeout(requestTimeout);
-      final channel = _captureJson(
-        channelSearchResponse,
-        'search channel',
-        (json) => _validateSearchResponse(
-          json,
-          containsItem: _rendererItem('channelRenderer'),
-        ),
-      );
-      saveResponse('testing/search_channel.json', channel);
+    final channelSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
+          }),
+        )
+        .timeout(requestTimeout);
+    final channel = _captureJson(
+      channelSearchResponse,
+      'search channel',
+      (json) => _validateSearchResponse(
+        json,
+        containsItem: _rendererItem('channelRenderer'),
+      ),
+    );
+    saveResponse('testing/search_channel.json', channel);
     }
 
     print('3. Fetching search playlist JSON...');
     if (!shouldFetch('testing/search_playlist.json')) {
       skipNote('testing/search_playlist.json');
     } else {
-      final playlistSearchResponse = await client
-          .post(
-            Uri.parse('https://www.youtube.com/youtubei/v1/search'),
-            headers: _headers,
-            body: jsonEncode({
-              'context': _clientContext,
-              'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 3,
-              ),
-            }),
-          )
-          .timeout(requestTimeout);
-      final playlist = _captureJson(
-        playlistSearchResponse,
-        'search playlist',
-        (json) => _validateSearchResponse(
-          json,
-          containsItem: _containsPlaylistLockup,
-        ),
-      );
-      saveResponse('testing/search_playlist.json', playlist);
+    final playlistSearchResponse = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 3),
+          }),
+        )
+        .timeout(requestTimeout);
+    final playlist = _captureJson(
+      playlistSearchResponse,
+      'search playlist',
+      (json) =>
+          _validateSearchResponse(json, containsItem: _containsPlaylistLockup),
+    );
+    saveResponse('testing/search_playlist.json', playlist);
     }
 
     print('4. Fetching search suggest JSON...');
     if (!shouldFetch('testing/search_suggest.json')) {
       skipNote('testing/search_suggest.json');
     } else {
-      final suggestResponse = await client
-          .get(
-            Uri.parse(
-              'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
-            ),
-          )
-          .timeout(requestTimeout);
-      final suggest = _captureJson(
-        suggestResponse,
-        'search suggest',
-        _validateSuggestResponse,
-      );
-      saveResponse('testing/search_suggest.json', suggest);
+    final suggestResponse = await client
+        .get(
+          Uri.parse(
+            'https://suggestqueries.google.com/complete/search?q=Flutter&client=youtube&ds=yt',
+          ),
+        )
+        .timeout(requestTimeout);
+    final suggest = _captureJson(
+      suggestResponse,
+      'search suggest',
+      _validateSuggestResponse,
+    );
+    saveResponse('testing/search_suggest.json', suggest);
     }
 
     // Browse + continuation are captured as a pair: the continuation token

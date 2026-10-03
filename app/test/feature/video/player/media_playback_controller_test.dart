@@ -9,8 +9,6 @@ import 'package:media_kit/media_kit.dart';
 ///
 /// 播放器库以「事件流」而非轮询状态的方式通知变化，故测试要复现真实的
 /// 事件序列——包括某些状态变化**不会**再次发事件这一点。
-// ignore_for_file: close_sinks
-
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   this {
     state = PlayerState();
@@ -44,30 +42,55 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     );
   }
 
+  // ignore: close_sinks
   final _playlist = StreamController<Playlist>.broadcast();
+  // ignore: close_sinks
   final _playing = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _completed = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _position = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _duration = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _volume = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _rate = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _pitch = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _buffering = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _buffer = StreamController<Duration>.broadcast();
+  // ignore: close_sinks
   final _bufferingPercentage = StreamController<double>.broadcast();
+  // ignore: close_sinks
   final _playlistMode = StreamController<PlaylistMode>.broadcast();
+  // ignore: close_sinks
   final _shuffle = StreamController<bool>.broadcast();
+  // ignore: close_sinks
   final _audioParams = StreamController<AudioParams>.broadcast();
+  // ignore: close_sinks
   final _videoParams = StreamController<VideoParams>.broadcast();
+  // ignore: close_sinks
   final _audioBitrate = StreamController<double?>.broadcast();
+  // ignore: close_sinks
   final _audioDevice = StreamController<AudioDevice>.broadcast();
+  // ignore: close_sinks
   final _audioDevices = StreamController<List<AudioDevice>>.broadcast();
+  // ignore: close_sinks
   final _track = StreamController<Track>.broadcast();
+  // ignore: close_sinks
   final _tracks = StreamController<Tracks>.broadcast();
+  // ignore: close_sinks
   final _width = StreamController<int?>.broadcast();
+  // ignore: close_sinks
   final _height = StreamController<int?>.broadcast();
+  // ignore: close_sinks
   final _subtitle = StreamController<List<String>>.broadcast();
+  // ignore: close_sinks
   final _log = StreamController<PlayerLog>.broadcast();
+  // ignore: close_sinks
   final _error = StreamController<String>.broadcast();
 
   @override

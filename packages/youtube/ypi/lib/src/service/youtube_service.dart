@@ -208,9 +208,8 @@ final class YoutubeService {
           'browsePlaylist requires either playlistId, browseId, or continuation',
         );
       }
-      final formattedBrowseId = targetId.startsWith('VL')
-          ? targetId
-          : 'VL$targetId';
+      final formattedBrowseId =
+          targetId.startsWith('VL') ? targetId : 'VL$targetId';
       body['browseId'] = formattedBrowseId;
       if (params != null && params.isNotEmpty) {
         body['params'] = params;

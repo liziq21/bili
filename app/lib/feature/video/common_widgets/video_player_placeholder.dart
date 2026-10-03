@@ -76,7 +76,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: $styles.colors.onScrim),
-                    tooltip: '返回',
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -102,7 +101,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
             // Center Big Play / Pause Trigger
             IconButton(
               iconSize: 56,
-              tooltip: _isPlaying ? '暂停' : '播放',
               icon: Icon(
                 _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
                 color: $styles.colors.accentFill,
@@ -138,7 +136,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                   children: [
                     IconButton(
                       iconSize: 22,
-                      tooltip: _isPlaying ? '暂停' : '播放',
                       icon: Icon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,
                         color: $styles.colors.onScrim,
@@ -181,7 +178,6 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     PopupMenuButton<String>(
                       initialValue: _selectedQuality,
-                      tooltip: '切换',
                       onSelected: (val) {
                         setState(() {
                           _selectedQuality = val;

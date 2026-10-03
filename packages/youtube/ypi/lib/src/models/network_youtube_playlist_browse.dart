@@ -217,9 +217,8 @@ final class NetworkYouTubePlaylistHeader {
               (source) => NetworkYouTubeThumbnailSize(
                 url: _string(source['url']),
                 width: source['width'] is int ? source['width'] as int : null,
-                height: source['height'] is int
-                    ? source['height'] as int
-                    : null,
+                height:
+                    source['height'] is int ? source['height'] as int : null,
               ),
             )
             .toList(growable: false),
@@ -277,7 +276,9 @@ final class NetworkYouTubePlaylistVideoItem {
       final bottomOverlay = _map(overlay['thumbnailBottomOverlayViewModel']);
       if (bottomOverlay != null) {
         for (final badge in _list(bottomOverlay['badges']).map(_map).nonNulls) {
-          final text = _string(_map(badge['thumbnailBadgeViewModel'])?['text']);
+          final text = _string(
+            _map(badge['thumbnailBadgeViewModel'])?['text'],
+          );
           if (text != null && text.isNotEmpty) {
             lengthText = text;
             break;
@@ -512,11 +513,14 @@ String? _continuationTokenFromJson(Map<String, dynamic>? renderer) {
   // 1. continuationItemRenderer
   final contItem = _map(renderer['continuationItemRenderer']) ?? renderer;
   final endpoint = _map(contItem['continuationEndpoint']);
-  final token1 = _string(_map(endpoint?['continuationCommand'])?['token']);
+  final token1 = _string(
+    _map(endpoint?['continuationCommand'])?['token'],
+  );
   if (token1 != null) return token1;
 
   // 2. continuationItemViewModel
-  final contViewModel = _map(renderer['continuationItemViewModel']) ?? renderer;
+  final contViewModel =
+      _map(renderer['continuationItemViewModel']) ?? renderer;
   final contCmd = _map(contViewModel['continuationCommand']);
   final token2 =
       _string(_map(contCmd?['continuationCommand'])?['token']) ??

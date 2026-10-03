@@ -48,6 +48,7 @@ extension on PlaybackState {
       error: error ?? this.error,
     );
   }
+
 }
 
 /// 会话初始状态：未播放、未缓冲、位置与时长归零、无错误。

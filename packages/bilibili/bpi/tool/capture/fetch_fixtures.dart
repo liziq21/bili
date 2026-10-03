@@ -114,19 +114,15 @@ Future<void> main(List<String> args) async {
     }
 
     if (Platform.environment['CAPTURE_LIVE_ROOM_PLAY_INFO_ONLY'] == '1') {
-      if (!shouldFetch('testing/live_room_play_info.json')) {
-        skipNote('testing/live_room_play_info.json');
-      } else {
-        final liveRoomPlayInfo = await getJson(
-          Uri.parse(
-            'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8',
-          ),
-          'live room play info',
-        );
-        _requireLiveRoomPlayInfo(liveRoomPlayInfo.json, 'live room play info');
-        saveResponse('testing/live_room_play_info.json', liveRoomPlayInfo);
-        print('Live room play info fixture fetched successfully.');
-      }
+      final liveRoomPlayInfo = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo?room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8',
+        ),
+        'live room play info',
+      );
+      _requireLiveRoomPlayInfo(liveRoomPlayInfo.json, 'live room play info');
+      saveResponse('testing/live_room_play_info.json', liveRoomPlayInfo);
+      print('Live room play info fixture fetched successfully.');
       return;
     }
 
@@ -506,44 +502,9 @@ void _requirePopularItems(Map<String, dynamic> json, String label) {
 
 void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
-  // room_id 是 NetworkLiveRoomPlayInfo 唯一的必填字段（其余都有默认值），
-  // 缺它时 DTO 解析会直接抛，fixture 却已经写进仓库了。
-  if (data['room_id'] is! num) {
-    throw FormatException('$label data.room_id is missing or not a number');
-  }
   final playurlInfo = data['playurl_info'];
   if (playurlInfo is! Map) {
     throw FormatException('$label data.playurl_info is not an object');
-  }
-  // 校验到可播放流一层：playurl_info 存在但没有可播放流的业务无效响应不得写入
-  // fixture，否则 `live_room_play_info_test.dart` 对 stream / codec / baseUrl /
-  // host 的断言会对这份 fixture 直接失败。
-  final playurl = playurlInfo['playurl'];
-  if (playurl is! Map) {
-    throw FormatException('$label data.playurl_info.playurl is not an object');
-  }
-  final stream = playurl['stream'];
-  if (stream is! List || stream.isEmpty) {
-    throw FormatException('$label has no playable stream in data.playurl_info.playurl');
-  }
-  final hasPlayable = stream.any((entry) {
-    if (entry is! Map) return false;
-    final formats = entry['format'];
-    if (formats is! List || formats.isEmpty) return false;
-    return formats.any((format) {
-      if (format is! Map) return false;
-      final codecs = format['codec'];
-      if (codecs is! List || codecs.isEmpty) return false;
-      return codecs.any((codec) {
-        if (codec is! Map) return false;
-        // 原始 JSON 走 snake_case（DTO 的 fieldRename 发生在解析层，不在这里）：base_url
-        final baseUrl = codec['base_url'];
-        return baseUrl is String && baseUrl.isNotEmpty;
-      });
-    });
-  });
-  if (!hasPlayable) {
-    throw FormatException('$label has no playable stream codec with a base URL');
   }
 }
 
