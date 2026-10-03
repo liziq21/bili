@@ -531,7 +531,8 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
       if (codecs is! List || codecs.isEmpty) return false;
       return codecs.any((codec) {
         if (codec is! Map) return false;
-        final baseUrl = codec['baseUrl'];
+        // 原始 JSON 走 snake_case（DTO 的 fieldRename 发生在解析层，不在这里）：base_url
+        final baseUrl = codec['base_url'];
         return baseUrl is String && baseUrl.isNotEmpty;
       });
     });
