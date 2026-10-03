@@ -89,36 +89,45 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
 
   @override
   Widget build(BuildContext context) {
+    // 建议浮层的内容依赖 SearchBloc；数据源没有建议能力时该 bloc 未注入，
+    // 不能把整棵 anchor 挂在 BlocSelector 之下，否则构建期就抛
+    // ProviderNotFoundException。此时只出基础 anchor：输入与提交照常工作，
+    // _getSuggestions 的 null bloc 兜底路径直接返回上次的结果（或空列表）。
+    if (_searchBloc == null) {
+      return _buildAnchor();
+    }
     return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
       selector: (state) => state.recentSearchQueries,
-      builder: (_, state) {
-        final anchor = widget.builder == null
-            ? SearchAnchor.bar(
-                searchController: _controller,
-                barHintText: '搜索...',
-                barElevation: const WidgetStatePropertyAll(0.0),
-                suggestionsBuilder: _getSuggestions,
-                textInputAction: .search,
-                onSubmitted: _handleSearch,
-                onChanged: _handleViewChanged,
-              )
-            : SearchAnchor(
-                searchController: _controller,
-                builder: widget.builder!,
-                suggestionsBuilder: _getSuggestions,
-                textInputAction: .search,
-                viewOnSubmitted: _handleSearch,
-                viewOnChanged: _handleViewChanged,
-              );
-
-        // bar 模式自带一个 TextField，用 descendantsAreFocusable: false 避免
-        // 它参与外层 Tab 序列。图标模式相反——那个 IconButton 必须能被键盘
-        // 聚焦，否则纯键盘用户根本打不开搜索。
-        return widget.builder == null
-            ? FocusScope(descendantsAreFocusable: false, child: anchor)
-            : anchor;
-      },
+      builder: (_, state) => _buildAnchor(),
     );
+  }
+
+  Widget _buildAnchor() {
+    final anchor = widget.builder == null
+        ? SearchAnchor.bar(
+            searchController: _controller,
+            barHintText: '搜索...',
+            barElevation: const WidgetStatePropertyAll(0.0),
+            suggestionsBuilder: _getSuggestions,
+            textInputAction: .search,
+            onSubmitted: _handleSearch,
+            onChanged: _handleViewChanged,
+          )
+        : SearchAnchor(
+            searchController: _controller,
+            builder: widget.builder!,
+            suggestionsBuilder: _getSuggestions,
+            textInputAction: .search,
+            viewOnSubmitted: _handleSearch,
+            viewOnChanged: _handleViewChanged,
+          );
+
+    // bar 模式自带一个 TextField，用 descendantsAreFocusable: false 避免
+    // 它参与外层 Tab 序列。图标模式相反——那个 IconButton 必须能被键盘
+    // 聚焦，否则纯键盘用户根本打不开搜索。
+    return widget.builder == null
+        ? FocusScope(descendantsAreFocusable: false, child: anchor)
+        : anchor;
   }
 
   Future<Iterable<Widget>> _getSuggestions(
