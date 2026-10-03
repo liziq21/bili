@@ -74,9 +74,11 @@ final class const AppNavigationShell({
                   ),
               ],
             ),
-            // 分隔线粗细跟随文字缩放：固定 1 在高缩放下会显得过细。
+            // 分隔线随文字缩放变粗：固定 1 在高缩放下会显得过细。width 只是占位
+            // 宽度，线条粗细由 thickness 决定，两者都要跟着缩放。
             VerticalDivider(
-              width: 1 / MediaQuery.textScalerOf(context).scale(1),
+              width: MediaQuery.textScalerOf(context).scale(1),
+              thickness: MediaQuery.textScalerOf(context).scale(1),
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
             Expanded(child: navigationShell),

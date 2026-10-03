@@ -7,6 +7,14 @@ import '../../database/table/media.dart';
 
 part 'media_history_state.dart';
 
+/// 一条观看历史
+///
+/// 数据源跟着条目走而不是由 id 反查：`media` 表的唯一键是
+/// `{sourceId, type, originalId}`（`database/table/media.dart`），同一个
+/// `originalId` 在两个数据源下可以各存一行，用 id 索引的映射会让后载入的那条
+/// 覆盖前一条，点开就会跳到错的服务。
+typedef MediaHistoryItem = ({VideoModel video, String sourceId});
+
 /// 观看历史加载器
 ///
 /// 历史表按 `accessedAt` 倒序，新观看会插到最前，因此**不去重**：同一视频看两次
@@ -26,14 +34,17 @@ class MediaHistoryCubit({
   /// 单页条数
   final int _pageSize;
 
-  /// 历史条目 id 到数据源标识的映射，供 [sourceOf] 查询
-  final Map<String, String> _sourceById = {};
-
-  /// 取某个历史条目的数据源标识
+  /// 已消费的 DAO 行数（含被过滤的非视频行），下一页的 offset 基准
   ///
-  /// 历史跨源存放，跳转详情页时必须带上：缺省会落到当前默认源，用错源的接口
-  /// 取详情会失败。找不到时返回 null，由调用方回落到默认源。
-  String? sourceOf(String originalId) => _sourceById[originalId];
+  /// 不能用 `state.items.length`：DAO 的 offset 按 `media_history` 行计数，而列表
+  /// 里只有视频，两者不等时下一页会重复读到已消费的行。
+  int _rowOffset = 0;
+
+  /// 单次加载最多顺带翻的页数上限
+  ///
+  /// 只在「整页都没有视频」时才会连续翻页；没有上限时，历史里若全是文章 / 动态，
+  /// 一次 `loadMore` 会变成读到表尾为止的循环。
+  static const int _maxPagesPerFetch = 10;
 
   /// 追加下一页
   Future<void> loadMore() async {
@@ -42,12 +53,12 @@ class MediaHistoryCubit({
     if (state.isLoading) return;
     if (!state.hasMore) return;
     emit(state.copyWith(isLoading: true, clearError: true));
-    await _fetch(offset: state.items.length, replace: false);
+    await _fetch(offset: _rowOffset, replace: false);
   }
 
   /// 重新拉取第一页
   ///
-  /// [loadMore] 是追加语义（offset 基于已有条数），只适合滚动加载。刷新要回到
+  /// [loadMore] 是追加语义（offset 基于已消费行数），只适合滚动加载。刷新要回到
   /// 起点，因此单列一条路径，而不是给 [loadMore] 加布尔开关——两种 offset 基准
   /// 混在一个方法里最容易在边界上算错。
   Future<void> refresh() async {
@@ -60,36 +71,39 @@ class MediaHistoryCubit({
   ///
   /// [replace] 为 true 时用本页结果替换列表（刷新），否则追加（翻页）。
   Future<void> _fetch({required int offset, required bool replace}) async {
-    try {
-      final rows = await _mediaHistoryDao.getHistoryWithMedia(
-        limit: _pageSize,
-        offset: offset,
-      );
+    final items = replace ? <MediaHistoryItem>[] : [...state.items];
+    var cursor = offset;
+    var hasMore = true;
 
-      final videos = <VideoModel>[];
-      final sources = <String, String>{};
-      for (final row in rows) {
-        // 非视频条目（文章 / 动态）当前无展示位，跳过但不影响分页判断。
-        if (row.media.type != Media.typeVideo) continue;
-        videos.add(_toVideoModel(row.media));
-        sources[row.media.originalId] = row.media.sourceId;
+    try {
+      for (var page = 0; page < _maxPagesPerFetch; page++) {
+        final rows = await _mediaHistoryDao.getHistoryWithMedia(
+          limit: _pageSize,
+          offset: cursor,
+        );
+        cursor += rows.length;
+        // 用 DAO 返回的行数判断是否到底，而不是转换后的条数：非视频条目会被过滤，
+        // 用过滤后的长度判断会误判为「还有更多」而多翻一页空页。
+        hasMore = rows.length == _pageSize;
+
+        var added = 0;
+        for (final row in rows) {
+          // 非视频条目（文章 / 动态）当前无展示位，跳过但照常计入 offset。
+          if (row.media.type != Media.typeVideo) continue;
+          items.add((
+            video: _toVideoModel(row.media),
+            sourceId: row.media.sourceId,
+          ));
+          added++;
+        }
+
+        // 整页都没有视频但还有下一页时继续翻：本页过滤后为空会让界面显示「还没有
+        // 观看记录」，而翻页按钮在列表为空时是禁用的，视频就永远到不了。
+        if (added > 0 || !hasMore) break;
       }
 
-      // 刷新时清空旧映射：残留的 id 可能已不在第一页，留着会让已删历史的条目
-      // 仍解析出一个过时数据源。
-      if (replace) _sourceById.clear();
-      _sourceById.addAll(sources);
-
-      emit(
-        state.copyWith(
-          isLoading: false,
-          items: replace ? videos : [...state.items, ...videos],
-          // 用 DAO 返回的行数判断是否到底，而不是转换后的 videos.length：
-          // 非视频条目会被过滤，用过滤后的长度判断会误判为「还有更多」而多翻
-          // 一页空页。
-          hasMore: rows.length == _pageSize,
-        ),
-      );
+      _rowOffset = cursor;
+      emit(state.copyWith(isLoading: false, items: items, hasMore: hasMore));
     } catch (e) {
       emit(state.copyWith(isLoading: false, error: '$e'));
     }
