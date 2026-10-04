@@ -50,11 +50,23 @@ For architectural walkthroughs — not prescriptive rules, but context on why bo
 
 ## Universal Development Guidelines
 
+### SDK 版本
+
+`.fvmrc` 是本仓库唯一的 SDK 版本来源，钉在 Flutter 3.47.5（Dart 3.13.4）。
+
+**执行任何 `dart` / `flutter` 命令前，先分别确认两个 SDK 与 `.fvmrc` 一致**（`dart --version` 与 `flutter --version`）。不一致时不要继续，改用 `fvm dart` / `fvm flutter`，或先切到 3.47.5。两个都要看：PATH 里的 Dart 与 Flutter 可能来自不同 SDK，且 Flutter 自带的 Dart 可能与独立安装的 Dart 冲突——只核对 `dart --version` 匹配，仍可能让后续 `flutter` 命令跑在另一个版本上。
+
+原因不是洁癖：`dart format` 的输出随 SDK 版本变化，同一份源码在不同 formatter 上会得到不同排版。agent 在与仓库不一致的 SDK 上跑一次格式化，它碰过的每个文件都会被整体重排；如果这些文件此后又与 main 前进过的版本撞车，PR 就会变成 dirty，而这类 dirty 的净差异里混着「把 main 已合内容改回旧写法」的回退，只能关单重开。2026-10-04 的 #220、#222、#232、#234、#235、#236 六条 PR 全部是这个成因。
+
+CI 的 Flutter 版本由根 `pubspec.yaml` 的 `environment` 约束经 `pubspec-matrix-action` 展开，当前产出 `3.47.5, 3.13.4`（下限）与最新 stable 两项；`.fvmrc` 与下限项一致，也是 `rerecord-goldens.yml` 录制 golden 基线所用的版本。**升级 SDK 时 `.fvmrc`、`pubspec.yaml`、ruleset 的 required check 名三者必须同一次改动里一起改。**
+
 ### Formatting
 提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。
 
+**只格式化本次改动触及的文件**，不要对整个目录或全库跑，也不要把目录作为参数传给 `dart format`——它会递归处理目录下所有 Dart 文件并改写它们，其中未改动的文件也会被重排。格式化一个你没改过的文件，会把它的排版整体换成当前 SDK formatter 的风格，与 main 上尚未重排的部分形成无意义的大范围差异。
+
 ```bash
-dart format --set-exit-if-changed <changed files or directories>
+dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列出>
 ```
 
 该命令会直接改写被格式化的文件，退出码非 0 表示有文件被修改过（即原格式不符），但不代表修复后仍不符。看到退出码非 0 时，先确认文件已被改写，再重跑一次同样的命令，确认退出码为 0 后才可提交。
