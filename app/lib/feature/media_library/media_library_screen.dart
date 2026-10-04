@@ -23,6 +23,7 @@ import 'media_history_cubit.dart';
 /// 而列表与翻页状态在两处实例上会各走各的。
 class const MediaLibraryScreen({
   super.key,
+
   /// 点按历史条目时的回调
   required final void Function(MediaHistoryItem item) onVideoTap,
 }) extends StatelessWidget {
