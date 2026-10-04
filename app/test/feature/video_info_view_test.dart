@@ -123,27 +123,46 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Check Like button semantics: label '点赞 3.8万', tooltip '点赞', selected false
-      final likeSemantics = tester.widget<Semantics>(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.label == '点赞 3.8万',
-        ),
+      // Check Like button semantics & tooltip: label '点赞 3.8万', tooltip '点赞', selected false
+      final likeSemanticsFinder = find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == '点赞 3.8万',
       );
+      final likeSemantics = tester.widget<Semantics>(likeSemanticsFinder);
       expect(likeSemantics.properties.label, '点赞 3.8万');
       expect(likeSemantics.properties.tooltip, '点赞');
       expect(likeSemantics.properties.selected, false);
-
-      // Check Favorite button semantics: label '收藏 1.2万', tooltip '取消收藏', selected true
-      final favoriteSemantics = tester.widget<Semantics>(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics && widget.properties.label == '收藏 1.2万',
+      expect(
+        find.ancestor(
+          of: likeSemanticsFinder,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Tooltip &&
+                widget.message == '点赞' &&
+                widget.excludeFromSemantics == true,
+          ),
         ),
+        findsOneWidget,
+      );
+
+      // Check Favorite button semantics & tooltip: label '收藏 1.2万', tooltip '取消收藏', selected true
+      final favoriteSemanticsFinder = find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == '收藏 1.2万',
+      );
+      final favoriteSemantics = tester.widget<Semantics>(
+        favoriteSemanticsFinder,
       );
       expect(favoriteSemantics.properties.label, '收藏 1.2万');
       expect(favoriteSemantics.properties.tooltip, '取消收藏');
       expect(favoriteSemantics.properties.selected, true);
+      expect(
+        find.ancestor(
+          of: favoriteSemanticsFinder,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Tooltip && widget.message == '取消收藏',
+          ),
+        ),
+        findsOneWidget,
+      );
 
       // Check Creator Subscribe button semantics: label '关注创作者 测试UP主', tooltip '关注创作者', selected false
       final subSemantics = tester.widget<Semantics>(

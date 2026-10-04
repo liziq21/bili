@@ -841,59 +841,64 @@ class const _ActionButton({
     final computedTooltip =
         tooltip ?? (isActive ? '取消$actionName' : actionName);
 
-    return Semantics(
-      button: true,
-      enabled: true,
-      selected: isActive,
-      excludeSemantics: true,
-      label: semanticLabel,
-      tooltip: computedTooltip,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
-        borderRadius: BorderRadius.circular($styles.corners.lg),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: Motion.standard,
-                curve: Motion.easingStandard,
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? color.withValues(alpha: 0.15)
-                      : $styles.colors.outline.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: AnimatedSwitcher(
+    return Tooltip(
+      message: computedTooltip,
+      // Semantics 上已带同一个 tooltip 标签，不排除会让读屏用户听到两遍。
+      excludeFromSemantics: true,
+      child: Semantics(
+        button: true,
+        enabled: true,
+        selected: isActive,
+        excludeSemantics: true,
+        label: semanticLabel,
+        tooltip: computedTooltip,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
+          borderRadius: BorderRadius.circular($styles.corners.lg),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
                   duration: Motion.standard,
-                  switchInCurve: Motion.easingEmphasized,
-                  switchOutCurve: Motion.easingDecelerate,
-                  transitionBuilder: (child, animation) =>
-                      ScaleTransition(scale: animation, child: child),
-                  child: Icon(
-                    isActive ? activeIcon : icon,
-                    key: ValueKey(isActive),
-                    size: 20,
-                    color: isActive ? color : $styles.colors.onSurfaceVariant,
+                  curve: Motion.easingStandard,
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? color.withValues(alpha: 0.15)
+                        : $styles.colors.outline.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: Motion.standard,
+                    switchInCurve: Motion.easingEmphasized,
+                    switchOutCurve: Motion.easingDecelerate,
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(scale: animation, child: child),
+                    child: Icon(
+                      isActive ? activeIcon : icon,
+                      key: ValueKey(isActive),
+                      size: 20,
+                      color: isActive ? color : $styles.colors.onSurfaceVariant,
+                    ),
                   ),
                 ),
-              ),
-              const Gap(4),
-              Text(
-                label,
-                style: $styles.text.bodySmall.copyWith(
-                  color: isActive ? color : $styles.colors.onSurfaceVariant,
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                const Gap(4),
+                Text(
+                  label,
+                  style: $styles.text.bodySmall.copyWith(
+                    color: isActive ? color : $styles.colors.onSurfaceVariant,
+                    fontSize: 11,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
