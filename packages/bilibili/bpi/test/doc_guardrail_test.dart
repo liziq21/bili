@@ -698,18 +698,23 @@ void main() {
     test('the capture loop still writes the fixtures it enumerates', () {
       final source = File('tool/capture/fetch_fixtures.dart')
           .readAsStringSync();
+      // Strip comments once: the key matches and the loop-body extraction
+      // below must see the same comment-free text, or a commented-out
+      // `saveResponse` inside the loop would still satisfy the write check
+      // and comment braces would skew the depth scan.
+      final stripped = _stripDartComments(source);
       final tableDriven = _mapKeyFixtureName
-          .allMatches(_stripDartComments(source))
+          .allMatches(stripped)
           .map((m) => m.group(1)!)
           .toSet();
       if (tableDriven.isEmpty) {
         return;
       }
       final boundKeys = _mapKeyLoopVariable
-          .allMatches(_stripDartComments(source))
+          .allMatches(stripped)
           .map((m) => m.group(1)!)
           .toList();
-      final loopBody = _fixtureLoopBody(source);
+      final loopBody = _fixtureLoopBody(stripped);
       expect(
         loopBody,
         isNotNull,
