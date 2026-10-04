@@ -297,6 +297,18 @@ String _unquote(String cell) {
       : unquoted;
 }
 
+/// Expands a `Fixture` cell into the file names it stands for on disk.
+///
+/// A cell without a `*` names exactly one file; a wildcard cell names every
+/// file matching it. Used both to expand the cells read from the documentation
+/// and to check what a spec's declared cell stands for, so the two readings
+/// cannot drift apart.
+Set<String> _expandCell(String cell, Set<String> onDisk) {
+  if (!cell.contains('*')) return {cell};
+  final pattern = RegExp('^${RegExp.escape(cell).replaceAll(r'\*', '.*')}\$');
+  return onDisk.where(pattern.hasMatch).toSet();
+}
+
 /// Checks that one documentation table records every method in the spec table,
 /// and that every cell it lists is claimed by exactly the methods that declare
 /// it.
@@ -319,6 +331,22 @@ void _assertDocumentationTableCoversSpec(String documentPath) {
 
   final quoted = cells.map(_unquote).toList();
 
+  final duplicates =
+      quoted
+          .where((c) => quoted.where((d) => d == c).length > 1)
+          .toSet()
+          .toList()
+        ..sort();
+  expect(
+    duplicates,
+    isEmpty,
+    reason:
+        '$documentPath records these `Fixture` cells more than once. A '
+        'duplicate row can disagree with the row above it about which source '
+        'or endpoint it belongs to, while the coverage comparison below still '
+        'sees the same set. Remove the duplicate rows.',
+  );
+
   for (final spec in endpointSpecs) {
     expect(
       quoted,
@@ -326,6 +354,25 @@ void _assertDocumentationTableCoversSpec(String documentPath) {
       reason:
           '${spec.method} declares its `Fixture` cell as ${spec.docCell}, '
           'which $documentPath does not contain. Add the row back.',
+    );
+  }
+
+  // The coverage comparison below is a set comparison, so it stays green when
+  // the documentation records a file under the wrong method: swapping
+  // getPopular's cell for ranking.json leaves the union untouched. Bind each
+  // spec to the cell it declares, so a row pointing at another method's
+  // fixture fails here instead.
+  final onDiskForSpecs = _fixturesOnDisk().toSet();
+  for (final spec in endpointSpecs) {
+    final cellCovers = _expandCell(spec.docCell, onDiskForSpecs);
+    expect(
+      spec.fixtureNames.difference(cellCovers),
+      isEmpty,
+      reason:
+          '${spec.method} declares `Fixture` cell ${spec.docCell}, which in '
+          '$documentPath stands for $cellCovers and therefore does not cover '
+          'its registered fixture ${spec.fixtures}. The row points at another '
+          "method's entry, or the `fixtures` list is wrong.",
     );
   }
 
