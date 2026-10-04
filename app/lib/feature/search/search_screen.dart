@@ -20,7 +20,6 @@ class const SearchScreen({
   required final void Function(String query) onSearch,
   final int recentQueryLimit = 20,
 }) extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +96,6 @@ class const _RecentSearches({
   required final int limit,
   required final void Function(String query) onSearch,
 }) extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<SearchBloc?>();
@@ -107,11 +105,7 @@ class const _RecentSearches({
     // Rebuilding `_RecentSearches` strictly when search history changes isolates
     // this subtree from high-frequency typing/suggestion state updates (e.g. `currentQuery` or
     // `suggests` emissions) as users type into the search bar.
-    return BlocSelector<
-      SearchBloc,
-      SearchState,
-      List<RecentSearchQuery>
-    >(
+    return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
       selector: (state) => state.recentSearchQueries,
       builder: (context, queries) {
         if (queries.isEmpty) return const SliverToBoxAdapter();

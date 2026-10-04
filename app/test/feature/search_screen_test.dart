@@ -10,10 +10,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 /// 记录写入次数与是否抛错，用于验证「只写一次」与「写失败不影响搜索」。
-class RecordingRecentSearchRepository({
-  this.failOnWrite = false,
-}) implements RecentSearchQueryRepository {
-  final bool failOnWrite;
+class RecordingRecentSearchRepository({final bool failOnWrite = false})
+    implements RecentSearchQueryRepository {
   final written = <String>[];
 
   @override
@@ -94,10 +92,7 @@ void main() {
     var navigations = 0;
 
     await tester.pumpWidget(
-      buildScreen(
-        recent: recent,
-        onSearch: (_) => navigations++,
-      ),
+      buildScreen(recent: recent, onSearch: (_) => navigations++),
     );
     await tester.pumpAndSettle();
 
@@ -121,10 +116,7 @@ void main() {
     var navigations = 0;
 
     await tester.pumpWidget(
-      buildScreen(
-        recent: recent,
-        onSearch: (_) => navigations++,
-      ),
+      buildScreen(recent: recent, onSearch: (_) => navigations++),
     );
     await tester.pumpAndSettle();
 
