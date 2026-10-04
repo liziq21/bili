@@ -53,9 +53,20 @@ final class const AppNavigationShell({
 
   void _goBranch(int index) {
     final isReselect = index == navigationShell.currentIndex;
-    // 重复点当前目的地时回到该分支的根，而不是什么都不做。
-    navigationShell.goBranch(index, initialLocation: isReselect);
-    if (isReselect) destinations[index].onReselect?.call();
+    if (!isReselect) {
+      navigationShell.goBranch(index);
+      return;
+    }
+    // 重复点当前目的地：交给目的地自己决定。默认回到该分支的根，
+    // 但提供了 onReselect 的目的地（如搜索：把焦点交回输入框）不能重置分支——
+    // goBranch(initialLocation: true) 会先导航到根路由，用户已被带走，
+    // 此时的回调等于在一个用户看不到的页面上执行。
+    final onReselect = destinations[index].onReselect;
+    if (onReselect != null) {
+      onReselect();
+    } else {
+      navigationShell.goBranch(index, initialLocation: true);
+    }
   }
 
   @override
