@@ -180,5 +180,36 @@ void main() {
 
       await youtube.close();
     });
+
+    test('videoSearchDataSource and creatorProfileSearchDataSource sanitize control characters and handle blank queries', () async {
+      var videoRequestMade = false;
+      var creatorRequestMade = false;
+
+      final youtube = YouTube(
+        httpClient: MockClient((request) async {
+          if (request.url.path.contains('/search')) {
+            videoRequestMade = true;
+            creatorRequestMade = true;
+          }
+          return http.Response('{}', 200);
+        }),
+      );
+
+      final videoDS = youtube.videoSearchDataSource;
+      final creatorDS = youtube.creatorProfileSearchDataSource;
+
+      // Blank query fast-returns empty Page without making HTTP request
+      final blankVideoRes = await videoDS.searchVideo('  \r\n\x00  ');
+      expect(blankVideoRes, isA<Ok<Page<VideoModel>>>());
+      expect((blankVideoRes as Ok<Page<VideoModel>>).value.data, isEmpty);
+      expect(videoRequestMade, isFalse);
+
+      final blankCreatorRes = await creatorDS.searchCreatorProfile('  \x1f  ');
+      expect(blankCreatorRes, isA<Ok<Page<CreatorProfile>>>());
+      expect((blankCreatorRes as Ok<Page<CreatorProfile>>).value.data, isEmpty);
+      expect(creatorRequestMade, isFalse);
+
+      await youtube.close();
+    });
   });
 }
