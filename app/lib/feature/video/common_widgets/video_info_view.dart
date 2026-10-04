@@ -843,6 +843,8 @@ class const _ActionButton({
 
     return Tooltip(
       message: computedTooltip,
+      // Semantics 上已带同一个 tooltip 标签，不排除会让读屏用户听到两遍。
+      excludeFromSemantics: true,
       child: Semantics(
         button: true,
         enabled: true,

@@ -135,7 +135,10 @@ void main() {
         find.ancestor(
           of: likeSemanticsFinder,
           matching: find.byWidgetPredicate(
-            (widget) => widget is Tooltip && widget.message == '点赞',
+            (widget) =>
+                widget is Tooltip &&
+                widget.message == '点赞' &&
+                widget.excludeFromSemantics == true,
           ),
         ),
         findsOneWidget,
