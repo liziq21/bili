@@ -226,6 +226,73 @@ final RegExp _saveResponseInLoop = RegExp(
   r"saveResponse\(\s*'testing/\$\w+\??'",
 );
 
+/// A copy of `source` with all `//`, `/* */`, and `///` comment spans
+/// replaced by spaces. This prevents a commented-out `saveResponse` call from
+/// being counted as a live write by the fixture-coverage regexes.
+///
+/// The replacement is character-exact (same length as the original) so that
+/// any line/column anchoring the test file relies on is preserved; only the
+/// `multiLine` regexes that match at the start of a line see changed content,
+/// and those are the ones that must not match a comment.
+String _stripDartComments(String source) {
+  final sb = StringBuffer();
+  var i = 0;
+  final n = source.length;
+  while (i < n) {
+    final ch = source[i];
+    if (ch == '/' && i + 1 < n) {
+      final next = source[i + 1];
+      if (next == '/') {
+        // Single-line comment to end of line (includes /// doc comments).
+        while (i < n && source[i] != '\n') {
+          sb.write(' ');
+          i++;
+        }
+        continue;
+      }
+      if (next == '*') {
+        // Block comment; consume until the closing */.
+        sb.write(' ');
+        i++; // '/'
+        sb.write(' ');
+        i++; // '*'
+        while (i < n) {
+          if (source[i] == '*' && i + 1 < n && source[i + 1] == '/') {
+            sb.write('  ');
+            i += 2;
+            break;
+          }
+          sb.write(source[i] == '\n' ? '\n' : ' ');
+          i++;
+        }
+        continue;
+      }
+    }
+    if (ch == "'" || ch == '"') {
+      // String literal; copy verbatim so that a `//` inside a string is
+      // not mistaken for a comment opener.
+      final quote = ch;
+      sb.write(ch);
+      i++;
+      while (i < n) {
+        final c = source[i];
+        sb.write(c);
+        i++;
+        if (c == '\\' && i < n) {
+          sb.write(source[i]);
+          i++;
+        } else if (c == quote) {
+          break;
+        }
+      }
+      continue;
+    }
+    sb.write(ch);
+    i++;
+  }
+  return sb.toString();
+}
+
 /// The body of the fixture-enumerating loop, or `null` when it cannot be
 /// located.
 ///
@@ -605,8 +672,14 @@ void main() {
       // of a branch whose fetch and write had been deleted, which is exactly
       // the drift this test exists for.
       final written = <String>{
-        for (final m in _literalSaveResponse.allMatches(source)) m.group(1)!,
-        for (final m in _mapKeyFixtureName.allMatches(source)) m.group(1)!,
+        for (final m in _literalSaveResponse.allMatches(
+          _stripDartComments(source),
+        ))
+          m.group(1)!,
+        for (final m in _mapKeyFixtureName.allMatches(
+          _stripDartComments(source),
+        ))
+          m.group(1)!,
       };
 
       for (final fixture in fixturesOnDisk) {
@@ -626,14 +699,14 @@ void main() {
       final source = File('tool/capture/fetch_fixtures.dart')
           .readAsStringSync();
       final tableDriven = _mapKeyFixtureName
-          .allMatches(source)
+          .allMatches(_stripDartComments(source))
           .map((m) => m.group(1)!)
           .toSet();
       if (tableDriven.isEmpty) {
         return;
       }
       final boundKeys = _mapKeyLoopVariable
-          .allMatches(source)
+          .allMatches(_stripDartComments(source))
           .map((m) => m.group(1)!)
           .toList();
       final loopBody = _fixtureLoopBody(source);
