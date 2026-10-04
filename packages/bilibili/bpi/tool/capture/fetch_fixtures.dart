@@ -130,6 +130,21 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_USER_CARD_ONLY'] == '1') {
+      if (!shouldFetch('testing/user_card.json')) {
+        skipNote('testing/user_card.json');
+      } else {
+        final userCard = await getJson(
+          Uri.parse('https://api.bilibili.com/x/web-interface/card?mid=2'),
+          'user card',
+        );
+        _requireUserCard(userCard.json, 'user card');
+        saveResponse('testing/user_card.json', userCard);
+        print('User card fixture fetched successfully.');
+      }
+      return;
+    }
+
     mixinKey = await WbiUtils.fetchMixinKey(client);
 
     const sampleBvid = 'BV1GJ411x7vy';
@@ -374,6 +389,18 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/live_room_play_info.json', liveRoomPlayInfo);
     }
 
+    // 13. User Card
+    if (!shouldFetch('testing/user_card.json')) {
+      skipNote('testing/user_card.json');
+    } else {
+      final userCard = await getJson(
+        Uri.parse('https://api.bilibili.com/x/web-interface/card?mid=2'),
+        'user card',
+      );
+      _requireUserCard(userCard.json, 'user card');
+      saveResponse('testing/user_card.json', userCard);
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -532,7 +559,9 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
   }
   final stream = playurl['stream'];
   if (stream is! List || stream.isEmpty) {
-    throw FormatException('$label has no playable stream in data.playurl_info.playurl');
+    throw FormatException(
+      '$label has no playable stream in data.playurl_info.playurl',
+    );
   }
   final hasPlayable = stream.any((entry) {
     if (entry is! Map) return false;
@@ -561,7 +590,9 @@ void _requireLiveRoomPlayInfo(Map<String, dynamic> json, String label) {
     });
   });
   if (!hasPlayable) {
-    throw FormatException('$label has no playable stream codec with a base URL and host');
+    throw FormatException(
+      '$label has no playable stream codec with a base URL and host',
+    );
   }
 }
 
@@ -579,4 +610,11 @@ void _requireRankingItems(Map<String, dynamic> json, String label) {
   if (videoItems == 0) {
     throw FormatException('$label has no video item with aid and bvid');
   }
+}
+
+void _requireUserCard(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  // 直接解析 DTO 覆盖全部已声明字段的类型：逐字段手写断言覆盖不全，
+  // 类型错误的字段会在此抛错，而不是写进 fixture 后才被 fixture 测试发现。
+  NetworkBiliUserCardData.fromJson(data);
 }

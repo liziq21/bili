@@ -384,4 +384,19 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkLiveRoomPlayInfo, NetworkLiveRoomPlayInfo>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkBiliUserCardData> getUserCard({required int mid}) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/web-interface/card');
+    final Map<String, dynamic> $params = <String, dynamic>{'mid': mid};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkBiliUserCardData> $response = await client
+        .send<NetworkBiliUserCardData, NetworkBiliUserCardData>($request);
+    return $response.bodyOrThrow;
+  }
 }

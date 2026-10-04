@@ -29,6 +29,7 @@ final class ApiPath {
   static const String popular = '/x/web-interface/popular';
   static const String ranking = '/x/web-interface/ranking/v2';
   static const String playerV2 = '/x/player/v2';
+  static const String userCard = '/x/web-interface/card';
 }
 
 final class WbiApiPath {
