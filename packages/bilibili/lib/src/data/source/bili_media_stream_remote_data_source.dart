@@ -24,9 +24,7 @@ final class BiliMediaStreamRemoteDataSource({
       final detail = await network.getVideoDetail(bvid: videoId);
       final pages = detail.pages;
       if (pages == null || pages.isEmpty) {
-        return Result.error(
-          Exception('视频 $videoId 没有可用分P，无法解析播放地址'),
-        );
+        return Result.error(Exception('视频 $videoId 没有可用分P，无法解析播放地址'));
       }
       final cid = pages.first.cid;
 
@@ -108,10 +106,7 @@ final class BiliMediaStreamRemoteDataSource({
   /// 就近 = 与期望高度绝对差最小的一档，故期望高于全部可用档时自然落到
   /// 最高档、低于全部时落到最低档，无需为两种边界另写分支。缺高度的条目
   /// 视为不可比（差值无穷大），只在所有条目都缺高度时才被选中。
-  MediaStreamItem _pickVideo(
-    List<MediaStreamItem> items,
-    int? preferHeight,
-  ) {
+  MediaStreamItem _pickVideo(List<MediaStreamItem> items, int? preferHeight) {
     if (preferHeight == null) return _highestBandwidth(items);
     return items.reduce((best, item) {
       final candidateGap = _heightGap(item, preferHeight);
@@ -131,9 +126,7 @@ final class BiliMediaStreamRemoteDataSource({
 
   MediaStreamItem _highestBandwidth(List<MediaStreamItem> items) =>
       (items.toList()
-            ..sort(
-              (a, b) => (a.bandwidth ?? 0).compareTo(b.bandwidth ?? 0),
-            ))
+            ..sort((a, b) => (a.bandwidth ?? 0).compareTo(b.bandwidth ?? 0)))
           .last;
 
   Duration? _milliseconds(int? value) =>

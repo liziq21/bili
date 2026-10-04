@@ -1387,7 +1387,6 @@ void main() {
       addTearDown(service.close);
 
       await service.getComments('  TOKEN_123  ');
-
     });
 
     test('rejects an empty continuation before issuing a request', () async {
@@ -1406,5 +1405,4 @@ void main() {
       expect(called, isFalse, reason: '空 continuation 不该发请求');
     });
   });
-
 }

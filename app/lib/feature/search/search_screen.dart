@@ -105,10 +105,8 @@ class const SearchScreen({
 ///
 /// [SearchBloc] 通过 [MonitorRecentSearches] 订阅仓库的变更流，这里只渲染
 /// 快照。bloc 缺失时（数据源不支持建议）整块不渲染。
-class const _RecentSearches({
-  required this.limit,
-  required this.onSearch,
-}) extends StatelessWidget {
+class const _RecentSearches({required this.limit, required this.onSearch})
+    extends StatelessWidget {
   final int limit;
   final void Function(String query) onSearch;
 

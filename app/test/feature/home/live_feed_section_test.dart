@@ -50,7 +50,9 @@ void main() {
       // Check semantics label via InkWell semantics node
       final inkWellFinder = find.byType(InkWell);
       expect(inkWellFinder, findsOneWidget);
-      final semanticsData = tester.getSemantics(inkWellFinder).getSemanticsData();
+      final semanticsData = tester
+          .getSemantics(inkWellFinder)
+          .getSemanticsData();
       expect(semanticsData.label, equals('直播，主播: 未知主播'));
       expect(semanticsData.flagsCollection.isButton, isTrue);
 

@@ -131,6 +131,46 @@ jobs:
           path: app/test/golden/goldens/ci/
 
 
+  format_check:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    # 只读代码即可。setup-flutter 的 cache 用的是 Actions 自己的 runtime token，
+    # 不依赖 GITHUB_TOKEN 权限（同 rerecord-goldens.yml 的用法）。
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # 默认 true 会把 GITHUB_TOKEN 写进 .git/config 的 http.extraheader，
+          # 后续任何 git 命令都带上它。门禁只跑 dart format，不需要 git 凭据。
+          persist-credentials: false
+
+      # Pinned to the single version in .fvmrc rather than the pubspec matrix.
+      # `dart format` output changes between SDK releases (dart_style ships
+      # style fixes that are not language-versioned, including in patch
+      # releases), so running this across matrix versions would make the gate
+      # itself flaky. The gate exists to stop unformatted code from landing,
+      # and one authoritative version is enough for that.
+      - id: fvmrc
+        name: Read pinned SDK version
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.fvmrc'))['flutter'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ steps.fvmrc.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Report pinned SDK
+        run: |
+          echo "flutter=$(flutter --version --machine | head -c 200)"
+          dart --version
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
   build_androidApp:
     name: Build Flutter App (android)
     needs: [pubspec, flutter_test]
