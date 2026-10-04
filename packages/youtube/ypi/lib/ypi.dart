@@ -2,6 +2,7 @@ export 'src/client/youtube_client_config.dart';
 export 'src/exception/ypi_exception.dart';
 export 'src/models/network_youtube_browse.dart';
 export 'src/models/network_youtube_comments.dart';
+export 'src/models/network_youtube_player.dart';
 export 'src/models/network_youtube_playlist_browse.dart';
 export 'src/models/network_youtube_search.dart';
 export 'src/models/network_youtube_watch_next.dart';

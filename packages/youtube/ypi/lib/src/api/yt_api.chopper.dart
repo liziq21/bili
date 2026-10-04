@@ -43,6 +43,14 @@ final class _$YoutubeApi extends YoutubeApi {
   }
 
   @override
+  Future<Response<Map<String, dynamic>>> player(Map<String, dynamic> body) {
+    final Uri $url = Uri.parse('https://www.youtube.com/youtubei/v1/player');
+    final $body = body;
+    final Request $request = Request('POST', $url, client.baseUrl, body: $body);
+    return client.send<Map<String, dynamic>, Map<String, dynamic>>($request);
+  }
+
+  @override
   Future<Response<String>> getSearchSuggestions(
     String query, {
     String searchClient = 'youtube',
