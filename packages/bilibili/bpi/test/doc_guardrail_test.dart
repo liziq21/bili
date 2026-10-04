@@ -207,12 +207,49 @@ final RegExp _mapKeyFixtureName = RegExp(
   multiLine: true,
 );
 
-/// The loop that turns map keys into written fixture paths. Matched separately
-/// because a map key on its own does not prove anything is written: the loop
-/// could keep its table and lose the `saveResponse` call inside it.
-final RegExp _saveResponseThroughLoopVariable = RegExp(
-  r"saveResponse\(\s*'testing/\$\{?[A-Za-z_]\w*\}?'",
+/// The variable a fixture-keyed loop binds its map key to, as the search-type
+/// capture loop does with `final fileName = entry.key;`.
+final RegExp _mapKeyLoopVariable = RegExp(
+  r'^\s*final\s+([A-Za-z_]\w*)\s*=\s*entry\.key\s*;',
+  multiLine: true,
 );
+
+/// The header of the `for` loop that walks the fixture table, binding each map
+/// key to a loop variable.
+final RegExp _fixtureLoopHeader = RegExp(
+  r'for\s*\(\s*final\s+\w+\s+in\s+[A-Za-z_]\w*\.entries\s*\)',
+);
+
+/// The `saveResponse` call that writes the current loop iteration's fixture.
+final RegExp _saveResponseInLoop = RegExp(
+  r"saveResponse\(\s*'testing/\$\w+\??'",
+);
+
+/// The body of the fixture-enumerating loop, or `null` when it cannot be
+/// located.
+///
+/// Scans forward from the loop header to the `}` closing its body at the same
+/// nesting depth. Anchoring the write check to that span is what makes it
+/// meaningful: a `saveResponse('testing/$name', ...)` sitting in an unrelated
+/// branch of the script would otherwise satisfy it, and the guardrail would
+/// keep reporting the fixture loop as writing its fixtures after the loop had
+/// stopped writing them.
+String? _fixtureLoopBody() {
+  final script = File('tool/capture/fetch_fixtures.dart').readAsStringSync();
+  final header = _fixtureLoopHeader.firstMatch(script);
+  if (header == null) return null;
+  var depth = 0;
+  for (var i = header.end; i < script.length; i++) {
+    final c = script[i];
+    if (c == '{') {
+      depth++;
+    } else if (c == '}') {
+      if (depth == 0) return script.substring(header.end, i);
+      depth--;
+    }
+  }
+  return null;
+}
 
 /// Runs before the guardrail reads anything from disk, so that being launched
 /// from the wrong working directory reports itself as such instead of looking
@@ -583,14 +620,20 @@ void main() {
       if (tableDriven.isEmpty) {
         return;
       }
+      final writers = _mapKeyLoopVariable
+          .allMatches(source)
+          .map((m) => m.group(1)!)
+          .where((name) => _saveResponseWriting(name).hasMatch(source))
+          .toList();
+
       expect(
-        source,
-        matches(_saveResponseThroughLoopVariable),
+        writers,
+        isNotEmpty,
         reason:
-            'tool/capture/fetch_fixtures.dart lists fixtures as map keys '
-            '(${tableDriven.join(', ')}) but has no saveResponse call writing '
-            'them through the loop variable, so those fixtures are declared '
-            'and never captured.',
+            'tool/capture/fetch_fixtures.dart lists fixtures as map keys ('
+            '${tableDriven.join(', ')}) but no loop over that table writes '
+            'them: the variable holding the key never reaches a saveResponse '
+            'call, so those fixtures are declared and never captured.',
       );
     });
   });
