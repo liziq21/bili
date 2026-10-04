@@ -10,6 +10,8 @@ import 'youtube_network_search_mapper.dart';
 final class const YouTubeCreatorProfileSearchRemoteDataSource(
   final YoutubeService _youtubeService,
 ) extends CreatorProfileSearchRemoteDataSource with YouTubeRemoteDataSource {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   List<SortOption> get sortOptions => const [];
 
@@ -22,16 +24,27 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
   }) async {
     try {
       final targetPage = pageKey ?? 1;
-      final continuationKey = '$query:$targetPage';
-      final previousContinuationKey = '$query:${targetPage - 1}';
+      final sanitizedQuery = query.replaceAll(_controlChars, '').trim();
+      if (sanitizedQuery.isEmpty) {
+        return Result.ok(
+          Page<CreatorProfile>(
+            number: targetPage,
+            totalPages: targetPage,
+            data: const [],
+          ),
+        );
+      }
+      final continuationKey = '$sanitizedQuery:$targetPage';
+      final previousContinuationKey = '$sanitizedQuery:${targetPage - 1}';
       final continuation = targetPage > 1
           ? _continuationTokens[previousContinuationKey]
           : null;
 
       final response = await _youtubeService.searchChannels(
-        query,
+        sanitizedQuery,
         continuation: continuation,
       );
+
       final nextToken = channelContinuationToken(response);
       if (nextToken != null && nextToken.isNotEmpty) {
         _continuationTokens[continuationKey] = nextToken;
