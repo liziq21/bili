@@ -13,14 +13,16 @@ class SearchState({
     List<String>? suggests,
     String? currentQuery,
   }) {
-    // 复制并冻结两个列表。BlocSelector 依赖所选值不可变来跳过重建；若状态持有
-    // 的是调用方那个可变列表，状态发出后再被原地修改，选择器会误判为「值没变」
-    // 而跳过重建。类头默认参数只原样持有引用，冻结只能在此入口做。
+    // 只在收到新列表时复制并冻结，沿用时直接复用已有列表。BlocSelector 用 !=
+    // 比较所选值，而 Dart 列表按实例比较——若每次 copyWith 都对沿用的列表再造
+    // 一个 unmodifiable 副本，更新 currentQuery 或 suggests 时选择值也会「变」，
+    // 最近搜索子树照样重建，等于抵消了 BlocSelector 的隔离作用。
+    // 沿用是安全的：类头默认值是 const []，此后每次进入 copyWith 的列表都已冻结。
     return SearchState(
-      recentSearchQueries: List.unmodifiable(
-        recentSearchQueries ?? this.recentSearchQueries,
-      ),
-      suggests: List.unmodifiable(suggests ?? this.suggests),
+      recentSearchQueries: recentSearchQueries == null
+          ? this.recentSearchQueries
+          : List.unmodifiable(recentSearchQueries),
+      suggests: suggests == null ? this.suggests : List.unmodifiable(suggests),
       currentQuery: currentQuery ?? this.currentQuery,
     );
   }

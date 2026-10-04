@@ -52,4 +52,41 @@ void main() {
       expect(different.recentSearchQueries.map((q) => q.query), equals(['b']));
     });
   });
+    test('沿用列表时保留实例，更新查询时不重建选择值', () {
+      final withHistory = SearchState().copyWith(
+        recentSearchQueries: [
+          RecentSearchQuery(query: 'a', queriedDate: _date),
+        ],
+      );
+
+      // BlocSelector 用 != 比较所选值，Dart 列表按实例比较。只更新 currentQuery
+      // 或 suggests 时，recentSearchQueries 必须复用同一实例，否则最近搜索子树
+      // 会因无关更新而重建。
+      final typed = withHistory.copyWith(currentQuery: 'flutter');
+      final suggested = withHistory.copyWith(suggests: ['dart']);
+
+      expect(
+        identical(typed.recentSearchQueries, withHistory.recentSearchQueries),
+        isTrue,
+      );
+      expect(
+        identical(
+          suggested.recentSearchQueries,
+          withHistory.recentSearchQueries,
+        ),
+        isTrue,
+      );
+
+      // 列表本身变化时实例必须不同，否则选择器会误判为「值没变」而跳过重建。
+      final changed = withHistory.copyWith(
+        recentSearchQueries: [
+          RecentSearchQuery(query: 'b', queriedDate: _date),
+        ],
+      );
+      expect(
+        identical(changed.recentSearchQueries, withHistory.recentSearchQueries),
+        isFalse,
+      );
+    });
+
 }
