@@ -145,13 +145,25 @@ Future<void> main(List<String> args) async {
     }
 
     // Browse + continuation are captured as a pair: the continuation token
-    // comes from the same response body that is saved to browse.json.
-    // If browse.json is skipped (already exists, no --force), the
-    // continuation fetch is skipped too so the two fixtures stay consistent.
+    // comes from the same response body that is saved to browse.json. The pair
+    // is therefore all-or-nothing: if either file already exists, skip both.
+    // Fetching just one half would write a continuation built from a fresh
+    // browse response next to a stale browse.json, leaving the two fixtures
+    // describing different runs.
     final browseNeedsFetch = shouldFetch('testing/browse.json');
     final contNeedsFetch = shouldFetch('testing/browse_continuation.json');
 
-    if (!browseNeedsFetch && !contNeedsFetch) {
+    if (browseNeedsFetch != contNeedsFetch) {
+      final existing = browseNeedsFetch
+          ? 'testing/browse_continuation.json'
+          : 'testing/browse.json';
+      print(
+        'Skipped the browse fixture pair because $existing already exists; '
+        'pass --force to refresh both.',
+      );
+      if (!browseNeedsFetch) skipNote('testing/browse.json');
+      if (!contNeedsFetch) skipNote('testing/browse_continuation.json');
+    } else if (!browseNeedsFetch) {
       skipNote('testing/browse.json');
       skipNote('testing/browse_continuation.json');
     } else {
