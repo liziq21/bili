@@ -48,6 +48,10 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 解析器同时支持以上两种形态，并可提取 `commentsHeaderRenderer` 中的评论总数文本（如 `"2,458,110"`）及下一页评论的 `continuationItemRenderer` continuation token。
 
+`onResponseReceivedEndpoints` 与 `onResponseReceivedActions` 都取不出 continuation endpoint 时抛 `FormatException`：响应结构变化时端点会整个消失，此时继续走会静默返回空列表，调用方分不清「视频没有评论」与「解析器不认识这个响应」。评论条目本身解析失败按上面的口径忽略。
+
+`watch_next.json` 的 `commentsContinuationToken` 只取自 `itemSectionRenderer` 中 `targetId` 为 `comments-section` 的区段。排在它之前、同样带 `continuationItemRenderer` 的其他区段（如 `related-items-section`）持有的令牌不是评论续页令牌。
+
 ## 播放列表搜索的 renderer 形态
 
 `searchPlaylists` 解析 `lockupViewModel`，不解析 `playlistRenderer`。依据是实测：`contentType: 3` 的搜索响应里 **`playlistRenderer` 出现 0 次**，播放列表以 `contentId` 带 `PL` 前缀的 `lockupViewModel` 到达。2026-09-30 跨三个 client（WEB 2.20230818.00.00、WEB 2.20240726.00.00、ANDROID 19.09.37）各测一次，结论一致；2026-10-01 用 WEB 2.20230818.00.00 复测，`playlistRenderer` 仍为 0、`lockupViewModel` 为 2、`estimatedResults` 为 3628246（`search_playlist.json` 记录的是 3628154，同期取值，结果数随时间漂移）。
