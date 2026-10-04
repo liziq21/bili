@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/model/recent_search_query.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
 import '../../main.dart';
@@ -116,9 +117,9 @@ class const _RecentSearches({
     final bloc = context.read<SearchBloc?>();
     if (bloc == null) return const SliverToBoxAdapter();
 
-    return BlocBuilder<SearchBloc, SearchState>(
-      builder: (context, state) {
-        final queries = state.recentSearchQueries;
+    return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
+      selector: (state) => state.recentSearchQueries,
+      builder: (context, queries) {
         if (queries.isEmpty) return const SliverToBoxAdapter();
 
         final theme = Theme.of(context);
