@@ -17,6 +17,11 @@ abstract class YoutubeApi extends ChopperService {
   @POST(path: '/youtubei/v1/next')
   Future<Response<Map<String, dynamic>>> next(@body Map<String, dynamic> body);
 
+  @POST(path: '/youtubei/v1/player')
+  Future<Response<Map<String, dynamic>>> player(
+    @body Map<String, dynamic> body,
+  );
+
   @GET(path: 'https://suggestqueries.google.com/complete/search')
   Future<Response<String>> getSearchSuggestions(
     @Query('q') String query, {

@@ -15,6 +15,7 @@
 | `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-09-30 |
 | `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
 | `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
+| `player.json` | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04 |
 
 
 ## 频道浏览的 renderer 形态
@@ -51,6 +52,12 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 `onResponseReceivedEndpoints` 与 `onResponseReceivedActions` 都取不出 continuation endpoint 时抛 `FormatException`：响应结构变化时端点会整个消失，此时继续走会静默返回空列表，调用方分不清「视频没有评论」与「解析器不认识这个响应」。评论条目本身解析失败按上面的口径忽略。
 
 `watch_next.json` 的 `commentsContinuationToken` 只取自 `itemSectionRenderer` 中 `targetId` 为 `comments-section` 的区段。排在它之前、同样带 `continuationItemRenderer` 的其他区段（如 `related-items-section`）持有的令牌不是评论续页令牌。
+
+## 视频 Player 的响应形态
+
+`getPlayer` 解析 `/youtubei/v1/player` 接口返回的播放器数据，包含 `playabilityStatus`（播放状态与不可播放原因）、`videoDetails`（视频 ID、标题、作者、频道 ID、时长、观看量、描述与缩略图等）、`microformat.playerMicroformatRenderer`（发布时间、分类等）及 `streamingData`（`formats` 与 `adaptiveFormats` 中的媒体流格式、qualityLabel、mimeType、url、bitrate 等）。
+
+若响应中存在顶层 `error` 或 `alerts` 中的错误信息，按包内规范抛出 `YpiInnerTubeException`。缺 `videoId` 或缺核心字段时抛出 `FormatException`。
 
 ## 播放列表搜索的 renderer 形态
 
