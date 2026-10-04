@@ -2,72 +2,180 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-/// One public endpoint method and the fixtures that back it.
+/// One public endpoint method, its backing fixtures, and the documentation
+/// table row that records it.
 ///
-/// [method] must match a method declared in `lib/src/network_*_data_source.dart`
-/// and every name in [fixtures] must match a file in `testing/`.
+/// [method] must match a method declared in `lib/src/network_*_data_source.dart`,
+/// every name in [fixtures] must match a file in `testing/`, and [docCell] must
+/// match a `Fixture` cell in both `AGENTS.md` and `testing/README.md`.
 ///
 /// This table is written out by hand on purpose. Deriving it from the source
 /// files, the fixture directory or the documentation would make the guardrail
 /// compare a value with itself and detect nothing.
+///
+/// [docCell] is explicit rather than defaulted to the fixture name because the
+/// two wildcard rows in the documentation cover more files than any one method
+/// owns. Inferring the cell from the fixture name would let `search_*.json`
+/// stand in for `search_suggest.json` and `search_all.json`, which have their
+/// own rows because they are separate endpoints with separate sources.
 final class EndpointSpec {
-  const EndpointSpec({required this.method, required this.fixtures});
+  const EndpointSpec({
+    required this.method,
+    required this.fixtures,
+    required this.docCell,
+  });
 
   final String method;
   final List<String> fixtures;
+
+  /// The `Fixture` cell text as written in the documentation tables, without
+  /// the surrounding backticks and without a directory part. May contain a `*`
+  /// wildcard.
+  ///
+  /// The two tables spell the same cell differently — `AGENTS.md` writes
+  /// `testing/popular.json`, `testing/README.md` writes `popular.json` — so the
+  /// cell is compared on its file-name part alone.
+  final String docCell;
+
+  /// The documentation cells this row is responsible for. Only meaningful when
+  /// [docCell] is a wildcard.
+  Set<String> get fixtureNames => fixtures.toSet();
 }
 
-/// Every public endpoint method in the package, with its backing fixtures.
+/// Every public endpoint method in the package.
 ///
 /// Three documented exceptions to a strict one-method-one-fixture rule:
 ///
-/// * The twelve `search*` methods share the single `search_*.json` wildcard row
-///   in both documentation tables; each still keeps its own concrete fixture.
+/// * The eleven `search*` type methods share the single `search_*.json`
+///   wildcard row in both documentation tables; each still keeps its own
+///   concrete fixture.
 /// * `reply_*.json` is a wildcard row too, and `getReplyList` spans two
 ///   endpoints: `/x/v2/reply` for a paged read and `/x/v2/reply/main` when a
 ///   server continuation offset is supplied, so it owns two fixtures.
 /// * `getSuggests` calls `/main/suggest`, not the WBI search endpoints, so its
-///   fixture is named `search_suggest.json` without being a search-type fixture.
+///   fixture is named `search_suggest.json` without being a search-type
+///   fixture, and it has its own row rather than sharing `search_*.json`.
 const endpointSpecs = <EndpointSpec>[
-  EndpointSpec(method: 'getPopular', fixtures: ['popular.json']),
-  EndpointSpec(method: 'getRanking', fixtures: ['ranking.json']),
+  EndpointSpec(
+    method: 'getPopular',
+    fixtures: ['popular.json'],
+    docCell: 'popular.json',
+  ),
+  EndpointSpec(
+    method: 'getRanking',
+    fixtures: ['ranking.json'],
+    docCell: 'ranking.json',
+  ),
   EndpointSpec(
     method: 'getLiveRoomDetail',
     fixtures: ['live_room_detail.json'],
+    docCell: 'live_room_detail.json',
   ),
   EndpointSpec(
     method: 'getLiveRoomPlayInfo',
     fixtures: ['live_room_play_info.json'],
+    docCell: 'live_room_play_info.json',
   ),
-  EndpointSpec(method: 'searchAll', fixtures: ['search_all.json']),
-  EndpointSpec(method: 'searchArticle', fixtures: ['search_article.json']),
-  EndpointSpec(method: 'searchBiliUser', fixtures: ['search_bili_user.json']),
-  EndpointSpec(method: 'searchLive', fixtures: ['search_live.json']),
-  EndpointSpec(method: 'searchLiveRoom', fixtures: ['search_live_room.json']),
-  EndpointSpec(method: 'searchLiveUser', fixtures: ['search_live_user.json']),
+  EndpointSpec(
+    method: 'searchAll',
+    fixtures: ['search_all.json'],
+    docCell: 'search_all.json',
+  ),
+  EndpointSpec(
+    method: 'searchArticle',
+    fixtures: ['search_article.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchBiliUser',
+    fixtures: ['search_bili_user.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchLive',
+    fixtures: ['search_live.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchLiveRoom',
+    fixtures: ['search_live_room.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchLiveUser',
+    fixtures: ['search_live_user.json'],
+    docCell: 'search_*.json',
+  ),
   EndpointSpec(
     method: 'searchMediaBangumi',
     fixtures: ['search_media_bangumi.json'],
+    docCell: 'search_*.json',
   ),
-  EndpointSpec(method: 'searchMediaFt', fixtures: ['search_media_ft.json']),
-  EndpointSpec(method: 'searchPhoto', fixtures: ['search_photo.json']),
-  EndpointSpec(method: 'searchTopic', fixtures: ['search_topic.json']),
-  EndpointSpec(method: 'searchVideo', fixtures: ['search_video.json']),
-  EndpointSpec(method: 'getSuggests', fixtures: ['search_suggest.json']),
-  EndpointSpec(method: 'getUserCard', fixtures: ['user_card.json']),
-  EndpointSpec(method: 'getVideoDetail', fixtures: ['video_detail.json']),
-  EndpointSpec(method: 'getVideoRelation', fixtures: ['video_relation.json']),
-  EndpointSpec(method: 'getRelatedVideos', fixtures: ['related_videos.json']),
+  EndpointSpec(
+    method: 'searchMediaFt',
+    fixtures: ['search_media_ft.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchPhoto',
+    fixtures: ['search_photo.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchTopic',
+    fixtures: ['search_topic.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'searchVideo',
+    fixtures: ['search_video.json'],
+    docCell: 'search_*.json',
+  ),
+  EndpointSpec(
+    method: 'getSuggests',
+    fixtures: ['search_suggest.json'],
+    docCell: 'search_suggest.json',
+  ),
+  EndpointSpec(
+    method: 'getUserCard',
+    fixtures: ['user_card.json'],
+    docCell: 'user_card.json',
+  ),
+  EndpointSpec(
+    method: 'getVideoDetail',
+    fixtures: ['video_detail.json'],
+    docCell: 'video_detail.json',
+  ),
+  EndpointSpec(
+    method: 'getVideoRelation',
+    fixtures: ['video_relation.json'],
+    docCell: 'video_relation.json',
+  ),
+  EndpointSpec(
+    method: 'getRelatedVideos',
+    fixtures: ['related_videos.json'],
+    docCell: 'related_videos.json',
+  ),
   EndpointSpec(
     method: 'getReplyList',
     fixtures: ['reply_list.json', 'reply_list_main.json'],
+    docCell: 'reply_*.json',
   ),
   EndpointSpec(
     method: 'getReplyReplyList',
     fixtures: ['reply_reply_list.json'],
+    docCell: 'reply_*.json',
   ),
-  EndpointSpec(method: 'getPlayUrl', fixtures: ['play_url.json']),
-  EndpointSpec(method: 'getPlayerInfo', fixtures: ['player_v2.json']),
+  EndpointSpec(
+    method: 'getPlayUrl',
+    fixtures: ['play_url.json'],
+    docCell: 'play_url.json',
+  ),
+  EndpointSpec(
+    method: 'getPlayerInfo',
+    fixtures: ['player_v2.json'],
+    docCell: 'player_v2.json',
+  ),
 ];
 
 /// Matches an abstract method declaration such as
@@ -99,9 +207,16 @@ final RegExp _mapKeyFixtureName = RegExp(
   multiLine: true,
 );
 
-/// Runs once before the guardrail reads anything from disk, so that being
-/// launched from the wrong working directory reports itself as such instead of
-/// looking like an empty fixture directory.
+/// The loop that turns map keys into written fixture paths. Matched separately
+/// because a map key on its own does not prove anything is written: the loop
+/// could keep its table and lose the `saveResponse` call inside it.
+final RegExp _saveResponseThroughLoopVariable = RegExp(
+  r"saveResponse\(\s*'testing/\$\{?[A-Za-z_]\w*\}?'",
+);
+
+/// Runs before the guardrail reads anything from disk, so that being launched
+/// from the wrong working directory reports itself as such instead of looking
+/// like an empty fixture directory.
 void _requirePackageRoot() {
   for (final relative in ['lib/src', 'testing', 'AGENTS.md']) {
     expect(
@@ -113,31 +228,6 @@ void _requirePackageRoot() {
           'packages/bilibili/bpi.',
     );
   }
-}
-
-List<String> _dataSourceFiles() {
-  return Directory('lib/src')
-      .listSync()
-      .whereType<File>()
-      .map((file) => file.uri.pathSegments.last)
-      .where(
-        (name) =>
-            name.startsWith('network_') && name.endsWith('_data_source.dart'),
-      )
-      .toList()
-    ..sort();
-}
-
-/// Every public endpoint method name declared across the data source files.
-Set<String> _declaredServiceMethods() {
-  final methods = <String>{};
-  for (final name in _dataSourceFiles()) {
-    final source = File('lib/src/$name').readAsStringSync();
-    methods.addAll(
-      _methodDeclaration.allMatches(source).map((m) => m.group(2)!),
-    );
-  }
-  return methods;
 }
 
 /// Every fixture file name in `testing/`, sorted.
@@ -190,17 +280,16 @@ List<String> _fixtureColumn(String source, String documentPath) {
   for (final line in lines.skip(headerIndex + 1)) {
     final row = _markdownCells(line);
     if (row.every((cell) => _markdownSeparatorCell.hasMatch(cell))) continue;
-    if (row.length <= column) {
-      continue;
-    }
+    if (row.length <= column) continue;
     cells.add(row[column]);
   }
   return cells;
 }
 
-/// Strips the surrounding backticks and the `testing/` prefix so that the same
-/// cell text can be compared against the bare file names in `testing/`.
-String _bareFixtureName(String cell) {
+/// Strips the surrounding backticks and any `testing/` directory part so cell
+/// text can be compared with [EndpointSpec.docCell]. `AGENTS.md` writes
+/// `testing/popular.json` where `testing/README.md` writes `popular.json`.
+String _unquote(String cell) {
   final unquoted = cell.replaceAll('`', '').trim();
   const prefix = 'testing/';
   return unquoted.startsWith(prefix)
@@ -208,48 +297,89 @@ String _bareFixtureName(String cell) {
       : unquoted;
 }
 
-/// Resolves the `Fixture` cells of one documentation table against the files
-/// actually present in `testing/`.
+/// Checks that one documentation table records every method in the spec table,
+/// and that every cell it lists is claimed by exactly the methods that declare
+/// it.
 ///
-/// A literal cell must name a file that exists. A wildcard cell such as
-/// `search_*.json` must expand to at least one real file, so a stale prefix
-/// cannot quietly keep passing after the fixtures behind it are renamed.
-Set<String> _documentedFixtures(
-  List<String> cells,
-  Set<String> onDisk,
-  String documentPath,
-) {
-  final documented = <String>{};
-  for (final cell in cells) {
-    final name = _bareFixtureName(cell);
+/// The second half matters as much as the first. Checking only that every
+/// fixture is mentioned somewhere lets the `search_*.json` wildcard stand in
+/// for the `search_suggest.json` and `search_all.json` rows: delete those two
+/// rows and the wildcard still matches their files, so a coverage-only
+/// assertion stays green while the documentation has lost a source record.
+void _assertDocumentationTableCoversSpec(String documentPath) {
+  final cells = _fixtureColumn(
+    File(documentPath).readAsStringSync(),
+    documentPath,
+  );
+  expect(
+    cells,
+    isNotEmpty,
+    reason: '$documentPath has no rows in its fixture table.',
+  );
+
+  final quoted = cells.map(_unquote).toList();
+
+  for (final spec in endpointSpecs) {
     expect(
-      name,
+      quoted,
+      contains(spec.docCell),
+      reason:
+          '${spec.method} declares its `Fixture` cell as ${spec.docCell}, '
+          'which $documentPath does not contain. Add the row back.',
+    );
+  }
+
+  // Expand every wildcard cell against the files it actually matches, so a
+  // stale prefix cannot keep passing, then require the union to be exactly the
+  // set of files the spec table claims.
+  final onDisk = _fixturesOnDisk().toSet();
+  final covered = <String>{};
+  for (final cell in quoted) {
+    expect(
+      cell,
       isNotEmpty,
       reason: '$documentPath has a `Fixture` row with an empty cell.',
     );
-    if (!name.contains('*')) {
+    if (!cell.contains('*')) {
       expect(
         onDisk,
-        contains(name),
+        contains(cell),
         reason:
-            '$documentPath documents $name, which is not in the testing/ '
+            '$documentPath documents $cell, which is not in the testing/ '
             'directory.',
       );
-      documented.add(name);
+      covered.add(cell);
       continue;
     }
-    final pattern = RegExp('^${RegExp.escape(name).replaceAll(r'\*', '.*')}\$');
+    final pattern = RegExp('^${RegExp.escape(cell).replaceAll(r'\*', '.*')}\$');
     final matches = onDisk.where(pattern.hasMatch).toList()..sort();
     expect(
       matches,
       isNotEmpty,
       reason:
-          '$documentPath documents the wildcard $name, which matches none of '
+          '$documentPath documents the wildcard $cell, which matches none of '
           'the files in testing/.',
     );
-    documented.addAll(matches);
+    covered.addAll(matches);
   }
-  return documented;
+
+  final claimed = <String>{
+    for (final spec in endpointSpecs) ...spec.fixtureNames,
+  };
+  expect(
+    onDisk.difference(covered).toList()..sort(),
+    isEmpty,
+    reason:
+        'These fixtures exist in testing/ but $documentPath does not record '
+        'them.',
+  );
+  expect(
+    covered.difference(claimed).toList()..sort(),
+    isEmpty,
+    reason:
+        '$documentPath records these fixtures, but no endpoint method in '
+        'endpointSpecs claims them.',
+  );
 }
 
 void main() {
@@ -259,7 +389,32 @@ void main() {
 
   group('bpi endpoint documentation guardrail', () {
     test('every declared service method is registered in the spec table', () {
-      final declared = _declaredServiceMethods();
+      final declared = <String>{};
+      final dataSourceDirectory = Directory('lib/src');
+      final names =
+          dataSourceDirectory
+              .listSync()
+              .whereType<File>()
+              .map((file) => file.uri.pathSegments.last)
+              .where(
+                (name) =>
+                    name.startsWith('network_') &&
+                    name.endsWith('_data_source.dart'),
+              )
+              .toList()
+            ..sort();
+      expect(
+        names,
+        isNotEmpty,
+        reason: 'No data source files were found in lib/src.',
+      );
+
+      for (final name in names) {
+        final source = File('lib/src/$name').readAsStringSync();
+        declared.addAll(
+          _methodDeclaration.allMatches(source).map((m) => m.group(2)!),
+        );
+      }
       expect(
         declared,
         isNotEmpty,
@@ -272,9 +427,9 @@ void main() {
         isEmpty,
         reason:
             'These endpoint methods have no entry in endpointSpecs, so their '
-            'fixture is undocumented. Add the method with its fixture names to '
-            'the table in this file, plus rows in bpi/AGENTS.md and '
-            'testing/README.md.',
+            'fixture is undocumented. Add the method with its fixture names and '
+            'its documentation cell to the table in this file, plus rows in '
+            'bpi/AGENTS.md and testing/README.md.',
       );
       expect(
         registered.difference(declared).toList()..sort(),
@@ -327,60 +482,18 @@ void main() {
       }
     });
 
-    test('the endpoint table in AGENTS.md covers every fixture on disk', () {
-      final onDisk = fixturesOnDisk.toSet();
-      final cells = _fixtureColumn(
-        File('AGENTS.md').readAsStringSync(),
-        'AGENTS.md',
-      );
-      expect(
-        cells,
-        isNotEmpty,
-        reason: 'AGENTS.md has no rows in its endpoint table.',
-      );
-
-      final documented = _documentedFixtures(cells, onDisk, 'AGENTS.md');
-      expect(
-        onDisk.difference(documented).toList()..sort(),
-        isEmpty,
-        reason:
-            'These fixtures exist in testing/ but the AGENTS.md endpoint '
-            'table does not record them. Add a row under '
-            '「已确认的来源与端点」.',
-      );
+    test('the endpoint table in AGENTS.md records every registered method', () {
+      _assertDocumentationTableCoversSpec('AGENTS.md');
     });
 
     test(
-      'the fixture table in testing/README.md covers every file on disk',
+      'the fixture table in testing/README.md records every registered method',
       () {
-        final onDisk = fixturesOnDisk.toSet();
-        final cells = _fixtureColumn(
-          File('testing/README.md').readAsStringSync(),
-          'testing/README.md',
-        );
-        expect(
-          cells,
-          isNotEmpty,
-          reason: 'testing/README.md has no rows in its fixture table.',
-        );
-
-        final documented = _documentedFixtures(
-          cells,
-          onDisk,
-          'testing/README.md',
-        );
-        expect(
-          onDisk.difference(documented).toList()..sort(),
-          isEmpty,
-          reason:
-              'These fixtures exist in testing/ but the testing/README.md '
-              'fixture table does not record them. Add a row under '
-              '「Fixture 记录」.',
-        );
+        _assertDocumentationTableCoversSpec('testing/README.md');
       },
     );
 
-    test('every fixture can be produced again by the capture script', () {
+    test('every fixture can be written again by the capture script', () {
       final script = File('tool/capture/fetch_fixtures.dart');
       expect(
         script.existsSync(),
@@ -389,12 +502,12 @@ void main() {
       );
       final source = script.readAsStringSync();
 
-      // A fixture is captured either through a literal
-      // `saveResponse('testing/<name>.json', ...)` call or through a loop whose
-      // map keys are the fixture names, as the twelve search-type endpoints do.
-      // Matching the bare file name anywhere in the file would also match the
-      // `shouldFetch('testing/<name>.json')` guard of a branch whose fetch and
-      // write were deleted, which is exactly the drift this test exists for.
+      // A fixture is written either through a literal
+      // `saveResponse('testing/<name>.json', ...)` call or through a loop over
+      // a table of fixture names. Matching the bare file name anywhere in the
+      // file would also match the `shouldFetch('testing/<name>.json')` guard
+      // of a branch whose fetch and write had been deleted, which is exactly
+      // the drift this test exists for.
       final written = <String>{
         for (final m in _literalSaveResponse.allMatches(source)) m.group(1)!,
         for (final m in _mapKeyFixtureName.allMatches(source)) m.group(1)!,
@@ -411,6 +524,27 @@ void main() {
               'branch for every endpoint.',
         );
       }
+    });
+
+    test('the capture loop still writes the fixtures it enumerates', () {
+      final source = File('tool/capture/fetch_fixtures.dart')
+          .readAsStringSync();
+      final tableDriven = _mapKeyFixtureName
+          .allMatches(source)
+          .map((m) => m.group(1)!)
+          .toSet();
+      if (tableDriven.isEmpty) {
+        return;
+      }
+      expect(
+        source,
+        matches(_saveResponseThroughLoopVariable),
+        reason:
+            'tool/capture/fetch_fixtures.dart lists fixtures as map keys '
+            '(${tableDriven.join(', ')}) but has no saveResponse call writing '
+            'them through the loop variable, so those fixtures are declared '
+            'and never captured.',
+      );
     });
   });
 }
