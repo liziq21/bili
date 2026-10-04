@@ -150,5 +150,26 @@ void main() {
         throwsA(isA<BpiSerializationException>()),
       );
     });
+
+    test('maps invalid UTF-8 bytes to BpiSerializationException', () async {
+      // Content-Type 声明 JSON 但字节含无效 UTF-8 时，Chopper 在 JSON 解析
+      // 容错逻辑之前先 utf8.decode 而抛 FormatException。
+      final network = BiliNetworkSearch(
+        client: MockClient(
+          (_) async => http.Response.bytes(
+            // 0xFF 不是合法 UTF-8 起始字节。
+            <int>[0x7B, 0xFF, 0x7D],
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
+      addTearDown(network.close);
+
+      expect(
+        network.getUserCard(mid: 2),
+        throwsA(isA<BpiSerializationException>()),
+      );
+    });
   });
 }

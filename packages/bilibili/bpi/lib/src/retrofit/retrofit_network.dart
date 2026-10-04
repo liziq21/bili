@@ -453,6 +453,24 @@ class BiliNetworkSearch
   );
 
   @override
-  Future<NetworkBiliUserCardData> getUserCard({required int mid}) =>
-      _networkApi.getUserCard(mid: mid);
+  Future<NetworkBiliUserCardData> getUserCard({required int mid}) async {
+    try {
+      return await _networkApi.getUserCard(mid: mid);
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      // Content-Type 匹配 JSON 但字节含无效 UTF-8 时，Chopper 会在 JSON 解析
+      // 容错逻辑之前先调 utf8.decode 而抛 FormatException。不包一层的话调用方
+      // 会收到 BpiException 体系之外的异常。
+      throw BpiSerializationException(
+        'Bilibili user card response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili user card network request failed.',
+        cause: error,
+      );
+    }
+  }
 }
