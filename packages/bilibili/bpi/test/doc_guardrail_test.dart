@@ -246,14 +246,18 @@ String? _fixtureLoopBody(String script) {
   if (header == null) return null;
 
   final afterTable = table.end + header.end;
+  // The scan starts just after the loop header, so the loop's own opening
+  // brace takes the counter to 1. Test after decrementing: checking before
+  // would never fire, and the scan would run on past the loop into unrelated
+  // code, letting a `saveResponse` outside the loop satisfy the check.
   var depth = 0;
   for (var i = afterTable; i < script.length; i++) {
     final c = script[i];
     if (c == '{') {
       depth++;
     } else if (c == '}') {
-      if (depth == 0) return script.substring(afterTable, i);
       depth--;
+      if (depth == 0) return script.substring(afterTable, i);
     }
   }
   return null;
