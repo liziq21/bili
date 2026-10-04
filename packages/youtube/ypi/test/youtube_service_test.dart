@@ -1351,4 +1351,60 @@ void main() {
       networkService.close();
     });
   });
+  group('YoutubeService.getComments', () {
+    test('posts to /next with the trimmed continuation', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.path, equals('/youtubei/v1/next'));
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        // continuation 必须先 trim 再发出，不能带调用方传入的空白。
+        expect(body['continuation'], equals('TOKEN_123'));
+        return http.Response(
+          json.encode({
+            'onResponseReceivedEndpoints': <dynamic>[
+              {
+                'appendContinuationItemsAction': {
+                  'continuationItems': <dynamic>[
+                    {
+                      'commentThreadRenderer': {
+                        'comment': {
+                          'commentRenderer': {
+                            'commentId': 'C1',
+                            'contentText': {'simpleText': 'hi'},
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      await service.getComments('  TOKEN_123  ');
+
+    });
+
+    test('rejects an empty continuation before issuing a request', () async {
+      var called = false;
+      final mockClient = MockClient((_) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      await expectLater(
+        service.getComments('   '),
+        throwsA(isA<YpiJsonException>()),
+      );
+      expect(called, isFalse, reason: '空 continuation 不该发请求');
+    });
+  });
+
 }

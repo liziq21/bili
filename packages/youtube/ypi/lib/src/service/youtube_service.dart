@@ -8,6 +8,7 @@ import '../api/yt_interceptor.dart';
 import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
 import '../models/network_youtube_browse.dart';
+import '../models/network_youtube_comments.dart';
 import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../models/network_youtube_watch_next.dart';
@@ -161,6 +162,20 @@ final class YoutubeService {
         requestedVideoId: sanitizedVideoId,
       ),
     );
+  }
+
+  /// Fetches comment threads for a video using a comment [continuation] token.
+  Future<NetworkYouTubeCommentsResponse> getComments(
+    String continuation,
+  ) async {
+    final sanitizedContinuation = continuation.trim();
+    if (sanitizedContinuation.isEmpty) {
+      throw const YpiJsonException('getComments requires continuation');
+    }
+    final body = <String, dynamic>{'continuation': sanitizedContinuation};
+
+    final response = await _send(_api.next, body);
+    return _parseResponse(response, NetworkYouTubeCommentsResponse.fromJson);
   }
 
   Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(

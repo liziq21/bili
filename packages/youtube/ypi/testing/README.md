@@ -14,6 +14,7 @@
 | `browse_continuation.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | continuation=取自 `browse.json` 的 richGrid 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
 | `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-09-30 |
 | `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
+| `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
 
 
 ## 频道浏览的 renderer 形态
@@ -36,6 +37,20 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 - `alerts[].alertRenderer.type` 有值且非 `OK`（如 `ERROR`）→ `YpiInnerTubeException`，`reason` 取 alert 文本（`simpleText` 与 `runs` 两种形态都认；都取不到时退化为 `InnerTube alert: <type>`）。与 `network_youtube_browse.dart` 对失效频道的口径一致。
 - 缺 `videoId` 或缺 `videoPrimaryInfoRenderer` 标题 → `FormatException`。标题是必填项：失效或受限视频会返回 HTTP 200 且 `results.results.contents` 非空，但两个 renderer 循环全程空转，只靠 `videoId` 兜底就会放行一个标题与作者全 null 的「成功」响应。
 - `owner` 解析失败（`FormatException`）→ 忽略，`owner` 置 null。播放量、发布时间、视频简介缺失同理，都是可空字段。
+
+## 视频评论的 renderer 形态
+
+`getComments` 解析 `onResponseReceivedEndpoints` / `onResponseReceivedActions` 中的 `reloadContinuationItemsCommand` / `appendContinuationItemsAction` 下的 `continuationItems`。
+
+评论条目存在两种形态：
+- `commentThreadRenderer` 包含 `commentViewModel`：作者与文本信息保存在 `frameworkUpdates.entityBatchUpdate.mutations` 的 `commentEntityPayload` 中，通过 `commentKey` / `commentId` 关联。
+- `commentThreadRenderer` 包含 `commentRenderer`：经典 InnerTube 结构，直接包含 `authorText`、`authorEndpoint`、`authorThumbnail`、`contentText`、`publishedTimeText` 和 `voteCount`。
+
+解析器同时支持以上两种形态，并可提取 `commentsHeaderRenderer` 中的评论总数文本（如 `"2,458,110"`）及下一页评论的 `continuationItemRenderer` continuation token。
+
+`onResponseReceivedEndpoints` 与 `onResponseReceivedActions` 都取不出 continuation endpoint 时抛 `FormatException`：响应结构变化时端点会整个消失，此时继续走会静默返回空列表，调用方分不清「视频没有评论」与「解析器不认识这个响应」。评论条目本身解析失败按上面的口径忽略。
+
+`watch_next.json` 的 `commentsContinuationToken` 只取自 `itemSectionRenderer` 中 `targetId` 为 `comments-section` 的区段。排在它之前、同样带 `continuationItemRenderer` 的其他区段（如 `related-items-section`）持有的令牌不是评论续页令牌。
 
 ## 播放列表搜索的 renderer 形态
 
