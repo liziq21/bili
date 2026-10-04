@@ -1,4 +1,3 @@
-
 import '../exception/ypi_exception.dart';
 import 'network_youtube_search.dart';
 
@@ -57,6 +56,7 @@ final class NetworkYouTubeWatchNextResponse {
     this.publishedTimeText,
     this.owner,
     this.description,
+    this.commentsContinuationToken,
   });
 
   factory NetworkYouTubeWatchNextResponse.fromJson(
@@ -85,6 +85,7 @@ final class NetworkYouTubeWatchNextResponse {
     String? publishedTimeText;
     NetworkYouTubeVideoOwner? owner;
     String? description;
+    String? commentsContinuationToken;
 
     for (final rawItem in contentsList.map(_map).nonNulls) {
       final primary = _map(rawItem['videoPrimaryInfoRenderer']);
@@ -129,6 +130,32 @@ final class NetworkYouTubeWatchNextResponse {
             _string(_map(secondary['attributedDescription'])?['content']);
         description ??= descText;
       }
+
+      final itemSection = _map(rawItem['itemSectionRenderer']);
+      if (itemSection != null) {
+        final targetId =
+            _string(itemSection['targetId']) ??
+            _string(itemSection['sectionId']);
+        // 只取评论区段落的令牌。`|| commentsContinuationToken == null` 会让排在
+        // 评论区段之前、同样带 continuationItemRenderer 的区段抢先写入自己的
+        // 令牌，而 `??=` 又使真正的评论区令牌无法覆盖它。
+        if (targetId == 'comments-section') {
+          for (final rawContent in _list(
+            itemSection['contents'],
+          ).map(_map).nonNulls) {
+            final contItem = _map(rawContent['continuationItemRenderer']);
+            if (contItem != null) {
+              final endpoint = _map(contItem['continuationEndpoint']);
+              final command = _map(endpoint?['continuationCommand']);
+              final token = _string(command?['token']);
+              if (token != null) {
+                commentsContinuationToken = token;
+                break;
+              }
+            }
+          }
+        }
+      }
     }
 
     final currentVideoEndpoint = _map(json['currentVideoEndpoint']);
@@ -163,6 +190,7 @@ final class NetworkYouTubeWatchNextResponse {
       publishedTimeText: publishedTimeText,
       owner: owner,
       description: description,
+      commentsContinuationToken: commentsContinuationToken,
     );
   }
 
@@ -173,6 +201,9 @@ final class NetworkYouTubeWatchNextResponse {
   final String? publishedTimeText;
   final NetworkYouTubeVideoOwner? owner;
   final String? description;
+
+  /// 评论区段落的 continuation token，抓取评论续页时使用。
+  final String? commentsContinuationToken;
 }
 
 /// Pulls `continuationItems` out of a paginated `next` response.
@@ -181,7 +212,9 @@ final class NetworkYouTubeWatchNextResponse {
 /// `{"appendContinuationItemsAction": {"continuationItems": [...]}}`；reload
 /// 条目走 `reloadContinuationItemsCommand`，同样带 `continuationItems`。
 List<dynamic> _continuationItems(Map<String, dynamic> json) {
-  for (final rawAction in _list(json['onResponseReceivedActions']).map(_map).nonNulls) {
+  for (final rawAction in _list(
+    json['onResponseReceivedActions'],
+  ).map(_map).nonNulls) {
     for (final key in const [
       'appendContinuationItemsAction',
       'reloadContinuationItemsCommand',

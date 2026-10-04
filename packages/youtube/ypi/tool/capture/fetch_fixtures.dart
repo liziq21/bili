@@ -225,6 +225,39 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/watch_next.json', next);
     }
 
+    print('8. Fetching video comments JSON...');
+    if (!shouldFetch('testing/comments.json')) {
+      skipNote('testing/comments.json');
+    } else {
+      final watchNextJson = jsonDecode(
+        File('testing/watch_next.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
+      final commentsToken = NetworkYouTubeWatchNextResponse.fromJson(
+        watchNextJson,
+      ).commentsContinuationToken;
+      if (commentsToken == null || commentsToken.isEmpty) {
+        throw const FormatException(
+          'watch_next.json carried no comments continuation token',
+        );
+      }
+      final commentsResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/next'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'continuation': commentsToken,
+            }),
+          )
+          .timeout(requestTimeout);
+      final comments = _captureJson(
+        commentsResponse,
+        'video comments',
+        _validateCommentsResponse,
+      );
+      saveResponse('testing/comments.json', comments);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -550,6 +583,18 @@ void _validateNextResponse(dynamic json) {
   if (parsed.owner == null) {
     throw const FormatException(
       'InnerTube next response has no videoSecondaryInfoRenderer owner',
+    );
+  }
+}
+
+void _validateCommentsResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube comments response is not an object');
+  }
+  final items = NetworkYouTubeCommentsResponse.fromJson(json).items;
+  if (items.isEmpty) {
+    throw const FormatException(
+      'InnerTube comments response yields no comment items',
     );
   }
 }

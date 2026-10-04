@@ -316,34 +316,31 @@ void main() {
     // 但里面没有 videoPrimaryInfoRenderer。兜底的 videoId 会让非空检查通过，
     // 于是返回一个标题与作者全 null 的「成功」响应。
     expect(
-      () => NetworkYouTubeWatchNextResponse.fromJson(
-        <String, dynamic>{
-          'contents': <String, dynamic>{
-            'twoColumnWatchNextResults': <String, dynamic>{
+      () => NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+        'contents': <String, dynamic>{
+          'twoColumnWatchNextResults': <String, dynamic>{
+            'results': <String, dynamic>{
               'results': <String, dynamic>{
-                'results': <String, dynamic>{
-                  'contents': <dynamic>[
-                    <String, dynamic>{
-                      'videoSecondaryInfoRenderer': <String, dynamic>{
-                        'owner': <String, dynamic>{
-                          'videoOwnerRenderer': <String, dynamic>{
-                            'navigationEndpoint': <String, dynamic>{
-                              'browseEndpoint': <String, dynamic>{
-                                'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
-                              },
+                'contents': <dynamic>[
+                  <String, dynamic>{
+                    'videoSecondaryInfoRenderer': <String, dynamic>{
+                      'owner': <String, dynamic>{
+                        'videoOwnerRenderer': <String, dynamic>{
+                          'navigationEndpoint': <String, dynamic>{
+                            'browseEndpoint': <String, dynamic>{
+                              'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
                             },
                           },
                         },
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
         },
-        requestedVideoId: 'dQw4w9WgXcQ',
-      ),
+      }, requestedVideoId: 'dQw4w9WgXcQ'),
       throwsA(isA<FormatException>()),
     );
   });
@@ -352,56 +349,51 @@ void main() {
     // 续页结构与首屏完全不同：条目在
     // onResponseReceivedActions[].appendContinuationItemsAction.continuationItems。
     // 只读首屏路径的话，续页响应会被当成「没有内容」。
-    final response = NetworkYouTubeWatchNextResponse.fromJson(
-      <String, dynamic>{
-        'onResponseReceivedActions': <dynamic>[
-          <String, dynamic>{
-            'appendContinuationItemsAction': <String, dynamic>{
-              'continuationItems': <dynamic>[
-                <String, dynamic>{
-                  'videoPrimaryInfoRenderer': <String, dynamic>{
-                    'title': <String, dynamic>{
-                      'runs': <dynamic>[
-                        <String, dynamic>{'text': 'Continued Title'},
-                      ],
-                    },
-                    'viewCount': <String, dynamic>{
-                      'videoViewCountRenderer': <String, dynamic>{
-                        'viewCount': <String, dynamic>{
-                          'simpleText': '1,000次观看',
-                        },
-                      },
+    final response = NetworkYouTubeWatchNextResponse.fromJson(<String, dynamic>{
+      'onResponseReceivedActions': <dynamic>[
+        <String, dynamic>{
+          'appendContinuationItemsAction': <String, dynamic>{
+            'continuationItems': <dynamic>[
+              <String, dynamic>{
+                'videoPrimaryInfoRenderer': <String, dynamic>{
+                  'title': <String, dynamic>{
+                    'runs': <dynamic>[
+                      <String, dynamic>{'text': 'Continued Title'},
+                    ],
+                  },
+                  'viewCount': <String, dynamic>{
+                    'videoViewCountRenderer': <String, dynamic>{
+                      'viewCount': <String, dynamic>{'simpleText': '1,000次观看'},
                     },
                   },
                 },
-                <String, dynamic>{
-                  'videoSecondaryInfoRenderer': <String, dynamic>{
-                    'owner': <String, dynamic>{
-                      'videoOwnerRenderer': <String, dynamic>{
-                        'navigationEndpoint': <String, dynamic>{
-                          'browseEndpoint': <String, dynamic>{
-                            'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
-                          },
-                        },
-                        'title': <String, dynamic>{
-                          'runs': <dynamic>[
-                            <String, dynamic>{'text': 'Continued Owner'},
-                          ],
+              },
+              <String, dynamic>{
+                'videoSecondaryInfoRenderer': <String, dynamic>{
+                  'owner': <String, dynamic>{
+                    'videoOwnerRenderer': <String, dynamic>{
+                      'navigationEndpoint': <String, dynamic>{
+                        'browseEndpoint': <String, dynamic>{
+                          'browseId': 'UCuAXFkgsw1L7xaCfnd5JJOw',
                         },
                       },
-                    },
-                    'attributedDescription': <String, dynamic>{
-                      'content': 'Continued description',
+                      'title': <String, dynamic>{
+                        'runs': <dynamic>[
+                          <String, dynamic>{'text': 'Continued Owner'},
+                        ],
+                      },
                     },
                   },
+                  'attributedDescription': <String, dynamic>{
+                    'content': 'Continued description',
+                  },
                 },
-              ],
-            },
+              },
+            ],
           },
-        ],
-      },
-      requestedVideoId: 'dQw4w9WgXcQ',
-    );
+        },
+      ],
+    }, requestedVideoId: 'dQw4w9WgXcQ');
     expect(response.title, 'Continued Title');
     expect(response.viewCountText, '1,000次观看');
     expect(response.owner?.title, 'Continued Owner');
@@ -466,4 +458,155 @@ window.google.ac.h(["test", [
       'clean query',
     ]);
   });
+
+  test('parses the real comments fixture into typed comment threads', () {
+    final response = NetworkYouTubeCommentsResponse.fromJson(
+      loadFixtureMap('comments.json'),
+    );
+    expect(response.headerCountText, isNotNull);
+    expect(response.headerCountText, isNotEmpty);
+    expect(response.items, isNotEmpty);
+
+    final first = response.items.first;
+    expect(first.commentId, isNotEmpty);
+    expect(first.text, isNotNull);
+    expect(first.text, isNotEmpty);
+    expect(first.author?.displayName, isNotNull);
+    expect(first.author?.channelId, isNotNull);
+    expect(first.author?.avatar?.thumbnails, isNotEmpty);
+    expect(first.publishedTimeText, isNotNull);
+    expect(first.likeCountText, isNotNull);
+
+    expect(response.continuationToken, isNotNull);
+    expect(response.continuationToken, isNotEmpty);
+  });
+
+  test('parses legacy commentRenderer structure in commentThreadRenderer', () {
+    final response = NetworkYouTubeCommentsResponse.fromJson({
+      'onResponseReceivedEndpoints': [
+        {
+          'reloadContinuationItemsCommand': {
+            'continuationItems': [
+              {
+                'commentsHeaderRenderer': {
+                  'countText': {'simpleText': '100'},
+                },
+              },
+              {
+                'commentThreadRenderer': {
+                  'comment': {
+                    'commentRenderer': {
+                      'commentId': 'LEGACY_COMMENT_1',
+                      'authorText': {'simpleText': 'Legacy Author'},
+                      'authorEndpoint': {
+                        'browseEndpoint': {'browseId': 'UC_LEGACY_1'},
+                      },
+                      'authorThumbnail': {
+                        'thumbnails': [
+                          {'url': 'https://yt.com/avatar.jpg'},
+                        ],
+                      },
+                      'contentText': {'simpleText': 'Legacy Comment Text'},
+                      'publishedTimeText': {'simpleText': '2 hours ago'},
+                      'voteCount': {'simpleText': '42'},
+                      'replyCount': 5,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(response.headerCountText, '100');
+    expect(response.items, hasLength(1));
+    final comment = response.items.single;
+    expect(comment.commentId, 'LEGACY_COMMENT_1');
+    expect(comment.author?.displayName, 'Legacy Author');
+    expect(comment.author?.channelId, 'UC_LEGACY_1');
+    expect(
+      comment.author?.avatar?.thumbnails.first.url,
+      'https://yt.com/avatar.jpg',
+    );
+    expect(comment.text, 'Legacy Comment Text');
+    expect(comment.publishedTimeText, '2 hours ago');
+    expect(comment.likeCountText, '42');
+    expect(comment.replyCount, 5);
+  });
+  test('rejects a comments response with no continuation endpoints', () {
+    // 响应结构变化时端点会整个消失。静默返回空列表会让调用方把
+    // 「解析器不认识这个响应」误当成「视频没有评论」。
+    expect(
+      () => NetworkYouTubeCommentsResponse.fromJson(<String, dynamic>{
+        'responseContext': <String, dynamic>{},
+        'onResponseReceivedEndpoints': <dynamic>[],
+      }),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test(
+    'takes the comments continuation token only from the comments section',
+    () {
+      // 非评论区段排在前面且同样带 continuationItemRenderer。旧条件
+      // `targetId == 'comments-section' || commentsContinuationToken == null`
+      // 会让前者的令牌抢先写入，而 `??=` 使评论区令牌无法覆盖它。
+      Map<String, dynamic> section(String key, String name, String token) =>
+          <String, dynamic>{
+            'itemSectionRenderer': <String, dynamic>{
+              key: name,
+              'contents': <dynamic>[
+                <String, dynamic>{
+                  'continuationItemRenderer': <String, dynamic>{
+                    'continuationEndpoint': <String, dynamic>{
+                      'continuationCommand': <String, dynamic>{'token': token},
+                    },
+                  },
+                },
+              ],
+            },
+          };
+
+      final json = <String, dynamic>{
+        'currentVideoEndpoint': <String, dynamic>{
+          'watchEndpoint': <String, dynamic>{'videoId': 'VIDEO_ID'},
+        },
+        'contents': <String, dynamic>{
+          'twoColumnWatchNextResults': <String, dynamic>{
+            'results': <String, dynamic>{
+              'results': <String, dynamic>{
+                'contents': <dynamic>[
+                  <String, dynamic>{
+                    'videoPrimaryInfoRenderer': <String, dynamic>{
+                      'title': <String, dynamic>{
+                        'runs': <dynamic>[
+                          <String, dynamic>{'text': 'A title'},
+                        ],
+                      },
+                    },
+                  },
+                  section(
+                    'sectionId',
+                    'related-items-section',
+                    'RELATED_SECTION_TOKEN',
+                  ),
+                  section(
+                    'targetId',
+                    'comments-section',
+                    'COMMENTS_SECTION_TOKEN',
+                  ),
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      final response = NetworkYouTubeWatchNextResponse.fromJson(json);
+
+      expect(response.commentsContinuationToken, 'COMMENTS_SECTION_TOKEN');
+    },
+  );
 }
