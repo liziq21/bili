@@ -214,10 +214,11 @@ final RegExp _mapKeyLoopVariable = RegExp(
   multiLine: true,
 );
 
-/// The header of the `for` loop that walks the fixture table, binding each map
-/// key to a loop variable.
-final RegExp _fixtureLoopHeader = RegExp(
-  r'for\s*\(\s*final\s+\w+\s+in\s+[A-Za-z_]\w*\.entries\s*\)',
+/// The map whose literal keys are the fixture names, as the search-type
+/// capture table is.
+final RegExp _fixtureTableDeclaration = RegExp(
+  r'(?:final|var)\s+[A-Za-z_]\w*'
+  r'(?:<[^>]*>)?\s*=\s*<String,\s*String>\{',
 );
 
 /// The `saveResponse` call that writes the current loop iteration's fixture.
@@ -228,23 +229,30 @@ final RegExp _saveResponseInLoop = RegExp(
 /// The body of the fixture-enumerating loop, or `null` when it cannot be
 /// located.
 ///
-/// Scans forward from the loop header to the `}` closing its body at the same
-/// nesting depth. Anchoring the write check to that span is what makes it
-/// meaningful: a `saveResponse('testing/$name', ...)` sitting in an unrelated
-/// branch of the script would otherwise satisfy it, and the guardrail would
-/// keep reporting the fixture loop as writing its fixtures after the loop had
-/// stopped writing them.
-String? _fixtureLoopBody() {
-  final script = File('tool/capture/fetch_fixtures.dart').readAsStringSync();
-  final header = _fixtureLoopHeader.firstMatch(script);
+/// Finds the loop by the table it iterates, not by taking the first
+/// `for (… in ….entries)` in the file: the script also walks the response
+/// while scanning for credentials, and keying off position would anchor the
+/// write check to whichever loop happens to come first, so reordering the two
+/// would report a false failure. Scans forward from that loop's header to the
+/// `}` closing its body at the same nesting depth, and returns nothing when
+/// the declaration is present but no loop over it can be found.
+String? _fixtureLoopBody(String script) {
+  final table = _fixtureTableDeclaration.firstMatch(script);
+  if (table == null) return null;
+
+  final header = RegExp(
+    r'for\s*\(\s*final\s+\w+\s+in\s+[A-Za-z_]\w*\.entries\s*\)',
+  ).firstMatch(script.substring(table.end));
   if (header == null) return null;
+
+  final afterTable = table.end + header.end;
   var depth = 0;
-  for (var i = header.end; i < script.length; i++) {
+  for (var i = afterTable; i < script.length; i++) {
     final c = script[i];
     if (c == '{') {
       depth++;
     } else if (c == '}') {
-      if (depth == 0) return script.substring(header.end, i);
+      if (depth == 0) return script.substring(afterTable, i);
       depth--;
     }
   }
@@ -620,20 +628,36 @@ void main() {
       if (tableDriven.isEmpty) {
         return;
       }
-      final writers = _mapKeyLoopVariable
+      final boundKeys = _mapKeyLoopVariable
           .allMatches(source)
           .map((m) => m.group(1)!)
-          .where((name) => _saveResponseWriting(name).hasMatch(source))
           .toList();
-
+      final loopBody = _fixtureLoopBody(source);
       expect(
-        writers,
+        loopBody,
+        isNotNull,
+        reason:
+            'tool/capture/fetch_fixtures.dart lists fixtures as map keys '
+            '(${tableDriven.join(', ')}) but no loop iterates that table, so '
+            'those fixtures are declared and never captured.',
+      );
+      expect(
+        boundKeys,
         isNotEmpty,
         reason:
-            'tool/capture/fetch_fixtures.dart lists fixtures as map keys ('
-            '${tableDriven.join(', ')}) but no loop over that table writes '
-            'them: the variable holding the key never reaches a saveResponse '
-            'call, so those fixtures are declared and never captured.',
+            'tool/capture/fetch_fixtures.dart has a loop over the fixture '
+            'table but never binds the map key to a variable, so it cannot '
+            'name the file it is about to write.',
+      );
+      // Checked inside the loop body only. A matching call in an unrelated
+      // branch would keep this green after the loop stopped writing.
+      expect(
+        _saveResponseInLoop.hasMatch(loopBody!),
+        isTrue,
+        reason:
+            'The fixture loop in tool/capture/fetch_fixtures.dart binds '
+            '${boundKeys.first} but never calls saveResponse with it, so the '
+            'fixtures enumerated as map keys are never written to disk.',
       );
     });
   });
