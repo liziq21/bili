@@ -54,9 +54,12 @@ jobs:
           # 两个端点都分页读：后续页里的派发标记会被漏算（轮次上限失真），
           # 后续页里的本次意见会被漏采（漏派）。--paginate 的 --jq 是逐页应用的，
           # 所以每页各自输出符合条件的行，不做页内聚合。
+          # 作者也要筛：任何能在 PR 留言的人都能发一条带当前 head 标记的评论，
+          # 命中去重分支后会让本轮派发被静默跳过。
           mapfile -t dispatched < <(
             gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" \
-              --jq ".[] | select(.body | contains(\"$MARK\"))
+              --jq ".[] | select(.user.login == \"github-actions[bot]\"
+                              and (.body | contains(\"$MARK\")))
                      | (.body | split(\"head:\")[1] | split(\" \")[0])
                      | select(length > 0)"
           )
@@ -77,12 +80,15 @@ jobs:
           # CodeRabbit 的行内评论在 review 对象提交前就已创建
           # （实测早 1 秒），用 created_at > submitted_at 会把它们全排除。
           # 该字段是 JSON number，比较前必须 tostring，否则字符串等值恒为假。
-          FINDINGS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments?per_page=100" \
+          # 不用 `| head -8`：读到第八条 head 就关管道，gh 收 SIGPIPE 返回非零，
+          # 在 pipefail 下整步失败、通知步骤也不会跑。整页落盘后再取前八条。
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments?per_page=100" \
             --jq ".[] | select(.user.login == \"coderabbitai[bot]\"
                               and (.pull_request_review_id | tostring) == \"$REVIEW_ID\"
                               and (.position // 0) > 0)
                    | \"- \(.path):\(.line // .original_line) —— \(.body | gsub(\"[\\n\\r]+\"; \" \") | .[0:600])\"" \
-            | head -8)
+            > /tmp/findings_all.txt
+          FINDINGS=$(head -8 /tmp/findings_all.txt)
 
           if [ -z "$FINDINGS" ]; then
             echo "本次 review 没有新增可执行的行内意见，跳过"
@@ -122,4 +128,6 @@ jobs:
             echo "- 每条意见要么修掉，要么回帖说明为什么不改。"
             echo "- 改完自己跑 \`flutter analyze\` 和受影响的测试。"
           } > /tmp/body.md
-          gh pr comment "$PR" --body-file /tmp/body.md
+          # 必须带 --repo：pull_request_review 事件不 checkout，
+          # gh pr comment 在无 .git 的目录里会报 fatal: not a git repository。
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file /tmp/body.md
