@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,13 +18,7 @@ import 'bloc/search_bloc.dart';
 class const SearchScreen({
   super.key,
   required final void Function(String query) onSearch,
-
-  /// 登记聚焦入口的回调，由页面内的搜索框在挂载时以聚焦函数调用、销毁时以 null 调用
-  ///
-  /// 底栏重复点「搜索」时用它：已经在搜索页就继续打字，而不是回到页首。
   final void Function(void Function()? focus)? onFocusInputReady,
-
-  /// 最近搜索最多展示的条数
   final int recentQueryLimit = 20,
 }) extends StatelessWidget {
   @override
@@ -136,35 +129,23 @@ class const _RecentSearches({
                       ),
                     ),
                   ),
-                  Tooltip(
-                    message: '清空最近搜索历史',
-                    child: TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.read<SearchBloc>().add(
-                          ClearRecentSearchesPressed(),
-                        );
-                      },
-                      child: const Text('清空'),
+                  TextButton(
+                    onPressed: () => context.read<SearchBloc>().add(
+                      ClearRecentSearchesPressed(),
                     ),
+                    child: const Text('清空'),
                   ),
                 ],
               ),
               for (final q in queries.take(limit))
-                Tooltip(
-                  message: '搜索 "${q.query}"',
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      Icons.history_rounded,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    title: Text(q.query),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      onSearch(q.query);
-                    },
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.history_rounded,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
+                  title: Text(q.query),
+                  onTap: () => onSearch(q.query),
                 ),
             ],
           ),

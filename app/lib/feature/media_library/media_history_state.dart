@@ -1,7 +1,5 @@
 part of 'media_history_cubit.dart';
 
-// 💡 类头括号里写了 final，类体内不再需要写成员变量声明
-
 class const MediaHistoryState({
   /// 已加载的历史条目（按访问时间倒序）
   final List<MediaHistoryItem> items = const [],

@@ -1,6 +1,5 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -24,7 +23,6 @@ import 'media_history_cubit.dart';
 /// 而列表与翻页状态在两处实例上会各走各的。
 class const MediaLibraryScreen({
   super.key,
-
   /// 点按历史条目时的回调
   required final void Function(MediaHistoryItem item) onVideoTap,
 }) extends StatelessWidget {
@@ -81,10 +79,8 @@ class const MediaLibraryScreen({
                       ),
                     ),
                     TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.read<MediaHistoryCubit>().loadMore();
-                      },
+                      onPressed: () =>
+                          context.read<MediaHistoryCubit>().loadMore(),
                       child: const Text('重试'),
                     ),
                   ],
@@ -107,10 +103,7 @@ class const MediaLibraryScreen({
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
                     onPressed: state.hasMore && !state.isLoading
-                        ? () {
-                            HapticFeedback.lightImpact();
-                            context.read<MediaHistoryCubit>().loadMore();
-                          }
+                        ? () => context.read<MediaHistoryCubit>().loadMore()
                         : null,
                     child: Text(state.hasMore ? '加载更多' : '没有更多了'),
                   ),
@@ -236,17 +229,14 @@ class const _HistoryRow({
       child: Semantics(
         button: true,
         label: <String>[
-          if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
+          if (sourceLabel case final source? when source.isNotEmpty) source,
           video.title,
           if (duration.isNotEmpty) '时长 $duration',
           '观看于 $viewedAtLabel',
         ].join('，'),
         excludeSemantics: true,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
+          onTap: onTap,
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: $styles.insets.sm,
@@ -359,7 +349,7 @@ class const _HistoryRow({
   String _subtitle(VideoModel video, String viewedAt) {
     final creator = video.creatorProfileName;
     final parts = <String>[
-      if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
+      if (sourceLabel case final source? when source.isNotEmpty) source,
       if (creator != null && creator.isNotEmpty) creator,
       viewedAt,
     ];
