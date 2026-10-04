@@ -12,6 +12,8 @@ import 'youtube_network_search_mapper.dart';
 final class const YouTubeVideoSearchRemoteDataSource(
   final YoutubeService _youtubeService,
 ) extends VideoSearchRemoteDataSource with YouTubeRemoteDataSource {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   List<FilterGroup> get filters => const [
     YoutubeUploadDateFilterGroup(),
@@ -39,7 +41,16 @@ final class const YouTubeVideoSearchRemoteDataSource(
   ) async {
     try {
       final targetPage = searchQuery.pageKey;
-      final query = searchQuery.query;
+      final query = searchQuery.query.replaceAll(_controlChars, '').trim();
+      if (query.isEmpty) {
+        return Result.ok(
+          Page<VideoModel>(
+            number: targetPage,
+            totalPages: targetPage,
+            data: const [],
+          ),
+        );
+      }
 
       int? sort;
       if (searchQuery.sortOption is YoutubeSearchSort) {
