@@ -59,3 +59,4 @@
 5. 实现 service 与 DTO，一个 endpoint 对应一个 service 方法；DTO 用 `Network` 前缀加平台或域标识加端点语义命名（`NetworkBili*` / `NetworkLive*` / `NetworkReply*`）。service 按域拆分为 `NetworkSearchDataSource`、`NetworkVideoDataSource`、`NetworkLiveDataSource`、`NetworkFeedDataSource`。
 6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
 7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。
+8. 在 `test/doc_guardrail_test.dart` 的 `endpointSpecs` 登记新方法与它的 fixture 文件名。该测试强制六条一致性：每个公开方法都在表内、每个 fixture 文件都存在、每个 fixture 只被一个方法声明、`AGENTS.md` 端点表与 `testing/README.md` fixture 表覆盖 `testing/` 下的全部文件、每个 fixture 都由 `tool/capture/fetch_fixtures.dart` 真正写出。漏登记任何一处，该测试失败。文档里 `search_*.json` 与 `reply_*.json` 两行是通配写法，测试按前缀展开后与磁盘比对。
