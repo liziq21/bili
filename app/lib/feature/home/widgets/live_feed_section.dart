@@ -104,9 +104,10 @@ class const _LiveRoomCard({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final streamerName = liveRoom.creatorProfileName ?? '未知主播';
-    final semanticLabel = <String>[liveRoom.title, '主播: $streamerName'].join(
-      '，',
-    );
+    final semanticLabel = <String>[
+      liveRoom.title,
+      '主播: $streamerName',
+    ].join('，');
 
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
@@ -137,13 +138,14 @@ class const _LiveRoomCard({
                   AspectRatio(
                     aspectRatio: 16 / 9,
                     child: switch (liveRoom.thumbnailUrl) {
-                      final String url when url.isNotEmpty => CachedNetworkImage(
-                        imageUrl: url,
-                        memCacheWidth: 320,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, url, error) =>
-                            _thumbnailPlaceholder(colorScheme),
-                      ),
+                      final String url when url.isNotEmpty =>
+                        CachedNetworkImage(
+                          imageUrl: url,
+                          memCacheWidth: 320,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, url, error) =>
+                              _thumbnailPlaceholder(colorScheme),
+                        ),
                       _ => _thumbnailPlaceholder(colorScheme),
                     },
                   ),

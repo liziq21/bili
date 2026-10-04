@@ -64,9 +64,9 @@ class const HomeScreen({
                     color: colorScheme.onSurfaceVariant,
                   ),
                   tooltip: '设置',
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('设置开发中')),
-                  ),
+                  onPressed: () =>
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text('设置开发中'))),
                 ),
                 SizedBox(width: $styles.insets.xs),
               ],

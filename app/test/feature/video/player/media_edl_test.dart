@@ -18,69 +18,75 @@ void main() {
       expect(uri, 'edl://https://cdn.example.com/v.mp4');
     });
 
-    test('a separate-audio stream puts the audio track behind a new_stream', () {
-      final uri = MediaEdl.uriOf(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/v.m4s',
-          audioUrl: 'https://cdn.example.com/a.m4s',
-        ),
-      );
+    test(
+      'a separate-audio stream puts the audio track behind a new_stream',
+      () {
+        final uri = MediaEdl.uriOf(
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/v.m4s',
+            audioUrl: 'https://cdn.example.com/a.m4s',
+          ),
+        );
 
-      expect(
-        uri,
-        'edl://https://cdn.example.com/v.m4s'
-        ';!new_stream'
-        ';https://cdn.example.com/a.m4s',
-      );
-    });
+        expect(
+          uri,
+          'edl://https://cdn.example.com/v.m4s'
+          ';!new_stream'
+          ';https://cdn.example.com/a.m4s',
+        );
+      },
+    );
 
-    test('a segmented stream lists every segment in order without new_stream', () {
-      final uri = MediaEdl.uriOf(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/1.m4s',
-          segments: [
-            MediaSegment(url: 'https://cdn.example.com/1.m4s'),
-            MediaSegment(url: 'https://cdn.example.com/2.m4s'),
-            MediaSegment(url: 'https://cdn.example.com/3.m4s'),
-          ],
-        ),
-      );
+    test(
+      'a segmented stream lists every segment in order without new_stream',
+      () {
+        final uri = MediaEdl.uriOf(
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/1.m4s',
+            segments: [
+              MediaSegment(url: 'https://cdn.example.com/1.m4s'),
+              MediaSegment(url: 'https://cdn.example.com/2.m4s'),
+              MediaSegment(url: 'https://cdn.example.com/3.m4s'),
+            ],
+          ),
+        );
 
-      expect(
-        uri,
-        'edl://https://cdn.example.com/1.m4s'
-        ';https://cdn.example.com/2.m4s'
-        ';https://cdn.example.com/3.m4s',
-      );
-    });
+        expect(
+          uri,
+          'edl://https://cdn.example.com/1.m4s'
+          ';https://cdn.example.com/2.m4s'
+          ';https://cdn.example.com/3.m4s',
+        );
+      },
+    );
 
-    test('a segmented stream with audio keeps all segments ahead of the audio', () {
-      final uri = MediaEdl.uriOf(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/1.m4s',
-          audioUrl: 'https://cdn.example.com/a.m4s',
-          segments: [
-            MediaSegment(url: 'https://cdn.example.com/1.m4s'),
-            MediaSegment(url: 'https://cdn.example.com/2.m4s'),
-          ],
-        ),
-      );
+    test(
+      'a segmented stream with audio keeps all segments ahead of the audio',
+      () {
+        final uri = MediaEdl.uriOf(
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/1.m4s',
+            audioUrl: 'https://cdn.example.com/a.m4s',
+            segments: [
+              MediaSegment(url: 'https://cdn.example.com/1.m4s'),
+              MediaSegment(url: 'https://cdn.example.com/2.m4s'),
+            ],
+          ),
+        );
 
-      expect(
-        uri,
-        'edl://https://cdn.example.com/1.m4s'
-        ';https://cdn.example.com/2.m4s'
-        ';!new_stream'
-        ';https://cdn.example.com/a.m4s',
-      );
-    });
+        expect(
+          uri,
+          'edl://https://cdn.example.com/1.m4s'
+          ';https://cdn.example.com/2.m4s'
+          ';!new_stream'
+          ';https://cdn.example.com/a.m4s',
+        );
+      },
+    );
 
     test('an empty audio address does not add a new_stream', () {
       final uri = MediaEdl.uriOf(
-        MediaStream(
-          videoUrl: 'https://cdn.example.com/v.mp4',
-          audioUrl: '',
-        ),
+        MediaStream(videoUrl: 'https://cdn.example.com/v.mp4', audioUrl: ''),
       );
 
       expect(uri, isNot(contains('!new_stream')));
@@ -113,15 +119,18 @@ void main() {
       }
     });
 
-    test('an address with a raw line break is stripped of control characters', () {
-      // 长度前缀转义挡不住这个：切分发生在 mpv 读到 EDL 之前。
-      final uri = MediaEdl.uriOf(
-        MediaStream(videoUrl: 'https://cdn.example.com/v\n.m4s'),
-      );
+    test(
+      'an address with a raw line break is stripped of control characters',
+      () {
+        // 长度前缀转义挡不住这个：切分发生在 mpv 读到 EDL 之前。
+        final uri = MediaEdl.uriOf(
+          MediaStream(videoUrl: 'https://cdn.example.com/v\n.m4s'),
+        );
 
-      expect(uri, isNot(contains('\n')));
-      expect(uri, 'edl://https://cdn.example.com/v.m4s');
-    });
+        expect(uri, isNot(contains('\n')));
+        expect(uri, 'edl://https://cdn.example.com/v.m4s');
+      },
+    );
 
     test('control characters in an address never reach the playlist line', () {
       // 播放列表按行解析，任何控制字符都可能改变行的边界或内容。
@@ -154,9 +163,7 @@ void main() {
       // 首行 # mpv EDL v0 必须独占一行，而换行无法穿过播放列表，
       // 故整体省略——该行在规范中是可选注释。
       expect(
-        MediaEdl.uriOf(
-          MediaStream(videoUrl: 'https://cdn.example.com/v.mp4'),
-        ),
+        MediaEdl.uriOf(MediaStream(videoUrl: 'https://cdn.example.com/v.mp4')),
         isNot(contains('mpv EDL v0')),
       );
     });
@@ -164,9 +171,7 @@ void main() {
 
   group('MediaEdl escaping', () {
     test('a comma-bearing address is escaped by byte length', () {
-      final uri = MediaEdl.uriOf(
-        MediaStream(videoUrl: _urlWithCommas),
-      );
+      final uri = MediaEdl.uriOf(MediaStream(videoUrl: _urlWithCommas));
 
       expect(uri, 'edl://%${_urlWithCommas.length}%$_urlWithCommas');
     });
@@ -190,9 +195,8 @@ void main() {
         'https://cdn.example.com/a!b.m4s',
         'https://cdn.example.com/a%b.m4s',
       ]) {
-        final escaped = MediaEdl.uriOf(
-          MediaStream(videoUrl: url),
-        ).substring('edl://'.length);
+        final escaped = MediaEdl.uriOf(MediaStream(videoUrl: url))
+            .substring('edl://'.length);
 
         expect(
           escaped.startsWith('%${url.length}%$url'),

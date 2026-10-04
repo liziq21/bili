@@ -11,9 +11,7 @@ void main() {
     tester,
   ) async {
     var reselected = 0;
-    final branch1Key = GlobalKey<NavigatorState>(
-      debugLabel: 'branch1',
-    );
+    final branch1Key = GlobalKey<NavigatorState>(debugLabel: 'branch1');
 
     final router = GoRouter(
       initialLocation: '/home/detail',
@@ -24,10 +22,7 @@ void main() {
             width: 400,
             navigationShell: navigationShell,
             destinations: [
-              const AppNavDestination(
-                label: '首页',
-                icon: Icons.home_rounded,
-              ),
+              const AppNavDestination(label: '首页', icon: Icons.home_rounded),
               AppNavDestination(
                 label: '搜索',
                 icon: Icons.search_rounded,

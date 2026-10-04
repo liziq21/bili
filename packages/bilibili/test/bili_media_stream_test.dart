@@ -15,7 +15,6 @@ class MockMediaStreamNetwork({
   /// 为 true 时 `getVideoDetail` 抛异常，用于验证异常收敛路径。
   final bool failDetailRequest = false,
 }) implements NetworkVideoDataSource {
-
   /// 记录最近一次 getPlayUrl 收到的 cid，用于验证接口按分P而非 bvid 取址。
   int? lastCid;
 
@@ -44,9 +43,8 @@ class MockMediaStreamNetwork({
       throw UnimplementedError();
 
   @override
-  Future<List<NetworkRelatedVideo>> getRelatedVideos({
-    required String bvid,
-  }) => throw UnimplementedError();
+  Future<List<NetworkRelatedVideo>> getRelatedVideos({required String bvid}) =>
+      throw UnimplementedError();
 
   @override
   Future<NetworkReplyData> getReplyList({
@@ -114,7 +112,8 @@ void main() {
         'video': video,
         // 缺省给一条可用音轨：多数用例只关心选流，显式传空列表才是
         // 「无音轨」这个待测场景。
-        'audio': audio ??
+        'audio':
+            audio ??
             [
               {
                 'id': 30280,
@@ -130,32 +129,37 @@ void main() {
   /// Result 没有取值方法，按 Ok 的模式匹配取出成功值。
   MediaStream expectOk(Result<MediaStream> result) {
     expect(result.isOk, isTrue, reason: '期望成功，实际 $result');
-    return switch (result) { Ok(:final value) => value, _ => throw StateError('unreachable') };
+    return switch (result) {
+      Ok(:final value) => value,
+      _ => throw StateError('unreachable'),
+    };
   }
 
   group('BiliMediaStreamRemoteDataSource', () {
     test('解析 DASH 为分离流：画面进 videoUrl，声音进 audioUrl', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {
-            'id': 32,
-            'baseUrl': 'https://cdn.example/video-720.m4s',
-            'backupUrl': ['https://backup.example/video-720.m4s'],
-            'bandwidth': 1200000,
-            'codecs': 'avc1.640028',
-            'width': 1280,
-            'height': 720,
-          },
-        ],
-        audio: [
-          {
-            'id': 30280,
-            'baseUrl': 'https://cdn.example/audio.m4s',
-            'bandwidth': 192000,
-            'codecs': 'mp4a.40.2',
-          },
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/video-720.m4s',
+              'backupUrl': ['https://backup.example/video-720.m4s'],
+              'bandwidth': 1200000,
+              'codecs': 'avc1.640028',
+              'width': 1280,
+              'height': 720,
+            },
+          ],
+          audio: [
+            {
+              'id': 30280,
+              'baseUrl': 'https://cdn.example/audio.m4s',
+              'bandwidth': 192000,
+              'codecs': 'mp4a.40.2',
+            },
+          ],
+        ),
+      );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
 
@@ -172,11 +176,13 @@ void main() {
     });
 
     test('请求头带浏览器标识与 Referer', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
+          ],
+        ),
+      );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
       final stream = expectOk(result);
@@ -209,13 +215,27 @@ void main() {
     });
 
     test('preferHeight 选不高于期望的最高一路', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 120, 'baseUrl': 'https://cdn.example/v-4k.m4s', 'height': 2160},
-          {'id': 80, 'baseUrl': 'https://cdn.example/v-1080.m4s', 'height': 1080},
-          {'id': 32, 'baseUrl': 'https://cdn.example/v-720.m4s', 'height': 720},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 120,
+              'baseUrl': 'https://cdn.example/v-4k.m4s',
+              'height': 2160,
+            },
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080.m4s',
+              'height': 1080,
+            },
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(
         await source.getMediaStream('BV1GJ411x7vy', preferHeight: 1080),
@@ -225,12 +245,22 @@ void main() {
     });
 
     test('preferHeight 高于所有可用档时取最高一路', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v-720.m4s', 'height': 720},
-          {'id': 64, 'baseUrl': 'https://cdn.example/v-480.m4s', 'height': 480},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+            {
+              'id': 64,
+              'baseUrl': 'https://cdn.example/v-480.m4s',
+              'height': 480,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(
         await source.getMediaStream('BV1GJ411x7vy', preferHeight: 4320),
@@ -239,12 +269,22 @@ void main() {
     });
 
     test('preferHeight 低于所有可用档时退到最低一路', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v-720.m4s', 'height': 720},
-          {'id': 64, 'baseUrl': 'https://cdn.example/v-480.m4s', 'height': 480},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+            {
+              'id': 64,
+              'baseUrl': 'https://cdn.example/v-480.m4s',
+              'height': 480,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(
         await source.getMediaStream('BV1GJ411x7vy', preferHeight: 360),
@@ -253,12 +293,22 @@ void main() {
     });
 
     test('不给 preferHeight 时取码率最高的一路', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v-low.m4s', 'bandwidth': 500000},
-          {'id': 80, 'baseUrl': 'https://cdn.example/v-high.m4s', 'bandwidth': 3000000},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-low.m4s',
+              'bandwidth': 500000,
+            },
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-high.m4s',
+              'bandwidth': 3000000,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
       expect(stream.videoUrl, 'https://cdn.example/v-high.m4s');
@@ -287,7 +337,10 @@ void main() {
       // 备选地址是同一段的镜像，不算新片段。
       expect(stream.segments, hasLength(1));
       expect(stream.segments.first.url, 'https://cdn.example/muxed.mp4');
-      expect(stream.segments.first.duration, const Duration(milliseconds: 105000));
+      expect(
+        stream.segments.first.duration,
+        const Duration(milliseconds: 105000),
+      );
     });
 
     test('durl 多段：保留全部片段并按 order 排序', () async {
@@ -304,76 +357,89 @@ void main() {
 
       final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
       expect(stream.isSegmented, isTrue);
-      expect(
-        stream.segments.map((segment) => segment.url).toList(),
-        ['https://cdn.example/p1.mp4', 'https://cdn.example/p2.mp4', 'https://cdn.example/p3.mp4'],
-        reason: '响应乱序返回，必须按 order 升序拼，否则播放顺序错乱',
-      );
+      expect(stream.segments.map((segment) => segment.url).toList(), [
+        'https://cdn.example/p1.mp4',
+        'https://cdn.example/p2.mp4',
+        'https://cdn.example/p3.mp4',
+      ], reason: '响应乱序返回，必须按 order 升序拼，否则播放顺序错乱');
       expect(stream.videoUrl, 'https://cdn.example/p1.mp4');
     });
 
     test('DASH 有视频但无可用音轨时报错，不返回无声流', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
-        ],
-        audio: [
-          {'id': 30280, 'bandwidth': 192000},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
+          ],
+          audio: [
+            {'id': 30280, 'bandwidth': 192000},
+          ],
+        ),
+      );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
       expect(result.isError, isTrue);
-      expect(
-        '$result',
-        contains('音轨'),
-        reason: 'audioUrl 为空会被播放层当作自带声音，必然无声',
-      );
+      expect('$result', contains('音轨'), reason: 'audioUrl 为空会被播放层当作自带声音，必然无声');
     });
 
     test('durl 中间片段无地址时报错，不返回缺片的序列', () async {
-      final source = makeSource(buildPlayUrl(
-        durl: [
-          {'order': 1, 'length': 30000, 'url': 'https://cdn.example/p1.mp4'},
-          // 该片段既无 url 也无 backupUrl，整段不可用。
-          {'order': 2, 'length': 30000},
-          {'order': 3, 'length': 30000, 'url': 'https://cdn.example/p3.mp4'},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          durl: [
+            {'order': 1, 'length': 30000, 'url': 'https://cdn.example/p1.mp4'},
+            // 该片段既无 url 也无 backupUrl，整段不可用。
+            {'order': 2, 'length': 30000},
+            {'order': 3, 'length': 30000, 'url': 'https://cdn.example/p3.mp4'},
+          ],
+        ),
+      );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(
-        result.isError,
-        isTrue,
-        reason: '静默跳过会交给播放层一段残缺序列，播放中途断掉且无从察觉',
-      );
+      expect(result.isError, isTrue, reason: '静默跳过会交给播放层一段残缺序列，播放中途断掉且无从察觉');
     });
 
     test('最高档视频缺地址时降级到可用档', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 120, 'baseUrl': '', 'height': 2160, 'bandwidth': 9000000},
-          {'id': 80, 'baseUrl': 'https://cdn.example/v-1080.m4s', 'height': 1080, 'bandwidth': 2000000},
-        ],
-        audio: [
-          {'id': 30280, 'baseUrl': 'https://cdn.example/a.m4s', 'bandwidth': 192000},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 120, 'baseUrl': '', 'height': 2160, 'bandwidth': 9000000},
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080.m4s',
+              'height': 1080,
+              'bandwidth': 2000000,
+            },
+          ],
+          audio: [
+            {
+              'id': 30280,
+              'baseUrl': 'https://cdn.example/a.m4s',
+              'bandwidth': 192000,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
       expect(stream.videoUrl, 'https://cdn.example/v-1080.m4s');
     });
 
     test('最高码率音轨缺地址时降级到可用音轨', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
-        ],
-        audio: [
-          {'id': 30280, 'baseUrl': '', 'bandwidth': 999000},
-          {'id': 30216, 'baseUrl': 'https://cdn.example/a-low.m4s', 'bandwidth': 67000},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 32, 'baseUrl': 'https://cdn.example/v.m4s', 'height': 720},
+          ],
+          audio: [
+            {'id': 30280, 'baseUrl': '', 'bandwidth': 999000},
+            {
+              'id': 30216,
+              'baseUrl': 'https://cdn.example/a-low.m4s',
+              'bandwidth': 67000,
+            },
+          ],
+        ),
+      );
 
       final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
       expect(stream.audioUrl, 'https://cdn.example/a-low.m4s');
@@ -421,11 +487,13 @@ void main() {
     });
 
     test('视频流缺少地址时报错而非返回空地址', () async {
-      final source = makeSource(buildPlayUrl(
-        video: [
-          {'id': 32, 'height': 720},
-        ],
-      ));
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 32, 'height': 720},
+          ],
+        ),
+      );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
       expect(result.isError, isTrue);
