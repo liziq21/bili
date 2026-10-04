@@ -1,0 +1,133 @@
+name: dispatch-coderabbit-to-jules
+
+# CodeRabbit 交回 CHANGES_REQUESTED 时，在 PR 上发一条 @jules 评论，
+# 由 Jules（Reactive Mode）自己去修。只用默认的 GITHUB_TOKEN，不需要额外 secret。
+#
+# 生效前提：workflow 必须在默认分支 main 上，pull_request_review 事件才会触发。
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# 同一条 PR 的派发串行，避免两轮同时 @jules
+concurrency:
+  group: coderabbit-to-jules-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: >-
+      github.event.review.state == 'changes_requested' &&
+      github.event.review.user.login == 'coderabbitai[bot]' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # 幂等（同一 head 只派一次）+ 轮次上限 + 采集本轮新增的 finding
+      - name: 决定是否派发并采集 finding
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          REVIEW_ID: ${{ github.event.review.id }}
+          HEAD_SHA: ${{ github.event.review.commit_id }}
+        run: |
+          set -euo pipefail
+          MAX_ROUNDS=2
+          MARK='<!-- coderabbit-to-jules -->'
+          SHORT=${HEAD_SHA:0:7}
+
+          # review.commit_id 是被审查的提交，不保证仍是 PR 当前 head。
+          # 有新 commit 在 review 提交后到达时，本 workflow 会对着旧 tree 派发，
+          # 并把旧 SHA 记成一轮，白耗额度还可能让 Jules 基于过期代码动手。
+          PR_HEAD=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
+          if [ "$PR_HEAD" != "$HEAD_SHA" ]; then
+            echo "PR head 已前进（review $SHORT → 当前 ${PR_HEAD:0:7}），本次不派发"
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 两个端点都分页读：后续页里的派发标记会被漏算（轮次上限失真），
+          # 后续页里的本次意见会被漏采（漏派）。--paginate 的 --jq 是逐页应用的，
+          # 所以每页各自输出符合条件的行，不做页内聚合。
+          # 作者也要筛：任何能在 PR 留言的人都能发一条带当前 head 标记的评论，
+          # 命中去重分支后会让本轮派发被静默跳过。
+          mapfile -t dispatched < <(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\"
+                              and (.body | contains(\"$MARK\")))
+                     | (.body | split(\"head:\")[1] | split(\" \")[0])
+                     | select(length > 0)"
+          )
+          if [ "${#dispatched[@]}" -ge "$MAX_ROUNDS" ]; then
+            echo "轮次上限已达（${#dispatched[@]}/$MAX_ROUNDS），不再派发"
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for s in "${dispatched[@]}"; do
+            if [ "$s" = "$SHORT" ]; then
+              echo "该 head $SHORT 已派发过，跳过"
+              echo "dispatch=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          # 按 pull_request_review_id 关联本次 review，不按时间推断归属：
+          # CodeRabbit 的行内评论在 review 对象提交前就已创建
+          # （实测早 1 秒），用 created_at > submitted_at 会把它们全排除。
+          # 该字段是 JSON number，比较前必须 tostring，否则字符串等值恒为假。
+          # 不用 `| head -8`：读到第八条 head 就关管道，gh 收 SIGPIPE 返回非零，
+          # 在 pipefail 下整步失败、通知步骤也不会跑。整页落盘后再取前八条。
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments?per_page=100" \
+            --jq ".[] | select(.user.login == \"coderabbitai[bot]\"
+                              and (.pull_request_review_id | tostring) == \"$REVIEW_ID\"
+                              and (.position // 0) > 0)
+                   | \"- \(.path):\(.line // .original_line) —— \(.body | gsub(\"[\\n\\r]+\"; \" \") | .[0:600])\"" \
+            > /tmp/findings_all.txt
+          FINDINGS=$(head -8 /tmp/findings_all.txt)
+
+          if [ -z "$FINDINGS" ]; then
+            echo "本次 review 没有新增可执行的行内意见，跳过"
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "dispatch=true" >> "$GITHUB_OUTPUT"
+          echo "round=$((${#dispatched[@]} + 1))" >> "$GITHUB_OUTPUT"
+          {
+            echo "findings<<FINDINGS_EOF"
+            echo "$FINDINGS"
+            echo "FINDINGS_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # 幂等标记和 @jules 放同一条评论：Jules 的回复不带标记，不会被重复计数
+      - name: "通知 Jules"
+        if: steps.decide.outputs.dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          SHORT: ${{ github.event.review.commit_id }}
+          ROUND: ${{ steps.decide.outputs.round }}
+          FINDINGS: ${{ steps.decide.outputs.findings }}
+        run: |
+          {
+            echo "<!-- coderabbit-to-jules -->head:${SHORT:0:7} round:${ROUND}"
+            echo
+            echo "@jules CodeRabbit 在本 PR 上提了下列未解决的意见，请修掉："
+            echo
+            printf '%s\n' "$FINDINGS"
+            echo
+            echo "硬性约束："
+            echo "- 动手前先 \`git fetch origin\`，确认远端分支与 origin/main 都是最新的；"
+            echo "  你在旧快照上工作会把 main 上已合入的改动回退掉。"
+            echo "- 只改意见里点名的文件，不顺手重构、不动无关格式。"
+            echo "- 每条意见要么修掉，要么回帖说明为什么不改。"
+            echo "- 改完自己跑 \`flutter analyze\` 和受影响的测试。"
+          } > /tmp/body.md
+          # 必须带 --repo：pull_request_review 事件不 checkout，
+          # gh pr comment 在无 .git 的目录里会报 fatal: not a git repository。
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file /tmp/body.md
