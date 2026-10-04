@@ -13,9 +13,14 @@ class SearchState({
     List<String>? suggests,
     String? currentQuery,
   }) {
+    // 复制并冻结两个列表。BlocSelector 依赖所选值不可变来跳过重建；若状态持有
+    // 的是调用方那个可变列表，状态发出后再被原地修改，选择器会误判为「值没变」
+    // 而跳过重建。类头默认参数只原样持有引用，冻结只能在此入口做。
     return SearchState(
-      recentSearchQueries: recentSearchQueries ?? this.recentSearchQueries,
-      suggests: suggests ?? this.suggests,
+      recentSearchQueries: List.unmodifiable(
+        recentSearchQueries ?? this.recentSearchQueries,
+      ),
+      suggests: List.unmodifiable(suggests ?? this.suggests),
       currentQuery: currentQuery ?? this.currentQuery,
     );
   }
