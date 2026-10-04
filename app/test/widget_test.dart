@@ -149,14 +149,14 @@ void main() {
       // blanket `FlutterError.onError` filter hide it again.
       //
       // The probe follows the search entry's current shape rather than pinning
-      // one: the home screen renders an icon (see `AppSearchAnchor`), and the
-      // widget that actually needs localizations is the BackButton inside the
-      // view it opens -- that is where #96 blew up. So open the view and check
-      // the BackButton.
-      await tester.tap(find.descendant(
-        of: find.byType(AppScaffold),
-        matching: find.byIcon(Icons.search_rounded),
-      ).first);
+      // one: search now lives in the bottom bar's second destination, not an
+      // app bar icon, and the widget that actually needs localizations is the
+      // BackButton inside the view it opens -- that is where #96 blew up. So go
+      // to the search branch, open the view and check the BackButton.
+      await tester.tap(find.text('搜索'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.search_rounded).first);
       await tester.pumpAndSettle();
 
       final backButton = find.byType(BackButton);

@@ -244,8 +244,6 @@ void main() {
         value: bloc,
         child: HomeScreen(
           onLive: (_) {},
-          navigateToSearchResult: (_) {},
-          onSpace: (_) {},
           onVideo: (_) {},
         ),
       ),
@@ -583,7 +581,7 @@ void main() {
       expect(bloc.state.visibleVideoSections.length + bloc.state.visibleLiveSections.length, 1);
     });
 
-    testWidgets('Hides the live entry for sources without live support', (
+    testWidgets('App bar holds the settings entry alone, for any source', (
       tester,
     ) async {
       final bloc = buildBloc();
@@ -595,13 +593,18 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('YouTube'), findsWidgets);
+      expect(find.byTooltip('设置'), findsOneWidget);
+      // The by-ID entries (live room, creator space) and the search icon are
+      // gone from the app bar, so neither the source having live support nor
+      // not having it may bring them back.
       expect(find.byTooltip('直达直播间'), findsNothing);
-      expect(find.byTooltip('访问创作者空间'), findsOneWidget);
-      // R8：创作者入口的文案不随服务源变化。
+      expect(find.byTooltip('访问创作者空间'), findsNothing);
+      expect(find.byTooltip('搜索'), findsNothing);
+
+      // R8: the settings entry wording does not vary with the service source.
       mockUserDataRepository.emitData(const UserData(sourceId: 'bilibili'));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('访问创作者空间'), findsOneWidget);
-      expect(find.byTooltip('访问 UP主空间'), findsNothing);
+      expect(find.byTooltip('设置'), findsOneWidget);
     });
 
     testWidgets('Never offers filters the source does not implement', (

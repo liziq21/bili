@@ -17,19 +17,27 @@ class const VideoFeedSection({
   required final VoidCallback onLoadMore,
 }) extends StatelessWidget {
   /// 视频卡片高度：封面 16:9 + 文字区块，随字体缩放而变化，避免固定宽高比溢出
+  ///
+  /// 文字高度取 [VideoCard._buildFeedCard] 的真实渲染值，而非设计令牌的
+  /// 默认值——两处都被 `copyWith` 覆写过：标题 `title2.copyWith(height: 1.25)`
+  /// 覆盖了 title2 原有的 16.38/14≈1.17 行高，副标题
+  /// `bodySmall.copyWith(fontSize: 12)` 覆盖了字号。字号仍从令牌读取：
+  /// [$styles] 按屏幕尺寸整体缩放（宽屏 1.1 / 超宽 1.2），写死 14 会漏掉这一层。
   static double cardExtent(BuildContext context, double cardWidth) {
     final textScaler = MediaQuery.textScalerOf(context);
-    final titleStyle = $styles.text.title2;
+    // 标题：两行，行高 1.25 由 video_card.dart 的 copyWith 显式指定
     final titleHeight =
-        textScaler.scale(titleStyle.fontSize ?? 14) * 1.25 * 2; // 最多两行
+        textScaler.scale($styles.text.title2.fontSize ?? 14) * 1.25 * 2;
+    // 副标题：字号被覆写为 12，行高沿用 bodySmall 的 heightPx / sizePx = 23/14
     final subtitleHeight =
-        textScaler.scale($styles.text.bodySmall.fontSize ?? 14) * 1.4;
+        textScaler.scale(12) * ($styles.text.bodySmall.height ?? 1);
 
     return cardWidth * 9 / 16 +
         titleHeight +
         subtitleHeight +
         $styles.insets.sm * 2 +
-        $styles.insets.xxs;
+        $styles.insets.xxs +
+        2; // Material 内层 Padding(EdgeInsets.all(1)) 的上下各 1px
   }
 
   @override

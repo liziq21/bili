@@ -15,6 +15,14 @@ class const AppSearchAnchor({
   final Function(String)? navigateToSearchResult,
   final SearchAnchorChildBuilder? builder,
 
+  /// 登记聚焦入口的回调，由本组件在挂载时以 `focusInput` 调用、销毁时以 null 调用
+  ///
+  /// 外部（底栏导航的搜索目的地）需要在「已在搜索页又点一次搜索」时把焦点移回
+  /// 输入框。bar 模式的输入框由 `SearchBar` 自建焦点节点且 `SearchAnchor.bar`
+  /// 不透传 `focusNode`，外部拿不到那个节点，所以只能由本组件自己暴露入口。
+  /// 为 null 时不注册，组件内部仍照常工作。
+  final void Function(void Function()? focus)? onFocusInputReady,
+
   /// 搜索关键词的最大长度。SearchAnchor 的 SearchBar 没有暴露 maxLength，
   /// 这里在 viewOnChanged 里截断，等价于旧 TextField 的
   /// [MaxLengthEnforcement.enforced]。
@@ -46,9 +54,39 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // 只在注册与注销之间持有回调：外部可能在 dispose 之后仍持有它，
+    // 那时调用会打到已销毁的 controller。
+    widget.onFocusInputReady?.call(focusInput);
+  }
+
+  @override
+  void didUpdateWidget(AppSearchAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.onFocusInputReady != widget.onFocusInputReady) {
+      oldWidget.onFocusInputReady?.call(null);
+      widget.onFocusInputReady?.call(focusInput);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.onFocusInputReady?.call(null);
     _controller.dispose();
     super.dispose();
+  }
+
+  /// 把焦点交回搜索输入框。
+  ///
+  /// bar 模式下输入框由 [SearchBar] 自建焦点节点，`SearchAnchor.bar` 不透传
+  /// `focusNode`，外部拿不到那个节点。可用的入口只有 [SearchController.openView]：
+  /// 它推进搜索视图路由，视图内的输入框会自行获得焦点（material_ui 的
+  /// `_SearchPageState` 在路由就位后请求焦点）。视图已开着时重开无副作用，
+  /// 因此这里不额外判断状态。
+  void focusInput() {
+    if (!_controller.isAttached) return;
+    _controller.openView();
   }
 
   void _handleSearch(String query) {
