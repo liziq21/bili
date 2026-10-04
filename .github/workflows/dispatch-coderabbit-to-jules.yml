@@ -41,9 +41,21 @@ jobs:
           MARK='<!-- coderabbit-to-jules -->'
           SHORT=${HEAD_SHA:0:7}
 
-          # 每个标记评论只输出一行短 SHA：评论正文是多行的，取整段会数错轮次
+          # review.commit_id 是被审查的提交，不保证仍是 PR 当前 head。
+          # 有新 commit 在 review 提交后到达时，本 workflow 会对着旧 tree 派发，
+          # 并把旧 SHA 记成一轮，白耗额度还可能让 Jules 基于过期代码动手。
+          PR_HEAD=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
+          if [ "$PR_HEAD" != "$HEAD_SHA" ]; then
+            echo "PR head 已前进（review $SHORT → 当前 ${PR_HEAD:0:7}），本次不派发"
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 两个端点都分页读：后续页里的派发标记会被漏算（轮次上限失真），
+          # 后续页里的本次意见会被漏采（漏派）。--paginate 的 --jq 是逐页应用的，
+          # 所以每页各自输出符合条件的行，不做页内聚合。
           mapfile -t dispatched < <(
-            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" \
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" \
               --jq ".[] | select(.body | contains(\"$MARK\"))
                      | (.body | split(\"head:\")[1] | split(\" \")[0])
                      | select(length > 0)"
@@ -61,15 +73,16 @@ jobs:
             fi
           done
 
-          # 只取本次 review 提交时间之后新增的 CodeRabbit 行内评论：
-          # 更早的意见属于上一轮已交给 Jules 的范围，不重复喂。
-          SINCE=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/reviews/$REVIEW_ID" --jq .submitted_at)
-          FINDINGS=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR/comments?per_page=100" \
-            --jq "map(select(.user.login == \"coderabbitai[bot]\"
-                              and .created_at > \"$SINCE\"
-                              and (.position // 0) > 0))
-                   | .[0:8][]
-                   | \"- \(.path):\(.line // .original_line) —— \(.body | gsub(\"[\\n\\r]+\"; \" \") | .[0:600])\"")
+          # 按 pull_request_review_id 关联本次 review，不按时间推断归属：
+          # CodeRabbit 的行内评论在 review 对象提交前就已创建
+          # （实测早 1 秒），用 created_at > submitted_at 会把它们全排除。
+          # 该字段是 JSON number，比较前必须 tostring，否则字符串等值恒为假。
+          FINDINGS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/comments?per_page=100" \
+            --jq ".[] | select(.user.login == \"coderabbitai[bot]\"
+                              and (.pull_request_review_id | tostring) == \"$REVIEW_ID\"
+                              and (.position // 0) > 0)
+                   | \"- \(.path):\(.line // .original_line) —— \(.body | gsub(\"[\\n\\r]+\"; \" \") | .[0:600])\"" \
+            | head -8)
 
           if [ -z "$FINDINGS" ]; then
             echo "本次 review 没有新增可执行的行内意见，跳过"
