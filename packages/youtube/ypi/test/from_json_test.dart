@@ -428,6 +428,116 @@ void main() {
     );
   });
 
+  test(
+    'reports the errorScreen reason when the top-level reason is absent',
+    () {
+      // 非 OK 响应常常只有 errorScreen.playerErrorMessageRenderer.reason，
+      // 顶层 playabilityStatus.reason 缺失。异常原因必须取到平台给出的
+      // 文案，而不是退化成 'Player status: ...'。
+      final response = <String, dynamic>{
+        'playabilityStatus': <String, dynamic>{
+          'status': 'LOGIN_REQUIRED',
+          'errorScreen': <String, dynamic>{
+            'playerErrorMessageRenderer': <String, dynamic>{
+              'reason': <String, dynamic>{
+                'runs': <dynamic>[
+                  <String, dynamic>{'text': 'Sign in to confirm your age'},
+                ],
+              },
+            },
+          },
+        },
+        'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+      };
+
+      expect(
+        () => NetworkYouTubePlayerResponse.fromJson(response),
+        throwsA(
+          isA<YpiInnerTubeException>()
+              .having(
+                (e) => e.reason,
+                'reason from errorScreen',
+                'Sign in to confirm your age',
+              )
+              .having(
+                (e) => e.reason,
+                'does not fall back to bare status',
+                isNot(contains('Player status:')),
+              ),
+        ),
+      );
+    },
+  );
+
+  test('reads a top-level reason expressed as a text object', () {
+    // 顶层 playabilityStatus.reason 有两种形态：纯字符串与文本对象
+    // （simpleText 或 runs）。只读字符串的实现在文本对象形态下，
+    // reason 会退化成 'Player status: <status>'。
+    final simple = <String, dynamic>{
+      'playabilityStatus': <String, dynamic>{
+        'status': 'LOGIN_REQUIRED',
+        'reason': <String, dynamic>{
+          'simpleText': 'Please sign in to confirm your age',
+        },
+      },
+      'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+    };
+    expect(
+      () => NetworkYouTubePlayerResponse.fromJson(simple),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'simpleText form',
+          'Please sign in to confirm your age',
+        ),
+      ),
+    );
+
+    final runs = <String, dynamic>{
+      'playabilityStatus': <String, dynamic>{
+        'status': 'LOGIN_REQUIRED',
+        'reason': <String, dynamic>{
+          'runs': <dynamic>[
+            <String, dynamic>{'text': 'Sign in'},
+            <String, dynamic>{'text': ' to continue'},
+          ],
+        },
+      },
+      'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+    };
+    expect(
+      () => NetworkYouTubePlayerResponse.fromJson(runs),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'runs form',
+          'Sign in to continue',
+        ),
+      ),
+    );
+  });
+
+  test(
+    'rejects the current player fixture, which records an UNPLAYABLE response',
+    () {
+      // player.json 记录的是 UNPLAYABLE 业务失败响应（无 streamingData），
+      // 尚未在可访问 YouTube 的环境重抓。fromJson 对非 OK 状态抛
+      // YpiInnerTubeException，与 browse / watchNext 的口径一致。
+      expect(
+        () => NetworkYouTubePlayerResponse.fromJson(
+          loadFixtureMap('player.json'),
+        ),
+        throwsA(
+          isA<YpiInnerTubeException>().having(
+            (e) => e.reason,
+            'reason',
+            isNotNull,
+          ),
+        ),
+      );
+    },
+  );
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);

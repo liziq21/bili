@@ -9,6 +9,7 @@ import '../client/youtube_client_config.dart';
 import '../exception/ypi_exception.dart';
 import '../models/network_youtube_browse.dart';
 import '../models/network_youtube_comments.dart';
+import '../models/network_youtube_player.dart';
 import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../models/network_youtube_watch_next.dart';
@@ -176,6 +177,24 @@ final class YoutubeService {
 
     final response = await _send(_api.next, body);
     return _parseResponse(response, NetworkYouTubeCommentsResponse.fromJson);
+  }
+
+  /// Fetches video player data including details and streaming formats for a [videoId].
+  Future<NetworkYouTubePlayerResponse> getPlayer(String videoId) async {
+    final sanitizedVideoId = videoId.replaceAll(_controlChars, '').trim();
+    if (sanitizedVideoId.isEmpty) {
+      throw const YpiJsonException('getPlayer requires videoId');
+    }
+    final body = <String, dynamic>{'videoId': sanitizedVideoId};
+
+    final response = await _send(_api.player, body);
+    return _parseResponse(
+      response,
+      (json) => NetworkYouTubePlayerResponse.fromJson(
+        json,
+        requestedVideoId: sanitizedVideoId,
+      ),
+    );
   }
 
   Future<NetworkYouTubeSearchSuggestions> getSearchSuggestions(

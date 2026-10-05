@@ -1351,6 +1351,88 @@ void main() {
       networkService.close();
     });
   });
+  group('YoutubeService.getPlayer', () {
+    test('posts to /player and returns typed player response', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.path, equals('/youtubei/v1/player'));
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['videoId'], equals('dQw4w9WgXcQ'));
+        return http.Response(
+          json.encode({
+            'playabilityStatus': {'status': 'OK'},
+            'videoDetails': {
+              'videoId': 'dQw4w9WgXcQ',
+              'title': 'Test Video Title',
+              'author': 'Test Author',
+              'channelId': 'UC_TEST_123',
+              'lengthSeconds': '120',
+              'viewCount': '5000',
+            },
+            'streamingData': {
+              'formats': [
+                {
+                  'itag': 18,
+                  'url': 'https://googlevideo.com/videoplayback?itag=18',
+                  'mimeType': 'video/mp4; codecs="avc1.42001E, mp4a.40.2"',
+                  'qualityLabel': '360p',
+                },
+              ],
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      final response = await service.getPlayer('dQw4w9WgXcQ');
+      expect(response.videoId, equals('dQw4w9WgXcQ'));
+      expect(response.playabilityStatus?.status, equals('OK'));
+      expect(response.videoDetails?.title, equals('Test Video Title'));
+      expect(response.videoDetails?.author, equals('Test Author'));
+      expect(response.streamingData?.formats, hasLength(1));
+      expect(response.streamingData?.formats.first.itag, equals(18));
+      expect(
+        response.streamingData?.formats.first.qualityLabel,
+        equals('360p'),
+      );
+    });
+
+    test('rejects an empty videoId before issuing a request', () async {
+      var called = false;
+      final mockClient = MockClient((_) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      await expectLater(
+        service.getPlayer('   '),
+        throwsA(isA<YpiJsonException>()),
+      );
+      expect(
+        called,
+        isFalse,
+        reason: 'Empty videoId should not trigger request',
+      );
+    });
+
+    test('maps a non-2xx response to YpiHttpException', () async {
+      final mockClient = MockClient((_) async => http.Response('error', 404));
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      await expectLater(
+        service.getPlayer('dQw4w9WgXcQ'),
+        throwsA(isA<YpiHttpException>()),
+      );
+    });
+  });
+
   group('YoutubeService.getComments', () {
     test('posts to /next with the trimmed continuation', () async {
       final mockClient = MockClient((request) async {

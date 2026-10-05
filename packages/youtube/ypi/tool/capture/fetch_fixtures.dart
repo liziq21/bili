@@ -278,6 +278,28 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/comments.json', comments);
     }
 
+    print('9. Fetching video player JSON...');
+    if (!shouldFetch('testing/player.json')) {
+      skipNote('testing/player.json');
+    } else {
+      final playerResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/player'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'videoId': _watchNextVideoId,
+            }),
+          )
+          .timeout(requestTimeout);
+      final player = _captureJson(
+        playerResponse,
+        'video player',
+        _validatePlayerResponse,
+      );
+      saveResponse('testing/player.json', player);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -615,6 +637,36 @@ void _validateCommentsResponse(dynamic json) {
   if (items.isEmpty) {
     throw const FormatException(
       'InnerTube comments response yields no comment items',
+    );
+  }
+}
+
+void _validatePlayerResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube player response is not an object');
+  }
+  final playabilityStatus = json['playabilityStatus'];
+  if (playabilityStatus is! Map || playabilityStatus['status'] != 'OK') {
+    throw FormatException(
+      'InnerTube player response is not playable: '
+      '${playabilityStatus is Map ? playabilityStatus['status'] : null}',
+    );
+  }
+  if (json['streamingData'] is! Map) {
+    throw const FormatException(
+      'InnerTube player response has no streamingData',
+    );
+  }
+  final videoDetails = json['videoDetails'];
+  if (videoDetails is! Map<String, dynamic>) {
+    throw const FormatException(
+      'InnerTube player response has no videoDetails',
+    );
+  }
+  final title = videoDetails['title'];
+  if (title is! String || title.isEmpty) {
+    throw const FormatException(
+      'InnerTube player response videoDetails missing title',
     );
   }
 }
