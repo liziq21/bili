@@ -112,6 +112,10 @@ NetworkBiliUserArticlesResponse _$NetworkBiliUserArticlesResponseFromJson(
   final val = NetworkBiliUserArticlesResponse(
     code: $checkedConvert('code', (v) => (v as num).toInt()),
     message: $checkedConvert('message', (v) => v as String),
+    ttl: $checkedConvert(
+      'ttl',
+      (v) => const NullableIntOrStringConverter().fromJson(v),
+    ),
     data: $checkedConvert(
       'data',
       (v) => v == null

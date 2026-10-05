@@ -652,8 +652,17 @@ void _requireUserCard(Map<String, dynamic> json, String label) {
 
 void _requireUserArticles(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
-  final articles = data['articles'];
-  if (articles is! List || articles.isEmpty) {
-    throw FormatException('$label data.articles is not a non-empty list');
+  try {
+    final articlesData = NetworkBiliUserArticlesData.fromJson(data);
+    final articles = articlesData.articles;
+    if (articles == null || articles.isEmpty) {
+      throw const FormatException('data.articles is not a non-empty list');
+    }
+    final hasValidArticle = articles.any((article) => article.id > 0);
+    if (!hasValidArticle) {
+      throw const FormatException('data.articles has no article with valid id');
+    }
+  } on Object catch (error) {
+    throw FormatException('$label is not a parsable user articles: $error');
   }
 }

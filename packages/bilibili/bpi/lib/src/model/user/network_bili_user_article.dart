@@ -86,11 +86,14 @@ class NetworkBiliUserArticlesResponse {
   const NetworkBiliUserArticlesResponse({
     required this.code,
     required this.message,
+    this.ttl,
     this.data,
   });
 
   final int code;
   final String message;
+  @NullableIntOrStringConverter()
+  final int? ttl;
   final NetworkBiliUserArticlesData? data;
 
   factory NetworkBiliUserArticlesResponse.fromJson(Map<String, dynamic> json) =>
