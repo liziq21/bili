@@ -57,7 +57,7 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 `getPlayer` 解析 `/youtubei/v1/player` 接口返回的播放器数据，包含 `playabilityStatus`（播放状态与不可播放原因）、`videoDetails`（视频 ID、标题、作者、频道 ID、时长、观看量、描述与缩略图等）、`microformat.playerMicroformatRenderer`（发布时间、分类等）及 `streamingData`（`formats` 与 `adaptiveFormats` 中的媒体流格式、qualityLabel、mimeType、url、bitrate 等）。
 
-若响应中存在顶层 `error` 或 `alerts` 中的错误信息，按包内规范抛出 `YpiInnerTubeException`。缺 `videoId` 或缺核心字段时抛出 `FormatException`。
+若响应中存在顶层 `error` 或 `alerts` 中的错误信息，按包内规范抛出 `YpiInnerTubeException`。仅当无法取得非空 `videoId` 且未提供非空 `requestedVideoId` 时，才因缺少 `videoId` 抛出 `FormatException`。`getPlayer` 会传入请求中的 `videoId`；`videoDetails` 缺失或其中的 `videoId` 无效时，解析器仍会返回 DTO，且 `videoDetails` 为 `null`。
 
 ## 播放列表搜索的 renderer 形态
 

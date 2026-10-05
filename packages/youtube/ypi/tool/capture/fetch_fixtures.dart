@@ -645,6 +645,13 @@ void _validatePlayerResponse(dynamic json) {
   if (json is! Map<String, dynamic>) {
     throw const FormatException('InnerTube player response is not an object');
   }
+  final playabilityStatus = json['playabilityStatus'];
+  if (playabilityStatus is! Map || playabilityStatus['status'] != 'OK') {
+    throw FormatException(
+      'InnerTube player response is not playable: '
+      '${playabilityStatus is Map ? playabilityStatus['status'] : null}',
+    );
+  }
   final videoDetails = json['videoDetails'];
   if (videoDetails is! Map<String, dynamic>) {
     throw const FormatException(

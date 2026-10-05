@@ -127,7 +127,10 @@ final class NetworkYouTubeStreamFormat {
   factory NetworkYouTubeStreamFormat.fromJson(Map<String, dynamic> json) {
     final itag = json['itag'] is int
         ? json['itag'] as int
-        : int.tryParse('${json['itag']}') ?? 0;
+        : int.tryParse('${json['itag']}');
+    if (itag == null) {
+      throw const FormatException('Stream format is missing itag');
+    }
     return NetworkYouTubeStreamFormat(
       itag: itag,
       url: _string(json['url']),
@@ -160,7 +163,21 @@ final class NetworkYouTubeStreamFormat {
   final String? audioSampleRate;
 }
 
-/// Streaming media data container returned in a YouTube `/youtubei/v1/player` response.
+List<NetworkYouTubeStreamFormat> _parseStreamFormats(dynamic raw) {
+  return _list(raw)
+      .map(_map)
+      .nonNulls
+      .map((json) {
+        try {
+          return NetworkYouTubeStreamFormat.fromJson(json);
+        } on FormatException {
+          return null;
+        }
+      })
+      .nonNulls
+      .toList(growable: false);
+}
+
 @immutable
 final class NetworkYouTubeStreamingData {
   const NetworkYouTubeStreamingData({
@@ -169,17 +186,8 @@ final class NetworkYouTubeStreamingData {
   });
 
   factory NetworkYouTubeStreamingData.fromJson(Map<String, dynamic> json) {
-    final formats = _list(json['formats'])
-        .map(_map)
-        .nonNulls
-        .map(NetworkYouTubeStreamFormat.fromJson)
-        .toList(growable: false);
-
-    final adaptiveFormats = _list(json['adaptiveFormats'])
-        .map(_map)
-        .nonNulls
-        .map(NetworkYouTubeStreamFormat.fromJson)
-        .toList(growable: false);
+    final formats = _parseStreamFormats(json['formats']);
+    final adaptiveFormats = _parseStreamFormats(json['adaptiveFormats']);
 
     return NetworkYouTubeStreamingData(
       formats: List.unmodifiable(formats),
