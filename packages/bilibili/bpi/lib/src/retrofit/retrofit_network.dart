@@ -14,6 +14,7 @@ import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
+import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_bili_player_info.dart';
@@ -152,6 +153,13 @@ abstract class BiliNetworkApi extends ChopperService {
   @GET(path: ApiPath.userCard)
   Future<NetworkBiliUserCardData> getUserCard({@query required int mid});
 
+  @GET(path: ApiPath.userArticles)
+  Future<NetworkBiliUserArticlesData> getUserArticles({
+    @query required int mid,
+    @Query('pn') int page = 1,
+    @Query('ps') int pageSize = 30,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -180,6 +188,7 @@ class BiliNetworkSearch
         NetworkLiveRoomDetail: NetworkLiveRoomDetail.fromJson,
         NetworkLiveRoomPlayInfo: NetworkLiveRoomPlayInfo.fromJson,
         NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
+        NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -469,6 +478,33 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili user card network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliUserArticlesData> getUserArticles({
+    required int mid,
+    int page = 1,
+    int pageSize = 30,
+  }) async {
+    try {
+      return await _networkApi.getUserArticles(
+        mid: mid,
+        page: page,
+        pageSize: pageSize,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili user articles response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili user articles network request failed.',
         cause: error,
       );
     }

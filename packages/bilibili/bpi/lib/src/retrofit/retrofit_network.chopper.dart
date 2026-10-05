@@ -399,4 +399,29 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkBiliUserCardData, NetworkBiliUserCardData>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkBiliUserArticlesData> getUserArticles({
+    required int mid,
+    int page = 1,
+    int pageSize = 30,
+  }) async {
+    final Uri $url = Uri.parse('https://api.bilibili.com/x/space/article');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'mid': mid,
+      'pn': page,
+      'ps': pageSize,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkBiliUserArticlesData> $response = await client
+        .send<NetworkBiliUserArticlesData, NetworkBiliUserArticlesData>(
+          $request,
+        );
+    return $response.bodyOrThrow;
+  }
 }
