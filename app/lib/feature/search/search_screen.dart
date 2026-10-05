@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -17,20 +18,16 @@ import 'bloc/search_bloc.dart';
 /// 底栏每个目的地都能被直接唤起（导航语义：点按当前项回到该分支根）。
 class const SearchScreen({
   super.key,
-  required this.onSearch,
-  this.onFocusInputReady,
-  this.recentQueryLimit = 20,
-}) extends StatelessWidget {
-  final void Function(String query) onSearch;
+  required final void Function(String query) onSearch,
 
   /// 登记聚焦入口的回调，由页面内的搜索框在挂载时以聚焦函数调用、销毁时以 null 调用
   ///
   /// 底栏重复点「搜索」时用它：已经在搜索页就继续打字，而不是回到页首。
-  final void Function(void Function()? focus)? onFocusInputReady;
+  final void Function(void Function()? focus)? onFocusInputReady,
 
   /// 最近搜索最多展示的条数
-  final int recentQueryLimit;
-
+  final int recentQueryLimit = 20,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,11 +102,10 @@ class const SearchScreen({
 ///
 /// [SearchBloc] 通过 [MonitorRecentSearches] 订阅仓库的变更流，这里只渲染
 /// 快照。bloc 缺失时（数据源不支持建议）整块不渲染。
-class const _RecentSearches({required this.limit, required this.onSearch})
-    extends StatelessWidget {
-  final int limit;
-  final void Function(String query) onSearch;
-
+class const _RecentSearches({
+  required final int limit,
+  required final void Function(String query) onSearch,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<SearchBloc?>();
@@ -135,28 +131,40 @@ class const _RecentSearches({required this.limit, required this.onSearch})
                   Expanded(
                     child: Text(
                       '最近搜索',
-                      style: $styles.text.title2?.copyWith(
+                      style: $styles.text.title2.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => context.read<SearchBloc>().add(
-                      ClearRecentSearchesPressed(),
+                  Tooltip(
+                    message: '清空最近搜索历史',
+                    child: TextButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.read<SearchBloc>().add(
+                          ClearRecentSearchesPressed(),
+                        );
+                      },
+                      child: const Text('清空'),
                     ),
-                    child: const Text('清空'),
                   ),
                 ],
               ),
               for (final q in queries.take(limit))
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.history_rounded,
-                    color: theme.colorScheme.onSurfaceVariant,
+                Tooltip(
+                  message: '搜索 "${q.query}"',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.history_rounded,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(q.query),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      onSearch(q.query);
+                    },
                   ),
-                  title: Text(q.query),
-                  onTap: () => onSearch(q.query),
                 ),
             ],
           ),

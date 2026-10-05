@@ -10,9 +10,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 /// 记录写入次数与是否抛错，用于验证「只写一次」与「写失败不影响搜索」。
-class RecordingRecentSearchRepository({this.failOnWrite = false})
+class RecordingRecentSearchRepository({final bool failOnWrite = false})
     implements RecentSearchQueryRepository {
-  final bool failOnWrite;
   final written = <String>[];
 
   @override
