@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -79,8 +80,10 @@ class const MediaLibraryScreen({super.key, required this.onVideoTap})
                       ),
                     ),
                     TextButton(
-                      onPressed: () =>
-                          context.read<MediaHistoryCubit>().loadMore(),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.read<MediaHistoryCubit>().loadMore();
+                      },
                       child: const Text('重试'),
                     ),
                   ],
@@ -103,7 +106,10 @@ class const MediaLibraryScreen({super.key, required this.onVideoTap})
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
                     onPressed: state.hasMore && !state.isLoading
-                        ? () => context.read<MediaHistoryCubit>().loadMore()
+                        ? () {
+                            HapticFeedback.lightImpact();
+                            context.read<MediaHistoryCubit>().loadMore();
+                          }
                         : null,
                     child: Text(state.hasMore ? '加载更多' : '没有更多了'),
                   ),
@@ -242,7 +248,10 @@ class const _HistoryRow({
         ].join('，'),
         excludeSemantics: true,
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: $styles.insets.sm,

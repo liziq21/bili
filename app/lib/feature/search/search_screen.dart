@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -140,23 +141,35 @@ class const _RecentSearches({required this.limit, required this.onSearch})
                       ),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => context.read<SearchBloc>().add(
-                      ClearRecentSearchesPressed(),
+                  Tooltip(
+                    message: '清空最近搜索历史',
+                    child: TextButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.read<SearchBloc>().add(
+                          ClearRecentSearchesPressed(),
+                        );
+                      },
+                      child: const Text('清空'),
                     ),
-                    child: const Text('清空'),
                   ),
                 ],
               ),
               for (final q in queries.take(limit))
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.history_rounded,
-                    color: theme.colorScheme.onSurfaceVariant,
+                Tooltip(
+                  message: '搜索 "${q.query}"',
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.history_rounded,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    title: Text(q.query),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      onSearch(q.query);
+                    },
                   ),
-                  title: Text(q.query),
-                  onTap: () => onSearch(q.query),
                 ),
             ],
           ),
