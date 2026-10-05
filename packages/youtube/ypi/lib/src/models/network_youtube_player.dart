@@ -217,6 +217,7 @@ final class NetworkYouTubePlayerResponse {
   }) {
     _throwInnerTubeError(json);
     _throwAlertError(json);
+    _throwUnplayableStatus(json);
 
     final playability = _map(json['playabilityStatus']);
     final playabilityStatus = playability == null
@@ -285,6 +286,20 @@ void _throwAlertError(Map<String, dynamic> json) {
           'InnerTube alert: $type',
     );
   }
+}
+
+void _throwUnplayableStatus(Map<String, dynamic> json) {
+  final playability = _map(json['playabilityStatus']);
+  if (playability == null) return;
+  final status = _string(playability['status']);
+  if (status == null || status == 'OK') return;
+  final reason = NetworkYouTubeText.fromJson(_map(playability['reason'])).value ??
+      _string(playability['reason']);
+  throw YpiInnerTubeException(
+    code: null,
+    continuation: null,
+    reason: reason ?? 'Player status: $status',
+  );
 }
 
 void _throwInnerTubeError(Map<String, dynamic> json) {

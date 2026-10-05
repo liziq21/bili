@@ -428,20 +428,22 @@ void main() {
     );
   });
 
-  test('parses the real video player fixture into typed player response', () {
-    final response = NetworkYouTubePlayerResponse.fromJson(
-      loadFixtureMap('player.json'),
+  test('rejects the current player fixture, which records an UNPLAYABLE response', () {
+    // player.json 记录的是 UNPLAYABLE 业务失败响应（无 streamingData），
+    // 尚未在可访问 YouTube 的环境重抓。fromJson 对非 OK 状态抛
+    // YpiInnerTubeException，与 browse / watchNext 的口径一致。
+    expect(
+      () => NetworkYouTubePlayerResponse.fromJson(
+        loadFixtureMap('player.json'),
+      ),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'reason',
+          isNotNull,
+        ),
+      ),
     );
-    expect(response.videoId, 'dQw4w9WgXcQ');
-    expect(response.playabilityStatus?.status, 'UNPLAYABLE');
-    expect(response.playabilityStatus?.reason, isNotNull);
-    expect(response.videoDetails?.videoId, 'dQw4w9WgXcQ');
-    expect(response.videoDetails?.title, contains('Rick Astley'));
-    expect(response.videoDetails?.author, 'Rick Astley');
-    expect(response.videoDetails?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
-    expect(response.videoDetails?.lengthSeconds, '213');
-    expect(response.microformat?.category, 'Music');
-    expect(response.microformat?.publishDate, isNotNull);
   });
 
   test('parses the real suggest fixture into a typed suggestion DTO', () {

@@ -32,10 +32,11 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 `getWatchNext` 解析 `twoColumnWatchNextResults.results.results.contents` 中的 `videoPrimaryInfoRenderer`（主视频标题、播放量、发布时间）和 `videoSecondaryInfoRenderer`（频道作者 ID、频道名称、头像、订阅数、视频简介）。续页响应的条目在 `onResponseReceivedActions[].appendContinuationItemsAction.continuationItems`，解析器两条路径都读。
 
-抛错行为按实现分四种，不要照着文档想当然：
+抛错行为按实现分五种，不要照着文档想当然：
 
 - 顶层有 `error` 字段 → `YpiInnerTubeException`（带 code / continuation / reason）。
 - `alerts[].alertRenderer.type` 有值且非 `OK`（如 `ERROR`）→ `YpiInnerTubeException`，`reason` 取 alert 文本（`simpleText` 与 `runs` 两种形态都认；都取不到时退化为 `InnerTube alert: <type>`）。与 `network_youtube_browse.dart` 对失效频道的口径一致。
+- `playabilityStatus.status` 有值且非 `OK`（如 `UNPLAYABLE`、`LOGIN_REQUIRED`）→ `YpiInnerTubeException`，`reason` 取 `playabilityStatus.reason`（文本对象或纯字符串两种形态都认；都取不到时退化为 `Player status: <status>`）。仅 player 端点适用，与 browse / watchNext 的口径一致。
 - 缺 `videoId` 或缺 `videoPrimaryInfoRenderer` 标题 → `FormatException`。标题是必填项：失效或受限视频会返回 HTTP 200 且 `results.results.contents` 非空，但两个 renderer 循环全程空转，只靠 `videoId` 兜底就会放行一个标题与作者全 null 的「成功」响应。
 - `owner` 解析失败（`FormatException`）→ 忽略，`owner` 置 null。播放量、发布时间、视频简介缺失同理，都是可空字段。
 
@@ -57,7 +58,11 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 `getPlayer` 解析 `/youtubei/v1/player` 接口返回的播放器数据，包含 `playabilityStatus`（播放状态与不可播放原因）、`videoDetails`（视频 ID、标题、作者、频道 ID、时长、观看量、描述与缩略图等）、`microformat.playerMicroformatRenderer`（发布时间、分类等）及 `streamingData`（`formats` 与 `adaptiveFormats` 中的媒体流格式、qualityLabel、mimeType、url、bitrate 等）。
 
-若响应中存在顶层 `error` 或 `alerts` 中的错误信息，按包内规范抛出 `YpiInnerTubeException`。仅当无法取得非空 `videoId` 且未提供非空 `requestedVideoId` 时，才因缺少 `videoId` 抛出 `FormatException`。`getPlayer` 会传入请求中的 `videoId`；`videoDetails` 缺失或其中的 `videoId` 无效时，解析器仍会返回 DTO，且 `videoDetails` 为 `null`。
+若响应中存在顶层 `error`、`alerts` 中的错误信息，或 `playabilityStatus.status` 非 `OK`，按包内规范抛出 `YpiInnerTubeException`。仅当无法取得非空 `videoId` 且未提供非空 `requestedVideoId` 时，才因缺少 `videoId` 抛出 `FormatException`。`getPlayer` 会传入请求中的 `videoId`；`videoDetails` 缺失或其中的 `videoId` 无效时，解析器仍会返回 DTO，且 `videoDetails` 为 `null`。
+
+`playabilityStatus.status` 非 `OK` 时的响应没有 `streamingData`，此前会被解析成 DTO 返回，调用方无法区分「平台拒绝播放」与「解析失败」；`getPlayer` 传入的 `videoId` 兜底又让 `videoId` 始终非空，问题更难发现。现按上表抛 `YpiInnerTubeException`。
+
+**`player.json` 当前记录的是 `UNPLAYABLE` 业务失败响应**，不满足「fixture 须保存成功且业务有效响应」的规范，需在可访问 YouTube 的环境用抓取脚本重新获取 `status == 'OK'` 且含 `streamingData` 的响应。`tool/capture/fetch_fixtures.dart` 目前没有 player 分支，该 fixture 最初为手工放入。在重抓完成前，`from_json_test.dart` 里对它的断言走失败路径。
 
 ## 播放列表搜索的 renderer 形态
 
