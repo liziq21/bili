@@ -13,6 +13,7 @@ final class NetworkYouTubePlayabilityStatus {
       status: _string(json['status']) ?? 'UNKNOWN',
       reason:
           _string(json['reason']) ??
+          NetworkYouTubeText.fromJson(_map(json['reason'])).value ??
           NetworkYouTubeText.fromJson(
             _map(
               _map(
