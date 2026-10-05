@@ -291,15 +291,14 @@ void _throwAlertError(Map<String, dynamic> json) {
 void _throwUnplayableStatus(Map<String, dynamic> json) {
   final playability = _map(json['playabilityStatus']);
   if (playability == null) return;
-  final status = _string(playability['status']);
-  if (status == null || status == 'OK') return;
-  final reason =
-      NetworkYouTubeText.fromJson(_map(playability['reason'])).value ??
-      _string(playability['reason']);
+  final parsed = NetworkYouTubePlayabilityStatus.fromJson(playability);
+  if (parsed.status == 'OK') return;
   throw YpiInnerTubeException(
     code: null,
     continuation: null,
-    reason: reason ?? 'Player status: $status',
+    // parsed.reason 覆盖顶层 reason 与 errorScreen.playerErrorMessageRenderer
+    // 两级来源，避免非 OK 响应因只写 Player status 而丢失平台给出的原因。
+    reason: parsed.reason ?? 'Player status: ${parsed.status}',
   );
 }
 

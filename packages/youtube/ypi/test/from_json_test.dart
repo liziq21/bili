@@ -429,6 +429,47 @@ void main() {
   });
 
   test(
+    'reports the errorScreen reason when the top-level reason is absent',
+    () {
+      // 非 OK 响应常常只有 errorScreen.playerErrorMessageRenderer.reason，
+      // 顶层 playabilityStatus.reason 缺失。异常原因必须取到平台给出的
+      // 文案，而不是退化成 'Player status: ...'。
+      final response = <String, dynamic>{
+        'playabilityStatus': <String, dynamic>{
+          'status': 'LOGIN_REQUIRED',
+          'errorScreen': <String, dynamic>{
+            'playerErrorMessageRenderer': <String, dynamic>{
+              'reason': <String, dynamic>{
+                'runs': <dynamic>[
+                  <String, dynamic>{'text': 'Sign in to confirm your age'},
+                ],
+              },
+            },
+          },
+        },
+        'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+      };
+
+      expect(
+        () => NetworkYouTubePlayerResponse.fromJson(response),
+        throwsA(
+          isA<YpiInnerTubeException>()
+              .having(
+                (e) => e.reason,
+                'reason from errorScreen',
+                'Sign in to confirm your age',
+              )
+              .having(
+                (e) => e.reason,
+                'does not fall back to bare status',
+                isNot(contains('Player status:')),
+              ),
+        ),
+      );
+    },
+  );
+
+  test(
     'rejects the current player fixture, which records an UNPLAYABLE response',
     () {
       // player.json 记录的是 UNPLAYABLE 业务失败响应（无 streamingData），

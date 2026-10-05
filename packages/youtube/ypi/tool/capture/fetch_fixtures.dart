@@ -652,6 +652,11 @@ void _validatePlayerResponse(dynamic json) {
       '${playabilityStatus is Map ? playabilityStatus['status'] : null}',
     );
   }
+  if (json['streamingData'] is! Map) {
+    throw const FormatException(
+      'InnerTube player response has no streamingData',
+    );
+  }
   final videoDetails = json['videoDetails'];
   if (videoDetails is! Map<String, dynamic>) {
     throw const FormatException(
