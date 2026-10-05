@@ -469,56 +469,53 @@ void main() {
     },
   );
 
-  test(
-    'reads a top-level reason expressed as a text object',
-    () {
-      // 顶层 playabilityStatus.reason 有两种形态：纯字符串与文本对象
-      // （simpleText 或 runs）。只读字符串的实现在文本对象形态下，
-      // reason 会退化成 'Player status: <status>'。
-      final simple = <String, dynamic>{
-        'playabilityStatus': <String, dynamic>{
-          'status': 'LOGIN_REQUIRED',
-          'reason': <String, dynamic>{
-            'simpleText': 'Please sign in to confirm your age',
-          },
+  test('reads a top-level reason expressed as a text object', () {
+    // 顶层 playabilityStatus.reason 有两种形态：纯字符串与文本对象
+    // （simpleText 或 runs）。只读字符串的实现在文本对象形态下，
+    // reason 会退化成 'Player status: <status>'。
+    final simple = <String, dynamic>{
+      'playabilityStatus': <String, dynamic>{
+        'status': 'LOGIN_REQUIRED',
+        'reason': <String, dynamic>{
+          'simpleText': 'Please sign in to confirm your age',
         },
-        'videoDetails': <String, dynamic>{'videoId': 'abc123'},
-      };
-      expect(
-        () => NetworkYouTubePlayerResponse.fromJson(simple),
-        throwsA(
-          isA<YpiInnerTubeException>().having(
-            (e) => e.reason,
-            'simpleText form',
-            'Please sign in to confirm your age',
-          ),
+      },
+      'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+    };
+    expect(
+      () => NetworkYouTubePlayerResponse.fromJson(simple),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'simpleText form',
+          'Please sign in to confirm your age',
         ),
-      );
+      ),
+    );
 
-      final runs = <String, dynamic>{
-        'playabilityStatus': <String, dynamic>{
-          'status': 'LOGIN_REQUIRED',
-          'reason': <String, dynamic>{
-            'runs': <dynamic>[
-              <String, dynamic>{'text': 'Sign in'},
-              <String, dynamic>{'text': ' to continue'},
-            ],
-          },
+    final runs = <String, dynamic>{
+      'playabilityStatus': <String, dynamic>{
+        'status': 'LOGIN_REQUIRED',
+        'reason': <String, dynamic>{
+          'runs': <dynamic>[
+            <String, dynamic>{'text': 'Sign in'},
+            <String, dynamic>{'text': ' to continue'},
+          ],
         },
-        'videoDetails': <String, dynamic>{'videoId': 'abc123'},
-      };
-      expect(
-        () => NetworkYouTubePlayerResponse.fromJson(runs),
-        throwsA(
-          isA<YpiInnerTubeException>().having(
-            (e) => e.reason,
-            'runs form',
-            'Sign in to continue',
-          ),
+      },
+      'videoDetails': <String, dynamic>{'videoId': 'abc123'},
+    };
+    expect(
+      () => NetworkYouTubePlayerResponse.fromJson(runs),
+      throwsA(
+        isA<YpiInnerTubeException>().having(
+          (e) => e.reason,
+          'runs form',
+          'Sign in to continue',
         ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
   test(
     'rejects the current player fixture, which records an UNPLAYABLE response',
