@@ -293,7 +293,8 @@ void _throwUnplayableStatus(Map<String, dynamic> json) {
   if (playability == null) return;
   final status = _string(playability['status']);
   if (status == null || status == 'OK') return;
-  final reason = NetworkYouTubeText.fromJson(_map(playability['reason'])).value ??
+  final reason =
+      NetworkYouTubeText.fromJson(_map(playability['reason'])).value ??
       _string(playability['reason']);
   throw YpiInnerTubeException(
     code: null,
