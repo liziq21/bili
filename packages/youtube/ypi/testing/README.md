@@ -64,6 +64,8 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 **`player.json` 当前记录的是 `UNPLAYABLE` 业务失败响应**，不满足「fixture 须保存成功且业务有效响应」的规范，需在可访问 YouTube 的环境用抓取脚本重新获取 `status == 'OK'` 且含 `streamingData` 的响应。`tool/capture/fetch_fixtures.dart` 目前没有 player 分支，该 fixture 最初为手工放入。在重抓完成前，`from_json_test.dart` 里对它的断言走失败路径。
 
+**Player 成功路径目前未经真实 fixture 回归**：`youtube_service_test.dart` 的 `getPlayer` 用例由 MockClient 合成响应，只验证请求形状与成功 DTO 的字段映射，不能验证真实 InnerTube 响应契约。取得 `status == 'OK'` 的真实响应后，需用它补成功路径断言。
+
 ## 播放列表搜索的 renderer 形态
 
 `searchPlaylists` 解析 `lockupViewModel`，不解析 `playlistRenderer`。依据是实测：`contentType: 3` 的搜索响应里 **`playlistRenderer` 出现 0 次**，播放列表以 `contentId` 带 `PL` 前缀的 `lockupViewModel` 到达。2026-09-30 跨三个 client（WEB 2.20230818.00.00、WEB 2.20240726.00.00、ANDROID 19.09.37）各测一次，结论一致；2026-10-01 用 WEB 2.20230818.00.00 复测，`playlistRenderer` 仍为 0、`lockupViewModel` 为 2、`estimatedResults` 为 3628246（`search_playlist.json` 记录的是 3628154，同期取值，结果数随时间漂移）。
