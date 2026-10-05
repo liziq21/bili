@@ -16,6 +16,7 @@
 | `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
 | `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
 | `player.json` | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04（实测状态 `UNPLAYABLE`，非成功响应，待重抓） |
+| `home_feed.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`FEwhat_to_watch` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 首页推荐 feed | 2026-10-04 |
 
 
 ## 频道浏览的 renderer 形态

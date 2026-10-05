@@ -1487,4 +1487,106 @@ void main() {
       expect(called, isFalse, reason: '空 continuation 不该发请求');
     });
   });
+
+  group('YoutubeService.browseHomeFeed', () {
+    test('posts to /browse with FEwhat_to_watch', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.method, equals('POST'));
+        expect(request.url.path, equals('/youtubei/v1/browse'));
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['browseId'], equals('FEwhat_to_watch'));
+        expect(body['continuation'], isNull);
+        return http.Response(
+          json.encode({
+            'contents': {
+              'twoColumnBrowseResultsRenderer': {
+                'tabs': [
+                  {
+                    'tabRenderer': {
+                      'selected': true,
+                      'content': {
+                        'richGridRenderer': {
+                          'contents': [
+                            {
+                              'richItemRenderer': {
+                                'content': {
+                                  'lockupViewModel': {
+                                    'contentId': 'HOME_VIDEO_1',
+                                    'contentType': 'LOCKUP_CONTENT_TYPE_VIDEO',
+                                    'metadata': {
+                                      'lockupMetadataViewModel': {
+                                        'title': {'content': 'Home Video One'},
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      final response = await service.browseHomeFeed();
+      expect(response.items.single.contentId, equals('HOME_VIDEO_1'));
+      expect(response.items.single.title, equals('Home Video One'));
+    });
+
+    test('pages with continuation when provided', () async {
+      final mockClient = MockClient((request) async {
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['continuation'], equals('HOME_TOKEN_1'));
+        expect(body['browseId'], isNull);
+        return http.Response(
+          json.encode({
+            'onResponseReceivedActions': [
+              {
+                'appendContinuationItemsAction': {
+                  'continuationItems': [
+                    {
+                      'richItemRenderer': {
+                        'content': {
+                          'lockupViewModel': {
+                            'contentId': 'HOME_VIDEO_2',
+                            'contentType': 'LOCKUP_CONTENT_TYPE_VIDEO',
+                            'metadata': {
+                              'lockupMetadataViewModel': {
+                                'title': {'content': 'Home Video Two'},
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      addTearDown(service.close);
+
+      final response = await service.browseHomeFeed(
+        continuation: 'HOME_TOKEN_1',
+      );
+      expect(response.items.single.contentId, equals('HOME_VIDEO_2'));
+    });
+  });
 }

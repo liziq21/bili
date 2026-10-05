@@ -300,6 +300,50 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/player.json', player);
     }
 
+    print('10. Fetching home feed JSON...');
+    if (!shouldFetch('testing/home_feed.json')) {
+      skipNote('testing/home_feed.json');
+    } else {
+      final homeFeedResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'browseId': 'FEwhat_to_watch',
+            }),
+          )
+          .timeout(requestTimeout);
+      final homeFeed = _captureJson(
+        homeFeedResponse,
+        'home feed',
+        _validateHomeFeedResponse,
+      );
+      saveResponse('testing/home_feed.json', homeFeed);
+    }
+
+    print('11. Fetching playlist browse JSON...');
+    if (!shouldFetch('testing/browse_playlist.json')) {
+      skipNote('testing/browse_playlist.json');
+    } else {
+      final browsePlaylistResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'browseId': 'VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ',
+            }),
+          )
+          .timeout(requestTimeout);
+      final browsePlaylist = _captureJson(
+        browsePlaylistResponse,
+        'playlist browse',
+        _validateBrowsePlaylistResponse,
+      );
+      saveResponse('testing/browse_playlist.json', browsePlaylist);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -360,6 +404,44 @@ void _validateBrowseResponse(dynamic json) {
     throw const FormatException(
       'InnerTube browse yields no video items: the capture would record a '
       'channel the parser reads as empty',
+    );
+  }
+}
+
+void _validateHomeFeedResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException(
+      'InnerTube home feed response is not an object',
+    );
+  }
+  for (final rawAlert in (json['alerts'] as List? ?? const [])) {
+    if (rawAlert is! Map) continue;
+    final alert = rawAlert['alertRenderer'];
+    if (alert is! Map) continue;
+    final type = alert['type'];
+    if (type is String && type.isNotEmpty && type != 'OK') {
+      throw FormatException(
+        'InnerTube home feed returned alert type "$type": '
+        '${alert['text']}',
+      );
+    }
+  }
+  final contents = json['contents'];
+  if (contents is! Map<String, dynamic>) {
+    throw const FormatException('InnerTube home feed response has no contents');
+  }
+}
+
+void _validateBrowsePlaylistResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException(
+      'InnerTube playlist browse response is not an object',
+    );
+  }
+  final items = NetworkYouTubePlaylistBrowseResponse.fromJson(json).items;
+  if (items.isEmpty) {
+    throw const FormatException(
+      'InnerTube playlist browse yields no video items',
     );
   }
 }
