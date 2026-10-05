@@ -71,3 +71,9 @@ Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) fro
 Vulnerability: `YouTubeVideoSearchRemoteDataSource` and `YouTubeCreatorProfileSearchRemoteDataSource` passed raw search queries containing non-printable ASCII control characters (`\r\n`, `\x00`, `\x1f`) directly to InnerTube remote API services and continuation token cache keys, causing unnecessary API requests on whitespace/control-character-only inputs.
 Learning: Remote data sources must strip control characters and return an empty `Page` immediately for blank or control-character-only queries to avoid redundant API network traffic and query injection risk.
 Prevention: Always sanitize control characters (`[\x00-\x1F\x7F]`) and trim search query strings before building continuation keys or invoking API services.
+
+## 2026-09-28 - Sanitize Control Characters in Bilibili Search Remote Data Sources
+
+Vulnerability: Bilibili search remote data sources (`BiliVideoSearchRemoteDataSource`, `BiliCreatorProfileSearchRemoteDataSource`, `BiliLiveRoomSearchRemoteDataSource`, and `BiliAggregateSearchRemoteDataSource`) passed raw search `query` parameters containing non-printable control characters (`\r\n`, `\x00`, `\x1F`, `\x7F`) directly to network API services, and executed remote network calls for empty or whitespace-only search queries.
+Learning: Remote search data sources must strip non-printable ASCII control characters and return empty `Page` or `AggregateSearchPage` results immediately for blank or control-character-only search inputs to prevent CRLF query injection and redundant network requests.
+Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and short-circuit empty queries with an empty result `Page` before calling backend search APIs.
