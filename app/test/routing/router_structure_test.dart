@@ -150,8 +150,9 @@ void main() {
             continue;
           }
           for (final child in route.routes.whereType<GoRoute>()) {
-            if (child.path.startsWith('/'))
+            if (child.path.startsWith('/')) {
               offender = '${route.path} -> ${child.path}';
+            }
           }
           walk(route.routes);
         }

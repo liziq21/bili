@@ -22,11 +22,12 @@ import 'media_history_cubit.dart';
 ///
 /// [MediaHistoryCubit] 由路由提供：本页若自己再建一个，加载第一页会查询两次，
 /// 而列表与翻页状态在两处实例上会各走各的。
-class const MediaLibraryScreen({super.key, required this.onVideoTap})
-    extends StatelessWidget {
-  /// 点按历史条目时的回调
-  final void Function(MediaHistoryItem item) onVideoTap;
+class const MediaLibraryScreen({
+  super.key,
 
+  /// 点按历史条目时的回调
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,9 +127,9 @@ class const MediaLibraryScreen({super.key, required this.onVideoTap})
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
 ///
 /// 历史为空是正常状态（新装用户）而不是故障，所以与错误态分开表达。
-class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
-  final void Function(MediaHistoryItem item) onVideoTap;
-
+class const _HistoryList({
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
@@ -169,11 +170,10 @@ class const _HistoryList({required this.onVideoTap}) extends StatelessWidget {
 ///
 /// 缩略图尺寸按可用宽度算并封顶：宽屏下固定尺寸会在行首留一大片空白，
 /// 而封顶后条目宽度仍跟着窗口走，分隔线与标题左边缘始终对齐。
-class const _HistoryRows({required this.items, required this.onVideoTap})
-    extends StatelessWidget {
-  final List<MediaHistoryItem> items;
-  final void Function(MediaHistoryItem item) onVideoTap;
-
+class const _HistoryRows({
+  required final List<MediaHistoryItem> items,
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverLayoutBuilder(
@@ -219,16 +219,11 @@ class const _HistoryRows({required this.items, required this.onVideoTap})
 
 /// 单条历史：左缩略图 + 右标题 / 来源 / 时间
 class const _HistoryRow({
-  required this.item,
-  required this.thumbWidth,
-  required this.onTap,
-  this.sourceLabel,
+  required final MediaHistoryItem item,
+  required final double thumbWidth,
+  required final VoidCallback onTap,
+  final String? sourceLabel,
 }) extends StatelessWidget {
-  final MediaHistoryItem item;
-  final double thumbWidth;
-  final VoidCallback onTap;
-  final String? sourceLabel;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -391,16 +386,11 @@ class const _HistoryRow({
 
 /// 空态 / 错误态的统一版式
 class const _Message({
-  required this.icon,
-  required this.message,
-  this.actionLabel,
-  this.onAction,
+  required final IconData icon,
+  required final String message,
+  final String? actionLabel,
+  final VoidCallback? onAction,
 }) extends StatelessWidget {
-  final IconData icon;
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -412,7 +402,7 @@ class const _Message({
           SizedBox(height: $styles.insets.sm),
           Text(
             message,
-            style: $styles.text.body?.copyWith(
+            style: $styles.text.body.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
