@@ -428,6 +428,22 @@ void main() {
     );
   });
 
+  test('parses the real video player fixture into typed player response', () {
+    final response = NetworkYouTubePlayerResponse.fromJson(
+      loadFixtureMap('player.json'),
+    );
+    expect(response.videoId, 'dQw4w9WgXcQ');
+    expect(response.playabilityStatus?.status, 'UNPLAYABLE');
+    expect(response.playabilityStatus?.reason, isNotNull);
+    expect(response.videoDetails?.videoId, 'dQw4w9WgXcQ');
+    expect(response.videoDetails?.title, contains('Rick Astley'));
+    expect(response.videoDetails?.author, 'Rick Astley');
+    expect(response.videoDetails?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
+    expect(response.videoDetails?.lengthSeconds, '213');
+    expect(response.microformat?.category, 'Music');
+    expect(response.microformat?.publishDate, isNotNull);
+  });
+
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');
     expect(file.existsSync(), isTrue);
