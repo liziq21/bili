@@ -83,3 +83,9 @@ Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and
 Vulnerability: `BiliVideoDetailRemoteDataSource`, `BiliVideoCommentRemoteDataSource`, and `BiliMediaStreamRemoteDataSource` passed raw `videoId` / `id` parameters containing non-printable ASCII control characters (`\r\n`, `\x00`, `\x1f`, `\x7f`) or empty strings directly to Bilibili network API calls (`getVideoDetail`, `getReplyList`, `getPlayUrl`), risking parameter corruption and redundant network requests.
 Learning: Video ID parameters sourced from deep links, routes, or user navigation must be sanitized at the remote data source boundary to prevent CRLF parameter injection and fail fast on blank inputs.
 Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and trim video ID parameters, returning `Result.error` fast for empty or whitespace-only inputs.
+
+## 2026-10-06 - Standardize and Secure Bilibili Media Asset URLs in DTO Mappers
+
+Vulnerability: Model DTO mappers across Bilibili search, ranking, and user results used naive string concatenation (`'https:$upic'`, `'https:$cover'`) or incomplete URL checks, producing corrupted schemes (`https:https://...` or `https:http://...`) when endpoints returned full URLs, and leaving scheme-relative URLs (`//...`) without explicit `https:`.
+Learning: Untrusted network JSON asset fields can vary between scheme-relative (`//`), unencrypted (`http://`), or full HTTPS URLs (`https://`). Naive string interpolation corrupts valid HTTPS URLs or fails to enforce encrypted HTTPS transport.
+Prevention: Use a standardized URL normalizer (`normalizeBiliUrl`) that securely converts `//` and `http://` to `https://`, preserves existing `https://` URLs, and handles `null`/empty values safely.
