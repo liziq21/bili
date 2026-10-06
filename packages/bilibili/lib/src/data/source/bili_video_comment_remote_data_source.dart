@@ -9,6 +9,8 @@ import 'bili_remote_data_source.dart';
 final class BiliVideoCommentRemoteDataSource({
   required final NetworkVideoDataSource network,
 }) extends VideoCommentRemoteDataSource with BiliRemoteDataSource {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   Future<Result<Page<VideoComment>>> getVideoComments(
     String videoId, {
@@ -16,12 +18,17 @@ final class BiliVideoCommentRemoteDataSource({
     int pageSize = 20,
   }) async {
     try {
+      final sanitizedVideoId = videoId.replaceAll(_controlChars, '').trim();
+      if (sanitizedVideoId.isEmpty) {
+        return Result.error(Exception('Video ID cannot be empty'));
+      }
+
       int oid;
-      final numericAid = int.tryParse(videoId);
+      final numericAid = int.tryParse(sanitizedVideoId);
       if (numericAid != null) {
         oid = numericAid;
       } else {
-        final detail = await network.getVideoDetail(bvid: videoId);
+        final detail = await network.getVideoDetail(bvid: sanitizedVideoId);
         oid = detail.aid;
       }
 

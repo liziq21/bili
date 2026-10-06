@@ -9,21 +9,28 @@ import 'bili_remote_data_source.dart';
 final class BiliVideoDetailRemoteDataSource({
   required final NetworkVideoDataSource network,
 }) extends VideoDetailRemoteDataSource with BiliRemoteDataSource {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async {
     try {
-      final detailData = await network.getVideoDetail(bvid: id);
+      final sanitizedId = id.replaceAll(_controlChars, '').trim();
+      if (sanitizedId.isEmpty) {
+        return Result.error(Exception('Video ID cannot be empty'));
+      }
+
+      final detailData = await network.getVideoDetail(bvid: sanitizedId);
 
       NetworkVideoRelation? relation;
       try {
-        relation = await network.getVideoRelation(bvid: id);
+        relation = await network.getVideoRelation(bvid: sanitizedId);
       } catch (_) {
         // Relation call is best-effort
       }
 
       List<NetworkRelatedVideo> related = [];
       try {
-        related = await network.getRelatedVideos(bvid: id);
+        related = await network.getRelatedVideos(bvid: sanitizedId);
       } catch (_) {
         // Related videos is best-effort
       }

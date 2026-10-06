@@ -512,5 +512,17 @@ void main() {
       final result = await source.getMediaStream('BV1GJ411x7vy');
       expect(result.isError, isTrue);
     });
+
+    test('getMediaStream 清理控制字符并针对空 videoId 返回 Result.error', () async {
+      final source = makeSource(playUrlJson);
+
+      final sanitizedResult = await source.getMediaStream(
+        'BV1GJ411x7vy\r\n\x00',
+      );
+      expect(sanitizedResult.isOk, isTrue);
+
+      final emptyResult = await source.getMediaStream('  \r\n\x00 ');
+      expect(emptyResult.isError, isTrue);
+    });
   });
 }

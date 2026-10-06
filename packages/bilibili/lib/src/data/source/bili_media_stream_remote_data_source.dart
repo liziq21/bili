@@ -13,28 +13,38 @@ final class BiliMediaStreamRemoteDataSource({
   required final NetworkVideoDataSource network,
   required final String browserUserAgent,
 }) extends MediaStreamRemoteDataSource with BiliRemoteDataSource {
+  static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
   @override
   Future<Result<MediaStream>> getMediaStream(
     String videoId, {
     int? preferHeight,
   }) async {
     try {
+      final sanitizedVideoId = videoId.replaceAll(_controlChars, '').trim();
+      if (sanitizedVideoId.isEmpty) {
+        return Result.error(Exception('Video ID cannot be empty'));
+      }
+
       // B站的播放地址按分P（cid）下发，而能力接口收的是媒体标识（bvid），
       // 故先取详情取首个分P的 cid。
-      final detail = await network.getVideoDetail(bvid: videoId);
+      final detail = await network.getVideoDetail(bvid: sanitizedVideoId);
       final pages = detail.pages;
       if (pages == null || pages.isEmpty) {
-        return Result.error(Exception('视频 $videoId 没有可用分P，无法解析播放地址'));
+        return Result.error(Exception('视频 $sanitizedVideoId 没有可用分P，无法解析播放地址'));
       }
       final cid = pages.first.cid;
 
-      final playUrl = await network.getPlayUrl(bvid: videoId, cid: cid);
+      final playUrl = await network.getPlayUrl(
+        bvid: sanitizedVideoId,
+        cid: cid,
+      );
 
       final dash = playUrl.dash;
       if (dash != null) {
         final videoItems = _playable(dash.video);
         if (videoItems.isNotEmpty) {
-          return _fromDash(videoId, dash, videoItems, preferHeight);
+          return _fromDash(sanitizedVideoId, dash, videoItems, preferHeight);
         }
       }
 
@@ -50,7 +60,7 @@ final class BiliMediaStreamRemoteDataSource({
         );
       }
 
-      return Result.error(Exception('视频 $videoId 未返回可播放的流'));
+      return Result.error(Exception('视频 $sanitizedVideoId 未返回可播放的流'));
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }
