@@ -23,7 +23,8 @@ abstract interface class VideoDetailRepository() {
 /// [VideoDetailRepository] 的默认应用实现
 ///
 /// 依赖可选的 [VideoDetailRemoteDataSource] 能力接口。
-/// 当当前数据源未实现视频详情能力时，安全返回相应的错误或默认状态。
+/// 当当前数据源未实现该能力时返回错误：假成功比失败更糟，调用方会据此
+/// 回滚乐观更新，而假成功会让界面停在一个从未被持久化的状态上。
 class AppVideoDetailRepository([
   final VideoDetailRemoteDataSource? _remoteDataSource,
 ]) implements VideoDetailRepository {
@@ -40,7 +41,7 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleLike(id, isLiked);
     }
-    return Result.ok(!isLiked);
+    return Result.error(Exception('当前数据源不支持点赞'));
   }
 
   @override
@@ -48,7 +49,7 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleFavorite(id, isFavorited);
     }
-    return Result.ok(!isFavorited);
+    return Result.error(Exception('当前数据源不支持收藏'));
   }
 
   @override
@@ -59,6 +60,6 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleSubscribe(creatorId, isSubscribed);
     }
-    return Result.ok(!isSubscribed);
+    return Result.error(Exception('当前数据源不支持关注创作者'));
   }
 }

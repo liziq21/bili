@@ -467,84 +467,101 @@ class _ActionButtonsSectionState()
 
     if (metrics == null) return const SizedBox.shrink();
 
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _ActionButton(
-            icon: Icons.thumb_up_outlined,
-            activeIcon: Icons.thumb_up,
-            label: _formatCount(metrics.likeCount),
-            actionName: '点赞',
-            isActive: metrics.isLiked,
-            color: $styles.colors.accentFill,
-            onTap: () {
-              context.read<VideoBloc>().add(const ToggleVideoLike());
-            },
-          ),
-          _ActionButton(
-            icon: Icons.grade_outlined,
-            activeIcon: Icons.grade,
-            label: _formatCount(metrics.favoriteCount),
-            actionName: '收藏',
-            isActive: metrics.isFavorited,
-            color: $styles.colors.tertiary,
-            onTap: () {
-              context.read<VideoBloc>().add(const ToggleVideoFavorite());
-            },
-          ),
-          _ActionButton(
-            icon: Icons.cloud_sync,
-            activeIcon: Icons.cloud_sync,
-            label: '多源换源',
-            actionName: '多源换源',
-            tooltip: '切换视频数据源',
-            isActive: true,
-            color: $styles.colors.accentFill,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('自动切换至最优可用的解析线路'),
-                  duration: $styles.times.fast,
-                ),
-              );
-            },
-          ),
-          _ActionButton(
-            icon: Icons.share_outlined,
-            activeIcon: Icons.share,
-            label: _formatCount(metrics.shareCount),
-            actionName: '分享',
-            tooltip: '分享视频',
-            isActive: false,
-            color: $styles.colors.secondary,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('分享多源视频链接'),
-                  duration: $styles.times.fast,
-                ),
-              );
-            },
-          ),
-          _ActionButton(
-            icon: _isDanmakuActive
-                ? Icons.closed_caption
-                : Icons.closed_caption_disabled,
-            activeIcon: Icons.closed_caption,
-            label: _isDanmakuActive ? '弹幕开' : '弹幕关',
-            actionName: '弹幕',
-            tooltip: _isDanmakuActive ? '关闭弹幕' : '开启弹幕',
-            isActive: _isDanmakuActive,
-            color: $styles.colors.accentFill,
-            onTap: () {
-              setState(() {
-                _isDanmakuActive = !_isDanmakuActive;
-              });
-            },
-          ),
-        ],
+    // 写失败只提示一句，不动页面内容：乐观更新已被 bloc 回滚，详情仍在屏上，
+    // 把它并入加载失败通道会把整页顶成「视频加载失败」，与刚发生的写操作无关。
+    return BlocListener<VideoBloc, VideoState>(
+      listenWhen: (previous, current) =>
+          current.actionError != null &&
+          previous.actionError != current.actionError,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(state.actionError!),
+              duration: $styles.times.fast,
+            ),
+          );
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _ActionButton(
+              icon: Icons.thumb_up_outlined,
+              activeIcon: Icons.thumb_up,
+              label: _formatCount(metrics.likeCount),
+              actionName: '点赞',
+              isActive: metrics.isLiked,
+              color: $styles.colors.accentFill,
+              onTap: () {
+                context.read<VideoBloc>().add(const ToggleVideoLike());
+              },
+            ),
+            _ActionButton(
+              icon: Icons.grade_outlined,
+              activeIcon: Icons.grade,
+              label: _formatCount(metrics.favoriteCount),
+              actionName: '收藏',
+              isActive: metrics.isFavorited,
+              color: $styles.colors.tertiary,
+              onTap: () {
+                context.read<VideoBloc>().add(const ToggleVideoFavorite());
+              },
+            ),
+            _ActionButton(
+              icon: Icons.cloud_sync,
+              activeIcon: Icons.cloud_sync,
+              label: '多源换源',
+              actionName: '多源换源',
+              tooltip: '切换视频数据源',
+              isActive: true,
+              color: $styles.colors.accentFill,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('自动切换至最优可用的解析线路'),
+                    duration: $styles.times.fast,
+                  ),
+                );
+              },
+            ),
+            _ActionButton(
+              icon: Icons.share_outlined,
+              activeIcon: Icons.share,
+              label: _formatCount(metrics.shareCount),
+              actionName: '分享',
+              tooltip: '分享视频',
+              isActive: false,
+              color: $styles.colors.secondary,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('分享多源视频链接'),
+                    duration: $styles.times.fast,
+                  ),
+                );
+              },
+            ),
+            _ActionButton(
+              icon: _isDanmakuActive
+                  ? Icons.closed_caption
+                  : Icons.closed_caption_disabled,
+              activeIcon: Icons.closed_caption,
+              label: _isDanmakuActive ? '弹幕开' : '弹幕关',
+              actionName: '弹幕',
+              tooltip: _isDanmakuActive ? '关闭弹幕' : '开启弹幕',
+              isActive: _isDanmakuActive,
+              color: $styles.colors.accentFill,
+              onTap: () {
+                setState(() {
+                  _isDanmakuActive = !_isDanmakuActive;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -79,3 +79,9 @@ CI 对分析的处理分两档：Jules 相关 PR 用 `--fatal-infos --fatal-warn
 
 Database unit tests live in `app/test/database/` using `NativeDatabase.memory()`.
 Note: Import `package:drift/drift.dart` with `hide isNotNull` to avoid collision with `package:flutter_test`.
+
+## Dart MCP Server
+
+仓库根的 `.mcp.json` 声明了一个 `dart` MCP server（`dart mcp-server`），连接后可用其工具操作 Dart/Flutter 工具链（包源码读取、pub、pub.dev 搜索、代码导航、分析等）。工具清单与参数以 server 当前版本为准，直接从连接后的工具列表读取，不在此罗列。
+
+需注意其中分析/代码导航类工具依赖一个对整个 workspace 建立全量索引的分析服务器，单进程内存占用可达 1.5 GiB 量级；内存不足时该服务器会被操作系统杀死，表现为请求超时。这是工具的实现特性，不是连接或配置问题——遇到超时时改用 CLI 自查（与 CI 同命令的 `flutter analyze`，可传单个文件缩小分析范围，例如 `flutter analyze test/foo_bar_test.dart`），或确认运行环境内存充足后重试。

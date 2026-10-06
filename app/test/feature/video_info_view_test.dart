@@ -303,4 +303,109 @@ void main() {
       },
     );
   });
+
+  group('VideoInfoView action error surface', () {
+    // A failed like used to be reported through `error`, which drives the
+    // full-page "视频加载失败" replacement. The page was already showing the
+    // video, so that message was both wrong and destructive. These cases pin
+    // the split: `actionError` prompts, it does not replace the page.
+    Widget mountWith(VideoBloc bloc) {
+      return MaterialApp(
+        home: Scaffold(
+          body: BlocProvider<VideoBloc>.value(
+            value: bloc,
+            child: const VideoInfoView(),
+          ),
+        ),
+      );
+    }
+
+    // The like button's visible text is the formatted count, so locate it by
+    // its tooltip instead of by label text.
+    Finder likeButton() => find.byWidgetPredicate(
+      (widget) => widget is Semantics && widget.properties.tooltip == '点赞',
+    );
+    VideoDetail sampleDetail() => VideoDetail(
+      video: const VideoModel(
+        id: 'BV1test',
+        url: 'https://example.com/video',
+        title: '测试视频标题',
+      ),
+      creator: const CreatorProfile(id: 'c1', name: '测试UP主'),
+      likeCount: 10,
+    );
+
+    testWidgets('actionError shows a prompt without replacing the page', (
+      tester,
+    ) async {
+      final bloc = MockVideoBloc(VideoState(videoDetail: sampleDetail()));
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(mountWith(bloc));
+      await tester.pumpAndSettle();
+
+      // A bloc only notifies listeners on a state *transition*: mounting with
+      // actionError already set produces no prompt, which is correct (nothing
+      // failed during this mount). Drive the failure the way the bloc does.
+      bloc.emit(bloc.state.copyWith(actionError: '点赞失败'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('点赞失败'), findsOneWidget);
+      // The detail is still on screen: the action buttons are still there and
+      // the load-failure copy is absent.
+      expect(likeButton(), findsOneWidget);
+      expect(find.text('视频加载失败，请重试'), findsNothing);
+    });
+
+    testWidgets('a repeated identical message still prompts', (tester) async {
+      // Two consecutive failures carry the same text. If actionError were not
+      // in props, Equatable would collapse the second state into the first and
+      // the user would only ever see one prompt.
+      final bloc = MockVideoBloc(VideoState(videoDetail: sampleDetail()));
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(mountWith(bloc));
+      await tester.pumpAndSettle();
+
+      bloc.emit(bloc.state.copyWith(actionError: '点赞失败'));
+      await tester.pumpAndSettle();
+      expect(find.text('点赞失败'), findsOneWidget);
+
+      // Clear it, and let the first SnackBar's auto-dismiss timer run out so
+      // the second prompt is distinguishable from the first.
+      bloc.emit(bloc.state.copyWith(actionError: null));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      expect(find.text('点赞失败'), findsNothing);
+
+      bloc.emit(bloc.state.copyWith(actionError: '点赞失败'));
+      await tester.pumpAndSettle();
+      expect(find.text('点赞失败'), findsOneWidget);
+    });
+
+    testWidgets('a null actionError shows no prompt', (tester) async {
+      final bloc = MockVideoBloc(VideoState(videoDetail: sampleDetail()));
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(mountWith(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsNothing);
+      expect(likeButton(), findsOneWidget);
+    });
+
+    testWidgets('a load error still replaces the page', (tester) async {
+      // The load-failure channel keeps its original behaviour; only the write
+      // channel was split out.
+      final bloc = MockVideoBloc(const VideoState(error: 'boom'));
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(mountWith(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.text('视频加载失败，请重试'), findsOneWidget);
+      expect(likeButton(), findsNothing);
+    });
+  });
 }
