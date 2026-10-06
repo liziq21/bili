@@ -16,6 +16,7 @@ import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
+import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_bili_player_info.dart';
 import '../model/video/network_related_video.dart';
@@ -160,6 +161,12 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ps') int pageSize = 30,
   });
 
+  @GET(path: ApiPath.bangumiSeason)
+  Future<NetworkBangumiSeasonData> getBangumiSeason({
+    @Query('season_id') int? seasonId,
+    @Query('ep_id') int? epId,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -189,6 +196,7 @@ class BiliNetworkSearch
         NetworkLiveRoomPlayInfo: NetworkLiveRoomPlayInfo.fromJson,
         NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
         NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
+        NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -320,6 +328,28 @@ class BiliNetworkSearch
     pubTimeBeginS: pubTimeBeginS,
     pubTimeEndS: pubTimeEndS,
   );
+
+  @override
+  Future<NetworkBangumiSeasonData> getBangumiSeason({
+    int? seasonId,
+    int? epId,
+  }) async {
+    try {
+      return await _networkApi.getBangumiSeason(seasonId: seasonId, epId: epId);
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili bangumi season response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili bangumi season network request failed.',
+        cause: error,
+      );
+    }
+  }
 
   @override
   Future<VideoDetailData> getVideoDetail({required String bvid}) =>

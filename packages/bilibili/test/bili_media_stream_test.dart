@@ -68,6 +68,12 @@ class MockMediaStreamNetwork({
     required String bvid,
     required int cid,
   }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkBangumiSeasonData> getBangumiSeason({
+    int? seasonId,
+    int? epId,
+  }) => throw UnimplementedError();
 }
 
 void main() {

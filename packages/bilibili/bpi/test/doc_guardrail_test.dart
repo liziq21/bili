@@ -147,6 +147,11 @@ const endpointSpecs = <EndpointSpec>[
     docCell: 'user_articles.json',
   ),
   EndpointSpec(
+    method: 'getBangumiSeason',
+    fixtures: ['bangumi_season.json'],
+    docCell: 'bangumi_season.json',
+  ),
+  EndpointSpec(
     method: 'getVideoDetail',
     fixtures: ['video_detail.json'],
     docCell: 'video_detail.json',

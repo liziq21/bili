@@ -31,6 +31,7 @@ final class ApiPath {
   static const String playerV2 = '/x/player/v2';
   static const String userCard = '/x/web-interface/card';
   static const String userArticles = '/x/space/article';
+  static const String bangumiSeason = '/pgc/view/web/season';
 }
 
 final class WbiApiPath {

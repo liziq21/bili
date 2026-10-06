@@ -76,6 +76,14 @@ class MockNetworkVideoDataSource({
   }) async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<NetworkBangumiSeasonData> getBangumiSeason({
+    int? seasonId,
+    int? epId,
+  }) async {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
