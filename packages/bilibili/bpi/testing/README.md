@@ -21,6 +21,7 @@
 | `live_room_play_info.json` | `/xlive/web-room/v2/index/getRoomPlayInfo` | GET | `room_id=21144080&protocol=0,1&format=0,1,2&codec=0,1&qn=10000&platform=web&ptype=8` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-02 |
 | `user_card.json` | `/x/web-interface/card` | GET | `mid=2` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-03 |
 | `user_articles.json` | `/x/space/article` | GET | `mid=353840826&pn=1&ps=30` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-04 |
+| `bangumi_season.json` | `/pgc/view/web/season` | GET | `season_id=28800` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-05 |
 
 ## 抓取规则
 

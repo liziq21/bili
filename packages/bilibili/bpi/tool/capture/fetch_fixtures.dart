@@ -45,12 +45,22 @@ Future<void> main(List<String> args) async {
   Future<_CapturedResponse> getWbiJson(
     String baseUrl,
     Map<String, dynamic> params,
-    String label,
-  ) async {
+    String label, {
+    Map<String, String>? headers,
+  }) async {
     final signedParams = WbiUtils.encWbi(params, mixinKey);
     final uri = Uri.parse(baseUrl).replace(
       queryParameters: signedParams.map((k, v) => MapEntry(k, v.toString())),
     );
+    if (headers != null) {
+      final response = await client.get(uri, headers: headers);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw HttpException('HTTP ${response.statusCode}');
+      }
+      final decoded = _decodeJsonObject(response, label);
+      _requireBiliSuccess(decoded, label);
+      return _CapturedResponse(response: response, json: decoded);
+    }
     return getJson(uri, label);
   }
 
@@ -158,6 +168,23 @@ Future<void> main(List<String> args) async {
         _requireUserCard(userCard.json, 'user card');
         saveResponse('testing/user_card.json', userCard);
         print('User card fixture fetched successfully.');
+      }
+      return;
+    }
+
+    if (Platform.environment['CAPTURE_BANGUMI_SEASON_ONLY'] == '1') {
+      if (!shouldFetch('testing/bangumi_season.json')) {
+        skipNote('testing/bangumi_season.json');
+      } else {
+        final bangumiSeason = await getJson(
+          Uri.https('api.bilibili.com', '/pgc/view/web/season', {
+            'season_id': '28800',
+          }),
+          'bangumi season',
+        );
+        _requireBangumiSeason(bangumiSeason.json, 'bangumi season');
+        saveResponse('testing/bangumi_season.json', bangumiSeason);
+        print('Bangumi season fixture fetched successfully.');
       }
       return;
     }
@@ -432,6 +459,20 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/user_articles.json', userArticles);
     }
 
+    // 15. Bangumi Season
+    if (!shouldFetch('testing/bangumi_season.json')) {
+      skipNote('testing/bangumi_season.json');
+    } else {
+      final bangumiSeason = await getJson(
+        Uri.https('api.bilibili.com', '/pgc/view/web/season', {
+          'season_id': '28800',
+        }),
+        'bangumi season',
+      );
+      _requireBangumiSeason(bangumiSeason.json, 'bangumi season');
+      saveResponse('testing/bangumi_season.json', bangumiSeason);
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -664,5 +705,24 @@ void _requireUserArticles(Map<String, dynamic> json, String label) {
     }
   } on Object catch (error) {
     throw FormatException('$label is not a parsable user articles: $error');
+  }
+}
+
+void _requireBangumiSeason(Map<String, dynamic> json, String label) {
+  final result = json['result'];
+  if (result is! Map) {
+    throw FormatException('$label result is not an object');
+  }
+  final episodes = result['episodes'];
+  if (episodes is! List || episodes.isEmpty) {
+    throw FormatException('$label result.episodes is not a non-empty list');
+  }
+  final hasEpisode = episodes.any((item) {
+    if (item is! Map) return false;
+    final epId = item['ep_id'] ?? item['id'];
+    return epId is int;
+  });
+  if (!hasEpisode) {
+    throw FormatException('$label has no episode with ep_id or id');
   }
 }
