@@ -152,6 +152,30 @@ void main() {
         expect(page.data, isNotEmpty);
         expect(page.data.first.authorName, isNotEmpty);
       });
+
+      test('getVideoDetail sanitizes control characters and returns Result.error for empty ID', () async {
+        final sanitizedResult = await detailDataSource.getVideoDetail(
+          'BV1GJ411x7vy\r\n\x00',
+        );
+        expect(sanitizedResult.isOk, isTrue);
+
+        final emptyResult = await detailDataSource.getVideoDetail(
+          '  \r\n\x00 ',
+        );
+        expect(emptyResult.isError, isTrue);
+      });
+
+      test('getVideoComments sanitizes control characters and returns Result.error for empty ID', () async {
+        final sanitizedResult = await commentDataSource.getVideoComments(
+          'BV1GJ411x7vy\r\n\x00',
+        );
+        expect(sanitizedResult.isOk, isTrue);
+
+        final emptyResult = await commentDataSource.getVideoComments(
+          '  \r\n\x00 ',
+        );
+        expect(emptyResult.isError, isTrue);
+      });
     },
   );
 }

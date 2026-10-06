@@ -77,3 +77,9 @@ Prevention: Always sanitize control characters (`[\x00-\x1F\x7F]`) and trim sear
 Vulnerability: Bilibili search remote data sources (`BiliVideoSearchRemoteDataSource`, `BiliCreatorProfileSearchRemoteDataSource`, `BiliLiveRoomSearchRemoteDataSource`, and `BiliAggregateSearchRemoteDataSource`) passed raw search `query` parameters containing non-printable control characters (`\r\n`, `\x00`, `\x1F`, `\x7F`) directly to network API services, and executed remote network calls for empty or whitespace-only search queries.
 Learning: Remote search data sources must strip non-printable ASCII control characters and return empty `Page` or `AggregateSearchPage` results immediately for blank or control-character-only search inputs to prevent CRLF query injection and redundant network requests.
 Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and short-circuit empty queries with an empty result `Page` before calling backend search APIs.
+
+## 2026-09-29 - Sanitize Control Characters and Validate Video IDs in Bilibili Remote Data Sources
+
+Vulnerability: `BiliVideoDetailRemoteDataSource`, `BiliVideoCommentRemoteDataSource`, and `BiliMediaStreamRemoteDataSource` passed raw `videoId` / `id` parameters containing non-printable ASCII control characters (`\r\n`, `\x00`, `\x1f`, `\x7f`) or empty strings directly to Bilibili network API calls (`getVideoDetail`, `getReplyList`, `getPlayUrl`), risking parameter corruption and redundant network requests.
+Learning: Video ID parameters sourced from deep links, routes, or user navigation must be sanitized at the remote data source boundary to prevent CRLF parameter injection and fail fast on blank inputs.
+Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and trim video ID parameters, returning `Result.error` fast for empty or whitespace-only inputs.
