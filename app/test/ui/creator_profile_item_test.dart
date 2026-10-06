@@ -42,4 +42,27 @@ void main() {
       await clearImageCacheDuringTest(tester);
     },
   );
+
+  testWidgets(
+    'CreatorProfileItem handles untapped/null onTap gracefully without throwing',
+    (WidgetTester tester) async {
+      const creator = CreatorProfile(id: '188339', name: 'CodeCraft');
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 320,
+              height: 80,
+              child: CreatorProfileItem(creatorProfile: creator),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('CodeCraft, @188339'), findsOneWidget);
+      await tester.tap(find.byType(CreatorProfileItem));
+      await tester.pumpAndSettle();
+    },
+  );
 }

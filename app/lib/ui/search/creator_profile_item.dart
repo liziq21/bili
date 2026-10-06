@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../main.dart';
@@ -24,6 +25,7 @@ class const CreatorProfileItem({
     final semanticLabel = '${creatorProfile.name}, @${creatorProfile.id}';
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Tooltip(
         message: creatorProfile.name,
         child: Semantics(
@@ -32,7 +34,12 @@ class const CreatorProfileItem({
           label: semanticLabel,
           excludeSemantics: true,
           child: InkWell(
-            onTap: onTap,
+            onTap: onTap != null
+                ? () {
+                    HapticFeedback.lightImpact();
+                    onTap!();
+                  }
+                : null,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Row(
