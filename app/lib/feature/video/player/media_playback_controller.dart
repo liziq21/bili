@@ -29,7 +29,28 @@ class PlaybackState({
   /// 不代表一定能播下去。错误一经产生就保持到下次 [MediaPlaybackController.open]，
   /// 不被后续位置、时长等状态更新冲掉。
   final String? error,
+
+  /// 队列长度。未打开队列时为 0。
+  final int queueLength = 0,
+
+  /// 队列里正在播放的序号，没有队列时为 0。
+  final int currentIndex = 0,
+
+  /// 队列播放模式，无队列时为 [PlaybackQueueMode.none]。
+  final PlaybackQueueMode queueMode = PlaybackQueueMode.none,
 });
+
+/// 队列播放模式，语义对齐播放器库的 [PlaylistMode]。
+enum PlaybackQueueMode() {
+  /// 播完队列即停。
+  none,
+
+  /// 单条循环。
+  single,
+
+  /// 整队列循环。
+  loop,
+}
 
 extension on PlaybackState {
   /// 复制本状态，未显式给出的字段沿用原值。
@@ -39,6 +60,9 @@ extension on PlaybackState {
     Duration? position,
     Duration? duration,
     String? error,
+    int? queueLength,
+    int? currentIndex,
+    PlaybackQueueMode? queueMode,
   }) {
     return PlaybackState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -46,6 +70,9 @@ extension on PlaybackState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       error: error ?? this.error,
+      queueLength: queueLength ?? this.queueLength,
+      currentIndex: currentIndex ?? this.currentIndex,
+      queueMode: queueMode ?? this.queueMode,
     );
   }
 }
@@ -143,6 +170,75 @@ class MediaPlaybackController([
   /// 播放器库的量程是 0 到 100，此处对外用 0 到 1 并在转发前换算。
   Future<void> setVolume(double volume) => _player.setVolume(volume * 100);
 
+  /// 打开一个播放队列并从头（或指定序号）开始播放。
+  ///
+  /// 每条 [MediaStream] 各自拼成 EDL 虚拟媒体，互不干扰。队列为空时
+  /// 交给播放器库的空 [Playlist] 不会播放任何内容。
+  Future<void> openQueue(List<MediaStream> streams, {int index = 0}) async {
+    _subscribe();
+    _isPlaying = false;
+    _isBuffering = false;
+    _emit(_initialPlaybackState());
+    await _player.open(
+      Playlist(
+        streams
+            .map(
+              (stream) =>
+                  Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
+            )
+            .toList(),
+        index: index,
+      ),
+    );
+  }
+
+  /// 追加一条媒体到队列末尾。
+  Future<void> addToQueue(MediaStream stream) =>
+      _player.add(Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers));
+
+  /// 移除队列中指定序号的条目。
+  Future<void> removeFromQueue(int index) => _player.remove(index);
+
+  /// 移动队列条目：把 [from] 挪到 [to] 的位置。
+  Future<void> moveQueueItem(int from, int to) => _player.move(from, to);
+
+  /// 跳到队列的下一首。
+  Future<void> next() => _player.next();
+
+  /// 跳到队列的上一首。
+  Future<void> previous() => _player.previous();
+
+  /// 跳到队列中指定序号的条目。
+  Future<void> jumpTo(int index) => _player.jump(index);
+
+  /// 设置队列播放模式。
+  Future<void> setQueueMode(PlaybackQueueMode mode) =>
+      _player.setPlaylistMode(_playlistModeOf(mode));
+
+  /// 队列播放模式 → 播放器库枚举。
+  PlaylistMode _playlistModeOf(PlaybackQueueMode mode) {
+    switch (mode) {
+      case PlaybackQueueMode.none:
+        return PlaylistMode.none;
+      case PlaybackQueueMode.single:
+        return PlaylistMode.single;
+      case PlaybackQueueMode.loop:
+        return PlaylistMode.loop;
+    }
+  }
+
+  /// 播放器库枚举 → 队列播放模式。
+  PlaybackQueueMode _queueModeOf(PlaylistMode mode) {
+    switch (mode) {
+      case PlaylistMode.none:
+        return PlaybackQueueMode.none;
+      case PlaylistMode.single:
+        return PlaybackQueueMode.single;
+      case PlaylistMode.loop:
+        return PlaybackQueueMode.loop;
+    }
+  }
+
   /// 释放原生播放器资源。
   Future<void> dispose() async {
     for (final subscription in _subscriptions) {
@@ -177,6 +273,17 @@ class MediaPlaybackController([
       }),
       _player.stream.error.listen((error) {
         _emit(_state.copyWith(error: error));
+      }),
+      _player.stream.playlist.listen((playlist) {
+        _emit(
+          _state.copyWith(
+            queueLength: playlist.medias.length,
+            currentIndex: playlist.index,
+          ),
+        );
+      }),
+      _player.stream.playlistMode.listen((mode) {
+        _emit(_state.copyWith(queueMode: _queueModeOf(mode)));
       }),
     ]);
   }

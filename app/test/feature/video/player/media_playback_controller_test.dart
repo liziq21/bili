@@ -99,6 +99,24 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// 投喂播放错误。
   void emitError(String value) => _error.add(value);
 
+  /// 投喂队列变化。
+  void emitPlaylist(Playlist value) => _playlist.add(value);
+
+  /// 投喂队列模式变化。
+  void emitPlaylistMode(PlaylistMode value) => _playlistMode.add(value);
+
+  /// 记录收到的队列。
+  final List<Playlist> openedPlaylists = [];
+
+  /// 记录收到的跳转、追加、移除、移动、模式设置调用。
+  final List<int> nextCalls = [];
+  final List<int> previousCalls = [];
+  final List<int> jumpCalls = [];
+  final List<Media> addedMedias = [];
+  final List<int> removedIndexes = [];
+  final List<({int from, int to})> movedItems = [];
+  final List<PlaylistMode> setPlaylistModeCalls = [];
+
   @override
   Future<void> open(
     Playable playable, {
@@ -108,6 +126,12 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     if (playable is Media) {
       openedUris.add(playable.uri);
       openedHeaders.add(playable.httpHeaders ?? const {});
+    } else if (playable is Playlist) {
+      openedPlaylists.add(playable);
+      for (final media in playable.medias) {
+        openedUris.add(media.uri);
+        openedHeaders.add(media.httpHeaders ?? const {});
+      }
     }
   }
 
@@ -115,6 +139,29 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   Future<void> setVolume(double volume, {bool synchronized = true}) async {
     volumeCalls.add(volume);
   }
+
+  @override
+  Future<void> next() async => nextCalls.add(0);
+
+  @override
+  Future<void> previous() async => previousCalls.add(0);
+
+  @override
+  Future<void> jump(int index) async => jumpCalls.add(index);
+
+  @override
+  Future<void> add(Media media) async => addedMedias.add(media);
+
+  @override
+  Future<void> remove(int index) async => removedIndexes.add(index);
+
+  @override
+  Future<void> move(int from, int to) async =>
+      movedItems.add((from: from, to: to));
+
+  @override
+  Future<void> setPlaylistMode(PlaylistMode mode) async =>
+      setPlaylistModeCalls.add(mode);
 
   @override
   Future<void> dispose() async {
@@ -335,6 +382,137 @@ void main() {
       await controller.setVolume(0);
 
       expect(fake.volumeCalls, [100.0, 50.0, 0.0]);
+    });
+  });
+
+  group('MediaPlaybackController.openQueue', () {
+    test(
+      'builds an EDL media per queue item and keeps the given order',
+      () async {
+        await controller.openQueue([
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/1v.m4s',
+            audioUrl: 'https://cdn.example.com/1a.m4s',
+            headers: {'Referer': 'https://www.bilibili.com'},
+          ),
+          MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+        ]);
+
+        expect(fake.openedPlaylists, hasLength(1));
+        expect(fake.openedPlaylists.single.medias, hasLength(2));
+        expect(fake.openedPlaylists.single.index, 0);
+        // 每条队列项各自拼成 EDL，互不串扰。
+        for (final uri in fake.openedUris) {
+          expect(uri, startsWith('edl://'));
+          expect(uri, isNot(contains('\n')));
+        }
+        // 队列项的请求头随各自媒体下发，不共用。
+        expect(fake.openedHeaders[0]['Referer'], 'https://www.bilibili.com');
+        expect(fake.openedHeaders[1], isEmpty);
+      },
+    );
+
+    test('passes the requested starting index to the player', () async {
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      ], index: 1);
+
+      expect(fake.openedPlaylists.single.index, 1);
+    });
+
+    test(
+      'playlist updates surface as queue length and current index',
+      () async {
+        await controller.openQueue([
+          MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+          MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+        ]);
+        fake.emitPlaylist(
+          Playlist([
+            Media('https://cdn.example.com/1.m4s'),
+            Media('https://cdn.example.com/2.m4s'),
+          ], index: 0),
+        );
+        await pumpEventQueue();
+        expect(recorder.last.queueLength, 2);
+        expect(recorder.last.currentIndex, 0);
+
+        // 播放器把指针挪到第三条：长度与序号都从 playlist 流流出。
+        fake.emitPlaylist(
+          Playlist([
+            Media('https://cdn.example.com/1.m4s'),
+            Media('https://cdn.example.com/2.m4s'),
+            Media('https://cdn.example.com/3.m4s'),
+          ], index: 2),
+        );
+        await pumpEventQueue();
+
+        expect(recorder.last.queueLength, 3);
+        expect(recorder.last.currentIndex, 2);
+      },
+    );
+  });
+
+  group('MediaPlaybackController queue edits', () {
+    test('addToQueue forwards an EDL media with its own headers', () async {
+      await controller.addToQueue(
+        MediaStream(
+          videoUrl: 'https://cdn.example.com/v.m4s',
+          headers: {'Referer': 'https://www.bilibili.com'},
+        ),
+      );
+
+      expect(fake.addedMedias, hasLength(1));
+      expect(fake.addedMedias.single.uri, startsWith('edl://'));
+      expect(
+        fake.addedMedias.single.httpHeaders?['Referer'],
+        'https://www.bilibili.com',
+      );
+    });
+
+    test(
+      'removeFromQueue, moveQueueItem and jumps forward the indexes',
+      () async {
+        await controller.removeFromQueue(2);
+        await controller.moveQueueItem(0, 1);
+        await controller.jumpTo(3);
+        await controller.next();
+        await controller.previous();
+
+        expect(fake.removedIndexes, [2]);
+        expect(fake.movedItems, [(from: 0, to: 1)]);
+        expect(fake.jumpCalls, [3]);
+        expect(fake.nextCalls, hasLength(1));
+        expect(fake.previousCalls, hasLength(1));
+      },
+    );
+  });
+
+  group('MediaPlaybackController.setQueueMode', () {
+    test('maps the public enum onto the library playlist mode', () async {
+      await controller.setQueueMode(PlaybackQueueMode.single);
+      await controller.setQueueMode(PlaybackQueueMode.loop);
+      await controller.setQueueMode(PlaybackQueueMode.none);
+
+      expect(fake.setPlaylistModeCalls, [
+        PlaylistMode.single,
+        PlaylistMode.loop,
+        PlaylistMode.none,
+      ]);
+    });
+
+    test('playlist mode updates surface as the public enum', () async {
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      ]);
+      fake.emitPlaylistMode(PlaylistMode.loop);
+      await pumpEventQueue();
+      expect(recorder.last.queueMode, PlaybackQueueMode.loop);
+
+      fake.emitPlaylistMode(PlaylistMode.single);
+      await pumpEventQueue();
+      expect(recorder.last.queueMode, PlaybackQueueMode.single);
     });
   });
 }
