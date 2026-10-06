@@ -12,12 +12,7 @@ NetworkBiliUserArticlesData _$NetworkBiliUserArticlesDataFromJson(
   final val = NetworkBiliUserArticlesData(
     articles: $checkedConvert(
       'articles',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) =>
-                NetworkBiliUserArticleItem.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
+      (v) => const NetworkBiliArticleListConverter().fromJson(v),
     ),
     pn: $checkedConvert(
       'pn',
@@ -43,7 +38,7 @@ NetworkBiliUserArticleItem _$NetworkBiliUserArticleItemFromJson(
   ($checkedConvert) {
     final val = NetworkBiliUserArticleItem(
       id: $checkedConvert('id', (v) => (v as num).toInt()),
-      title: $checkedConvert('title', (v) => v as String),
+      title: $checkedConvert('title', (v) => v as String?),
       summary: $checkedConvert('summary', (v) => v as String?),
       bannerUrl: $checkedConvert('banner_url', (v) => v as String?),
       publishTime: $checkedConvert(

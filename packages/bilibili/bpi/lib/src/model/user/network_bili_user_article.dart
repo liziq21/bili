@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../converter/int_or_string_converter.dart';
+import '../../converter/network_bili_article_list_converter.dart';
 
 part 'network_bili_user_article.g.dart';
 
@@ -13,6 +14,7 @@ class NetworkBiliUserArticlesData {
     this.count,
   });
 
+  @NetworkBiliArticleListConverter()
   final List<NetworkBiliUserArticleItem>? articles;
   @NullableIntOrStringConverter()
   final int? pn;
@@ -29,7 +31,7 @@ class NetworkBiliUserArticlesData {
 class NetworkBiliUserArticleItem {
   const NetworkBiliUserArticleItem({
     required this.id,
-    required this.title,
+    this.title,
     this.summary,
     this.bannerUrl,
     this.publishTime,
@@ -39,7 +41,7 @@ class NetworkBiliUserArticleItem {
   });
 
   final int id;
-  final String title;
+  final String? title;
   final String? summary;
   final String? bannerUrl;
   @NullableIntOrStringConverter()
