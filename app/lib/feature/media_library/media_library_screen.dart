@@ -59,17 +59,30 @@ class const MediaLibraryScreen({
             style: $styles.text.h3.copyWith(color: colorScheme.onSurface),
           ),
           SizedBox(height: $styles.insets.sm),
-          BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
-            builder: (context, state) {
+          // ⚡ Bolt Optimization: Isolate header bar status text and load button rebuilds using BlocSelector.
+          // Extracting (itemCount, hasError, isLoading, hasMore) into fine-grained selectors ensures
+          // header UI only rebuilds when status flags change, saving unnecessary layout passes.
+          BlocSelector<
+            MediaHistoryCubit,
+            MediaHistoryState,
+            ({int itemCount, bool hasError, bool isLoading, bool hasMore})
+          >(
+            selector: (state) => (
+              itemCount: state.items.length,
+              hasError: state.error != null,
+              isLoading: state.isLoading,
+              hasMore: state.hasMore,
+            ),
+            builder: (context, headerState) {
               // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
               // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
-              final label = state.items.isEmpty
+              final label = headerState.itemCount == 0
                   ? '观看历史'
-                  : '观看历史 · 已载入 ${state.items.length} 条';
+                  : '观看历史 · 已载入 ${headerState.itemCount} 条';
 
               // 出错且已经有条目时不整页替换：列表内容比错误更该被看见，
               // 但错误不能因此消失，所以在这里补一条。
-              if (state.error != null && state.items.isNotEmpty) {
+              if (headerState.hasError && headerState.itemCount > 0) {
                 return Row(
                   children: [
                     Expanded(
@@ -106,13 +119,13 @@ class const MediaLibraryScreen({
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   TextButton(
-                    onPressed: state.hasMore && !state.isLoading
+                    onPressed: headerState.hasMore && !headerState.isLoading
                         ? () {
                             HapticFeedback.lightImpact();
                             context.read<MediaHistoryCubit>().loadMore();
                           }
                         : null,
-                    child: Text(state.hasMore ? '加载更多' : '没有更多了'),
+                    child: Text(headerState.hasMore ? '加载更多' : '没有更多了'),
                   ),
                 ],
               );
@@ -132,16 +145,28 @@ class const _HistoryList({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MediaHistoryCubit, MediaHistoryState>(
-      builder: (context, state) {
-        if (state.isLoading && state.items.isEmpty) {
+    // ⚡ Bolt Optimization: Replace broad BlocBuilder with BlocSelector for non-content states (loading, error, empty).
+    // When items are present, history rows are rendered via context.select in _HistoryRowsContent,
+    // avoiding top-level list container rebuilds when unrelated state fields (e.g., error string changes) occur.
+    return BlocSelector<
+      MediaHistoryCubit,
+      MediaHistoryState,
+      ({bool isLoading, bool hasError, bool isEmpty})
+    >(
+      selector: (state) => (
+        isLoading: state.isLoading,
+        hasError: state.error != null,
+        isEmpty: state.items.isEmpty,
+      ),
+      builder: (context, listState) {
+        if (listState.isLoading && listState.isEmpty) {
           return const SliverFillRemaining(
             hasScrollBody: false,
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (state.error != null && state.items.isEmpty) {
+        if (listState.hasError && listState.isEmpty) {
           return SliverFillRemaining(
             hasScrollBody: false,
             child: _Message(
@@ -153,16 +178,29 @@ class const _HistoryList({
           );
         }
 
-        if (state.items.isEmpty) {
+        if (listState.isEmpty) {
           return const SliverFillRemaining(
             hasScrollBody: false,
             child: _Message(icon: Icons.history_rounded, message: '还没有观看记录'),
           );
         }
 
-        return _HistoryRows(items: state.items, onVideoTap: onVideoTap);
+        return _HistoryRowsContent(onVideoTap: onVideoTap);
       },
     );
+  }
+}
+
+/// Content wrapper that selects items list specifically to isolate list row rebuilding.
+class const _HistoryRowsContent({
+  required final void Function(MediaHistoryItem item) onVideoTap,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final items = context.select<MediaHistoryCubit, List<MediaHistoryItem>>(
+      (cubit) => cubit.state.items,
+    );
+    return _HistoryRows(items: items, onVideoTap: onVideoTap);
   }
 }
 
