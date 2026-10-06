@@ -74,18 +74,26 @@ abstract class const VideoDetailRemoteDataSource() extends RemoteDataSource {
   Future<Result<VideoDetail>> getVideoDetail(String id);
 
   /// 切换点赞状态
+  ///
+  /// 默认实现报失败而非回一个看似成功的翻转值：本能力是可选的，数据源未实现时
+  /// 「操作已生效」是假的，调用方（VideoBloc）会据此回滚乐观更新并提示用户。
+  /// 实现该能力的数据源覆写本方法。
   Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      Result.ok(!isLiked);
+      Result.error(Exception('当前数据源不支持点赞'));
 
   /// 切换收藏状态
+  ///
+  /// 覆写理由同 [toggleLike]。
   Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.ok(!isFavorited);
+      Result.error(Exception('当前数据源不支持收藏'));
 
   /// 切换关注创作者状态
+  ///
+  /// 覆写理由同 [toggleLike]。
   Future<Result<bool>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
-  ) async => Result.ok(!isSubscribed);
+  ) async => Result.error(Exception('当前数据源不支持关注创作者'));
 }
 
 /// 媒体流可选能力接口

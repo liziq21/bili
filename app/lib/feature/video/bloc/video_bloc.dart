@@ -54,7 +54,20 @@ class VideoBloc({required final VideoDetailRepository _repository})
     );
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleLike(detail.video.id, updatedDetail.isLiked);
+
+    final result = await _repository.toggleLike(
+      detail.video.id,
+      updatedDetail.isLiked,
+    );
+    // 乐观更新已经上屏，写失败必须回滚：否则界面停在一个从未被持久化的状态上，
+    // 且没有任何迹象告诉用户它没生效。
+    switch (result) {
+      case Ok():
+        break;
+      case Error(:final error):
+        _log.warning('Failed to toggle like', error);
+        emit(state.copyWith(videoDetail: detail, actionError: '点赞失败'));
+    }
   }
 
   Future<void> _onToggleVideoFavorite(
@@ -74,10 +87,19 @@ class VideoBloc({required final VideoDetailRepository _repository})
     );
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleFavorite(
+
+    final result = await _repository.toggleFavorite(
       detail.video.id,
       updatedDetail.isFavorited,
     );
+    // 回滚理由同 _onToggleVideoLike
+    switch (result) {
+      case Ok():
+        break;
+      case Error(:final error):
+        _log.warning('Failed to toggle favorite', error);
+        emit(state.copyWith(videoDetail: detail, actionError: '收藏失败'));
+    }
   }
 
   Future<void> _onToggleCreatorSubscribe(
@@ -91,9 +113,18 @@ class VideoBloc({required final VideoDetailRepository _repository})
     final updatedDetail = detail.copyWith(isSubscribed: newIsSubscribed);
 
     emit(state.copyWith(videoDetail: updatedDetail));
-    await _repository.toggleSubscribe(
+
+    final result = await _repository.toggleSubscribe(
       detail.creator!.id,
       updatedDetail.isSubscribed,
     );
+    // 回滚理由同 _onToggleVideoLike
+    switch (result) {
+      case Ok():
+        break;
+      case Error(:final error):
+        _log.warning('Failed to toggle subscribe', error);
+        emit(state.copyWith(videoDetail: detail, actionError: '关注失败'));
+    }
   }
 }

@@ -56,6 +56,49 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   }
 }
 
+/// Loads a normal detail but reports every write as rejected, which is the
+/// case the toggle handlers currently swallow.
+class _RejectingVideoDetailRemoteDataSource
+    extends VideoDetailRemoteDataSource {
+  @override
+  String get sourceId => 'rejecting';
+
+  @override
+  Future<Result<VideoDetail>> getVideoDetail(String id) async {
+    final video = VideoModel(
+      id: id,
+      title: 'Test Video Title $id',
+      url: 'https://example.com/$id',
+    );
+    final creator = CreatorProfile(id: 'creator_1', name: 'Creator 1');
+    return Result.ok(
+      VideoDetail(
+        video: video,
+        creator: creator,
+        likeCount: 10,
+        favoriteCount: 5,
+        isLiked: false,
+        isFavorited: false,
+        isSubscribed: false,
+      ),
+    );
+  }
+
+  @override
+  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+      Result.error(Exception('rejected'));
+
+  @override
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.error(Exception('rejected'));
+
+  @override
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.error(Exception('rejected'));
+}
+
 class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
   @override
   String get sourceId => 'fake';
@@ -95,6 +138,21 @@ void main() {
 
     test('Initial state is correct', () {
       expect(videoBloc.state, const VideoState());
+    });
+
+    test('actionError participates in equality', () {
+      // Equatable 按 props 去重：actionError 若不在 props 里，两次相同的失败
+      // 会被判为同一个状态，BlocListener 的 listenWhen 收不到第二次变化，
+      // 用户连点两次点赞只会看到第一次的提示。
+      const base = VideoState();
+
+      expect(base, const VideoState());
+      expect(base, isNot(const VideoState(actionError: '点赞失败')));
+      // copyWith 对 actionError 是「无条件赋值」而非「null 保留」：不传即清空。
+      // 这是既有 error 字段的同一形态，bloc 的回滚 emit 每次都显式带上消息，
+      // 所以这里记录下来，避免后来者以为它是保留语义。
+      expect(base.copyWith(isLoading: true).actionError, isNull);
+      expect(base.copyWith(actionError: '点赞失败').actionError, '点赞失败');
     });
 
     test('LoadVideoDetail loads video detail successfully', () async {
@@ -236,6 +294,128 @@ void main() {
         final repoWithoutSource = AppVideoDetailRepository();
         final result = await repoWithoutSource.getVideoDetail('test_id');
         expect(result.isError, isTrue);
+      },
+    );
+
+    // A failed write must roll the optimistic update back. These handlers used
+    // to discard the `Result` the repository returned, so a rejected like left
+    // the button lit and the count inflated with nothing persisted and no
+    // message shown. They also used to report the failure through `error`, but
+    // that field drives the full-page "load failed" replacement in
+    // VideoInfoView; a write failure has to use `actionError` instead or the
+    // user is shown a load error for an action that succeeded in loading.
+    test(
+      'a failed ToggleVideoLike rolls back and reports actionError',
+      () async {
+        final rejecting = _RejectingVideoDetailRemoteDataSource();
+        final bloc = VideoBloc(repository: AppVideoDetailRepository(rejecting));
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('test_id'));
+        await bloc.stream.firstWhere((s) => !s.isLoading);
+        final loaded = bloc.state.videoDetail!;
+
+        bloc.add(const ToggleVideoLike());
+        // The optimistic state does land first, so a listener can react instantly.
+        await expectLater(
+          bloc.stream,
+          emits(predicate<VideoState>((s) => s.videoDetail!.isLiked == true)),
+        );
+
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(bloc.state.videoDetail!.isLiked, isFalse);
+        expect(bloc.state.videoDetail!.likeCount, loaded.likeCount);
+        expect(bloc.state.actionError, isNotNull);
+        // The load-failure channel must stay clean, or the whole detail page is
+        // replaced by "视频加载失败" for a failed like.
+        expect(bloc.state.error, isNull);
+      },
+    );
+
+    test(
+      'a failed ToggleVideoFavorite rolls back and reports actionError',
+      () async {
+        final rejecting = _RejectingVideoDetailRemoteDataSource();
+        final bloc = VideoBloc(repository: AppVideoDetailRepository(rejecting));
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('test_id'));
+        await bloc.stream.firstWhere((s) => !s.isLoading);
+        final loaded = bloc.state.videoDetail!;
+
+        bloc.add(const ToggleVideoFavorite());
+        await expectLater(
+          bloc.stream,
+          emits(
+            predicate<VideoState>((s) => s.videoDetail!.isFavorited == true),
+          ),
+        );
+
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(bloc.state.videoDetail!.isFavorited, isFalse);
+        expect(bloc.state.videoDetail!.favoriteCount, loaded.favoriteCount);
+        expect(bloc.state.actionError, isNotNull);
+        expect(bloc.state.error, isNull);
+      },
+    );
+
+    test(
+      'a failed ToggleCreatorSubscribe rolls back and reports actionError',
+      () async {
+        final rejecting = _RejectingVideoDetailRemoteDataSource();
+        final bloc = VideoBloc(repository: AppVideoDetailRepository(rejecting));
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('test_id'));
+        await bloc.stream.firstWhere((s) => !s.isLoading);
+
+        bloc.add(const ToggleCreatorSubscribe());
+        await expectLater(
+          bloc.stream,
+          emits(
+            predicate<VideoState>((s) => s.videoDetail!.isSubscribed == true),
+          ),
+        );
+
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(bloc.state.videoDetail!.isSubscribed, isFalse);
+        expect(bloc.state.actionError, isNotNull);
+        expect(bloc.state.error, isNull);
+      },
+    );
+
+    test(
+      'a rejected write clears the previous actionError on the next toggle',
+      () async {
+        final rejecting = _RejectingVideoDetailRemoteDataSource();
+        final bloc = VideoBloc(repository: AppVideoDetailRepository(rejecting));
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('test_id'));
+        await bloc.stream.firstWhere((s) => !s.isLoading);
+
+        bloc.add(const ToggleVideoLike());
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+        expect(bloc.state.actionError, isNotNull);
+
+        // The next optimistic emit must not carry the stale message forward,
+        // otherwise a later successful toggle still shows the old failure.
+        bloc.add(const ToggleVideoLike());
+        await expectLater(
+          bloc.stream,
+          emits(
+            predicate<VideoState>(
+              (s) => s.videoDetail!.isLiked == true && s.actionError == null,
+            ),
+          ),
+        );
       },
     );
   });
