@@ -142,6 +142,11 @@ const endpointSpecs = <EndpointSpec>[
     docCell: 'user_card.json',
   ),
   EndpointSpec(
+    method: 'getUserArticles',
+    fixtures: ['user_articles.json'],
+    docCell: 'user_articles.json',
+  ),
+  EndpointSpec(
     method: 'getVideoDetail',
     fixtures: ['video_detail.json'],
     docCell: 'video_detail.json',

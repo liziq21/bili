@@ -23,6 +23,7 @@ export 'src/model/video/network_bili_player_info.dart';
 export 'src/model/video/network_related_video.dart';
 export 'src/model/video/network_video_relation.dart';
 export 'src/model/user/network_bili_user_card.dart';
+export 'src/model/user/network_bili_user_article.dart';
 export 'src/model/video/video_detail_data.dart';
 export 'src/network_search_data_source.dart';
 export 'src/network_user_data_source.dart';

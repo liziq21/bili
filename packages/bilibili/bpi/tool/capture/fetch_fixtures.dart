@@ -130,6 +130,23 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_USER_ARTICLES_ONLY'] == '1') {
+      if (!shouldFetch('testing/user_articles.json')) {
+        skipNote('testing/user_articles.json');
+      } else {
+        final userArticles = await getJson(
+          Uri.parse(
+            'https://api.bilibili.com/x/space/article?mid=353840826&pn=1&ps=30',
+          ),
+          'user articles',
+        );
+        _requireUserArticles(userArticles.json, 'user articles');
+        saveResponse('testing/user_articles.json', userArticles);
+        print('User articles fixture fetched successfully.');
+      }
+      return;
+    }
+
     if (Platform.environment['CAPTURE_USER_CARD_ONLY'] == '1') {
       if (!shouldFetch('testing/user_card.json')) {
         skipNote('testing/user_card.json');
@@ -401,6 +418,20 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/user_card.json', userCard);
     }
 
+    // 14. User Articles
+    if (!shouldFetch('testing/user_articles.json')) {
+      skipNote('testing/user_articles.json');
+    } else {
+      final userArticles = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/space/article?mid=353840826&pn=1&ps=30',
+        ),
+        'user articles',
+      );
+      _requireUserArticles(userArticles.json, 'user articles');
+      saveResponse('testing/user_articles.json', userArticles);
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -617,4 +648,21 @@ void _requireUserCard(Map<String, dynamic> json, String label) {
   // 直接解析 DTO 覆盖全部已声明字段的类型：逐字段手写断言覆盖不全，
   // 类型错误的字段会在此抛错，而不是写进 fixture 后才被 fixture 测试发现。
   NetworkBiliUserCardData.fromJson(data);
+}
+
+void _requireUserArticles(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  try {
+    final articlesData = NetworkBiliUserArticlesData.fromJson(data);
+    final articles = articlesData.articles;
+    if (articles == null || articles.isEmpty) {
+      throw const FormatException('data.articles is not a non-empty list');
+    }
+    final hasValidArticle = articles.any((article) => article.id > 0);
+    if (!hasValidArticle) {
+      throw const FormatException('data.articles has no article with valid id');
+    }
+  } on Object catch (error) {
+    throw FormatException('$label is not a parsable user articles: $error');
+  }
 }
