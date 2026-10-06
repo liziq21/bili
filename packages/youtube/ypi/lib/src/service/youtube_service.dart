@@ -297,6 +297,23 @@ final class YoutubeService {
     );
   }
 
+  /// Fetches the home feed (recommendations), or the next page of it.
+  ///
+  /// Pass a [continuation] from a previous response to page through the feed.
+  Future<NetworkYouTubeBrowseResponse> browseHomeFeed({
+    String? continuation,
+  }) async {
+    final body = <String, dynamic>{};
+    if (continuation != null && continuation.isNotEmpty) {
+      body['continuation'] = continuation;
+    } else {
+      body['browseId'] = 'FEwhat_to_watch';
+    }
+
+    final response = await _send(_api.browse, body);
+    return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
+  }
+
   /// Runs an InnerTube POST against a path that takes the shared client body.
   Future<Response<Map<String, dynamic>>> _send(
     Future<Response<Map<String, dynamic>>> Function(Map<String, dynamic>) call,

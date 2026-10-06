@@ -11,6 +11,13 @@ void main() {
     return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
   }
 
+  test('parses the real home feed fixture', () {
+    final response = NetworkYouTubeBrowseResponse.fromJson(
+      loadFixtureMap('home_feed.json'),
+    );
+    expect(response.responseContext, isNotNull);
+  });
+
   test('parses the real video search fixture into typed renderers', () {
     final response = NetworkYouTubeVideoSearchResponse.fromJson(
       loadFixtureMap('search_video.json'),
