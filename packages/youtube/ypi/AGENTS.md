@@ -22,7 +22,7 @@
 | 视频评论 | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；使用 Watch Next 返回的 comment continuation token 请求，评论条目以 `commentThreadRenderer` / `commentViewModel` 返回 | [PipePipe / InnerPipe 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/comments.json` | 2026-10-03 |
 | 视频 Player 播放器 | `POST https://www.youtube.com/youtubei/v1/player` | InnerTube client context；当前实现不要求登录；包含视频基本信息 `videoDetails`、播放状态 `playabilityStatus` 及媒体流格式 `streamingData` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/player.json`（`videoId=dQw4w9WgXcQ`） | 尚无成功响应 fixture；现存 fixture 为 `UNPLAYABLE` 业务失败响应、无 `streamingData`，待重抓 |
 | 搜索建议 | `GET https://suggestqueries.google.com/complete/search` | 公共请求 | [Google Suggest](https://suggestqueries.google.com/complete/search) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录 |
-| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；使用 `browseId=FEwhat_to_watch` 请求推荐 feed | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/home_feed.json` | 2026-10-04 |
+| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；**登录门控**：匿名 session 返回 200 但只有 `feedNudgeRenderer`（提示先搜索/观看以生成推荐），无 `videoRenderer` / `gridVideoRenderer`；当前项目不实现登录，该端点实际不可用 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/home_feed.json`（匿名空 feed） | 2026-10-04 |
 | 独立 Trending | 不作为实现依据 | 社区报告旧 `FEtrending` 不稳定/退役，尚未验证，不注册 | [InnerTube 使用说明](https://github.com/tombulled/innertube) | 不适用 | 未验证 |
 
 不得使用第三方聚合 API 或抓取服务作为运行时数据源；社区实现只能作为请求格式参考，不能替代本包的实测 fixture。

@@ -46,6 +46,46 @@ void main() {
     expect(articlesData.articles, isNull);
   });
 
+  test(
+    'skips articles missing the core id instead of failing the whole page',
+    () {
+      final data = {
+        'pn': '1',
+        'ps': '30',
+        'count': '3',
+        'articles': [
+          {'id': 53109096, 'title': '正常文章'},
+          // 缺核心标识 id 的坏条目：必须被跳过，不能让整页解析失败。
+          {'title': '无 id 的坏条目'},
+          {'id': 53109097, 'title': '另一篇正常文章'},
+        ],
+      };
+
+      final articlesData = NetworkBiliUserArticlesData.fromJson(data);
+
+      expect(articlesData.articles, hasLength(2));
+      expect(articlesData.articles!.map((a) => a.id), [53109096, 53109097]);
+    },
+  );
+
+  test('tolerates an article missing the non-core title', () {
+    final data = {
+      'pn': '1',
+      'ps': '30',
+      'count': '1',
+      'articles': [
+        // id 是核心标识必须存在；title 缺失读为 null，不丢弃该条目。
+        {'id': 53109096},
+      ],
+    };
+
+    final articlesData = NetworkBiliUserArticlesData.fromJson(data);
+
+    expect(articlesData.articles, hasLength(1));
+    expect(articlesData.articles!.single.id, equals(53109096));
+    expect(articlesData.articles!.single.title, isNull);
+  });
+
   group('BiliNetworkSearch.getUserArticles', () {
     test(
       'sends mid, page, and pageSize parameters and parses the response',
