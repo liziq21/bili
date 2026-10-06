@@ -1,7 +1,5 @@
 import 'package:app/feature/search/app_search_anchor.dart';
 import 'package:app/routing/router.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 // 必须用 material_ui 而不是 flutter/material：SearchAnchor 内部查找的是
 // material_ui 自己的 MaterialLocalizations 类型。与 app_search_anchor_test.dart

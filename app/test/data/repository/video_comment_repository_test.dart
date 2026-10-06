@@ -3,7 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
-class _RecordingVideoCommentRemoteDataSource
+class _RecordingVideoCommentRemoteDataSource()
     extends VideoCommentRemoteDataSource {
   @override
   String get sourceId => 'recording';

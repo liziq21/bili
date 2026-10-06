@@ -58,7 +58,7 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
 
 /// Loads a normal detail but reports every write as rejected, which is the
 /// case the toggle handlers currently swallow.
-class _RejectingVideoDetailRemoteDataSource
+class _RejectingVideoDetailRemoteDataSource()
     extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'rejecting';

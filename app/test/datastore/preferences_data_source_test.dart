@@ -8,7 +8,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 
 /// 聚合 [PreferencesKey.sourceId] 与 [PreferencesKey.themeConfig] 两个 key，
 /// 用于验证 streamOfSet 的聚合语义。
-class _SourceAndThemeSet implements PreferencesKeySet<String> {
+class _SourceAndThemeSet() implements PreferencesKeySet<String> {
   @override
   List<PreferencesKey<Object?>> get keys => [
     PreferencesKey.sourceId,

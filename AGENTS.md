@@ -33,6 +33,7 @@ Before writing or modifying code in this repository, read the specification file
 | Add or modify a package under `packages/` | `packages/AGENTS.md` + the relevant sub-package `AGENTS.md` |
 | Add a new API endpoint or DTO in `bpi` or `ypi` | The corresponding sub-package `AGENTS.md` (API 子包通用规范 section) |
 | Write a test (unit, widget, or golden) | Root `AGENTS.md` (Testing section) + the test's layer file |
+| Use the Dart MCP server (code navigation, analysis, pub) | `app/AGENTS.md` (Dart MCP Server section) |
 | Change CI workflow or golden baselines | `.github/workflows/ci.yml` + `.github/workflows/rerecord-goldens.yml` |
 | Dispatch a task to an external coding agent | `docs/postmortems/README.md` — check the past incidents for deadlocks between `AGENTS.md` rules and what CI can actually do before writing the brief |
 | Bump the app version or cut a release | The Release section below |

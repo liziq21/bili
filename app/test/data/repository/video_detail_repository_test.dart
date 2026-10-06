@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
 /// A data source whose reads always fail.
-class _FailingVideoDetailRemoteDataSource extends VideoDetailRemoteDataSource {
+class _FailingVideoDetailRemoteDataSource()
+    extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'failing';
 
@@ -29,7 +30,7 @@ class _FailingVideoDetailRemoteDataSource extends VideoDetailRemoteDataSource {
 
 /// A data source whose toggles succeed but can be told to report `false`,
 /// which is how a "the server rejected this" outcome reaches the repository.
-class _ControllableVideoDetailRemoteDataSource
+class _ControllableVideoDetailRemoteDataSource()
     extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'controllable';

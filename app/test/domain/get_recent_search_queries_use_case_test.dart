@@ -9,16 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// The repository is an `abstract class` and this package has no mocking
 /// library, so the fake implements it directly.
-class _RecordingRecentSearchQueryRepository
+class _RecordingRecentSearchQueryRepository()
     implements RecentSearchQueryRepository {
   final requestedLimits = <int>[];
-  final StreamController<List<RecentSearchQuery>> controller =
-      StreamController<List<RecentSearchQuery>>.broadcast();
 
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) {
     requestedLimits.add(limit);
-    return controller.stream;
+    return const Stream<List<RecentSearchQuery>>.empty();
   }
 
   @override
@@ -42,10 +40,6 @@ void main() {
       useCase = GetRecentSearchQueriesUseCase(
         recentSearchQueryRepository: repository,
       );
-    });
-
-    tearDown(() async {
-      await repository.controller.close();
     });
 
     test('defaults to ten entries when no limit is given', () {

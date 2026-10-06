@@ -8,11 +8,9 @@ import 'package:model/model.dart';
 ///
 /// `SearchContentsRepository` is an `abstract interface class`, so a plain
 /// `implements` is enough -- no mocking library is needed in this package.
-class _RecordingSearchContentsRepository
-    implements SearchContentsRepository<VideoModel> {
-  _RecordingSearchContentsRepository(this.result);
-
-  final Result<Page<VideoModel>> result;
+class _RecordingSearchContentsRepository({
+  required final Result<Page<VideoModel>> result,
+}) implements SearchContentsRepository<VideoModel> {
   final receivedQueries = <SearchQuery>[];
 
   @override
@@ -43,7 +41,7 @@ void main() {
 
     test('returns the success result from the repository', () async {
       final repository = _RecordingSearchContentsRepository(
-        Result.ok(emptyPage),
+        result: Result.ok(emptyPage),
       );
       final useCase = GetSearchContentsUseCase<VideoModel>(
         repository: repository,
@@ -57,7 +55,7 @@ void main() {
 
     test('keeps the failure result instead of unwrapping it', () async {
       final repository = _RecordingSearchContentsRepository(
-        Result<Page<VideoModel>>.error(Exception('search failed')),
+        result: Result<Page<VideoModel>>.error(Exception('search failed')),
       );
       final useCase = GetSearchContentsUseCase<VideoModel>(
         repository: repository,
@@ -71,7 +69,7 @@ void main() {
 
     test('forwards the query object to the repository unchanged', () async {
       final repository = _RecordingSearchContentsRepository(
-        Result.ok(emptyPage),
+        result: Result.ok(emptyPage),
       );
       final useCase = GetSearchContentsUseCase<VideoModel>(
         repository: repository,
@@ -85,15 +83,21 @@ void main() {
 
     test('preserves paging fields on the returned page', () async {
       final paged = Page<VideoModel>(data: const [], number: 3, totalPages: 9);
-      final repository = _RecordingSearchContentsRepository(Result.ok(paged));
+      final repository = _RecordingSearchContentsRepository(
+        result: Result.ok(paged),
+      );
       final useCase = GetSearchContentsUseCase<VideoModel>(
         repository: repository,
       );
 
       final result = await useCase.invoke(query);
 
-      expect((result as Ok<Page<VideoModel>>).value.number, 3);
-      expect((result as Ok<Page<VideoModel>>).value.totalPages, 9);
+      final ok = switch (result) {
+        Ok(:final value) => value,
+        Error(:final error) => fail('expected Ok but got Error: $error'),
+      };
+      expect(ok.number, 3);
+      expect(ok.totalPages, 9);
     });
   });
 }
