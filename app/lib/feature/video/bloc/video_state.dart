@@ -15,21 +15,45 @@ class const VideoState({
   final String? actionError,
 
   final VideoDetail? videoDetail,
+
+  /// 当前视频的可播放地址。
+  ///
+  /// 与 [videoDetail] 分开：详情可以无地址（某些源只给元信息），地址也可以
+  /// 在详情之后单独到达。null 表示尚未取得，不区分原因——失败原因在
+  /// [streamError] 里。
+  final MediaStream? mediaStream,
+
+  /// 解析播放地址失败的原因。
+  ///
+  /// 与 [error] 分开，理由同 [actionError]：播放地址失败只该影响播放器区域，
+  /// 并入 [error] 会把已加载成功的简介与评论一起顶掉。
+  final String? streamError,
 }) extends Equatable {
   VideoState copyWith({
     bool? isLoading,
     String? error,
     String? actionError,
     VideoDetail? videoDetail,
+    MediaStream? mediaStream,
+    String? streamError,
   }) {
     return VideoState(
       isLoading: isLoading ?? this.isLoading,
       error: error,
       actionError: actionError,
       videoDetail: videoDetail ?? this.videoDetail,
+      mediaStream: mediaStream ?? this.mediaStream,
+      streamError: streamError,
     );
   }
 
   @override
-  List<Object?> get props => [isLoading, error, actionError, videoDetail];
+  List<Object?> get props => [
+    isLoading,
+    error,
+    actionError,
+    videoDetail,
+    mediaStream,
+    streamError,
+  ];
 }

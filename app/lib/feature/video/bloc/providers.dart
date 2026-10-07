@@ -21,8 +21,9 @@ List<BlocProvider> getVideoBlocProviders(
 
   return [
     BlocProvider<VideoBloc>(
-      create: (_) =>
-          VideoBloc(repository: detailRepo)..add(LoadVideoDetail(videoId)),
+      create: (_) => VideoBloc(repository: detailRepo)
+        ..add(LoadVideoDetail(videoId))
+        ..add(LoadMediaStream(videoId)),
     ),
     BlocProvider<VideoCommentBloc>(
       create: (_) =>

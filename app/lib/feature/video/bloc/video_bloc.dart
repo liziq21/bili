@@ -15,6 +15,7 @@ class VideoBloc({required final VideoDetailRepository _repository})
     extends Bloc<VideoEvent, VideoState> {
   this : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
+    on<LoadMediaStream>(_onLoadMediaStream);
     on<ToggleVideoLike>(_onToggleVideoLike);
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
     on<ToggleCreatorSubscribe>(_onToggleCreatorSubscribe);
@@ -36,6 +37,23 @@ class VideoBloc({required final VideoDetailRepository _repository})
       case Error(:final error):
         _log.warning('Failed to load video detail', error);
         emit(state.copyWith(isLoading: false, error: error.toString()));
+    }
+  }
+
+  Future<void> _onLoadMediaStream(
+    LoadMediaStream event,
+    Emitter<VideoState> emit,
+  ) async {
+    emit(state.copyWith(streamError: null));
+    _log.info('Loading media stream for id: ${event.id}');
+
+    final result = await _repository.getMediaStream(event.id);
+    switch (result) {
+      case Ok(:final value):
+        emit(state.copyWith(mediaStream: value));
+      case Error(:final error):
+        _log.warning('Failed to load media stream', error);
+        emit(state.copyWith(streamError: error.toString()));
     }
   }
 

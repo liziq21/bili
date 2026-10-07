@@ -7,7 +7,7 @@ import 'bloc/providers.dart';
 import 'bloc/video_bloc.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
-import 'common_widgets/video_player_placeholder.dart';
+import 'common_widgets/video_player.dart';
 
 class const VideoScreen({super.key, final String videoId = 'demo_video'})
     extends StatelessWidget {
@@ -58,10 +58,7 @@ class const _VideoContent({required final String videoId})
             state.videoDetail?.video.title,
           ),
           builder: (context, info) {
-            return VideoPlayerPlaceholder(
-              thumbnailUrl: info.$1,
-              title: info.$2,
-            );
+            return VideoPlayer();
           },
         ),
         Expanded(
