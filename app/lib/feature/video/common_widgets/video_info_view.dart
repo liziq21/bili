@@ -345,6 +345,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
               color: $styles.colors.onSurfaceVariant,
             ),
             onPressed: () {
+              HapticFeedback.lightImpact();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text('跳转原源作者主页'),
