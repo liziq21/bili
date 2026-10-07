@@ -1,5 +1,16 @@
 import 'uri_extensions.dart';
 
+/// Standardizes and secures Bilibili media/asset URLs into valid HTTPS URLs.
+///
+/// Handles scheme-relative (`//`), unencrypted (`http://`), already secure (`https://`),
+/// and empty/null values safely without producing corrupted scheme prefixes (`https:https://`).
+String? normalizeBiliUrl(String? url) {
+  if (url == null || url.isEmpty) return null;
+  if (url.startsWith('//')) return 'https:$url';
+  if (url.startsWith('http://')) return 'https://${url.substring(7)}';
+  return url;
+}
+
 class BiliUtils() {
   /// 从 URI 中提取并构建路由路径
   ///

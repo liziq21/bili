@@ -2,6 +2,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
 
 final class const BiliRankingVideoFeedRemoteDataSource({
@@ -32,7 +33,7 @@ extension NetworkBiliRankingVideoX on NetworkBiliRankingVideo {
     id: bvid,
     title: title ?? bvid,
     url: 'https://www.bilibili.com/video/$bvid',
-    thumbnailUrl: _normalizeBiliUrl(pic),
+    thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: stat?.view,
     uploadDate: pubdate == null
         ? null
@@ -41,9 +42,4 @@ extension NetworkBiliRankingVideoX on NetworkBiliRankingVideo {
     creatorProfileName: owner?.name,
     creatorProfileId: owner?.mid?.toString(),
   );
-}
-
-String? _normalizeBiliUrl(String? value) {
-  if (value == null || value.isEmpty) return null;
-  return value.startsWith('http://') ? 'https://${value.substring(7)}' : value;
 }
