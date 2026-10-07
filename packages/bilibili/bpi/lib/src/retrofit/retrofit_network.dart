@@ -167,6 +167,15 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ep_id') int? epId,
   });
 
+  @GET(path: ApiPath.bangumiPlayUrl)
+  Future<NetworkPlayUrl> getBangumiPlayUrl({
+    @Query('ep_id') int? epId,
+    @Query('cid') int? cid,
+    @Query('qn') int qn = 80,
+    @Query('fnval') int fnval = 4048,
+    @Query('fourk') int fourk = 1,
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -346,6 +355,37 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili bangumi season network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkPlayUrl> getBangumiPlayUrl({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) async {
+    try {
+      return await _networkApi.getBangumiPlayUrl(
+        epId: epId,
+        cid: cid,
+        qn: qn,
+        fnval: fnval,
+        fourk: fourk,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili bangumi play URL response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili bangumi play URL network request failed.',
         cause: error,
       );
     }
