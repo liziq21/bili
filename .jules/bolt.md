@@ -21,3 +21,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-09-21 - Decompose monolithic detail view BlocBuilders into fine-grained selectors
 **Learning:** Wrapping complex screen subviews (like `VideoInfoView`) in a single root `BlocBuilder<VideoBloc, VideoState>` causes every user action (e.g. toggling like or favorite) to force rebuild passes across the entire view, including static video metadata, creator profile info, expandable synopsis, and recommended video lists.
 **Action:** Split monolithic screen widgets into scoped sub-components (`_VideoHeaderSection`, `_CreatorProfileSection`, `_ActionButtonsSection`, `_SynopsisSection`), each consuming only their specific fields via `context.select` or `BlocSelector` to restrict rebuild passes strictly to the interacted elements.
+
+## 2026-10-06 - Avoid tearing off static methods for indicator builders in cold paths
+**Learning:** Tearing off static methods for error/empty state indicator builders in `PagedChildBuilderDelegate` provides no measurable performance or memory benefit during normal list rendering/scrolling, as those builders represent cold paths and static tear-offs in Dart build methods still create closure instances.
+**Action:** Do not micro-optimize cold error/empty indicators or introduce tear-offs unless a profile-mode trace confirms a real rendering or allocation bottleneck.
