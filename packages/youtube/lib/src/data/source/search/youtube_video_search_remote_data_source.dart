@@ -6,6 +6,7 @@ import 'package:ypi/ypi.dart';
 
 import '../../../search/search_filter.dart';
 import '../../../search/sort.dart';
+import '../../../youtube_utils.dart';
 import '../youtube_remote_data_source.dart';
 import 'youtube_network_search_mapper.dart';
 
@@ -147,7 +148,9 @@ final class const YouTubeVideoSearchRemoteDataSource(
       id: video.videoId,
       title: video.title?.value ?? '',
       url: 'https://www.youtube.com/watch?v=${video.videoId}',
-      thumbnailUrl: video.thumbnail?.thumbnails.lastOrNull?.url,
+      thumbnailUrl: normalizeYoutubeUrl(
+        video.thumbnail?.thumbnails.lastOrNull?.url,
+      ),
       viewCount: _parseInt(video.viewCountText?.value),
       uploadDate: _parseUploadDate(video.publishedTimeText?.value),
       duration: _parseDuration(video.lengthText?.value),
