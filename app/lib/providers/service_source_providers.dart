@@ -108,6 +108,7 @@ class const ServiceSourceProviders({
               RepositoryProvider<VideoDetailRepository>(
                 create: (context) => AppVideoDetailRepository(
                   context.read<Bili>().videoDetailDataSource,
+                  context.read<Bili>().mediaStreamDataSource,
                 ),
               ),
               RepositoryProvider<VideoCommentRepository>(

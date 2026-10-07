@@ -18,15 +18,22 @@ abstract interface class VideoDetailRepository() {
 
   /// 切换对创作者的关注状态
   Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed);
+
+  /// 解析指定视频的可播放地址
+  ///
+  /// [preferHeight] 为期望的画面高度，源按自身可用清晰度就近选取；为
+  /// null 时由源取默认档。播放地址带签名时效，调用方取到即播。
+  Future<Result<MediaStream>> getMediaStream(String id, {int? preferHeight});
 }
 
 /// [VideoDetailRepository] 的默认应用实现
 ///
-/// 依赖可选的 [VideoDetailRemoteDataSource] 能力接口。
-/// 当当前数据源未实现该能力时返回错误：假成功比失败更糟，调用方会据此
-/// 回滚乐观更新，而假成功会让界面停在一个从未被持久化的状态上。
+/// 依赖可选的 [VideoDetailRemoteDataSource] 与 [MediaStreamRemoteDataSource]
+/// 能力接口。当当前数据源未实现该能力时返回错误：假成功比失败更糟，调用方
+/// 会据此回滚乐观更新，而假成功会让界面停在一个从未被持久化的状态上。
 class AppVideoDetailRepository([
   final VideoDetailRemoteDataSource? _remoteDataSource,
+  final MediaStreamRemoteDataSource? _mediaStreamDataSource,
 ]) implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async {
@@ -61,5 +68,19 @@ class AppVideoDetailRepository([
       return _remoteDataSource.toggleSubscribe(creatorId, isSubscribed);
     }
     return Result.error(Exception('当前数据源不支持关注创作者'));
+  }
+
+  @override
+  Future<Result<MediaStream>> getMediaStream(
+    String id, {
+    int? preferHeight,
+  }) async {
+    if (_mediaStreamDataSource != null) {
+      return _mediaStreamDataSource.getMediaStream(
+        id,
+        preferHeight: preferHeight,
+      );
+    }
+    return Result.error(Exception('当前数据源不支持获取播放地址'));
   }
 }
