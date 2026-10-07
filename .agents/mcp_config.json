@@ -1,17 +1,8 @@
 {
   "mcpServers": {
     "dart": {
-      "command": "/data/data/com.termux/files/usr/opt/flutter/bin/cache/dart-sdk/bin/dart",
-      "args": [
-        "mcp-server"
-      ]
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+      "command": "dart",
+      "args": ["mcp-server"]
     }
   }
 }
