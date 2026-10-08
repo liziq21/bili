@@ -84,6 +84,17 @@ class MockNetworkVideoDataSource({
   }) async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<NetworkPlayUrl> getBangumiPlayUrl({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) async {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

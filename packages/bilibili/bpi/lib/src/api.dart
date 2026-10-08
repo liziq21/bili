@@ -32,6 +32,7 @@ final class ApiPath {
   static const String userCard = '/x/web-interface/card';
   static const String userArticles = '/x/space/article';
   static const String bangumiSeason = '/pgc/view/web/season';
+  static const String bangumiPlayUrl = '/pgc/player/web/playurl';
 }
 
 final class WbiApiPath {

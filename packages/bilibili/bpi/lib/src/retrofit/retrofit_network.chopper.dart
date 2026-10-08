@@ -445,4 +445,33 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkBangumiSeasonData, NetworkBangumiSeasonData>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkPlayUrl> getBangumiPlayUrl({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/pgc/player/web/playurl',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'ep_id': epId,
+      'cid': cid,
+      'qn': qn,
+      'fnval': fnval,
+      'fourk': fourk,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkPlayUrl> $response = await client
+        .send<NetworkPlayUrl, NetworkPlayUrl>($request);
+    return $response.bodyOrThrow;
+  }
 }

@@ -29,6 +29,7 @@
 | 用户名片/信息 | `GET /x/web-interface/card` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/user_card.json` | 2026-10-03 |
 | 用户专栏文章列表 | `GET /x/space/article` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/user_articles.json` | 2026-10-04 |
 | 番剧/剧集详情 | `GET /pgc/view/web/season` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/bangumi_season.json` | 2026-10-05 |
+| 番剧/剧集播放地址 | `GET /pgc/player/web/playurl` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/bangumi_play_url.json` | 2026-10-08 |
 
 `getH5InfoByRoom` 和 `getRoomPlayInfo` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以对应的 fixture 为准。
 

@@ -22,6 +22,7 @@
 | `user_card.json` | `/x/web-interface/card` | GET | `mid=2` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-03 |
 | `user_articles.json` | `/x/space/article` | GET | `mid=353840826&pn=1&ps=30` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-04 |
 | `bangumi_season.json` | `/pgc/view/web/season` | GET | `season_id=28800` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-05 |
+| `bangumi_play_url.json` | `/pgc/player/web/playurl` | GET | `ep_id=326233&qn=80&fnval=4048&fourk=1` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-08 |
 
 ## 抓取规则
 

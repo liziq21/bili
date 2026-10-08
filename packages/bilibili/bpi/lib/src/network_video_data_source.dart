@@ -9,6 +9,15 @@ import 'model/video/video_detail_data.dart';
 
 abstract interface class NetworkVideoDataSource {
   Future<NetworkBangumiSeasonData> getBangumiSeason({int? seasonId, int? epId});
+
+  Future<NetworkPlayUrl> getBangumiPlayUrl({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  });
+
   Future<VideoDetailData> getVideoDetail({required String bvid});
 
   Future<NetworkVideoRelation> getVideoRelation({required String bvid});

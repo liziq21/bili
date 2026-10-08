@@ -140,6 +140,26 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    if (Platform.environment['CAPTURE_BANGUMI_PLAY_URL_ONLY'] == '1') {
+      if (!shouldFetch('testing/bangumi_play_url.json')) {
+        skipNote('testing/bangumi_play_url.json');
+      } else {
+        final bangumiPlayUrl = await getJson(
+          Uri.https('api.bilibili.com', '/pgc/player/web/playurl', {
+            'ep_id': '326233',
+            'qn': '80',
+            'fnval': '4048',
+            'fourk': '1',
+          }),
+          'bangumi play url',
+        );
+        _requireBangumiPlayUrl(bangumiPlayUrl.json, 'bangumi play url');
+        saveResponse('testing/bangumi_play_url.json', bangumiPlayUrl);
+        print('Bangumi play URL fixture fetched successfully.');
+      }
+      return;
+    }
+
     if (Platform.environment['CAPTURE_USER_ARTICLES_ONLY'] == '1') {
       if (!shouldFetch('testing/user_articles.json')) {
         skipNote('testing/user_articles.json');
@@ -473,6 +493,23 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/bangumi_season.json', bangumiSeason);
     }
 
+    // 16. Bangumi Play URL
+    if (!shouldFetch('testing/bangumi_play_url.json')) {
+      skipNote('testing/bangumi_play_url.json');
+    } else {
+      final bangumiPlayUrl = await getJson(
+        Uri.https('api.bilibili.com', '/pgc/player/web/playurl', {
+          'ep_id': '326233',
+          'qn': '80',
+          'fnval': '4048',
+          'fourk': '1',
+        }),
+        'bangumi play url',
+      );
+      _requireBangumiPlayUrl(bangumiPlayUrl.json, 'bangumi play url');
+      saveResponse('testing/bangumi_play_url.json', bangumiPlayUrl);
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -724,5 +761,34 @@ void _requireBangumiSeason(Map<String, dynamic> json, String label) {
   });
   if (!hasEpisode) {
     throw FormatException('$label has no episode with ep_id or id');
+  }
+}
+
+void _requireBangumiPlayUrl(Map<String, dynamic> json, String label) {
+  final result = json['result'];
+  if (result is! Map<String, dynamic> && result is! Map) {
+    throw FormatException('$label result is not an object');
+  }
+  final resultMap = Map<String, dynamic>.from(result as Map);
+  try {
+    final parsed = NetworkPlayUrl.fromJson(resultMap);
+    final dashVideo = parsed.dash?.video;
+    final dashAudio = parsed.dash?.audio;
+    final hasDash =
+        dashVideo != null &&
+        dashVideo.isNotEmpty &&
+        dashAudio != null &&
+        dashAudio.isNotEmpty &&
+        dashVideo.any((stream) => stream.playUrls.any((url) => url.isNotEmpty));
+    final hasDurl =
+        parsed.durl?.any(
+          (stream) => stream.playUrls.any((url) => url.isNotEmpty),
+        ) ??
+        false;
+    if (!hasDash && !hasDurl) {
+      throw const FormatException('bangumi play URL has no playable streams');
+    }
+  } on Object catch (error) {
+    throw FormatException('$label is not a parsable bangumi play URL: $error');
   }
 }
