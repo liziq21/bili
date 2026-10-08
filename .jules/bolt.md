@@ -25,3 +25,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-10-06 - Avoid tearing off static methods for indicator builders in cold paths
 **Learning:** Tearing off static methods for error/empty state indicator builders in `PagedChildBuilderDelegate` provides no measurable performance or memory benefit during normal list rendering/scrolling, as those builders represent cold paths and static tear-offs in Dart build methods still create closure instances.
 **Action:** Do not micro-optimize cold error/empty indicators or introduce tear-offs unless a profile-mode trace confirms a real rendering or allocation bottleneck.
+
+## 2026-10-12 - Pre-compute context lookups above list item builders
+**Learning:** Invoking InheritedWidget lookups (like `context.mediaSources` or `MediaQuery.textScalerOf(context)`) inside `SliverList.separated` item and separator builders triggers element tree traversals and linear list lookups for every single visible item during scroll rendering.
+**Action:** Pre-compute lookup maps and theme/scaler constants once in the parent widget's `build` method before passing them down to list item builders.

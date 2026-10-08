@@ -214,44 +214,43 @@ class const _HistoryRows({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // ⚡ Bolt Optimization: Pre-compute source name lookup map and divider style parameters.
+    // Reading `context.mediaSources` once at the top of _HistoryRows avoids O(N) InheritedWidget
+    // element tree lookups and list iterations per item built on scroll.
+    final sourceNames = {
+      for (final source in context.mediaSources) source.id: source.name,
+    };
+
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.crossAxisExtent;
         final thumbWidth = (width * 0.32).clamp(96.0, 200.0);
+        final dividerThickness = MediaQuery.textScalerOf(context).scale(1);
+        final dividerIndent = thumbWidth + $styles.insets.sm;
+        final dividerColor = Theme.of(context).colorScheme.outlineVariant;
 
         return SliverList.separated(
           itemCount: items.length,
           separatorBuilder: (context, index) => Divider(
             height: 1,
-            thickness: MediaQuery.textScalerOf(context).scale(1),
+            thickness: dividerThickness,
             // 分隔线自标题左边缘起（缩略图宽度 + 间距），不贯穿整行：
             // 贯穿会让每行读起来像表格，缩略图与文字之间的关系反而被切断。
-            indent: thumbWidth + $styles.insets.sm,
-            color: Theme.of(context).colorScheme.outlineVariant,
+            indent: dividerIndent,
+            color: dividerColor,
           ),
           itemBuilder: (context, index) {
             final item = items[index];
             return _HistoryRow(
               item: item,
               thumbWidth: thumbWidth,
-              sourceLabel: _sourceLabel(context, item.sourceId),
+              sourceLabel: sourceNames[item.sourceId],
               onTap: () => onVideoTap(item),
             );
           },
         );
       },
     );
-  }
-
-  /// 数据源展示名
-  ///
-  /// 历史跨源存放，行上标出来源才看得出这条是哪个服务的；标识对不上任何已注册
-  /// 数据源时留空，由 [_HistoryRow] 跳过徽章而不是显示原始标识。
-  static String? _sourceLabel(BuildContext context, String sourceId) {
-    for (final source in context.mediaSources) {
-      if (source.id == sourceId) return source.name;
-    }
-    return null;
   }
 }
 
@@ -409,12 +408,13 @@ class const _HistoryRow({
   /// 用相对表述而不是绝对日期：历史是「回看」场景，「昨天 / 3 天前」比
   /// 「2026-10-02」更快传达新旧顺序。超过一周落到日期，跨年补上年份。
   static String _formatViewedAt(DateTime viewedAt) {
-    final difference = DateTime.now().difference(viewedAt);
+    // ⚡ Bolt Optimization: Instantiate system clock time once per row format.
+    final now = DateTime.now();
+    final difference = now.difference(viewedAt);
     if (difference.inMinutes < 1) return '刚刚';
     if (difference.inHours < 1) return '${difference.inMinutes} 分钟前';
     if (difference.inDays < 1) return '${difference.inHours} 小时前';
     if (difference.inDays < 7) return '${difference.inDays} 天前';
-    final now = DateTime.now();
     final sameYear = viewedAt.year == now.year;
     final month = viewedAt.month.toString().padLeft(2, '0');
     final day = viewedAt.day.toString().padLeft(2, '0');
