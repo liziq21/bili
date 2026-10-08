@@ -16,6 +16,7 @@ void main() {
       expect(find.byTooltip('返回'), findsOneWidget);
       expect(find.byTooltip('播放'), findsNWidgets(2));
       expect(find.byTooltip('切换'), findsOneWidget);
+      expect(find.byTooltip('全屏'), findsOneWidget);
 
       // Tap play button and verify tooltips update to '暂停'
       await tester.tap(find.byTooltip('播放').first);

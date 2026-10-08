@@ -1,4 +1,5 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 
@@ -78,6 +79,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     icon: Icon(Icons.arrow_back, color: $styles.colors.onScrim),
                     tooltip: '返回',
                     onPressed: () {
+                      HapticFeedback.lightImpact();
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
                       }
@@ -108,6 +110,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                 color: $styles.colors.accentFill,
               ),
               onPressed: () {
+                HapticFeedback.lightImpact();
                 setState(() {
                   _isPlaying = !_isPlaying;
                 });
@@ -144,6 +147,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         color: $styles.colors.onScrim,
                       ),
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         setState(() {
                           _isPlaying = !_isPlaying;
                         });
@@ -224,11 +228,13 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     IconButton(
                       iconSize: 20,
+                      tooltip: '全屏',
                       icon: Icon(
                         Icons.fullscreen,
                         color: $styles.colors.onScrim,
                       ),
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: const Text('全屏切换'),

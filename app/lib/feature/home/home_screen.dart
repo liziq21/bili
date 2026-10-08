@@ -1,6 +1,8 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 import 'bloc/home_bloc.dart';
@@ -62,10 +64,12 @@ class const HomeScreen({
                     Icons.settings_outlined,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  tooltip: '设置',
-                  onPressed: () =>
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(const SnackBar(content: Text('设置开发中'))),
+                  tooltip: AppLocalizations.of(context)?.navSettings ?? '设置',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('设置开发中')));
+                  },
                 ),
                 SizedBox(width: $styles.insets.xs),
               ],
