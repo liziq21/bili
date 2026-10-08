@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:model/model.dart';
 import 'package:test/test.dart';
+import 'package:youtube/src/youtube_utils.dart';
 import 'package:youtube/youtube.dart';
 
 void main() {
@@ -208,6 +209,94 @@ void main() {
       expect(blankCreatorRes, isA<Ok<Page<CreatorProfile>>>());
       expect((blankCreatorRes as Ok<Page<CreatorProfile>>).value.data, isEmpty);
       expect(creatorRequestMade, isFalse);
+
+      await youtube.close();
+    });
+
+    test('normalizeYoutubeUrl tests', () {
+      expect(normalizeYoutubeUrl(null), isNull);
+      expect(normalizeYoutubeUrl(''), isNull);
+      expect(
+        normalizeYoutubeUrl('//yt3.googleusercontent.com/pic.jpg'),
+        equals('https://yt3.googleusercontent.com/pic.jpg'),
+      );
+      expect(
+        normalizeYoutubeUrl('http://yt3.googleusercontent.com/pic.jpg'),
+        equals('https://yt3.googleusercontent.com/pic.jpg'),
+      );
+      expect(
+        normalizeYoutubeUrl('https://yt3.googleusercontent.com/pic.jpg'),
+        equals('https://yt3.googleusercontent.com/pic.jpg'),
+      );
+    });
+
+    test('videoSearchDataSource and creatorProfileSearchDataSource normalize thumbnail URLs in DTOs', () async {
+      final jsonResponse = '''
+{
+  "contents": {
+    "twoColumnSearchResultsRenderer": {
+      "primaryContents": {
+        "sectionListRenderer": {
+          "contents": [
+            {
+              "itemSectionRenderer": {
+                "contents": [
+                  {
+                    "videoRenderer": {
+                      "videoId": "abc12345",
+                      "title": {"runs": [{"text": "Sample Video"}]},
+                      "thumbnail": {
+                        "thumbnails": [
+                          {"url": "//yt3.googleusercontent.com/thumb.jpg", "width": 120, "height": 90}
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "channelRenderer": {
+                      "channelId": "UC123456",
+                      "title": {"simpleText": "Sample Channel"},
+                      "thumbnail": {
+                        "thumbnails": [
+                          {"url": "http://yt3.googleusercontent.com/avatar.jpg", "width": 88, "height": 88}
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+''';
+
+      final youtube = YouTube(
+        httpClient: MockClient((_) async => http.Response(jsonResponse, 200)),
+      );
+
+      final videoDS = youtube.videoSearchDataSource;
+      final videoRes = await videoDS.searchVideo('sample');
+      expect(videoRes, isA<Ok<Page<VideoModel>>>());
+      final videos = (videoRes as Ok<Page<VideoModel>>).value.data;
+      expect(videos, hasLength(1));
+      expect(
+        videos.first.thumbnailUrl,
+        equals('https://yt3.googleusercontent.com/thumb.jpg'),
+      );
+
+      final creatorDS = youtube.creatorProfileSearchDataSource;
+      final creatorRes = await creatorDS.searchCreatorProfile('sample');
+      expect(creatorRes, isA<Ok<Page<CreatorProfile>>>());
+      final profiles = (creatorRes as Ok<Page<CreatorProfile>>).value.data;
+      expect(profiles, hasLength(1));
+      expect(
+        profiles.first.thumbnailUrl,
+        equals('https://yt3.googleusercontent.com/avatar.jpg'),
+      );
 
       await youtube.close();
     });

@@ -89,3 +89,9 @@ Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) and
 Vulnerability: Model DTO mappers across Bilibili search, ranking, and user results used naive string concatenation (`'https:$upic'`, `'https:$cover'`) or incomplete URL checks, producing corrupted schemes (`https:https://...` or `https:http://...`) when endpoints returned full URLs, and leaving scheme-relative URLs (`//...`) without explicit `https:`.
 Learning: Untrusted network JSON asset fields can vary between scheme-relative (`//`), unencrypted (`http://`), or full HTTPS URLs (`https://`). Naive string interpolation corrupts valid HTTPS URLs or fails to enforce encrypted HTTPS transport.
 Prevention: Use a standardized URL normalizer (`normalizeBiliUrl`) that securely converts `//` and `http://` to `https://`, preserves existing `https://` URLs, and handles `null`/empty values safely.
+
+## 2026-10-07 - Standardize and Secure YouTube Media Asset URLs in DTO Mappers
+
+Vulnerability: `YouTubeVideoSearchRemoteDataSource` and `YouTubeCreatorProfileSearchRemoteDataSource` extracted raw thumbnail URLs directly from YouTube InnerTube JSON renderers, which can contain scheme-relative (`//yt3.googleusercontent.com/...`) or unencrypted (`http://...`) links, risking cleartext HTTP asset fetching or invalid scheme parsing.
+Learning: YouTube InnerTube API responses return thumbnail URLs with scheme-relative `//` or cleartext `http://` prefixes that can bypass HTTPS transport or result in broken asset loads if not standardized across media sources.
+Prevention: Use a standardized URL normalizer (`normalizeYoutubeUrl`) that securely converts `//` and `http://` to `https://`, preserves existing `https://` URLs, and handles `null`/empty values safely.

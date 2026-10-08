@@ -4,6 +4,7 @@ import 'package:data/data.dart';
 import 'package:model/model.dart';
 import 'package:ypi/ypi.dart';
 
+import '../../../youtube_utils.dart';
 import '../youtube_remote_data_source.dart';
 import 'youtube_network_search_mapper.dart';
 
@@ -74,7 +75,9 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
     return CreatorProfile(
       id: channel.channelId,
       name: channel.title?.value ?? '',
-      thumbnailUrl: channel.thumbnail?.thumbnails.lastOrNull?.url,
+      thumbnailUrl: normalizeYoutubeUrl(
+        channel.thumbnail?.thumbnails.lastOrNull?.url,
+      ),
       videos: _parseInt(channel.videoCountText?.value),
     );
   }
