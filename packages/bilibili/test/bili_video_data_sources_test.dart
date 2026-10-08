@@ -115,86 +115,96 @@ void main() {
     return jsonDecode(file.readAsStringSync());
   }
 
-  group(
-    'BiliVideoDetailRemoteDataSource & BiliVideoCommentRemoteDataSource',
-    () {
-      late MockNetworkVideoDataSource mockNetwork;
-      late BiliVideoDetailRemoteDataSource detailDataSource;
-      late BiliVideoCommentRemoteDataSource commentDataSource;
+  group('BiliVideoDetailRemoteDataSource & BiliVideoCommentRemoteDataSource', () {
+    late MockNetworkVideoDataSource mockNetwork;
+    late BiliVideoDetailRemoteDataSource detailDataSource;
+    late BiliVideoCommentRemoteDataSource commentDataSource;
 
-      setUp(() {
-        final detailJson = loadJson('video_detail.json');
-        final relationJson = loadJson('video_relation.json');
-        final relatedJson = loadJson('related_videos.json');
-        final replyJson = loadJson('reply_list.json');
+    setUp(() {
+      final detailJson = loadJson('video_detail.json');
+      final relationJson = loadJson('video_relation.json');
+      final relatedJson = loadJson('related_videos.json');
+      final replyJson = loadJson('reply_list.json');
 
-        mockNetwork = MockNetworkVideoDataSource(
-          videoDetailJson: detailJson as Map<String, dynamic>,
-          videoRelationJson: relationJson as Map<String, dynamic>,
-          relatedVideosJson:
-              (relatedJson as Map<String, dynamic>)['data'] as List<dynamic>,
-          replyListJson: replyJson as Map<String, dynamic>,
-        );
-
-        detailDataSource = BiliVideoDetailRemoteDataSource(
-          network: mockNetwork,
-        );
-        commentDataSource = BiliVideoCommentRemoteDataSource(
-          network: mockNetwork,
-        );
-      });
-
-      test(
-        'getVideoDetail maps detail, owner, relation, and related videos',
-        () async {
-          final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-          expect(result.isOk, isTrue);
-
-          final detail = (result as dynamic).value;
-          expect(detail.video.id, equals('BV1GJ411x7vy'));
-          expect(detail.video.title, isNotEmpty);
-          expect(detail.creator, isNotNull);
-          expect(detail.creator?.name, isNotEmpty);
-          expect(detail.relatedVideos, isNotEmpty);
-        },
+      mockNetwork = MockNetworkVideoDataSource(
+        videoDetailJson: detailJson as Map<String, dynamic>,
+        videoRelationJson: relationJson as Map<String, dynamic>,
+        relatedVideosJson:
+            (relatedJson as Map<String, dynamic>)['data'] as List<dynamic>,
+        replyListJson: replyJson as Map<String, dynamic>,
       );
 
-      test('getVideoComments maps reply list to VideoComment page', () async {
-        final result = await commentDataSource.getVideoComments(
-          'BV1GJ411x7vy',
-          page: 1,
-        );
+      detailDataSource = BiliVideoDetailRemoteDataSource(network: mockNetwork);
+      commentDataSource = BiliVideoCommentRemoteDataSource(
+        network: mockNetwork,
+      );
+    });
+
+    test(
+      'getVideoDetail maps detail, owner, relation, and related videos',
+      () async {
+        final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
         expect(result.isOk, isTrue);
 
-        final page = (result as dynamic).value;
-        expect(page.number, equals(1));
-        expect(page.data, isNotEmpty);
-        expect(page.data.first.authorName, isNotEmpty);
-      });
+        final detail = (result as dynamic).value;
+        expect(detail.video.id, equals('BV1GJ411x7vy'));
+        expect(detail.video.title, isNotEmpty);
+        expect(detail.creator, isNotNull);
+        expect(detail.creator?.name, isNotEmpty);
+        expect(detail.relatedVideos, isNotEmpty);
+      },
+    );
 
-      test('getVideoDetail sanitizes control characters and returns Result.error for empty ID', () async {
-        final sanitizedResult = await detailDataSource.getVideoDetail(
-          'BV1GJ411x7vy\r\n\x00',
-        );
-        expect(sanitizedResult.isOk, isTrue);
+    test('getVideoComments maps reply list to VideoComment page', () async {
+      final result = await commentDataSource.getVideoComments(
+        'BV1GJ411x7vy',
+        page: 1,
+      );
+      expect(result.isOk, isTrue);
 
-        final emptyResult = await detailDataSource.getVideoDetail(
-          '  \r\n\x00 ',
-        );
-        expect(emptyResult.isError, isTrue);
-      });
+      final page = (result as dynamic).value;
+      expect(page.number, equals(1));
+      expect(page.data, isNotEmpty);
+      expect(page.data.first.authorName, isNotEmpty);
+    });
 
-      test('getVideoComments sanitizes control characters and returns Result.error for empty ID', () async {
-        final sanitizedResult = await commentDataSource.getVideoComments(
-          'BV1GJ411x7vy\r\n\x00',
-        );
-        expect(sanitizedResult.isOk, isTrue);
+    test('getVideoDetail sanitizes control characters and returns Result.error for empty ID', () async {
+      final sanitizedResult = await detailDataSource.getVideoDetail(
+        'BV1GJ411x7vy\r\n\x00',
+      );
+      expect(sanitizedResult.isOk, isTrue);
 
-        final emptyResult = await commentDataSource.getVideoComments(
-          '  \r\n\x00 ',
+      final emptyResult = await detailDataSource.getVideoDetail('  \r\n\x00 ');
+      expect(emptyResult.isError, isTrue);
+    });
+
+    test('getVideoComments sanitizes control characters and returns Result.error for empty ID', () async {
+      final sanitizedResult = await commentDataSource.getVideoComments(
+        'BV1GJ411x7vy\r\n\x00',
+      );
+      expect(sanitizedResult.isOk, isTrue);
+
+      final emptyResult = await commentDataSource.getVideoComments(
+        '  \r\n\x00 ',
+      );
+      expect(emptyResult.isError, isTrue);
+    });
+
+    test(
+      'normalizes http:// and // URLs in video detail and comments to https://',
+      () async {
+        final detailRes = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
+        expect(detailRes.isOk, isTrue);
+        final detail = (detailRes as dynamic).value;
+        expect(detail.video.thumbnailUrl, startsWith('https://'));
+
+        final commentRes = await commentDataSource.getVideoComments(
+          'BV1GJ411x7vy',
         );
-        expect(emptyResult.isError, isTrue);
-      });
-    },
-  );
+        expect(commentRes.isOk, isTrue);
+        final page = (commentRes as dynamic).value;
+        expect(page.data.first.authorAvatar, startsWith('https://'));
+      },
+    );
+  });
 }

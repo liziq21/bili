@@ -4,6 +4,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
 
 final class BiliVideoDetailRemoteDataSource({
@@ -39,7 +40,7 @@ final class BiliVideoDetailRemoteDataSource({
         id: detailData.bvid,
         title: detailData.title,
         url: 'https://www.bilibili.com/video/${detailData.bvid}',
-        thumbnailUrl: _formatUrl(detailData.pic),
+        thumbnailUrl: normalizeBiliUrl(detailData.pic),
         viewCount: detailData.stat?.view ?? 0,
         uploadDate: DateTime.fromMillisecondsSinceEpoch(
           detailData.pubdate * 1000,
@@ -54,7 +55,7 @@ final class BiliVideoDetailRemoteDataSource({
           ? CreatorProfile(
               id: detailData.owner!.mid.toString(),
               name: detailData.owner!.name,
-              thumbnailUrl: _formatUrl(detailData.owner!.face),
+              thumbnailUrl: normalizeBiliUrl(detailData.owner!.face),
             )
           : null;
 
@@ -64,7 +65,7 @@ final class BiliVideoDetailRemoteDataSource({
               id: item.bvid,
               title: item.title ?? '',
               url: 'https://www.bilibili.com/video/${item.bvid}',
-              thumbnailUrl: _formatUrl(item.pic),
+              thumbnailUrl: normalizeBiliUrl(item.pic),
               viewCount: item.stat?.view,
               uploadDate: item.pubdate != null
                   ? DateTime.fromMillisecondsSinceEpoch(item.pubdate! * 1000)
@@ -93,11 +94,5 @@ final class BiliVideoDetailRemoteDataSource({
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }
-  }
-
-  static String _formatUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    if (url.startsWith('//')) return 'https:$url';
-    return url;
   }
 }
