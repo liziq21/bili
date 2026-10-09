@@ -95,3 +95,9 @@ Prevention: Use a standardized URL normalizer (`normalizeBiliUrl`) that securely
 Vulnerability: `YouTubeVideoSearchRemoteDataSource` and `YouTubeCreatorProfileSearchRemoteDataSource` extracted raw thumbnail URLs directly from YouTube InnerTube JSON renderers, which can contain scheme-relative (`//yt3.googleusercontent.com/...`) or unencrypted (`http://...`) links, risking cleartext HTTP asset fetching or invalid scheme parsing.
 Learning: YouTube InnerTube API responses return thumbnail URLs with scheme-relative `//` or cleartext `http://` prefixes that can bypass HTTPS transport or result in broken asset loads if not standardized across media sources.
 Prevention: Use a standardized URL normalizer (`normalizeYoutubeUrl`) that securely converts `//` and `http://` to `https://`, preserves existing `https://` URLs, and handles `null`/empty values safely.
+
+## 2026-10-08 - Standardize and Secure Asset URLs in Video Detail and Comment Data Sources
+
+Vulnerability: `BiliVideoDetailRemoteDataSource` and `BiliVideoCommentRemoteDataSource` contained custom `_formatUrl` static methods that only handled scheme-relative `//` URLs and left unencrypted `http://` asset and avatar URLs untouched, allowing cleartext HTTP transport for media assets and user avatars over insecure connections.
+Learning: Data source helper functions written locally can easily omit `http://` to `https://` conversions, bypassing repository-wide HTTPS enforcement policies and leaking cleartext asset requests over the network.
+Prevention: Consistently eliminate local URL formatters in favor of centralized utilities like `normalizeBiliUrl` that enforce HTTPS for all `http://` and `//` asset URLs.

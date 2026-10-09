@@ -4,6 +4,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
 
 final class BiliVideoCommentRemoteDataSource({
@@ -59,7 +60,7 @@ final class BiliVideoCommentRemoteDataSource({
     return VideoComment(
       id: item.rpid.toString(),
       authorName: item.member?.uname ?? '',
-      authorAvatar: _formatUrl(item.member?.avatar),
+      authorAvatar: normalizeBiliUrl(item.member?.avatar),
       content: item.content?.message ?? '',
       likeCount: item.like ?? 0,
       isLiked: item.action == 1,
@@ -68,11 +69,5 @@ final class BiliVideoCommentRemoteDataSource({
           : null,
       replies: (item.replies ?? []).map(_mapReplyItem).toList(),
     );
-  }
-
-  static String _formatUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    if (url.startsWith('//')) return 'https:$url';
-    return url;
   }
 }
