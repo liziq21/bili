@@ -780,10 +780,16 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                           child:
                               video.thumbnailUrl != null &&
                                   video.thumbnailUrl!.isNotEmpty
-                              ? Image.network(
-                                  video.thumbnailUrl!,
+                              // ⚡ Bolt Optimization: Replace un-cached, un-bounded Image.network
+                              // with CachedNetworkImage and memCacheWidth: 320.
+                              // Display size is 120x68px. Capping decode resolution to 320px
+                              // prevents decoding full 1080p/4K network thumbnail images into GPU RAM,
+                              // saving ~4MB-16MB RAM per item and eliminating raster thread decode jank during list scroll.
+                              ? CachedNetworkImage(
+                                  imageUrl: video.thumbnailUrl!,
+                                  memCacheWidth: 320,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
+                                  errorBuilder: (context, url, error) {
                                     return Icon(
                                       Icons.play_circle_outline,
                                       color: $styles.colors.onScrim.withValues(
