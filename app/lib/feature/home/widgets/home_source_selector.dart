@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -16,12 +17,20 @@ class const HomeSourceSelector({
     final colorScheme = Theme.of(context).colorScheme;
 
     const semanticLabel = '切换数据源';
+    MediaSource activeSource;
+    try {
+      activeSource = sources.firstWhere((s) => s.id == activeSourceId);
+    } on StateError {
+      activeSource = sources.first;
+    }
+    final activeSourceName = activeSource.name;
 
     return Tooltip(
       message: '切换数据源',
       child: Semantics(
         button: true,
         label: semanticLabel,
+        value: activeSourceName,
         hint: '切换视频与媒体数据源',
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
@@ -47,6 +56,9 @@ class const HomeSourceSelector({
             ],
             onChanged: (newSource) {
               if (newSource == null) return;
+              if (newSource != activeSourceId) {
+                HapticFeedback.selectionClick();
+              }
               context.read<HomeBloc>().add(ServiceSourceChanged(newSource));
             },
           ),

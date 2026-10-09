@@ -46,6 +46,7 @@ void main() {
       (widget) =>
           widget is Semantics &&
           widget.properties.label == '切换数据源' &&
+          widget.properties.value == 'Bilibili' &&
           widget.properties.hint == '切换视频与媒体数据源',
     );
     expect(semanticsFinder, findsOneWidget);
