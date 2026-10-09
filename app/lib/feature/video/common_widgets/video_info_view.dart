@@ -6,8 +6,10 @@ import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../design/motion.dart';
+import '../../../data/repository/video_detail_repository.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
+import '../player/media_playback_controller.dart';
 
 String _formatCount(int count) {
   if (count >= 10000) {
@@ -16,38 +18,44 @@ String _formatCount(int count) {
   return '$count';
 }
 
-// ⚡ Bolt Optimization: Extracted static recommendations into compile-time const widgets.
-// Avoids re-instantiating list of maps, closures, text style copyWith objects,
-// and non-const layout widgets during VideoBloc state emissions.
-const List<_RelatedVideoCard> _relatedVideoCards = [
-  _RelatedVideoCard(
-    title: 'Flutter 3.24 全新渲染管线实战指南：自定义着色器与深度渲染',
-    author: 'CodeCraft',
-    views: '14.2万',
-    source: 'BILIBILI',
-    time: '4天前',
-    duration: '12:40',
-    onTap: null,
-  ),
-  _RelatedVideoCard(
-    title: 'Why Flutter\'s Impeller Engine Changes Everything for Cross-Platform Devs',
-    author: 'Flutter Dev Hub',
-    views: '290K views',
-    source: 'YOUTUBE',
-    time: '1周前',
-    duration: '18:15',
-    onTap: null,
-  ),
-  _RelatedVideoCard(
-    title: '跨平台框架底层图形层横评：React Native Fabric vs Flutter Impeller',
-    author: '开源音频周刊',
-    views: '3.8万收听',
-    source: 'PEERTUBE / RSS',
-    time: '3天前',
-    duration: '45:20',
-    onTap: null,
-  ),
-];
+/// 把秒数格式化为 `mm:ss` 或 `h:mm:ss`。
+String _formatDuration(int? seconds) {
+  if (seconds == null || seconds <= 0) return '';
+  final h = seconds ~/ 3600;
+  final m = (seconds % 3600) ~/ 60;
+  final s = seconds % 60;
+  final mm = m.toString().padLeft(2, '0');
+  final ss = s.toString().padLeft(2, '0');
+  return h > 0 ? '$h:$mm:$ss' : '$m:$ss';
+}
+
+/// 页面级的播放队列"加入队列"动作。
+///
+/// 由 [VideoScreen] 通过 [QueueAddController] 提供：把 [videoId] 经
+/// [VideoDetailRepository.getMediaStream] 解析为 [MediaStream] 后追加到
+/// [MediaPlaybackController] 的队列末尾。解析失败返回 false，调用方
+/// 自行提示。无 controller（未进入播放会话）时"加入队列"按钮隐藏。
+typedef AddVideoToQueue = Future<bool> Function(
+  String videoId,
+  VideoDetailRepository repository,
+  MediaPlaybackController controller,
+);
+
+class const QueueAddController({
+  required final AddVideoToQueue addVideoToQueue,
+  required super.child,
+  super.key,
+}) extends InheritedWidget {
+  @override
+  bool updateShouldNotify(QueueAddController oldWidget) =>
+      addVideoToQueue != oldWidget.addVideoToQueue;
+}
+
+extension QueueAddControllerX on BuildContext {
+  /// 向上查找 [QueueAddController]，未提供时为 null（"加入队列"按钮隐藏）。
+  QueueAddController? get queueAddController =>
+      dependOnInheritedWidgetOfExactType<QueueAddController>();
+}
 
 class const VideoInfoView({super.key}) extends StatelessWidget {
   @override
@@ -107,10 +115,40 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             Gap($styles.insets.md),
             const _RecommendationsHeader(),
             Gap($styles.insets.xs),
-            ..._relatedVideoCards,
+            const _RecommendationsSection(),
           ],
         );
       },
+    );
+  }
+}
+
+/// 关联推荐区：从 [VideoDetail.relatedVideos] 动态渲染，替代原 3 条硬编码假卡片。
+/// 每行右侧的"加入队列"按钮通过 [QueueAddController] 把视频加入播放队列；
+/// 无 controller 时按钮整体隐藏。
+class const _RecommendationsSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final relatedVideos = context.select<VideoBloc, List<VideoModel>?>(
+      (bloc) => bloc.state.videoDetail?.relatedVideos,
+    );
+
+    if (relatedVideos == null || relatedVideos.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.all($styles.insets.sm),
+        child: Text(
+          '暂无关联推荐',
+          style: $styles.text.bodySmall.copyWith(
+            color: $styles.colors.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (final video in relatedVideos) _RelatedVideoCard(video: video),
+      ],
     );
   }
 }
@@ -443,7 +481,7 @@ class _ActionButtonsSectionState()
     super.build(context);
     // ⚡ Bolt Optimization: Scoped selector for action metrics (likes, favorites, shares).
     // Rebuilds ONLY this action bar when like/favorite status changes, without rebuilding
-    // the title, creator profile, synopsis, or recommendation list.
+    // the title, creator info, synopsis, or recommendation list.
     final metrics = context
         .select<
           VideoBloc,
@@ -699,18 +737,19 @@ class const _RecommendationsHeader() extends StatelessWidget {
   }
 }
 
-class const _RelatedVideoCard({
-  required final String title,
-  required final String author,
-  required final String views,
-  required final String source,
-  required final String time,
-  required final String duration,
-  final VoidCallback? onTap,
-}) extends StatelessWidget {
+class const _RelatedVideoCard({required final VideoModel video})
+    extends StatefulWidget {
+  @override
+  State<_RelatedVideoCard> createState() => _RelatedVideoCardState();
+}
+
+class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
+  bool _isAddingToQueue = false;
+
   @override
   Widget build(BuildContext context) {
-    final semanticLabel = '$title, $author, $views, $time';
+    final video = widget.video;
+    final queueAddController = context.queueAddController;
 
     return Container(
       margin: EdgeInsets.only(bottom: $styles.insets.xs),
@@ -720,12 +759,11 @@ class const _RelatedVideoCard({
         clipBehavior: Clip.antiAlias,
         child: Semantics(
           button: true,
-          label: semanticLabel,
+          label:
+              '${video.title}, ${video.creatorProfileName ?? ''} '
+              '${_formatCount(video.viewCount ?? 0)}',
           child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onTap?.call();
-            },
+            onTap: null,
             child: Padding(
               padding: EdgeInsets.all($styles.insets.xxs),
               child: Row(
@@ -739,37 +777,54 @@ class const _RelatedVideoCard({
                           width: 120,
                           height: 68,
                           color: $styles.colors.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.play_circle_outline,
-                            color: $styles.colors.onScrim.withValues(
-                              alpha: 0.7,
-                            ),
-                            size: 28,
-                          ),
+                          child:
+                              video.thumbnailUrl != null &&
+                                  video.thumbnailUrl!.isNotEmpty
+                              ? Image.network(
+                                  video.thumbnailUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.play_circle_outline,
+                                      color: $styles.colors.onScrim.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                      size: 28,
+                                    );
+                                  },
+                                )
+                              : Icon(
+                                  Icons.play_circle_outline,
+                                  color: $styles.colors.onScrim.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  size: 28,
+                                ),
                         ),
-                        Positioned(
-                          right: 4,
-                          bottom: 4,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: $styles.colors.scrim.withValues(
-                                alpha: 0.7,
+                        if (video.duration != null && video.duration! > 0)
+                          Positioned(
+                            right: 4,
+                            bottom: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
                               ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              duration,
-                              style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.onScrim,
-                                fontSize: 10,
+                              decoration: BoxDecoration(
+                                color: $styles.colors.scrim.withValues(
+                                  alpha: 0.7,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _formatDuration(video.duration),
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.onScrim,
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -781,7 +836,7 @@ class const _RelatedVideoCard({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          video.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: $styles.text.bodySmallBold.copyWith(
@@ -792,47 +847,61 @@ class const _RelatedVideoCard({
                         ),
                         const Gap(4),
                         Text(
-                          '$author · $views',
+                          '${video.creatorProfileName ?? ''} · '
+                          '${_formatCount(video.viewCount ?? 0)}',
                           style: $styles.text.bodySmall.copyWith(
                             color: $styles.colors.onSurfaceVariant,
                             fontSize: 11,
                           ),
                         ),
-                        const Gap(4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 5,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: $styles.colors.onSurfaceVariant
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                source,
-                                style: $styles.text.btn.copyWith(
-                                  color: $styles.colors.onSurface,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const Gap(6),
-                            Text(
-                              time,
-                              style: $styles.text.bodySmall.copyWith(
-                                color: $styles.colors.onSurfaceVariant,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
+                  if (queueAddController != null)
+                    IconButton(
+                      icon: _isAddingToQueue
+                          ? SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: $styles.colors.accentText,
+                              ),
+                            )
+                          : const Icon(Icons.playlist_add),
+                      tooltip: _isAddingToQueue ? '正在加入队列' : '加入播放队列',
+                      iconSize: 20,
+                      color: $styles.colors.accentText,
+                      onPressed: _isAddingToQueue
+                          ? null
+                          : () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _isAddingToQueue = true);
+                              final repository = context
+                                  .read<VideoDetailRepository>();
+                              final controller = context
+                                  .read<MediaPlaybackController>();
+                              final messenger = ScaffoldMessenger.of(context);
+                              queueAddController
+                                  .addVideoToQueue(
+                                    video.id,
+                                    repository,
+                                    controller,
+                                  )
+                                  .then((success) {
+                                    if (!mounted) return;
+                                    setState(() => _isAddingToQueue = false);
+                                    messenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          success ? '已加入播放队列' : '加入队列失败',
+                                        ),
+                                        duration: $styles.times.fast,
+                                      ),
+                                    );
+                                  });
+                            },
+                    ),
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,6 +18,11 @@ import '../player/media_playback_controller.dart';
 /// 替代 `VideoPlayerPlaceholder` 的假件。播放地址由 [VideoBloc] 在
 /// [LoadMediaStream] 里解析，本组件只负责拿到就播、出错就显示在播放区域内——
 /// 简介与评论区不受影响。
+///
+/// 队列层：画面下方的控制条提供下一首 / 上一首 / 循环播放模式，直接调用
+/// [MediaPlaybackController] 的队列 API。控制条只在 [controller] 非 null
+/// （即由 [VideoScreen] 页面级注入）时渲染；单独使用本组件（如既有 widget
+/// 测试）时保持旧行为，不渲染控制条。
 class const VideoPlayer({
   super.key,
   final double aspectRatio = 16 / 9,
@@ -55,35 +61,170 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     _ownsPlayback = true;
   }
 
+  /// [widget.controller] 非空时直接使用注入的会话，不建原生播放器。
+  MediaPlaybackController? get _externalController => widget.controller;
+
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: widget.aspectRatio,
-      child:
-          BlocSelector<
-            VideoBloc,
-            VideoState,
-            ({MediaStream? stream, String? streamError})
-          >(
-            selector: (state) =>
-                (stream: state.mediaStream, streamError: state.streamError),
-            builder: (context, data) {
-              if (data.streamError != null) {
-                return _ErrorView(message: data.streamError!);
-              }
+    final hasExternalController = widget.controller != null;
 
-              final stream = data.stream;
-              if (stream == null) {
-                return const _LoadingView();
-              }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AspectRatio(
+          aspectRatio: widget.aspectRatio,
+          child:
+              BlocSelector<
+                VideoBloc,
+                VideoState,
+                ({MediaStream? stream, String? streamError})
+              >(
+                selector: (state) =>
+                    (stream: state.mediaStream, streamError: state.streamError),
+                builder: (context, data) {
+                  if (data.streamError != null) {
+                    return _ErrorView(message: data.streamError!);
+                  }
 
-              _ensurePlaybackCreated();
-              // 画面渲染与状态订阅分离：Video 只依赖 videoController 重建，
-              // 播放状态变化不会触发整棵控件树重建。
-              return _VideoSurface(controller: _playback!, stream: stream);
-            },
-          ),
+                  final stream = data.stream;
+                  if (stream == null) {
+                    return const _LoadingView();
+                  }
+
+                  _ensurePlaybackCreated();
+                  return _VideoSurface(controller: _playback!, stream: stream);
+                },
+              ),
+        ),
+        if (hasExternalController)
+          _QueueControlBar(controller: _externalController!),
+      ],
     );
+  }
+}
+
+/// 播放队列控制条：下一首 / 上一首 / 循环播放模式切换。
+///
+/// 只调用 [MediaPlaybackController] 的队列 API，不改变播放器会话；
+/// 队列状态（当前序号 / 长度）通过 [MediaPlaybackController.states]
+/// 订阅后在按钮旁边以小字形式显示。
+class const _QueueControlBar({
+  required final MediaPlaybackController controller,
+}) extends StatefulWidget {
+  @override
+  State<_QueueControlBar> createState() => _QueueControlBarState();
+}
+
+class _QueueControlBarState() extends State<_QueueControlBar> {
+  StreamSubscription<PlaybackState>? _subscription;
+  PlaybackState? _state;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.controller.states.listen((state) {
+      if (!mounted) return;
+      setState(() => _state = state);
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = _state;
+    final queueActive = state != null && state.queueLength > 0;
+    final displayIndex = state?.currentIndex != null
+        ? state!.currentIndex + 1
+        : 0;
+    final displayLength = state?.queueLength ?? 0;
+    final currentQueueMode = state?.queueMode ?? PlaybackQueueMode.none;
+
+    return Container(
+      color: $styles.colors.surface,
+      padding: EdgeInsets.symmetric(
+        horizontal: $styles.insets.sm,
+        vertical: $styles.insets.xs,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: '上一首',
+            iconSize: 22,
+            color: $styles.colors.onSurfaceVariant,
+            onPressed: queueActive
+                ? () {
+                    HapticFeedback.lightImpact();
+                    widget.controller.previous();
+                  }
+                : null,
+            icon: Icon(Icons.skip_previous),
+          ),
+          IconButton(
+            tooltip: '下一首',
+            iconSize: 22,
+            color: $styles.colors.onSurfaceVariant,
+            onPressed: queueActive
+                ? () {
+                    HapticFeedback.lightImpact();
+                    widget.controller.next();
+                  }
+                : null,
+            icon: Icon(Icons.skip_next),
+          ),
+          Gap($styles.insets.xs),
+          IconButton(
+            tooltip: '切换循环模式',
+            iconSize: 20,
+            color: $styles.colors.onSurfaceVariant,
+            onPressed: queueActive
+                ? () {
+                    HapticFeedback.lightImpact();
+                    widget.controller.setQueueMode(
+                      _nextQueueMode(currentQueueMode),
+                    );
+                  }
+                : null,
+            icon: Icon(_queueModeIcon(currentQueueMode)),
+          ),
+          const Spacer(),
+          if (queueActive)
+            Text(
+              '$displayIndex / $displayLength',
+              style: $styles.text.bodySmall.copyWith(
+                color: $styles.colors.onSurfaceVariant,
+                fontSize: 11,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  PlaybackQueueMode _nextQueueMode(PlaybackQueueMode current) {
+    switch (current) {
+      case PlaybackQueueMode.none:
+        return PlaybackQueueMode.single;
+      case PlaybackQueueMode.single:
+        return PlaybackQueueMode.loop;
+      case PlaybackQueueMode.loop:
+        return PlaybackQueueMode.none;
+    }
+  }
+
+  IconData _queueModeIcon(PlaybackQueueMode mode) {
+    switch (mode) {
+      case PlaybackQueueMode.none:
+        return Icons.repeat;
+      case PlaybackQueueMode.single:
+        return Icons.repeat_one;
+      case PlaybackQueueMode.loop:
+        return Icons.repeat;
+    }
   }
 }
 

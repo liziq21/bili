@@ -106,6 +106,17 @@ class MediaPlaybackController([
   /// 惰性建 Player：原生库须先初始化，故由 [_createPlayer] 承担。
   late final Player _player = _createPlayer(_platformPlayer);
 
+  /// [_player] 是否已被访问过（late final 首次取值即初始化）。
+  /// dispose 只在原生播放器确实创建过才释放，避免无头测试里
+  /// 访问未初始化的 late 字段触发 [MediaKit.ensureInitialized]。
+  bool _playerTouched = false;
+
+  /// 在首次使用 [_player] 时标记，供 [dispose] 判断是否需要释放。
+  Player get _touchedPlayer {
+    _playerTouched = true;
+    return _player;
+  }
+
   late final VideoController _videoController = VideoController(_player);
 
   final StreamController<PlaybackState> _stateController =
@@ -246,7 +257,7 @@ class MediaPlaybackController([
     }
     _subscriptions.clear();
     await _stateController.close();
-    await _player.dispose();
+    if (_playerTouched) await _player.dispose();
   }
 
   /// 订阅播放器状态。重复调用只生效一次。
