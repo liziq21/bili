@@ -211,7 +211,6 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// previous() 的调用计数。
   final List<int> previousCalls = [];
 
-
   @override
   Future<void> next() async => nextCalls.add(0);
 

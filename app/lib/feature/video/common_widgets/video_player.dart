@@ -61,10 +61,12 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     _ownsPlayback = true;
   }
 
+  /// [widget.controller] 非空时直接使用注入的会话，不建原生播放器。
+  MediaPlaybackController? get _externalController => widget.controller;
+
   @override
   Widget build(BuildContext context) {
     final hasExternalController = widget.controller != null;
-    _ensurePlaybackCreated();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -89,15 +91,13 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                     return const _LoadingView();
                   }
 
-                  return _VideoSurface(
-                    controller: _playback!,
-                    stream: stream,
-                  );
+                  _ensurePlaybackCreated();
+                  return _VideoSurface(controller: _playback!, stream: stream);
                 },
               ),
         ),
         if (hasExternalController)
-          _QueueControlBar(controller: _playback!),
+          _QueueControlBar(controller: _externalController!),
       ],
     );
   }
@@ -184,7 +184,9 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
             onPressed: queueActive
                 ? () {
                     HapticFeedback.lightImpact();
-                    widget.controller.setQueueMode(_nextQueueMode(currentQueueMode));
+                    widget.controller.setQueueMode(
+                      _nextQueueMode(currentQueueMode),
+                    );
                   }
                 : null,
             icon: Icon(_queueModeIcon(currentQueueMode)),

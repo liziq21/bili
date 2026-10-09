@@ -19,17 +19,26 @@ class const VideoScreen({super.key, final String videoId = 'demo_video'})
 }
 
 class VideoScreenState() extends State<VideoScreen> {
-  final MediaPlaybackController _playbackController =
-      MediaPlaybackController();
+  MediaPlaybackController? _playbackController;
+
+  /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
+  /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
+  MediaPlaybackController _ensurePlaybackController() {
+    if (_playbackController == null) {
+      _playbackController = MediaPlaybackController();
+    }
+    return _playbackController!;
+  }
 
   @override
   void dispose() {
-    _playbackController.dispose();
+    _playbackController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _ensurePlaybackController();
     // `$styles` is a mutable static that `AppScaffold` refreshes during its own
     // build, and this page sits below the navigator that `AppScaffold` wraps.
     // Reading a global in `build()` registers no InheritedWidget dependency,
@@ -64,7 +73,7 @@ class VideoScreenState() extends State<VideoScreen> {
     return MultiBlocProvider(
       providers: [
         ...getVideoBlocProviders(context, videoId: widget.videoId),
-        Provider<MediaPlaybackController>.value(value: _playbackController),
+        Provider<MediaPlaybackController>.value(value: controller),
       ],
       child: QueueAddController(
         addVideoToQueue: addVideoToQueue,
@@ -73,7 +82,7 @@ class VideoScreenState() extends State<VideoScreen> {
           body: SafeArea(
             child: _VideoContent(
               videoId: widget.videoId,
-              playbackController: _playbackController,
+              playbackController: controller,
             ),
           ),
         ),

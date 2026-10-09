@@ -147,8 +147,7 @@ class const _RecommendationsSection() extends StatelessWidget {
 
     return Column(
       children: [
-        for (final video in relatedVideos)
-          _RelatedVideoCard(video: video),
+        for (final video in relatedVideos) _RelatedVideoCard(video: video),
       ],
     );
   }
@@ -313,7 +312,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     : null,
                 child:
                     creator.thumbnailUrl == null ||
-                    creator.thumbnailUrl!.isEmpty
+                        creator.thumbnailUrl!.isEmpty
                     ? const Icon(Icons.person)
                     : null,
               ),
@@ -738,9 +737,8 @@ class const _RecommendationsHeader() extends StatelessWidget {
   }
 }
 
-class const _RelatedVideoCard({
-  required final VideoModel video,
-}) extends StatefulWidget {
+class const _RelatedVideoCard({required final VideoModel video})
+    extends StatefulWidget {
   @override
   State<_RelatedVideoCard> createState() => _RelatedVideoCardState();
 }
@@ -761,7 +759,8 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
         clipBehavior: Clip.antiAlias,
         child: Semantics(
           button: true,
-          label: '${video.title}, ${video.creatorProfileName ?? ''} '
+          label:
+              '${video.title}, ${video.creatorProfileName ?? ''} '
               '${_formatCount(video.viewCount ?? 0)}',
           child: InkWell(
             onTap: null,
@@ -778,7 +777,8 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                           width: 120,
                           height: 68,
                           color: $styles.colors.surfaceContainerHighest,
-                          child: video.thumbnailUrl != null &&
+                          child:
+                              video.thumbnailUrl != null &&
                                   video.thumbnailUrl!.isNotEmpty
                               ? Image.network(
                                   video.thumbnailUrl!,
@@ -786,8 +786,9 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.play_circle_outline,
-                                      color: $styles.colors.onScrim
-                                          .withValues(alpha: 0.7),
+                                      color: $styles.colors.onScrim.withValues(
+                                        alpha: 0.7,
+                                      ),
                                       size: 28,
                                     );
                                   },
@@ -868,9 +869,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                               ),
                             )
                           : const Icon(Icons.playlist_add),
-                      tooltip: _isAddingToQueue
-                          ? '正在加入队列'
-                          : '加入播放队列',
+                      tooltip: _isAddingToQueue ? '正在加入队列' : '加入播放队列',
                       iconSize: 20,
                       color: $styles.colors.accentText,
                       onPressed: _isAddingToQueue
@@ -878,10 +877,10 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                           : () {
                               HapticFeedback.lightImpact();
                               setState(() => _isAddingToQueue = true);
-                              final repository =
-                                  context.read<VideoDetailRepository>();
-                              final controller =
-                                  context.read<MediaPlaybackController>();
+                              final repository = context
+                                  .read<VideoDetailRepository>();
+                              final controller = context
+                                  .read<MediaPlaybackController>();
                               final messenger = ScaffoldMessenger.of(context);
                               queueAddController
                                   .addVideoToQueue(
@@ -895,9 +894,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                     messenger.showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          success
-                                              ? '已加入播放队列'
-                                              : '加入队列失败',
+                                          success ? '已加入播放队列' : '加入队列失败',
                                         ),
                                         duration: $styles.times.fast,
                                       ),
