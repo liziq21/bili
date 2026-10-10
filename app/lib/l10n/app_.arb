@@ -1101,6 +1101,18 @@
   "@tooltipPlay": {
     "description": "Tooltip - play button"
   },
+  "queueModeNone": "循环：关闭",
+  "@queueModeNone": {
+    "description": "Tooltip for player queue loop mode: off"
+  },
+  "queueModeSingle": "单首循环",
+  "@queueModeSingle": {
+    "description": "Tooltip for player queue loop mode: single track loop"
+  },
+  "queueModeLoop": "队列循环",
+  "@queueModeLoop": {
+    "description": "Tooltip for player queue loop mode: playlist loop"
+  },
   "filenameFormat": "Filename Format",
   "@filenameFormat": {
     "description": "Setting title - filename pattern"

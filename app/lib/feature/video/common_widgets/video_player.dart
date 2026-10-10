@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 // VideoState 同名。此处藏掉它，VideoState 全指 bloc 的状态。
 import 'package:media_kit_video/media_kit_video.dart' hide VideoState;
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
@@ -178,7 +179,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
           ),
           Gap($styles.insets.xs),
           IconButton(
-            tooltip: '切换循环模式',
+            tooltip: _queueModeTooltip(context, currentQueueMode),
             iconSize: 20,
             color: $styles.colors.onSurfaceVariant,
             onPressed: queueActive
@@ -213,6 +214,18 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
         return PlaybackQueueMode.loop;
       case PlaybackQueueMode.loop:
         return PlaybackQueueMode.none;
+    }
+  }
+
+  String _queueModeTooltip(BuildContext context, PlaybackQueueMode mode) {
+    final l10n = AppLocalizations.of(context);
+    switch (mode) {
+      case PlaybackQueueMode.none:
+        return l10n?.queueModeNone ?? '循环：关闭';
+      case PlaybackQueueMode.single:
+        return l10n?.queueModeSingle ?? '单首循环';
+      case PlaybackQueueMode.loop:
+        return l10n?.queueModeLoop ?? '队列循环';
     }
   }
 

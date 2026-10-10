@@ -106,6 +106,42 @@ void main() {
         addTearDown(bloc.close);
       },
     );
+
+    testWidgets('cycling loop mode updates the loop mode tooltip dynamically', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+
+      final bloc = VideoBloc(repository: _NoStreamRepository());
+      await pumpPlayer(tester, bloc: bloc, controller: controller);
+
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://example.com/1.m4s'),
+      ]);
+      await tester.pump();
+
+      // 初始模式为 none，Tooltip 显示 '循环：关闭'
+      expect(find.byTooltip('循环：关闭'), findsOneWidget);
+
+      // 点击一次，模式切为 single，Tooltip 显示 '单首循环'
+      await tester.tap(find.byTooltip('循环：关闭'));
+      await tester.pump();
+      expect(find.byTooltip('单首循环'), findsOneWidget);
+
+      // 再点一次，模式切为 loop，Tooltip 显示 '队列循环'
+      await tester.tap(find.byTooltip('单首循环'));
+      await tester.pump();
+      expect(find.byTooltip('队列循环'), findsOneWidget);
+
+      // 再点一次，模式切回 none，Tooltip 切回 '循环：关闭'
+      await tester.tap(find.byTooltip('队列循环'));
+      await tester.pump();
+      expect(find.byTooltip('循环：关闭'), findsOneWidget);
+
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+    });
   });
 }
 
@@ -230,7 +266,9 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   Future<void> move(int from, int to) async {}
 
   @override
-  Future<void> setPlaylistMode(PlaylistMode mode) async {}
+  Future<void> setPlaylistMode(PlaylistMode mode) async {
+    _playlistMode.add(mode);
+  }
 
   @override
   Future<void> open(

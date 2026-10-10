@@ -51,3 +51,9 @@
 **Learning:** Media player controls without explicit `tooltip` attributes leave hover/desktop users without feedback and screen reader users without state transitions (e.g. toggling between play/pause). Adding dynamic tooltips (`_isPlaying ? '暂停' : '播放'`) and popup menu tooltips (`切换`) improves accessibility while staying strictly within the test font subset (`test/fonts/subset-characters.txt`).
 
 **Action:** Always provide state-aware dynamic tooltips for media control toggles and verify all tooltip string characters exist in `test/fonts/subset-characters.txt`.
+
+## 2026-10-08 - Queue Loop Mode State-Aware Tooltips & Localization
+
+**Learning:** Static tooltips on state-cycling control buttons (such as static `'切换循环模式'`) leave hover users and screen readers (TalkBack/VoiceOver) unaware of the currently active mode. Providing state-aware dynamic tooltips via `AppLocalizations` (`queueModeNone`, `queueModeSingle`, `queueModeLoop`) ensures screen readers announce the exact active queue mode state while strictly respecting CJK font subset constraints in golden tests.
+
+**Action:** Always pair state-cycling action buttons with dynamic, state-aware localized tooltips and verify all text string characters exist in `app/test/fonts/subset-characters.txt`.

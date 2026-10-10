@@ -849,6 +849,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tooltipPlay => 'Play';
 
   @override
+  String get queueModeNone => '循环：关闭';
+
+  @override
+  String get queueModeSingle => '单首循环';
+
+  @override
+  String get queueModeLoop => '队列循环';
+
+  @override
   String get filenameFormat => 'Filename Format';
 
   @override
