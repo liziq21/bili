@@ -1564,6 +1564,24 @@ abstract class AppLocalizations {
   /// **'Play'**
   String get tooltipPlay;
 
+  /// Tooltip for player queue loop mode: off
+  ///
+  /// In zh, this message translates to:
+  /// **'循环：关闭'**
+  String get queueModeNone;
+
+  /// Tooltip for player queue loop mode: single track loop
+  ///
+  /// In zh, this message translates to:
+  /// **'单首循环'**
+  String get queueModeSingle;
+
+  /// Tooltip for player queue loop mode: playlist loop
+  ///
+  /// In zh, this message translates to:
+  /// **'队列循环'**
+  String get queueModeLoop;
+
   /// Setting title - filename pattern
   ///
   /// In zh, this message translates to:
