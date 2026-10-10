@@ -1,6 +1,3 @@
-import 'package:bilibili/bilibili.dart';
-import 'package:data/data.dart';
-import 'package:youtube/youtube.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
@@ -26,8 +23,8 @@ void main() {
       child: Builder(
         builder: (context) => MultiBlocProvider(
           providers: getBlocProviders(context),
-          child: Provider<List<MediaSource>>.value(
-            value: defaultMediaSources,
+          child: Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
             child: const App(),
           ),
         ),
@@ -47,8 +44,10 @@ void initDebugOverlayBridge() {
   // background screen recordings.
   if (kReleaseMode) {
     DebugOverlay.enabled = false;
-    Bili.client = http.IOClient();
-    YouTube.client = http.IOClient();
+    configureMediaSourceClients(
+      biliClient: http.IOClient(),
+      youtubeClient: http.IOClient(),
+    );
     return;
   }
 
@@ -107,8 +106,10 @@ void initDebugOverlayBridge() {
     );
   });
   // Enforce strict TLS/SSL certificate validation to protect against MitM attacks.
-  Bili.client = HttpLogClient(App.httpBucket, http.IOClient());
-  YouTube.client = HttpLogClient(App.httpBucket, http.IOClient());
+  configureMediaSourceClients(
+    biliClient: HttpLogClient(App.httpBucket, http.IOClient()),
+    youtubeClient: HttpLogClient(App.httpBucket, http.IOClient()),
+  );
 }
 
 AppStyle get $styles => AppScaffold.style;

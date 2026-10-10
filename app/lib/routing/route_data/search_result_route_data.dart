@@ -14,10 +14,12 @@ class const SearchRouteData({
 }) extends GoRouteData with $SearchRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final effectiveSource = source ?? _resolveSource(context);
+    final effectiveSource = _resolveSource(context, explicitSource: source);
+    if (effectiveSource == null) return const NoMediaSourceScreen();
 
     return ServiceSourceProviders(
-      source: effectiveSource,
+      key: ValueKey('search-result:${effectiveSource.id}'),
+      source: effectiveSource.id,
       child: Builder(
         builder: (context) => MultiBlocProvider(
           providers: [

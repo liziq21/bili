@@ -1,4 +1,5 @@
 import 'package:app/feature/home/widgets/home_source_selector.dart';
+import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,8 +17,16 @@ void main() {
     WidgetTester tester,
   ) async {
     final sources = [
-      const FakeMediaSource('bilibili', 'Bilibili'),
-      const FakeMediaSource('youtube', 'YouTube'),
+      MediaSourceDefinition(
+        id: 'bilibili',
+        name: 'Bilibili',
+        create: () => const FakeMediaSource('bilibili', 'Bilibili'),
+      ),
+      MediaSourceDefinition(
+        id: 'youtube',
+        name: 'YouTube',
+        create: () => const FakeMediaSource('youtube', 'YouTube'),
+      ),
     ];
 
     await tester.pumpWidget(

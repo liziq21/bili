@@ -1,11 +1,9 @@
 // ignore_for_file: use_primary_constructors, unnecessary_type_name_in_constructor
 
-import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/router.dart';
 import 'package:app/routing/routes.dart';
 
-import 'package:data/data.dart';
 import 'package:flutter/material.dart' hide MaterialApp, Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -13,8 +11,8 @@ import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
 import 'package:provider/provider.dart';
 
 /// 钉住各 typed route data 在「source 缺省」场景下的行为：每个 route 的 build
-/// 都读 context 解析 source，缺省时回落到 [defaultMediaSources] 首项而不是
-/// 崩溃。route data 类是 `part of router.dart` 的公开导出，可直接构造后调用
+/// 都读 context 解析 source，缺省时回落到目录首项而不是崩溃。route data 类是
+/// `part of router.dart` 的公开导出，可直接构造后调用
 /// build。
 void main() {
   GoRouterState fakeState({
@@ -40,8 +38,8 @@ void main() {
         final route = VideoRouteData(id: '123');
         Widget? built;
         await tester.pumpWidget(
-          Provider<List<MediaSource>>(
-            create: (_) => defaultMediaSources,
+          Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
             child: MaterialApp(
               home: Builder(
                 builder: (context) {
@@ -70,8 +68,8 @@ void main() {
         final route = NotFoundRouteData();
         Widget? built;
         await tester.pumpWidget(
-          Provider<List<MediaSource>>(
-            create: (_) => defaultMediaSources,
+          Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
             child: MaterialApp(
               home: Builder(
                 builder: (context) {
@@ -106,8 +104,8 @@ void main() {
       final route = NotFoundRouteData();
       Widget? built;
       await tester.pumpWidget(
-        Provider<List<MediaSource>>(
-          create: (_) => defaultMediaSources,
+        Provider<MediaSourceCatalog>.value(
+          value: defaultMediaSourceCatalog,
           child: MaterialApp(
             home: Builder(
               builder: (context) {
@@ -149,20 +147,20 @@ void main() {
     });
 
     testWidgets(
-      'navigateToVideo shows a snackbar when no VideoDetailRepository is in scope',
+      'navigateToVideo shows a snackbar for an unknown explicit source',
       (tester) async {
-        // 读不到仓库时不 push 路由，而是弹 SnackBar：这是「数据源不支持详情」的
-        // 唯一用户可见出口。push 分支需要真实 Navigator + 路由表，此处只钉兜底。
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (context) {
-                  return ElevatedButton(
-                    onPressed: () => context.navigateToVideo('abc'),
+          Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
+            child: MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () =>
+                        context.navigateToVideo('abc', source: 'missing'),
                     child: const Text('go'),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ),
@@ -170,42 +168,31 @@ void main() {
         await tester.tap(find.text('go'));
         await tester.pumpAndSettle();
 
-        expect(
-          find.text('当前数据源暂不支持查看视频详情'),
-          findsOneWidget,
-          reason: 'missing repo must surface a snackbar instead of pushing',
-        );
+        expect(find.text('视频所属的数据源不可用'), findsOneWidget);
       },
     );
 
     testWidgets(
-      'navigateToVideo does not show the snackbar when a repo is in scope',
+      'navigateToVideo does not require a repository in the current branch',
       (tester) async {
-        // 仓库在位时走 push 分支，push 需要 GoRouter 在 context 上、目标页
-        // 拉起 VideoScreen 需整套 provider 图——成本不抵收益。此处只钉
-        // 「repo 读取本身没被改坏」：读取成功就不该进 SnackBar 分支。tap 后
-        // 立即 pump（不 pumpAndSettle），push 抛 GoRouter 找不到的异常被
-        // 吞掉，只看 SnackBar 没出现。
         await tester.pumpWidget(
-          Provider<VideoDetailRepository?>(
-            create: (_) => _StubVideoDetailRepository(),
+          Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
             child: MaterialApp(
               home: Scaffold(
                 body: Builder(
-                  builder: (context) {
-                    return ElevatedButton(
-                      key: const ValueKey('go'),
-                      onPressed: () {
-                        try {
-                          context.navigateToVideo('abc');
-                        } catch (_) {
-                          // push 需要 GoRouter，此处必然抛；只关心没走
-                          // SnackBar 分支。
-                        }
-                      },
-                      child: const Text('go'),
-                    );
-                  },
+                  builder: (context) => ElevatedButton(
+                    key: const ValueKey('go'),
+                    onPressed: () {
+                      try {
+                        context.navigateToVideo('abc', source: 'bilibili');
+                      } catch (_) {
+                        // This focused test has no GoRouter; the absence of a
+                        // current-branch repository is not the failure path.
+                      }
+                    },
+                    child: const Text('go'),
+                  ),
                 ),
               ),
             ),
@@ -215,17 +202,8 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('go')));
         await tester.pump();
 
-        expect(
-          find.text('当前数据源暂不支持查看视频详情'),
-          findsNothing,
-          reason: 'repo in scope must not enter the snackbar fallback',
-        );
+        expect(find.text('视频所属的数据源不可用'), findsNothing);
       },
     );
   });
-}
-
-class _StubVideoDetailRepository implements VideoDetailRepository {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

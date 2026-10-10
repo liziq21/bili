@@ -1,14 +1,13 @@
 import 'dart:io';
 
-import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:window_size/window_size.dart';
-import 'package:youtube/youtube.dart';
 
 import 'app_bloc.dart';
+import 'providers/media_sources_provider.dart';
 import 'l10n/localization_file/app_localizations.dart';
 import 'routing/router.dart';
 import 'design/design.dart';
@@ -68,8 +67,7 @@ class const App({super.key}) extends StatelessWidget {
                 // `MaterialLocalizations.of(context)` lookup in widgets such as
                 // `TextField` returns null for any non-en locale.
                 ...GlobalMaterialLocalizations.delegates,
-                BilibiliLocalizations.delegate,
-                YoutubeLocalizations.delegate,
+                ...sourceLocalizationsDelegates,
               ],
               supportedLocales: const [
                 Locale('zh', 'CN'),

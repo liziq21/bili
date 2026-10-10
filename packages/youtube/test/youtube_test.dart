@@ -48,9 +48,7 @@ void main() {
 
       final youtube = YouTube();
       final ds = youtube.videoSearchDataSource;
-      await ds.searchVideoWithOptions(
-        const SearchQuery(query: 'test', pageKey: 1),
-      );
+      await ds.searchVideo(const SearchQuery(query: 'test', pageKey: 1));
 
       expect(clientUsed, isTrue);
       await youtube.close();
@@ -62,7 +60,7 @@ void main() {
       );
 
       final ds = youtube.videoSearchDataSource;
-      final videoRes = await ds.searchVideoWithOptions(
+      final videoRes = await ds.searchVideo(
         SearchQuery(
           query: 'test',
           pageKey: 1,
@@ -200,7 +198,9 @@ void main() {
       final creatorDS = youtube.creatorProfileSearchDataSource;
 
       // Blank query fast-returns empty Page without making HTTP request
-      final blankVideoRes = await videoDS.searchVideo('  \r\n\x00  ');
+      final blankVideoRes = await videoDS.searchVideo(
+        const SearchQuery(query: '  \r\n\x00  '),
+      );
       expect(blankVideoRes, isA<Ok<Page<VideoModel>>>());
       expect((blankVideoRes as Ok<Page<VideoModel>>).value.data, isEmpty);
       expect(videoRequestMade, isFalse);
@@ -287,7 +287,9 @@ void main() {
       );
 
       final videoDS = youtube.videoSearchDataSource;
-      final videoRes = await videoDS.searchVideo('sample');
+      final videoRes = await videoDS.searchVideo(
+        const SearchQuery(query: 'sample'),
+      );
       expect(videoRes, isA<Ok<Page<VideoModel>>>());
       final videos = (videoRes as Ok<Page<VideoModel>>).value.data;
       expect(videos, hasLength(1));

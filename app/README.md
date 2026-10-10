@@ -58,6 +58,7 @@ flutter run
 
 ## 相关规范
 
-详细架构规则、数据库规范与 UI 开发约束请参阅：
+生成文件必须由源文件和生成命令产生，禁止手工编辑；详细架构规则、数据库规范与 UI 开发约束请参阅：
 - [app/AGENTS.md](AGENTS.md)
+- [源注入规范](docs/source-injection.md)
 - [根目录 AGENTS.md](../AGENTS.md)

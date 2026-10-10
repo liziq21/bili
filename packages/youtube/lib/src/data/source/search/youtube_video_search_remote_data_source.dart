@@ -28,18 +28,7 @@ final class const YouTubeVideoSearchRemoteDataSource(
   static final Map<String, String> _continuationTokens = {};
 
   @override
-  Future<Result<Page<VideoModel>>> searchVideo(
-    String query, {
-    int? pageKey,
-  }) async {
-    return searchVideoWithOptions(
-      SearchQuery(query: query, pageKey: pageKey ?? 1),
-    );
-  }
-
-  Future<Result<Page<VideoModel>>> searchVideoWithOptions(
-    SearchQuery searchQuery,
-  ) async {
+  Future<Result<Page<VideoModel>>> searchVideo(SearchQuery searchQuery) async {
     try {
       final targetPage = searchQuery.pageKey;
       final query = searchQuery.query.replaceAll(_controlChars, '').trim();

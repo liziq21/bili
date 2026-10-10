@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:data/data.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
@@ -35,7 +36,8 @@ class const HomeScreen({
 
   @override
   Widget build(BuildContext context) {
-    final sources = context.mediaSources;
+    final sources = context.mediaSourceDefinitions;
+    final activeSource = context.read<MediaSource>();
     final colorScheme = Theme.of(context).colorScheme;
 
     // ⚡ Bolt Optimization: Isolate Scaffold and AppBar rebuild passes from HomeState feed updates.
@@ -48,8 +50,6 @@ class const HomeScreen({
         child: BlocSelector<HomeBloc, HomeState, String>(
           selector: (state) => state.sourceId,
           builder: (context, sourceId) {
-            final activeSource = context.read<HomeBloc>().activeSource!;
-
             return AppBar(
               titleSpacing: $styles.insets.sm,
               title: HomeSourceSelector(
@@ -79,7 +79,6 @@ class const HomeScreen({
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          final activeSource = context.read<HomeBloc>().activeSource!;
           return RefreshIndicator(
             onRefresh: () => _onRefresh(context),
             child: CustomScrollView(
