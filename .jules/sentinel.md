@@ -101,3 +101,9 @@ Prevention: Use a standardized URL normalizer (`normalizeYoutubeUrl`) that secur
 Vulnerability: `BiliVideoDetailRemoteDataSource` and `BiliVideoCommentRemoteDataSource` contained custom `_formatUrl` static methods that only handled scheme-relative `//` URLs and left unencrypted `http://` asset and avatar URLs untouched, allowing cleartext HTTP transport for media assets and user avatars over insecure connections.
 Learning: Data source helper functions written locally can easily omit `http://` to `https://` conversions, bypassing repository-wide HTTPS enforcement policies and leaking cleartext asset requests over the network.
 Prevention: Consistently eliminate local URL formatters in favor of centralized utilities like `normalizeBiliUrl` that enforce HTTPS for all `http://` and `//` asset URLs.
+
+## 2026-10-09 - Sanitize Control Characters and Secure Watch URLs in YouTube Video DTOs
+
+Vulnerability: `YouTubeVideoSearchRemoteDataSource` used raw string interpolation (`'https://www.youtube.com/watch?v=${video.videoId}'`) without sanitizing `video.videoId`, creating risk of parameter or header injection if untrusted API responses contained ASCII control characters (`\r\n`, `\x00`).
+Learning: Video watch URLs constructed from external API responses can propagate control characters into URI consumers or intent launchers if not sanitized at the DTO mapping layer.
+Prevention: Use a dedicated URL builder (`buildYoutubeWatchUrl`) that strips ASCII control characters (`[\x00-\x1F\x7F]`) and validates inputs before assembling watch URLs.

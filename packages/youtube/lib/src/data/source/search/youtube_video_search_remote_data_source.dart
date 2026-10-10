@@ -147,7 +147,7 @@ final class const YouTubeVideoSearchRemoteDataSource(
     return VideoModel(
       id: video.videoId,
       title: video.title?.value ?? '',
-      url: 'https://www.youtube.com/watch?v=${video.videoId}',
+      url: buildYoutubeWatchUrl(video.videoId),
       thumbnailUrl: normalizeYoutubeUrl(
         video.thumbnail?.thumbnails.lastOrNull?.url,
       ),

@@ -213,7 +213,7 @@ void main() {
       await youtube.close();
     });
 
-    test('normalizeYoutubeUrl tests', () {
+    test('normalizeYoutubeUrl and buildYoutubeWatchUrl tests', () {
       expect(normalizeYoutubeUrl(null), isNull);
       expect(normalizeYoutubeUrl(''), isNull);
       expect(
@@ -227,6 +227,14 @@ void main() {
       expect(
         normalizeYoutubeUrl('https://yt3.googleusercontent.com/pic.jpg'),
         equals('https://yt3.googleusercontent.com/pic.jpg'),
+      );
+
+      expect(buildYoutubeWatchUrl(null), equals(''));
+      expect(buildYoutubeWatchUrl(''), equals(''));
+      expect(buildYoutubeWatchUrl('   \r\n\x00 '), equals(''));
+      expect(
+        buildYoutubeWatchUrl('abc123\r\n45\x00'),
+        equals('https://www.youtube.com/watch?v=abc12345'),
       );
     });
 
