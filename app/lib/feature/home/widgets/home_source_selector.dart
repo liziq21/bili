@@ -1,15 +1,15 @@
-import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
+import '../../../providers/media_sources_provider.dart';
 import '../bloc/home_bloc.dart';
 
 /// 主页 AppBar 中的「数据源切换」下拉按钮
 class const HomeSourceSelector({
   super.key,
-  required final List<MediaSource> sources,
+  required final List<MediaSourceDefinition> sources,
   required final String activeSourceId,
 }) extends StatelessWidget {
   @override
@@ -17,7 +17,7 @@ class const HomeSourceSelector({
     final colorScheme = Theme.of(context).colorScheme;
 
     const semanticLabel = '切换数据源';
-    MediaSource activeSource;
+    MediaSourceDefinition activeSource;
     try {
       activeSource = sources.firstWhere((s) => s.id == activeSourceId);
     } on StateError {

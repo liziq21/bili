@@ -18,10 +18,10 @@ final class const BiliVideoSearchRemoteDataSource({
   @override
   List<SortOption> get sortOptions => const [];
   @override
-  Future<Result<Page<VideoModel>>> searchVideo(String query, {int? pageKey}) {
-    final cleanQuery = query.replaceAll(_controlChars, '').trim();
+  Future<Result<Page<VideoModel>>> searchVideo(SearchQuery searchQuery) {
+    final cleanQuery = searchQuery.query.replaceAll(_controlChars, '').trim();
     if (cleanQuery.isEmpty) {
-      final targetPage = pageKey ?? 1;
+      final targetPage = searchQuery.pageKey;
       return Future.value(
         Result.ok(
           Page<VideoModel>(
@@ -33,7 +33,7 @@ final class const BiliVideoSearchRemoteDataSource({
       );
     }
     return _network
-        .searchVideo(cleanQuery, page: pageKey)
+        .searchVideo(cleanQuery, page: searchQuery.pageKey)
         .then((it) => it.asPagedVideos())
         .toResult();
   }

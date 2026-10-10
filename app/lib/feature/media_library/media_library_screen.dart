@@ -215,10 +215,11 @@ class const _HistoryRows({
   @override
   Widget build(BuildContext context) {
     // ⚡ Bolt Optimization: Pre-compute source name lookup map and divider style parameters.
-    // Reading `context.mediaSources` once at the top of _HistoryRows avoids O(N) InheritedWidget
-    // element tree lookups and list iterations per item built on scroll.
+    // Reading the immutable catalog once at the top of _HistoryRows avoids repeated
+    // InheritedWidget lookups and list iterations per item built on scroll.
     final sourceNames = {
-      for (final source in context.mediaSources) source.id: source.name,
+      for (final source in context.mediaSourceDefinitions)
+        source.id: source.name,
     };
 
     return SliverLayoutBuilder(

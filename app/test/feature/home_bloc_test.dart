@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart' hide Page;
 import 'package:data/data.dart' as data show Page;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -234,15 +235,25 @@ void main() {
 
   HomeBloc buildBloc() => HomeBloc(
     userDataRepository: mockUserDataRepository,
-    mediaSources: mediaSources,
+    source: mediaSources.first,
   );
 
-  Widget buildScreen(HomeBloc bloc) => Provider<List<MediaSource>>.value(
-    value: mediaSources,
-    child: MaterialApp(
-      home: BlocProvider<HomeBloc>.value(
-        value: bloc,
-        child: HomeScreen(onLive: (_) {}, onVideo: (_) {}),
+  Widget buildScreen(HomeBloc bloc) => Provider<MediaSourceCatalog>.value(
+    value: MediaSourceCatalog([
+      for (final source in mediaSources)
+        MediaSourceDefinition(
+          id: source.id,
+          name: source.name,
+          create: () => source,
+        ),
+    ]),
+    child: Provider<MediaSource>.value(
+      value: mediaSources.first,
+      child: MaterialApp(
+        home: BlocProvider<HomeBloc>.value(
+          value: bloc,
+          child: HomeScreen(onLive: (_) {}, onVideo: (_) {}),
+        ),
       ),
     ),
   );
@@ -368,81 +379,29 @@ void main() {
       expect(find.text('继续加载'), findsNothing);
     });
 
-    test('Emits updated sourceId when UserData changes', () async {
+    test('keeps the route source when persisted user data changes', () async {
       final bloc = buildBloc();
       addTearDown(bloc.close);
-      await pumpEventQueue();
 
       mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
-
-      await expectLater(
-        bloc.stream.firstWhere((state) => state.sourceId == 'youtube'),
-        completes,
-      );
-    });
-
-    test(
-      'Keeps the first source and does not refetch on a fresh install',
-      () async {
-        final bloc = buildBloc();
-        addTearDown(bloc.close);
-        await bloc.stream.firstWhere((state) => state.videoSections.isNotEmpty);
-        final fetchesBefore = biliVideoFeed.fetchCount;
-
-        // 首次安装：SharedPreferences 无 SOURCE_ID，读到的 UserData.sourceId 为 null。
-        // 解析后与构造时的初始值相同，不应清空并重拉 Feed。
-        mockUserDataRepository.emitData(const UserData());
-        await pumpEventQueue();
-
-        expect(bloc.state.sourceId, 'bilibili');
-        expect(biliVideoFeed.fetchCount, fetchesBefore);
-      },
-    );
-
-    test('Ignores a persisted sourceId that is not in the list', () async {
-      final bloc = buildBloc();
-      addTearDown(bloc.close);
-      await bloc.stream.firstWhere((state) => state.videoSections.isNotEmpty);
-      final fetchesBefore = biliVideoFeed.fetchCount;
-
-      // 服务源已从清单中移除时，持久化的脏值不应生效。
-      mockUserDataRepository.emitData(
-        const UserData(sourceId: 'removed-service'),
-      );
       await pumpEventQueue();
 
       expect(bloc.state.sourceId, 'bilibili');
-      expect(biliVideoFeed.fetchCount, fetchesBefore);
     });
-
-    test(
-      'Returns to the first source when UserData reports no selection',
-      () async {
-        final bloc = buildBloc();
-        addTearDown(bloc.close);
-
-        mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
-        await bloc.stream.firstWhere((state) => state.sourceId == 'youtube');
-
-        mockUserDataRepository.emitData(const UserData());
-        await bloc.stream.firstWhere((state) => state.sourceId == 'bilibili');
-
-        expect(bloc.state.sourceId, 'bilibili');
-      },
-    );
 
     test(
       'ServiceSourceChanged event triggers repository setSourceId',
       () async {
         final bloc = buildBloc();
         addTearDown(bloc.close);
+        final userData = mockUserDataRepository.data.firstWhere(
+          (data) => data.sourceId == 'youtube',
+        );
 
         bloc.add(ServiceSourceChanged('youtube'));
 
-        await expectLater(
-          bloc.stream.firstWhere((state) => state.sourceId == 'youtube'),
-          completes,
-        );
+        await userData;
+        expect(bloc.state.sourceId, 'bilibili');
       },
     );
 
@@ -500,21 +459,18 @@ void main() {
       );
     });
 
-    test(
-      'Refresh with no source emits refreshing then not refreshing',
-      () async {
-        mediaSources = [];
-        final bloc = buildBloc();
-        addTearDown(bloc.close);
+    test('Refresh with a source with no feeds emits refreshing then not refreshing', () async {
+      mediaSources = [FakeMediaSource(id: 'empty', name: 'Empty')];
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
 
-        final expectation = expectLater(
-          bloc.stream.map((state) => state.isRefreshing),
-          emitsInOrder([isTrue, isFalse]),
-        );
-        bloc.add(FeedsRequested(refresh: true));
-        await expectation;
-      },
-    );
+      final expectation = expectLater(
+        bloc.stream.map((state) => state.isRefreshing),
+        emitsInOrder([isTrue, isFalse]),
+      );
+      bloc.add(FeedsRequested(refresh: true));
+      await expectation;
+    });
 
     test('Discards stale overlapping video and live feed requests', () async {
       final videoFeed = ControlledVideoFeed(id: 'shared', title: '视频');
@@ -582,7 +538,7 @@ void main() {
       );
     });
 
-    testWidgets('App bar holds the settings entry alone, for any source', (
+    testWidgets('App bar holds the settings entry for the route source', (
       tester,
     ) async {
       final bloc = buildBloc();
@@ -590,10 +546,7 @@ void main() {
 
       await tester.pumpWidget(buildScreen(bloc));
       await tester.pumpAndSettle();
-      mockUserDataRepository.emitData(const UserData(sourceId: 'youtube'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('YouTube'), findsWidgets);
+      expect(find.text('Bilibili'), findsWidgets);
       expect(find.byTooltip('设置'), findsOneWidget);
       // The by-ID entries (live room, creator space) and the search icon are
       // gone from the app bar, so neither the source having live support nor
@@ -602,9 +555,6 @@ void main() {
       expect(find.byTooltip('访问创作者空间'), findsNothing);
       expect(find.byTooltip('搜索'), findsNothing);
 
-      // R8: the settings entry wording does not vary with the service source.
-      mockUserDataRepository.emitData(const UserData(sourceId: 'bilibili'));
-      await tester.pumpAndSettle();
       expect(find.byTooltip('设置'), findsOneWidget);
     });
 

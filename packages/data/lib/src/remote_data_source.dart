@@ -1,5 +1,7 @@
 import 'package:model/model.dart';
 
+import 'search_query.dart';
+
 import 'model/creator_profile_model.dart';
 import 'model/filter_group.dart';
 import 'model/live_room_model.dart';
@@ -59,7 +61,10 @@ abstract class const LiveRoomSearchRemoteDataSource()
 abstract class const VideoSearchRemoteDataSource()
     extends SearchRemoteDataSource {
   /// 分页搜索视频
-  Future<Result<Page<VideoModel>>> searchVideo(String query, {int? pageKey});
+  ///
+  /// The source owns the interpretation of the neutral [SearchQuery] filters
+  /// and sort option. Unsupported options are not an app-layer concern.
+  Future<Result<Page<VideoModel>>> searchVideo(SearchQuery query);
 }
 
 /// 搜索联想/建议远程数据源能力接口

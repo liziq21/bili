@@ -3,6 +3,7 @@
 import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:app/feature/media_library/media_library_screen.dart';
+import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:drift/native.dart';
@@ -96,8 +97,14 @@ void main() {
   Future<void> pumpLibrary(WidgetTester tester, MediaHistoryCubit cubit) async {
     final tapped = <MediaHistoryItem>[];
     await tester.pumpWidget(
-      Provider<List<MediaSource>>.value(
-        value: [_FakeMediaSource(id: 'bilibili', name: 'Bilibili')],
+      Provider<MediaSourceCatalog>.value(
+        value: MediaSourceCatalog([
+          MediaSourceDefinition(
+            id: 'bilibili',
+            name: 'Bilibili',
+            create: () => _FakeMediaSource(id: 'bilibili', name: 'Bilibili'),
+          ),
+        ]),
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),
@@ -244,8 +251,14 @@ void main() {
 
     final tapped = <MediaHistoryItem>[];
     await tester.pumpWidget(
-      Provider<List<MediaSource>>.value(
-        value: [_FakeMediaSource(id: 'bilibili', name: 'Bilibili')],
+      Provider<MediaSourceCatalog>.value(
+        value: MediaSourceCatalog([
+          MediaSourceDefinition(
+            id: 'bilibili',
+            name: 'Bilibili',
+            create: () => _FakeMediaSource(id: 'bilibili', name: 'Bilibili'),
+          ),
+        ]),
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),

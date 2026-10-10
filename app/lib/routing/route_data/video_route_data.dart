@@ -2,19 +2,17 @@ part of '../router.dart';
 
 extension BuildContextVideo on BuildContext {
   void navigateToVideo(String id, {String? source}) {
-    VideoDetailRepository? repo;
-    try {
-      repo = read<VideoDetailRepository?>();
-    } catch (_) {
-      repo = null;
+    if (source != null && read<MediaSourceCatalog>().find(source) == null) {
+      ScaffoldMessenger.of(this)
+          .showSnackBar(const SnackBar(content: Text('视频所属的数据源不可用')));
+      return;
     }
 
-    if (repo != null) {
-      VideoRouteData(id: id, source: source).push(this);
-    } else {
-      ScaffoldMessenger.of(this)
-          .showSnackBar(const SnackBar(content: Text('当前数据源暂不支持查看视频详情')));
-    }
+    // The route owns the source scope and performs the capability check after
+    // creating the selected source. The caller may be outside that scope (for
+    // example the media-library branch), so checking a context repository here
+    // would incorrectly reject valid historical items.
+    VideoRouteData(id: id, source: source).push(this);
   }
 }
 
@@ -30,11 +28,22 @@ class const VideoRouteData({
 }) extends GoRouteData with $VideoRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final effectiveSource = source ?? _resolveSource(context);
+    final effectiveSource = _resolveSource(context, explicitSource: source);
+    if (effectiveSource == null) {
+      return const NoMediaSourceScreen(message: '视频所属的数据源不可用');
+    }
 
     return ServiceSourceProviders(
-      source: effectiveSource,
-      child: VideoScreen(videoId: id),
+      key: ValueKey('video:${effectiveSource.id}'),
+      source: effectiveSource.id,
+      child: Builder(
+        builder: (context) {
+          if (context.read<VideoDetailRepository?>() == null) {
+            return const NoMediaSourceScreen(message: '当前数据源暂不支持查看视频详情');
+          }
+          return VideoScreen(videoId: id);
+        },
+      ),
     );
   }
 }

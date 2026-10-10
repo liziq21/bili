@@ -3,9 +3,9 @@ import 'package:model/model.dart';
 
 import '../search_contents_repository.dart';
 
-class const AppLiveRoomSearchRepository(
-  final LiveRoomSearchRemoteDataSource _remoteDataSource,
-) implements LiveRoomSearchRepository {
+class const AppCreatorProfileSearchRepository(
+  final CreatorProfileSearchRemoteDataSource _remoteDataSource,
+) implements CreatorProfileSearchRepository {
   @override
   List<FilterGroup> get filters => _remoteDataSource.filters;
 
@@ -13,8 +13,8 @@ class const AppLiveRoomSearchRepository(
   List<SortOption> get sortOptions => _remoteDataSource.sortOptions;
 
   @override
-  Future<Result<Page<LiveRoomModel>>> search(SearchQuery query) {
-    return _remoteDataSource.searchLiveRoom(
+  Future<Result<Page<CreatorProfile>>> search(SearchQuery query) {
+    return _remoteDataSource.searchCreatorProfile(
       query.query,
       pageKey: query.pageKey,
     );
