@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
@@ -64,7 +65,10 @@ class const FeedStatusView({
           if (onRetry != null) ...[
             SizedBox(height: $styles.insets.xs),
             OutlinedButton.icon(
-              onPressed: onRetry,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                onRetry!();
+              },
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('重试'),
             ),
