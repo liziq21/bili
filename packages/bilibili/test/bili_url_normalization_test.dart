@@ -78,5 +78,103 @@ void main() {
       expect(model.thumbnailUrl, startsWith('https://'));
       expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
     });
+
+    test('NetworkVideoSearchResultX.asModel normalizes video url to https', () {
+      final json = loadFake('search_video');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+      final video = result.result.video.first;
+
+      final model = video.asModel();
+      expect(model.url, startsWith('https://'));
+      expect(model.url, isNot(startsWith('https:https://')));
+    });
+
+    test('NetworkVideoSearchResultX.asModel handles http and empty arcurl', () {
+      final json = loadFake('search_video');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+      final rawVideo = result.result.video.first;
+
+      final httpVideo = NetworkVideoSearchResult(
+        id: rawVideo.id,
+        author: rawVideo.author,
+        mid: rawVideo.mid,
+        typeid: rawVideo.typeid,
+        typename: rawVideo.typename,
+        arcurl: 'http://www.bilibili.com/video/av12345678',
+        aid: rawVideo.aid,
+        bvid: rawVideo.bvid,
+        title: rawVideo.title,
+        description: rawVideo.description,
+        pic: rawVideo.pic,
+        play: rawVideo.play,
+        favorites: rawVideo.favorites,
+        tag: rawVideo.tag,
+        review: rawVideo.review,
+        pubdate: rawVideo.pubdate,
+        senddate: rawVideo.senddate,
+        duration: rawVideo.duration,
+        badgepay: rawVideo.badgepay,
+        isUnionVideo: rawVideo.isUnionVideo,
+        like: rawVideo.like,
+        upic: rawVideo.upic,
+        corner: rawVideo.corner,
+        cover: rawVideo.cover,
+        desc: rawVideo.desc,
+        url: rawVideo.url,
+        danmaku: rawVideo.danmaku,
+      );
+      expect(
+        httpVideo.asModel().url,
+        equals('https://www.bilibili.com/video/av12345678'),
+      );
+
+      final emptyVideo = NetworkVideoSearchResult(
+        id: rawVideo.id,
+        author: rawVideo.author,
+        mid: rawVideo.mid,
+        typeid: rawVideo.typeid,
+        typename: rawVideo.typename,
+        arcurl: '',
+        aid: rawVideo.aid,
+        bvid: rawVideo.bvid,
+        title: rawVideo.title,
+        description: rawVideo.description,
+        pic: rawVideo.pic,
+        play: rawVideo.play,
+        favorites: rawVideo.favorites,
+        tag: rawVideo.tag,
+        review: rawVideo.review,
+        pubdate: rawVideo.pubdate,
+        senddate: rawVideo.senddate,
+        duration: rawVideo.duration,
+        badgepay: rawVideo.badgepay,
+        isUnionVideo: rawVideo.isUnionVideo,
+        like: rawVideo.like,
+        upic: rawVideo.upic,
+        corner: rawVideo.corner,
+        cover: rawVideo.cover,
+        desc: rawVideo.desc,
+        url: rawVideo.url,
+        danmaku: rawVideo.danmaku,
+      );
+      expect(
+        emptyVideo.asModel().url,
+        equals('https://www.bilibili.com/video/${rawVideo.bvid}'),
+      );
+    });
+
+    test('NetworkBiliUserResX.asModel normalizes video url to https', () {
+      final json = loadFake('search_bili_user');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+      final user = result.result.biliUser.first;
+      final video = user.res.first;
+
+      final model = video.asModel();
+      expect(model.url, startsWith('https://'));
+      expect(model.url, isNot(startsWith('https:https://')));
+    });
   });
 }

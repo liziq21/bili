@@ -53,9 +53,15 @@ jobs:
             app/android/*.gradle*
             app/android/**/gradle-wrapper.properties
 
+      - id: fvmrc
+        name: Read pinned SDK version
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.fvmrc'))['flutter'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
-          version: 3.47.5
+          version: ${{ steps.fvmrc.outputs.version }}
           channel: stable
           cache: true
 
@@ -102,7 +108,7 @@ jobs:
         run: flutter pub get
 
       - name: Run build_runner
-        run: flutter pub run build_runner build --delete-conflicting-outputs --verbose
+        run: dart run build_runner build --delete-conflicting-outputs --verbose
 
       - name: Build signed release APK
         # versionCode = run_number * 10 + run_attempt. Re-running a workflow keeps

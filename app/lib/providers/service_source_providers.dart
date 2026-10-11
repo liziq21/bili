@@ -1,141 +1,148 @@
-import 'package:bilibili/bilibili.dart';
+import 'dart:async';
+
 import 'package:data/data.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:youtube/youtube.dart';
+import 'package:logging/logging.dart';
+import 'package:provider/single_child_widget.dart';
 
+import '../data/repository/app_search_suggest_repository.dart';
+import '../data/repository/search/app_creator_profile_search_repository.dart';
 import '../data/repository/search/app_live_room_search_repository.dart';
-import '../data/repository/search/app_user_search_repository.dart';
 import '../data/repository/search/app_video_search_repository.dart';
-import '../data/repository/search/app_youtube_video_search_repository.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_comment_repository.dart';
 import '../data/repository/video_detail_repository.dart';
+import 'media_sources_provider.dart';
 
-/// 数据源 Context 依赖注入提供器 (Service Source Provider)
+/// Injects one route-scoped [MediaSource] and the repositories for its
+/// optional capabilities.
 ///
-/// 当导航到特定数据源页面（如 Bilibili 或 YouTube）时，
-/// 负责为组件树条件注入该数据源实例及其实现的相关 Repository。
+/// The source catalog owns factories; this widget owns the instance returned
+/// by the selected factory. Concrete source packages never appear in this
+/// file. Repository injection is driven by the nullable capability interfaces
+/// exposed by [MediaSource], not by source-ID switches.
 class const ServiceSourceProviders({
   super.key,
-
-  /// 数据源标识名称（如 'bilibili', 'youtube'）
   required final String source,
-
-  /// 子组件
   required final Widget child,
 }) extends StatelessWidget {
-  /// 已注册数据源标识 → 实例构造函数。新增数据源在此登记一处。
-  ///
-  /// 用构造函数 tear-off 而非已建实例：校验只需查表，不必每次 build 都 new
-  /// 一个 [Bili]/[YouTube]（`Bili` 的生命周期由下方 `dispose` 负责关闭）。
-  static const _registry = <String, MediaSource Function()>{
-    'bilibili': Bili.new,
-    'youtube': YouTube.new,
-  };
-
-  /// 未注册标识直接抛错，不静默放过。
-  ///
-  /// 必须在任何提前返回 `child` 之前调用：[source] 是公开构造参数，若祖先已
-  /// 注册了同名 String provider，校验会被 `return child` 绕过。
-  void _assertRegistered(String sourceName) {
-    if (!_registry.containsKey(sourceName.toLowerCase())) {
+  @override
+  Widget build(BuildContext context) {
+    if (source != normalizeMediaSourceId(source)) {
       throw ArgumentError.value(
-        sourceName,
-        'sourceName',
-        '未知数据源标识（已注册：${_registry.keys.join('、')}）',
+        source,
+        'source',
+        'Source ID must be canonical',
+      );
+    }
+    final definition = context.watch<MediaSourceCatalog>().find(source);
+    if (definition == null) {
+      throw ArgumentError.value(source, 'source', 'Unknown source ID');
+    }
+    // New routes are siblings under a Navigator, not nested source scopes.
+    // Reject nesting rather than inheriting another source's missing capability.
+    if (context.read<MediaSource?>() != null) {
+      throw StateError('Source scopes must not be nested');
+    }
+    return _SourceScope(
+      key: ValueKey(definition.id),
+      definition: definition,
+      child: child,
+    );
+  }
+}
+
+class const _SourceScope({
+  super.key,
+  required final MediaSourceDefinition definition,
+  required final Widget child,
+}) extends StatefulWidget {
+  @override
+  State<_SourceScope> createState() => _SourceScopeState();
+}
+
+class _SourceScopeState() extends State<_SourceScope> {
+  MediaSource? _ownedSource;
+  late final List<SingleChildWidget> _providers;
+  final _log = Logger('ServiceSourceProviders');
+
+  @override
+  void initState() {
+    super.initState();
+    final mediaSource = widget.definition.create();
+    _ownedSource = mediaSource;
+    try {
+      if (mediaSource.id != widget.definition.id) {
+        throw StateError('Source factory returned a mismatched ID');
+      }
+      _providers = _buildProviders(mediaSource);
+    } catch (_) {
+      _closeSource();
+      rethrow;
+    }
+  }
+
+  void _closeSource() {
+    final source = _ownedSource;
+    _ownedSource = null;
+    if (source != null) {
+      unawaited(
+        Future<void>.sync(source.close)
+            .catchError((Object error, StackTrace stackTrace) {
+              _log.warning(
+                'Failed to close source ${source.id}',
+                error,
+                stackTrace,
+              );
+            }),
       );
     }
   }
 
-  /// 根据数据源标识字符串创建对应的 [MediaSource] 实例
-  MediaSource _createMediaSource(String sourceName) =>
-      _registry[sourceName.toLowerCase()]!();
+  @override
+  void dispose() {
+    _closeSource();
+    super.dispose();
+  }
+
+  List<SingleChildWidget> _buildProviders(MediaSource source) => [
+    // State owns this instance even when no descendant reads the provider.
+    RepositoryProvider<MediaSource>.value(value: source),
+    RepositoryProvider<MediaSourceDefinition>.value(value: widget.definition),
+    if (source.videoSearchDataSource case final videoSearchDataSource?)
+      RepositoryProvider<VideoSearchRepository>(
+        create: (_) => AppVideoSearchRepository(videoSearchDataSource),
+      ),
+    if (source.creatorProfileSearchDataSource
+        case final creatorProfileSearchDataSource?)
+      RepositoryProvider<CreatorProfileSearchRepository>(
+        create: (_) =>
+            AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),
+      ),
+    if (source.searchSuggestDataSource case final searchSuggestDataSource?)
+      RepositoryProvider<SearchSuggestRepository>(
+        create: (_) => AppSearchSuggestRepository(searchSuggestDataSource),
+      ),
+    if (source.liveRoomSearchDataSource case final liveRoomSearchDataSource?)
+      RepositoryProvider<LiveRoomSearchRepository>(
+        create: (_) => AppLiveRoomSearchRepository(liveRoomSearchDataSource),
+      ),
+    if (source.videoDetailDataSource case final videoDetailDataSource?)
+      RepositoryProvider<VideoDetailRepository>(
+        create: (_) => AppVideoDetailRepository(
+          videoDetailDataSource,
+          source.mediaStreamDataSource,
+        ),
+      ),
+    if (source.videoCommentDataSource case final videoCommentDataSource?)
+      RepositoryProvider<VideoCommentRepository>(
+        create: (_) => AppVideoCommentRepository(videoCommentDataSource),
+      ),
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    // 先校验再谈其它：未注册标识必须在建树前暴露，否则错误会推迟到子树里
-    // 某处 `context.read<...>()` 抛出 ProviderNotFoundException 而无法回溯来源。
-    _assertRegistered(source);
-
-    // 仅「String provider 未注册」时按需注入；其它异常不得吞掉。
-    String? currentSource;
-    try {
-      currentSource = context.read<String?>();
-    } on ProviderNotFoundException {
-      currentSource = null;
-    }
-    if (currentSource?.toLowerCase() == source.toLowerCase()) {
-      return child;
-    }
-
-    final mediaSource = _createMediaSource(source);
-
-    return RepositoryProvider<String>.value(
-      value: source,
-      child: RepositoryProvider<MediaSource>.value(
-        value: mediaSource,
-        child: switch (source.toLowerCase()) {
-          'bilibili' => MultiRepositoryProvider(
-            providers: [
-              RepositoryProvider<Bili>(
-                create: (_) => mediaSource as Bili,
-                dispose: (bili) => bili.close(),
-              ),
-              RepositoryProvider<VideoSearchRepository>(
-                create: (context) => AppVideoSearchRepository(
-                  context.read<Bili>().videoSearchDataSource,
-                ),
-              ),
-              RepositoryProvider<CreatorProfileSearchRepository>(
-                create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource,
-                  context.read<Bili>().searchSuggestDataSource,
-                ),
-              ),
-              RepositoryProvider<LiveRoomSearchRepository>(
-                create: (context) => AppLiveRoomSearchRepository(
-                  context.read<Bili>().liveRoomSearchDataSource,
-                ),
-              ),
-              RepositoryProvider<SearchSuggestRepository>(
-                create: (context) => AppUserSearchRepository(
-                  context.read<Bili>().creatorProfileSearchDataSource,
-                  context.read<Bili>().searchSuggestDataSource,
-                ),
-              ),
-              RepositoryProvider<VideoDetailRepository>(
-                create: (context) => AppVideoDetailRepository(
-                  context.read<Bili>().videoDetailDataSource,
-                  context.read<Bili>().mediaStreamDataSource,
-                ),
-              ),
-              RepositoryProvider<VideoCommentRepository>(
-                create: (context) => AppVideoCommentRepository(
-                  context.read<Bili>().videoCommentDataSource,
-                ),
-              ),
-            ],
-            child: child,
-          ),
-          'youtube' => MultiRepositoryProvider(
-            providers: [
-              RepositoryProvider<YouTube>(
-                create: (_) => mediaSource as YouTube,
-                dispose: (yt) => yt.close(),
-              ),
-              RepositoryProvider<VideoSearchRepository>(
-                create: (context) => AppYouTubeVideoSearchRepository(
-                  context.read<YouTube>().videoSearchDataSource,
-                ),
-              ),
-            ],
-            child: child,
-          ),
-          _ => child,
-        },
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      MultiRepositoryProvider(providers: _providers, child: widget.child);
 }

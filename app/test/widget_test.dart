@@ -8,6 +8,7 @@ import 'package:app/data/repository/recent_search_query/recent_search_query_repo
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -103,9 +104,13 @@ void main() {
     (tester) async {
       final userDataRepository = FakeUserDataRepository();
       final appBloc = AppBloc(userDataRepository: userDataRepository);
-      final mediaSources = <MediaSource>[
-        FakeMediaSource('bilibili', 'Bilibili'),
-      ];
+      final mediaSourceCatalog = MediaSourceCatalog([
+        MediaSourceDefinition(
+          id: 'bilibili',
+          name: 'Bilibili',
+          create: _createFakeBilibili,
+        ),
+      ]);
 
       addTearDown(() {
         appBloc.close();
@@ -126,8 +131,8 @@ void main() {
               ),
               child: BlocProvider<AppBloc>.value(
                 value: appBloc,
-                child: Provider<List<MediaSource>>.value(
-                  value: mediaSources,
+                child: Provider<MediaSourceCatalog>.value(
+                  value: mediaSourceCatalog,
                   child: const App(),
                 ),
               ),
@@ -169,3 +174,5 @@ void main() {
     },
   );
 }
+
+MediaSource _createFakeBilibili() => FakeMediaSource('bilibili', 'Bilibili');

@@ -1,29 +1,57 @@
+import 'dart:async';
+
 import 'package:app/providers/media_sources_provider.dart';
-import 'package:bilibili/bilibili.dart';
+import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:youtube/youtube.dart';
 
 void main() {
-  group('defaultMediaSources', () {
-    test('exposes bilibili then youtube', () {
-      expect(defaultMediaSources.map((source) => source.id).toList(), [
+  group('MediaSourceCatalog', () {
+    test('contains source definitions without creating source instances', () {
+      expect(defaultMediaSourceCatalog.definitions.map((source) => source.id), [
         'bilibili',
         'youtube',
       ]);
+      expect(defaultMediaSourceCatalog.definitions, everyElement(isNotNull));
     });
 
-    test('holds distinct instances so each source owns its own client', () {
-      final ids = defaultMediaSources.map((source) => source.id).toList();
-      expect(ids.toSet().length, ids.length);
+    test('resolves canonical and case-insensitive source IDs', () {
+      expect(defaultMediaSourceCatalog.find('bilibili')?.id, 'bilibili');
+      expect(defaultMediaSourceCatalog.find(' YouTube ')?.id, 'youtube');
     });
 
-    test('creates real Bili and YouTube implementations', () {
-      expect(defaultMediaSources.first, isA<Bili>());
-      expect(defaultMediaSources.last, isA<YouTube>());
+    test('falls back to the first definition for stale persisted values', () {
+      expect(
+        defaultMediaSourceCatalog.resolvePersisted('removed')?.id,
+        'bilibili',
+      );
+      expect(defaultMediaSourceCatalog.resolvePersisted(null)?.id, 'bilibili');
     });
 
-    test('is non-empty for the default source fallback', () {
-      expect(defaultMediaSources, isNotEmpty);
+    test('returns null when an empty catalog resolves a persisted value', () {
+      final catalog = MediaSourceCatalog(const []);
+
+      expect(catalog.resolvePersisted(null), isNull);
+      expect(catalog.resolvePersisted('bilibili'), isNull);
+    });
+
+    test(
+      'creates source instances only when a definition factory is called',
+      () {
+        final definition = defaultMediaSourceCatalog.definitions.first;
+        final first = definition.create();
+        final second = definition.create();
+
+        expect(first, isA<MediaSource>());
+        expect(identical(first, second), isFalse);
+        unawaited(first.close());
+        unawaited(second.close());
+      },
+    );
+  });
+
+  group('normalizeMediaSourceId', () {
+    test('trims and lowercases external source IDs', () {
+      expect(normalizeMediaSourceId(' YouTube '), 'youtube');
     });
   });
 }
