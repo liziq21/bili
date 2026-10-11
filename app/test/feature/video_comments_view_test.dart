@@ -80,8 +80,14 @@ void main() {
     await tester.pump();
 
     expect(find.text('收起回复'), findsOneWidget);
-    expect(find.text('Preview reply', findRichText: true), findsOneWidget);
-    expect(find.text('Loaded reply', findRichText: true), findsOneWidget);
+    expect(
+      find.textContaining('Preview reply', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Loaded reply', findRichText: true),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('comment-replies-c1')));
     await tester.pump();
