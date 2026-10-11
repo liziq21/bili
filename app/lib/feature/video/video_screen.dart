@@ -14,13 +14,15 @@ import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
 import 'player/media_playback_controller.dart';
 
-class const VideoScreen({super.key, final String videoId = 'demo_video'})
-    extends StatefulWidget {
+class VideoScreen extends StatefulWidget {
+  const VideoScreen({super.key, this.videoId = 'demo_video'});
+  final String videoId;
+
   @override
   State<VideoScreen> createState() => VideoScreenState();
 }
 
-class VideoScreenState() extends State<VideoScreen> {
+class VideoScreenState extends State<VideoScreen> {
   MediaPlaybackController? _playbackController;
   MediaHistoryDao? _mediaHistoryDao;
   String? _sourceId;
