@@ -138,7 +138,10 @@ class _SourceScopeState() extends State<_SourceScope> {
       ),
     if (source.videoCommentDataSource case final videoCommentDataSource?)
       RepositoryProvider<VideoCommentRepository>(
-        create: (_) => AppVideoCommentRepository(videoCommentDataSource),
+        create: (_) => AppVideoCommentRepository(
+          videoCommentDataSource,
+          source.videoCommentRepliesDataSource,
+        ),
       ),
   ];
 

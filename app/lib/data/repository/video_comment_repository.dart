@@ -13,6 +13,14 @@ abstract interface class VideoCommentRepository() {
     int page = 1,
     int pageSize = 20,
   });
+
+  /// 分页获取指定评论的二级回复列表。
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  });
 }
 
 /// [VideoCommentRepository] 的默认应用实现
@@ -21,6 +29,7 @@ abstract interface class VideoCommentRepository() {
 /// 当当前数据源未实现评论功能时，安全返回错误结果。
 class AppVideoCommentRepository([
   final VideoCommentRemoteDataSource? _remoteDataSource,
+  final VideoCommentRepliesRemoteDataSource? _repliesDataSource,
 ]) implements VideoCommentRepository {
   @override
   Future<Result<Page<VideoComment>>> getVideoComments(
@@ -36,5 +45,23 @@ class AppVideoCommentRepository([
       );
     }
     return Result.error(Exception('当前数据源不支持获取评论'));
+  }
+
+  @override
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    if (_repliesDataSource != null) {
+      return _repliesDataSource.getVideoCommentReplies(
+        videoId,
+        rootCommentId,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    return Result.error(Exception('当前数据源不支持获取评论回复'));
   }
 }

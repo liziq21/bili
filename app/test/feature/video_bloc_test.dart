@@ -113,9 +113,49 @@ class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
       id: 'c1',
       authorName: 'User 1',
       content: 'Comment 1',
+      replies: [
+        VideoComment(id: 'r1', authorName: 'Reply 1', content: 'Preview reply'),
+      ],
+      replyCount: 3,
     );
     return Result.ok(
       Page<VideoComment>(number: page, totalPages: 2, data: [comment]),
+    );
+  }
+}
+
+class FakeVideoCommentRepliesRemoteDataSource()
+    extends VideoCommentRepliesRemoteDataSource {
+  @override
+  String get sourceId => 'fake';
+
+  final calls = <(String, String, int, int)>[];
+
+  @override
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    calls.add((videoId, rootCommentId, page, pageSize));
+    return Result.ok(
+      Page<VideoComment>(
+        number: page,
+        totalPages: 2,
+        data: [
+          if (page == 1)
+            VideoComment(
+              id: 'r1',
+              authorName: 'Reply 1',
+              content: 'Preview reply',
+            ),
+          if (page == 1)
+            VideoComment(id: 'r2', authorName: 'Reply 2', content: 'Reply 2')
+          else
+            VideoComment(id: 'r3', authorName: 'Reply 3', content: 'Reply 3'),
+        ],
+      ),
     );
   }
 }
@@ -423,10 +463,13 @@ void main() {
   group('VideoCommentBloc Tests', () {
     late AppVideoCommentRepository commentRepo;
     late VideoCommentBloc commentBloc;
+    late FakeVideoCommentRepliesRemoteDataSource repliesDataSource;
 
     setUp(() {
+      repliesDataSource = FakeVideoCommentRepliesRemoteDataSource();
       commentRepo = AppVideoCommentRepository(
         FakeVideoCommentRemoteDataSource(),
+        repliesDataSource,
       );
       commentBloc = VideoCommentBloc(repository: commentRepo);
     });
@@ -488,6 +531,70 @@ void main() {
         ),
       );
     });
+
+    test(
+      'expanding replies keeps the preview and loads the first page',
+      () async {
+        commentBloc.add(const LoadVideoComments('test_id'));
+        await commentBloc.stream.firstWhere((s) => !s.isLoading);
+
+        commentBloc.add(const ToggleCommentReplies('c1'));
+        await commentBloc.stream.firstWhere(
+          (s) => s.replyStates['c1']?.hasLoaded == true,
+        );
+
+        final replies = commentBloc.state.replyStates['c1']!;
+        expect(replies.isExpanded, isTrue);
+        expect(replies.replies.map((reply) => reply.id), ['r1', 'r2']);
+        expect(repliesDataSource.calls, [('test_id', 'c1', 1, 20)]);
+      },
+    );
+
+    test(
+      'reply pagination is keyed by root comment and deduplicates previews',
+      () async {
+        commentBloc.add(const LoadVideoComments('test_id'));
+        await commentBloc.stream.firstWhere((s) => !s.isLoading);
+        commentBloc.add(const ToggleCommentReplies('c1'));
+        await commentBloc.stream.firstWhere(
+          (s) => s.replyStates['c1']?.hasLoaded == true,
+        );
+
+        commentBloc.add(const FetchNextCommentRepliesPage('c1'));
+        await commentBloc.stream.firstWhere(
+          (s) => s.replyStates['c1']?.currentPage == 2,
+        );
+
+        final replies = commentBloc.state.replyStates['c1']!;
+        expect(replies.replies.map((reply) => reply.id), ['r1', 'r2', 'r3']);
+        expect(repliesDataSource.calls, [
+          ('test_id', 'c1', 1, 20),
+          ('test_id', 'c1', 2, 20),
+        ]);
+      },
+    );
+
+    test(
+      'collapsing replies keeps the loaded state for the next expansion',
+      () async {
+        commentBloc.add(const LoadVideoComments('test_id'));
+        await commentBloc.stream.firstWhere((s) => !s.isLoading);
+        commentBloc.add(const ToggleCommentReplies('c1'));
+        await commentBloc.stream.firstWhere(
+          (s) => s.replyStates['c1']?.hasLoaded == true,
+        );
+
+        commentBloc.add(const ToggleCommentReplies('c1'));
+        await commentBloc.stream.firstWhere(
+          (s) => s.replyStates['c1']?.isExpanded == false,
+        );
+
+        final replies = commentBloc.state.replyStates['c1']!;
+        expect(replies.replies, hasLength(2));
+        expect(replies.hasLoaded, isTrue);
+        expect(repliesDataSource.calls, [('test_id', 'c1', 1, 20)]);
+      },
+    );
 
     test(
       'AppVideoCommentRepository returns error when no remote data source',

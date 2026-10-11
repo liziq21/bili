@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+
+@immutable
 final class const VideoComment({
   required final String id,
   required final String authorName,
@@ -7,6 +10,7 @@ final class const VideoComment({
   final bool isLiked = false,
   final DateTime? createdAt,
   final List<VideoComment> replies = const [],
+  final int replyCount = 0,
 }) {
   VideoComment copyWith({
     String? id,
@@ -17,6 +21,7 @@ final class const VideoComment({
     bool? isLiked,
     DateTime? createdAt,
     List<VideoComment>? replies,
+    int? replyCount,
   }) {
     return VideoComment(
       id: id ?? this.id,
@@ -27,6 +32,7 @@ final class const VideoComment({
       isLiked: isLiked ?? this.isLiked,
       createdAt: createdAt ?? this.createdAt,
       replies: replies ?? this.replies,
+      replyCount: replyCount ?? this.replyCount,
     );
   }
 }

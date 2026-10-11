@@ -3,7 +3,55 @@ part of 'video_comment_bloc.dart';
 class const _VideoCommentErrorSentinel();
 
 const _keepVideoCommentError = _VideoCommentErrorSentinel();
+const _keepVideoCommentReplyError = _VideoCommentErrorSentinel();
 
+@immutable
+class const VideoCommentReplyState({
+  final List<VideoComment> replies = const [],
+  final bool isExpanded = false,
+  final bool isLoading = false,
+  final bool hasLoaded = false,
+  final int currentPage = 0,
+  final int totalPages = 1,
+  final String? error,
+}) extends Equatable {
+  bool get hasMore => !hasLoaded || currentPage < totalPages;
+
+  VideoCommentReplyState copyWith({
+    List<VideoComment>? replies,
+    bool? isExpanded,
+    bool? isLoading,
+    bool? hasLoaded,
+    int? currentPage,
+    int? totalPages,
+    Object? error = _keepVideoCommentReplyError,
+  }) {
+    return VideoCommentReplyState(
+      replies: replies ?? this.replies,
+      isExpanded: isExpanded ?? this.isExpanded,
+      isLoading: isLoading ?? this.isLoading,
+      hasLoaded: hasLoaded ?? this.hasLoaded,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      error: identical(error, _keepVideoCommentReplyError)
+          ? this.error
+          : error as String?,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    replies,
+    isExpanded,
+    isLoading,
+    hasLoaded,
+    currentPage,
+    totalPages,
+    error,
+  ];
+}
+
+@immutable
 class const VideoCommentState({
   final bool isLoading = false,
   final bool isLoadingMore = false,
@@ -13,6 +61,7 @@ class const VideoCommentState({
   final int totalPages = 1,
   final bool hasMore = false,
   final String videoId = '',
+  final Map<String, VideoCommentReplyState> replyStates = const {},
 }) extends Equatable {
   VideoCommentState copyWith({
     bool? isLoading,
@@ -23,6 +72,7 @@ class const VideoCommentState({
     int? totalPages,
     bool? hasMore,
     String? videoId,
+    Map<String, VideoCommentReplyState>? replyStates,
   }) {
     return VideoCommentState(
       isLoading: isLoading ?? this.isLoading,
@@ -35,6 +85,9 @@ class const VideoCommentState({
       totalPages: totalPages ?? this.totalPages,
       hasMore: hasMore ?? this.hasMore,
       videoId: videoId ?? this.videoId,
+      replyStates: replyStates == null
+          ? this.replyStates
+          : Map.unmodifiable(replyStates),
     );
   }
 
@@ -48,5 +101,6 @@ class const VideoCommentState({
     totalPages,
     hasMore,
     videoId,
+    replyStates,
   ];
 }

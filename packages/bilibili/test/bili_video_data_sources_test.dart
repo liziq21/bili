@@ -11,7 +11,10 @@ class MockNetworkVideoDataSource({
   required final Map<String, dynamic> videoRelationJson,
   required final List<dynamic> relatedVideosJson,
   required final Map<String, dynamic> replyListJson,
+  required final Map<String, dynamic> replyReplyListJson,
 }) implements NetworkVideoDataSource {
+  final replyReplyCalls = <(int, int, int, int)>[];
+
   @override
   Future<VideoDetailData> getVideoDetail({required String bvid}) async {
     return VideoDetailData.fromJson(
@@ -55,7 +58,10 @@ class MockNetworkVideoDataSource({
     required int type,
     int page = 1,
   }) async {
-    throw UnimplementedError();
+    replyReplyCalls.add((oid, root, type, page));
+    return NetworkReplyReplyData.fromJson(
+      replyReplyListJson['data'] as Map<String, dynamic>,
+    );
   }
 
   @override
@@ -125,6 +131,7 @@ void main() {
       final relationJson = loadJson('video_relation.json');
       final relatedJson = loadJson('related_videos.json');
       final replyJson = loadJson('reply_list.json');
+      final replyReplyJson = loadJson('reply_reply_list.json');
 
       mockNetwork = MockNetworkVideoDataSource(
         videoDetailJson: detailJson as Map<String, dynamic>,
@@ -132,6 +139,7 @@ void main() {
         relatedVideosJson:
             (relatedJson as Map<String, dynamic>)['data'] as List<dynamic>,
         replyListJson: replyJson as Map<String, dynamic>,
+        replyReplyListJson: replyReplyJson as Map<String, dynamic>,
       );
 
       detailDataSource = BiliVideoDetailRemoteDataSource(network: mockNetwork);
@@ -166,6 +174,21 @@ void main() {
       expect(page.number, equals(1));
       expect(page.data, isNotEmpty);
       expect(page.data.first.authorName, isNotEmpty);
+    });
+
+    test('getVideoCommentReplies maps and paginates nested replies', () async {
+      final result = await commentDataSource.getVideoCommentReplies(
+        '80431228',
+        '2202965009',
+        page: 2,
+      );
+      expect(result.isOk, isTrue);
+
+      final page = (result as dynamic).value;
+      expect(page.number, equals(2));
+      expect(page.totalPages, equals(1));
+      expect(page.data, isEmpty);
+      expect(mockNetwork.replyReplyCalls, [(80431228, 2202965009, 1, 2)]);
     });
 
     test('getVideoDetail sanitizes control characters and returns Result.error for empty ID', () async {

@@ -127,6 +127,21 @@ abstract class const VideoCommentRemoteDataSource() extends RemoteDataSource {
   });
 }
 
+/// 视频评论回复可选能力接口。
+///
+/// 服务源可以独立实现评论列表和评论回复；app 只依赖这个中立能力接口，
+/// 不通过具体服务源类型判断回复是否可用。
+abstract class const VideoCommentRepliesRemoteDataSource()
+    extends RemoteDataSource {
+  /// 分页获取指定视频评论的二级回复列表
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  });
+}
+
 /// 推荐Feed/流数据源泛型能力接口
 abstract class const FeedRemoteDataSource<T>() extends RemoteDataSource {
   /// Feed 流标识

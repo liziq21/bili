@@ -81,9 +81,11 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           onNotification: (ScrollNotification scrollInfo) {
             if (scrollInfo.metrics.pixels >=
                 scrollInfo.metrics.maxScrollExtent - 200) {
-              context.read<VideoCommentBloc>().add(
-                const FetchNextCommentPage(),
-              );
+              if (scrollInfo.depth == 0) {
+                context.read<VideoCommentBloc>().add(
+                  const FetchNextCommentPage(),
+                );
+              }
             }
             return false;
           },
@@ -121,20 +123,34 @@ class const _CommentItem({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // ⚡ Bolt Optimization: Selective state listener via context.select.
-    // Listens strictly to the VideoComment item at `index`.
-    // Includes bounds checking to safely return null if the comment list shrinks.
-    // Re-renders ONLY this specific _CommentItem when its state changes (e.g., like toggles),
-    // skipping build passes for all other visible comment items in the list.
-    final comment = context.select<VideoCommentBloc, VideoComment?>(
-      (bloc) => index < bloc.state.comments.length
-          ? bloc.state.comments[index]
-          : null,
-    );
+    final selection = context
+        .select<
+          VideoCommentBloc,
+          ({VideoComment? comment, VideoCommentReplyState? replyState})
+        >((bloc) {
+          if (index >= bloc.state.comments.length) {
+            return (comment: null, replyState: null);
+          }
+          final comment = bloc.state.comments[index];
+          return (
+            comment: comment,
+            replyState: bloc.state.replyStates[comment.id],
+          );
+        });
+
+    final comment = selection.comment;
+    final replyState = selection.replyState;
 
     if (comment == null) {
       return const SizedBox.shrink();
     }
+
+    final hasReplies = comment.replyCount > 0 || comment.replies.isNotEmpty;
+    final effectiveReplyState =
+        replyState ?? VideoCommentReplyState(replies: comment.replies);
+    final replyCount = comment.replyCount > 0
+        ? comment.replyCount
+        : effectiveReplyState.replies.length;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,52 +255,147 @@ class const _CommentItem({
                   ),
                 ],
               ),
-              // Threaded Sub-replies
-              if (comment.replies.isNotEmpty) ...[
-                const Gap(8),
-                Container(
-                  padding: EdgeInsets.all($styles.insets.xs),
-                  decoration: BoxDecoration(
-                    color: $styles.colors.surface,
-                    borderRadius: BorderRadius.circular($styles.corners.sm),
-                    border: Border.all(
-                      color: $styles.colors.outline.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: comment.replies.map((reply) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2.0),
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: '${reply.authorName}: ',
-                                style: $styles.text.bodyBold.copyWith(
-                                  color: $styles.colors.onSurfaceStrong,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              TextSpan(
-                                text: reply.content,
-                                style: $styles.text.bodySmall.copyWith(
-                                  color: $styles.colors.onSurface,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+              if (hasReplies) ...[
+                const Gap(2),
+                Semantics(
+                  button: true,
+                  enabled: true,
+                  label: effectiveReplyState.isExpanded
+                      ? '收起回复'
+                      : '查看 ${formatCount(replyCount)} 条回复',
+                  child: TextButton(
+                    key: ValueKey('comment-replies-${comment.id}'),
+                    onPressed: () {
+                      context.read<VideoCommentBloc>().add(
+                        ToggleCommentReplies(comment.id),
                       );
-                    }).toList(),
+                    },
+                    child: Text(
+                      effectiveReplyState.isExpanded
+                          ? '收起回复'
+                          : '查看 ${formatCount(replyCount)} 条回复',
+                    ),
                   ),
                 ),
               ],
+              if (effectiveReplyState.isExpanded)
+                _CommentReplies(
+                  commentId: comment.id,
+                  state: effectiveReplyState,
+                ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class const _CommentReplies({
+  required final String commentId,
+  required final VideoCommentReplyState state,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.axis == Axis.vertical &&
+            notification.metrics.extentAfter <= 160 &&
+            state.hasMore &&
+            !state.isLoading) {
+          context.read<VideoCommentBloc>().add(
+            FetchNextCommentRepliesPage(commentId),
+          );
+        }
+        return false;
+      },
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 240),
+        padding: EdgeInsets.all($styles.insets.xs),
+        decoration: BoxDecoration(
+          color: $styles.colors.surface,
+          borderRadius: BorderRadius.circular($styles.corners.sm),
+          border: Border.all(
+            color: $styles.colors.outline.withValues(alpha: 0.15),
+          ),
+        ),
+        child: state.replies.isEmpty && state.isLoading
+            ? Padding(
+                padding: EdgeInsets.all($styles.insets.sm),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: $styles.colors.accentFill,
+                  ),
+                ),
+              )
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount:
+                    state.replies.length +
+                    (state.isLoading ? 1 : 0) +
+                    (state.error != null ? 1 : 0),
+                separatorBuilder: (_, _) => const Divider(height: 8),
+                itemBuilder: (context, index) {
+                  if (state.error != null && index == 0) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '评论回复暂不可用',
+                          style: $styles.text.bodySmall.copyWith(
+                            color: $styles.colors.onSurfaceVariant,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            context.read<VideoCommentBloc>().add(
+                              FetchNextCommentRepliesPage(commentId),
+                            );
+                          },
+                          child: const Text('重试'),
+                        ),
+                      ],
+                    );
+                  }
+
+                  final replyIndex = state.error != null ? index - 1 : index;
+                  if (replyIndex >= state.replies.length) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: $styles.insets.xs,
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: $styles.colors.accentFill,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final reply = state.replies[replyIndex];
+                  return Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${reply.authorName}: ',
+                          style: $styles.text.bodyBold.copyWith(
+                            color: $styles.colors.onSurfaceStrong,
+                            fontSize: 12,
+                          ),
+                        ),
+                        TextSpan(
+                          text: reply.content,
+                          style: $styles.text.bodySmall.copyWith(
+                            color: $styles.colors.onSurface,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }

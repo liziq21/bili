@@ -28,6 +28,9 @@
   `packages/<service>/` 适配到 `packages/data` 的中立接口，再进入 app。
 - 若 app 需要的请求参数无法由中立接口表达，应先扩展 `packages/data` 的接口；不得
   在 app 中对具体平台类型做 downcast。
+- app 功能是否实现不以所有服务源都支持该能力为前提。某个源缺少可选能力只影响该源
+  的运行时可用状态，不改变 app 的功能范围；app 必须通过中立接口处理可用与不可用状态，
+  不得按服务源名称分支。
 
 ## 3. 源目录
 
@@ -64,10 +67,12 @@ SearchSuggestRemoteDataSource        -> SearchSuggestRepository
 LiveRoomSearchRemoteDataSource       -> LiveRoomSearchRepository
 VideoDetailRemoteDataSource           -> VideoDetailRepository
 VideoCommentRemoteDataSource          -> VideoCommentRepository
+VideoCommentRepliesRemoteDataSource   -> VideoCommentRepository
 ```
 
-- 一个能力一个 Repository；不得为了复用实现而把两个不相关能力强行合并成一个平台
-  命名 Repository。
+- 一个领域能力一个 Repository；同一评论聚合下的评论列表与评论回复可以由同一个
+  `VideoCommentRepository` 承载，但不得为了复用实现而把两个不相关能力强行合并成
+  一个平台命名 Repository。
 - 缺少可选能力时省略对应 Provider，并由页面显示明确的不可用状态或隐藏该能力的
   UI。不得用一个隐藏“不支持”行为的通用 Repository 伪装成已注入能力。
 - 页面级 Bloc 在 route data 或路由组装点创建，依赖由源作用域向下提供。Bloc 不得

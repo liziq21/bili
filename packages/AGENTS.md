@@ -34,6 +34,7 @@ This directory contains shared packages and modules (`packages/*`). A directory 
 - **`sourceId` Placement**: Each service module overrides `sourceId` on its `RemoteDataSource` implementation to identify origin — `sourceId` lives on the source, not on model instances.
 - **Canonical Models**: Use `VideoModel` / `LiveRoomModel` (avoid deprecated `VideoInfoBase` / `LiveRoom` aliases).
 - **Optional Capability Interfaces**: Design specific features as mixins or optional interfaces (e.g. `VideoDetailRemoteDataSource`, `VideoCommentRemoteDataSource`, `VideoFeedRemoteDataSource`, `LiveRoomFeedRemoteDataSource`). Implementations pick and choose supported capabilities; consumers check interface availability before invocation.
+- A service source may implement any subset of the capability interfaces. Missing support in one source is a runtime availability boundary for that source, not a boundary on the app feature itself; app code must depend on the neutral interface and must not branch on service names.
 
 ## API 子包通用规范
 
