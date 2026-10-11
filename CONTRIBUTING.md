@@ -36,6 +36,24 @@
 
 5. 用 `git diff --check` 和 `git diff` 排除无关格式、生成产物和临时文件。纯文档改动至少检查相对链接、引用的路径/命令和对应的文档门禁测试；不用为此重新生成代码或录制基线。
 
+### Flutter runner 不可用时
+
+如果本机因平台或动态库缺失无法启动 `flutter_tester`，不要删除或在测试内部跳过 Flutter/widget/golden 测试。使用仓库提供的本地入口：
+
+```bash
+dart run tool/test_local.dart
+```
+
+该入口会先探测 Flutter 测试进程。runner 可用时运行完整本地测试矩阵；runner 仅因主机环境无法启动时，运行仍可执行的纯 Dart 检查，并明确报告未运行的 Flutter 测试。降级结果只代表本地可执行部分通过，完整结果仍以 CI 为准。
+
+需要强制要求 Flutter 测试可启动时使用：
+
+```bash
+dart run tool/test_local.dart --require-flutter
+```
+
+当前 CI 不使用降级入口，仍按 `.github/workflows/ci.yml` 执行完整测试。
+
 ## Pull request
 
 1. 从最新 `main` 开分支，分支名用 `类型/描述`（如 `feat/media-history`、`docs/rule-ownership`）。保留已有未提交工作，不用 reset/force-push 清理他人的改动。

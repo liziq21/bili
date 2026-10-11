@@ -109,3 +109,7 @@ coverage/
 # test/golden/goldens/ are deliberately committed; the diff output written on a
 # failed run is not.
 /app/test/golden/failures/
+
+# Local agent state and OpenCode configuration
+/__agent__/
+/opencode.json
