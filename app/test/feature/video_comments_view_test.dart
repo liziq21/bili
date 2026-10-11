@@ -56,11 +56,13 @@ void main() {
       MaterialApp(
         theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
         home: AppScaffold(
-          child: SizedBox(
-            height: 600,
-            child: BlocProvider.value(
-              value: bloc,
-              child: const VideoCommentsView(),
+          child: Material(
+            child: SizedBox(
+              height: 600,
+              child: BlocProvider.value(
+                value: bloc,
+                child: const VideoCommentsView(),
+              ),
             ),
           ),
         ),
