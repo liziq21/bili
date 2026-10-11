@@ -45,6 +45,20 @@ void main() {
         .contents;
     expect(sections, isNotEmpty);
     expect(sections.whereType<NetworkYouTubeItemSectionRenderer>(), isNotEmpty);
+
+    // The channel-filtered response can still carry playlist lockups. This
+    // fixture was captured from the live endpoint rather than hand-authored,
+    // so the shared search parser is covered by the channel response too.
+    final playlists = sections
+        .whereType<NetworkYouTubeItemSectionRenderer>()
+        .expand((section) => section.contents)
+        .whereType<NetworkYouTubePlaylistSearchItem>()
+        .toList();
+    expect(playlists, isNotEmpty);
+    expect(
+      playlists.every((item) => item.renderer.playlistId.startsWith('PL')),
+      isTrue,
+    );
   });
 
   test('parses the real playlist search fixture into typed lockups', () {
