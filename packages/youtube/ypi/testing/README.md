@@ -1,6 +1,6 @@
 # ypi 测试 fixture
 
-`testing/` 中的 JSON 是 YouTube InnerTube API 经过追踪字段脱敏后的 HTTP response body，用于离线解析测试和接口结构回归。fixture 不包含 headers、Cookie、Token、client context 凭据或追踪字段。
+`testing/` 中的 JSON 是 YouTube InnerTube API 经过追踪字段脱敏后的 HTTP response body，用于离线解析测试和接口结构回归。fixture 不包含 headers、Cookie、Token、client context 凭据或追踪字段。成功 fixture 用于成功解析回归；明确标记为 `negative` 的 fixture 只用于失败、受限或匿名能力边界回归。
 
 ## Fixture 记录
 
@@ -15,8 +15,8 @@
 | `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-09-30 |
 | `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
 | `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
-| `player.json` | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04（实测状态 `UNPLAYABLE`，非成功响应，待重抓） |
-| `home_feed.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`FEwhat_to_watch` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 首页推荐 feed | 2026-10-04（匿名 session 登录门控：只有 `feedNudgeRenderer`，无视频条目，非成功响应） |
+| `player.json`（negative） | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04（实测状态 `UNPLAYABLE`，仅用于失败路径；成功响应待重抓） |
+| `home_feed.json`（negative） | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`FEwhat_to_watch` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 首页推荐 feed | 2026-10-04（匿名 session 登录门控：只有 `feedNudgeRenderer`，无视频条目；仅用于能力边界回归） |
 
 
 ## 频道浏览的 renderer 形态
@@ -78,7 +78,7 @@ fixture 本身是 `0c11d88` 落盘的：该提交经 `tool/capture/fetch_fixture
 ## 抓取规则
 
 - 抓取脚本放在 `tool/capture/`，只手动执行，不进入 CI。
-- 新 fixture 写入 `testing/<endpoint>.json` 前必须确认响应为成功响应且结构可识别，并在本文件记录实际 HTTP status 和非敏感请求参数。
-- 失败响应不得写入或覆盖已有 fixture。
+- 成功 fixture 写入 `testing/<endpoint>.json` 前必须确认响应为成功响应且结构可识别，并在本文件记录实际 HTTP status 和非敏感请求参数。
+- 失败或受限响应不得覆盖成功 fixture；只有当失败形态本身是公开契约的一部分时，才允许保留明确标记为 `negative` 的 fixture，并在本文件说明其用途。
 - 抓取脚本在保存 response body 前递归移除 `trackingParams`、`clickTrackingParams` 和 `visitorData`；除 response body 外不保存 headers、Cookie、Token、带凭据 URL、client context 凭据或其他追踪字段。
 - 新增 endpoint 必须同步更新本文件和包级 `AGENTS.md` 的来源记录。

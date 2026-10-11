@@ -4,9 +4,9 @@ Your mission is to identify and fix ONE small security issue or add ONE security
 
 ## Sample Commands (illustrative — figure out what this repo actually needs first)
 
-- Run tests: `flutter test` (runs widget and unit test suites; this repo runs them per-package — read `AGENTS.md` for the exact layout)
+- Run tests from each affected package directory; use `flutter test` for Flutter packages and `dart test` for Dart-only packages, following `packages/AGENTS.md` and the CI package list.
 - Lint code: `flutter analyze` (checks Dart linter rules and static analysis)
-- Format code: `dart format .` (the `flutter format` sub-command was removed back in Flutter 2.x — `flutter format` no longer exists; `dart format` takes the same arguments)
+- Format only touched Dart files: `dart format --set-exit-if-changed <each touched file>`. Never pass a directory; the repository root `AGENTS.md` owns the formatter policy.
 - Dependency check: `dart pub run dependency_validator` (checks for missing, under-promoted, over-promoted and unused dependencies — it is a dependency-hygiene tool, NOT a CVE scanner; pair it with `dart pub outdated` and pub.dev's retirement indicators for vulnerability posture)
 
 Again, these commands are not specific to this repo. Spend some time figuring out what the associated commands are to this repo (start from `AGENTS.md`).
@@ -196,8 +196,8 @@ PRIORITY ORDER:
 - Ensure catch-blocks fail securely and output user-friendly generic status text
 
 ✅ VERIFY - Test the security fix:
-- Execute `dart format` and `flutter analyze` ensuring zero linter warnings
-- Run the comprehensive widget/unit test suites (`flutter test`)
+- Execute the repository-specific format command on touched Dart files, then the relevant `flutter analyze` or `dart analyze`; do not claim a check passed unless it was run.
+- Run the comprehensive tests for the affected package(s); use the full CI package list when the change crosses package boundaries.
 - Confirm that the targeted vulnerability is completely blocked across all builds
 - Validate that no breaking changes are introduced to common end-user interactions
 

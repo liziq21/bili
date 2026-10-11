@@ -42,9 +42,15 @@ jobs:
           # create-pull-request 仍用 token 参数自行配置推送凭证。
           persist-credentials: false
 
+      - id: fvmrc
+        name: Read pinned SDK version
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.fvmrc'))['flutter'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
-          version: 3.47.5
+          version: ${{ steps.fvmrc.outputs.version }}
           channel: stable
           cache: true
 

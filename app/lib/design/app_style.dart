@@ -12,6 +12,8 @@ import 'brand_palette.dart';
 class AppStyle({
   Size? screenSize,
   final bool disableAnimations = false,
+  // Bootstrap value only: AppScaffold replaces it from Theme.of(context) on
+  // its first build before themed widgets consume the live $styles singleton.
   final bool isDark = false,
   final ColorScheme? scheme,
 }) {

@@ -5,11 +5,19 @@ This repository is a Flutter workspace project with a modular structure separati
 ## Project Structure
 
 - `app/`: The main Flutter application.
-- `packages/`: Shared packages/modules (`bilibili`, `youtube`, `components`, `data`, `model`).
+- `packages/`: Shared packages/modules (`bilibili`, `youtube`, `data`, `model`). `packages/components/` is currently reserved and has no `pubspec.yaml`, so it is not a workspace package.
 
 ## Normative Documents
 
 Before writing or modifying code in this repository, read the specification files that govern your change. This list is the map; each file is the source of truth — no rule is restated here.
+
+### Rule ownership and precedence
+
+- Executable configuration is authoritative for what the tooling actually does: `.fvmrc`, the root `pubspec.yaml`, `analysis_options.yaml`, package `pubspec.yaml` files, and `.github/workflows/`.
+- `AGENTS.md` rules apply to the directory they are in. When rules overlap, the most specific applicable `AGENTS.md` wins; a package rule may narrow a root rule but must not silently contradict it.
+- `app/docs/design-system.md` owns color, theme, token, and contrast policy. `packages/AGENTS.md` owns shared package and API-package boundaries; `bpi/AGENTS.md` and `ypi/AGENTS.md` add platform-specific details only.
+- `README.md`, learning journeys, journals, and postmortems provide context or history. They must link to the owning rule instead of creating a second source of truth. `docs/runbook.md` is normative only for incident recovery steps.
+- If a document and executable configuration disagree, do not guess: fix the document or configuration in the same change, and state which behavior is intended.
 
 **Before starting work, read:**
 
@@ -20,7 +28,8 @@ Before writing or modifying code in this repository, read the specification file
 - [`packages/bilibili/bpi/AGENTS.md`](packages/bilibili/bpi/AGENTS.md) — Bilibili API sub-package rules.
 - [`packages/youtube/ypi/AGENTS.md`](packages/youtube/ypi/AGENTS.md) — YouTube API sub-package rules.
 - [`.coderabbit.yaml`](.coderabbit.yaml) — CodeRabbit review configuration (language, review profile, ignore rules).
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow: branch naming, pre-commit checks, the three required status checks.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow: branch naming, pre-commit checks, and CI status checks.
+- [`.fvmrc`](.fvmrc), [`pubspec.yaml`](pubspec.yaml), [`analysis_options.yaml`](analysis_options.yaml), and [`.github/workflows/`](.github/workflows/) — executable SDK, dependency, analysis, and CI behavior; consult these when a rule mentions a command, version, or gate.
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
 
@@ -34,8 +43,9 @@ Before writing or modifying code in this repository, read the specification file
 | Add a new API endpoint or DTO in `bpi` or `ypi` | The corresponding sub-package `AGENTS.md` (API 子包通用规范 section) |
 | Write a test (unit, widget, or golden) | Root `AGENTS.md` (Testing section) + the test's layer file |
 | Use the Dart MCP server (code navigation, analysis, pub) | `app/AGENTS.md` (Dart MCP Server section) |
-| Change CI workflow or golden baselines | `.github/workflows/ci.yml` + `.github/workflows/rerecord-goldens.yml` |
-| Dispatch a task to an external coding agent | `docs/postmortems/README.md` — check the past incidents for deadlocks between `AGENTS.md` rules and what CI can actually do before writing the brief |
+| Change CI workflow or golden baselines | `.github/workflows/ci.yml` + `.github/workflows/rerecord-goldens.yml` + `docs/postmortems/README.md` |
+| Change SDK, formatter, analyzer, or package commands | `.fvmrc` + root `pubspec.yaml` + relevant `analysis_options.yaml` + `.github/workflows/ci.yml` |
+| Dispatch a task to an external coding agent | `docs/postmortems/README.md` + the relevant `.github/workflows/` files — check that the brief has a satisfiable CI path before dispatching |
 | Bump the app version or cut a release | The Release section below |
 
 ## Release
@@ -43,7 +53,7 @@ Before writing or modifying code in this repository, read the specification file
 - **Version source of truth** is `app/pubspec.yaml` `version: X.Y.Z+N`, not the git tag. Local `flutter build` reads the pubspec, so making the tag authoritative would silently produce a wrong `versionCode` on developer machines. The tag is a release marker; `.github/workflows/release.yml` fails the build when `vX.Y.Z` disagrees with the pubspec's `X.Y.Z`.
 - **Build number** is injected by CI and never committed. The verification build in `ci.yml` uses `--build-number=${{ github.run_number }}`; the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
 - **Release signing is mandatory.** `app/android/app/build.gradle.kts` throws `GradleException` when a release build has no `key.properties`, so a release build can never silently fall back to the debug keystore. `BILI_ALLOW_UNSIGNED_RELEASE=1` is the single opt-out; CI sets it to verify that the release variant compiles, and artifacts built that way are not publishable.
-- **Required status checks carry a version suffix.** The two CI checks in the ruleset are `Run Flutter Test (3.47.5, 3.13.4)` and `Build Flutter App (android) (3.47.5, 3.13.4)`; the matrix is generated from the root `pubspec.yaml` `environment` block. **Upgrading Flutter or Dart requires updating the ruleset in the same change**, or every PR blocks on a missing required check.
+- **Status check names carry a version suffix for matrix jobs.** `ci.yml` emits `Run Flutter Test (3.47.5, 3.13.4)` and `Build Flutter App (android) (3.47.5, 3.13.4)` from the root `pubspec.yaml` `environment` matrix; `Check Formatting` is an independent, single-version job. The GitHub ruleset decides which emitted checks are required. **Upgrading Flutter or Dart requires updating the ruleset's required names in the same change**, or every PR can block on a missing check.
 
 For architectural walkthroughs — not prescriptive rules, but context on why boundaries fall where they do:
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).
@@ -53,7 +63,7 @@ For architectural walkthroughs — not prescriptive rules, but context on why bo
 
 ### SDK 版本
 
-`.fvmrc` 是本仓库唯一的 SDK 版本来源，钉在 Flutter 3.47.5（Dart 3.13.4）。
+`.fvmrc` 是本地开发与单版本格式门禁的精确 SDK 来源，当前钉在 Flutter 3.47.5（Dart 3.13.4）；根 `pubspec.yaml` 的 `environment` 是包的最低约束，也是 CI 矩阵的输入。两者必须保持下限与本地 pin 一致。
 
 **执行任何 `dart` / `flutter` 命令前，先分别确认两个 SDK 与 `.fvmrc` 一致**（`dart --version` 与 `flutter --version`）。不一致时不要继续，改用 `fvm dart` / `fvm flutter`，或先切到 3.47.5。两个都要看：PATH 里的 Dart 与 Flutter 可能来自不同 SDK，且 Flutter 自带的 Dart 可能与独立安装的 Dart 冲突——只核对 `dart --version` 匹配，仍可能让后续 `flutter` 命令跑在另一个版本上。
 
@@ -72,9 +82,9 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 该命令会直接改写被格式化的文件，退出码非 0 表示有文件被修改过（即原格式不符），但不代表修复后仍不符。看到退出码非 0 时，先确认文件已被改写，再重跑一次同样的命令，确认退出码为 0 后才可提交。
 
-**CI 有 `Check Formatting` 门禁**（required check 之一），对全库跑 `dart format --output=none --set-exit-if-changed .`，用 `.fvmrc` 里的单个版本，不跑 pubspec 矩阵。门禁覆盖全库，但仍按上面的纪律只格式化本次改动触及的文件：全库已经是当前 SDK 的排版，改动未触及的文件本来就不会被改写，纪律是为了让你在提交前就看清自己那几个文件的变化，而不是依赖 CI 回头打回。
+**CI 有 `Check Formatting` 门禁**；对全库跑 `dart format --output=none --set-exit-if-changed .`，用 `.fvmrc` 里的单个版本，不跑 pubspec 矩阵。门禁覆盖全库，但仍按上面的纪律只格式化本次改动触及的文件：全库已经是当前 SDK 的排版，改动未触及的文件本来就不会被改写，纪律是为了让你在提交前就看清自己那几个文件的变化，而不是依赖 CI 回头打回。
 
-门禁刻意不跑矩阵版本：`dart_style` 会在 patch release 里带非语言版本化的样式修复（例如枚举主构造函数的尾逗号），两个 SDK 版本的 formatter 输出可能不同，同一份代码在一个版本绿、另一个版本红，门禁本身就变成随机失败。一个权威版本足够拦住「未格式化的代码进 main」这件事。**因此 `.fvmrc` 升级时门禁行为可能一次性变化**：升级后本地跑一次 `dart format .` 看有多少文件变化，若有，在同一个 PR 里一并重排。
+门禁刻意不跑矩阵版本：`dart_style` 会在 patch release 里带非语言版本化的样式修复（例如枚举主构造函数的尾逗号），两个 SDK 版本的 formatter 输出可能不同，同一份代码在一个版本绿、另一个版本红，门禁本身就变成随机失败。一个权威版本足够拦住「未格式化的代码进 main」这件事。**因此 `.fvmrc` 升级时门禁行为可能一次性变化**：先用 CI 同款命令 `dart format --output=none --set-exit-if-changed .` 评估变化；只有明确把全仓库格式迁移纳入该升级 PR 时，才按迁移清单逐文件格式化，否则仍只格式化本次改动触及的文件。
 
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
@@ -105,7 +115,7 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 ### Dart Version & Syntax
 - Do not arbitrarily downgrade the Dart SDK version.
-- Prioritize using **Dart 3.13.0** primary constructors and concise syntax features.
+- Prioritize using the repository's **Dart 3.13.x** primary constructors and concise syntax features; do not write syntax that requires a newer SDK than the root constraint.
 
 #### Primary Constructors & Concise Syntax (Dart 3.13+)
 权威规范见 Dart constructors — Concise constructor syntax: https://dart.dev/language/constructors#concise-constructor-syntax；本仓库特例见下文的无参类规则。
@@ -143,6 +153,18 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 #### Immutability & Value Equality
 - **`@immutable`**: Always apply `@immutable` from `package:meta` to data models, state classes, DTOs, and value objects.
 - **`EquatableMixin`**: Use `package:equatable` (preferably `EquatableMixin` to preserve class hierarchies) for structural equality on state classes and models. Include all identifying properties in `props`.
+
+## External agent dispatch
+
+Before dispatching an external coding agent, read [`docs/postmortems/README.md`](docs/postmortems/README.md) and compare the brief with the actual workflow capabilities. The brief must state the expected CI state and the compliant recovery path when a gate depends on generated output.
+
+For any golden-test task, the brief must explicitly state all three items:
+
+1. CI may remain red until a baseline is present; do not create a local PNG to make it green.
+2. The only recording path is `rerecord-goldens.yml`; use `target_ref` for the branch that owns the change.
+3. The task must not merge or hand-edit baselines; review the CI-generated baseline PR and its provenance instead.
+
+Before dispatching, verify that each requirement in the brief has an executable path in `.github/workflows/` (an intersection check), and stop/escalate when no compliant path exists.
 
 ## Testing
 

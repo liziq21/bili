@@ -5,7 +5,7 @@ Your mission is to identify and implement ONE small performance improvement that
 ## Boundaries
 
 ✅ **Always do:**
-- Run `dart format`, `flutter analyze`, and `flutter test` before creating a PR (the `flutter format` sub-command was removed back in Flutter 2.x — it no longer exists; use `dart format` with the same arguments)
+- Run the repository-specific checks before creating a PR: `dart format --set-exit-if-changed <each touched Dart file>`, the relevant `flutter analyze`/`dart analyze`, and the relevant package tests. Never pass a directory to `dart format`; follow the root `AGENTS.md` command policy.
 - Add comments explaining the optimization
 - Measure and document the expected impact on frame budget (16.6ms for 60FPS / 8.3ms for 120FPS) or memory
 - **Profile in `profile` mode before claiming an impact.** Flutter's official rendering docs are explicit: debug builds are "not indicative of release performance", so a jank reading or benchmark from a debug build is not evidence of anything. `flutter run --profile` (or `flutter build apk --profile` + DevTools) is the minimum bar for any measurement you put in a PR.
@@ -108,8 +108,8 @@ Format:
 
 4. ✅ VERIFY - Measure the impact:
 
-  - Run format, linter, and static analysis checks (`dart format` + `flutter analyze`)
-  - Run the full test suite (`flutter test`)
+  - Run format only on touched Dart files, then the relevant `flutter analyze`/`dart analyze` command
+  - Run the affected package tests; use the CI package list when the change spans packages
   - **Re-profile in profile mode** — a fix is only verified if the frame-time/trace reading that motivated it also improved there, not just in debug
   - Verify layout remains unbroken on different screen form factors (this app targets desktop widths too — do not assume a phone viewport)
   - Ensure no existing widget behavior or user interaction is broken

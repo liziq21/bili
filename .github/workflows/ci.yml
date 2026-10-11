@@ -33,13 +33,15 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     permissions:
-      contents: write # for actions/checkout to fetch code
+      contents: read
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     timeout-minutes: 60
     
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
@@ -50,25 +52,10 @@ jobs:
       - run: flutter pub get
 
       - name: Run build_runner
-        run: flutter pub run build_runner build \
+        run: dart run build_runner build \
           --delete-conflicting-outputs \
           --verbose
           
-      - name: Commit changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
-          git status
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "chore: Update generated files [skip ci]"
-            git push --force origin HEAD:build_runner
-          else
-            echo "No changes to commit"
-          fi
-
       - name: Run analyze
         env:
           IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
@@ -102,7 +89,7 @@ jobs:
 
       - name: Run bpi test
         if: ${{ !cancelled() }}
-        run: flutter test test/
+        run: dart test test/
         working-directory: packages/bilibili/bpi
 
       - name: Run youtube package test
@@ -112,8 +99,13 @@ jobs:
 
       - name: Run ypi test
         if: ${{ !cancelled() }}
-        run: flutter test test/
+        run: dart test test/
         working-directory: packages/youtube/ypi
+
+      - name: Run data package test
+        if: ${{ !cancelled() }}
+        run: dart test
+        working-directory: packages/data
 
       - name: Upload golden failure diffs
         if: always()
@@ -175,11 +167,14 @@ jobs:
     name: Build Flutter App (android)
     needs: [pubspec, flutter_test]
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
     strategy:
       matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
         with:
@@ -200,7 +195,7 @@ jobs:
         run: flutter pub get
 
       - name: Run build_runner
-        run: flutter pub run build_runner build \
+        run: dart run build_runner build \
           --delete-conflicting-outputs \
           --verbose
       
@@ -216,7 +211,7 @@ jobs:
       - name: Upload APK as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: app-arm64-v8a-release-unsigned.apk
+          name: app-arm64-v8a-release-unsigned-${{ matrix.release.flutter }}.apk
           path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
 

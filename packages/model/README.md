@@ -27,8 +27,8 @@ dart pub get
 # 静态分析
 dart analyze
 
-# 单元测试
-dart test
+# 当前没有 test/ 目录
+# 新增测试后，从本目录运行：dart test
 ```
 
 ## 相关规范

@@ -95,8 +95,10 @@ graph TD
 | 已覆盖组件的渲染 | golden | `app/test/golden/` | alchemist CI goldens，详见下一节 |
 | `bpi` / `ypi` | unit + fixture | 各包 `test/` | 离线，用 `MockClient` 与 `testing/*.json`；**必须从包目录跑** |
 | `bilibili` / `youtube` | unit | 各包 `test/` | 同上 |
+| `data` | unit | `packages/data/test/` | Dart-only；使用 fake 和纯数据输入 |
+| `model` | — | — | 当前没有测试文件，仍由 workspace 分析覆盖 |
 
-**包级测试有一条容易踩的坑**：`bpi` 的 fixture 用相对路径读 `testing/<endpoint>.json`，从仓库根目录跑会失败。必须 `cd packages/bilibili/bpi && flutter test test/`。
+**包级测试有一条容易踩的坑**：`bpi` 的 fixture 用相对路径读 `testing/<endpoint>.json`，从仓库根目录跑会失败。必须 `cd packages/bilibili/bpi && dart test test/`；`ypi` 同样从 `packages/youtube/ypi/` 运行。
 
 ## 7. 截图测试为什么不用原生 golden
 
@@ -106,7 +108,7 @@ graph TD
 
 同一页还说明，flutter_test 默认用 Ahem 字体（把每个字符画成实心方块），并给了用 `FontLoader` 在 `flutter_test_config.dart` 里加载固定字体的做法。
 
-本仓库没有启用原生 `platform goldens`，因此用 alchemist 的 CI goldens 作为跨平台基线：CI goldens 走 Ahem 字体并把文字遮蔽成纯色块，`app/test/flutter_test_config.dart` 把 `platformGoldens` 设为 `false`、`diffThreshold` 设为 `0.01`。
+本仓库没有启用原生 `platform goldens`，因此用 alchemist 的 CI goldens 作为基线：测试加载仓库固定的 CJK 字体子集并设置 `obscureText: false`，保留真实字形与文字宽度；`app/test/flutter_test_config.dart` 把 `platformGoldens` 设为 `false`、`diffThreshold` 设为 `0.01`。
 
 这是本仓库的选择，不代表原生 golden 加载固定字体后就无法共享一张基线 PNG——官方文档给的就是 `FontLoader` 这条路。要注意的是 `0.01` 是**比较容差**：截图测试通过不等于逐像素相等。
 
@@ -116,7 +118,7 @@ graph TD
 
 - 粒度会随规模变化。`data` 和 `model` 现在都很小，如果它们继续各自只有一个文件，合并成一个包会让依赖图少一层。
 - **原本的 `packages/components` 已并入 `app`**（2026-09-27）。它此前没有任何包依赖、全仓也没有一处 `import 'package:components/...'`，作为独立包没有存在价值；`ToggleSwitchComponent` 落到 `app/lib/ui/common/`，`Motion` 落到 `app/lib/design/`。并入后两者仍无引用者——共享控件的归属由它实际的调用方决定，等有了调用方再谈是否值得独立成包。
-- **包级测试目前不在 CI 里跑。** CI 的测试步骤只有 `cd app && flutter test`。这四个包合计 81 个用例，改包之后必须本地跑过才算完。
+- **包级测试由 CI 分包执行。** `ci.yml` 会运行 `app`、两个 Flutter package、两个 Dart-only API 子包和 `packages/data`；`packages/model` 当前没有测试文件，但会被 workspace 分析覆盖。改包之后仍必须从自己的目录运行本地检查。
 - 加新服务要动五处：新建 `packages/<service>/pubspec.yaml` 写 `resolution: workspace`；在 `packages/data` 加能力接口；在 `packages/<service>` 实现；若另有 API 客户端子包（如 `bpi`），在 `packages/<service>/pubspec.yaml` 里加嵌套 `workspace:` 把子包纳入；在 `app/pubspec.yaml` 加一条 path 依赖，并在 app 的服务清单里注册。**根 `pubspec.yaml` 的 `packages/*` 只覆盖顶层包**——glob 不递归，新包不需要动根文件，但子包要靠父包的嵌套声明。
 
 ## 9. 延伸阅读

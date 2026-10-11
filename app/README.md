@@ -33,7 +33,7 @@ flutter pub get
 ### 静态分析与测试
 
 ```bash
-flutter analyze lib/
+flutter analyze
 flutter test
 ```
 
@@ -44,10 +44,10 @@ flutter test
 dart run build_runner build --delete-conflicting-outputs
 
 # 定向生成 Drift 数据库代码
-dart pub run build_runner build --build-filter="lib/database/**"
+dart run build_runner build --build-filter="lib/database/**"
 
 # 定向生成 go_router 路由代码
-dart pub run build_runner build --build-filter="lib/routing/**"
+dart run build_runner build --build-filter="lib/routing/**"
 ```
 
 ### 运行应用
