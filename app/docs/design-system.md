@@ -56,7 +56,7 @@
 
 ### R3 —— 亮度单源
 
-`isDark` 只有一个来源：`Theme.of(context).brightness`，由 `AppScaffold` 注入 `AppStyle`。**禁止任何位置硬编码 `isDark = false`。**
+运行中的 `isDark` 只有一个来源：`Theme.of(context).brightness`，由 `AppScaffold` 注入 `AppStyle`。`AppScaffold` 第一次 build 前的静态 `$styles` 只允许使用亮色 bootstrap fallback，用于让构造期读取有安全值；第一次 build 必须用真实 Theme 亮度覆盖它，不能把 fallback 当作运行时主题。除该 bootstrap 初始化外，**禁止任何位置硬编码 `isDark = false`**。
 
 ### R4 —— ColorScheme 是唯一真值
 

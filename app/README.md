@@ -33,7 +33,7 @@ flutter pub get
 ### 静态分析与测试
 
 ```bash
-flutter analyze lib/
+flutter analyze
 flutter test
 ```
 
@@ -44,10 +44,10 @@ flutter test
 dart run build_runner build --delete-conflicting-outputs
 
 # 定向生成 Drift 数据库代码
-dart pub run build_runner build --build-filter="lib/database/**"
+dart run build_runner build --build-filter="lib/database/**"
 
 # 定向生成 go_router 路由代码
-dart pub run build_runner build --build-filter="lib/routing/**"
+dart run build_runner build --build-filter="lib/routing/**"
 ```
 
 ### 运行应用
@@ -58,6 +58,7 @@ flutter run
 
 ## 相关规范
 
-详细架构规则、数据库规范与 UI 开发约束请参阅：
+生成文件必须由源文件和生成命令产生，禁止手工编辑；详细架构规则、数据库规范与 UI 开发约束请参阅：
 - [app/AGENTS.md](AGENTS.md)
+- [源注入规范](docs/source-injection.md)
 - [根目录 AGENTS.md](../AGENTS.md)

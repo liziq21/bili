@@ -2,8 +2,6 @@ part of 'home_bloc.dart';
 
 sealed class HomeEvent();
 
-class _UserDataChanged(final UserData userData) extends HomeEvent;
-
 class ServiceSourceChanged(final String sourceId) extends HomeEvent;
 
 /// 拉取当前数据源的全部 Feed 首页数据

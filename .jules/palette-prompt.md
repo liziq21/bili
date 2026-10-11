@@ -9,7 +9,7 @@ These are the commands that actually work here. The generic `flutter format .` /
 - **Analyze:** `flutter analyze` in `app/` (covers that package only; CI runs at the repo root and covers the whole workspace including `app/test/`). Check the strict tier locally with `flutter analyze --fatal-infos --fatal-warnings` — that is the tier CI applies to agent PRs.
 - **Test:** `flutter test` (single file: `flutter test test/<path>.dart`; single case: `--plain-name "..."`).
 - **Format:** `dart format --set-exit-if-changed <each file you touched>`. **Only the files you touched, listed individually.** Never run `dart format .` or pass a directory — it recursively reformats every file under it, including files you never changed, and those rewrites collide with main and turn the PR dirty. This is a hard rule in the root `AGENTS.md`, and CI has a `Check Formatting` gate that formats the whole tree, so your own discipline is what keeps the diff clean.
-- **Build check:** `flutter build apk --analyze-size` (the CI gate is `Build Flutter App (android)`).
+- **Build check:** when the change affects builds, use the CI-equivalent unsigned release build (`cd app && BILI_ALLOW_UNSIGNED_RELEASE=1 flutter build apk --release --split-per-abi`); `--analyze-size` is an optional local diagnostic, not the CI gate.
 
 ## Repo context (bili) — verified state of the art
 

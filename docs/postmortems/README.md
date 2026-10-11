@@ -30,8 +30,9 @@ Do not write one for a routine red build that the runbook handled directly.
 - **Every action item has an owner and a link.** An item with no issue is a wish.
 - **Every timeline entry has evidence** — a commit SHA, a PR, a run ID. Not "around 3pm".
 - **One incident per file**, named `YYYY-MM-DD-short-slug.md`.
-- **Close the open items.** A postmortem whose action items are all still open is a
-  complaint, not a postmortem.
+- **Track every open item.** A postmortem must show an owner and a link for each
+  action; close completed items with evidence and keep unresolved items visible until
+  their tracking issue or change is complete.
 
 ## Index
 

@@ -18,6 +18,10 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (context.read<VideoCommentBloc?>() == null) {
+      return const Center(child: Text('当前数据源暂不支持评论'));
+    }
+
     // ⚡ Bolt Optimization: Use BlocSelector to isolate list container state
     // (loading, error, comment count, hasMore) from individual comment item updates.
     // Toggling likes or sub-reply states on a single comment will not force re-evaluating

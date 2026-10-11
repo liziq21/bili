@@ -29,7 +29,7 @@ GitHub reports these timestamps in UTC; converted to UTC+8 below.
 
 The blocking was internal: two CI runs on one branch, and roughly half an hour of delay on a single test file. Nothing shipped. The baseline that ended up on `main` was recorded by CI, and its blob (`a729b15b`) matches what a local recording produces at the pinned toolchain.
 
-The lasting cost is different from the immediate one. **The prevention never made it into the repository.** `docs/runbook.md` records the symptom and the recovery. `AGENTS.md` records the structural fix. Nothing records the check that would have caught the deadlock before dispatch — so the next agent task touching golden baselines repeats this.
+The lasting cost is different from the immediate one. The recovery path was documented, and the follow-up now records the pre-dispatch checklist in `AGENTS.md`. The remaining open prevention is content-addressed CI detection for unprovenanced baseline PNGs; until that is implemented, dispatch review remains the first line of defense.
 
 ## Root causes
 
@@ -56,7 +56,7 @@ Autonomous mode turned cause 2 into cause 3's symptom: a CI failure triggers aut
 
 ### What did not work
 
-- The deadlock was detected by a human reading a commit list, roughly 36 minutes after the violating commit. Nothing in CI flags "this PR carries a baseline that no `rerecord-goldens.yml` run produced".
+- The deadlock was detected by a human reading a commit list, roughly 36 minutes after the violating commit. CI still does not flag "this PR carries a baseline that no `rerecord-goldens.yml` run produced"; that detection action remains open.
 - The brief treated the task as self-contained. It was not: it required knowing that the repository's baseline policy had no feature-branch path.
 
 ## Action items
@@ -64,11 +64,11 @@ Autonomous mode turned cause 2 into cause 3's symptom: a CI failure triggers aut
 | # | Class | Action | Owner | Tracking |
 |---|---|---|---|---|
 | 1 | Prevention | Give `rerecord-goldens.yml` a feature-branch path so a golden task on a branch has a compliant way to go green. **Done** — `988a880`. | liziq21 | [PR #156](https://github.com/liziq21/bili/pull/156) |
-| 2 | Prevention | Record in `AGENTS.md` the three things a dispatch brief must state for any golden task: CI on the branch will be red before the baseline lands, the compliant way to record it, and which workflow constraints apply. `AGENTS.md` is read by the agent, so a rule there is a rule the agent sees. **Open.** | liziq21 | this directory, tracked as a follow-up |
-| 3 | Prevention | Record the pre-dispatch check: read `AGENTS.md` rules against `.github/workflows/` capabilities and confirm they intersect satisfiably before dispatching any task. **Open.** | liziq21 | as above |
-| 4 | Detection | Add a CI check that fails when a PR touches `app/test/golden/goldens/ci/*.png` and no `rerecord-goldens.yml` run produced those exact PNGs. The check must be content-addressed, not marker-based: branch name and PR body are both copyable, so a fork PR can replay them and substitute its own PNGs. Instead, for each commit that introduces or modifies a golden, resolve the run through that commit's own history and confirm the file's blob SHA matches the PNG that run uploaded. `rerecord-goldens.yml` already uploads the rendered files as an artifact named `goldens-<run_id>` containing `app/test/golden/goldens/ci/`, and opens its PR through the uhibot App, so both the run and the authoring identity are checkable. A check comparing only the current PR head against the workflow branch will be wrong: baselines land on the feature branch and are squashed, so head moves after the recording. Include a negative test that copies a valid run's branch name and PR body but swaps the PNG, and require the check to fail on it. **Open.** | liziq21 | as above |
+| 2 | Prevention | Record in `AGENTS.md` the three things a dispatch brief must state for any golden task: CI on the branch will be red before the baseline lands, the compliant way to record it, and which workflow constraints apply. **Done** — the `External agent dispatch` section now states the checklist. | liziq21 | [`AGENTS.md`](../../AGENTS.md#external-agent-dispatch) |
+| 3 | Prevention | Record the pre-dispatch check: read `AGENTS.md` rules against `.github/workflows/` capabilities and confirm they intersect satisfiably before dispatching any task. **Done** — the same `External agent dispatch` section requires this intersection check. | liziq21 | [`AGENTS.md`](../../AGENTS.md#external-agent-dispatch) |
+| 4 | Detection | Add a CI check that fails when a PR touches `app/test/golden/goldens/ci/*.png` and no `rerecord-goldens.yml` run produced those exact PNGs. The check must be content-addressed, not marker-based: branch name and PR body are both copyable, so a fork PR can replay them and substitute its own PNGs. Instead, for each commit that introduces or modifies a golden, resolve the run through that commit's own history and confirm the file's blob SHA matches the PNG that run uploaded. `rerecord-goldens.yml` already uploads the rendered files as an artifact named `goldens-<run_id>` containing `app/test/golden/goldens/ci/`, and opens its PR through the uhibot App, so both the run and the authoring identity are checkable. A check comparing only the current PR head against the workflow branch will be wrong: baselines land on the feature branch and are squashed, so head moves after the recording. Include a negative test that copies a valid run's branch name and PR body but swaps the PNG, and require the check to fail on it. **Open.** | liziq21 | [`docs/postmortems/2026-09-30-jules-golden-baseline-deadlock.md`](2026-09-30-jules-golden-baseline-deadlock.md#action-items) |
 | 5 | Mitigation | Keep the revert-not-force-push path. It is already documented and it worked. | liziq21 | [`docs/runbook.md`](../runbook.md) |
-| 6 | Fixes | The revert, then the compliant baseline. | liziq21 | `9434b5eff`, `a76444ae5` |
+| 6 | Fixes | The revert, then the compliant baseline. | liziq21 | [`9434b5eff`](https://github.com/liziq21/bili/commit/9434b5eff), [`a76444ae5`](https://github.com/liziq21/bili/commit/a76444ae5) |
 
 ## Appendix
 

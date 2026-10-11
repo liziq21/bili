@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:data/data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/user_data/user_data_repository.dart';
-import '../../../providers/media_sources_provider.dart';
 import 'feed_section_state.dart';
 
 export 'feed_section_state.dart';
@@ -18,78 +15,26 @@ part 'home_state.dart';
 
 class HomeBloc({
   required final UserDataRepository userDataRepository,
-  required final List<MediaSource> mediaSources,
+  required final MediaSource source,
 }) extends Bloc<HomeEvent, HomeState> {
   this
     : _userDataRepository = userDataRepository,
-      _mediaSources = mediaSources,
-      // 数据源清单由 DI 注入，可能为空；此时用空标识而不是崩溃或写死某个服务名。
-      super(HomeState(sourceId: resolveMediaSourceId(mediaSources, null))) {
-    on<_UserDataChanged>(_onUserDataChanged);
+      _source = source,
+      super(HomeState(sourceId: source.id)) {
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
     on<FilterSelected>(_onFilterSelected);
     on<FeedNextPageRequested>(_onFeedNextPageRequested);
 
-    _userDataSubscription = _userDataRepository.data.listen(
-      (userData) => add(_UserDataChanged(userData)),
-      onError: (error, stackTrace) {
-        _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
-      },
-    );
-
     add(FeedsRequested());
   }
 
   final UserDataRepository _userDataRepository;
-  final List<MediaSource> _mediaSources;
+  final MediaSource _source;
   final _log = Logger('HomeBloc');
   final Map<String, int> _videoRequestVersions = {};
   final Map<String, int> _liveRequestVersions = {};
   int _nextRequestVersion = 0;
-  StreamSubscription<UserData>? _userDataSubscription;
-
-  /// 把持久化的 [UserData.sourceId] 解析成当前生效的标识
-  ///
-  /// 转换规则本身在 [resolveMediaSourceId]：搜索分支不在本 bloc 之下，由路由自行
-  /// 解析同一份持久化数据，两处共用同一函数才不会解析出不同的源。
-  String _resolveSourceId(String? persisted) =>
-      resolveMediaSourceId(_mediaSources, persisted);
-
-  /// 当前生效的数据源，`sourceId` 不可用时回退到首个可用数据源
-  MediaSource? get activeSource {
-    if (_mediaSources.isEmpty) return null;
-    return _mediaSources.firstWhere(
-      (source) => source.id == state.sourceId,
-      orElse: () => _mediaSources.first,
-    );
-  }
-
-  @override
-  Future<void> close() {
-    _userDataSubscription?.cancel();
-    return super.close();
-  }
-
-  Future<void> _onUserDataChanged(
-    _UserDataChanged event,
-    Emitter<HomeState> emit,
-  ) async {
-    final userData = event.userData;
-    final resolved = _resolveSourceId(userData.sourceId);
-    if (resolved == state.sourceId) return;
-    // 数据源切换后旧 Feed 不再适用，清空并重新拉取。
-    // 清掉选中项：各源的 Feed id 不同，旧 id 在新源下必然失效。
-    emit(
-      state.copyWith(
-        sourceId: resolved,
-        clearFilter: true,
-        videoSections: const [],
-        liveSections: const [],
-      ),
-    );
-    add(FeedsRequested());
-  }
 
   Future<void> _onServiceSourceChanged(
     ServiceSourceChanged event,
@@ -112,14 +57,7 @@ class HomeBloc({
     FeedsRequested event,
     Emitter<HomeState> emit,
   ) async {
-    final source = activeSource;
-    if (source == null) {
-      if (event.refresh) {
-        emit(state.copyWith(isRefreshing: true));
-        emit(state.copyWith(isRefreshing: false));
-      }
-      return;
-    }
+    final source = _source;
 
     final videoFeeds = source.videoFeedDataSources;
     final liveFeeds = source.liveRoomFeedDataSources;
@@ -160,8 +98,7 @@ class HomeBloc({
     FeedNextPageRequested event,
     Emitter<HomeState> emit,
   ) async {
-    final source = activeSource;
-    if (source == null) return;
+    final source = _source;
 
     final section = state.videoSections
         .where((section) => section.id == event.feedId)
@@ -197,7 +134,7 @@ class HomeBloc({
     final result = await feed.fetchFeed(pageKey: pageKey);
     if (emit.isDone ||
         _videoRequestVersions[feed.id] != requestVersion ||
-        activeSource?.id != sourceId) {
+        _source.id != sourceId) {
       return;
     }
     final current = state.videoSections
@@ -219,7 +156,7 @@ class HomeBloc({
     final result = await feed.fetchFeed(pageKey: pageKey);
     if (emit.isDone ||
         _liveRequestVersions[feed.id] != requestVersion ||
-        activeSource?.id != sourceId) {
+        _source.id != sourceId) {
       return;
     }
     final current = state.liveSections

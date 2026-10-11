@@ -11,6 +11,7 @@ import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
+import '../feature/not_found/no_media_source_screen.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';
 import '../providers/service_source_providers.dart';
@@ -46,15 +47,26 @@ void requestSearchFocus() => _focusSearchInput?.call();
 /// [SearchScreen] 挂载/销毁时回调它，登记或注销聚焦入口
 void _registerSearchFocus(void Function()? focus) => _focusSearchInput = focus;
 
-String _resolveSource(BuildContext context) {
-  // 未注册 String provider 时回落到配置的默认数据源，不在此处写死服务标识。
+MediaSourceDefinition? _resolveSource(
+  BuildContext context, {
+  String? explicitSource,
+}) {
+  final catalog = context.read<MediaSourceCatalog>();
+  if (explicitSource != null) return catalog.find(explicitSource);
+
   try {
-    final s = context.read<String?>();
-    if (s != null) return s;
+    final scopedSource = context.read<MediaSourceDefinition?>();
+    if (scopedSource != null) return scopedSource;
   } on ProviderNotFoundException {
-    // 未注册，按默认数据源处理
+    // The route is not below a source scope yet.
   }
-  return defaultMediaSources.first.id;
+
+  final appBloc = context.read<AppBloc?>();
+  final persistedSource = switch (appBloc?.state) {
+    LoadSuccess(:final userData) => userData.sourceId,
+    _ => null,
+  };
+  return catalog.resolvePersisted(persistedSource);
 }
 
 /// 底部导航目的地
@@ -146,45 +158,45 @@ final GoRouter router = GoRouter(
 /// `ServiceSourceProviders` 注入与搜索 bloc 注入串在一起，属于「组装」而不是
 /// 「路由声明」，放在路由数据类里会让人误以为换个路由就得复制这段。
 Widget _buildHome(BuildContext context) {
-  return BlocProvider<HomeBloc>(
-    create: (context) => HomeBloc(
-      userDataRepository: context.read(),
-      mediaSources: context.read<List<MediaSource>>(),
-    ),
-    child: Builder(
-      builder: (context) => BlocSelector<HomeBloc, HomeState, String>(
-        selector: (state) => state.sourceId,
-        builder: (context, sourceId) {
-          // activeSource 会把不可用的 sourceId 回退到首个可用数据源，
-          // 搜索建议必须跟着实际生效的数据源走。
-          final effectiveSource =
-              context.read<HomeBloc>().activeSource?.id ?? sourceId;
+  return BlocSelector<AppBloc, AppState, String?>(
+    selector: (state) => switch (state) {
+      LoadSuccess(:final userData) => userData.sourceId,
+      _ => null,
+    },
+    builder: (context, persistedSourceId) {
+      final definition = context.read<MediaSourceCatalog>().resolvePersisted(
+        persistedSourceId,
+      );
+      if (definition == null) return const NoMediaSourceScreen();
 
-          return ServiceSourceProviders(
-            source: effectiveSource,
-            // 内层 Builder 的 context 位于 ServiceSourceProviders 之下，
-            // 才能读到它注入的 SearchSuggestRepository。
+      return ServiceSourceProviders(
+        key: ValueKey('home:${definition.id}'),
+        source: definition.id,
+        child: Builder(
+          builder: (context) => BlocProvider<HomeBloc>(
+            create: (context) => HomeBloc(
+              userDataRepository: context.read(),
+              source: context.read<MediaSource>(),
+            ),
             child: Builder(
               builder: (context) => _withSearchBloc(
                 context,
                 HomeScreen(
-                  onLive: (roomId) {
-                    final sourceId = context.read<HomeBloc>().activeSource?.id;
-                    if (sourceId == null) return;
-                    context.navigateToLive(roomId, source: sourceId);
-                  },
-                  onVideo: (id) {
-                    final sourceId = context.read<HomeBloc>().activeSource?.id;
-                    if (sourceId == null) return;
-                    context.navigateToVideo(id, source: sourceId);
-                  },
+                  onLive: (roomId) => context.navigateToLive(
+                    roomId,
+                    source: context.read<MediaSource>().id,
+                  ),
+                  onVideo: (id) => context.navigateToVideo(
+                    id,
+                    source: context.read<MediaSource>().id,
+                  ),
                 ),
               ),
             ),
-          );
-        },
-      ),
-    ),
+          ),
+        ),
+      );
+    },
   );
 }
 
@@ -208,9 +220,8 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
 
 /// 搜索分支
 ///
-/// 数据源跟随 app 全局选择：用户的选择持久化在 [UserData]，首页由 HomeBloc 读它，
-/// 搜索分支不在 HomeBloc 之下，因此自己从 [AppBloc] 读同一份数据再解析。
-/// 少了这一步，用户在首页选了 YouTube、点进搜索页仍会搜 B 站。
+/// 数据源跟随 app 全局选择：用户的选择持久化在 [UserData]，搜索分支从同一份
+/// 状态解析源目录。源实例仍由本分支的 [ServiceSourceProviders] 创建并拥有。
 Widget _buildSearchEntry(BuildContext context) {
   final persistedSourceId = context.select<AppBloc, String?>(
     (bloc) => switch (bloc.state) {
@@ -218,12 +229,14 @@ Widget _buildSearchEntry(BuildContext context) {
       _ => null,
     },
   );
-  final sourceId = resolveMediaSourceId(
-    context.read<List<MediaSource>>(),
+  final definition = context.read<MediaSourceCatalog>().resolvePersisted(
     persistedSourceId,
   );
+  if (definition == null) return const NoMediaSourceScreen();
+
   return ServiceSourceProviders(
-    source: sourceId,
+    key: ValueKey('search:${definition.id}'),
+    source: definition.id,
     child: Builder(
       builder: (context) {
         // 建议能力依赖 SearchSuggestRepository。数据源不支持时（provider 未
@@ -233,7 +246,7 @@ Widget _buildSearchEntry(BuildContext context) {
           return SearchScreen(
             onFocusInputReady: _registerSearchFocus,
             onSearch: (query) =>
-                context.navigateToSearchResult(query, source: sourceId),
+                context.navigateToSearchResult(query, source: definition.id),
           );
         }
         return BlocProvider<SearchBloc>(
@@ -248,7 +261,7 @@ Widget _buildSearchEntry(BuildContext context) {
           child: SearchScreen(
             onFocusInputReady: _registerSearchFocus,
             onSearch: (query) =>
-                context.navigateToSearchResult(query, source: sourceId),
+                context.navigateToSearchResult(query, source: definition.id),
           ),
         );
       },

@@ -36,8 +36,8 @@ Flutter 官方的架构文档把应用切成 UI 层与数据层，复杂应用�
 | 步骤 | 做什么 | 去哪找 |
 |---|---|---|
 | 1 | 用户进入首页，界面订阅状态 | `HomeScreen` 里的 `BlocBuilder<HomeBloc, HomeState>` |
-| 2 | Bloc 构造完成后主动请求一次数据 | `HomeBloc` 构造函数末尾的 `add(FeedsRequested())` |
-| 3 | 事件处理器取出当前服务源；为空时只翻转刷新态就返回，不写死任何服务名 | `_onFeedsRequested` 里的 `activeSource` |
+| 2 | 路由根据目录解析当前源，并在源作用域内创建 Bloc | `router.dart` 的 `_buildHome` 与 `ServiceSourceProviders` |
+| 3 | Bloc 构造完成后主动请求一次数据 | `HomeBloc` 构造函数末尾的 `add(FeedsRequested())` |
 | 4 | 从服务源问出它支持哪些 feed | `source.videoFeedDataSources`、`source.liveRoomFeedDataSources` |
 | 5 | 先为每个 feed 发一次状态，section 置为 loading，让界面先出骨架 | `emit(state.copyWith(videoSections: [...FeedSectionState(status: FeedStatus.loading)]))` |
 | 6 | 并发拉取所有 section 的第一页 | `Future.wait([...])`，逐个调 `_fetchVideoPage` / `_fetchLivePage` |
@@ -46,7 +46,7 @@ Flutter 官方的架构文档把应用切成 UI 层与数据层，复杂应用�
 | 9 | 合并进 section 并发新状态 | `emit(_replaceVideoSection(_merge(current, result, pageKey: pageKey)))` |
 | 10 | 请求全部返回后收起刷新态 | `if (state.isRefreshing) emit(state.copyWith(isRefreshing: false))` |
 
-第 8 步值得单独看一眼。这里的两个检查解决的是两件事：`activeSource?.id != sourceId` 丢弃服务源从 A 切到 B 之后才返回的 A 响应；请求版本检查丢弃同一类 feed、同一 `feed.id` 上被更新请求取代的旧响应。缺少后者时，旧响应可能覆盖较新的请求结果。
+第 8 步值得单独看一眼。这里的两个检查解决的是两件事：`_source.id != sourceId` 丢弃不属于当前源作用域的响应；请求版本检查丢弃同一类 feed、同一 `feed.id` 上被更新请求取代的旧响应。缺少后者时，旧响应可能覆盖较新的请求结果。
 
 ## 4. 数据层
 
@@ -154,28 +154,22 @@ Bloc 只通过构造函数注入依赖：
 ```dart
 class HomeBloc({
   required final UserDataRepository userDataRepository,
-  required final List<MediaSource> mediaSources,
+  required final MediaSource source,
 }) extends Bloc<HomeEvent, HomeState> {
 ```
 
 **官方**：Bloc 的依赖「必须是可注入的、平台无关的，不允许平台分支」（[FAQs](https://bloclibrary.dev/faqs/)）。
 
-订阅外部数据源在构造函数里起，错误只记日志不上抛：
+Bloc 只处理当前路由作用域内的源，不订阅全局源清单。源切换由路由重新解析目录并
+重建作用域，旧源和旧 Bloc 随作用域一起释放。
 
-```dart
-_userDataSubscription = _userDataRepository.data.listen(
-  (userData) => add(_UserDataChanged(userData)),
-  onError: (error, stackTrace) {
-    _log.warning('Failed to load user data in HomeBloc', error, stackTrace);
-  },
-);
-```
-
-外部流 → 私有事件 → 状态，全程不跨层。注意构造函数里那行注释说明了服务源清单由 DI 注入、可能为空，此时用空标识而不是崩溃或写死某个服务名——这是第 1 节约束的代码形态。
+HomeBloc 的输入仍然只通过构造函数和事件进入，不直接导入具体服务包。源目录由组合
+根注入，源实例由路由作用域按需创建；空目录由路由显示无可用源状态，不创建
+HomeBloc。
 
 ### 6.3 依赖注入
 
-`app/lib/providers/` 分两个文件：`bloc_providers.dart` 放 Bloc，`repo_providers.dart` 放仓库与数据层对象。
+`app/lib/providers/` 分为全局本地依赖、Bloc 以及源作用域：`bloc_providers.dart` 放全局 Bloc，`repo_providers.dart` 放本地仓库与数据层对象，`media_sources_provider.dart` 登记源工厂，`service_source_providers.dart` 为路由作用域按能力注入源 Repository。
 
 ```dart
 RepositoryProvider<AppDatabase>(...);

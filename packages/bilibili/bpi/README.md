@@ -1,8 +1,8 @@
 # bpi
 
-`bpi` 是 Bilibili Web API 的 Dart 网络层，当前提供搜索、搜索建议和视频
-详情请求。需要注意：它不是 Bilibili 官方 SDK，接口行为可能随 Bilibili
-服务端变化。
+`bpi` 是 Bilibili Web API 的 Dart 网络层，提供搜索、搜索建议、视频/直播/用户
+内容与播放信息等请求。它不是 Bilibili 官方 SDK，接口行为可能随 Bilibili
+服务端变化；已实现端点和 fixture 以 [`AGENTS.md`](AGENTS.md) 为准。
 
 ## 功能
 
@@ -42,8 +42,9 @@ WBI key 会从 Bilibili 导航接口获取，并在内存中缓存。WBI 请求�
 
 ## 开发
 
-该包要求 Dart `^3.13.0`。测试不应依赖真实 Bilibili 网络服务，应使用固定
-JSON fixtures 和 mock HTTP client。
+该包要求 Dart `^3.13.4`。测试不应依赖真实 Bilibili 网络服务，应使用固定
+JSON fixtures 和 mock HTTP client；端点文档与 fixture 表由 `doc_guardrail_test.dart`
+保持同步。
 
 ```bash
 dart test

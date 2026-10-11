@@ -40,7 +40,9 @@ void main() {
       });
 
       test('strips control characters from search video query', () async {
-        final result = await dataSource.searchVideo('flut\r\nter\x00');
+        final result = await dataSource.searchVideo(
+          const SearchQuery(query: 'flut\r\nter\x00'),
+        );
         expect(result, isA<Ok<Page<VideoModel>>>());
         expect(mockNetwork.lastCapturedQuery, equals('flutter'));
       });
@@ -48,7 +50,9 @@ void main() {
       test(
         'returns empty Page when search video query is empty or whitespace',
         () async {
-          final result = await dataSource.searchVideo('   \r\n\x00');
+          final result = await dataSource.searchVideo(
+            const SearchQuery(query: '   \r\n\x00'),
+          );
           expect(result, isA<Ok<Page<VideoModel>>>());
           expect(mockNetwork.lastCapturedQuery, isNull);
           if (result case Ok(:final value)) {

@@ -20,9 +20,9 @@
 | 播放列表浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；使用 `browseId=VL<playlistId>` 请求播放列表页面 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/browse_playlist.json` | 2026-09-30 |
 | 视频 Watch Next | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；主信息在 `twoColumnWatchNextResults` 的 `videoPrimaryInfoRenderer` / `videoSecondaryInfoRenderer`，续页条目走 `onResponseReceivedActions[].appendContinuationItemsAction.continuationItems` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/watch_next.json`（`videoId=dQw4w9WgXcQ`） | 2026-10-03 |
 | 视频评论 | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；使用 Watch Next 返回的 comment continuation token 请求，评论条目以 `commentThreadRenderer` / `commentViewModel` 返回 | [PipePipe / InnerPipe 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/comments.json` | 2026-10-03 |
-| 视频 Player 播放器 | `POST https://www.youtube.com/youtubei/v1/player` | InnerTube client context；当前实现不要求登录；包含视频基本信息 `videoDetails`、播放状态 `playabilityStatus` 及媒体流格式 `streamingData` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/player.json`（`videoId=dQw4w9WgXcQ`） | 尚无成功响应 fixture；现存 fixture 为 `UNPLAYABLE` 业务失败响应、无 `streamingData`，待重抓 |
+| 视频 Player 播放器 | `POST https://www.youtube.com/youtubei/v1/player` | InnerTube client context；当前实现不要求登录；包含视频基本信息 `videoDetails`、播放状态 `playabilityStatus` 及媒体流格式 `streamingData` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/player.json`（negative：`videoId=dQw4w9WgXcQ`） | 尚无成功响应 fixture；现存 fixture 为 `UNPLAYABLE` 业务失败响应、无 `streamingData`，只用于失败路径，待重抓成功响应 |
 | 搜索建议 | `GET https://suggestqueries.google.com/complete/search` | 公共请求 | [Google Suggest](https://suggestqueries.google.com/complete/search) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录 |
-| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；**登录门控**：匿名 session 返回 200 但只有 `feedNudgeRenderer`（提示先搜索/观看以生成推荐），无 `videoRenderer` / `gridVideoRenderer`；当前项目不实现登录，该端点实际不可用 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/home_feed.json`（匿名空 feed） | 2026-10-04 |
+| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；**登录门控**：匿名 session 返回 200 但只有 `feedNudgeRenderer`（提示先搜索/观看以生成推荐），无 `videoRenderer` / `gridVideoRenderer`；当前项目不实现登录，该端点实际不可用 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/home_feed.json`（negative：匿名空 feed） | 2026-10-04 |
 | 独立 Trending | 不作为实现依据 | 社区报告旧 `FEtrending` 不稳定/退役，尚未验证，不注册 | [InnerTube 使用说明](https://github.com/tombulled/innertube) | 不适用 | 未验证 |
 
 不得使用第三方聚合 API 或抓取服务作为运行时数据源；社区实现只能作为请求格式参考，不能替代本包的实测 fixture。
@@ -40,12 +40,12 @@
 ## 抓取与测试
 
 - 真实抓取脚本放在 `tool/capture/`，从 `packages/youtube/ypi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
-- fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。
+- 成功 fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。用于覆盖公开失败/受限行为的 negative fixture 必须在文件名、表格和测试中明确标注用途，不能替代成功 fixture。
 - 写盘前脚本递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
-- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）仍属业务失败，不得写入，人工确认也不能例外。
-- 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖 fixture，并返回非零状态。
+- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）默认仍属业务失败，不得写入，人工确认也不能例外。若该响应是已登记的公开失败/受限能力边界，才可以保存为明确标记的 negative fixture，并只由失败/能力边界测试引用。
+- 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖成功 fixture，并返回非零状态。已存在的 negative fixture 只用于离线失败路径回归，不得用抓取脚本的成功分支覆盖。
 - fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
-- 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
+- 每个新增 endpoint 必须包含真实成功 fixture；若端点只实现或必须覆盖公开失败/受限形态，可额外保留明确标记的 negative fixture，但不得用它替代成功 fixture。两者都要配套 MockClient 请求形状测试、fixture 解析测试和失败路径测试。
 - 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
 
 ## 新增 endpoint 流程
@@ -53,7 +53,7 @@
 1. 确认来源：InnerTube 客户端实际请求为最高事实来源，可复核开源实现只作请求格式参考。无来源不实现。
 2. 在 `tool/capture/fetch_fixtures.dart` 增加抓取分支与 `_validate*` 结构校验函数；业务语义无效的 200 响应（如失效频道）必须在校验层拦下。
 3. 在本文件「已确认的来源与端点」表格加一行：Endpoint、Method/Path、请求/鉴权、来源、Fixture、实测日期。未实测的端点可登记但标注「尚无 / 未实测」，不实现。
-4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐 HTTP status、非敏感请求参数、client context、来源与抓取日期；响应形态的特殊之处写进该文件的说明段。
+4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐 HTTP status、非敏感请求参数、client context、来源与抓取日期；成功 fixture 记录成功形态，negative fixture 必须明确写出 `negative` 及用途；响应形态的特殊之处写进该文件的说明段。
 5. 实现 service 方法与 DTO，一个 endpoint 对应 `YoutubeService` 上的一个方法；DTO 用 `NetworkYouTube` 前缀加端点或角色语义命名。
-6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
+6. 写四项测试：成功（或明确标记的 negative）fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身；若成功 fixture 尚未取得，必须在文档中标明 endpoint 尚不可视为完成。
 7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。

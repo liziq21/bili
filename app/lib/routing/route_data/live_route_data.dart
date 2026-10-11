@@ -12,10 +12,13 @@ class const LiveRouteData({required final String roomId, final String? source})
     with $LiveRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final effectiveSource = source ?? _resolveSource(context);
+    final effectiveSource = _resolveSource(context, explicitSource: source);
+    if (effectiveSource == null) {
+      return const NoMediaSourceScreen(message: '直播所属的数据源不可用');
+    }
 
     return ServiceSourceProviders(
-      source: effectiveSource,
+      source: effectiveSource.id,
       child: LiveScreen(roomId: roomId, onBackClick: () => context.pop()),
     );
   }
