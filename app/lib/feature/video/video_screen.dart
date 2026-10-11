@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../../main.dart';
 import '../../../utils/platfrom_info.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../database/dao/media_history_dao.dart';
+import '../../../database/table/media.dart';
 import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
@@ -20,6 +22,8 @@ class const VideoScreen({super.key, final String videoId = 'demo_video'})
 
 class VideoScreenState() extends State<VideoScreen> {
   MediaPlaybackController? _playbackController;
+  MediaHistoryDao? _mediaHistoryDao;
+  String? _sourceId;
 
   /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
   /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
@@ -31,7 +35,55 @@ class VideoScreenState() extends State<VideoScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_mediaHistoryDao == null || _sourceId == null) {
+      try {
+        _mediaHistoryDao ??= context.read<MediaHistoryDao>();
+        _sourceId ??= context.read<String>();
+      } catch (_) {}
+    }
+    if (_didLoadProgress || _mediaHistoryDao == null || _sourceId == null) return;
+    _didLoadProgress = true;
+    _loadProgressAsync();
+  }
+
+  bool _didLoadProgress = false;
+
+  /// 查 [media_history] 里这条视频的播放进度，
+  /// 拿到后写入 [MediaPlaybackController.restorePositionSeconds]，
+  /// [_VideoSurface] 在 open 完成后自动 seek。
+  Future<void> _loadProgressAsync() async {
+    final dao = _mediaHistoryDao!;
+    try {
+      final mediaId = await dao.getOrCreateMediaId(
+        _sourceId!,
+        widget.videoId,
+        Media.typeVideo,
+      );
+      final progress = await dao.getProgressForMedia(mediaId);
+      if (progress != null && progress > 0) {
+        _playbackController?.restorePositionSeconds = progress;
+      }
+    } catch (_) {}
+  }
+
+  /// 把当前播放位置写回 [media_history]，供下次进入本视频时 seek 起播。
+  /// 不足 10s 不记，避免刚开进来就退出时把进度打回零。
+  void _saveProgress() {
+    final controller = _playbackController;
+    final dao = _mediaHistoryDao;
+    if (controller == null || dao == null || _sourceId == null) return;
+    final positionSeconds = controller.state.position.inSeconds;
+    if (positionSeconds < 10) return;
+    dao.getOrCreateMediaId(_sourceId!, widget.videoId, Media.typeVideo).then(
+      (mediaId) => dao.saveProgress(mediaId, positionSeconds),
+    );
+  }
+
+  @override
   void dispose() {
+    _saveProgress();
     _playbackController?.dispose();
     super.dispose();
   }

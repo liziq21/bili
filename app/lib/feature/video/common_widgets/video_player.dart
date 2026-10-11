@@ -284,14 +284,20 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   @override
   Widget build(BuildContext context) {
     final state = _playbackState;
+    final hasError = state != null && state.error != null;
     return Stack(
       alignment: Alignment.center,
       children: [
         Positioned.fill(
           child: Video(controller: widget.controller.videoController),
         ),
-        if (state != null && state.error != null)
-          Positioned.fill(child: _ErrorView(message: state.error!)),
+        if (hasError)
+          Positioned.fill(
+            child: _ErrorView(
+              message: state.error!,
+              onRetry: () => widget.controller.retry(widget.stream),
+            ),
+          ),
       ],
     );
   }
@@ -308,8 +314,10 @@ class const _LoadingView() extends StatelessWidget {
   }
 }
 
-class const _ErrorView({required final String message})
-    extends StatelessWidget {
+class const _ErrorView({
+  required final String message,
+  final VoidCallback? onRetry,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -328,6 +336,18 @@ class const _ErrorView({required final String message})
               color: $styles.colors.onScrim,
             ),
           ),
+          if (onRetry != null) ...[
+            const Gap(8),
+            TextButton(
+              onPressed: onRetry,
+              child: Text(
+                '重试',
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.accentText,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

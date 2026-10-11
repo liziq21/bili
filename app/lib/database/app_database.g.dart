@@ -996,6 +996,10 @@ class $MediaHistoryTable extends MediaHistory
   @override
   Set<GeneratedColumn> get $primaryKey => {internalId};
   @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {mediaId},
+  ];
+  @override
   MediaHistoryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MediaHistoryEntity(

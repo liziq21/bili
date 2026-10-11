@@ -12,14 +12,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:model/model.dart';
 
 void main() {
-  /// 两个用例都不创建 `_VideoSurface`（loading 与 error 分支在渲染管线外
-  /// 返回），故不注入 [MediaPlaybackController]。
-  ///
-  /// stream 到位后进入 `_VideoSurface`、由 `Video` 组件渲染画面的路径不在此
-  /// 覆盖：`VideoController` 构造会异步创建平台纹理，测试环境无 libmpv，该
-  /// 创建经 `completeError` 兜底但 `Future.error` 仍冒出测试 zone，且 `Video`
-  /// 组件本身只渲染空盒子（`notifier == null` 时返回 `SizedBox.shrink()`）。
-  /// 该路径的地址拼装与转交由 `media_playback_controller_test.dart` 覆盖。
   Future<void> pumpPlayer(
     WidgetTester tester, {
     required VideoBloc bloc,
@@ -58,13 +50,10 @@ void main() {
 
     await pumpPlayer(tester, bloc: bloc);
     bloc.add(const LoadMediaStream('BV123'));
-    // 不用 pumpAndSettle：_HangingStreamRepository 的 future 永不完成，
-    // settle 会等到超时。这里地址失败是同步路径，几帧足够。
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(find.textContaining('播放失败'), findsOneWidget);
-    // 关键判据：错误只出现在播放器区域内，不把整页顶掉。
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
     addTearDown(bloc.close);
@@ -80,12 +69,9 @@ void main() {
         final bloc = VideoBloc(repository: _NoStreamRepository());
         await pumpPlayer(tester, bloc: bloc, controller: controller);
 
-        // 无 stream、无 streamError：画面区是 loading，但注入了外部 controller，
-        // 控制条照常渲染。初始无队列事件：两个按钮禁用。
         expect(find.byTooltip('下一首'), findsOneWidget);
         expect(find.byTooltip('上一首'), findsOneWidget);
 
-        // 走真实入口造队列：open() 同时订阅流并推首个 queue 状态事件。
         await controller.openQueue([
           MediaStream(videoUrl: 'https://example.com/1.m4s'),
           MediaStream(videoUrl: 'https://example.com/2.m4s'),
@@ -121,20 +107,16 @@ void main() {
       ]);
       await tester.pump();
 
-      // 初始模式为 none，Tooltip 显示 '循环：关闭'
       expect(find.byTooltip('循环：关闭'), findsOneWidget);
 
-      // 点击一次，模式切为 single，Tooltip 显示 '单首循环'
       await tester.tap(find.byTooltip('循环：关闭'));
       await tester.pump();
       expect(find.byTooltip('单首循环'), findsOneWidget);
 
-      // 再点一次，模式切为 loop，Tooltip 显示 '队列循环'
       await tester.tap(find.byTooltip('单首循环'));
       await tester.pump();
       expect(find.byTooltip('队列循环'), findsOneWidget);
 
-      // 再点一次，模式切回 none，Tooltip 切回 '循环：关闭'
       await tester.tap(find.byTooltip('队列循环'));
       await tester.pump();
       expect(find.byTooltip('循环：关闭'), findsOneWidget);
@@ -143,9 +125,54 @@ void main() {
       addTearDown(bloc.close);
     });
   });
+
+  group('retry and restore progress', () {
+    test('retry reopens the stream', () async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final stream = MediaStream(videoUrl: 'https://example.com/v.m4s');
+
+      await controller.open(stream);
+      await controller.retry(stream);
+
+      expect(fake.openCalls, hasLength(2));
+
+      addTearDown(controller.dispose);
+    });
+
+    test('restorePositionSeconds triggers seek after open', () async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      controller.restorePositionSeconds = 30;
+
+      await controller.open(MediaStream(videoUrl: 'https://example.com/1.m4s'));
+      expect(fake.seekCalls, hasLength(1));
+      expect(fake.seekCalls.first, const Duration(seconds: 30));
+      expect(controller.restorePositionSeconds, 0);
+
+      addTearDown(controller.dispose);
+    });
+
+    test('retry after restorePositionSeconds does not re-seek', () async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final stream = MediaStream(videoUrl: 'https://example.com/v.m4s');
+      controller.restorePositionSeconds = 45;
+
+      await controller.open(stream);
+      expect(fake.seekCalls, hasLength(1));
+      expect(fake.seekCalls.first, const Duration(seconds: 45));
+
+      // retry 不应再次 seek（restorePositionSeconds 已清零）
+      await controller.retry(stream);
+      expect(fake.seekCalls, hasLength(1));
+      expect(fake.openCalls, hasLength(2));
+
+      addTearDown(controller.dispose);
+    });
+  });
 }
 
-/// 详情与地址都不可用的仓库：画面区停在 loading，但允许外部注入 controller。
 class _NoStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
@@ -174,9 +201,6 @@ class _NoStreamRepository() implements VideoDetailRepository {
   }
 }
 
-/// 只实现被观察的那几个流的假播放器，与
-/// `media_playback_controller_test.dart` 里的形态一致，此处只保留队列测试
-/// 需要的 next/previous 调用记录与 playlist 事件注入。
 // ignore_for_file: close_sinks
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   this {
@@ -241,11 +265,14 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   @override
   late PlayerStream stream;
 
-  /// next() 的调用计数。
-  final List<int> nextCalls = [];
+  /// [PlatformPlayer.isVideoControllerAttached] — `VideoController`
+  /// constructor writes this; [dispose] reads it.
+  bool isVideoControllerAttached = false;
 
-  /// previous() 的调用计数。
+  final List<int> nextCalls = [];
   final List<int> previousCalls = [];
+  final List<Playable> openCalls = [];
+  final List<Duration> seekCalls = [];
 
   @override
   Future<void> next() async => nextCalls.add(0);
@@ -276,16 +303,23 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     bool play = true,
     bool synchronized = true,
   }) async {
+    openCalls.add(playable);
     if (playable is Playlist) {
       _playlist.add(playable);
     }
   }
 
   @override
+  Future<void> seek(Duration position) async {
+    seekCalls.add(position);
+  }
+
+  @override
   Future<void> dispose() async {}
+
+  void injectPlaybackError(String message) => _error.add(message);
 }
 
-/// 地址请求永不返回，用于把控件留在 loading 态。
 class _HangingStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
@@ -310,12 +344,10 @@ class _HangingStreamRepository() implements VideoDetailRepository {
     String id, {
     int? preferHeight,
   }) async {
-    // 故意不完成：loading 态就是「地址还没到」。
     return Completer<Result<MediaStream>>().future;
   }
 }
 
-/// 详情接口返回错误：播放队列 UI 已接入，此用例只关心地址通道。
 class _FailingStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
@@ -340,4 +372,31 @@ class _FailingStreamRepository() implements VideoDetailRepository {
     String id, {
     int? preferHeight,
   }) async => Result.error(Exception('签名过期'));
+}
+
+class _OkStreamRepository() implements VideoDetailRepository {
+  @override
+  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.error(Exception('unused'));
+
+  @override
+  Future<Result<MediaStream>> getMediaStream(
+    String id, {
+    int? preferHeight,
+  }) async =>
+      Result.ok(MediaStream(videoUrl: 'https://example.com/v.m4s'));
 }
