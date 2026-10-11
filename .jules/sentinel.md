@@ -107,3 +107,9 @@ Prevention: Consistently eliminate local URL formatters in favor of centralized 
 Vulnerability: `YouTubeVideoSearchRemoteDataSource` used raw string interpolation (`'https://www.youtube.com/watch?v=${video.videoId}'`) without sanitizing `video.videoId`, creating risk of parameter or header injection if untrusted API responses contained ASCII control characters (`\r\n`, `\x00`).
 Learning: Video watch URLs constructed from external API responses can propagate control characters into URI consumers or intent launchers if not sanitized at the DTO mapping layer.
 Prevention: Use a dedicated URL builder (`buildYoutubeWatchUrl`) that strips ASCII control characters (`[\x00-\x1F\x7F]`) and validates inputs before assembling watch URLs.
+
+## 2026-10-10 - Standardize and Secure Video URLs in Bilibili Search and User Model Mappers
+
+Vulnerability: `NetworkVideoSearchResultX.asModel()` and `NetworkBiliUserResX.asModel()` directly assigned raw `arcurl` from Bilibili API responses to `VideoModel.url`, exposing cleartext `http://` URLs and scheme-relative links to application navigation and external URI launchers without HTTPS enforcement or null/empty fallback.
+Learning: REST API search and user video lists frequently return unencrypted `http://` article/video URLs (`arcurl`). Unsanitized raw `arcurl` fields bypass TLS transport enforcement and risk insecure HTTP navigation when launched or opened in web contexts.
+Prevention: Always normalize video web URLs using `normalizeBiliUrl(arcurl)` and provide a secure HTTPS fallback (`https://www.bilibili.com/video/$bvid`) when mapping API responses to domain models.

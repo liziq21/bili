@@ -7,7 +7,7 @@ extension NetworkVideoSearchResultX on NetworkVideoSearchResult {
   VideoModel asModel() => VideoModel(
     id: bvid,
     title: title.parsedTitle(),
-    url: arcurl,
+    url: normalizeBiliUrl(arcurl) ?? 'https://www.bilibili.com/video/$bvid',
     thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: play,
     uploadDate: DateTime.fromMillisecondsSinceEpoch(pubdate * 1000),
@@ -21,7 +21,7 @@ extension NetworkBiliUserResX on NetworkBiliUserRes {
   VideoModel asModel() => VideoModel(
     id: bvid,
     title: title,
-    url: arcurl,
+    url: normalizeBiliUrl(arcurl) ?? 'https://www.bilibili.com/video/$bvid',
     thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: int.tryParse(play),
     uploadDate: DateTime.fromMillisecondsSinceEpoch(pubdate * 1000),
