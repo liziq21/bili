@@ -2,6 +2,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
 
 /// B站播放地址数据源
@@ -87,10 +88,28 @@ final class BiliMediaStreamRemoteDataSource({
     final video = _pickVideo(videoItems, preferHeight);
     final audio = _pickAudio(audioItems);
 
+    final rawVideoUrl = video.playUrls.firstWhere(
+      (candidate) => candidate.isNotEmpty,
+      orElse: () => '',
+    );
+    final rawAudioUrl = audio.playUrls.firstWhere(
+      (candidate) => candidate.isNotEmpty,
+      orElse: () => '',
+    );
+    final videoUrl = normalizeBiliUrl(rawVideoUrl);
+    final audioUrl = normalizeBiliUrl(rawAudioUrl);
+
+    if (videoUrl == null || videoUrl.isEmpty) {
+      return Result.error(Exception('视频 $videoId 的分离流视频地址无效'));
+    }
+    if (audioUrl == null || audioUrl.isEmpty) {
+      return Result.error(Exception('视频 $videoId 的分离流音频地址无效'));
+    }
+
     return Result.ok(
       MediaStream(
-        videoUrl: video.playUrls.first,
-        audioUrl: audio.playUrls.first,
+        videoUrl: videoUrl,
+        audioUrl: audioUrl,
         headers: _headers,
         width: video.width,
         height: video.height,
@@ -161,13 +180,14 @@ final class BiliMediaStreamRemoteDataSource({
     }
     final segments = <MediaSegment>[];
     for (final item in ordered) {
-      final url = item.playUrls.firstWhere(
+      final rawUrl = item.playUrls.firstWhere(
         (candidate) => candidate.isNotEmpty,
         orElse: () => '',
       );
+      final url = normalizeBiliUrl(rawUrl);
       // 任一片段无可用地址都会让播放层拿到残缺序列却无从察觉（播到该段
       // 才断），故整条流判为不可用，而不是跳过后返回缺片的列表。
-      if (url.isEmpty) return [];
+      if (url == null || url.isEmpty) return [];
       segments.add(
         MediaSegment(
           url: url,
