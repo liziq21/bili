@@ -121,7 +121,9 @@ bili 的 `AppDatabase` 由 `RepositoryProvider<AppDatabase>` 提供（见 `app/l
 
 ## 5. 领域层
 
-`app/lib/domain/` 放跨功能的业务规则，目前是两个用例：`get_recent_search_queries_use_case.dart`、`get_search_contents_use_case.dart`。
+`app/lib/domain/` 放跨功能的业务规则，目前包含两个用例
+（`get_recent_search_queries_use_case.dart`、`get_search_contents_use_case.dart`）和
+数据源选择策略（`media_source_selection.dart`）。
 
 **官方**：领域层「夹在 UI 层与数据层之间」（[Guide](https://docs.flutter.dev/app-architecture/guide)）。
 

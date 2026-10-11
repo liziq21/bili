@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/user_data/user_data_repository.dart';
-import '../../../providers/media_sources_provider.dart';
+import '../../../domain/media_source_selection.dart';
 import 'feed_section_state.dart';
 
 export 'feed_section_state.dart';

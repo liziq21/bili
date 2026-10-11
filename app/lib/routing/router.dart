@@ -9,6 +9,7 @@ import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
+import '../domain/media_source_selection.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
 import '../feature/search/bloc/search_bloc.dart';
@@ -54,7 +55,7 @@ String _resolveSource(BuildContext context) {
   } on ProviderNotFoundException {
     // 未注册，按默认数据源处理
   }
-  return defaultMediaSources.first.id;
+  return resolveMediaSourceId(defaultMediaSources, null);
 }
 
 /// 底部导航目的地
