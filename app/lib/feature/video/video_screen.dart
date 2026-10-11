@@ -45,7 +45,8 @@ class VideoScreenState extends State<VideoScreen> {
         _sourceId ??= context.read<String>();
       } catch (_) {}
     }
-    if (_didLoadProgress || _mediaHistoryDao == null || _sourceId == null) return;
+    if (_didLoadProgress || _mediaHistoryDao == null || _sourceId == null)
+      return;
     _didLoadProgress = true;
     _loadProgressAsync();
   }
@@ -78,9 +79,9 @@ class VideoScreenState extends State<VideoScreen> {
     if (controller == null || dao == null || _sourceId == null) return;
     final positionSeconds = controller.state.position.inSeconds;
     if (positionSeconds < 10) return;
-    dao.getOrCreateMediaId(_sourceId!, widget.videoId, Media.typeVideo).then(
-      (mediaId) => dao.saveProgress(mediaId, positionSeconds),
-    );
+    dao
+        .getOrCreateMediaId(_sourceId!, widget.videoId, Media.typeVideo)
+        .then((mediaId) => dao.saveProgress(mediaId, positionSeconds));
   }
 
   @override

@@ -267,6 +267,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
 
   /// [PlatformPlayer.isVideoControllerAttached] — `VideoController`
   /// constructor writes this; [dispose] reads it.
+  @override
   bool isVideoControllerAttached = false;
 
   final List<int> nextCalls = [];
@@ -397,6 +398,5 @@ class _OkStreamRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
-  }) async =>
-      Result.ok(MediaStream(videoUrl: 'https://example.com/v.m4s'));
+  }) async => Result.ok(MediaStream(videoUrl: 'https://example.com/v.m4s'));
 }

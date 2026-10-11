@@ -47,12 +47,14 @@ class MediaHistoryDao(super.db)
     String? title,
     String? url,
   }) async {
-    final existing = await (
-      select(media)..where((m) =>
-        m.sourceId.equals(sourceId) &
-            m.originalId.equals(originalId) &
-            m.type.equals(type))
-    ).getSingleOrNull();
+    final existing =
+        await (select(media)..where(
+              (m) =>
+                  m.sourceId.equals(sourceId) &
+                  m.originalId.equals(originalId) &
+                  m.type.equals(type),
+            ))
+            .getSingleOrNull();
     if (existing != null) return existing.internalId;
 
     final inserted = await into(media).insertReturning(
@@ -65,19 +67,16 @@ class MediaHistoryDao(super.db)
       ),
     );
     await insertMediaHistory(
-      MediaHistoryCompanion.insert(
-        mediaId: inserted.internalId,
-      ),
+      MediaHistoryCompanion.insert(mediaId: inserted.internalId),
     );
     return inserted.internalId;
   }
 
   /// 取指定媒体的播放进度（秒），无记录或进度为 null 时返回 null。
   Future<int?> getProgressForMedia(int mediaId) async {
-    final rows = await (
-      select(mediaHistory)
-        ..where((h) => h.mediaId.equals(mediaId))
-    ).get();
+    final rows = await (select(
+      mediaHistory,
+    )..where((h) => h.mediaId.equals(mediaId))).get();
     if (rows.isEmpty) return null;
     return rows.first.progressSeconds?.toInt();
   }
