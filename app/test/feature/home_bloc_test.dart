@@ -464,6 +464,10 @@ void main() {
       final bloc = buildBloc();
       addTearDown(bloc.close);
 
+      // The bloc requests its first page in the constructor. Let that
+      // non-refresh emission finish before observing the explicit refresh.
+      await pumpEventQueue();
+
       final expectation = expectLater(
         bloc.stream.map((state) => state.isRefreshing),
         emitsInOrder([isTrue, isFalse]),
