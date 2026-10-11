@@ -127,17 +127,12 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    // 建议浮层的内容依赖 SearchBloc；数据源没有建议能力时该 bloc 未注入，
-    // 不能把整棵 anchor 挂在 BlocSelector 之下，否则构建期就抛
-    // ProviderNotFoundException。此时只出基础 anchor：输入与提交照常工作，
-    // _getSuggestions 的 null bloc 兜底路径直接返回上次的结果（或空列表）。
-    if (_searchBloc == null) {
-      return _buildAnchor();
-    }
-    return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
-      selector: (state) => state.recentSearchQueries,
-      builder: (_, state) => _buildAnchor(),
-    );
+    // ⚡ Bolt Optimization: Build SearchAnchor directly without wrapping in a BlocSelector.
+    // SearchAnchor UI does not depend on recent search query state emissions. Suggestions
+    // subscribe directly to SearchBloc via stream listeners in _getSuggestions, avoiding
+    // unnecessary rebuild passes of the SearchAnchor and FocusScope subtrees whenever
+    // recent search queries are added or updated in state.
+    return _buildAnchor();
   }
 
   Widget _buildAnchor() {
