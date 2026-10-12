@@ -13,6 +13,80 @@ class MediaHistoryDao(super.db)
   Future<int> insertMediaHistory(Insertable<MediaHistoryEntity> entry) =>
       into(mediaHistory).insert(entry);
 
+  /// 保存一条媒体播放进度。upsert 语义：已有记录则更新进度，没有则插入。
+  ///
+  /// 用 drift 的 `insert` + `onConflict` 单语句完成，无并发双插风险。
+  Future<void> saveProgress(
+    int mediaId,
+    int progressSeconds, {
+    bool completed = false,
+  }) async {
+    final companion = MediaHistoryCompanion.insert(
+      mediaId: mediaId,
+      progressSeconds: Value(BigInt.from(progressSeconds)),
+      completed: Value(completed),
+    );
+    await into(mediaHistory).insert(
+      companion,
+      onConflict: DoUpdate(
+        (_) => MediaHistoryCompanion(
+          progressSeconds: Value(BigInt.from(progressSeconds)),
+          completed: Value(completed),
+          accessedAt: Value(DateTime.now()),
+        ),
+        target: [mediaHistory.mediaId],
+      ),
+    );
+  }
+
+  /// 按 (sourceId, originalId, type) 查找 media 行的 internalId；
+  /// 不存在时插入 media + media_history 行并返回新 id。
+  Future<int> getOrCreateMediaId(
+    String sourceId,
+    String originalId,
+    String type, {
+    String? title,
+    String? url,
+  }) async {
+    return transaction(() async {
+      final mediaCompanion = MediaCompanion.insert(
+        sourceId: sourceId,
+        originalId: originalId,
+        title: title ?? originalId,
+        url: url ?? '',
+        type: type,
+      );
+      final inserted = await into(media).insertReturning(
+        mediaCompanion,
+        onConflict: DoUpdate(
+          (_) => MediaCompanion(
+            sourceId: Value(sourceId),
+            originalId: Value(originalId),
+            type: Value(type),
+          ),
+          target: [media.sourceId, media.type, media.originalId],
+        ),
+      );
+      await into(mediaHistory).insert(
+        MediaHistoryCompanion.insert(mediaId: inserted.internalId),
+        onConflict: DoUpdate(
+          (_) => MediaHistoryCompanion(mediaId: Value(inserted.internalId)),
+          target: [mediaHistory.mediaId],
+        ),
+      );
+      return inserted.internalId;
+    });
+  }
+
+  /// 取指定媒体的播放进度（秒），无记录或进度为 null 时返回 null。
+  Future<int?> getProgressForMedia(int mediaId) async {
+    final rows = await (select(
+      mediaHistory,
+    )..where((h) => h.mediaId.equals(mediaId))).get();
+    if (rows.isEmpty) return null;
+    return rows.first.progressSeconds?.toInt();
+  }
+
   // 获取带媒体信息的历史记录
   Future<List<({MediaHistoryEntity history, MediaEntity media})>>
   getHistoryWithMedia({int limit = 20, int offset = 0}) {

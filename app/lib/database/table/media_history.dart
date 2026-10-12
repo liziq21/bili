@@ -17,4 +17,9 @@ class MediaHistory() extends Table {
 
   @override
   String get tableName => 'media_history';
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {mediaId},
+  ];
 }

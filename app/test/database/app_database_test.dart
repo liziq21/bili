@@ -268,5 +268,33 @@ void main() {
         equals(BigInt.from(60)),
       );
     });
+
+    test('saveProgress updates the existing media history row', () async {
+      final historyDao = db.mediaHistoryDao;
+
+      final mediaId = await historyDao.getOrCreateMediaId(
+        'bilibili',
+        'BV_PROGRESS',
+        Media.typeVideo,
+        title: 'A title',
+        url: 'https://example.com/video',
+      );
+      expect(
+        await historyDao.getOrCreateMediaId(
+          'bilibili',
+          'BV_PROGRESS',
+          Media.typeVideo,
+        ),
+        mediaId,
+      );
+      await historyDao.saveProgress(mediaId, 10);
+      await historyDao.saveProgress(mediaId, 42);
+
+      expect(await historyDao.getProgressForMedia(mediaId), 42);
+      final rows = await historyDao.getHistoryWithMedia();
+      expect(rows, hasLength(1));
+      expect(rows.single.media.title, 'A title');
+      expect(rows.single.media.url, 'https://example.com/video');
+    });
   });
 }

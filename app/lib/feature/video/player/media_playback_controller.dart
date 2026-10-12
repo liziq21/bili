@@ -108,14 +108,8 @@ class MediaPlaybackController([
 
   /// [_player] 是否已被访问过（late final 首次取值即初始化）。
   /// dispose 只在原生播放器确实创建过才释放，避免无头测试里
-  /// 访问未初始化的 late 字段触发 [MediaKit.ensureInitialized]。
-  bool _playerTouched = false;
-
   /// 在首次使用 [_player] 时标记，供 [dispose] 判断是否需要释放。
-  Player get _touchedPlayer {
-    _playerTouched = true;
-    return _player;
-  }
+  bool _playerTouched = false;
 
   late final VideoController _videoController = VideoController(_player);
 
@@ -149,21 +143,6 @@ class MediaPlaybackController([
   /// 当前状态快照。
   PlaybackState get state => _state;
 
-  /// 打开一条媒体并开始播放。
-  ///
-  /// [stream] 携带的地址可能已失效（各服务的地址签名都有时效），此时
-  /// 错误经 [states] 的 [PlaybackState.error] 报出。重复打开会先把状态
-  /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
-  Future<void> open(MediaStream stream) async {
-    _subscribe();
-    _isPlaying = false;
-    _isBuffering = false;
-    _emit(_initialPlaybackState());
-    await _player.open(
-      Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
-    );
-  }
-
   /// 暂停。
   Future<void> pause() => _player.pause();
 
@@ -176,6 +155,11 @@ class MediaPlaybackController([
   /// 跳转到指定位置。
   Future<void> seek(Duration position) => _player.seek(position);
 
+  /// 重新打开指定 stream（用于播放错误后重试）。
+  ///
+  /// 重新走完整 [open] 流程，状态归零后重新加载。
+  Future<void> retry(MediaStream stream) => open(stream);
+
   /// 设置音量，取值 0 到 1。
   ///
   /// 播放器库的量程是 0 到 100，此处对外用 0 到 1 并在转发前换算。
@@ -186,6 +170,7 @@ class MediaPlaybackController([
   /// 每条 [MediaStream] 各自拼成 EDL 虚拟媒体，互不干扰。队列为空时
   /// 交给播放器库的空 [Playlist] 不会播放任何内容。
   Future<void> openQueue(List<MediaStream> streams, {int index = 0}) async {
+    _playerTouched = true;
     _subscribe();
     _isPlaying = false;
     _isBuffering = false;
@@ -250,6 +235,12 @@ class MediaPlaybackController([
     }
   }
 
+  /// 恢复起播位置（秒），在 [open] 完成后自动 seek。
+  ///
+  /// 由调用方在 [open] 之前赋值，播放层在 `open` 成功后 seek 到此位置，
+  /// 用于进度续播场景。
+  int restorePositionSeconds = 0;
+
   /// 释放原生播放器资源。
   Future<void> dispose() async {
     for (final subscription in _subscriptions) {
@@ -258,6 +249,26 @@ class MediaPlaybackController([
     _subscriptions.clear();
     await _stateController.close();
     if (_playerTouched) await _player.dispose();
+  }
+
+  /// 打开一条媒体并开始播放。
+  ///
+  /// [stream] 携带的地址可能已失效（各服务的地址签名都有时效），此时
+  /// 错误经 [states] 的 [PlaybackState.error] 报出。重复打开会先把状态
+  /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
+  Future<void> open(MediaStream stream) async {
+    _playerTouched = true;
+    _subscribe();
+    _isPlaying = false;
+    _isBuffering = false;
+    _emit(_initialPlaybackState());
+    await _player.open(
+      Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
+    );
+    if (restorePositionSeconds > 0) {
+      await _player.seek(Duration(seconds: restorePositionSeconds));
+      restorePositionSeconds = 0;
+    }
   }
 
   /// 订阅播放器状态。重复调用只生效一次。

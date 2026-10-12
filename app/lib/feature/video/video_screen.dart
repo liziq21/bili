@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -6,20 +9,29 @@ import 'package:provider/provider.dart';
 import '../../../main.dart';
 import '../../../utils/platfrom_info.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../database/dao/media_history_dao.dart';
+import '../../../database/table/media.dart';
 import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
 import 'player/media_playback_controller.dart';
 
-class const VideoScreen({super.key, final String videoId = 'demo_video'})
-    extends StatefulWidget {
+class VideoScreen extends StatefulWidget {
+  const VideoScreen({super.key, this.videoId = 'demo_video'});
+  final String videoId;
+
   @override
   State<VideoScreen> createState() => VideoScreenState();
 }
 
-class VideoScreenState() extends State<VideoScreen> {
+class VideoScreenState extends State<VideoScreen> {
   MediaPlaybackController? _playbackController;
+  MediaHistoryDao? _mediaHistoryDao;
+  String? _sourceId;
+  Future<void>? _progressLoadFuture;
+  int _restorePositionSeconds = 0;
+  int _progressGeneration = 0;
 
   /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
   /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
@@ -31,7 +43,72 @@ class VideoScreenState() extends State<VideoScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_progressLoadFuture == null) {
+      try {
+        _mediaHistoryDao ??= context.read<MediaHistoryDao>();
+        _sourceId ??= context.read<MediaSource>().id;
+      } catch (_) {}
+    }
+    if (_progressLoadFuture == null &&
+        _mediaHistoryDao != null &&
+        _sourceId != null) {
+      _progressLoadFuture = _loadProgressAsync();
+    }
+  }
+
+  /// 查 [media_history] 里这条视频的播放进度，
+  /// 拿到后写入 [MediaPlaybackController.restorePositionSeconds]，
+  /// [_VideoSurface] 在 open 完成后自动 seek。
+  Future<void> _loadProgressAsync({String? videoId}) async {
+    final dao = _mediaHistoryDao;
+    final sourceId = _sourceId;
+    if (dao == null || sourceId == null) return;
+    final generation = ++_progressGeneration;
+    final requestedVideoId = videoId ?? widget.videoId;
+    try {
+      final mediaId = await dao.getOrCreateMediaId(
+        sourceId,
+        requestedVideoId,
+        Media.typeVideo,
+      );
+      final progress = await dao.getProgressForMedia(mediaId);
+      if (generation != _progressGeneration) return;
+      if (progress != null && progress > 0) _restorePositionSeconds = progress;
+    } catch (_) {}
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoId == widget.videoId) return;
+    _restorePositionSeconds = 0;
+    _playbackController?.restorePositionSeconds = 0;
+    _progressLoadFuture = _loadProgressAsync(videoId: widget.videoId);
+  }
+
+  /// 把当前播放位置写回 [media_history]，供下次进入本视频时 seek 起播。
+  /// 不足 10s 不记，避免刚开进来就退出时把进度打回零。
+  Future<void> _saveProgress() async {
+    final controller = _playbackController;
+    final dao = _mediaHistoryDao;
+    if (controller == null || dao == null || _sourceId == null) return;
+    final positionSeconds = controller.state.position.inSeconds;
+    if (positionSeconds < 10) return;
+    try {
+      final mediaId = await dao.getOrCreateMediaId(
+        _sourceId!,
+        widget.videoId,
+        Media.typeVideo,
+      );
+      await dao.saveProgress(mediaId, positionSeconds);
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
+    unawaited(_saveProgress());
     _playbackController?.dispose();
     super.dispose();
   }
@@ -70,7 +147,7 @@ class VideoScreenState() extends State<VideoScreen> {
       }
     }
 
-    return MultiBlocProvider(
+    final content = MultiBlocProvider(
       providers: [
         ...getVideoBlocProviders(context, videoId: widget.videoId),
         Provider<MediaPlaybackController>.value(value: controller),
@@ -87,6 +164,22 @@ class VideoScreenState() extends State<VideoScreen> {
           ),
         ),
       ),
+    );
+
+    final progressLoadFuture = _progressLoadFuture;
+    if (progressLoadFuture == null) return content;
+
+    return FutureBuilder<void>(
+      future: progressLoadFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Center(
+            child: CircularProgressIndicator(color: $styles.colors.accentFill),
+          );
+        }
+        controller.restorePositionSeconds = _restorePositionSeconds;
+        return content;
+      },
     );
   }
 }
