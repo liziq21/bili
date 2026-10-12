@@ -81,6 +81,10 @@ class Bili() implements MediaSource {
       .new(network: _videoApi);
 
   @override
+  BiliVideoCommentRemoteDataSource get videoCommentRepliesDataSource =>
+      .new(network: _videoApi);
+
+  @override
   BiliMediaStreamRemoteDataSource get mediaStreamDataSource =>
       .new(network: _videoApi, browserUserAgent: browserUserAgent);
 

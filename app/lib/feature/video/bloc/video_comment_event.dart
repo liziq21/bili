@@ -18,3 +18,15 @@ final class const ToggleCommentLike(final String commentId)
   @override
   List<Object?> get props => [commentId];
 }
+
+final class const ToggleCommentReplies(final String commentId)
+    extends VideoCommentEvent {
+  @override
+  List<Object?> get props => [commentId];
+}
+
+final class const FetchNextCommentRepliesPage(final String commentId)
+    extends VideoCommentEvent {
+  @override
+  List<Object?> get props => [commentId];
+}

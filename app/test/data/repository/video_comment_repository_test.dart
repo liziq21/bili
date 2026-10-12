@@ -27,6 +27,31 @@ class _RecordingVideoCommentRemoteDataSource()
   }
 }
 
+class _RecordingVideoCommentRepliesRemoteDataSource()
+    extends VideoCommentRepliesRemoteDataSource {
+  @override
+  String get sourceId => 'recording';
+
+  final calls = <(String, String, int, int)>[];
+
+  @override
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    calls.add((videoId, rootCommentId, page, pageSize));
+    return Result.ok(
+      Page<VideoComment>(
+        number: page,
+        totalPages: 2,
+        data: [VideoComment(id: 'r1', authorName: 'R', content: 'reply')],
+      ),
+    );
+  }
+}
+
 /// `AppVideoCommentRepository` takes an optional data source and is constructed
 /// without one in `lib/feature/video/bloc/providers.dart`, so both the
 /// delegating branch and the unsupported-source branch run in the app.
@@ -103,6 +128,32 @@ void main() {
       final result = await repository.getVideoComments('BV1', page: 9);
 
       expect(result.isError, isTrue);
+    });
+
+    test('reports an unsupported reply capability', () async {
+      final result = await repository.getVideoCommentReplies('BV1', '1');
+
+      expect(result.isError, isTrue);
+      expect(
+        (result as Error<Page<VideoComment>>).error.toString(),
+        contains('评论回复'),
+      );
+    });
+  });
+
+  group('AppVideoCommentRepository with a reply data source', () {
+    test('forwards reply identity and paging values', () async {
+      final remote = _RecordingVideoCommentRepliesRemoteDataSource();
+      final repository = AppVideoCommentRepository(null, remote);
+
+      await repository.getVideoCommentReplies(
+        'BV1',
+        'root-1',
+        page: 3,
+        pageSize: 50,
+      );
+
+      expect(remote.calls, [('BV1', 'root-1', 3, 50)]);
     });
   });
 }
