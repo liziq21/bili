@@ -115,7 +115,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchResultTypeVideo.
   ///
   /// In zh, this message translates to:
-  /// **'Video'**
+  /// **'视频'**
   String get searchResultTypeVideo;
 
   /// Bottom navigation - Library tab
@@ -1483,7 +1483,7 @@ abstract class AppLocalizations {
   /// Search result category - artists
   ///
   /// In zh, this message translates to:
-  /// **'Artists'**
+  /// **'创作者'**
   String get searchArtists;
 
   /// Search result category - albums

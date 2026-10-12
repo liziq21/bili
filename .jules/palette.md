@@ -57,3 +57,9 @@
 **Learning:** Static tooltips on state-cycling control buttons (such as static `'切换循环模式'`) leave hover users and screen readers (TalkBack/VoiceOver) unaware of the currently active mode. Providing state-aware dynamic tooltips via `AppLocalizations` (`queueModeNone`, `queueModeSingle`, `queueModeLoop`) ensures screen readers announce the exact active queue mode state while strictly respecting CJK font subset constraints in golden tests.
 
 **Action:** Always pair state-cycling action buttons with dynamic, state-aware localized tooltips and verify all text string characters exist in `app/test/fonts/subset-characters.txt`.
+
+## 2026-10-12 - Search Result Tab Localization & Haptic Feedback
+
+**Learning:** Raw internal identifier keys in UI tab headers (such as `creatorProfile` and `video`) degrade the user experience and screen reader clarity. Routing tab titles through `AppLocalizations` with fallback Chinese strings (`创作者` and `视频`) ensures clean localized tab labels while `HapticFeedback.selectionClick()` on `TabBar.onTap` delivers clear tactile feedback.
+
+**Action:** Always route tab titles through `AppLocalizations` with CJK subset fallback strings and add `HapticFeedback.selectionClick()` on tab selection handlers.

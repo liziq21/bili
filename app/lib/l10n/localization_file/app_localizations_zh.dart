@@ -19,7 +19,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchResultTypeAll => 'All';
 
   @override
-  String get searchResultTypeVideo => 'Video';
+  String get searchResultTypeVideo => '视频';
 
   @override
   String get navLibrary => 'Library';
@@ -807,7 +807,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchSongs => 'Songs';
 
   @override
-  String get searchArtists => 'Artists';
+  String get searchArtists => '创作者';
 
   @override
   String get searchAlbums => 'Albums';

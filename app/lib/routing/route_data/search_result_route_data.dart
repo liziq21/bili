@@ -50,6 +50,7 @@ class const SearchRouteData({
           child: SearchResultScreen(
             query: keyword,
             onBackClick: () => context.pop(),
+            source: effectiveSource.id,
           ),
         ),
       ),
