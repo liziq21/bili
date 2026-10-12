@@ -98,9 +98,12 @@ class const _VideoContent({
   @override
   Widget build(BuildContext context) {
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
+    // ⚡ Bolt Optimization: Use MediaQuery.sizeOf(context) instead of MediaQuery.of(context).size.
+    // Targeted size lookup prevents _VideoContent and descendant subtrees from rebuilding
+    // when unrelated MediaQuery properties change (e.g., soft keyboard viewInsets or system padding).
+    final size = MediaQuery.sizeOf(context);
     final bool useTwoColumnLayout =
-        MediaQuery.of(context).size.aspectRatio > twoColumnAspect ||
-        MediaQuery.of(context).size.width >= 800;
+        size.aspectRatio > twoColumnAspect || size.width >= 800;
 
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayerPlaceholder.
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower

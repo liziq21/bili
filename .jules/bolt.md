@@ -29,3 +29,7 @@ This journal stores CRITICAL codebase-specific learnings, performance pitfalls, 
 ## 2026-10-12 - Pre-compute context lookups above list item builders
 **Learning:** Invoking InheritedWidget lookups (like `context.mediaSources` or `MediaQuery.textScalerOf(context)`) inside `SliverList.separated` item and separator builders triggers element tree traversals and linear list lookups for every single visible item during scroll rendering.
 **Action:** Pre-compute lookup maps and theme/scaler constants once in the parent widget's `build` method before passing them down to list item builders.
+
+## 2026-10-15 - Scope MediaQuery dependencies using targeted aspect getters
+**Learning:** Calling `MediaQuery.of(context).size` registers a dependency on the entire `MediaQueryData` object, causing the widget and its entire subtree to rebuild when unrelated properties (such as soft keyboard `viewInsets` or padding) change.
+**Action:** Use targeted getters like `MediaQuery.sizeOf(context)`, `MediaQuery.textScalerOf(context)`, or `MediaQuery.paddingOf(context)` to scope InheritedWidget dependencies strictly to required layout properties.
