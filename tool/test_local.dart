@@ -105,6 +105,12 @@ Future<int> _runCompleteMatrix() async {
       arguments: ['test'],
       workingDirectory: 'packages/data',
     ),
+    (
+      label: 'model package analysis (no test directory)',
+      executable: 'dart',
+      arguments: ['analyze'],
+      workingDirectory: 'packages/model',
+    ),
   ];
 
   for (final suite in suites) {
