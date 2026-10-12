@@ -16,6 +16,7 @@ class const SearchResultScreen({
   super.key,
   required final String query,
   required final VoidCallback? onBackClick,
+  final String? source,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class const SearchResultScreen({
             child: AppSearchAnchor(
               onSearch: (newQuery) {
                 if (newQuery.isNotEmpty && newQuery != query) {
-                  context.navigateToSearchResult(newQuery);
+                  context.navigateToSearchResult(newQuery, source: source);
                 }
               },
             ),

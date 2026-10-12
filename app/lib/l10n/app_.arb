@@ -10,7 +10,7 @@
     "description": "Bottom navigation - Home tab"
   },
   "searchResultTypeAll": "All",
-  "searchResultTypeVideo": "Video",
+  "searchResultTypeVideo": "视频",
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"
@@ -1045,7 +1045,7 @@
   "@searchSongs": {
     "description": "Search result category - songs"
   },
-  "searchArtists": "Artists",
+  "searchArtists": "创作者",
   "@searchArtists": {
     "description": "Search result category - artists"
   },
