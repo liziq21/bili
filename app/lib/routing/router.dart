@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -89,11 +90,18 @@ List<AppNavDestination> get _navDestinations => [
   ),
 ];
 
+final _log = Logger('Router');
+
 final GoRouter router = GoRouter(
   // Security Hardening: Restrict diagnostic logging to non-release builds
   // to prevent leaking internal navigation traces, deep-link queries, and UI parameters.
   debugLogDiagnostics: !kReleaseMode,
-  onException: (_, GoRouterState state, GoRouter router) {},
+  onException: (_, GoRouterState state, GoRouter router) {
+    _log.severe(
+      'Routing exception for URI: ${NotFoundScreen.sanitizeUriString(state.uri.toString())}',
+      state.error,
+    );
+  },
   routes: [
     // 底部导航的三个主分支。用 indexedStack 而非普通 ShellRoute：切分支时
     // 保留各分支的导航栈，从详情页返回时回到离开前的那一屏而不是分支根。
