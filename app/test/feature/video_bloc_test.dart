@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/data/repository/video_comment_repository.dart';
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
@@ -158,6 +160,38 @@ class FakeVideoCommentRepliesRemoteDataSource()
       ),
     );
   }
+}
+
+class _SwitchingVideoCommentRepository() implements VideoCommentRepository {
+  final staleResult = Completer<Result<Page<VideoComment>>>();
+
+  @override
+  Future<Result<Page<VideoComment>>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  }) {
+    if (videoId == 'old') return staleResult.future;
+    return Future.value(
+      Result.ok(
+        Page<VideoComment>(
+          number: page,
+          totalPages: 1,
+          data: [
+            VideoComment(id: 'new-comment', authorName: 'New', content: 'new'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async => Result.error(Exception('unused'));
 }
 
 void main() {
@@ -510,6 +544,38 @@ void main() {
           }),
         ]),
       );
+    });
+
+    test('ignores a comment response from a previous video', () async {
+      final repository = _SwitchingVideoCommentRepository();
+      final bloc = VideoCommentBloc(repository: repository);
+      addTearDown(bloc.close);
+
+      bloc.add(const LoadVideoComments('old'));
+      await bloc.stream.firstWhere(
+        (state) => state.isLoading && state.videoId == 'old',
+      );
+
+      bloc.add(const LoadVideoComments('new'));
+      await bloc.stream.firstWhere(
+        (state) => !state.isLoading && state.videoId == 'new',
+      );
+
+      repository.staleResult.complete(
+        Result.ok(
+          Page<VideoComment>(
+            number: 1,
+            totalPages: 1,
+            data: [
+              VideoComment(id: 'stale', authorName: 'Old', content: 'old'),
+            ],
+          ),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.videoId, 'new');
+      expect(bloc.state.comments.single.id, 'new-comment');
     });
 
     test('ToggleCommentLike updates comment like status', () async {

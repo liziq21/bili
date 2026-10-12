@@ -107,43 +107,48 @@ class _SourceScopeState() extends State<_SourceScope> {
     super.dispose();
   }
 
-  List<SingleChildWidget> _buildProviders(MediaSource source) => [
-    // State owns this instance even when no descendant reads the provider.
-    RepositoryProvider<MediaSource>.value(value: source),
-    RepositoryProvider<MediaSourceDefinition>.value(value: widget.definition),
-    if (source.videoSearchDataSource case final videoSearchDataSource?)
-      RepositoryProvider<VideoSearchRepository>(
-        create: (_) => AppVideoSearchRepository(videoSearchDataSource),
-      ),
-    if (source.creatorProfileSearchDataSource
-        case final creatorProfileSearchDataSource?)
-      RepositoryProvider<CreatorProfileSearchRepository>(
-        create: (_) =>
-            AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),
-      ),
-    if (source.searchSuggestDataSource case final searchSuggestDataSource?)
-      RepositoryProvider<SearchSuggestRepository>(
-        create: (_) => AppSearchSuggestRepository(searchSuggestDataSource),
-      ),
-    if (source.liveRoomSearchDataSource case final liveRoomSearchDataSource?)
-      RepositoryProvider<LiveRoomSearchRepository>(
-        create: (_) => AppLiveRoomSearchRepository(liveRoomSearchDataSource),
-      ),
-    if (source.videoDetailDataSource case final videoDetailDataSource?)
-      RepositoryProvider<VideoDetailRepository>(
-        create: (_) => AppVideoDetailRepository(
-          videoDetailDataSource,
-          source.mediaStreamDataSource,
+  List<SingleChildWidget> _buildProviders(MediaSource source) {
+    final videoCommentDataSource = source.videoCommentDataSource;
+    final repliesDataSource = source.videoCommentRepliesDataSource;
+
+    return [
+      // State owns this instance even when no descendant reads the provider.
+      RepositoryProvider<MediaSource>.value(value: source),
+      RepositoryProvider<MediaSourceDefinition>.value(value: widget.definition),
+      if (source.videoSearchDataSource case final videoSearchDataSource?)
+        RepositoryProvider<VideoSearchRepository>(
+          create: (_) => AppVideoSearchRepository(videoSearchDataSource),
         ),
-      ),
-    if (source.videoCommentDataSource case final videoCommentDataSource?)
-      RepositoryProvider<VideoCommentRepository>(
-        create: (_) => AppVideoCommentRepository(
-          videoCommentDataSource,
-          source.videoCommentRepliesDataSource,
+      if (source.creatorProfileSearchDataSource
+          case final creatorProfileSearchDataSource?)
+        RepositoryProvider<CreatorProfileSearchRepository>(
+          create: (_) =>
+              AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),
         ),
-      ),
-  ];
+      if (source.searchSuggestDataSource case final searchSuggestDataSource?)
+        RepositoryProvider<SearchSuggestRepository>(
+          create: (_) => AppSearchSuggestRepository(searchSuggestDataSource),
+        ),
+      if (source.liveRoomSearchDataSource case final liveRoomSearchDataSource?)
+        RepositoryProvider<LiveRoomSearchRepository>(
+          create: (_) => AppLiveRoomSearchRepository(liveRoomSearchDataSource),
+        ),
+      if (source.videoDetailDataSource case final videoDetailDataSource?)
+        RepositoryProvider<VideoDetailRepository>(
+          create: (_) => AppVideoDetailRepository(
+            videoDetailDataSource,
+            source.mediaStreamDataSource,
+          ),
+        ),
+      if (videoCommentDataSource != null || repliesDataSource != null)
+        RepositoryProvider<VideoCommentRepository>(
+          create: (_) => AppVideoCommentRepository(
+            videoCommentDataSource,
+            repliesDataSource,
+          ),
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) =>

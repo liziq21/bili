@@ -23,11 +23,13 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
   }
 
   final _log = Logger('VideoCommentBloc');
+  int _loadGeneration = 0;
 
   Future<void> _onLoadVideoComments(
     LoadVideoComments event,
     Emitter<VideoCommentState> emit,
   ) async {
+    final generation = ++_loadGeneration;
     emit(
       state.copyWith(
         isLoading: true,
@@ -41,6 +43,10 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
 
     _log.info('Loading comments for videoId: ${event.videoId}');
     final result = await _repository.getVideoComments(event.videoId, page: 1);
+
+    if (generation != _loadGeneration || state.videoId != event.videoId) {
+      return;
+    }
 
     switch (result) {
       case Ok(:final value):
@@ -66,6 +72,8 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
   ) async {
     if (state.isLoadingMore || !state.hasMore) return;
 
+    final generation = _loadGeneration;
+    final videoId = state.videoId;
     final nextPage = state.currentPage + 1;
     emit(state.copyWith(isLoadingMore: true));
 
@@ -73,6 +81,8 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
       state.videoId,
       page: nextPage,
     );
+
+    if (generation != _loadGeneration || state.videoId != videoId) return;
 
     switch (result) {
       case Ok(:final value):
@@ -147,6 +157,8 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
     final current = state.replyStates[event.commentId];
     if (current == null || current.isLoading || !current.hasMore) return;
 
+    final generation = _loadGeneration;
+    final videoId = state.videoId;
     final nextPage = current.hasLoaded ? current.currentPage + 1 : 1;
     emit(
       state.copyWith(
@@ -166,6 +178,8 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
       event.commentId,
       page: nextPage,
     );
+
+    if (generation != _loadGeneration || state.videoId != videoId) return;
 
     switch (result) {
       case Ok(:final value):
