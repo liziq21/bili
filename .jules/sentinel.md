@@ -113,3 +113,9 @@ Prevention: Use a dedicated URL builder (`buildYoutubeWatchUrl`) that strips ASC
 Vulnerability: `NetworkVideoSearchResultX.asModel()` and `NetworkBiliUserResX.asModel()` directly assigned raw `arcurl` from Bilibili API responses to `VideoModel.url`, exposing cleartext `http://` URLs and scheme-relative links to application navigation and external URI launchers without HTTPS enforcement or null/empty fallback.
 Learning: REST API search and user video lists frequently return unencrypted `http://` article/video URLs (`arcurl`). Unsanitized raw `arcurl` fields bypass TLS transport enforcement and risk insecure HTTP navigation when launched or opened in web contexts.
 Prevention: Always normalize video web URLs using `normalizeBiliUrl(arcurl)` and provide a secure HTTPS fallback (`https://www.bilibili.com/video/$bvid`) when mapping API responses to domain models.
+
+## 2026-10-11 - Standardize and Secure Bilibili Media Stream URLs in Media Data Source
+
+Vulnerability: `BiliMediaStreamRemoteDataSource` passed raw `playUrls` from Bilibili playurl API responses directly into `MediaStream` and `MediaSegment` objects without URL normalization, allowing scheme-relative (`//`) or cleartext (`http://`) media stream URLs to pass to the media player.
+Learning: Media streaming endpoints can return scheme-relative or cleartext HTTP play URLs. Passing un-normalized URLs directly to audio/video player components can trigger cleartext transport or network socket failures.
+Prevention: Normalize all DASH audio/video stream URLs and durl segment URLs with `normalizeBiliUrl` at the data source layer before returning `MediaStream` objects.

@@ -539,5 +539,48 @@ void main() {
       final emptyResult = await source.getMediaStream('  \r\n\x00 ');
       expect(emptyResult.isError, isTrue);
     });
+
+    test('规范化 DASH 与 durl 媒体流 URL 为 HTTPS', () async {
+      final dashSource = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 32, 'baseUrl': '//cdn.example/v.m4s', 'height': 720},
+          ],
+          audio: [
+            {
+              'id': 30280,
+              'baseUrl': 'http://cdn.example/a.m4s',
+              'bandwidth': 192000,
+            },
+          ],
+        ),
+      );
+
+      final dashStream = expectOk(
+        await dashSource.getMediaStream('BV1GJ411x7vy'),
+      );
+      expect(dashStream.videoUrl, 'https://cdn.example/v.m4s');
+      expect(dashStream.audioUrl, 'https://cdn.example/a.m4s');
+
+      final durlSource = makeSource(<String, dynamic>{
+        'code': 0,
+        'data': <String, dynamic>{
+          'durl': [
+            {'order': 1, 'length': 105000, 'url': '//cdn.example/part1.mp4'},
+            {
+              'order': 2,
+              'length': 105000,
+              'url': 'http://cdn.example/part2.mp4',
+            },
+          ],
+        },
+      });
+
+      final durlStream = expectOk(
+        await durlSource.getMediaStream('BV1GJ411x7vy'),
+      );
+      expect(durlStream.segments[0].url, 'https://cdn.example/part1.mp4');
+      expect(durlStream.segments[1].url, 'https://cdn.example/part2.mp4');
+    });
   });
 }
