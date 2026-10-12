@@ -1,11 +1,8 @@
 import 'package:app/feature/not_found/not_found_screen.dart';
 import 'package:app/routing/router.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-
-class _DummyContext extends Fake implements BuildContext {}
 
 void main() {
   group('GoRouter Security Hardening Tests', () {
@@ -23,7 +20,7 @@ void main() {
       expect(sanitized, isNot(contains('\x00')));
     });
 
-    test('onException logs sanitized URI without sensitive query params', () {
+    test('logRoutingException logs sanitized URI without sensitive params', () {
       final logRecords = <LogRecord>[];
       final subscription = Logger('Router').onRecord.listen(logRecords.add);
 
@@ -36,7 +33,7 @@ void main() {
           error: Exception('Route not found'),
         );
 
-        router.onException!(_DummyContext(), state, router);
+        logRoutingException(state);
 
         expect(logRecords, hasLength(1));
         final message = logRecords.first.message;
