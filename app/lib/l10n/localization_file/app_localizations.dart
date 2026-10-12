@@ -1582,6 +1582,12 @@ abstract class AppLocalizations {
   /// **'队列循环'**
   String get queueModeLoop;
 
+  /// Playback speed picker title in the player
+  ///
+  /// In zh, this message translates to:
+  /// **'倍速'**
+  String get playbackSpeedLabel;
+
   /// Setting title - filename pattern
   ///
   /// In zh, this message translates to:

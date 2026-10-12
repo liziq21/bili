@@ -270,10 +270,19 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   @override
   bool isVideoControllerAttached = false;
 
+  /// 固定的原生句柄：[NativeVideoController.create] 用它做缓存键与纹理注册。
+  @override
+  final Future<int> handle = Future.value(42);
+
+  /// [NativeVideoController.create] 注册 [Player.dispose] 回调到这里。
+  @override
+  final List<Future<void> Function()> release = [];
+
   final List<int> nextCalls = [];
   final List<int> previousCalls = [];
   final List<Playable> openCalls = [];
   final List<Duration> seekCalls = [];
+  final List<double> rateCalls = [];
 
   @override
   Future<void> next() async => nextCalls.add(0);
@@ -314,6 +323,15 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   Future<void> seek(Duration position) async {
     seekCalls.add(position);
   }
+
+  @override
+  Future<void> setRate(double rate) async {
+    rateCalls.add(rate);
+    _rate.add(rate);
+  }
+
+  /// 投喂一次速率事件，驱动 [MediaPlaybackController.states] 的 rate 字段。
+  void emitRate(double rate) => _rate.add(rate);
 
   @override
   Future<void> dispose() async {}

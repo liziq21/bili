@@ -133,6 +133,9 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
+  /// 播放器默认倍速：用户在倍速弹窗里选过就记住，下次进入播放器自动套用。
+  static const playbackRate = PreferencesKey<double>._('PLAYBACK_RATE', 1.0);
+
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which

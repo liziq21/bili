@@ -1113,6 +1113,10 @@
   "@queueModeLoop": {
     "description": "Tooltip for player queue loop mode: playlist loop"
   },
+  "playbackSpeedLabel": "倍速",
+  "@playbackSpeedLabel": {
+    "description": "Playback speed picker title in the player"
+  },
   "filenameFormat": "Filename Format",
   "@filenameFormat": {
     "description": "Setting title - filename pattern"

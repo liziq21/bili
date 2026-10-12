@@ -8,7 +8,10 @@ import 'package:material_ui/material_ui.dart';
 // media_kit_video 也导出名为 VideoState 的控件状态类，与本页 bloc 的
 // VideoState 同名。此处藏掉它，VideoState 全指 bloc 的状态。
 import 'package:media_kit_video/media_kit_video.dart' hide VideoState;
+import 'package:model/model.dart';
 
+import '../../../datastore/preferences_data_source.dart';
+import 'playback_speed_chip.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
@@ -256,15 +259,39 @@ class const _VideoSurface({
 class _VideoSurfaceState() extends State<_VideoSurface> {
   StreamSubscription<PlaybackState>? _subscription;
   PlaybackState? _playbackState;
+  late final BoostRateController _boost;
 
   @override
   void initState() {
     super.initState();
+    _boost = BoostRateController(widget.controller);
     _subscription = widget.controller.states.listen((state) {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
     widget.controller.open(widget.stream);
+    _restoreSavedRate();
+  }
+
+  /// 套用上次记住的默认倍速。
+  ///
+  /// PreferencesDataSource 由页面级注入；单独使用本组件的 widget 测试
+  /// 没有该注入，此时跳过（只影响默认倍速记忆，不影响当次播放）。
+  Future<void> _restoreSavedRate() async {
+    try {
+      final result = await context.read<PreferencesDataSource>().get(
+        PreferencesKey.playbackRate,
+      );
+      if (!mounted) return;
+      switch (result) {
+        case Ok(:final value):
+          if (value != 1.0) {
+            unawaited(widget.controller.setRate(value));
+          }
+        case Error():
+          break;
+      }
+    } catch (_) {}
   }
 
   @override
@@ -277,6 +304,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
 
   @override
   void dispose() {
+    _boost.dispose();
     _subscription?.cancel();
     super.dispose();
   }
@@ -289,7 +317,23 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       alignment: Alignment.center,
       children: [
         Positioned.fill(
-          child: Video(controller: widget.controller.videoController),
+          child: GestureDetector(
+            // 长按临时 2x 快速浏览，松开恢复原倍速。
+            onLongPress: _boost.onLongPress,
+            onLongPressEnd: (_) => _boost.onLongPressEnd(),
+            child: Video(controller: widget.controller.videoController),
+          ),
+        ),
+        Positioned(
+          top: $styles.insets.xs,
+          right: $styles.insets.xs,
+          child: PlaybackSpeedChip(controller: widget.controller),
+        ),
+        ListenableBuilder(
+          listenable: _boost,
+          builder: (context, _) => _boost.boosted
+              ? const Positioned(bottom: 16, child: _BoostBadge())
+              : const SizedBox.shrink(),
         ),
         if (hasError)
           Positioned.fill(
@@ -349,6 +393,24 @@ class const _ErrorView({
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// 长按 2x 期间的临时标记。
+class const _BoostBadge() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: $styles.colors.scrim.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        '2x',
+        style: $styles.text.bodySmall.copyWith(color: $styles.colors.onScrim),
       ),
     );
   }

@@ -858,6 +858,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get queueModeLoop => '队列循环';
 
   @override
+  String get playbackSpeedLabel => '倍速';
+
+  @override
   String get filenameFormat => 'Filename Format';
 
   @override
