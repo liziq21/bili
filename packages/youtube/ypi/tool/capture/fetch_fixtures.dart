@@ -41,6 +41,16 @@ Future<void> main(List<String> args) async {
   try {
     const requestTimeout = Duration(seconds: 30);
 
+    if (args.contains('--capture-search-channel')) {
+      await _captureSearchChannelFixture(client, requestTimeout, force: force);
+      return;
+    }
+
+    if (args.contains('--probe-channel-lockup')) {
+      await _probeChannelSearchForLockup(client, requestTimeout);
+      return;
+    }
+
     print('1. Fetching search video JSON...');
     if (!shouldFetch('testing/search_video.json')) {
       skipNote('testing/search_video.json');
@@ -634,6 +644,120 @@ void _validateSearchResponse(
       'InnerTube search response has no item matching the expected shape',
     );
   }
+}
+
+/// Probes the live search endpoint without writing a fixture.
+///
+/// `searchChannels` uses content type 2, while the playlist lockups described
+/// in LIZ-23 use content type 3. Keeping both requests in the probe makes the
+/// reachability result explicit instead of confusing a playlist-search
+/// response with a channel-search response.
+Future<void> _probeChannelSearchForLockup(
+  http.Client client,
+  Duration timeout,
+) async {
+  const probes = <String, int>{
+    'channel search (contentType=2)': 2,
+    'playlist search (contentType=3)': 3,
+  };
+
+  for (final entry in probes.entries) {
+    final response = await client
+        .post(
+          Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+          headers: _headers,
+          body: jsonEncode({
+            'context': _clientContext,
+            'query': 'Flutter',
+            'params': YoutubeProtobufEncoder.encodeSearchParams(
+              contentType: entry.value,
+            ),
+          }),
+        )
+        .timeout(timeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw HttpException('${entry.key} returned HTTP ${response.statusCode}');
+    }
+
+    final decoded = _decodeBody(response.body);
+    print(
+      '${entry.key}: HTTP ${response.statusCode}; '
+      'channelRenderer=${_countKey(decoded, 'channelRenderer')}; '
+      'lockupViewModel=${_countKey(decoded, 'lockupViewModel')}; '
+      'playlistLockup=${_countPlaylistLockups(decoded)}',
+    );
+  }
+}
+
+Future<void> _captureSearchChannelFixture(
+  http.Client client,
+  Duration timeout, {
+  required bool force,
+}) async {
+  const path = 'testing/search_channel.json';
+  final file = File(path);
+  if (file.existsSync() && !force) {
+    print('Skipped (already exists, pass --force to overwrite): $path');
+    return;
+  }
+
+  final response = await client
+      .post(
+        Uri.parse('https://www.youtube.com/youtubei/v1/search'),
+        headers: _headers,
+        body: jsonEncode({
+          'context': _clientContext,
+          'query': 'Flutter',
+          'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
+        }),
+      )
+      .timeout(timeout);
+  final captured = _captureJson(
+    response,
+    'search channel',
+    (json) => _validateSearchResponse(
+      json,
+      containsItem: _rendererItem('channelRenderer'),
+    ),
+  );
+  file.writeAsBytesSync(captured.bodyBytes);
+  print('Saved: $path (HTTP ${captured.response.statusCode})');
+}
+
+int _countKey(Object? value, String key) {
+  if (value is Map) {
+    return value.entries.fold<int>(
+      value.containsKey(key) ? 1 : 0,
+      (count, entry) => count + _countKey(entry.value, key),
+    );
+  }
+  if (value is List) {
+    return value.fold<int>(0, (count, item) => count + _countKey(item, key));
+  }
+  return 0;
+}
+
+int _countPlaylistLockups(Object? value) {
+  if (value is Map) {
+    final lockup = value['lockupViewModel'];
+    final ownCount =
+        lockup is Map &&
+            (lockup['contentId'] as Object?) is String &&
+            (lockup['contentId'] as String).startsWith('PL')
+        ? 1
+        : 0;
+    return value.entries.fold<int>(
+      ownCount,
+      (count, entry) => count + _countPlaylistLockups(entry.value),
+    );
+  }
+  if (value is List) {
+    return value.fold<int>(
+      0,
+      (count, item) => count + _countPlaylistLockups(item),
+    );
+  }
+  return 0;
 }
 
 bool Function(Map<String, dynamic> item) _rendererItem(String renderer) {

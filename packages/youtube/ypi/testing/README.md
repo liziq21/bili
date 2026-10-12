@@ -7,7 +7,7 @@
 | Fixture | Endpoint | Method | HTTP status | 请求参数 | 来源 | 请求上下文 | 抓取日期 |
 |---|---|---|---|---|---|---|---|
 | `search_video.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 视频搜索 | 原始抓取日期未保留 |
-| `search_channel.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 未知（原始记录未保留） | 未保留（原始记录未保留） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | 频道搜索 | 原始抓取日期未保留 |
+| `search_channel.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 200 | query=Flutter, hl=zh-CN, contentType=2（`params=QgIQAg==`） | [YouTube.js](https://github.com/LuanRT/YouTube.js) | WEB 2.20230818.00.00，频道搜索 | 2026-10-11 |
 | `search_playlist.json` | `https://www.youtube.com/youtubei/v1/search` | POST | 200 | query=Flutter, hl=zh-CN, contentType=3（`params=QgIQAw==`） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00，播放列表搜索 | 2026-09-30 |
 | `search_suggest.json` | `https://suggestqueries.google.com/complete/search` | GET | 未知（原始记录未保留） | 未保留（原始记录未保留） | [Google Suggest](https://suggestqueries.google.com/complete/search) | 公共 | 原始抓取日期未保留 |
 | `browse.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`UCuAXFkgsw1L7xaCfnd5JJOw`, params=`EgZ2aWRlb3PyBgQKAjoA`（视频 tab） | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-01 |
@@ -17,6 +17,23 @@
 | `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
 | `player.json`（negative） | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04（实测状态 `UNPLAYABLE`，仅用于失败路径；成功响应待重抓） |
 | `home_feed.json`（negative） | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`FEwhat_to_watch` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 首页推荐 feed | 2026-10-04（匿名 session 登录门控：只有 `feedNudgeRenderer`，无视频条目；仅用于能力边界回归） |
+
+## 频道搜索的 renderer 形态
+
+2026-10-11 通过 `tool/capture/fetch_fixtures.dart --probe-channel-lockup` 实抓
+`contentType=2` 的频道搜索请求，HTTP 200 响应同时包含 `channelRenderer=2`、
+`lockupViewModel=2`，其中 2 个是 `PL` 前缀的播放列表 lockup。随后使用同一抓取
+脚本的 `--capture-search-channel --force` 路径写入 `search_channel.json`，并由
+`from_json_test.dart` 验证 channel response 中的 playlist lockup。`contentType=3`
+的对照请求同样返回 2 个 playlist lockup，但不替代频道搜索 fixture。
+
+探针与抓取是两次独立请求，以上计数不是落盘 fixture 的计数。当前
+`search_channel.json` 递归统计为 1 个 `channelRenderer`、14 个
+`lockupViewModel`（其中 4 个 `PL` 播放列表、10 个视频）；实时结果可以变化。
+
+该结果确认频道搜索不是只有 `channelRenderer`；共享 `_searchItemFromJson` 的
+playlist lockup 分支需要由 `search_channel.json` 覆盖。fixture 写入前仍经过
+现有的 HTTP、响应结构和追踪字段脱敏校验。
 
 
 ## 频道浏览的 renderer 形态
