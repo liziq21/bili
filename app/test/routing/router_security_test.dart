@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
+class _DummyContext extends Fake implements BuildContext {}
+
 void main() {
   group('GoRouter Security Hardening Tests', () {
     test('Router instance is initialized', () {
@@ -12,50 +14,37 @@ void main() {
       expect(router.configuration, isNotNull);
     });
 
-    test(
-      'NotFoundScreen.sanitizeUriString masks query parameters and strips control characters',
-      () {
-        final sanitized = NotFoundScreen.sanitizeUriString(
-          '/unknown?token=secret123&code=\x00abc',
+    test('sanitizeUriString masks query params and control chars', () {
+      final sanitized = NotFoundScreen.sanitizeUriString(
+        '/unknown?token=secret123&code=\x00abc',
+      );
+      expect(sanitized, contains('REDACTED'));
+      expect(sanitized, isNot(contains('secret123')));
+      expect(sanitized, isNot(contains('\x00')));
+    });
+
+    test('onException logs sanitized URI without sensitive query params', () {
+      final logRecords = <LogRecord>[];
+      final subscription = Logger('Router').onRecord.listen(logRecords.add);
+
+      try {
+        final state = GoRouterState(
+          router.configuration,
+          location: '/unknown?token=secret123&code=abc',
+          uri: Uri.parse('/unknown?token=secret123&code=abc'),
+          matchedLocation: '/unknown',
+          error: Exception('Route not found'),
         );
-        expect(sanitized, contains('REDACTED'));
-        expect(sanitized, isNot(contains('secret123')));
-        expect(sanitized, isNot(contains('\x00')));
-      },
-    );
 
-    testWidgets(
-      'onException logs sanitized URI without sensitive query parameters',
-      (tester) async {
-        final logRecords = <LogRecord>[];
-        final subscription = Logger('Router').onRecord.listen(logRecords.add);
+        router.onException!(_DummyContext(), state, router);
 
-        try {
-          await tester.pumpWidget(
-            Builder(
-              builder: (context) {
-                final state = GoRouterState(
-                  router.configuration,
-                  location: '/unknown?token=secret123&code=abc',
-                  uri: Uri.parse('/unknown?token=secret123&code=abc'),
-                  matchedLocation: '/unknown',
-                  error: Exception('Route not found'),
-                );
-
-                router.onException!(context, state, router);
-                return const SizedBox.shrink();
-              },
-            ),
-          );
-
-          expect(logRecords, hasLength(1));
-          final message = logRecords.first.message;
-          expect(message, contains('REDACTED'));
-          expect(message, isNot(contains('secret123')));
-        } finally {
-          subscription.cancel();
-        }
-      },
-    );
+        expect(logRecords, hasLength(1));
+        final message = logRecords.first.message;
+        expect(message, contains('REDACTED'));
+        expect(message, isNot(contains('secret123')));
+      } finally {
+        subscription.cancel();
+      }
+    });
   });
 }
