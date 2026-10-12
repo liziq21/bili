@@ -42,12 +42,33 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (_, from, _) async {
+      if (from < 2) {
+        // Older databases allowed more than one history row per media. Keep
+        // the newest row before adding the unique key required by progress
+        // upserts; otherwise an existing user's first upgrade would fail.
+        await customStatement('''
+          DELETE FROM media_history
+          WHERE internal_id != (
+            SELECT newest.internal_id
+            FROM media_history AS newest
+            WHERE newest.media_id = media_history.media_id
+            ORDER BY newest.accessed_at DESC, newest.internal_id DESC
+            LIMIT 1
+          )
+        ''');
+        await customStatement(
+          'CREATE UNIQUE INDEX IF NOT EXISTS '
+          'media_history_media_id_unique ON media_history(media_id)',
+        );
+      }
     },
   );
 

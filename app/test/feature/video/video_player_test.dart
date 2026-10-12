@@ -374,29 +374,3 @@ class _FailingStreamRepository() implements VideoDetailRepository {
     int? preferHeight,
   }) async => Result.error(Exception('签名过期'));
 }
-
-class _OkStreamRepository() implements VideoDetailRepository {
-  @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
-      Result.error(Exception('unused'));
-
-  @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      Result.error(Exception('unused'));
-
-  @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
-
-  @override
-  Future<Result<bool>> toggleSubscribe(
-    String creatorId,
-    bool isSubscribed,
-  ) async => Result.error(Exception('unused'));
-
-  @override
-  Future<Result<MediaStream>> getMediaStream(
-    String id, {
-    int? preferHeight,
-  }) async => Result.ok(MediaStream(videoUrl: 'https://example.com/v.m4s'));
-}

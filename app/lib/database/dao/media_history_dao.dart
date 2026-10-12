@@ -30,6 +30,7 @@ class MediaHistoryDao(super.db)
       companion,
       onConflict: DoUpdate(
         (_) => MediaHistoryCompanion(
+          progressSeconds: Value(BigInt.from(progressSeconds)),
           completed: Value(completed),
           accessedAt: Value(DateTime.now()),
         ),
@@ -47,29 +48,34 @@ class MediaHistoryDao(super.db)
     String? title,
     String? url,
   }) async {
-    final existing =
-        await (select(media)..where(
-              (m) =>
-                  m.sourceId.equals(sourceId) &
-                  m.originalId.equals(originalId) &
-                  m.type.equals(type),
-            ))
-            .getSingleOrNull();
-    if (existing != null) return existing.internalId;
-
-    final inserted = await into(media).insertReturning(
-      MediaCompanion.insert(
+    return transaction(() async {
+      final mediaCompanion = MediaCompanion.insert(
         sourceId: sourceId,
         originalId: originalId,
         title: title ?? originalId,
         url: url ?? '',
         type: type,
-      ),
-    );
-    await insertMediaHistory(
-      MediaHistoryCompanion.insert(mediaId: inserted.internalId),
-    );
-    return inserted.internalId;
+      );
+      final inserted = await into(media).insertReturning(
+        mediaCompanion,
+        onConflict: DoUpdate(
+          (_) => MediaCompanion(
+            sourceId: Value(sourceId),
+            originalId: Value(originalId),
+            type: Value(type),
+          ),
+          target: [media.sourceId, media.type, media.originalId],
+        ),
+      );
+      await into(mediaHistory).insert(
+        MediaHistoryCompanion.insert(mediaId: inserted.internalId),
+        onConflict: DoUpdate(
+          (_) => MediaHistoryCompanion(mediaId: Value(inserted.internalId)),
+          target: [mediaHistory.mediaId],
+        ),
+      );
+      return inserted.internalId;
+    });
   }
 
   /// 取指定媒体的播放进度（秒），无记录或进度为 null 时返回 null。
