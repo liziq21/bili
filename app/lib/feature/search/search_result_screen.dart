@@ -1,8 +1,11 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../l10n/localization_file/app_localizations.dart';
+import '../../routing/router.dart';
 import '../../ui/search/creator_profile_item.dart';
 import '../../ui/video_card.dart';
 import 'app_search_anchor.dart';
@@ -11,14 +14,18 @@ import 'bloc/search_result_bloc.dart';
 
 class const SearchResultScreen({
   super.key,
-  required String query,
+  required final String query,
   required final VoidCallback? onBackClick,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final creatorLabel = l10n?.searchArtists ?? '创作者';
+    final videoLabel = l10n?.searchResultTypeVideo ?? '视频';
+
     final Map<Widget, Widget> tabAndView = {
-      Tab(text: 'creatorProfile'): ?_creatorProfileResultView(context),
-      Tab(text: 'video'): ?_videoResultView(context),
+      Tab(text: creatorLabel): ?_creatorProfileResultView(context),
+      Tab(text: videoLabel): ?_videoResultView(context),
     };
     return DefaultTabController(
       length: tabAndView.length,
@@ -26,12 +33,19 @@ class const SearchResultScreen({
         appBar: AppBar(
           title: Padding(
             padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
-            child: AppSearchAnchor(onSearch: (String query) {}),
+            child: AppSearchAnchor(
+              onSearch: (newQuery) {
+                if (newQuery.isNotEmpty && newQuery != query) {
+                  context.navigateToSearchResult(newQuery);
+                }
+              },
+            ),
           ),
           bottom: TabBar(
             isScrollable: true,
-            tabAlignment: .start,
+            tabAlignment: TabAlignment.start,
             tabs: tabAndView.keys.toList(),
+            onTap: (_) => HapticFeedback.selectionClick(),
           ),
         ),
         body: Padding(
