@@ -27,6 +27,10 @@
 `from_json_test.dart` 验证 channel response 中的 playlist lockup。`contentType=3`
 的对照请求同样返回 2 个 playlist lockup，但不替代频道搜索 fixture。
 
+探针与抓取是两次独立请求，以上计数不是落盘 fixture 的计数。当前
+`search_channel.json` 递归统计为 1 个 `channelRenderer`、14 个
+`lockupViewModel`（其中 4 个 `PL` 播放列表、10 个视频）；实时结果可以变化。
+
 该结果确认频道搜索不是只有 `channelRenderer`；共享 `_searchItemFromJson` 的
 playlist lockup 分支需要由 `search_channel.json` 覆盖。fixture 写入前仍经过
 现有的 HTTP、响应结构和追踪字段脱敏校验。

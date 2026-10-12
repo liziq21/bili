@@ -14,7 +14,7 @@
 | Endpoint | Method / Path | 请求/鉴权 | 来源 | Fixture | 实测日期 |
 |---|---|---|---|---|---|
 | 视频搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_video.json` | 已有原始 fixture；抓取日期未记录 |
-| 频道搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；频道筛选结果也可能包含 `lockupViewModel` 播放列表条目 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_channel.json` | 2026-10-11（WEB 2.20230818.00.00，实抓包含 2 个 playlist lockup） |
+| 频道搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；频道筛选结果也可能包含 `lockupViewModel` 播放列表条目 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_channel.json` | 2026-10-11（WEB 2.20230818.00.00；探针与落盘响应统计见 testing/README.md） |
 | 播放列表搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；结果以 `lockupViewModel` 返回，`contentId` 为 `PL` 前缀 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/search_playlist.json` | 2026-09-30 |
 | 频道浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；视频 tab 的条目以 `richItemRenderer.content.lockupViewModel` 返回，channel ID 取自 `metadata.channelMetadataRenderer.externalId` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/browse.json` + `testing/browse_continuation.json` | 2026-10-01 |
 | 播放列表浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；使用 `browseId=VL<playlistId>` 请求播放列表页面 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/browse_playlist.json` | 2026-09-30 |
