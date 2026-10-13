@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 /// playlist entries, or subscriptions accidentally.
 @immutable
 final class const LocalMediaKey(final String sourceId, final String originalId)
-    with EquatableMixin {
+    extends Equatable {
   @override
   List<Object?> get props => [sourceId, originalId];
 }

@@ -7,13 +7,20 @@ import 'package:logging/logging.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../data/repository/local_library_repository.dart';
 
 part 'video_event.dart';
 part 'video_state.dart';
 
-class VideoBloc({required final VideoDetailRepository _repository})
-    extends Bloc<VideoEvent, VideoState> {
-  this : super(const VideoState()) {
+class VideoBloc extends Bloc<VideoEvent, VideoState> {
+  VideoBloc({
+    required VideoDetailRepository repository,
+    LocalLibraryRepository? localLibraryRepository,
+    String? sourceId,
+  }) : _repository = repository,
+       _localLibraryRepository = localLibraryRepository,
+       _sourceId = sourceId,
+       super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
     on<LoadMediaStream>(_onLoadMediaStream);
     on<ToggleVideoLike>(_onToggleVideoLike);
@@ -23,6 +30,9 @@ class VideoBloc({required final VideoDetailRepository _repository})
   }
 
   final _log = Logger('VideoBloc');
+  final VideoDetailRepository _repository;
+  final LocalLibraryRepository? _localLibraryRepository;
+  final String? _sourceId;
 
   Future<void> _onLoadVideoDetail(
     LoadVideoDetail event,
@@ -34,7 +44,23 @@ class VideoBloc({required final VideoDetailRepository _repository})
     final result = await _repository.getVideoDetail(event.id);
     switch (result) {
       case Ok(:final value):
-        emit(state.copyWith(isLoading: false, videoDetail: value));
+        var detail = value;
+        final local = _localLibraryRepository;
+        final sourceId = _sourceId;
+        if (local != null && sourceId != null) {
+          final isFavorited = await local.isBookmarked(
+            sourceId,
+            value.video.id,
+          );
+          final isSubscribed = value.creator == null
+              ? false
+              : await local.isSubscribed(sourceId, value.creator!.id);
+          detail = value.copyWith(
+            isFavorited: isFavorited,
+            isSubscribed: isSubscribed,
+          );
+        }
+        emit(state.copyWith(isLoading: false, videoDetail: detail));
       case Error(:final error):
         _log.warning('Failed to load video detail', error);
         emit(state.copyWith(isLoading: false, error: error.toString()));
@@ -107,10 +133,14 @@ class VideoBloc({required final VideoDetailRepository _repository})
 
     emit(state.copyWith(videoDetail: updatedDetail));
 
-    final result = await _repository.toggleFavorite(
-      detail.video.id,
-      updatedDetail.isFavorited,
-    );
+    final local = _localLibraryRepository;
+    final sourceId = _sourceId;
+    final result = local != null && sourceId != null
+        ? await _setLocalBookmark(local, sourceId, updatedDetail)
+        : await _repository.toggleFavorite(
+            detail.video.id,
+            updatedDetail.isFavorited,
+          );
     // 回滚理由同 _onToggleVideoLike
     switch (result) {
       case Ok():
@@ -133,10 +163,14 @@ class VideoBloc({required final VideoDetailRepository _repository})
 
     emit(state.copyWith(videoDetail: updatedDetail));
 
-    final result = await _repository.toggleSubscribe(
-      detail.creator!.id,
-      updatedDetail.isSubscribed,
-    );
+    final local = _localLibraryRepository;
+    final sourceId = _sourceId;
+    final result = local != null && sourceId != null
+        ? await _setLocalSubscription(local, sourceId, updatedDetail)
+        : await _repository.toggleSubscribe(
+            detail.creator!.id,
+            updatedDetail.isSubscribed,
+          );
     // 回滚理由同 _onToggleVideoLike
     switch (result) {
       case Ok():
@@ -153,5 +187,41 @@ class VideoBloc({required final VideoDetailRepository _repository})
     Emitter<VideoState> emit,
   ) {
     emit(state.copyWith(mediaStream: event.stream, streamError: null));
+  }
+
+  Future<Result<void>> _setLocalBookmark(
+    LocalLibraryRepository repository,
+    String sourceId,
+    VideoDetail updatedDetail,
+  ) async {
+    try {
+      await repository.setBookmark(
+        sourceId: sourceId,
+        video: updatedDetail.video,
+        bookmarked: updatedDetail.isFavorited,
+      );
+      return const Result.ok(null);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
+  }
+
+  Future<Result<void>> _setLocalSubscription(
+    LocalLibraryRepository repository,
+    String sourceId,
+    VideoDetail updatedDetail,
+  ) async {
+    try {
+      final creator = updatedDetail.creator;
+      if (creator == null) return const Result.ok(null);
+      await repository.setSubscription(
+        sourceId: sourceId,
+        creator: creator,
+        subscribed: updatedDetail.isSubscribed,
+      );
+      return const Result.ok(null);
+    } on Exception catch (error) {
+      return Result.error(error);
+    }
   }
 }

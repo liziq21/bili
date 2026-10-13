@@ -45,6 +45,8 @@ void main() {
     required String sourceId,
     required int minutesAgo,
     DateTime? anchor,
+    int? progressSeconds,
+    bool completed = false,
   }) async {
     await db.videoDao.insertVideo((
       MediaCompanion(
@@ -62,6 +64,10 @@ void main() {
         accessedAt: Value(
           (anchor ?? DateTime(2026)).subtract(Duration(minutes: minutesAgo)),
         ),
+        progressSeconds: progressSeconds == null
+            ? const Value.absent()
+            : Value(BigInt.from(progressSeconds)),
+        completed: Value(completed),
       ),
     );
   }
@@ -234,6 +240,29 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    await cubit.close();
+  });
+
+  testWidgets('shows saved playback progress in the history subtitle', (
+    tester,
+  ) async {
+    await addVideo(
+      'v1',
+      sourceId: 'bilibili',
+      minutesAgo: 5,
+      anchor: testClock,
+      progressSeconds: 61,
+    );
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    expect(find.text('Bilibili · 已观看 01:01 · 5 分钟前'), findsOneWidget);
 
     await cubit.close();
   });

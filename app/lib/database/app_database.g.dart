@@ -2469,6 +2469,1994 @@ class PostCompanion extends UpdateCompanion<PostEntity> {
   }
 }
 
+class $LocalBookmarkTable extends LocalBookmark
+    with TableInfo<$LocalBookmarkTable, LocalBookmarkEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalBookmarkTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originalIdMeta = const VerificationMeta(
+    'originalId',
+  );
+  @override
+  late final GeneratedColumn<String> originalId = GeneratedColumn<String>(
+    'original_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileIdMeta = const VerificationMeta(
+    'creatorProfileId',
+  );
+  @override
+  late final GeneratedColumn<String> creatorProfileId = GeneratedColumn<String>(
+    'creator_profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileNameMeta =
+      const VerificationMeta('creatorProfileName');
+  @override
+  late final GeneratedColumn<String> creatorProfileName =
+      GeneratedColumn<String>(
+        'creator_profile_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_bookmark';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalBookmarkEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('original_id')) {
+      context.handle(
+        _originalIdMeta,
+        originalId.isAcceptableOrUnknown(data['original_id']!, _originalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originalIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_id')) {
+      context.handle(
+        _creatorProfileIdMeta,
+        creatorProfileId.isAcceptableOrUnknown(
+          data['creator_profile_id']!,
+          _creatorProfileIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_name')) {
+      context.handle(
+        _creatorProfileNameMeta,
+        creatorProfileName.isAcceptableOrUnknown(
+          data['creator_profile_name']!,
+          _creatorProfileNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceId, originalId},
+  ];
+  @override
+  LocalBookmarkEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalBookmarkEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      originalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      creatorProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_id'],
+      ),
+      creatorProfileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_name'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalBookmarkTable createAlias(String alias) {
+    return $LocalBookmarkTable(attachedDatabase, alias);
+  }
+}
+
+class LocalBookmarkEntity extends DataClass
+    implements Insertable<LocalBookmarkEntity> {
+  final int internalId;
+  final String sourceId;
+  final String originalId;
+  final String title;
+  final String url;
+  final String? thumbnailUrl;
+  final String? creatorProfileId;
+  final String? creatorProfileName;
+  final DateTime createdAt;
+  const LocalBookmarkEntity({
+    required this.internalId,
+    required this.sourceId,
+    required this.originalId,
+    required this.title,
+    required this.url,
+    this.thumbnailUrl,
+    this.creatorProfileId,
+    this.creatorProfileName,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['original_id'] = Variable<String>(originalId);
+    map['title'] = Variable<String>(title);
+    map['url'] = Variable<String>(url);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    if (!nullToAbsent || creatorProfileId != null) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId);
+    }
+    if (!nullToAbsent || creatorProfileName != null) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  LocalBookmarkCompanion toCompanion(bool nullToAbsent) {
+    return LocalBookmarkCompanion(
+      internalId: Value(internalId),
+      sourceId: Value(sourceId),
+      originalId: Value(originalId),
+      title: Value(title),
+      url: Value(url),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      creatorProfileId: creatorProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileId),
+      creatorProfileName: creatorProfileName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileName),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory LocalBookmarkEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalBookmarkEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      originalId: serializer.fromJson<String>(json['originalId']),
+      title: serializer.fromJson<String>(json['title']),
+      url: serializer.fromJson<String>(json['url']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      creatorProfileId: serializer.fromJson<String?>(json['creatorProfileId']),
+      creatorProfileName: serializer.fromJson<String?>(
+        json['creatorProfileName'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'originalId': serializer.toJson<String>(originalId),
+      'title': serializer.toJson<String>(title),
+      'url': serializer.toJson<String>(url),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'creatorProfileId': serializer.toJson<String?>(creatorProfileId),
+      'creatorProfileName': serializer.toJson<String?>(creatorProfileName),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  LocalBookmarkEntity copyWith({
+    int? internalId,
+    String? sourceId,
+    String? originalId,
+    String? title,
+    String? url,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    Value<String?> creatorProfileId = const Value.absent(),
+    Value<String?> creatorProfileName = const Value.absent(),
+    DateTime? createdAt,
+  }) => LocalBookmarkEntity(
+    internalId: internalId ?? this.internalId,
+    sourceId: sourceId ?? this.sourceId,
+    originalId: originalId ?? this.originalId,
+    title: title ?? this.title,
+    url: url ?? this.url,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    creatorProfileId: creatorProfileId.present
+        ? creatorProfileId.value
+        : this.creatorProfileId,
+    creatorProfileName: creatorProfileName.present
+        ? creatorProfileName.value
+        : this.creatorProfileName,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  LocalBookmarkEntity copyWithCompanion(LocalBookmarkCompanion data) {
+    return LocalBookmarkEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      originalId: data.originalId.present
+          ? data.originalId.value
+          : this.originalId,
+      title: data.title.present ? data.title.value : this.title,
+      url: data.url.present ? data.url.value : this.url,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      creatorProfileId: data.creatorProfileId.present
+          ? data.creatorProfileId.value
+          : this.creatorProfileId,
+      creatorProfileName: data.creatorProfileName.present
+          ? data.creatorProfileName.value
+          : this.creatorProfileName,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalBookmarkEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    internalId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalBookmarkEntity &&
+          other.internalId == this.internalId &&
+          other.sourceId == this.sourceId &&
+          other.originalId == this.originalId &&
+          other.title == this.title &&
+          other.url == this.url &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.creatorProfileId == this.creatorProfileId &&
+          other.creatorProfileName == this.creatorProfileName &&
+          other.createdAt == this.createdAt);
+}
+
+class LocalBookmarkCompanion extends UpdateCompanion<LocalBookmarkEntity> {
+  final Value<int> internalId;
+  final Value<String> sourceId;
+  final Value<String> originalId;
+  final Value<String> title;
+  final Value<String> url;
+  final Value<String?> thumbnailUrl;
+  final Value<String?> creatorProfileId;
+  final Value<String?> creatorProfileName;
+  final Value<DateTime> createdAt;
+  const LocalBookmarkCompanion({
+    this.internalId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.originalId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  LocalBookmarkCompanion.insert({
+    this.internalId = const Value.absent(),
+    required String sourceId,
+    required String originalId,
+    required String title,
+    required String url,
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       originalId = Value(originalId),
+       title = Value(title),
+       url = Value(url);
+  static Insertable<LocalBookmarkEntity> custom({
+    Expression<int>? internalId,
+    Expression<String>? sourceId,
+    Expression<String>? originalId,
+    Expression<String>? title,
+    Expression<String>? url,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? creatorProfileId,
+    Expression<String>? creatorProfileName,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (originalId != null) 'original_id': originalId,
+      if (title != null) 'title': title,
+      if (url != null) 'url': url,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (creatorProfileId != null) 'creator_profile_id': creatorProfileId,
+      if (creatorProfileName != null)
+        'creator_profile_name': creatorProfileName,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  LocalBookmarkCompanion copyWith({
+    Value<int>? internalId,
+    Value<String>? sourceId,
+    Value<String>? originalId,
+    Value<String>? title,
+    Value<String>? url,
+    Value<String?>? thumbnailUrl,
+    Value<String?>? creatorProfileId,
+    Value<String?>? creatorProfileName,
+    Value<DateTime>? createdAt,
+  }) {
+    return LocalBookmarkCompanion(
+      internalId: internalId ?? this.internalId,
+      sourceId: sourceId ?? this.sourceId,
+      originalId: originalId ?? this.originalId,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      creatorProfileId: creatorProfileId ?? this.creatorProfileId,
+      creatorProfileName: creatorProfileName ?? this.creatorProfileName,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (originalId.present) {
+      map['original_id'] = Variable<String>(originalId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (creatorProfileId.present) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId.value);
+    }
+    if (creatorProfileName.present) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalBookmarkCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalPlaylistTable extends LocalPlaylist
+    with TableInfo<$LocalPlaylistTable, LocalPlaylistEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalPlaylistTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    sourceId,
+    name,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlist';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalPlaylistEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceId, name},
+  ];
+  @override
+  LocalPlaylistEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalPlaylistTable createAlias(String alias) {
+    return $LocalPlaylistTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistEntity extends DataClass
+    implements Insertable<LocalPlaylistEntity> {
+  final int internalId;
+  final String sourceId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const LocalPlaylistEntity({
+    required this.internalId,
+    required this.sourceId,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['name'] = Variable<String>(name);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  LocalPlaylistCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistCompanion(
+      internalId: Value(internalId),
+      sourceId: Value(sourceId),
+      name: Value(name),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory LocalPlaylistEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      name: serializer.fromJson<String>(json['name']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'name': serializer.toJson<String>(name),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  LocalPlaylistEntity copyWith({
+    int? internalId,
+    String? sourceId,
+    String? name,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => LocalPlaylistEntity(
+    internalId: internalId ?? this.internalId,
+    sourceId: sourceId ?? this.sourceId,
+    name: name ?? this.name,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  LocalPlaylistEntity copyWithCompanion(LocalPlaylistCompanion data) {
+    return LocalPlaylistEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      name: data.name.present ? data.name.value : this.name,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(internalId, sourceId, name, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistEntity &&
+          other.internalId == this.internalId &&
+          other.sourceId == this.sourceId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LocalPlaylistCompanion extends UpdateCompanion<LocalPlaylistEntity> {
+  final Value<int> internalId;
+  final Value<String> sourceId;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const LocalPlaylistCompanion({
+    this.internalId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  LocalPlaylistCompanion.insert({
+    this.internalId = const Value.absent(),
+    required String sourceId,
+    required String name,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       name = Value(name);
+  static Insertable<LocalPlaylistEntity> custom({
+    Expression<int>? internalId,
+    Expression<String>? sourceId,
+    Expression<String>? name,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (name != null) 'name': name,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  LocalPlaylistCompanion copyWith({
+    Value<int>? internalId,
+    Value<String>? sourceId,
+    Value<String>? name,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return LocalPlaylistCompanion(
+      internalId: internalId ?? this.internalId,
+      sourceId: sourceId ?? this.sourceId,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalPlaylistItemTable extends LocalPlaylistItem
+    with TableInfo<$LocalPlaylistItemTable, LocalPlaylistItemEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalPlaylistItemTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _playlistIdMeta = const VerificationMeta(
+    'playlistId',
+  );
+  @override
+  late final GeneratedColumn<int> playlistId = GeneratedColumn<int>(
+    'playlist_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES local_playlist (internal_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originalIdMeta = const VerificationMeta(
+    'originalId',
+  );
+  @override
+  late final GeneratedColumn<String> originalId = GeneratedColumn<String>(
+    'original_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    playlistId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    position,
+    addedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_playlist_item';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalPlaylistItemEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('playlist_id')) {
+      context.handle(
+        _playlistIdMeta,
+        playlistId.isAcceptableOrUnknown(data['playlist_id']!, _playlistIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playlistIdMeta);
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('original_id')) {
+      context.handle(
+        _originalIdMeta,
+        originalId.isAcceptableOrUnknown(data['original_id']!, _originalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originalIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  LocalPlaylistItemEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalPlaylistItemEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      playlistId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}playlist_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      originalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalPlaylistItemTable createAlias(String alias) {
+    return $LocalPlaylistItemTable(attachedDatabase, alias);
+  }
+}
+
+class LocalPlaylistItemEntity extends DataClass
+    implements Insertable<LocalPlaylistItemEntity> {
+  final int internalId;
+  final int playlistId;
+  final String sourceId;
+  final String originalId;
+  final String title;
+  final String url;
+  final String? thumbnailUrl;
+  final int position;
+  final DateTime addedAt;
+  const LocalPlaylistItemEntity({
+    required this.internalId,
+    required this.playlistId,
+    required this.sourceId,
+    required this.originalId,
+    required this.title,
+    required this.url,
+    this.thumbnailUrl,
+    required this.position,
+    required this.addedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['playlist_id'] = Variable<int>(playlistId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['original_id'] = Variable<String>(originalId);
+    map['title'] = Variable<String>(title);
+    map['url'] = Variable<String>(url);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    map['position'] = Variable<int>(position);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    return map;
+  }
+
+  LocalPlaylistItemCompanion toCompanion(bool nullToAbsent) {
+    return LocalPlaylistItemCompanion(
+      internalId: Value(internalId),
+      playlistId: Value(playlistId),
+      sourceId: Value(sourceId),
+      originalId: Value(originalId),
+      title: Value(title),
+      url: Value(url),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      position: Value(position),
+      addedAt: Value(addedAt),
+    );
+  }
+
+  factory LocalPlaylistItemEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalPlaylistItemEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      playlistId: serializer.fromJson<int>(json['playlistId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      originalId: serializer.fromJson<String>(json['originalId']),
+      title: serializer.fromJson<String>(json['title']),
+      url: serializer.fromJson<String>(json['url']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      position: serializer.fromJson<int>(json['position']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'playlistId': serializer.toJson<int>(playlistId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'originalId': serializer.toJson<String>(originalId),
+      'title': serializer.toJson<String>(title),
+      'url': serializer.toJson<String>(url),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'position': serializer.toJson<int>(position),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+    };
+  }
+
+  LocalPlaylistItemEntity copyWith({
+    int? internalId,
+    int? playlistId,
+    String? sourceId,
+    String? originalId,
+    String? title,
+    String? url,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    int? position,
+    DateTime? addedAt,
+  }) => LocalPlaylistItemEntity(
+    internalId: internalId ?? this.internalId,
+    playlistId: playlistId ?? this.playlistId,
+    sourceId: sourceId ?? this.sourceId,
+    originalId: originalId ?? this.originalId,
+    title: title ?? this.title,
+    url: url ?? this.url,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    position: position ?? this.position,
+    addedAt: addedAt ?? this.addedAt,
+  );
+  LocalPlaylistItemEntity copyWithCompanion(LocalPlaylistItemCompanion data) {
+    return LocalPlaylistItemEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      playlistId: data.playlistId.present
+          ? data.playlistId.value
+          : this.playlistId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      originalId: data.originalId.present
+          ? data.originalId.value
+          : this.originalId,
+      title: data.title.present ? data.title.value : this.title,
+      url: data.url.present ? data.url.value : this.url,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      position: data.position.present ? data.position.value : this.position,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistItemEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    internalId,
+    playlistId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    position,
+    addedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalPlaylistItemEntity &&
+          other.internalId == this.internalId &&
+          other.playlistId == this.playlistId &&
+          other.sourceId == this.sourceId &&
+          other.originalId == this.originalId &&
+          other.title == this.title &&
+          other.url == this.url &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.position == this.position &&
+          other.addedAt == this.addedAt);
+}
+
+class LocalPlaylistItemCompanion
+    extends UpdateCompanion<LocalPlaylistItemEntity> {
+  final Value<int> internalId;
+  final Value<int> playlistId;
+  final Value<String> sourceId;
+  final Value<String> originalId;
+  final Value<String> title;
+  final Value<String> url;
+  final Value<String?> thumbnailUrl;
+  final Value<int> position;
+  final Value<DateTime> addedAt;
+  const LocalPlaylistItemCompanion({
+    this.internalId = const Value.absent(),
+    this.playlistId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.originalId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.position = const Value.absent(),
+    this.addedAt = const Value.absent(),
+  });
+  LocalPlaylistItemCompanion.insert({
+    this.internalId = const Value.absent(),
+    required int playlistId,
+    required String sourceId,
+    required String originalId,
+    required String title,
+    required String url,
+    this.thumbnailUrl = const Value.absent(),
+    required int position,
+    this.addedAt = const Value.absent(),
+  }) : playlistId = Value(playlistId),
+       sourceId = Value(sourceId),
+       originalId = Value(originalId),
+       title = Value(title),
+       url = Value(url),
+       position = Value(position);
+  static Insertable<LocalPlaylistItemEntity> custom({
+    Expression<int>? internalId,
+    Expression<int>? playlistId,
+    Expression<String>? sourceId,
+    Expression<String>? originalId,
+    Expression<String>? title,
+    Expression<String>? url,
+    Expression<String>? thumbnailUrl,
+    Expression<int>? position,
+    Expression<DateTime>? addedAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (playlistId != null) 'playlist_id': playlistId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (originalId != null) 'original_id': originalId,
+      if (title != null) 'title': title,
+      if (url != null) 'url': url,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (position != null) 'position': position,
+      if (addedAt != null) 'added_at': addedAt,
+    });
+  }
+
+  LocalPlaylistItemCompanion copyWith({
+    Value<int>? internalId,
+    Value<int>? playlistId,
+    Value<String>? sourceId,
+    Value<String>? originalId,
+    Value<String>? title,
+    Value<String>? url,
+    Value<String?>? thumbnailUrl,
+    Value<int>? position,
+    Value<DateTime>? addedAt,
+  }) {
+    return LocalPlaylistItemCompanion(
+      internalId: internalId ?? this.internalId,
+      playlistId: playlistId ?? this.playlistId,
+      sourceId: sourceId ?? this.sourceId,
+      originalId: originalId ?? this.originalId,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      position: position ?? this.position,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (playlistId.present) {
+      map['playlist_id'] = Variable<int>(playlistId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (originalId.present) {
+      map['original_id'] = Variable<String>(originalId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalPlaylistItemCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('playlistId: $playlistId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalSubscriptionTable extends LocalSubscription
+    with TableInfo<$LocalSubscriptionTable, LocalSubscriptionEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalSubscriptionTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originalIdMeta = const VerificationMeta(
+    'originalId',
+  );
+  @override
+  late final GeneratedColumn<String> originalId = GeneratedColumn<String>(
+    'original_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupNameMeta = const VerificationMeta(
+    'groupName',
+  );
+  @override
+  late final GeneratedColumn<String> groupName = GeneratedColumn<String>(
+    'group_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _subscribedAtMeta = const VerificationMeta(
+    'subscribedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> subscribedAt = GeneratedColumn<DateTime>(
+    'subscribed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    sourceId,
+    originalId,
+    name,
+    thumbnailUrl,
+    groupName,
+    subscribedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_subscription';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalSubscriptionEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('original_id')) {
+      context.handle(
+        _originalIdMeta,
+        originalId.isAcceptableOrUnknown(data['original_id']!, _originalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originalIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('group_name')) {
+      context.handle(
+        _groupNameMeta,
+        groupName.isAcceptableOrUnknown(data['group_name']!, _groupNameMeta),
+      );
+    }
+    if (data.containsKey('subscribed_at')) {
+      context.handle(
+        _subscribedAtMeta,
+        subscribedAt.isAcceptableOrUnknown(
+          data['subscribed_at']!,
+          _subscribedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceId, originalId},
+  ];
+  @override
+  LocalSubscriptionEntity map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalSubscriptionEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      originalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      groupName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_name'],
+      )!,
+      subscribedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}subscribed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalSubscriptionTable createAlias(String alias) {
+    return $LocalSubscriptionTable(attachedDatabase, alias);
+  }
+}
+
+class LocalSubscriptionEntity extends DataClass
+    implements Insertable<LocalSubscriptionEntity> {
+  final int internalId;
+  final String sourceId;
+  final String originalId;
+  final String name;
+  final String? thumbnailUrl;
+  final String groupName;
+  final DateTime subscribedAt;
+  const LocalSubscriptionEntity({
+    required this.internalId,
+    required this.sourceId,
+    required this.originalId,
+    required this.name,
+    this.thumbnailUrl,
+    required this.groupName,
+    required this.subscribedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['original_id'] = Variable<String>(originalId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    map['group_name'] = Variable<String>(groupName);
+    map['subscribed_at'] = Variable<DateTime>(subscribedAt);
+    return map;
+  }
+
+  LocalSubscriptionCompanion toCompanion(bool nullToAbsent) {
+    return LocalSubscriptionCompanion(
+      internalId: Value(internalId),
+      sourceId: Value(sourceId),
+      originalId: Value(originalId),
+      name: Value(name),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      groupName: Value(groupName),
+      subscribedAt: Value(subscribedAt),
+    );
+  }
+
+  factory LocalSubscriptionEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalSubscriptionEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      originalId: serializer.fromJson<String>(json['originalId']),
+      name: serializer.fromJson<String>(json['name']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      groupName: serializer.fromJson<String>(json['groupName']),
+      subscribedAt: serializer.fromJson<DateTime>(json['subscribedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'originalId': serializer.toJson<String>(originalId),
+      'name': serializer.toJson<String>(name),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'groupName': serializer.toJson<String>(groupName),
+      'subscribedAt': serializer.toJson<DateTime>(subscribedAt),
+    };
+  }
+
+  LocalSubscriptionEntity copyWith({
+    int? internalId,
+    String? sourceId,
+    String? originalId,
+    String? name,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    String? groupName,
+    DateTime? subscribedAt,
+  }) => LocalSubscriptionEntity(
+    internalId: internalId ?? this.internalId,
+    sourceId: sourceId ?? this.sourceId,
+    originalId: originalId ?? this.originalId,
+    name: name ?? this.name,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    groupName: groupName ?? this.groupName,
+    subscribedAt: subscribedAt ?? this.subscribedAt,
+  );
+  LocalSubscriptionEntity copyWithCompanion(LocalSubscriptionCompanion data) {
+    return LocalSubscriptionEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      originalId: data.originalId.present
+          ? data.originalId.value
+          : this.originalId,
+      name: data.name.present ? data.name.value : this.name,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      groupName: data.groupName.present ? data.groupName.value : this.groupName,
+      subscribedAt: data.subscribedAt.present
+          ? data.subscribedAt.value
+          : this.subscribedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalSubscriptionEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('name: $name, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('groupName: $groupName, ')
+          ..write('subscribedAt: $subscribedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    internalId,
+    sourceId,
+    originalId,
+    name,
+    thumbnailUrl,
+    groupName,
+    subscribedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalSubscriptionEntity &&
+          other.internalId == this.internalId &&
+          other.sourceId == this.sourceId &&
+          other.originalId == this.originalId &&
+          other.name == this.name &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.groupName == this.groupName &&
+          other.subscribedAt == this.subscribedAt);
+}
+
+class LocalSubscriptionCompanion
+    extends UpdateCompanion<LocalSubscriptionEntity> {
+  final Value<int> internalId;
+  final Value<String> sourceId;
+  final Value<String> originalId;
+  final Value<String> name;
+  final Value<String?> thumbnailUrl;
+  final Value<String> groupName;
+  final Value<DateTime> subscribedAt;
+  const LocalSubscriptionCompanion({
+    this.internalId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.originalId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.groupName = const Value.absent(),
+    this.subscribedAt = const Value.absent(),
+  });
+  LocalSubscriptionCompanion.insert({
+    this.internalId = const Value.absent(),
+    required String sourceId,
+    required String originalId,
+    required String name,
+    this.thumbnailUrl = const Value.absent(),
+    this.groupName = const Value.absent(),
+    this.subscribedAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       originalId = Value(originalId),
+       name = Value(name);
+  static Insertable<LocalSubscriptionEntity> custom({
+    Expression<int>? internalId,
+    Expression<String>? sourceId,
+    Expression<String>? originalId,
+    Expression<String>? name,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? groupName,
+    Expression<DateTime>? subscribedAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (originalId != null) 'original_id': originalId,
+      if (name != null) 'name': name,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (groupName != null) 'group_name': groupName,
+      if (subscribedAt != null) 'subscribed_at': subscribedAt,
+    });
+  }
+
+  LocalSubscriptionCompanion copyWith({
+    Value<int>? internalId,
+    Value<String>? sourceId,
+    Value<String>? originalId,
+    Value<String>? name,
+    Value<String?>? thumbnailUrl,
+    Value<String>? groupName,
+    Value<DateTime>? subscribedAt,
+  }) {
+    return LocalSubscriptionCompanion(
+      internalId: internalId ?? this.internalId,
+      sourceId: sourceId ?? this.sourceId,
+      originalId: originalId ?? this.originalId,
+      name: name ?? this.name,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      groupName: groupName ?? this.groupName,
+      subscribedAt: subscribedAt ?? this.subscribedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (originalId.present) {
+      map['original_id'] = Variable<String>(originalId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (groupName.present) {
+      map['group_name'] = Variable<String>(groupName.value);
+    }
+    if (subscribedAt.present) {
+      map['subscribed_at'] = Variable<DateTime>(subscribedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalSubscriptionCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('name: $name, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('groupName: $groupName, ')
+          ..write('subscribedAt: $subscribedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2480,6 +4468,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CreatorProfileTable creatorProfile = $CreatorProfileTable(this);
   late final $ArticleTable article = $ArticleTable(this);
   late final $PostTable post = $PostTable(this);
+  late final $LocalBookmarkTable localBookmark = $LocalBookmarkTable(this);
+  late final $LocalPlaylistTable localPlaylist = $LocalPlaylistTable(this);
+  late final $LocalPlaylistItemTable localPlaylistItem =
+      $LocalPlaylistItemTable(this);
+  late final $LocalSubscriptionTable localSubscription =
+      $LocalSubscriptionTable(this);
   late final RecentSearchQueryDao recentSearchQueryDao = RecentSearchQueryDao(
     this as AppDatabase,
   );
@@ -2492,6 +4486,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final ArticleDao articleDao = ArticleDao(this as AppDatabase);
   late final PostDao postDao = PostDao(this as AppDatabase);
+  late final LocalLibraryDao localLibraryDao = LocalLibraryDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2504,6 +4501,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     creatorProfile,
     article,
     post,
+    localBookmark,
+    localPlaylist,
+    localPlaylistItem,
+    localSubscription,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2534,6 +4535,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('post', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'local_playlist',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('local_playlist_item', kind: UpdateKind.delete)],
     ),
   ]);
   @override
@@ -4769,6 +6777,1295 @@ typedef $$PostTableProcessedTableManager =
       PostEntity,
       PrefetchHooks Function({bool mediaId})
     >;
+typedef $$LocalBookmarkTableCreateCompanionBuilder =
+    LocalBookmarkCompanion Function({
+      Value<int> internalId,
+      required String sourceId,
+      required String originalId,
+      required String title,
+      required String url,
+      Value<String?> thumbnailUrl,
+      Value<String?> creatorProfileId,
+      Value<String?> creatorProfileName,
+      Value<DateTime> createdAt,
+    });
+typedef $$LocalBookmarkTableUpdateCompanionBuilder =
+    LocalBookmarkCompanion Function({
+      Value<int> internalId,
+      Value<String> sourceId,
+      Value<String> originalId,
+      Value<String> title,
+      Value<String> url,
+      Value<String?> thumbnailUrl,
+      Value<String?> creatorProfileId,
+      Value<String?> creatorProfileName,
+      Value<DateTime> createdAt,
+    });
+
+class $$LocalBookmarkTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalBookmarkTable> {
+  $$LocalBookmarkTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalBookmarkTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalBookmarkTable> {
+  $$LocalBookmarkTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalBookmarkTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalBookmarkTable> {
+  $$LocalBookmarkTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$LocalBookmarkTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalBookmarkTable,
+          LocalBookmarkEntity,
+          $$LocalBookmarkTableFilterComposer,
+          $$LocalBookmarkTableOrderingComposer,
+          $$LocalBookmarkTableAnnotationComposer,
+          $$LocalBookmarkTableCreateCompanionBuilder,
+          $$LocalBookmarkTableUpdateCompanionBuilder,
+          (
+            LocalBookmarkEntity,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalBookmarkTable,
+              LocalBookmarkEntity
+            >,
+          ),
+          LocalBookmarkEntity,
+          PrefetchHooks Function()
+        > {
+  $$LocalBookmarkTableTableManager(_$AppDatabase db, $LocalBookmarkTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalBookmarkTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalBookmarkTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalBookmarkTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> originalId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => LocalBookmarkCompanion(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required String sourceId,
+                required String originalId,
+                required String title,
+                required String url,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => LocalBookmarkCompanion.insert(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalBookmarkTable, LocalBookmarkEntity>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LocalBookmarkTable,
+                    LocalBookmarkEntity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalBookmarkTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalBookmarkTable,
+      LocalBookmarkEntity,
+      $$LocalBookmarkTableFilterComposer,
+      $$LocalBookmarkTableOrderingComposer,
+      $$LocalBookmarkTableAnnotationComposer,
+      $$LocalBookmarkTableCreateCompanionBuilder,
+      $$LocalBookmarkTableUpdateCompanionBuilder,
+      (
+        LocalBookmarkEntity,
+        BaseReferences<_$AppDatabase, $LocalBookmarkTable, LocalBookmarkEntity>,
+      ),
+      LocalBookmarkEntity,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalPlaylistTableCreateCompanionBuilder =
+    LocalPlaylistCompanion Function({
+      Value<int> internalId,
+      required String sourceId,
+      required String name,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$LocalPlaylistTableUpdateCompanionBuilder =
+    LocalPlaylistCompanion Function({
+      Value<int> internalId,
+      Value<String> sourceId,
+      Value<String> name,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$LocalPlaylistTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalPlaylistTable,
+          LocalPlaylistEntity
+        > {
+  $$LocalPlaylistTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $LocalPlaylistItemTable,
+    List<LocalPlaylistItemEntity>
+  >
+  _localPlaylistItemRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.localPlaylistItem,
+        aliasName:
+            'local_playlist__internal_id__local_playlist_item__playlist_id',
+      );
+
+  $$LocalPlaylistItemTableProcessedTableManager get localPlaylistItemRefs {
+    final manager =
+        $$LocalPlaylistItemTableTableManager(
+          $_db,
+          $_db.localPlaylistItem,
+        ).filter(
+          (f) => f.playlistId.internalId.sqlEquals(
+            $_itemColumn<int>('internal_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _localPlaylistItemRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$LocalPlaylistTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistTable> {
+  $$LocalPlaylistTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> localPlaylistItemRefs(
+    Expression<bool> Function($$LocalPlaylistItemTableFilterComposer f) f,
+  ) {
+    final $$LocalPlaylistItemTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.internalId,
+      referencedTable: $db.localPlaylistItem,
+      getReferencedColumn: (t) => t.playlistId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalPlaylistItemTableFilterComposer(
+            $db: $db,
+            $table: $db.localPlaylistItem,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$LocalPlaylistTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistTable> {
+  $$LocalPlaylistTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalPlaylistTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistTable> {
+  $$LocalPlaylistTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> localPlaylistItemRefs<T extends Object>(
+    Expression<T> Function($$LocalPlaylistItemTableAnnotationComposer a) f,
+  ) {
+    final $$LocalPlaylistItemTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.internalId,
+          referencedTable: $db.localPlaylistItem,
+          getReferencedColumn: (t) => t.playlistId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalPlaylistItemTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localPlaylistItem,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$LocalPlaylistTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalPlaylistTable,
+          LocalPlaylistEntity,
+          $$LocalPlaylistTableFilterComposer,
+          $$LocalPlaylistTableOrderingComposer,
+          $$LocalPlaylistTableAnnotationComposer,
+          $$LocalPlaylistTableCreateCompanionBuilder,
+          $$LocalPlaylistTableUpdateCompanionBuilder,
+          (LocalPlaylistEntity, $$LocalPlaylistTableReferences),
+          LocalPlaylistEntity,
+          PrefetchHooks Function({bool localPlaylistItemRefs})
+        > {
+  $$LocalPlaylistTableTableManager(_$AppDatabase db, $LocalPlaylistTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalPlaylistTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalPlaylistTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalPlaylistTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => LocalPlaylistCompanion(
+                internalId: internalId,
+                sourceId: sourceId,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required String sourceId,
+                required String name,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => LocalPlaylistCompanion.insert(
+                internalId: internalId,
+                sourceId: sourceId,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalPlaylistTable, LocalPlaylistEntity>(table),
+                  $$LocalPlaylistTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({localPlaylistItemRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (localPlaylistItemRefs) db.localPlaylistItem,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (localPlaylistItemRefs)
+                    await $_getPrefetchedData<
+                      LocalPlaylistEntity,
+                      $LocalPlaylistTable,
+                      LocalPlaylistItemEntity
+                    >(
+                      currentTable: table,
+                      referencedTable: $$LocalPlaylistTableReferences
+                          ._localPlaylistItemRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$LocalPlaylistTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).localPlaylistItemRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.playlistId == item.internalId,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LocalPlaylistTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalPlaylistTable,
+      LocalPlaylistEntity,
+      $$LocalPlaylistTableFilterComposer,
+      $$LocalPlaylistTableOrderingComposer,
+      $$LocalPlaylistTableAnnotationComposer,
+      $$LocalPlaylistTableCreateCompanionBuilder,
+      $$LocalPlaylistTableUpdateCompanionBuilder,
+      (LocalPlaylistEntity, $$LocalPlaylistTableReferences),
+      LocalPlaylistEntity,
+      PrefetchHooks Function({bool localPlaylistItemRefs})
+    >;
+typedef $$LocalPlaylistItemTableCreateCompanionBuilder =
+    LocalPlaylistItemCompanion Function({
+      Value<int> internalId,
+      required int playlistId,
+      required String sourceId,
+      required String originalId,
+      required String title,
+      required String url,
+      Value<String?> thumbnailUrl,
+      required int position,
+      Value<DateTime> addedAt,
+    });
+typedef $$LocalPlaylistItemTableUpdateCompanionBuilder =
+    LocalPlaylistItemCompanion Function({
+      Value<int> internalId,
+      Value<int> playlistId,
+      Value<String> sourceId,
+      Value<String> originalId,
+      Value<String> title,
+      Value<String> url,
+      Value<String?> thumbnailUrl,
+      Value<int> position,
+      Value<DateTime> addedAt,
+    });
+
+final class $$LocalPlaylistItemTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalPlaylistItemTable,
+          LocalPlaylistItemEntity
+        > {
+  $$LocalPlaylistItemTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $LocalPlaylistTable _playlistIdTable(_$AppDatabase db) =>
+      db.localPlaylist.createAlias(
+        'local_playlist_item__playlist_id__local_playlist__internal_id',
+      );
+
+  $$LocalPlaylistTableProcessedTableManager get playlistId {
+    final $_column = $_itemColumn<int>('playlist_id')!;
+
+    final manager = $$LocalPlaylistTableTableManager(
+      $_db,
+      $_db.localPlaylist,
+    ).filter((f) => f.internalId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_playlistIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalPlaylistItemTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistItemTable> {
+  $$LocalPlaylistItemTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$LocalPlaylistTableFilterComposer get playlistId {
+    final $$LocalPlaylistTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.localPlaylist,
+      getReferencedColumn: (t) => t.internalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalPlaylistTableFilterComposer(
+            $db: $db,
+            $table: $db.localPlaylist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalPlaylistItemTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistItemTable> {
+  $$LocalPlaylistItemTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocalPlaylistTableOrderingComposer get playlistId {
+    final $$LocalPlaylistTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.localPlaylist,
+      getReferencedColumn: (t) => t.internalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalPlaylistTableOrderingComposer(
+            $db: $db,
+            $table: $db.localPlaylist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalPlaylistItemTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalPlaylistItemTable> {
+  $$LocalPlaylistItemTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  $$LocalPlaylistTableAnnotationComposer get playlistId {
+    final $$LocalPlaylistTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playlistId,
+      referencedTable: $db.localPlaylist,
+      getReferencedColumn: (t) => t.internalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalPlaylistTableAnnotationComposer(
+            $db: $db,
+            $table: $db.localPlaylist,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalPlaylistItemTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalPlaylistItemTable,
+          LocalPlaylistItemEntity,
+          $$LocalPlaylistItemTableFilterComposer,
+          $$LocalPlaylistItemTableOrderingComposer,
+          $$LocalPlaylistItemTableAnnotationComposer,
+          $$LocalPlaylistItemTableCreateCompanionBuilder,
+          $$LocalPlaylistItemTableUpdateCompanionBuilder,
+          (LocalPlaylistItemEntity, $$LocalPlaylistItemTableReferences),
+          LocalPlaylistItemEntity,
+          PrefetchHooks Function({bool playlistId})
+        > {
+  $$LocalPlaylistItemTableTableManager(
+    _$AppDatabase db,
+    $LocalPlaylistItemTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalPlaylistItemTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalPlaylistItemTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalPlaylistItemTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<int> playlistId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> originalId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => LocalPlaylistItemCompanion(
+                internalId: internalId,
+                playlistId: playlistId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                position: position,
+                addedAt: addedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required int playlistId,
+                required String sourceId,
+                required String originalId,
+                required String title,
+                required String url,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                required int position,
+                Value<DateTime> addedAt = const Value.absent(),
+              }) => LocalPlaylistItemCompanion.insert(
+                internalId: internalId,
+                playlistId: playlistId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                position: position,
+                addedAt: addedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalPlaylistItemTable, LocalPlaylistItemEntity>(
+                    table,
+                  ),
+                  $$LocalPlaylistItemTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({playlistId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (playlistId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.playlistId,
+                        referencedTable: $$LocalPlaylistItemTableReferences
+                            ._playlistIdTable(db),
+                        referencedColumn: $$LocalPlaylistItemTableReferences
+                            ._playlistIdTable(db)
+                            .internalId,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LocalPlaylistItemTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalPlaylistItemTable,
+      LocalPlaylistItemEntity,
+      $$LocalPlaylistItemTableFilterComposer,
+      $$LocalPlaylistItemTableOrderingComposer,
+      $$LocalPlaylistItemTableAnnotationComposer,
+      $$LocalPlaylistItemTableCreateCompanionBuilder,
+      $$LocalPlaylistItemTableUpdateCompanionBuilder,
+      (LocalPlaylistItemEntity, $$LocalPlaylistItemTableReferences),
+      LocalPlaylistItemEntity,
+      PrefetchHooks Function({bool playlistId})
+    >;
+typedef $$LocalSubscriptionTableCreateCompanionBuilder =
+    LocalSubscriptionCompanion Function({
+      Value<int> internalId,
+      required String sourceId,
+      required String originalId,
+      required String name,
+      Value<String?> thumbnailUrl,
+      Value<String> groupName,
+      Value<DateTime> subscribedAt,
+    });
+typedef $$LocalSubscriptionTableUpdateCompanionBuilder =
+    LocalSubscriptionCompanion Function({
+      Value<int> internalId,
+      Value<String> sourceId,
+      Value<String> originalId,
+      Value<String> name,
+      Value<String?> thumbnailUrl,
+      Value<String> groupName,
+      Value<DateTime> subscribedAt,
+    });
+
+class $$LocalSubscriptionTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalSubscriptionTable> {
+  $$LocalSubscriptionTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupName => $composableBuilder(
+    column: $table.groupName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalSubscriptionTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalSubscriptionTable> {
+  $$LocalSubscriptionTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupName => $composableBuilder(
+    column: $table.groupName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalSubscriptionTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalSubscriptionTable> {
+  $$LocalSubscriptionTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupName =>
+      $composableBuilder(column: $table.groupName, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get subscribedAt => $composableBuilder(
+    column: $table.subscribedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$LocalSubscriptionTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalSubscriptionTable,
+          LocalSubscriptionEntity,
+          $$LocalSubscriptionTableFilterComposer,
+          $$LocalSubscriptionTableOrderingComposer,
+          $$LocalSubscriptionTableAnnotationComposer,
+          $$LocalSubscriptionTableCreateCompanionBuilder,
+          $$LocalSubscriptionTableUpdateCompanionBuilder,
+          (
+            LocalSubscriptionEntity,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalSubscriptionTable,
+              LocalSubscriptionEntity
+            >,
+          ),
+          LocalSubscriptionEntity,
+          PrefetchHooks Function()
+        > {
+  $$LocalSubscriptionTableTableManager(
+    _$AppDatabase db,
+    $LocalSubscriptionTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalSubscriptionTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalSubscriptionTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalSubscriptionTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> originalId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> groupName = const Value.absent(),
+                Value<DateTime> subscribedAt = const Value.absent(),
+              }) => LocalSubscriptionCompanion(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                name: name,
+                thumbnailUrl: thumbnailUrl,
+                groupName: groupName,
+                subscribedAt: subscribedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required String sourceId,
+                required String originalId,
+                required String name,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> groupName = const Value.absent(),
+                Value<DateTime> subscribedAt = const Value.absent(),
+              }) => LocalSubscriptionCompanion.insert(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                name: name,
+                thumbnailUrl: thumbnailUrl,
+                groupName: groupName,
+                subscribedAt: subscribedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalSubscriptionTable, LocalSubscriptionEntity>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LocalSubscriptionTable,
+                    LocalSubscriptionEntity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalSubscriptionTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalSubscriptionTable,
+      LocalSubscriptionEntity,
+      $$LocalSubscriptionTableFilterComposer,
+      $$LocalSubscriptionTableOrderingComposer,
+      $$LocalSubscriptionTableAnnotationComposer,
+      $$LocalSubscriptionTableCreateCompanionBuilder,
+      $$LocalSubscriptionTableUpdateCompanionBuilder,
+      (
+        LocalSubscriptionEntity,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalSubscriptionTable,
+          LocalSubscriptionEntity
+        >,
+      ),
+      LocalSubscriptionEntity,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4786,4 +8083,12 @@ class $AppDatabaseManager {
   $$ArticleTableTableManager get article =>
       $$ArticleTableTableManager(_db, _db.article);
   $$PostTableTableManager get post => $$PostTableTableManager(_db, _db.post);
+  $$LocalBookmarkTableTableManager get localBookmark =>
+      $$LocalBookmarkTableTableManager(_db, _db.localBookmark);
+  $$LocalPlaylistTableTableManager get localPlaylist =>
+      $$LocalPlaylistTableTableManager(_db, _db.localPlaylist);
+  $$LocalPlaylistItemTableTableManager get localPlaylistItem =>
+      $$LocalPlaylistItemTableTableManager(_db, _db.localPlaylistItem);
+  $$LocalSubscriptionTableTableManager get localSubscription =>
+      $$LocalSubscriptionTableTableManager(_db, _db.localSubscription);
 }
