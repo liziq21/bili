@@ -79,33 +79,81 @@ jobs:
           sarif_file: flutter_analyze.sarif
       
       - name: Run test
-        run: flutter test
+        run: flutter test --coverage
         working-directory: app
+
+      - name: Upload app coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-app-${{ matrix.release.flutter }}
+          path: app/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Run bilibili package test
         if: ${{ !cancelled() }}
-        run: flutter test test/
+        run: flutter test --coverage test/
         working-directory: packages/bilibili
+
+      - name: Upload bilibili coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-bilibili-${{ matrix.release.flutter }}
+          path: packages/bilibili/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Run bpi test
         if: ${{ !cancelled() }}
-        run: dart test test/
+        run: dart test test/ --coverage-path=coverage/lcov.info
         working-directory: packages/bilibili/bpi
+
+      - name: Upload bpi coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-bpi-${{ matrix.release.flutter }}
+          path: packages/bilibili/bpi/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Run youtube package test
         if: ${{ !cancelled() }}
-        run: flutter test test/
+        run: flutter test --coverage test/
         working-directory: packages/youtube
+
+      - name: Upload youtube coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-youtube-${{ matrix.release.flutter }}
+          path: packages/youtube/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Run ypi test
         if: ${{ !cancelled() }}
-        run: dart test test/
+        run: dart test test/ --coverage-path=coverage/lcov.info
         working-directory: packages/youtube/ypi
+
+      - name: Upload ypi coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-ypi-${{ matrix.release.flutter }}
+          path: packages/youtube/ypi/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Run data package test
         if: ${{ !cancelled() }}
-        run: dart test
+        run: dart test --coverage-path=coverage/lcov.info
         working-directory: packages/data
+
+      - name: Upload data coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-data-${{ matrix.release.flutter }}
+          path: packages/data/coverage/lcov.info
+          if-no-files-found: error
 
       - name: Upload golden failure diffs
         if: always()
