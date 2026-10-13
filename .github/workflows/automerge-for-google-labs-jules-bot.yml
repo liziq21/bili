@@ -2,7 +2,9 @@ name: Enable Auto-Merge for Jules
 
 on:
   pull_request:
-    types: [assigned, opened, reopened, edited, synchronize, review_requested]
+    types: [assigned, opened, reopened, edited, synchronize, review_requested, labeled]
+  pull_request_review:
+    types: [submitted]
 
 permissions:
   pull-requests: write
@@ -11,13 +13,73 @@ permissions:
 jobs:
   enable-automerge:
     runs-on: ubuntu-latest
-    if: |
-      github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
-      contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
+    # Jules PRs require an explicit maintainer-applied approval label. The
+    # labeled event is the only event that can enable auto-merge; a new commit
+    # or review request revokes the approval below.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'jules-auto-merge' &&
+      (
+        github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
+        contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
+      ) &&
+      !contains(join(github.event.pull_request.labels.*.name, ','), 'requires-human-review')
     steps:
+      - name: Verify label was applied by a maintainer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          case "$ACTOR" in
+            google-labs-jules\[bot\]|github-actions\[bot\])
+              echo "::error::Automation cannot authorize Jules auto-merge"
+              exit 1
+              ;;
+          esac
+          permission=$(gh api "repos/$REPOSITORY/collaborators/$ACTOR/permission" --jq .permission)
+          case "$permission" in
+            admin|maintain|write) ;;
+            *)
+              echo "::error::The labeler does not have maintainer merge permission: $permission"
+              exit 1
+              ;;
+          esac
       - name: Enable GitHub auto-merge for this PR
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ github.event.pull_request.number }}
           merge-method: squash
+
+  revoke-automerge:
+    runs-on: ubuntu-latest
+    # Do not let approval survive a new Jules commit, an explicit human-review
+    # label, or a submitted changes-requested review.
+    if: >-
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'synchronize' ||
+          (github.event.action == 'labeled' && github.event.label.name == 'requires-human-review')
+        )
+      ) ||
+      (
+        github.event_name == 'pull_request_review' &&
+        github.event.review.state == 'changes_requested'
+      )
+    steps:
+      - name: Disable auto-merge and remove stale approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          NODE_ID: ${{ github.event.pull_request.node_id }}
+        run: |
+          set -euo pipefail
+          gh api graphql \
+            -f query='mutation($id:ID!){disablePullRequestAutoMerge(input:{pullRequestId:$id}){clientMutationId}}' \
+            -F id="$NODE_ID" >/dev/null || true
+          gh api -X DELETE "repos/$REPOSITORY/issues/$PR/labels/jules-auto-merge" || true
