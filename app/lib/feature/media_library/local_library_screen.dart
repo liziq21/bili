@@ -1067,12 +1067,16 @@ class _BookmarkSelectionDialogState() extends State<_BookmarkSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final viewport = MediaQuery.sizeOf(context);
+    final dialogWidth = (viewport.width - 80).clamp(160.0, 460.0).toDouble();
+    final dialogHeight = (viewport.height - 240).clamp(120.0, 360.0).toDouble();
+
     return AlertDialog(
       title: const Text('添加收藏'),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 460, maxHeight: 360),
+      content: SizedBox(
+        width: dialogWidth,
+        height: dialogHeight,
         child: ListView.builder(
-          shrinkWrap: true,
           itemCount: widget.bookmarks.length,
           itemBuilder: (context, index) {
             final bookmark = widget.bookmarks[index];
