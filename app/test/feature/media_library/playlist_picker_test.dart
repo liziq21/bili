@@ -51,6 +51,23 @@ void main() {
 
   tearDown(() => database.close());
 
+  void testPickerWidgets(
+    String description,
+    Future<void> Function(WidgetTester tester) body,
+  ) {
+    testWidgets(description, (tester) async {
+      try {
+        await body(tester);
+      } finally {
+        // Drift defers removal of an unused query stream with Timer.run().
+        // Unmount while the test's fake-async zone is still active, then pump
+        // that timer before tearDown closes the database.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+  }
+
   Widget app(LocalLibraryRepository value) => MaterialApp(
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
     supportedLocales: const [Locale('en')],
@@ -79,16 +96,24 @@ void main() {
     for (var index = 0; index < 8; index++) {
       await tester.pump(const Duration(milliseconds: 20));
     }
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
-  testWidgets('creates a playlist and appends the video', (tester) async {
+  Future<void> pumpRoute(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  testPickerWidgets('creates a playlist and appends the video', (tester) async {
     await tester.pumpWidget(app(repository));
     await pumpDb(tester);
 
     await tester.tap(find.text('选择列表'));
-    await tester.pump(const Duration(milliseconds: 200));
+    await pumpRoute(tester);
     await tester.tap(find.text('新建播放列表'));
-    await tester.pump(const Duration(milliseconds: 200));
+    await pumpRoute(tester);
     await tester.enterText(find.byType(TextField), 'Watch later');
     await tester.tap(find.text('创建'));
     await pumpDb(tester);
@@ -103,35 +128,39 @@ void main() {
     expect(items.single.originalId, 'video-1');
   });
 
-  testWidgets('retries a failed stream and a failed append without closing', (
-    tester,
-  ) async {
-    final failingRepository = _FailOnceRepository(
-      dao: database.localLibraryDao,
-    );
-    final playlistId = await failingRepository.createPlaylist(
-      'bilibili',
-      'Watch later',
-    );
+  testPickerWidgets(
+    'retries a failed stream and a failed append without closing',
+    (tester) async {
+      final failingRepository = _FailOnceRepository(
+        dao: database.localLibraryDao,
+      );
+      final playlistId = await failingRepository.createPlaylist(
+        'bilibili',
+        'Watch later',
+      );
 
-    await tester.pumpWidget(app(failingRepository));
-    await pumpDb(tester);
-    await tester.tap(find.text('选择列表'));
-    await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpWidget(app(failingRepository));
+      await pumpDb(tester);
+      await tester.tap(find.text('选择列表'));
+      await pumpRoute(tester);
 
-    expect(find.text('播放列表加载失败'), findsOneWidget);
-    await tester.tap(find.text('重试'));
-    await pumpDb(tester);
-    expect(find.text('Watch later'), findsOneWidget);
+      expect(find.text('播放列表加载失败'), findsOneWidget);
+      await tester.tap(find.text('重试'));
+      await pumpDb(tester);
+      expect(find.text('Watch later'), findsOneWidget);
 
-    await tester.tap(find.text('Watch later'));
-    await pumpDb(tester);
-    expect(find.textContaining('添加失败'), findsOneWidget);
-    expect(find.text('添加到播放列表'), findsOneWidget);
+      await tester.tap(find.text('Watch later'));
+      await pumpDb(tester);
+      expect(find.textContaining('添加失败'), findsOneWidget);
+      expect(find.text('添加到播放列表'), findsOneWidget);
 
-    await tester.tap(find.text('Watch later'));
-    await pumpDb(tester);
-    expect(find.text('添加到播放列表'), findsNothing);
-    expect(await failingRepository.getPlaylistItems(playlistId), hasLength(1));
-  });
+      await tester.tap(find.text('Watch later'));
+      await pumpDb(tester);
+      expect(find.text('添加到播放列表'), findsNothing);
+      expect(
+        await failingRepository.getPlaylistItems(playlistId),
+        hasLength(1),
+      );
+    },
+  );
 }

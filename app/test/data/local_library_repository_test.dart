@@ -151,6 +151,7 @@ void main() {
         repository.watchSubscriptions(),
         emitsInOrder([isEmpty, hasLength(1)]),
       ).timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(Duration.zero);
 
       await repository.setBookmark(
         sourceId: 'source-a',
@@ -182,6 +183,7 @@ void main() {
         repository.watchPlaylists(),
         emitsInOrder([isEmpty, hasLength(1)]),
       ).timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(Duration.zero);
       final playlistId = await repository.createPlaylist(
         'source-a',
         'Reactive',
@@ -190,6 +192,7 @@ void main() {
         repository.watchPlaylistItems(playlistId),
         emitsInOrder([isEmpty, hasLength(1), isEmpty]),
       ).timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(Duration.zero);
       await repository.addToPlaylist(
         playlistId: playlistId,
         sourceId: 'source-a',

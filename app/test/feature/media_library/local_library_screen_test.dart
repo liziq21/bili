@@ -54,6 +54,23 @@ void main() {
 
   tearDown(() => database.close());
 
+  void testLibraryWidgets(
+    String description,
+    Future<void> Function(WidgetTester tester) body,
+  ) {
+    testWidgets(description, (tester) async {
+      try {
+        await body(tester);
+      } finally {
+        // Drift defers removal of an unused query stream with Timer.run().
+        // Unmount while the test's fake-async zone is still active, then pump
+        // that timer before tearDown closes the database.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+  }
+
   Widget app(Widget child, {LocalLibraryRepository? value}) => MaterialApp(
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
     supportedLocales: const [Locale('en')],
@@ -78,6 +95,14 @@ void main() {
     for (var index = 0; index < 8; index++) {
       await tester.pump(const Duration(milliseconds: 20));
     }
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+
+  Future<void> pumpRoute(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
   Future<void> openTab(WidgetTester tester, String label) async {
@@ -87,41 +112,44 @@ void main() {
 
   Future<void> openPlaylistMenu(WidgetTester tester) async {
     await tester.tap(find.byTooltip('播放列表操作'));
-    await tester.pump(const Duration(milliseconds: 200));
+    await pumpRoute(tester);
   }
 
   Future<void> openPlaylistItemMenu(WidgetTester tester, int index) async {
     await tester.tap(find.byTooltip('条目操作').at(index));
-    await tester.pump(const Duration(milliseconds: 200));
+    await pumpRoute(tester);
   }
 
-  testWidgets('creates and deletes a playlist through the real database', (
+  testLibraryWidgets(
+    'creates and deletes a playlist through the real database',
+    (tester) async {
+      await tester.pumpWidget(app(screen()));
+      await pumpLibrary(tester);
+      await openTab(tester, '播放列表');
+
+      await tester.tap(find.text('新建播放列表'));
+      await pumpRoute(tester);
+      await tester.enterText(find.byType(TextField), 'Watch later');
+      await tester.tap(find.text('创建'));
+      await pumpLibrary(tester);
+
+      expect(find.text('Watch later'), findsOneWidget);
+      expect(await repository.getPlaylists(), hasLength(1));
+
+      await openPlaylistMenu(tester);
+      await tester.tap(find.text('删除播放列表'));
+      await pumpRoute(tester);
+      await tester.tap(find.text('删除').last);
+      await pumpLibrary(tester);
+
+      expect(find.text('Watch later'), findsNothing);
+      expect(await repository.getPlaylists(), isEmpty);
+    },
+  );
+
+  testLibraryWidgets('removes only one duplicate playlist occurrence', (
     tester,
   ) async {
-    await tester.pumpWidget(app(screen()));
-    await pumpLibrary(tester);
-    await openTab(tester, '播放列表');
-
-    await tester.tap(find.text('新建播放列表'));
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.enterText(find.byType(TextField), 'Watch later');
-    await tester.tap(find.text('创建'));
-    await pumpLibrary(tester);
-
-    expect(find.text('Watch later'), findsOneWidget);
-    expect(await repository.getPlaylists(), hasLength(1));
-
-    await openPlaylistMenu(tester);
-    await tester.tap(find.text('删除播放列表'));
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.tap(find.text('删除').last);
-    await pumpLibrary(tester);
-
-    expect(find.text('Watch later'), findsNothing);
-    expect(await repository.getPlaylists(), isEmpty);
-  });
-
-  testWidgets('removes only one duplicate playlist occurrence', (tester) async {
     final playlistId = await repository.createPlaylist('bilibili', 'Queue');
     const video = VideoModel(
       id: 'same',
@@ -152,7 +180,9 @@ void main() {
     expect(await repository.getPlaylistItems(playlistId), hasLength(1));
   });
 
-  testWidgets('reorders playlist items from the item menu', (tester) async {
+  testLibraryWidgets('reorders playlist items from the item menu', (
+    tester,
+  ) async {
     final playlistId = await repository.createPlaylist('bilibili', 'Queue');
     for (final video in const [
       VideoModel(id: 'a', title: 'First', url: 'https://example.com/a'),
@@ -185,7 +215,7 @@ void main() {
     expect(items.map((item) => item.originalId), ['b', 'a']);
   });
 
-  testWidgets('batch-adds only same-source bookmarks to a playlist', (
+  testLibraryWidgets('batch-adds only same-source bookmarks to a playlist', (
     tester,
   ) async {
     final playlistId = await repository.createPlaylist('bilibili', 'Queue');
@@ -214,7 +244,7 @@ void main() {
     await openTab(tester, '播放列表');
     await openPlaylistMenu(tester);
     await tester.tap(find.text('添加收藏'));
-    await tester.pump(const Duration(milliseconds: 200));
+    await pumpRoute(tester);
 
     expect(find.text('Saved A'), findsOneWidget);
     expect(find.text('Saved B'), findsOneWidget);
@@ -234,7 +264,7 @@ void main() {
     expect(items.every((item) => item.sourceId == 'bilibili'), isTrue);
   });
 
-  testWidgets(
+  testLibraryWidgets(
     'groups subscriptions, filters source, unsubscribes, and calls back',
     (tester) async {
       await repository.setSubscription(
@@ -264,26 +294,26 @@ void main() {
       expect(find.text('未分组'), findsNWidgets(2));
 
       await tester.tap(find.text('筛选'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await pumpRoute(tester);
       await tester.tap(find.text('Bilibili').last);
       await pumpLibrary(tester);
       expect(find.text('Bili creator'), findsOneWidget);
       expect(find.text('YouTube creator'), findsNothing);
 
       await tester.tap(find.text('Bili creator'));
-      expect(creatorTaps, [(sourceId: 'bilibili', creatorId: 'b1')]);
+      expect(creatorTaps, [('bilibili', 'b1')]);
 
       await tester.tap(find.byTooltip('订阅操作'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await pumpRoute(tester);
       await tester.tap(find.text('设置分组'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await pumpRoute(tester);
       await tester.enterText(find.byType(TextField), 'Favorites');
       await tester.tap(find.text('保存'));
       await pumpLibrary(tester);
       expect(find.text('Favorites'), findsOneWidget);
 
       await tester.tap(find.byTooltip('订阅操作'));
-      await tester.pump(const Duration(milliseconds: 200));
+      await pumpRoute(tester);
       await tester.tap(find.text('取消订阅'));
       await pumpLibrary(tester);
       expect(find.text('Bili creator'), findsNothing);
@@ -291,17 +321,20 @@ void main() {
     },
   );
 
-  testWidgets('does not show the source filter for parent-owned history', (
+  testLibraryWidgets(
+    'does not show the source filter for parent-owned history',
+    (tester) async {
+      await tester.pumpWidget(app(screen()));
+      await pumpLibrary(tester);
+      expect(find.text('筛选'), findsNothing);
+      await openTab(tester, '收藏');
+      expect(find.text('筛选'), findsOneWidget);
+    },
+  );
+
+  testLibraryWidgets('recreates a failed local stream when retrying', (
     tester,
   ) async {
-    await tester.pumpWidget(app(screen()));
-    await pumpLibrary(tester);
-    expect(find.text('筛选'), findsNothing);
-    await openTab(tester, '收藏');
-    expect(find.text('筛选'), findsOneWidget);
-  });
-
-  testWidgets('recreates a failed local stream when retrying', (tester) async {
     final failingRepository = _FailOnceBookmarkRepository(
       dao: database.localLibraryDao,
     );
