@@ -120,6 +120,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  void registerHistoryCleanup(WidgetTester tester, MediaHistoryCubit cubit) {
+    addTearDown(() async {
+      // Detach the widget listener before canceling the cubit's bounded Drift
+      // stream. This also runs when an assertion fails before the test reaches
+      // its normal cleanup path.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      if (!cubit.isClosed) await cubit.close();
+    });
+  }
+
   testWidgets('a history row never prints the view count it does not have', (
     tester,
   ) async {
@@ -129,6 +140,7 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 10,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
@@ -136,8 +148,6 @@ void main() {
     // `media` has no view count column, so the row subtitle would read
     // "null views" if it interpolated the missing value.
     expect(find.textContaining('null'), findsNothing);
-
-    await cubit.close();
   });
 
   testWidgets('load more stays available while the list is still empty', (
@@ -153,6 +163,7 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 2,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
@@ -163,8 +174,6 @@ void main() {
     // is the only one: it must not be disabled just because the list is empty.
     final button = tester.widget<TextButton>(find.byType(TextButton));
     expect(button.onPressed, isNotNull);
-
-    await cubit.close();
   });
 
   testWidgets('labels each row with its source and when it was watched', (
@@ -198,6 +207,7 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 10,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
@@ -207,8 +217,6 @@ void main() {
     expect(find.text('Bilibili · 5 小时前'), findsOneWidget);
     expect(find.text('Bilibili · 1 天前'), findsOneWidget);
     expect(find.textContaining('bilibili'), findsNothing);
-
-    await cubit.close();
   });
 
   testWidgets('falls back to a date once a row is older than a week', (
@@ -225,6 +233,7 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 10,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
@@ -240,8 +249,6 @@ void main() {
       ),
       findsOneWidget,
     );
-
-    await cubit.close();
   });
 
   testWidgets('shows saved playback progress in the history subtitle', (
@@ -259,12 +266,11 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 10,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
     expect(find.text('Bilibili · 已观看 01:01 · 5 分钟前'), findsOneWidget);
-
-    await cubit.close();
   });
 
   testWidgets('tapping a row hands over the source that row was loaded from', (
@@ -276,6 +282,7 @@ void main() {
       mediaHistoryDao: db.mediaHistoryDao,
       pageSize: 10,
     );
+    registerHistoryCleanup(tester, cubit);
     await settle(cubit);
 
     final tapped = <MediaHistoryItem>[];
@@ -302,7 +309,5 @@ void main() {
     expect(tapped, hasLength(1));
     expect(tapped.single.video.id, 'v1');
     expect(tapped.single.sourceId, 'bilibili');
-
-    await cubit.close();
   });
 }
