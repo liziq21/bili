@@ -78,6 +78,9 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// 记录收到的音量，换算前的原值。
   final List<double> volumeCalls = [];
 
+  /// 记录收到的播放速率。
+  final List<double> rateCalls = [];
+
   /// 记录收到的媒体地址。
   final List<String> openedUris = [];
 
@@ -95,6 +98,9 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
 
   /// 投喂媒体时长变化。
   void emitDuration(Duration value) => _duration.add(value);
+
+  /// 投喂播放速率变化。
+  void emitRate(double value) => _rate.add(value);
 
   /// 投喂播放错误。
   void emitError(String value) => _error.add(value);
@@ -138,6 +144,11 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   @override
   Future<void> setVolume(double volume, {bool synchronized = true}) async {
     volumeCalls.add(volume);
+  }
+
+  @override
+  Future<void> setRate(double rate, {bool synchronized = true}) async {
+    rateCalls.add(rate);
   }
 
   @override
@@ -513,6 +524,40 @@ void main() {
       fake.emitPlaylistMode(PlaylistMode.single);
       await pumpEventQueue();
       expect(recorder.last.queueMode, PlaybackQueueMode.single);
+    });
+  });
+
+  group('MediaPlaybackController.setRate', () {
+    test('forwards the rate unchanged', () async {
+      await controller.setRate(2);
+      await controller.setRate(1.5);
+      await controller.setRate(0.5);
+
+      expect(fake.rateCalls, [2.0, 1.5, 0.5]);
+    });
+
+    test('defaults to normal speed before the player reports a rate', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+      );
+      await pumpEventQueue();
+
+      expect(recorder.last.rate, 1.0);
+    });
+
+    test('rate changes surface as the playback state', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/v.m4s'),
+      );
+      await pumpEventQueue();
+
+      fake.emitRate(1.5);
+      await pumpEventQueue();
+      expect(recorder.last.rate, 1.5);
+
+      fake.emitRate(2);
+      await pumpEventQueue();
+      expect(recorder.last.rate, 2.0);
     });
   });
 }

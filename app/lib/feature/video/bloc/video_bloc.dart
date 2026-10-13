@@ -19,6 +19,7 @@ class VideoBloc({required final VideoDetailRepository _repository})
     on<ToggleVideoLike>(_onToggleVideoLike);
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
     on<ToggleCreatorSubscribe>(_onToggleCreatorSubscribe);
+    on<MediaStreamChanged>(_onMediaStreamChanged);
   }
 
   final _log = Logger('VideoBloc');
@@ -144,5 +145,13 @@ class VideoBloc({required final VideoDetailRepository _repository})
         _log.warning('Failed to toggle subscribe', error);
         emit(state.copyWith(videoDetail: detail, actionError: '关注失败'));
     }
+  }
+
+  /// 只更新媒体流，不触发解析：解析与续接由持有播放会话的 UI 层完成。
+  void _onMediaStreamChanged(
+    MediaStreamChanged event,
+    Emitter<VideoState> emit,
+  ) {
+    emit(state.copyWith(mediaStream: event.stream, streamError: null));
   }
 }

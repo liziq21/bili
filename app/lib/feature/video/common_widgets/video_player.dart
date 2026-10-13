@@ -8,10 +8,18 @@ import 'package:material_ui/material_ui.dart';
 // media_kit_video 也导出名为 VideoState 的控件状态类，与本页 bloc 的
 // VideoState 同名。此处藏掉它，VideoState 全指 bloc 的状态。
 import 'package:media_kit_video/media_kit_video.dart' hide VideoState;
+import 'package:model/model.dart';
 
+import '../../../datastore/preferences_data_source.dart';
+import '../../../data/repository/video_detail_repository.dart';
+import 'playback_speed_chip.dart';
+import 'player_gesture_layer.dart';
+import 'quality_picker_chip.dart';
+import 'sleep_timer_chip.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
+import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
 
 /// 视频播放器：把 [MediaStream] 接到原生播放管线并渲染画面。
@@ -256,15 +264,102 @@ class const _VideoSurface({
 class _VideoSurfaceState() extends State<_VideoSurface> {
   StreamSubscription<PlaybackState>? _subscription;
   PlaybackState? _playbackState;
+  late final BoostRateController _boost;
+  late final BrightnessService _brightnessService;
+  bool _fullscreen = false;
 
   @override
   void initState() {
     super.initState();
+    _boost = BoostRateController(widget.controller);
+    _brightnessService = BrightnessService();
     _subscription = widget.controller.states.listen((state) {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
     widget.controller.open(widget.stream);
+    _restoreSavedRate();
+    _applyPreferredQuality();
+  }
+
+  /// 套用上次记住的默认倍速。
+  ///
+  /// PreferencesDataSource 由页面级注入；单独使用本组件的 widget 测试
+  /// 没有该注入，此时跳过（只影响默认倍速记忆，不影响当次播放）。
+  Future<void> _restoreSavedRate() async {
+    try {
+      final result = await context.read<PreferencesDataSource>().get(
+        PreferencesKey.playbackRate,
+      );
+      if (!mounted) return;
+      switch (result) {
+        case Ok(:final value):
+          if (value != 1.0) {
+            unawaited(widget.controller.setRate(value));
+          }
+        case Error():
+          break;
+      }
+    } catch (_) {}
+  }
+
+  /// 套用上次记住的默认画质。
+  ///
+  /// 只在记住的高度与当前流不同时重新解析一次；流已在该高度时什么也不做。
+  /// 无 PreferencesDataSource / VideoDetailRepository 注入时跳过。
+  Future<void> _applyPreferredQuality() async {
+    try {
+      final result = await context.read<PreferencesDataSource>().get(
+        PreferencesKey.preferredQualityHeight,
+      );
+      if (!mounted) return;
+      switch (result) {
+        case Ok(:final value):
+          final preferredHeight = value;
+          if (preferredHeight == null) return;
+          if (preferredHeight == widget.stream.height) return;
+          final videoId = context.read<VideoBloc>().state.videoDetail?.video.id;
+          if (videoId == null) return;
+          final repository = context.read<VideoDetailRepository>();
+          unawaited(
+            repository
+                .getMediaStream(videoId, preferHeight: preferredHeight)
+                .then((result) {
+                  if (!mounted) return;
+                  switch (result) {
+                    case Ok(:final value):
+                      widget.controller.restorePositionSeconds =
+                          widget.controller.state.position.inSeconds;
+                      unawaited(widget.controller.open(value));
+                      context.read<VideoBloc>().add(MediaStreamChanged(value));
+                    case Error():
+                      break;
+                  }
+                }),
+          );
+        case Error():
+          break;
+      }
+    } catch (_) {}
+  }
+
+  /// 全屏：横屏 + 沉浸系统 UI；退出时恢复竖屏与边缘到边缘。
+  ///
+  /// 不改页面布局，方向由系统响应；SystemChrome 在测试环境无效但不报错。
+  Future<void> _toggleFullscreen() async {
+    setState(() => _fullscreen = !_fullscreen);
+    if (_fullscreen) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   @override
@@ -277,7 +372,13 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
 
   @override
   void dispose() {
+    _boost.dispose();
     _subscription?.cancel();
+    if (_fullscreen) {
+      // 离开时若仍处全屏，恢复竖屏，避免带着横屏设置回到列表页。
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     super.dispose();
   }
 
@@ -289,7 +390,40 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       alignment: Alignment.center,
       children: [
         Positioned.fill(
-          child: Video(controller: widget.controller.videoController),
+          child: PlayerGestureLayer(
+            controller: widget.controller,
+            brightnessService: _brightnessService,
+            boost: _boost,
+            child: Video(controller: widget.controller.videoController),
+          ),
+        ),
+        Positioned(
+          top: $styles.insets.xs,
+          right: $styles.insets.xs,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SleepTimerChip(controller: widget.controller),
+              const Gap(6),
+              QualityPickerChip(
+                controller: widget.controller,
+                stream: widget.stream,
+              ),
+              const Gap(6),
+              PlaybackSpeedChip(controller: widget.controller),
+              const Gap(6),
+              _FullscreenButton(
+                fullscreen: _fullscreen,
+                onPressed: _toggleFullscreen,
+              ),
+            ],
+          ),
+        ),
+        ListenableBuilder(
+          listenable: _boost,
+          builder: (context, _) => _boost.boosted
+              ? const Positioned(bottom: 16, child: _BoostBadge())
+              : const SizedBox.shrink(),
         ),
         if (hasError)
           Positioned.fill(
@@ -349,6 +483,53 @@ class const _ErrorView({
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// 长按 2x 期间的临时标记。
+class const _BoostBadge() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: $styles.colors.scrim.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        '2x',
+        style: $styles.text.bodySmall.copyWith(color: $styles.colors.onScrim),
+      ),
+    );
+  }
+}
+
+/// 全屏 / 退出全屏按钮。
+class const _FullscreenButton({
+  required final bool fullscreen,
+  required final VoidCallback onPressed,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: $styles.colors.scrim.withValues(alpha: 0.6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onPressed();
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(
+            fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+            size: 18,
+            color: $styles.colors.onScrim,
+          ),
+        ),
       ),
     );
   }

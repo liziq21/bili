@@ -858,6 +858,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get queueModeLoop => '队列循环';
 
   @override
+  String get playbackSpeedLabel => '倍速';
+
+  @override
+  String get sleepTimerLabel => '定时';
+
+  @override
+  String get sleepTimerTitle => '睡眠定时器';
+
+  @override
+  String get sleepTimerCancel => '取消定时';
+
+  @override
+  String get qualityPickerTitle => '画质选择';
+
+  @override
+  String get qualityAutoLabel => '自动';
+
+  @override
+  String get qualitySingleOnly => '当前源只提供一个档位';
+
+  @override
   String get filenameFormat => 'Filename Format';
 
   @override

@@ -40,6 +40,13 @@ class MediaStream({
 
   /// 总时长，源未提供时为 null。
   final Duration? duration,
+
+  /// 同一视频的其他可选画质档位，不含当前正在播放的这一档。
+  ///
+  /// 由各服务适配层在解析出多档流（如 DASH 的全部视频轨）时填充；
+  /// 只下发单档的源为空。UI 据此渲染画质选择列表，选中后以
+  /// [MediaQualityOption.height] 重新解析地址。
+  final List<MediaQualityOption> alternatives = const [],
 }) {
   /// 音视频是否分离，即播放前是否需要先拼成虚拟媒体。
   bool get hasSeparateAudio => audioUrl != null && audioUrl!.isNotEmpty;
@@ -47,6 +54,21 @@ class MediaStream({
   /// 是否需要按片段顺序播放。
   bool get isSegmented => segments.isNotEmpty;
 }
+
+/// 一个可选的画质档位。
+///
+/// 字段刻意源中立：不出现任何服务端的清晰度编号体系，只有 UI 展示与
+/// 重新解析所需的两项（可读标签、画面高度）。
+class MediaQualityOption({
+  /// 画面高度（像素），用于重新解析时让源就近选档。
+  required final int height,
+
+  /// 可读标签，如 `1080P`。
+  required final String label,
+
+  /// 平均码率（bit/s），未知时为 null。仅用于排序与展示。
+  final int? bitrate,
+});
 
 /// 媒体流中的一个片段
 class MediaSegment({

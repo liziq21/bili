@@ -24,3 +24,13 @@ final class const ToggleVideoLike() extends VideoEvent;
 final class const ToggleVideoFavorite() extends VideoEvent;
 
 final class const ToggleCreatorSubscribe() extends VideoEvent;
+
+/// 把已解析好的新媒体流写回状态。
+///
+/// 画质切换时由 UI 层（持有播放会话）完成解析与续接，本事件只负责
+/// 更新状态，使播放器画面与画质列表同步到新档位。
+final class const MediaStreamChanged(final MediaStream stream)
+    extends VideoEvent {
+  @override
+  List<Object?> get props => [stream];
+}

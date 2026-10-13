@@ -30,6 +30,12 @@ class PlaybackState({
   /// 不被后续位置、时长等状态更新冲掉。
   final String? error,
 
+  /// 当前播放速率，1.0 为正常速度。
+  final double rate = 1.0,
+
+  /// 当前音量，0 到 1。
+  final double volume = 1.0,
+
   /// 队列长度。未打开队列时为 0。
   final int queueLength = 0,
 
@@ -60,6 +66,8 @@ extension on PlaybackState {
     Duration? position,
     Duration? duration,
     String? error,
+    double? rate,
+    double? volume,
     int? queueLength,
     int? currentIndex,
     PlaybackQueueMode? queueMode,
@@ -70,6 +78,8 @@ extension on PlaybackState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       error: error ?? this.error,
+      rate: rate ?? this.rate,
+      volume: volume ?? this.volume,
       queueLength: queueLength ?? this.queueLength,
       currentIndex: currentIndex ?? this.currentIndex,
       queueMode: queueMode ?? this.queueMode,
@@ -164,6 +174,9 @@ class MediaPlaybackController([
   ///
   /// 播放器库的量程是 0 到 100，此处对外用 0 到 1 并在转发前换算。
   Future<void> setVolume(double volume) => _player.setVolume(volume * 100);
+
+  /// 设置播放速率，1.0 为正常速度。
+  Future<void> setRate(double rate) => _player.setRate(rate);
 
   /// 打开一个播放队列并从头（或指定序号）开始播放。
   ///
@@ -289,6 +302,13 @@ class MediaPlaybackController([
       }),
       _player.stream.position.listen((position) {
         _emit(_state.copyWith(position: position));
+      }),
+      _player.stream.rate.listen((rate) {
+        _emit(_state.copyWith(rate: rate));
+      }),
+      // 播放器库音量量程 0 到 100，对外换算成 0 到 1。
+      _player.stream.volume.listen((volume) {
+        _emit(_state.copyWith(volume: (volume / 100).clamp(0.0, 1.0)));
       }),
       _player.stream.duration.listen((duration) {
         _emit(_state.copyWith(duration: duration));

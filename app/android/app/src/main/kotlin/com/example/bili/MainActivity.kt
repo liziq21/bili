@@ -179,6 +179,30 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                // 播放器亮度手势：写当前窗口的屏幕亮度。
+                // brightness 为 0..1，null 时恢复跟随系统。
+                "setBrightness" -> {
+                    try {
+                        val brightness = call.argument<Double>("brightness")
+                        val attrs = window.attributes
+                        attrs.screenBrightness = brightness?.toFloat()
+                            ?: LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                        window.attributes = attrs
+                        result.success(true)
+                    } catch (_: Exception) {
+                        result.success(false)
+                    }
+                }
+
+                // 读当前窗口的屏幕亮度，0..1；-1 为跟随系统。
+                "getBrightness" -> {
+                    try {
+                        result.success(window.attributes.screenBrightness.toDouble())
+                    } catch (_: Exception) {
+                        result.success(-1.0)
+                    }
+                }
+
                 "isFoldable" -> {
                     result.success(isFoldable)
                 }
