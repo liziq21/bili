@@ -207,7 +207,11 @@ void main() {
       final item = (await repository.getPlaylistItems(playlistId)).single;
       await repository.removePlaylistItem(item.internalId);
       await Future.wait([playlistChanges, itemChanges]);
+      // StreamMatcher cancels its StreamQueue asynchronously after matching.
+      // Let that cancellation reach Drift before the database is torn down.
+      await Future<void>.delayed(Duration.zero);
       await repository.deletePlaylist(playlistId);
+      await Future<void>.delayed(Duration.zero);
     },
   );
 
