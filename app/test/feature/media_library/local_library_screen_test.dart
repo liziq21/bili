@@ -5,6 +5,7 @@ import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/local_library_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,7 +49,12 @@ void main() {
   ]);
 
   setUp(() {
-    database = AppDatabase(NativeDatabase.memory());
+    database = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
     repository = LocalLibraryRepository(dao: database.localLibraryDao);
   });
 
@@ -96,9 +102,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 20));
     }
     await tester.pump(const Duration(milliseconds: 400));
-    // A route pop can dispose its StreamBuilder during the last frame, which
-    // schedules Drift's zero-duration stream-cache cleanup for the next frame.
-    await tester.pump();
   }
 
   Future<void> pumpRoute(WidgetTester tester) async {
