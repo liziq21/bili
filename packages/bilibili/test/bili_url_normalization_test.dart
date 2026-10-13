@@ -196,20 +196,14 @@ void main() {
       expect(model.url, isNot(startsWith('https:https://')));
     });
 
-    test(
-      'NetworkBiliPopularVideoX.asModel sanitizes bvid control characters in watch URL',
-      () {
-        final popularVideo = NetworkBiliPopularVideo(
-          aid: 12345,
-          bvid: '  BV1Deht6rEpZ\r\n\x00 ',
-          title: 'Popular Test',
-        );
-        final model = popularVideo.asModel();
-        expect(
-          model.url,
-          equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
-        );
-      },
-    );
+    test('NetworkBiliPopularVideoX sanitizes bvid control chars', () {
+      final popularVideo = NetworkBiliPopularVideo(
+        aid: 12345,
+        bvid: '  BV1Deht6rEpZ\r\n\x00 ',
+        title: 'Popular Test',
+      );
+      final model = popularVideo.asModel();
+      expect(model.url, equals('https://www.bilibili.com/video/BV1Deht6rEpZ'));
+    });
   });
 }
