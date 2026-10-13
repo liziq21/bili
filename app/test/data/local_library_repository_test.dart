@@ -146,11 +146,11 @@ void main() {
       final bookmarkChanges = expectLater(
         repository.watchBookmarks(),
         emitsInOrder([isEmpty, hasLength(1), isEmpty]),
-      );
+      ).timeout(const Duration(seconds: 10));
       final subscriptionChanges = expectLater(
         repository.watchSubscriptions(),
         emitsInOrder([isEmpty, hasLength(1)]),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       await repository.setBookmark(
         sourceId: 'source-a',
@@ -181,7 +181,7 @@ void main() {
       final playlistChanges = expectLater(
         repository.watchPlaylists(),
         emitsInOrder([isEmpty, hasLength(1)]),
-      );
+      ).timeout(const Duration(seconds: 10));
       final playlistId = await repository.createPlaylist(
         'source-a',
         'Reactive',
@@ -189,7 +189,7 @@ void main() {
       final itemChanges = expectLater(
         repository.watchPlaylistItems(playlistId),
         emitsInOrder([isEmpty, hasLength(1), isEmpty]),
-      );
+      ).timeout(const Duration(seconds: 10));
       await repository.addToPlaylist(
         playlistId: playlistId,
         sourceId: 'source-a',
