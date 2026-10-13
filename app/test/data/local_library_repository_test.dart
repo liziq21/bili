@@ -220,36 +220,49 @@ void main() {
     () async {
       final rawDatabase = sqlite.sqlite3.openInMemory();
       final first = AppDatabase(
-        NativeDatabase.opened(rawDatabase, closeUnderlyingOnClose: false),
+        DatabaseConnection(
+          NativeDatabase.opened(rawDatabase, closeUnderlyingOnClose: false),
+          closeStreamsSynchronously: true,
+        ),
       );
       final firstRepository = LocalLibraryRepository(
         dao: first.localLibraryDao,
       );
-      final playlistId = await firstRepository.createPlaylist(
-        'source-a',
-        'Saved',
-      );
-      await firstRepository.setBookmark(
-        sourceId: 'source-a',
-        video: _video('persisted'),
-        bookmarked: true,
-      );
-      await first.close();
+      late final int playlistId;
+      try {
+        playlistId = await firstRepository.createPlaylist('source-a', 'Saved');
+        await firstRepository.setBookmark(
+          sourceId: 'source-a',
+          video: _video('persisted'),
+          bookmarked: true,
+        );
+      } finally {
+        await first.close();
+      }
 
-      final reopened = AppDatabase(NativeDatabase.opened(rawDatabase));
-      addTearDown(reopened.close);
+      final reopened = AppDatabase(
+        DatabaseConnection(
+          NativeDatabase.opened(rawDatabase, closeUnderlyingOnClose: false),
+          closeStreamsSynchronously: true,
+        ),
+      );
       final reopenedRepository = LocalLibraryRepository(
         dao: reopened.localLibraryDao,
       );
 
-      expect(
-        (await reopenedRepository.getPlaylists()).single.internalId,
-        playlistId,
-      );
-      expect(
-        await reopenedRepository.isBookmarked('source-a', 'persisted'),
-        isTrue,
-      );
+      try {
+        expect(
+          (await reopenedRepository.getPlaylists()).single.internalId,
+          playlistId,
+        );
+        expect(
+          await reopenedRepository.isBookmarked('source-a', 'persisted'),
+          isTrue,
+        );
+      } finally {
+        await reopened.close();
+        rawDatabase.close();
+      }
     },
   );
 }
