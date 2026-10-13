@@ -1,6 +1,7 @@
 import 'package:app/database/app_database.dart';
 import 'package:app/data/repository/local_library_repository.dart';
 import 'package:data/data.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
@@ -10,7 +11,12 @@ void main() {
   late LocalLibraryRepository repository;
 
   setUp(() {
-    db = AppDatabase(NativeDatabase.memory());
+    db = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
     repository = LocalLibraryRepository(dao: db.localLibraryDao);
   });
 
