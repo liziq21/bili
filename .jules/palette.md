@@ -63,3 +63,9 @@
 **Learning:** Raw internal identifier keys in UI tab headers (such as `creatorProfile` and `video`) degrade the user experience and screen reader clarity. Routing tab titles through `AppLocalizations` with fallback Chinese strings (`创作者` and `视频`) ensures clean localized tab labels while `HapticFeedback.selectionClick()` on `TabBar.onTap` delivers clear tactile feedback.
 
 **Action:** Always route tab titles through `AppLocalizations` with CJK subset fallback strings and add `HapticFeedback.selectionClick()` on tab selection handlers.
+
+## 2026-10-13 - Creator Profile Metadata Formatting & Initial Avatar Fallback
+
+**Learning:** `CreatorProfileItem` search result cards previously omitted available creator statistics (`subscribers`, `videos`, `isLive`), leaving users without follower or live streaming context in search results, while missing thumbnail URLs left avatars completely blank without initial text placeholders. Formatting follower and video counts (e.g. `100.0万 关注`) within CJK test subset font bounds (`app/test/fonts/subset-characters.txt`), adding initial character fallback text in `CircleAvatar`, and enriching `Semantics(label: ...)` ensures clear screen reader context and polished visual hierarchy.
+
+**Action:** Always format optional creator metadata (`subscribers`, `videos`, `isLive`) in search profile cards, provide fallback initial avatar text for missing thumbnails, and verify all added CJK string characters exist in `app/test/fonts/subset-characters.txt`.

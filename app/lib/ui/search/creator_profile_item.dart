@@ -10,6 +10,17 @@ class const CreatorProfileItem({
   required final CreatorProfile creatorProfile,
   final Function()? onTap,
 }) extends StatelessWidget {
+  static String formatCount(int? count) {
+    if (count == null) return '';
+    if (count >= 100000000) {
+      return '${(count / 100000000).toStringAsFixed(1)}亿';
+    }
+    if (count >= 10000) {
+      return '${(count / 10000).toStringAsFixed(1)}万';
+    }
+    return '$count';
+  }
+
   @override
   Widget build(BuildContext context) {
     // `$styles.colors.*` below is read from a mutable static that `AppScaffold`
@@ -20,9 +31,29 @@ class const CreatorProfileItem({
     // `Element.updateChild` short-circuits on an identical child, leaving the
     // whole route subtree on the previous palette. The dependency read is the
     // cheap opt-in — see `feature/video/video_screen.dart` for the long form.
-    Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
-    final semanticLabel = '${creatorProfile.name}, @${creatorProfile.id}';
+    final formattedSubscribers = formatCount(creatorProfile.subscribers);
+    final formattedVideos = formatCount(creatorProfile.videos);
+
+    final statsParts = <String>[
+      '@${creatorProfile.id}',
+      if (formattedSubscribers.isNotEmpty) '$formattedSubscribers 关注',
+      if (formattedVideos.isNotEmpty) '$formattedVideos 视频',
+      if (creatorProfile.isLive == true) '直播中',
+    ];
+    final subtitleText = statsParts.join(' • ');
+
+    final semanticStatsParts = <String>[
+      if (formattedSubscribers.isNotEmpty) '$formattedSubscribers 关注',
+      if (formattedVideos.isNotEmpty) '$formattedVideos 视频',
+      if (creatorProfile.isLive == true) '直播中',
+    ];
+    final semanticStatsText = semanticStatsParts.isNotEmpty
+        ? '，${semanticStatsParts.join('，')}'
+        : '';
+    final semanticLabel =
+        '${creatorProfile.name}, @${creatorProfile.id}$semanticStatsText';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -46,6 +77,7 @@ class const CreatorProfileItem({
                 children: [
                   CircleAvatar(
                     radius: 22, // 固定头像大小
+                    backgroundColor: colorScheme.primaryContainer,
                     // ⚡ Bolt Optimization: Wrap provider with ResizeImage.resizeIfNeeded.
                     // Avatar visual size is 44x44px. Capping decode resolution to 128x128px
                     // avoids decoding high-res 1080p/4K network avatar images into full GPU RAM,
@@ -58,6 +90,18 @@ class const CreatorProfileItem({
                             128,
                             CachedNetworkImageProvider(
                               creatorProfile.thumbnailUrl!,
+                            ),
+                          )
+                        : null,
+                    child:
+                        (creatorProfile.thumbnailUrl == null ||
+                            creatorProfile.thumbnailUrl!.isEmpty)
+                        ? Text(
+                            creatorProfile.name.isNotEmpty
+                                ? creatorProfile.name[0].toUpperCase()
+                                : '?',
+                            style: $styles.text.bodySmallBold.copyWith(
+                              color: colorScheme.onPrimaryContainer,
                             ),
                           )
                         : null,
@@ -79,7 +123,7 @@ class const CreatorProfileItem({
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '@${creatorProfile.id}',
+                          subtitleText,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
