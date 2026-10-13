@@ -92,12 +92,13 @@ List<AppNavDestination> get _navDestinations => [
 
 final _log = Logger('Router');
 
-/// Logs routing exceptions while sanitizing URIs to prevent credential leakage.
+/// Logs routing exceptions with path-only diagnostics.
+///
+/// The URI path is retained for debugging, while query parameters, fragments,
+/// authority/user-info, and the exception payload are intentionally omitted.
 void logRoutingException(GoRouterState state) {
-  _log.severe(
-    'Routing exception for URI: ${NotFoundScreen.sanitizeUriString(state.uri.toString())}',
-    state.error,
-  );
+  final safePath = NotFoundScreen.sanitizeUriString(state.uri.path);
+  _log.severe('Routing exception for path: $safePath');
 }
 
 final GoRouter router = GoRouter(

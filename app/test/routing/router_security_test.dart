@@ -21,27 +21,58 @@ void main() {
       expect(sanitized, isNot(contains('\x00')));
     });
 
-    test('logRoutingException logs sanitized URI without sensitive params', () {
+    test('logRoutingException logs only safe path diagnostics', () {
       final logRecords = <LogRecord>[];
       final subscription = Logger('Router').onRecord.listen(logRecords.add);
 
       try {
+        const uriQuerySecret = 'uri-query-secret';
+        const uriFragmentSecret = 'uri-fragment-secret';
+        const uriUserInfoSecret = 'uri-user-info-secret';
+        const errorSecret = 'error-secret';
         final state = GoRouterState(
           router.configuration,
-          uri: Uri.parse('/unknown?token=secret123&code=abc'),
+          uri: Uri.parse(
+            'https://user:$uriUserInfoSecret@example.test/unknown'
+            '?token=$uriQuerySecret#$uriFragmentSecret',
+          ),
           matchedLocation: '/unknown',
           fullPath: '/unknown',
           pathParameters: const <String, String>{},
           pageKey: const ValueKey<String>('/unknown'),
-          error: GoException('Route not found'),
+          error: GoException(
+            'Route not found: $errorSecret '
+            'https://example.test/unknown?token=$errorSecret',
+          ),
         );
 
         logRoutingException(state);
 
         expect(logRecords, hasLength(1));
-        final message = logRecords.first.message;
-        expect(message, contains('REDACTED'));
-        expect(message, isNot(contains('secret123')));
+        final record = logRecords.single;
+        expect(record.level, Level.SEVERE);
+        expect(record.loggerName, 'Router');
+        expect(record.message, 'Routing exception for path: /unknown');
+        expect(record.error, isNull);
+        expect(record.stackTrace, isNull);
+        expect(record.object, isNull);
+
+        final recordDetails = <Object?>[
+          record.level,
+          record.message,
+          record.loggerName,
+          record.error,
+          record.stackTrace,
+          record.object,
+        ].join(' ');
+        for (final secret in [
+          uriQuerySecret,
+          uriFragmentSecret,
+          uriUserInfoSecret,
+          errorSecret,
+        ]) {
+          expect(recordDetails, isNot(contains(secret)));
+        }
       } finally {
         subscription.cancel();
       }
