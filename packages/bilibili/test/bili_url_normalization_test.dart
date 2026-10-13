@@ -51,6 +51,22 @@ void main() {
     });
   });
 
+  group('buildBiliWatchUrl tests', () {
+    test('builds valid watch URL for clean bvid', () {
+      expect(
+        buildBiliWatchUrl('BV1Deht6rEpZ'),
+        equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
+      );
+    });
+
+    test('strips control characters and whitespace from bvid', () {
+      expect(
+        buildBiliWatchUrl('  BV1Deht6rEpZ\r\n\x00 '),
+        equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
+      );
+    });
+  });
+
   group('Model DTO URL normalization tests', () {
     test(
       'NetworkVideoSearchResultX.asModel normalizes thumbnailUrl from fixture',
@@ -67,17 +83,20 @@ void main() {
       },
     );
 
-    test('NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture', () {
-      final json = loadFake('search_live');
-      final data = json['data'] as Map<String, dynamic>;
-      final result = NetworkSearchResult.fromJson(data);
-      final liveUser = result.result.liveUser.first;
+    test(
+      'NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture',
+      () {
+        final json = loadFake('search_live');
+        final data = json['data'] as Map<String, dynamic>;
+        final result = NetworkSearchResult.fromJson(data);
+        final liveUser = result.result.liveUser.first;
 
-      final model = liveUser.asModel();
-      expect(model.thumbnailUrl, isNotNull);
-      expect(model.thumbnailUrl, startsWith('https://'));
-      expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
-    });
+        final model = liveUser.asModel();
+        expect(model.thumbnailUrl, isNotNull);
+        expect(model.thumbnailUrl, startsWith('https://'));
+        expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
+      },
+    );
 
     test('NetworkVideoSearchResultX.asModel normalizes video url to https', () {
       final json = loadFake('search_video');
@@ -176,5 +195,21 @@ void main() {
       expect(model.url, startsWith('https://'));
       expect(model.url, isNot(startsWith('https:https://')));
     });
+
+    test(
+      'NetworkBiliPopularVideoX.asModel sanitizes bvid control characters in watch URL',
+      () {
+        final popularVideo = NetworkBiliPopularVideo(
+          aid: 12345,
+          bvid: '  BV1Deht6rEpZ\r\n\x00 ',
+          title: 'Popular Test',
+        );
+        final model = popularVideo.asModel();
+        expect(
+          model.url,
+          equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
+        );
+      },
+    );
   });
 }

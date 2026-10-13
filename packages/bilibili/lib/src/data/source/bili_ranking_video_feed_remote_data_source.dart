@@ -32,7 +32,7 @@ extension NetworkBiliRankingVideoX on NetworkBiliRankingVideo {
   VideoModel asModel() => VideoModel(
     id: bvid,
     title: title ?? bvid,
-    url: 'https://www.bilibili.com/video/$bvid',
+    url: buildBiliWatchUrl(bvid),
     thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: stat?.view,
     uploadDate: pubdate == null
