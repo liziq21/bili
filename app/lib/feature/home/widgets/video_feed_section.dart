@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
@@ -143,7 +144,13 @@ class const _FeedFooter({
       padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
       child: Center(
         child: section.hasMore
-            ? TextButton(onPressed: onLoadMore, child: Text(label))
+            ? TextButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onLoadMore();
+                },
+                child: Text(label),
+              )
             : Text(
                 label,
                 style: $styles.text.bodySmall.copyWith(

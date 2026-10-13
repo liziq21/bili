@@ -447,7 +447,13 @@ class const _Message({
           ),
           if (onAction != null) ...[
             SizedBox(height: $styles.insets.xs),
-            TextButton(onPressed: onAction, child: Text(actionLabel ?? '')),
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                onAction?.call();
+              },
+              child: Text(actionLabel ?? ''),
+            ),
           ],
         ],
       ),
