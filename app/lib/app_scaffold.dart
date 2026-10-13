@@ -1,6 +1,5 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:sized_context/sized_context.dart';
 
 import 'main.dart';
 import 'design/design.dart';
@@ -13,15 +12,18 @@ class const AppScaffold({super.key, required final Widget child})
 
   @override
   Widget build(BuildContext context) {
-    // Listen to the device size, and update AppStyle when it changes
-    final mq = MediaQuery.of(context);
-    //appLogic.handleAppSizeChanged(mq.size);
+    // ⚡ Bolt Optimization: Scope MediaQuery dependencies using targeted aspect getters
+    // (MediaQuery.sizeOf and MediaQuery.disableAnimationsOf) to prevent AppScaffold and its
+    // entire subtree from rebuilding when unrelated MediaQuery properties change
+    // (e.g., soft keyboard viewInsets or system padding).
+    final screenSize = MediaQuery.sizeOf(context);
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     // Set default timing for animations in the app
     Animate.defaultDuration = _style.times.fast;
     // Create a style object that will be passed down the widget tree
     _style = AppStyle(
-      screenSize: context.sizePx,
-      disableAnimations: mq.disableAnimations,
+      screenSize: screenSize,
+      disableAnimations: disableAnimations,
       // Read the real theme brightness so `$styles.colors.*` can pick light or
       // dark values. Previously `AppColors.isDark` was hardcoded to false,
       // which pinned every surface and text colour to the light palette and
