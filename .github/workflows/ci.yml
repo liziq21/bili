@@ -51,6 +51,9 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Validate iOS project configuration
+        run: python3 tool/validate_ios_config.py
+
       - name: Run build_runner
         run: dart run build_runner build \
           --delete-conflicting-outputs \
