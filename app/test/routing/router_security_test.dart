@@ -27,10 +27,12 @@ void main() {
       try {
         final state = GoRouterState(
           router.configuration,
-          location: '/unknown?token=secret123&code=abc',
           uri: Uri.parse('/unknown?token=secret123&code=abc'),
           matchedLocation: '/unknown',
-          error: Exception('Route not found'),
+          fullPath: '/unknown',
+          pathParameters: const <String, String>{},
+          pageKey: const ValueKey<String>('/unknown'),
+          error: GoException('Route not found'),
         );
 
         logRoutingException(state);
