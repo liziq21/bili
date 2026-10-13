@@ -122,7 +122,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // The history cubit owns a live Drift query stream. Use bounded pumps here
+    // instead of pumpAndSettle, whose frame loop can wait forever while that
+    // stream remains active even though the widget has rendered.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
   }
 
   testWidgets('a history row never prints the view count it does not have', (
@@ -299,10 +303,12 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.tap(find.textContaining('Video v1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(tapped, hasLength(1));
     expect(tapped.single.video.id, 'v1');
