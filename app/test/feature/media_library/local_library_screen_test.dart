@@ -96,6 +96,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 20));
     }
     await tester.pump(const Duration(milliseconds: 400));
+    // A route pop can dispose its StreamBuilder during the last frame, which
+    // schedules Drift's zero-duration stream-cache cleanup for the next frame.
+    await tester.pump();
   }
 
   Future<void> pumpRoute(WidgetTester tester) async {
