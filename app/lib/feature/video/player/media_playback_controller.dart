@@ -33,6 +33,9 @@ class PlaybackState({
   /// 当前播放速率，1.0 为正常速度。
   final double rate = 1.0,
 
+  /// 当前音量，0 到 1。
+  final double volume = 1.0,
+
   /// 队列长度。未打开队列时为 0。
   final int queueLength = 0,
 
@@ -64,6 +67,7 @@ extension on PlaybackState {
     Duration? duration,
     String? error,
     double? rate,
+    double? volume,
     int? queueLength,
     int? currentIndex,
     PlaybackQueueMode? queueMode,
@@ -75,6 +79,7 @@ extension on PlaybackState {
       duration: duration ?? this.duration,
       error: error ?? this.error,
       rate: rate ?? this.rate,
+      volume: volume ?? this.volume,
       queueLength: queueLength ?? this.queueLength,
       currentIndex: currentIndex ?? this.currentIndex,
       queueMode: queueMode ?? this.queueMode,
@@ -300,6 +305,10 @@ class MediaPlaybackController([
       }),
       _player.stream.rate.listen((rate) {
         _emit(_state.copyWith(rate: rate));
+      }),
+      // 播放器库音量量程 0 到 100，对外换算成 0 到 1。
+      _player.stream.volume.listen((volume) {
+        _emit(_state.copyWith(volume: (volume / 100).clamp(0.0, 1.0)));
       }),
       _player.stream.duration.listen((duration) {
         _emit(_state.copyWith(duration: duration));

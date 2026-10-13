@@ -1117,6 +1117,30 @@
   "@playbackSpeedLabel": {
     "description": "Playback speed picker title in the player"
   },
+  "sleepTimerLabel": "定时",
+  "@sleepTimerLabel": {
+    "description": "Sleep timer chip label when no timer is running"
+  },
+  "sleepTimerTitle": "睡眠定时器",
+  "@sleepTimerTitle": {
+    "description": "Sleep timer picker title"
+  },
+  "sleepTimerCancel": "取消定时",
+  "@sleepTimerCancel": {
+    "description": "Cancel the running sleep timer"
+  },
+  "qualityPickerTitle": "画质选择",
+  "@qualityPickerTitle": {
+    "description": "Quality picker title"
+  },
+  "qualityAutoLabel": "自动",
+  "@qualityAutoLabel": {
+    "description": "Label shown when the stream has no reported height"
+  },
+  "qualitySingleOnly": "当前源只提供一个档位",
+  "@qualitySingleOnly": {
+    "description": "Shown in the quality picker when no alternatives exist"
+  },
   "filenameFormat": "Filename Format",
   "@filenameFormat": {
     "description": "Setting title - filename pattern"

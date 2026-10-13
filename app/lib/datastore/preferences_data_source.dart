@@ -136,6 +136,14 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   /// 播放器默认倍速：用户在倍速弹窗里选过就记住，下次进入播放器自动套用。
   static const playbackRate = PreferencesKey<double>._('PLAYBACK_RATE', 1.0);
 
+  /// 默认画质高度：用户在画质弹窗里选过就记住，下次进入播放器就近套用。
+  ///
+  /// null 表示未选过，由源取默认档。
+  static const preferredQualityHeight = PreferencesKey<int?>._(
+    'PREFERRED_QUALITY_HEIGHT',
+    null,
+  );
+
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which
@@ -151,6 +159,7 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
       _ when runtimeType == _typeOf<String?>() => pref.getString(name),
       _ when runtimeType == _typeOf<bool>() => pref.getBool(name),
       _ when runtimeType == _typeOf<int>() => pref.getInt(name),
+      _ when runtimeType == _typeOf<int?>() => pref.getInt(name),
       _ when runtimeType == _typeOf<double>() => pref.getDouble(name),
       _ when runtimeType == _typeOf<List<String>>() => pref.getStringList(name),
       _ => throw UnsupportedError('Unsupported type: $T'),

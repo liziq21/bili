@@ -45,7 +45,13 @@ final class BiliMediaStreamRemoteDataSource({
       if (dash != null) {
         final videoItems = _playable(dash.video);
         if (videoItems.isNotEmpty) {
-          return _fromDash(sanitizedVideoId, dash, videoItems, preferHeight);
+          return _fromDash(
+            sanitizedVideoId,
+            playUrl,
+            dash,
+            videoItems,
+            preferHeight,
+          );
         }
       }
 
@@ -76,6 +82,7 @@ final class BiliMediaStreamRemoteDataSource({
   /// `audioUrl` 为空会让播放层把纯视频当作自带声音的文件，必然无声。
   Result<MediaStream> _fromDash(
     String videoId,
+    NetworkPlayUrl playUrl,
     DashData dash,
     List<MediaStreamItem> videoItems,
     int? preferHeight,
@@ -119,8 +126,76 @@ final class BiliMediaStreamRemoteDataSource({
         duration: dash.duration == null
             ? null
             : Duration(seconds: dash.duration!),
+        alternatives: _qualityOptions(
+          videoItems,
+          currentHeight: video.height,
+          acceptQuality: playUrl.acceptQuality,
+          acceptDescription: playUrl.acceptDescription,
+          supportFormats: playUrl.supportFormats,
+        ),
       ),
     );
+  }
+
+  /// 把全部可选视频轨收敛为 UI 可渲染的画质档位列表。
+  ///
+  /// 只保留有高度且非当前档的条目，按高度降序，方便弹窗从高到低排列。
+  /// 可读标签优先取源侧的描述映射（acceptDescription 与 acceptQuality
+  /// 等长对应），取不到时退回 `{height}P`。
+  List<MediaQualityOption> _qualityOptions(
+    List<MediaStreamItem> videoItems, {
+    required int? currentHeight,
+    List<int>? acceptQuality,
+    List<String>? acceptDescription,
+    List<FormatDescription>? supportFormats,
+  }) {
+    final options = <MediaQualityOption>[];
+    for (final item in videoItems) {
+      final height = item.height;
+      if (height == null || height == currentHeight) continue;
+      options.add(
+        MediaQualityOption(
+          height: height,
+          label: _qualityLabel(
+            height,
+            acceptQuality: acceptQuality,
+            acceptDescription: acceptDescription,
+            supportFormats: supportFormats,
+          ),
+          bitrate: item.bandwidth,
+        ),
+      );
+    }
+    options.sort((a, b) => b.height.compareTo(a.height));
+    return options;
+  }
+
+  /// 画质高度 → 可读标签。
+  ///
+  /// acceptQuality 与 acceptDescription 等长且按序对应，是源的官方描述；
+  /// supportFormats 的 new_description 是次要来源（部分响应才带）；
+  /// 两者都没有时用 `{height}P` 兜底。
+  String _qualityLabel(
+    int height, {
+    List<int>? acceptQuality,
+    List<String>? acceptDescription,
+    List<FormatDescription>? supportFormats,
+  }) {
+    final qualityIndex = acceptQuality?.indexOf(height);
+    if (qualityIndex != null &&
+        qualityIndex >= 0 &&
+        acceptDescription != null &&
+        qualityIndex < acceptDescription.length &&
+        acceptDescription[qualityIndex].isNotEmpty) {
+      return acceptDescription[qualityIndex];
+    }
+    final format = supportFormats?.firstWhere(
+      (format) => format.quality == height,
+      orElse: () => FormatDescription(),
+    );
+    final description = format?.newDescription;
+    if (description != null && description.isNotEmpty) return description;
+    return '${height}P';
   }
 
   /// 只保留带可用地址的条目。缺地址的条目不能参与择优，否则会选中一条

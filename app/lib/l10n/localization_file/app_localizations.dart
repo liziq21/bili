@@ -1588,6 +1588,42 @@ abstract class AppLocalizations {
   /// **'倍速'**
   String get playbackSpeedLabel;
 
+  /// Sleep timer chip label when no timer is running
+  ///
+  /// In zh, this message translates to:
+  /// **'定时'**
+  String get sleepTimerLabel;
+
+  /// Sleep timer picker title
+  ///
+  /// In zh, this message translates to:
+  /// **'睡眠定时器'**
+  String get sleepTimerTitle;
+
+  /// Cancel the running sleep timer
+  ///
+  /// In zh, this message translates to:
+  /// **'取消定时'**
+  String get sleepTimerCancel;
+
+  /// Quality picker title
+  ///
+  /// In zh, this message translates to:
+  /// **'画质选择'**
+  String get qualityPickerTitle;
+
+  /// Label shown when the stream has no reported height
+  ///
+  /// In zh, this message translates to:
+  /// **'自动'**
+  String get qualityAutoLabel;
+
+  /// Shown in the quality picker when no alternatives exist
+  ///
+  /// In zh, this message translates to:
+  /// **'当前源只提供一个档位'**
+  String get qualitySingleOnly;
+
   /// Setting title - filename pattern
   ///
   /// In zh, this message translates to:
