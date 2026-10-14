@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import '../../../data/repository/video_detail_repository.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
+import '../../media_library/playlist_picker.dart';
 
 String _formatCount(int count) {
   if (count >= 10000) {
@@ -505,6 +508,10 @@ class _ActionButtonsSectionState()
         });
 
     if (metrics == null) return const SizedBox.shrink();
+    final video = context.select<VideoBloc, VideoModel?>(
+      (bloc) => bloc.state.videoDetail?.video,
+    );
+    if (video == null) return const SizedBox.shrink();
 
     // 写失败只提示一句，不动页面内容：乐观更新已被 bloc 回滚，详情仍在屏上，
     // 把它并入加载失败通道会把整页顶成「视频加载失败」，与刚发生的写操作无关。
@@ -547,6 +554,24 @@ class _ActionButtonsSectionState()
               color: $styles.colors.tertiary,
               onTap: () {
                 context.read<VideoBloc>().add(const ToggleVideoFavorite());
+              },
+            ),
+            _ActionButton(
+              icon: Icons.queue_music_outlined,
+              activeIcon: Icons.queue_music,
+              label: '列表',
+              actionName: '加入播放列表',
+              tooltip: '加入本地播放列表',
+              isActive: false,
+              color: $styles.colors.secondary,
+              onTap: () {
+                unawaited(
+                  showLocalPlaylistPicker(
+                    context,
+                    sourceId: context.read<MediaSource>().id,
+                    video: video,
+                  ),
+                );
               },
             ),
             _ActionButton(

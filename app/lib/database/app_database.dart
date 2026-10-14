@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'dao/article_dao.dart';
 import 'dao/creator_profile_dao.dart';
 import 'dao/media_history_dao.dart';
+import 'dao/local_library_dao.dart';
 import 'dao/post_dao.dart';
 import 'dao/recent_search_query_dao.dart';
 import 'dao/video_dao.dart';
@@ -16,6 +17,7 @@ import 'table/post.dart';
 import 'table/recent_search_query.dart';
 import 'table/video.dart';
 import 'table/media_history.dart';
+import 'table/local_library.dart';
 
 part 'app_database.g.dart';
 
@@ -28,6 +30,10 @@ part 'app_database.g.dart';
     CreatorProfile,
     Article,
     Post,
+    LocalBookmark,
+    LocalPlaylist,
+    LocalPlaylistItem,
+    LocalSubscription,
   ],
   daos: [
     RecentSearchQueryDao,
@@ -36,20 +42,21 @@ part 'app_database.g.dart';
     CreatorProfileDao,
     ArticleDao,
     PostDao,
+    LocalLibraryDao,
   ],
 )
 class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
-    onUpgrade: (_, from, _) async {
+    onUpgrade: (m, from, _) async {
       if (from < 2) {
         // Older databases allowed more than one history row per media. Keep
         // the newest row before adding the unique key required by progress
@@ -68,6 +75,12 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
           'CREATE UNIQUE INDEX IF NOT EXISTS '
           'media_history_media_id_unique ON media_history(media_id)',
         );
+      }
+      if (from < 3) {
+        await m.createTable(localBookmark);
+        await m.createTable(localPlaylist);
+        await m.createTable(localPlaylistItem);
+        await m.createTable(localSubscription);
       }
     },
   );

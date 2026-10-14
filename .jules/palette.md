@@ -69,3 +69,9 @@
 **Learning:** `CreatorProfileItem` search result cards previously omitted available creator statistics (`subscribers`, `videos`, `isLive`), leaving users without follower or live streaming context in search results, while missing thumbnail URLs left avatars completely blank without initial text placeholders. Formatting follower and video counts (e.g. `100.0万 关注`) within CJK test subset font bounds (`app/test/fonts/subset-characters.txt`), adding initial character fallback text in `CircleAvatar`, and enriching `Semantics(label: ...)` ensures clear screen reader context and polished visual hierarchy.
 
 **Action:** Always format optional creator metadata (`subscribers`, `videos`, `isLive`) in search profile cards, provide fallback initial avatar text for missing thumbnails, and verify all added CJK string characters exist in `app/test/fonts/subset-characters.txt`.
+
+## 2026-10-14 - Search Result Error State Retry Buttons & Accessible Semantics
+
+**Learning:** Plain text error indicators in paginated search grids (e.g., `'加载失败，请稍后重试'`) leave users without an accessible tap-to-retry action, while screen readers lack structured button announcements (`button: true`). Extracting error views into dedicated widgets (`_SearchErrorView`, `_NewPageErrorIndicator`) featuring error icons, interactive retry buttons, `HapticFeedback.lightImpact()`, and `Semantics(button: true, label: ...)` allows users to recover from search network errors effortlessly without re-navigating.
+
+**Action:** Always pair pagination and search error indicators with explicit retry action buttons, `HapticFeedback.lightImpact()`, and concise `Semantics(button: true, label: ...)` announcements while verifying all CJK characters exist in `app/test/fonts/subset-characters.txt`.

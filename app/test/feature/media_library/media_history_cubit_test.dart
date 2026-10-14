@@ -1,6 +1,6 @@
 import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -183,4 +183,42 @@ void main() {
       await cubit.close();
     },
   );
+
+  test('visible history updates when playback progress is saved', () async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+    final media = await db.videoDao.getVideoMedia('bilibili', 'v1');
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    await settle(cubit);
+
+    final key = (sourceId: 'bilibili', originalId: 'v1');
+    expect(cubit.state.progressByMedia[key], isNotNull);
+    expect(cubit.state.progressByMedia[key]!.progressSeconds, isNull);
+    expect(cubit.state.progressByMedia[key]!.completed, isFalse);
+
+    await db.mediaHistoryDao.saveProgress(
+      media!.$1.internalId,
+      42,
+      completed: true,
+    );
+    final updated = await cubit.stream
+        .firstWhere(
+          (state) =>
+              state.progressByMedia[key]?.progressSeconds == 42 &&
+              state.progressByMedia[key]?.completed == true,
+        )
+        .timeout(const Duration(seconds: 10));
+
+    expect(updated.items, hasLength(1));
+    expect(updated.items.single.video.id, 'v1');
+    expect(
+      updated.progressFor(updated.items.single),
+      const MediaHistoryProgress(progressSeconds: 42, completed: true),
+    );
+
+    await cubit.close();
+  });
 }

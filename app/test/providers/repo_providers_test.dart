@@ -1,6 +1,7 @@
 // ignore_for_file: use_primary_constructors, unnecessary_type_name_in_constructor
 
 import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
+import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/database/dao/media_history_dao.dart';
@@ -70,6 +71,7 @@ void main() {
           expectSync(resolve<PreferencesDataSource>(context), isNotNull);
           expectSync(resolve<UserDataRepository>(context), isNotNull);
           expectSync(resolve<RecentSearchQueryRepository>(context), isNotNull);
+          expectSync(resolve<LocalLibraryRepository>(context), isNotNull);
           expectSync(
             resolve<GetRecentSearchQueriesUseCase>(context),
             isNotNull,
@@ -190,7 +192,7 @@ void main() {
     tester,
   ) async {
     expect(
-      databaseProviders.length + preferencesProviders.length + 3,
+      databaseProviders.length + preferencesProviders.length + 4,
       repoProviders.length,
     );
   });

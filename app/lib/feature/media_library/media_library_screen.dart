@@ -11,11 +11,8 @@ import 'media_history_cubit.dart';
 
 /// 「我的」页（底部导航第三项）
 ///
-/// 当前只承载「观看历史」。设计稿上的收藏 / 下载两个分段不搬：仓内既无对应表也无
-/// DAO（`database/table/` 只有 media / video / article / post / creator_profile /
-/// media_history / recent_search_query），做出来是两个点开空的分段。设计稿上的
-/// 「批量管理」同样不搬——它绑定的是删除 / 移动操作，而历史表没有任何写接口，
-/// 留一个按下去没反应的工具条比不给更差。等 LIZ-30 落地本地库再一起补。
+/// 当前只承载「观看历史」。收藏、下载和批量管理由本地库的其他功能负责，
+/// 这里保持历史列表自身的分页、来源标识和导航行为。
 ///
 /// 列表用行式而非网格：历史的语义是「按时间回看」，每条都要看清标题、来源与
 /// 观看时间，行式一屏能放下条数更多；网格把每条压成小方块，时间信息挤在一行里。
@@ -191,16 +188,30 @@ class const _HistoryList({
   }
 }
 
-/// Content wrapper that selects items list specifically to isolate list row rebuilding.
+/// Content wrapper that selects list data to isolate list row rebuilding.
 class const _HistoryRowsContent({
   required final void Function(MediaHistoryItem item) onVideoTap,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final items = context.select<MediaHistoryCubit, List<MediaHistoryItem>>(
-      (cubit) => cubit.state.items,
+    final history = context
+        .select<
+          MediaHistoryCubit,
+          ({
+            List<MediaHistoryItem> items,
+            Map<MediaHistoryProgressKey, MediaHistoryProgress> progressByMedia,
+          })
+        >(
+          (cubit) => (
+            items: cubit.state.items,
+            progressByMedia: cubit.state.progressByMedia,
+          ),
+        );
+    return _HistoryRows(
+      items: history.items,
+      progressByMedia: history.progressByMedia,
+      onVideoTap: onVideoTap,
     );
-    return _HistoryRows(items: items, onVideoTap: onVideoTap);
   }
 }
 
@@ -210,6 +221,8 @@ class const _HistoryRowsContent({
 /// 而封顶后条目宽度仍跟着窗口走，分隔线与标题左边缘始终对齐。
 class const _HistoryRows({
   required final List<MediaHistoryItem> items,
+  required final Map<MediaHistoryProgressKey, MediaHistoryProgress>
+  progressByMedia,
   required final void Function(MediaHistoryItem item) onVideoTap,
 }) extends StatelessWidget {
   @override
@@ -244,6 +257,11 @@ class const _HistoryRows({
             final item = items[index];
             return _HistoryRow(
               item: item,
+              progress:
+                  progressByMedia[(
+                    sourceId: item.sourceId,
+                    originalId: item.video.id,
+                  )],
               thumbWidth: thumbWidth,
               sourceLabel: sourceNames[item.sourceId],
               onTap: () => onVideoTap(item),
@@ -258,6 +276,7 @@ class const _HistoryRows({
 /// 单条历史：左缩略图 + 右标题 / 来源 / 时间
 class const _HistoryRow({
   required final MediaHistoryItem item,
+  final MediaHistoryProgress? progress,
   required final double thumbWidth,
   required final VoidCallback onTap,
   final String? sourceLabel,
@@ -268,6 +287,11 @@ class const _HistoryRow({
     final video = item.video;
     final duration = VideoCard.formatDuration(video.duration);
     final viewedAtLabel = _formatViewedAt(item.viewedAt);
+    final progressLabel = _formatProgress(progress);
+    final progressSemantics = switch (progressLabel) {
+      final label? => [label],
+      _ => const <String>[],
+    };
 
     return Tooltip(
       message: video.title,
@@ -277,6 +301,7 @@ class const _HistoryRow({
           if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
           video.title,
           if (duration.isNotEmpty) '时长 $duration',
+          ...progressSemantics,
           '观看于 $viewedAtLabel',
         ].join('，'),
         excludeSemantics: true,
@@ -355,7 +380,7 @@ class const _HistoryRow({
                         ),
                         SizedBox(height: $styles.insets.xxs),
                         Text(
-                          _subtitle(video, viewedAtLabel),
+                          _subtitle(video, viewedAtLabel, progressLabel),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: $styles.text.bodySmall.copyWith(
@@ -390,18 +415,32 @@ class const _HistoryRow({
     child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
   );
 
-  /// 副标题：来源 · 观看时间
+  /// 副标题：来源 · 播放进度 · 观看时间
   ///
   /// 历史条目没有播放量（media 表无该列），播放量与上传时间都不适用于「回看」
-  /// 这个语境，因此只留来源与观看时间。
-  String _subtitle(VideoModel video, String viewedAt) {
+  /// 这个语境，因此只留来源、播放进度与观看时间。
+  String _subtitle(VideoModel video, String viewedAt, String? progressLabel) {
     final creator = video.creatorProfileName;
+    final progressParts = switch (progressLabel) {
+      final label? => [label],
+      _ => const <String>[],
+    };
     final parts = <String>[
       if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
       if (creator != null && creator.isNotEmpty) creator,
+      ...progressParts,
       viewedAt,
     ];
     return parts.join(' · ');
+  }
+
+  /// Formats saved progress without requiring a duration in the media cache.
+  static String? _formatProgress(MediaHistoryProgress? progress) {
+    if (progress == null) return null;
+    if (progress.completed) return '已看完';
+    final seconds = progress.progressSeconds;
+    final formatted = VideoCard.formatDuration(seconds);
+    return formatted.isEmpty ? null : '已观看 $formatted';
   }
 
   /// 观看时间的相对表述

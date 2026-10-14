@@ -3,10 +3,12 @@ import 'package:logging/logging.dart';
 
 import '../data/repository/recent_search_query/default_recent_search_query_repository.dart';
 import '../data/repository/recent_search_query/recent_search_query_repository.dart';
+import '../data/repository/local_library_repository.dart';
 import '../data/repository/user_data/default_user_data_repository.dart';
 import '../data/repository/user_data/user_data_repository.dart';
 import '../database/app_database.dart';
 import '../database/dao/media_history_dao.dart';
+import '../database/dao/local_library_dao.dart';
 import '../database/dao/recent_search_query_dao.dart';
 import '../datastore/preferences_data_source.dart';
 import '../domain/get_recent_search_queries_use_case.dart';
@@ -35,6 +37,9 @@ List<RepositoryProvider> get databaseProviders => [
   RepositoryProvider<MediaHistoryDao>(
     create: (context) => context.read<AppDatabase>().mediaHistoryDao,
   ),
+  RepositoryProvider<LocalLibraryDao>(
+    create: (context) => context.read<AppDatabase>().localLibraryDao,
+  ),
 ];
 
 List<RepositoryProvider> get preferencesProviders => [
@@ -54,6 +59,9 @@ List<RepositoryProvider> get repoProviders => [
     create: ((context) => DefaultRecentSearchQueryRepository(
       recentSearchQueryDao: context.read(),
     )),
+  ),
+  RepositoryProvider<LocalLibraryRepository>(
+    create: (context) => LocalLibraryRepository(dao: context.read()),
   ),
   RepositoryProvider<GetRecentSearchQueriesUseCase>(
     create: (context) => .new(recentSearchQueryRepository: context.read()),

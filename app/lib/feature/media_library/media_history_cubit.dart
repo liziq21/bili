@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:data/data.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 
 import '../../database/app_database.dart';
 import '../../database/dao/media_history_dao.dart';
@@ -14,19 +18,24 @@ part 'media_history_state.dart';
 /// `originalId` 在两个数据源下可以各存一行，用 id 索引的映射会让后载入的那条
 /// 覆盖前一条，点开就会跳到错的服务。
 ///
-/// [viewedAt] 是 `media_history.accessedAt`：播放器的观看进度写回属于 LIZ-28
-/// 第 3 项，尚未实现，该列目前只有写入没有更新，值恒为入库时刻。列表照样显示
-/// 它——它至少是这条记录入库的时间，不显示等于丢掉唯一可用的时间信息。
+/// [viewedAt] 是 `media_history.accessedAt`，而播放进度和完成状态由
+/// [MediaHistoryState.progressByMedia] 关联提供。
 typedef MediaHistoryItem = ({
   VideoModel video,
   String sourceId,
   DateTime viewedAt,
 });
 
+/// A source-scoped key for a history item's progress.
+typedef MediaHistoryProgressKey = ({String sourceId, String originalId});
+
 /// 观看历史加载器
 ///
-/// 历史表按 `accessedAt` 倒序，新观看会插到最前，因此**不去重**：同一视频看两次
-/// 会出现两条，这正是「历史」而非「收藏」的语义。
+/// Loads and watches the source-scoped local watch history.
+///
+/// The database keeps one history row per media item. Saving progress updates
+/// that row and its access time, so an item can move to the front without
+/// creating duplicate rows.
 class MediaHistoryCubit({
   required final MediaHistoryDao mediaHistoryDao,
   final int pageSize = 20,
@@ -39,6 +48,15 @@ class MediaHistoryCubit({
   }
 
   final MediaHistoryDao _mediaHistoryDao;
+
+  // The subscription is canceled by [_stopWatching] and [close].
+  // ignore: cancel_subscriptions
+  StreamSubscription<List<MediaHistoryWithMedia>>? _historySubscription;
+
+  /// Invalidates callbacks from a query that was replaced by a new window.
+  int _watchGeneration = 0;
+
+  bool _isClosing = false;
 
   /// 单页条数
   final int _pageSize;
@@ -59,9 +77,10 @@ class MediaHistoryCubit({
   Future<void> loadMore() async {
     // 已有请求在飞时不重复触发：用户连点「加载更多」会打出并发查询，
     // 后到的响应携带重复的 offset，列表出现重复条目。
-    if (state.isLoading) return;
+    if (_isClosing || state.isLoading) return;
     if (!state.hasMore) return;
     emit(state.copyWith(isLoading: true, clearError: true));
+    await _stopWatching();
     await _fetch(offset: _rowOffset, replace: false);
   }
 
@@ -71,8 +90,9 @@ class MediaHistoryCubit({
   /// 起点，因此单列一条路径，而不是给 [loadMore] 加布尔开关——两种 offset 基准
   /// 混在一个方法里最容易在边界上算错。
   Future<void> refresh() async {
-    if (state.isLoading) return;
+    if (_isClosing || state.isLoading) return;
     emit(state.copyWith(isLoading: true, clearError: true));
+    await _stopWatching();
     await _fetch(offset: 0, replace: true);
   }
 
@@ -81,6 +101,9 @@ class MediaHistoryCubit({
   /// [replace] 为 true 时用本页结果替换列表（刷新），否则追加（翻页）。
   Future<void> _fetch({required int offset, required bool replace}) async {
     final items = replace ? <MediaHistoryItem>[] : [...state.items];
+    final progressByMedia = replace
+        ? <MediaHistoryProgressKey, MediaHistoryProgress>{}
+        : {...state.progressByMedia};
     var cursor = offset;
     var hasMore = true;
 
@@ -95,39 +118,121 @@ class MediaHistoryCubit({
         // 用过滤后的长度判断会误判为「还有更多」而多翻一页空页。
         hasMore = rows.length == _pageSize;
 
-        var added = 0;
-        for (final row in rows) {
-          // 非视频条目（文章 / 动态）当前无展示位，跳过但照常计入 offset。
-          if (row.media.type != Media.typeVideo) continue;
-          items.add((
-            video: _toVideoModel(row.media),
-            sourceId: row.media.sourceId,
-            viewedAt: row.history.accessedAt,
-          ));
-          added++;
-        }
+        final pageData = _historyData(rows);
+        items.addAll(pageData.items);
+        progressByMedia.addAll(pageData.progressByMedia);
 
         // 整页都没有视频但还有下一页时继续翻：本页过滤后为空会让界面显示「还没有
         // 观看记录」，而翻页按钮在列表为空时是禁用的，视频就永远到不了。
-        if (added > 0 || !hasMore) break;
+        if (pageData.items.isNotEmpty || !hasMore) break;
       }
 
       _rowOffset = cursor;
-      if (isClosed) return;
-      emit(state.copyWith(isLoading: false, items: items, hasMore: hasMore));
+      if (_isClosing || isClosed) return;
+      emit(
+        state.copyWith(
+          isLoading: false,
+          items: items,
+          progressByMedia: progressByMedia,
+          hasMore: hasMore,
+        ),
+      );
+      await _watchVisibleHistory();
     } catch (e) {
       // cubit 已关闭时 emit 会抛 StateError，这个 catch 会把它吞掉、再抛一次，
       // 于是「页面已离开」这种正常收尾变成未捕获异常。
-      if (isClosed) return;
+      if (_isClosing || isClosed) return;
       emit(state.copyWith(isLoading: false, error: '$e'));
+      await _watchVisibleHistory();
     }
+  }
+
+  /// Starts a bounded stream for all consumed rows plus one pagination sentinel.
+  Future<void> _watchVisibleHistory() async {
+    if (_isClosing || isClosed) return;
+    final generation = ++_watchGeneration;
+    final limit = _rowOffset == 0 ? 1 : _rowOffset + 1;
+    _historySubscription = _mediaHistoryDao
+        .watchHistoryWithMedia(limit: limit)
+        .listen(
+          (rows) {
+            if (generation != _watchGeneration || _isClosing || isClosed) {
+              return;
+            }
+
+            // An initially empty history has no consumed rows to watch. A
+            // later insert therefore refreshes the first page once, after
+            // which the normal bounded window takes over.
+            if (_rowOffset == 0) {
+              if (rows.isNotEmpty && !state.isLoading) unawaited(refresh());
+              return;
+            }
+
+            final visibleRows = rows.take(_rowOffset);
+            final data = _historyData(visibleRows);
+            emit(
+              state.copyWith(
+                items: data.items,
+                progressByMedia: data.progressByMedia,
+                hasMore: rows.length > _rowOffset,
+              ),
+            );
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (generation != _watchGeneration || _isClosing || isClosed) {
+              return;
+            }
+            emit(state.copyWith(error: '$error'));
+          },
+        );
+  }
+
+  /// Stops the current bounded history stream before changing its offset.
+  Future<void> _stopWatching() async {
+    ++_watchGeneration;
+    final subscription = _historySubscription;
+    _historySubscription = null;
+    await subscription?.cancel();
+  }
+
+  ({
+    List<MediaHistoryItem> items,
+    Map<MediaHistoryProgressKey, MediaHistoryProgress> progressByMedia,
+  })
+  _historyData(Iterable<MediaHistoryWithMedia> rows) {
+    final items = <MediaHistoryItem>[];
+    final progressByMedia = <MediaHistoryProgressKey, MediaHistoryProgress>{};
+    for (final row in rows) {
+      // 非视频条目（文章 / 动态）当前无展示位，跳过但照常计入 offset。
+      if (row.media.type != Media.typeVideo) continue;
+      items.add((
+        video: _toVideoModel(row.media),
+        sourceId: row.media.sourceId,
+        viewedAt: row.history.accessedAt,
+      ));
+      progressByMedia[(
+        sourceId: row.media.sourceId,
+        originalId: row.media.originalId,
+      )] = MediaHistoryProgress(
+        progressSeconds: row.history.progressSeconds?.toInt(),
+        completed: row.history.completed,
+      );
+    }
+    return (items: items, progressByMedia: progressByMedia);
+  }
+
+  @override
+  Future<void> close() async {
+    _isClosing = true;
+    await _stopWatching();
+    await super.close();
   }
 
   /// 把媒体行转成视频模型
   ///
-  /// `viewCount` 与 `duration` 在 `media` 表里没有对应列，仓内也没有落库位置
-  ///（`media_history` 只记 `accessedAt`），因此留空而不是填 0：填 0 会让卡片
-  /// 副标题渲染出「0 播放」和「00:00」角标。
+  /// `viewCount` 与 `duration` 在 `media` 表里没有对应列，因此留空而不是填 0：
+  /// 填 0 会让卡片副标题渲染出「0 播放」和「00:00」角标。播放进度保留在
+  /// [MediaHistoryProgress] 中，不混入远端视频模型。
   static VideoModel _toVideoModel(MediaEntity media) => VideoModel(
     id: media.originalId,
     title: media.title,
