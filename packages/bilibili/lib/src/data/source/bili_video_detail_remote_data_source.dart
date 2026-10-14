@@ -78,6 +78,11 @@ final class BiliVideoDetailRemoteDataSource({
           )
           .toList();
 
+      final chapters = detailData.pages
+              ?.map((part) => VideoChapter.fromVideoPart(part))
+              .toList() ??
+          const [];
+
       final detail = VideoDetail(
         video: video,
         creator: creator,
@@ -88,6 +93,7 @@ final class BiliVideoDetailRemoteDataSource({
         isFavorited: relation?.favorite ?? false,
         isSubscribed: relation?.attention ?? false,
         relatedVideos: relatedVideos,
+        chapters: chapters,
       );
 
       return Result.ok(detail);

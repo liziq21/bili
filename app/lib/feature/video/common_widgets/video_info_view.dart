@@ -115,6 +115,8 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             const _ActionButtonsSection(),
             Divider(color: $styles.colors.outline.withValues(alpha: 0.2)),
             const _SynopsisSection(),
+            const _ChaptersSection(),
+            const _UpInfoSection(),
             Gap($styles.insets.md),
             const _RecommendationsHeader(),
             Gap($styles.insets.xs),
@@ -726,6 +728,206 @@ class _SynopsisSectionState()
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 章节/分 P 区：从 [VideoDetail.chapters] 动态渲染，支持点击跳转。
+class const _ChaptersSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final chapters = context.select<VideoBloc, List<VideoChapter>?>(
+      (bloc) => bloc.state.videoDetail?.chapters,
+    );
+    if (chapters == null || chapters.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final playbackController = context.read<MediaPlaybackController>();
+    return Container(
+      margin: EdgeInsets.only(top: $styles.insets.md),
+      padding: EdgeInsets.all($styles.insets.xs),
+      decoration: BoxDecoration(
+        color: $styles.colors.surface,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '章节',
+            style: $styles.text.bodyBold.copyWith(
+              color: $styles.colors.onSurfaceStrong,
+              fontSize: 13,
+            ),
+          ),
+          const Gap(8),
+          for (int i = 0; i < chapters.length; i++)
+            _ChapterItem(
+              chapter: chapters[i],
+              index: i + 1,
+              playbackController: playbackController,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class const _ChapterItem({
+  required final VideoChapter chapter,
+  required final int index,
+  required final MediaPlaybackController playbackController,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        final chapterStart = chapter.duration * (index - 1);
+        playbackController.seek(Duration(seconds: chapterStart));
+      },
+      borderRadius: BorderRadius.circular($styles.corners.sm),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: $styles.insets.xxs,
+          horizontal: $styles.insets.xs,
+        ),
+        child: Row(
+          children: [
+            Text(
+              'P$index',
+              style: $styles.text.bodySmallBold.copyWith(
+                color: $styles.colors.accentText,
+                fontSize: 12,
+              ),
+            ),
+            const Gap(8),
+            Expanded(
+              child: Text(
+                chapter.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onSurface,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            Text(
+              _formatDuration(chapter.duration),
+              style: $styles.text.bodySmall.copyWith(
+                color: $styles.colors.onSurfaceVariant,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// UP 主信息块：点击跳转频道页（接 LIZ-35 频道页）。
+class const _UpInfoSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final creatorData = context
+        .select<VideoBloc, ({CreatorProfile? creator, bool isSubscribed})?>((
+          bloc,
+        ) {
+          final detail = bloc.state.videoDetail;
+          if (detail == null) return null;
+          return (creator: detail.creator, isSubscribed: detail.isSubscribed);
+        });
+    if (creatorData == null || creatorData.creator == null) {
+      return const SizedBox.shrink();
+    }
+    final creator = creatorData.creator!;
+    return Container(
+      margin: EdgeInsets.only(top: $styles.insets.md),
+      padding: EdgeInsets.all($styles.insets.xs),
+      decoration: BoxDecoration(
+        color: $styles.colors.surface,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+        border: Border.all(
+          color: $styles.colors.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          // TODO: 跳转频道页 LIZ-35 - 需要 creator.id 路由参数
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('跳转 ${creator.name} 的频道页 (LIZ-35)'),
+              duration: $styles.times.fast,
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular($styles.corners.md),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  creator.thumbnailUrl != null && creator.thumbnailUrl!.isNotEmpty
+                  ? ResizeImage.resizeIfNeeded(
+                      128,
+                      128,
+                      CachedNetworkImageProvider(creator.thumbnailUrl!),
+                    )
+                  : null,
+              child:
+                  creator.thumbnailUrl == null || creator.thumbnailUrl!.isEmpty
+                  ? const Icon(Icons.person)
+                  : null,
+            ),
+            Gap($styles.insets.xs),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          creator.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: $styles.text.bodyBold.copyWith(
+                            color: $styles.colors.onSurfaceStrong,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      const Gap(4),
+                      Icon(
+                        Icons.verified,
+                        size: 14,
+                        color: $styles.colors.secondary,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '${_formatCount(creator.subscribers ?? 0)} 关注者',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.bodySmall.copyWith(
+                      color: $styles.colors.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: $styles.colors.onSurfaceVariant,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
