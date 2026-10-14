@@ -6,6 +6,11 @@ import '../table/media_history.dart';
 
 part 'media_history_dao.g.dart';
 
+typedef MediaHistoryWithMedia = ({
+  MediaHistoryEntity history,
+  MediaEntity media,
+});
+
 @DriftAccessor(tables: [Media, MediaHistory])
 class MediaHistoryDao(super.db)
     extends DatabaseAccessor<AppDatabase>
@@ -87,9 +92,26 @@ class MediaHistoryDao(super.db)
     return rows.first.progressSeconds?.toInt();
   }
 
-  // 获取带媒体信息的历史记录
-  Future<List<({MediaHistoryEntity history, MediaEntity media})>>
-  getHistoryWithMedia({int limit = 20, int offset = 0}) {
+  /// Gets the history rows joined with their media rows.
+  Future<List<MediaHistoryWithMedia>> getHistoryWithMedia({
+    int limit = 20,
+    int offset = 0,
+  }) => _historyWithMediaQuery(limit: limit, offset: offset).get();
+
+  /// Watches a bounded history window joined with its media rows.
+  ///
+  /// The caller can request one extra row as a pagination sentinel. Keeping
+  /// the query bounded lets a paginated screen react to progress saves without
+  /// turning the whole history table into an unbounded stream.
+  Stream<List<MediaHistoryWithMedia>> watchHistoryWithMedia({
+    int limit = 20,
+    int offset = 0,
+  }) => _historyWithMediaQuery(limit: limit, offset: offset).watch();
+
+  Selectable<MediaHistoryWithMedia> _historyWithMediaQuery({
+    required int limit,
+    required int offset,
+  }) {
     final query =
         select(mediaHistory).join([
             innerJoin(media, media.internalId.equalsExp(mediaHistory.mediaId)),
@@ -102,6 +124,6 @@ class MediaHistoryDao(super.db)
         history: row.readTable(mediaHistory),
         media: row.readTable(media),
       );
-    }).get();
+    });
   }
 }

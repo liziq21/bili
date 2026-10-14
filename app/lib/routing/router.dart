@@ -12,6 +12,7 @@ import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
+import '../feature/media_library/local_library_screen.dart';
 import '../feature/not_found/no_media_source_screen.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';
@@ -285,18 +286,24 @@ Widget _buildSearchEntry(BuildContext context) {
 
 /// 媒体资产分支
 Widget _buildLibrary(BuildContext context) {
-  return BlocProvider<MediaHistoryCubit>(
-    create: (context) => MediaHistoryCubit(mediaHistoryDao: context.read()),
-    // 回调必须在 provider 之下创建：它读的是承载列表与分页的那个 cubit，用 provider
-    // 之上的 context 去 read 会抛 ProviderNotFoundException。
-    child: Builder(
-      builder: (context) => MediaLibraryScreen(
-        onVideoTap: (item) => context.navigateToVideo(
-          item.video.id,
-          // 历史跨源存放，不带 source 会落到当前默认源，用错源的接口取详情会失败。
-          source: item.sourceId,
+  return LocalLibraryScreen(
+    history: BlocProvider<MediaHistoryCubit>(
+      create: (context) => MediaHistoryCubit(mediaHistoryDao: context.read()),
+      // 回调必须在 provider 之下创建：它读的是承载列表与分页的那个 cubit，用 provider
+      // 之上的 context 去 read 会抛 ProviderNotFoundException。
+      child: Builder(
+        builder: (context) => MediaLibraryScreen(
+          onVideoTap: (item) => context.navigateToVideo(
+            item.video.id,
+            // 历史跨源存放，不带 source 会落到当前默认源，用错源的接口取详情会失败。
+            source: item.sourceId,
+          ),
         ),
       ),
     ),
+    onVideoTap: (sourceId, videoId) =>
+        context.navigateToVideo(videoId, source: sourceId),
+    onCreatorTap: (sourceId, creatorId) =>
+        context.navigateToSpace(creatorId, source: sourceId),
   );
 }

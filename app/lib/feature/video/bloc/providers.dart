@@ -1,8 +1,10 @@
+import 'package:data/data.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/repository/video_comment_repository.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../data/repository/local_library_repository.dart';
 import 'video_bloc.dart';
 import 'video_comment_bloc.dart';
 
@@ -15,13 +17,20 @@ List<BlocProvider> getVideoBlocProviders(
   final detailRepo = customDetailRepo ?? context.read<VideoDetailRepository?>();
   final commentRepo =
       customCommentRepo ?? context.read<VideoCommentRepository?>();
+  final localLibraryRepository = context.read<LocalLibraryRepository?>();
+  final sourceId = context.read<MediaSource>().id;
 
   return [
     if (detailRepo != null)
       BlocProvider<VideoBloc>(
-        create: (_) => VideoBloc(repository: detailRepo)
-          ..add(LoadVideoDetail(videoId))
-          ..add(LoadMediaStream(videoId)),
+        create: (_) =>
+            VideoBloc(
+                repository: detailRepo,
+                localLibraryRepository: localLibraryRepository,
+                sourceId: sourceId,
+              )
+              ..add(LoadVideoDetail(videoId))
+              ..add(LoadMediaStream(videoId)),
       ),
     if (commentRepo != null)
       BlocProvider<VideoCommentBloc>(
