@@ -1,7 +1,9 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:material_ui/material_ui.dart';
 
+import '../../main.dart';
 import 'bloc/search_result_bloc.dart';
 
 class const SearchResult<T>({
@@ -24,39 +26,17 @@ class const SearchResult<T>({
           slivers: [
             PagedSliverGrid<int, T>(
               state: state,
-              fetchNextPage: () =>
-                  context.read<SearchResultBloc<T>>().add(FetchNextPage()),
+              fetchNextPage: () => context.read<SearchResultBloc<T>>().add(
+                const FetchNextPage(),
+              ),
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
-                firstPageErrorIndicatorBuilder: (context) {
-                  return const Center(child: Text('加载失败，请稍后重试'));
-                },
-                newPageErrorIndicatorBuilder: (context) {
-                  return const Center(child: Text('更多数据加载失败，请稍后重试'));
-                },
-                noItemsFoundIndicatorBuilder: (context) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off_rounded,
-                          size: 48,
-                          color: colorScheme.outline,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          '未找到内容',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                firstPageErrorIndicatorBuilder: (context) =>
+                    _SearchErrorView<T>(),
+                newPageErrorIndicatorBuilder: (context) =>
+                    _NewPageErrorIndicator<T>(),
+                noItemsFoundIndicatorBuilder: (context) =>
+                    const _EmptySearchIndicator(),
               ),
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: maxCrossAxisExtent,
@@ -69,6 +49,127 @@ class const SearchResult<T>({
           ],
         );
       },
+    );
+  }
+}
+
+/// 首页搜索失败视图：图标 + 提示文案 + 明确重试按钮 + 触觉反馈 + 屏幕阅读器语义
+class _SearchErrorView<T> extends StatelessWidget {
+  const _SearchErrorView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
+          SizedBox(height: $styles.insets.sm),
+          Text(
+            '加载失败，请稍后重试',
+            style: $styles.text.body.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: $styles.insets.xs),
+          Semantics(
+            button: true,
+            label: '加载失败，重试',
+            excludeSemantics: true,
+            child: TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                context.read<SearchResultBloc<T>>().add(const FetchNextPage());
+              },
+              child: const Text('重试'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 翻页加载失败视图：单行可点击重试区域 + 触觉反馈 + 屏幕阅读器语义
+class _NewPageErrorIndicator<T> extends StatelessWidget {
+  const _NewPageErrorIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.all($styles.insets.sm),
+      child: Center(
+        child: Semantics(
+          button: true,
+          label: '更多数据加载失败，重试',
+          excludeSemantics: true,
+          child: InkWell(
+            borderRadius: BorderRadius.circular($styles.corners.sm),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.read<SearchResultBloc<T>>().add(const FetchNextPage());
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: $styles.insets.sm,
+                vertical: $styles.insets.xs,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.refresh_rounded,
+                    size: 18,
+                    color: colorScheme.error,
+                  ),
+                  SizedBox(width: $styles.insets.xs),
+                  Text(
+                    '更多数据加载失败，重试',
+                    style: $styles.text.bodySmall.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 空搜索结果视图：图标 + 文字 + 屏幕阅读器整体语义
+class _EmptySearchIndicator extends StatelessWidget {
+  const _EmptySearchIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Semantics(
+        label: '未找到内容',
+        excludeSemantics: true,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: colorScheme.outline,
+            ),
+            SizedBox(height: $styles.insets.xs),
+            Text(
+              '未找到内容',
+              style: $styles.text.body.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
