@@ -99,6 +99,8 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: Sanitize and log routing exceptions in GoRouter.onException (#297)
 - fix(LIZ-24): validate iOS project configuration on Linux (#302)
 - 🛡️ Sentinel: Sanitize BV IDs and secure Bilibili watch URLs (#306)
+- fix(tool): keep changelog regeneration PRs out of CHANGELOG.md (#312)
+- fix(tool): narrow the changelog self-exclusion to the workflow branch (#314)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
