@@ -98,6 +98,7 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: Standardize and secure Bilibili media stream URLs (#292)
 - 🛡️ Sentinel: Sanitize and log routing exceptions in GoRouter.onException (#297)
 - fix(LIZ-24): validate iOS project configuration on Linux (#302)
+- 🛡️ Sentinel: Sanitize BV IDs and secure Bilibili watch URLs (#306)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -166,6 +167,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Localize search result tab labels and add haptic feedback (#293)
 - ⚡ Bolt: optimize AppScaffold MediaQuery rebuild boundary (#296)
 - 🎨 Palette: Enhance CreatorProfileItem metadata formatting, accessibility, and button haptics (#298)
+- 🎨 Palette: [UX improvement] Add retry action and semantics to search result error and empty states (#308)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -198,6 +200,7 @@ so hand edits do not survive; change the generator instead.
 - docs: add optimized Jules agent prompts (Sentinel/Bolt/Palette) (#263)
 - docs(bolt): log learning on cold-path indicator builder micro-optimizations (#264)
 - docs: add Linear-synced Issue triage for Jules (#300)
+- docs(LIZ-25): 从合并 PR 自动生成 CHANGELOG (#309)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
