@@ -39,7 +39,7 @@ final class BiliVideoDetailRemoteDataSource({
       final video = VideoModel(
         id: detailData.bvid,
         title: detailData.title,
-        url: 'https://www.bilibili.com/video/${detailData.bvid}',
+        url: buildBiliWatchUrl(detailData.bvid),
         thumbnailUrl: normalizeBiliUrl(detailData.pic),
         viewCount: detailData.stat?.view ?? 0,
         uploadDate: DateTime.fromMillisecondsSinceEpoch(
@@ -64,7 +64,7 @@ final class BiliVideoDetailRemoteDataSource({
             (item) => VideoModel(
               id: item.bvid,
               title: item.title ?? '',
-              url: 'https://www.bilibili.com/video/${item.bvid}',
+              url: buildBiliWatchUrl(item.bvid),
               thumbnailUrl: normalizeBiliUrl(item.pic),
               viewCount: item.stat?.view,
               uploadDate: item.pubdate != null

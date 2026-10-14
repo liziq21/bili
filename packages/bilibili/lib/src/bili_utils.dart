@@ -1,5 +1,9 @@
 import 'uri_extensions.dart';
 
+/// ASCII 控制字符，加上会把 BV id 从路径段里「放出去」的 URI 分隔符：
+/// `?` 起查询串、`#` 起片段、`/` 与 `\` 能把剩余部分挪到别的路径段或主机。
+final RegExp _unsafeBvidChars = RegExp(r'[\x00-\x1F\x7F?#/\\]');
+
 /// Standardizes and secures Bilibili media/asset URLs into valid HTTPS URLs.
 ///
 /// Handles scheme-relative (`//`), unencrypted (`http://`), already secure (`https://`),
@@ -9,6 +13,17 @@ String? normalizeBiliUrl(String? url) {
   if (url.startsWith('//')) return 'https:$url';
   if (url.startsWith('http://')) return 'https://${url.substring(7)}';
   return url;
+}
+
+/// Constructs a secure Bilibili video watch URL from a BV id.
+///
+/// Strips non-printable ASCII control characters and the URI delimiters
+/// (`?`, `#`, `/`, `\\`) and trims whitespace, so the id stays one path segment
+/// of `www.bilibili.com` whatever the upstream feed put in it.
+/// A well-formed BV id contains none of these, so valid ids are unaffected.
+String buildBiliWatchUrl(String bvid) {
+  final sanitizedBvid = bvid.replaceAll(_unsafeBvidChars, '').trim();
+  return 'https://www.bilibili.com/video/$sanitizedBvid';
 }
 
 class BiliUtils() {

@@ -51,6 +51,47 @@ void main() {
     });
   });
 
+  group('buildBiliWatchUrl tests', () {
+    test('builds valid watch URL for clean bvid', () {
+      expect(
+        buildBiliWatchUrl('BV1Deht6rEpZ'),
+        equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
+      );
+    });
+
+    test('strips control characters and whitespace from bvid', () {
+      expect(
+        buildBiliWatchUrl('  BV1Deht6rEpZ\r\n\x00 '),
+        equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
+      );
+    });
+
+    test(
+      'strips uri delimiters so the bvid cannot escape its path segment',
+      () {
+        expect(
+          buildBiliWatchUrl('BV1Deht6rEpZ?evil=1'),
+          equals('https://www.bilibili.com/video/BV1Deht6rEpZevil=1'),
+        );
+        expect(
+          buildBiliWatchUrl('BV1Deht6rEpZ#/../../evil'),
+          equals('https://www.bilibili.com/video/BV1Deht6rEpZ....evil'),
+        );
+      },
+    );
+
+    test(
+      'a sanitized watch url parses to a single path segment on the host',
+      () {
+        final uri = Uri.parse(buildBiliWatchUrl('BV1a?b#c/d\\e\r\n'));
+        expect(uri.host, 'www.bilibili.com');
+        expect(uri.query, isEmpty);
+        expect(uri.fragment, isEmpty);
+        expect(uri.pathSegments, ['video', 'BV1abcde']);
+      },
+    );
+  });
+
   group('Model DTO URL normalization tests', () {
     test(
       'NetworkVideoSearchResultX.asModel normalizes thumbnailUrl from fixture',
@@ -175,6 +216,17 @@ void main() {
       final model = video.asModel();
       expect(model.url, startsWith('https://'));
       expect(model.url, isNot(startsWith('https:https://')));
+    });
+
+    test('NetworkBiliPopularVideoX sanitizes bvid control chars', () {
+      final popularVideo = NetworkBiliPopularVideo(
+        aid: 12345,
+        bvid: '  BV1Deht6rEpZ\r\n\x00 ',
+        title: 'Popular Test',
+      );
+      final model = popularVideo.asModel();
+      final expected = 'https://www.bilibili.com/video/BV1Deht6rEpZ';
+      expect(model.url, expected);
     });
   });
 }

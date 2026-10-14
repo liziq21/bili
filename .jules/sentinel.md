@@ -119,3 +119,9 @@ Prevention: Always normalize video web URLs using `normalizeBiliUrl(arcurl)` and
 Vulnerability: `BiliMediaStreamRemoteDataSource` passed raw `playUrls` from Bilibili playurl API responses directly into `MediaStream` and `MediaSegment` objects without URL normalization, allowing scheme-relative (`//`) or cleartext (`http://`) media stream URLs to pass to the media player.
 Learning: Media streaming endpoints can return scheme-relative or cleartext HTTP play URLs. Passing un-normalized URLs directly to audio/video player components can trigger cleartext transport or network socket failures.
 Prevention: Normalize all DASH audio/video stream URLs and durl segment URLs with `normalizeBiliUrl` at the data source layer before returning `MediaStream` objects.
+
+## 2026-10-12 - Sanitize BV IDs and Secure Watch URLs in Bilibili Feed and Detail DTOs
+
+Vulnerability: Model mappers across Bilibili feed (`NetworkBiliPopularVideo`, `NetworkBiliRankingVideo`) and video detail (`BiliVideoDetailRemoteDataSource`) directly interpolated `bvid` strings into watch URLs (`https://www.bilibili.com/video/$bvid`) without sanitization, risking control-character injection (`\r\n`, `\x00`).
+Learning: Video identifiers obtained from external API feeds can contain non-printable control characters that propagate into URI consumers and web view / browser intent launchers if not sanitized at the DTO mapping boundary.
+Prevention: Standardize watch URL construction using a centralized utility (`buildBiliWatchUrl`) that strips ASCII control characters (`[\x00-\x1F\x7F]`) and whitespace from BV IDs.
