@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:model/model.dart';
 
 /// 假播放器：只实现手势层路径需要的方法。
 class _FakePlatformPlayer extends Fake implements PlatformPlayer {
