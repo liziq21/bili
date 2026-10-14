@@ -203,7 +203,8 @@ void main() {
         title: 'Popular Test',
       );
       final model = popularVideo.asModel();
-      expect(model.url, equals('https://www.bilibili.com/video/BV1Deht6rEpZ'));
+      final expected = 'https://www.bilibili.com/video/BV1Deht6rEpZ';
+      expect(model.url, expected);
     });
   });
 }
