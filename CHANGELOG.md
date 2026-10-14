@@ -201,6 +201,7 @@ so hand edits do not survive; change the generator instead.
 - docs(bolt): log learning on cold-path indicator builder micro-optimizations (#264)
 - docs: add Linear-synced Issue triage for Jules (#300)
 - docs(LIZ-25): 从合并 PR 自动生成 CHANGELOG (#309)
+- docs: regenerate CHANGELOG.md from merged pull requests (#310)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
