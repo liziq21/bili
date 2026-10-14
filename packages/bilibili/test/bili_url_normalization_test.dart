@@ -65,6 +65,31 @@ void main() {
         equals('https://www.bilibili.com/video/BV1Deht6rEpZ'),
       );
     });
+
+    test(
+      'strips uri delimiters so the bvid cannot escape its path segment',
+      () {
+        expect(
+          buildBiliWatchUrl('BV1Deht6rEpZ?evil=1'),
+          equals('https://www.bilibili.com/video/BV1Deht6rEpZevil=1'),
+        );
+        expect(
+          buildBiliWatchUrl('BV1Deht6rEpZ#/../../evil'),
+          equals('https://www.bilibili.com/video/BV1Deht6rEpZ....evil'),
+        );
+      },
+    );
+
+    test(
+      'a sanitized watch url parses to a single path segment on the host',
+      () {
+        final uri = Uri.parse(buildBiliWatchUrl('BV1a?b#c/d\\e\r\n'));
+        expect(uri.host, 'www.bilibili.com');
+        expect(uri.query, isEmpty);
+        expect(uri.fragment, isEmpty);
+        expect(uri.pathSegments, ['video', 'BV1abcde']);
+      },
+    );
   });
 
   group('Model DTO URL normalization tests', () {
