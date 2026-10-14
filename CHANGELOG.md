@@ -99,6 +99,7 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: Sanitize and log routing exceptions in GoRouter.onException (#297)
 - fix(LIZ-24): validate iOS project configuration on Linux (#302)
 - 🛡️ Sentinel: Sanitize BV IDs and secure Bilibili watch URLs (#306)
+- fix(tool): keep changelog regeneration PRs out of CHANGELOG.md (#312)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -209,7 +210,6 @@ so hand edits do not survive; change the generator instead.
 - test(app): 接入 Flutter 泄漏追踪开关并修图片缓存泄漏 (#115)
 - test(app): 修掉图片 handle 泄漏并更正泄漏追踪的实测结论 (#123)
 - test(golden): render real CJK glyphs instead of Ahem boxes (#139)
-- test(golden): re-record CI baselines from CI (#141)
 - test(app): add golden test for CreatorProfileItem (#155)
 - test(bpi): 文档护栏改为机器校验 (#247)
 - test(golden): 补齐四个零覆盖区域的 golden 基线 (#273)
