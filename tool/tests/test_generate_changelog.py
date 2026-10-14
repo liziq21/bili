@@ -355,6 +355,38 @@ class FetchMergedPullRequestsTest(unittest.TestCase):
             ],
         )
 
+    def test_changelog_regeneration_pull_requests_are_excluded(self):
+        # The workflow that writes CHANGELOG.md runs on every merge, so its own
+        # pull request would otherwise make the next regeneration list it again.
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(7, "2026-10-01T00:00:00Z"),
+                    _api_item(
+                        8,
+                        "2026-10-02T00:00:00Z",
+                        title="docs: regenerate CHANGELOG.md",
+                        labels=[{"name": "ci-generated"}],
+                    ),
+                ]
+            ]
+        )
+        self.assertEqual([r["number"] for r in records], [7])
+
+    def test_only_the_exact_excluded_label_is_dropped(self):
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(
+                        9,
+                        "2026-10-02T00:00:00Z",
+                        labels=[{"name": "ci-generated-docs"}],
+                    )
+                ]
+            ]
+        )
+        self.assertEqual([r["number"] for r in records], [9])
+
     def test_a_full_page_is_followed_by_the_next_one(self):
         full_page = [_api_item(n, "2026-10-01T00:00:00Z") for n in range(100, 200)]
         second_page = [_api_item(200, "2026-10-02T00:00:00Z")]

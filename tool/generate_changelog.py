@@ -51,6 +51,12 @@ SECTIONS: tuple[str, ...] = (
     "Other",
 )
 
+# Pull requests carrying these labels are left out of the document. The
+# changelog workflow runs on every merge to main, so a regenerated changelog
+# pull request is itself a merged pull request: listing it makes every merged
+# changelog pull request produce the next one, forever.
+EXCLUDED_LABELS: tuple[str, ...] = ("ci-generated",)
+
 # `c:` labels synced from Linear take precedence over the title heuristics.
 LABEL_SECTIONS: dict[str, str] = {
     "c: feature": "Added",
@@ -325,14 +331,16 @@ def fetch_merged_pull_requests(
                 continue
             if (item.get("base") or {}).get("ref") != base:
                 continue
+            labels = [
+                (label or {}).get("name", "") for label in item.get("labels") or []
+            ]
+            if any(name in EXCLUDED_LABELS for name in labels):
+                continue
             collected.append(
                 {
                     "number": item["number"],
                     "title": (item.get("title") or "").strip(),
-                    "labels": [
-                        (label or {}).get("name", "")
-                        for label in item.get("labels") or []
-                    ],
+                    "labels": labels,
                     "merged_at": parse_iso(merged_at),
                 }
             )
