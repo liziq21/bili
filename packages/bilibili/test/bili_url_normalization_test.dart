@@ -83,20 +83,17 @@ void main() {
       },
     );
 
-    test(
-      'NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture',
-      () {
-        final json = loadFake('search_live');
-        final data = json['data'] as Map<String, dynamic>;
-        final result = NetworkSearchResult.fromJson(data);
-        final liveUser = result.result.liveUser.first;
+    test('NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture', () {
+      final json = loadFake('search_live');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+      final liveUser = result.result.liveUser.first;
 
-        final model = liveUser.asModel();
-        expect(model.thumbnailUrl, isNotNull);
-        expect(model.thumbnailUrl, startsWith('https://'));
-        expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
-      },
-    );
+      final model = liveUser.asModel();
+      expect(model.thumbnailUrl, isNotNull);
+      expect(model.thumbnailUrl, startsWith('https://'));
+      expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
+    });
 
     test('NetworkVideoSearchResultX.asModel normalizes video url to https', () {
       final json = loadFake('search_video');
