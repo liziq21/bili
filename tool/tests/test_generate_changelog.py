@@ -11,10 +11,18 @@ Run from the repository root:
 
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
+import io
+import json
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
+import urllib.error
+import unittest.mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -247,6 +255,267 @@ class BuildDocumentTest(unittest.TestCase):
             gc.build_document(self.tags, pull_requests),
         )
 
+
+
+class _FakeResponse(io.BytesIO):
+    """Minimal stand-in for what `json.load` expects from urlopen."""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.close()
+        return False
+
+
+class _RecordingOpener:
+    """Serve queued pages and remember every request the generator made."""
+
+    def __init__(self, pages):
+        self.pages = list(pages)
+        self.requests: list[urllib.request.Request] = []
+
+    def __call__(self, request, *args, **kwargs):
+        self.requests.append(request)
+        index = len(self.requests) - 1
+        if index >= len(self.pages):
+            raise AssertionError(f"unexpected request #{index + 1}: {request.full_url}")
+        return _FakeResponse(json.dumps(self.pages[index]).encode("utf-8"))
+
+
+def _api_item(number, merged_at, base="main", title="feat: x", labels=None):
+    return {
+        "number": number,
+        "title": title,
+        "labels": labels if labels is not None else [],
+        "merged_at": merged_at,
+        "base": {"ref": base},
+    }
+
+
+class FetchMergedPullRequestsTest(unittest.TestCase):
+    """The GitHub reads: pagination, the closed/merged filter, field mapping.
+
+    Everything here is asserted on the returned records rather than on the raw
+    payloads, so a filter that silently drops a pull request shows up as a
+    missing record instead of a cosmetic difference.
+    """
+
+    def _fetch(self, pages, base="main", token="secret-token"):
+        opener = _RecordingOpener(pages)
+        with unittest.mock.patch.object(gc.urllib.request, "urlopen", opener):
+            records = gc.fetch_merged_pull_requests("liziq21/bili", token, base)
+        return records, opener
+
+    def test_closed_but_unmerged_pull_requests_are_dropped(self):
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(7, "2026-10-01T00:00:00Z"),
+                    # `state=closed` also returns PRs closed without merging.
+                    _api_item(8, None),
+                ]
+            ]
+        )
+        self.assertEqual([r["number"] for r in records], [7])
+
+    def test_pull_requests_targeting_another_base_are_dropped(self):
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(7, "2026-10-01T00:00:00Z"),
+                    _api_item(9, "2026-10-02T00:00:00Z", base="dev"),
+                ]
+            ]
+        )
+        self.assertEqual([r["number"] for r in records], [7])
+
+    def test_fields_are_mapped_and_titles_trimmed(self):
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(
+                        7,
+                        "2026-10-01T12:00:00Z",
+                        title="  feat: trimmed title  ",
+                        labels=[{"name": "c: feature"}, None, {}],
+                    )
+                ]
+            ]
+        )
+        self.assertEqual(
+            records,
+            [
+                {
+                    "number": 7,
+                    "title": "feat: trimmed title",
+                    "labels": ["c: feature", "", ""],
+                    "merged_at": dt.datetime(2026, 10, 1, 12, tzinfo=UTC),
+                }
+            ],
+        )
+
+    def test_a_full_page_is_followed_by_the_next_one(self):
+        full_page = [_api_item(n, "2026-10-01T00:00:00Z") for n in range(100, 200)]
+        second_page = [_api_item(200, "2026-10-02T00:00:00Z")]
+        records, opener = self._fetch([full_page, second_page])
+        self.assertEqual(len(records), 101)
+        self.assertEqual(len(opener.requests), 2)
+        self.assertIn("page=1", opener.requests[0].full_url)
+        self.assertIn("page=2", opener.requests[1].full_url)
+
+    def test_a_short_page_ends_the_pagination(self):
+        records, opener = self._fetch([[_api_item(7, "2026-10-01T00:00:00Z")]])
+        self.assertEqual(len(records), 1)
+        self.assertEqual(len(opener.requests), 1)
+
+    def test_an_empty_first_page_returns_nothing(self):
+        records, opener = self._fetch([[]])
+        self.assertEqual(records, [])
+        self.assertEqual(len(opener.requests), 1)
+
+    def test_request_carries_the_token_and_the_filters(self):
+        _, opener = self._fetch([[]], base="release")
+        request = opener.requests[0]
+        self.assertEqual(request.get_header("Authorization"), "Bearer secret-token")
+        self.assertEqual(request.get_header("Accept"), "application/vnd.github+json")
+        self.assertIn("state=closed", request.full_url)
+        self.assertIn("per_page=100", request.full_url)
+        self.assertIn("base=release", request.full_url)
+
+    def test_a_non_list_payload_is_fatal(self):
+        opener = _RecordingOpener([{"message": "Not Found"}])
+        with unittest.mock.patch.object(gc.urllib.request, "urlopen", opener):
+            with self.assertRaises(SystemExit):
+                gc.fetch_merged_pull_requests("liziq21/bili", "t")
+
+    def test_a_transport_error_is_fatal(self):
+        def boom(*args, **kwargs):
+            raise urllib.error.URLError("connection reset")
+
+        with unittest.mock.patch.object(gc.urllib.request, "urlopen", boom):
+            with self.assertRaises(SystemExit):
+                gc.fetch_merged_pull_requests("liziq21/bili", "t")
+
+
+class CollectTagsTest(unittest.TestCase):
+    """Tag names decide the release sections, so their order is load-bearing."""
+
+    @unittest.skipUnless(shutil.which("git"), "git is required for this test")
+    def test_tags_are_newest_first_by_version_with_commit_dates(self):
+        with tempfile.TemporaryDirectory() as repo:
+            def git(*args, date="2026-10-01T00:00:00Z"):
+                # The author date is deliberately a day behind the committer
+                # date so the assertions pin `%cI` rather than `%aI`.
+                author = (
+                    dt.datetime.fromisoformat(date.replace("Z", "+00:00"))
+                    - dt.timedelta(days=1)
+                ).isoformat()
+                env = {
+                    **os.environ,
+                    "GIT_AUTHOR_DATE": author,
+                    "GIT_COMMITTER_DATE": date,
+                }
+                subprocess.run(
+                    ["git", "-C", repo, *args],
+                    check=True,
+                    capture_output=True,
+                    env=env,
+                )
+
+            git("init", "-q")
+            git("config", "user.email", "test@example.com")
+            git("config", "user.name", "Test")
+            for index, (tag, date) in enumerate(
+                [("v0.1.0", "2026-10-01T00:00:00Z"),
+                 ("v0.2.0", "2026-10-02T00:00:00Z"),
+                 ("v0.10.0", "2026-10-03T00:00:00Z")]
+            ):
+                with open(os.path.join(repo, "file.txt"), "w", encoding="utf-8") as handle:
+                    handle.write(str(index))
+                git("add", "file.txt")
+                git("commit", "-q", "-m", f"commit {index}", date=date)
+                git("tag", tag)
+
+            tags = gc.collect_tags(repo)
+
+        # `-v:refname` sorts v0.10.0 above v0.2.0, which a lexical sort would not.
+        self.assertEqual([tag for tag, _ in tags], ["v0.10.0", "v0.2.0", "v0.1.0"])
+        self.assertEqual(
+            dict(tags),
+            {
+                "v0.10.0": dt.datetime(2026, 10, 3, tzinfo=UTC),
+                "v0.2.0": dt.datetime(2026, 10, 2, tzinfo=UTC),
+                "v0.1.0": dt.datetime(2026, 10, 1, tzinfo=UTC),
+            },
+        )
+
+
+class MainTest(unittest.TestCase):
+    """`main` owns the workflow contract: never rewrite an unchanged file."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = os.path.join(self.tmp.name, "CHANGELOG.md")
+
+    def _run(self, pull_requests, tags=()):
+        stdout = io.StringIO()
+        with unittest.mock.patch.object(gc, "fetch_merged_pull_requests", return_value=pull_requests):
+            with unittest.mock.patch.object(gc, "collect_tags", return_value=list(tags)):
+                with unittest.mock.patch.dict(os.environ, {"GH_TOKEN": "t"}):
+                    with contextlib.redirect_stdout(stdout):
+                        code = gc.main(
+                            [
+                                "--repo",
+                                "liziq21/bili",
+                                "--repo-root",
+                                self.tmp.name,
+                            ]
+                        )
+        return code, stdout.getvalue()
+
+    def test_first_run_writes_the_file(self):
+        code, output = self._run([pr(7, "feat: x", at(2026, 10, 1))])
+        self.assertEqual(code, 0)
+        self.assertIn("wrote CHANGELOG.md", output)
+        with open(self.path, encoding="utf-8") as handle:
+            self.assertIn("- feat: x (#7)", handle.read())
+
+    def test_an_unchanged_run_leaves_the_file_untouched(self):
+        pull_requests = [pr(7, "feat: x", at(2026, 10, 1))]
+        self._run(pull_requests)
+        before = gc.build_document([], pull_requests)
+        # A fixed old mtime makes the no-write check independent of how coarse
+        # the filesystem's timestamps are.
+        os.utime(self.path, (1_000_000, 1_000_000))
+
+        code, output = self._run(pull_requests)
+
+        self.assertEqual(code, 0)
+        self.assertIn("is up to date", output)
+        self.assertEqual(os.stat(self.path).st_mtime_ns, 1_000_000 * 10**9)
+        with open(self.path, encoding="utf-8") as handle:
+            self.assertEqual(handle.read(), before)
+
+    def test_a_new_pull_request_rewrites_the_file(self):
+        self._run([pr(7, "feat: x", at(2026, 10, 1))])
+        code, output = self._run(
+            [pr(7, "feat: x", at(2026, 10, 1)), pr(8, "fix: y", at(2026, 10, 2))]
+        )
+        self.assertEqual(code, 0)
+        self.assertIn("wrote CHANGELOG.md", output)
+        with open(self.path, encoding="utf-8") as handle:
+            content = handle.read()
+        self.assertIn("- feat: x (#7)", content)
+        self.assertIn("- fix: y (#8)", content)
+
+    def test_a_missing_token_fails_before_any_work(self):
+        with unittest.mock.patch.dict(os.environ, {}, clear=True):
+            with contextlib.redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(gc.main(["--repo", "liziq21/bili"]), 1)
+        self.assertIn("GH_TOKEN", stderr.getvalue())
+        self.assertFalse(os.path.exists(self.path))
 
 if __name__ == "__main__":
     unittest.main()
