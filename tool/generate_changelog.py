@@ -51,11 +51,14 @@ SECTIONS: tuple[str, ...] = (
     "Other",
 )
 
-# Pull requests carrying these labels are left out of the document. The
-# changelog workflow runs on every merge to main, so a regenerated changelog
-# pull request is itself a merged pull request: listing it makes every merged
-# changelog pull request produce the next one, forever.
-EXCLUDED_LABELS: tuple[str, ...] = ("ci-generated",)
+# The changelog workflow opens its pull request from this fixed branch, so
+# matching on the branch excludes exactly the workflow's own output: the
+# workflow runs on every merge, and its pull request is itself a merged pull
+# request, so listing it makes every merged changelog pull request produce
+# the next one, forever. Matching on the branch rather than on the
+# `ci-generated` label keeps the golden-baseline workflow's pull requests,
+# which carry the same label but are real history.
+GENERATED_BRANCH = "ci/changelog"
 
 # `c:` labels synced from Linear take precedence over the title heuristics.
 LABEL_SECTIONS: dict[str, str] = {
@@ -331,11 +334,11 @@ def fetch_merged_pull_requests(
                 continue
             if (item.get("base") or {}).get("ref") != base:
                 continue
+            if (item.get("head") or {}).get("ref") == GENERATED_BRANCH:
+                continue
             labels = [
                 (label or {}).get("name", "") for label in item.get("labels") or []
             ]
-            if any(name in EXCLUDED_LABELS for name in labels):
-                continue
             collected.append(
                 {
                     "number": item["number"],

@@ -283,13 +283,21 @@ class _RecordingOpener:
         return _FakeResponse(json.dumps(self.pages[index]).encode("utf-8"))
 
 
-def _api_item(number, merged_at, base="main", title="feat: x", labels=None):
+def _api_item(
+    number,
+    merged_at,
+    base="main",
+    title="feat: x",
+    labels=None,
+    head_ref="feature/branch",
+):
     return {
         "number": number,
         "title": title,
         "labels": labels if labels is not None else [],
         "merged_at": merged_at,
         "base": {"ref": base},
+        "head": {"ref": head_ref},
     }
 
 
@@ -355,7 +363,7 @@ class FetchMergedPullRequestsTest(unittest.TestCase):
             ],
         )
 
-    def test_changelog_regeneration_pull_requests_are_excluded(self):
+    def test_the_changelog_workflow_branch_is_excluded(self):
         # The workflow that writes CHANGELOG.md runs on every merge, so its own
         # pull request would otherwise make the next regeneration list it again.
         records, _ = self._fetch(
@@ -367,25 +375,45 @@ class FetchMergedPullRequestsTest(unittest.TestCase):
                         "2026-10-02T00:00:00Z",
                         title="docs: regenerate CHANGELOG.md",
                         labels=[{"name": "ci-generated"}],
+                        head_ref="ci/changelog",
                     ),
                 ]
             ]
         )
         self.assertEqual([r["number"] for r in records], [7])
 
-    def test_only_the_exact_excluded_label_is_dropped(self):
+    def test_other_ci_generated_pull_requests_stay_in_the_document(self):
+        # The golden-baseline workflow labels its pull requests the same way and
+        # re-recording a baseline is a real change, so only the changelog
+        # workflow's own branch is excluded.
         records, _ = self._fetch(
             [
                 [
                     _api_item(
                         9,
                         "2026-10-02T00:00:00Z",
-                        labels=[{"name": "ci-generated-docs"}],
+                        title="test(golden): re-record CI baselines from CI",
+                        labels=[{"name": "golden"}, {"name": "ci-generated"}],
+                        head_ref="ci/rerecord-goldens-36560934576",
                     )
                 ]
             ]
         )
         self.assertEqual([r["number"] for r in records], [9])
+
+    def test_only_the_exact_branch_is_excluded(self):
+        records, _ = self._fetch(
+            [
+                [
+                    _api_item(
+                        10,
+                        "2026-10-02T00:00:00Z",
+                        head_ref="ci/changelog-backfill",
+                    )
+                ]
+            ]
+        )
+        self.assertEqual([r["number"] for r in records], [10])
 
     def test_a_full_page_is_followed_by_the_next_one(self):
         full_page = [_api_item(n, "2026-10-01T00:00:00Z") for n in range(100, 200)]
