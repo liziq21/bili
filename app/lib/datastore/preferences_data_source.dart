@@ -144,6 +144,33 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     null,
   );
 
+  static const danmakuEnabled = PreferencesKey<bool>._('DANMAKU_ENABLED', true);
+  static const danmakuRegularDuration = PreferencesKey<double>._(
+    'DANMAKU_REGULAR_DURATION',
+    8,
+  );
+  static const danmakuTopBottomDuration = PreferencesKey<double>._(
+    'DANMAKU_TOP_BOTTOM_DURATION',
+    6,
+  );
+  static const danmakuOpacity = PreferencesKey<double>._('DANMAKU_OPACITY', .9);
+  static const danmakuFontSize = PreferencesKey<double>._(
+    'DANMAKU_FONT_SIZE',
+    18,
+  );
+  static const danmakuOutlineRadius = PreferencesKey<double>._(
+    'DANMAKU_OUTLINE_RADIUS',
+    2,
+  );
+  static const danmakuTopMaxRows = PreferencesKey<int>._(
+    'DANMAKU_TOP_MAX_ROWS',
+    2,
+  );
+  static const danmakuBottomMaxRows = PreferencesKey<int>._(
+    'DANMAKU_BOTTOM_MAX_ROWS',
+    2,
+  );
+
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which

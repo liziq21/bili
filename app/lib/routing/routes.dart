@@ -17,6 +17,8 @@ abstract final class Routes() {
   static const library = '/$libraryRelative';
   static const libraryRelative = 'library';
 
+  static const danmakuSettings = '/settings/danmaku';
+
   static const space = '/$spaceRelative';
   static const spaceRelative = 'space';
   static const video = '/$videoRelative';

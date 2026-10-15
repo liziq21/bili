@@ -191,6 +191,11 @@ const endpointSpecs = <EndpointSpec>[
     fixtures: ['player_v2.json'],
     docCell: 'player_v2.json',
   ),
+  EndpointSpec(
+    method: 'getDanmaku',
+    fixtures: ['danmaku.xml'],
+    docCell: 'danmaku.xml',
+  ),
 ];
 
 /// Matches an abstract method declaration such as
@@ -211,7 +216,7 @@ final RegExp _markdownSeparatorCell = RegExp(r'^:?-+:?$');
 /// A fixture name written straight into a `saveResponse` call, as the
 /// single-endpoint capture branches do.
 final RegExp _literalSaveResponse = RegExp(
-  r"saveResponse\(\s*'testing/([A-Za-z0-9_]+\.json)'",
+  r"save(?:Response|XmlResponse)\(\s*'testing/([A-Za-z0-9_]+\.(?:json|xml))'",
 );
 
 /// A fixture name used as a map key, as the search-type capture loop does:
@@ -367,7 +372,7 @@ List<String> _fixturesOnDisk() {
       .listSync()
       .whereType<File>()
       .map((file) => file.uri.pathSegments.last)
-      .where((name) => name.endsWith('.json'))
+      .where((name) => name.endsWith('.json') || name.endsWith('.xml'))
       .toList()
     ..sort();
 }

@@ -222,6 +222,8 @@ class FakeMediaSource({
   @override
   VideoDetailRemoteDataSource? get videoDetailDataSource => null;
   @override
+  DanmakuRemoteDataSource? get danmakuDataSource => null;
+  @override
   VideoCommentRemoteDataSource? get videoCommentDataSource => null;
   @override
   VideoCommentRepliesRemoteDataSource? get videoCommentRepliesDataSource =>

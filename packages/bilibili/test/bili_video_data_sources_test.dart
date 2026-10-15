@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bilibili/bilibili.dart';
 import 'package:bpi/bpi.dart';
+import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
@@ -14,6 +15,7 @@ class MockNetworkVideoDataSource({
   required final Map<String, dynamic> replyReplyListJson,
   this.playerInfoJson,
   this.playerInfoError,
+  final NetworkBiliDanmakuDocument? danmakuDocument,
 }) implements NetworkVideoDataSource {
   final replyReplyCalls = <(int, int, int, int)>[];
 
@@ -100,6 +102,13 @@ class MockNetworkVideoDataSource({
   }
 
   @override
+  Future<NetworkBiliDanmakuDocument> getDanmaku({required int cid}) async {
+    final document = danmakuDocument;
+    if (document == null) throw UnimplementedError();
+    return document;
+  }
+
+  @override
   Future<NetworkBangumiSeasonData> getBangumiSeason({
     int? seasonId,
     int? epId,
@@ -141,6 +150,7 @@ void main() {
     late MockNetworkVideoDataSource mockNetwork;
     late BiliVideoDetailRemoteDataSource detailDataSource;
     late BiliVideoCommentRemoteDataSource commentDataSource;
+    late BiliDanmakuRemoteDataSource danmakuDataSource;
 
     setUp(() {
       final detailJson = loadJson('video_detail.json');
@@ -156,12 +166,34 @@ void main() {
             (relatedJson as Map<String, dynamic>)['data'] as List<dynamic>,
         replyListJson: replyJson as Map<String, dynamic>,
         replyReplyListJson: replyReplyJson as Map<String, dynamic>,
+        danmakuDocument: const NetworkBiliDanmakuDocument(
+          chatServer: 'chat.bilibili.com',
+          chatId: 137646676,
+          mission: 0,
+          maxLimit: 500,
+          state: 0,
+          realName: 0,
+          comments: [
+            NetworkBiliDanmaku(
+              startSeconds: 1.5,
+              mode: 5,
+              fontSize: 25,
+              color: 0xFFFFFF,
+              sentAt: 1,
+              pool: 0,
+              userHash: 'hash',
+              rowId: 7,
+              content: '顶部弹幕',
+            ),
+          ],
+        ),
       );
 
       detailDataSource = BiliVideoDetailRemoteDataSource(network: mockNetwork);
       commentDataSource = BiliVideoCommentRemoteDataSource(
         network: mockNetwork,
       );
+      danmakuDataSource = BiliDanmakuRemoteDataSource(network: mockNetwork);
     });
 
     test(
@@ -238,6 +270,18 @@ void main() {
       expect(page.number, equals(1));
       expect(page.data, isNotEmpty);
       expect(page.data.first.authorName, isNotEmpty);
+    });
+
+    test('getDanmaku maps the XML DTO to neutral timed comments', () async {
+      final result = await danmakuDataSource.getDanmaku('BV1GJ411x7vy');
+
+      expect(result.isOk, isTrue);
+      final comments = (result as Ok<List<DanmakuComment>>).value;
+      expect(comments, hasLength(1));
+      expect(comments.single.startTime, const Duration(milliseconds: 1500));
+      expect(comments.single.mode, DanmakuMode.top);
+      expect(comments.single.colorArgb, 0xFFFFFFFF);
+      expect(comments.single.content, '顶部弹幕');
     });
 
     test('getVideoCommentReplies maps and paginates nested replies', () async {

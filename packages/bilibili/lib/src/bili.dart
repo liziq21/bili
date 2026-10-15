@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:http/http.dart';
 
 import 'data/source/bili_feed_remote_data_source.dart';
+import 'data/source/bili_danmaku_remote_data_source.dart';
 import 'data/source/bili_media_stream_remote_data_source.dart';
 import 'data/source/bili_popular_video_feed_remote_data_source.dart';
 import 'data/source/bili_ranking_video_feed_remote_data_source.dart';
@@ -83,6 +84,9 @@ class Bili() implements MediaSource {
   @override
   BiliVideoCommentRemoteDataSource get videoCommentRepliesDataSource =>
       .new(network: _videoApi);
+
+  @override
+  BiliDanmakuRemoteDataSource get danmakuDataSource => .new(network: _videoApi);
 
   @override
   BiliMediaStreamRemoteDataSource get mediaStreamDataSource =>

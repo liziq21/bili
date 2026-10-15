@@ -75,6 +75,16 @@ Future<void> main(List<String> args) async {
     print('Saved: $path (HTTP ${captured.response.statusCode})');
   }
 
+  void saveXmlResponse(String path, http.Response response) {
+    final file = File(path);
+    if (file.existsSync() && !force) {
+      print('Skipped (already exists, pass --force to overwrite): $path');
+      return;
+    }
+    file.writeAsBytesSync(_decodeResponseBody(response));
+    print('Saved: $path (HTTP ${response.statusCode})');
+  }
+
   bool shouldFetch(String path) => !File(path).existsSync() || force;
 
   void skipNote(String path) {
@@ -82,6 +92,37 @@ Future<void> main(List<String> args) async {
   }
 
   try {
+    if (Platform.environment['CAPTURE_DANMAKU_ONLY'] == '1') {
+      if (!shouldFetch('testing/danmaku.xml')) {
+        skipNote('testing/danmaku.xml');
+      } else {
+        const cid = 42164617674;
+        final response = await client.get(
+          Uri.parse('https://comment.bilibili.com/$cid.xml'),
+          headers: const {
+            'User-Agent': 'Mozilla/5.0',
+            'Referer': 'https://www.bilibili.com/',
+          },
+        );
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          throw HttpException('HTTP ${response.statusCode}');
+        }
+        try {
+          final document = NetworkBiliDanmakuDocument.fromXml(
+            utf8.decode(_decodeResponseBody(response)),
+          );
+          if (document.comments.isEmpty) {
+            throw const FormatException('response contains no danmaku items');
+          }
+        } on Object catch (error) {
+          throw FormatException('danmaku response is not usable: $error');
+        }
+        saveXmlResponse('testing/danmaku.xml', response);
+        print('Danmaku fixture fetched successfully.');
+      }
+      return;
+    }
+
     if (Platform.environment['CAPTURE_POPULAR_ONLY'] == '1') {
       final popular = await getJson(
         Uri.https('api.bilibili.com', '/x/web-interface/popular', {
@@ -522,6 +563,24 @@ Future<void> main(List<String> args) async {
     exitCode = 1;
   } finally {
     client.close();
+  }
+}
+
+List<int> _decodeResponseBody(http.Response response) {
+  final encoding = response.headers['content-encoding']?.toLowerCase();
+  return switch (encoding) {
+    'deflate' => _decodeDeflate(response.bodyBytes),
+    'gzip' => GZipCodec().decode(response.bodyBytes),
+    _ => response.bodyBytes,
+  };
+}
+
+List<int> _decodeDeflate(List<int> bytes) {
+  try {
+    return ZLibCodec().decode(bytes);
+  } on Object {
+    // Some CDN edges label a raw DEFLATE stream as `deflate`.
+    return ZLibCodec(raw: true).decode(bytes);
   }
 }
 

@@ -1,6 +1,7 @@
 import 'model/reply/network_reply_data.dart';
 import 'model/reply/network_reply_reply_data.dart';
 import 'model/video/network_bangumi_season.dart';
+import 'model/video/network_bili_danmaku.dart';
 import 'model/video/network_play_url.dart';
 import 'model/video/network_bili_player_info.dart';
 import 'model/video/network_related_video.dart';
@@ -51,4 +52,6 @@ abstract interface class NetworkVideoDataSource {
     required String bvid,
     required int cid,
   });
+
+  Future<NetworkBiliDanmakuDocument> getDanmaku({required int cid});
 }

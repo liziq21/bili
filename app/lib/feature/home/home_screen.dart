@@ -1,11 +1,13 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:data/data.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../../routing/routes.dart';
 import 'bloc/home_bloc.dart';
 import 'widgets/feed_status_view.dart';
 import 'widgets/home_filter_bar.dart';
@@ -67,8 +69,7 @@ class const HomeScreen({
                   tooltip: AppLocalizations.of(context)?.navSettings ?? '设置',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('设置开发中')));
+                    context.push(Routes.danmakuSettings);
                   },
                 ),
                 SizedBox(width: $styles.insets.xs),
