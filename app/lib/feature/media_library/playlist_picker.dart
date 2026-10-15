@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -102,18 +103,34 @@ class _LocalPlaylistPickerDialogState()
                       separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final playlist = playlists[index];
-                        return ListTile(
-                          enabled: !_isSaving,
-                          leading: const Icon(Icons.queue_music_outlined),
-                          title: Text(playlist.name),
-                          onTap: () => _appendTo(playlist),
+                        return Tooltip(
+                          message: '添加到 ${playlist.name}',
+                          child: Semantics(
+                            button: true,
+                            enabled: !_isSaving,
+                            label: '添加到播放列表 ${playlist.name}',
+                            child: ListTile(
+                              enabled: !_isSaving,
+                              leading: const Icon(Icons.queue_music_outlined),
+                              title: Text(playlist.name),
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                _appendTo(playlist);
+                              },
+                            ),
+                          ),
                         );
                       },
                     ),
                   ),
                 SizedBox(height: $styles.insets.xs),
                 OutlinedButton.icon(
-                  onPressed: _isSaving ? null : _createPlaylist,
+                  onPressed: _isSaving
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          _createPlaylist();
+                        },
                   icon: const Icon(Icons.add),
                   label: const Text('新建播放列表'),
                 ),
@@ -260,15 +277,27 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
         controller: _controller,
         autofocus: true,
         maxLength: 60,
-        decoration: const InputDecoration(labelText: '名称'),
-        onSubmitted: (_) => _submit(),
+        decoration: const InputDecoration(
+          labelText: '名称',
+          hintText: '请输入播放列表名称',
+        ),
+        onSubmitted: (_) {
+          HapticFeedback.lightImpact();
+          _submit();
+        },
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('取消'),
         ),
-        FilledButton(onPressed: _submit, child: const Text('创建')),
+        FilledButton(
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            _submit();
+          },
+          child: const Text('创建'),
+        ),
       ],
     );
   }

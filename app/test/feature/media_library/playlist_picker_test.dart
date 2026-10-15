@@ -155,6 +155,9 @@ void main() {
       await pumpDb(tester);
       expect(find.text('Watch later'), findsOneWidget);
 
+      expect(find.byTooltip('添加到 Watch later'), findsOneWidget);
+      expect(find.bySemanticsLabel('添加到播放列表 Watch later'), findsOneWidget);
+
       await tester.tap(find.text('Watch later'));
       await pumpDb(tester);
       expect(find.textContaining('添加失败'), findsOneWidget);
