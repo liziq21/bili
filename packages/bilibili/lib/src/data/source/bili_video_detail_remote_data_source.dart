@@ -78,7 +78,8 @@ final class BiliVideoDetailRemoteDataSource({
           )
           .toList();
 
-      final chapters = detailData.pages
+      final chapters =
+          detailData.pages
               ?.map((part) => VideoChapter.fromVideoPart(part))
               .toList() ??
           const [];

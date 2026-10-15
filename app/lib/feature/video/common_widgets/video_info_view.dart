@@ -871,7 +871,8 @@ class const _UpInfoSection() extends StatelessWidget {
             CircleAvatar(
               radius: 24,
               backgroundImage:
-                  creator.thumbnailUrl != null && creator.thumbnailUrl!.isNotEmpty
+                  creator.thumbnailUrl != null &&
+                      creator.thumbnailUrl!.isNotEmpty
                   ? ResizeImage.resizeIfNeeded(
                       128,
                       128,
