@@ -23,7 +23,11 @@ abstract interface class VideoDetailRepository() {
   ///
   /// [preferHeight] 为期望的画面高度，源按自身可用清晰度就近选取；为
   /// null 时由源取默认档。播放地址带签名时效，调用方取到即播。
-  Future<Result<MediaStream>> getMediaStream(String id, {int? preferHeight});
+  Future<Result<MediaStream>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  });
 }
 
 /// [VideoDetailRepository] 的默认应用实现
@@ -74,11 +78,13 @@ class AppVideoDetailRepository([
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     if (_mediaStreamDataSource != null) {
       return _mediaStreamDataSource.getMediaStream(
         id,
         preferHeight: preferHeight,
+        preferStreamId: preferStreamId,
       );
     }
     return Result.error(Exception('当前数据源不支持获取播放地址'));

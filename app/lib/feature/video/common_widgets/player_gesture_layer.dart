@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -32,6 +33,12 @@ class const PlayerGestureLayer({
   required final BrightnessService brightnessService,
   required final BoostRateController boost,
   final VoidCallback? onTap,
+
+  /// 鼠标双击画面时的回调（桌面端用来进出全屏）。
+  ///
+  /// 与触摸双击的快进/快退共用同一个识别器：手势竞技场分不出设备，这里按
+  /// 最近一次按下事件的指针类型，用于在同一个双击识别器里区分设备。
+  final VoidCallback? onDoubleTapScreen,
   required final Widget child,
 }) extends StatefulWidget {
   @override
@@ -58,6 +65,9 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
 
   /// 收起提示浮层的定时器。
   Timer? _skipHintTimer;
+
+  /// 最近一次按下的指针设备类型，用于区分触摸双击与鼠标双击。
+  PointerDeviceKind? _lastPointerKind;
 
   @override
   void initState() {
@@ -161,6 +171,12 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   /// 分界取画面中线，与垂直拖动的左右分区同一条线，避免同一手势里出现两套
   /// 空间约定。时长未知（尚未打开媒体）时只给提示不 seek。
   void _onDoubleTapDown(TapDownDetails details) {
+    if (_lastPointerKind == PointerDeviceKind.mouse) {
+      widget.onDoubleTapScreen?.call();
+      return;
+    }
+    // 鼠标双击交回外部（桌面端全屏），触摸双击才做左右半屏快进快退。
+
     final width = context.size?.width ?? 1;
     final forward = details.localPosition.dx >= width / 2;
     final delta = forward ? kDoubleTapSeekDelta : -kDoubleTapSeekDelta;
@@ -210,19 +226,22 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
         return Stack(
           children: [
             Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onHorizontalDragStart: _onHorizontalDragStart,
-                onHorizontalDragUpdate: _onHorizontalDragUpdate,
-                onHorizontalDragEnd: _onHorizontalDragEnd,
-                onVerticalDragStart: _onVerticalDragStart,
-                onVerticalDragUpdate: _onVerticalDragUpdate,
-                onVerticalDragEnd: _onVerticalDragEnd,
-                onTap: widget.onTap,
-                onLongPress: widget.boost.onLongPress,
-                onLongPressEnd: (_) => widget.boost.onLongPressEnd(),
-                onDoubleTapDown: _onDoubleTapDown,
-                child: widget.child,
+              child: Listener(
+                onPointerDown: (event) => _lastPointerKind = event.kind,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragStart: _onHorizontalDragStart,
+                  onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                  onHorizontalDragEnd: _onHorizontalDragEnd,
+                  onVerticalDragStart: _onVerticalDragStart,
+                  onVerticalDragUpdate: _onVerticalDragUpdate,
+                  onVerticalDragEnd: _onVerticalDragEnd,
+                  onTap: widget.onTap,
+                  onLongPress: widget.boost.onLongPress,
+                  onLongPressEnd: (_) => widget.boost.onLongPressEnd(),
+                  onDoubleTapDown: _onDoubleTapDown,
+                  child: widget.child,
+                ),
               ),
             ),
             if (_seekTarget != null)

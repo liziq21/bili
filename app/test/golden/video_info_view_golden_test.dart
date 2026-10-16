@@ -34,6 +34,7 @@ class const _DetailRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async => Result.error(Exception('golden unused'));
 }
 
@@ -110,6 +111,7 @@ class const _NoCreatorRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async => Result.error(Exception('golden unused'));
 }
 

@@ -22,6 +22,7 @@ class FakeMediaStreamRemoteDataSource() extends MediaStreamRemoteDataSource {
   Future<Result<MediaStream>> getMediaStream(
     String videoId, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     requests.add((videoId, preferHeight));
     if (failNext) {

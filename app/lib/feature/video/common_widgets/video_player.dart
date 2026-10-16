@@ -14,6 +14,7 @@ import '../../../datastore/preferences_data_source.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
+import 'player_keyboard_shortcuts.dart';
 import 'quality_picker_chip.dart';
 import 'sleep_timer_chip.dart';
 import '../danmaku/danmaku_overlay.dart';
@@ -385,41 +386,67 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
 
   /// 套用上次记住的默认画质。
   ///
-  /// 只在记住的高度与当前流不同时重新解析一次；流已在该高度时什么也不做。
+  /// 整档记忆：先读源侧清晰度 id 精确匹配，id 缺失或源里已不存在该档时退回
+  /// 记住的高度。当前流已是目标档时什么也不做，不重复解析。
   /// 无 PreferencesDataSource / VideoDetailRepository 注入时跳过。
   Future<void> _applyPreferredQuality() async {
     try {
-      final result = await context.read<PreferencesDataSource>().get(
+      final preferences = context.read<PreferencesDataSource>();
+      int? preferredHeight;
+      int? preferredStreamId;
+      final heightResult = await preferences.get(
         PreferencesKey.preferredQualityHeight,
       );
       if (!mounted) return;
-      switch (result) {
+      switch (heightResult) {
         case Ok(:final value):
-          final preferredHeight = value;
-          if (preferredHeight == null) return;
-          if (preferredHeight == widget.stream.height) return;
-          final videoId = context.read<VideoBloc>().state.videoDetail?.video.id;
-          if (videoId == null) return;
-          final repository = context.read<VideoDetailRepository>();
-          unawaited(
-            repository
-                .getMediaStream(videoId, preferHeight: preferredHeight)
-                .then((result) {
-                  if (!mounted) return;
-                  switch (result) {
-                    case Ok(:final value):
-                      widget.controller.restorePositionSeconds =
-                          widget.controller.state.position.inSeconds;
-                      unawaited(widget.controller.open(value));
-                      context.read<VideoBloc>().add(MediaStreamChanged(value));
-                    case Error():
-                      break;
-                  }
-                }),
-          );
+          preferredHeight = value;
         case Error():
           break;
       }
+      final streamIdResult = await preferences.get(
+        PreferencesKey.preferredQualityStreamId,
+      );
+      if (!mounted) return;
+      switch (streamIdResult) {
+        case Ok(:final value):
+          preferredStreamId = value;
+        case Error():
+          break;
+      }
+      if (preferredHeight == null && preferredStreamId == null) return;
+      // 当前已在目标档：id 相同即同一档，缺 id 时退回按高度比。
+      if (preferredStreamId != null &&
+          widget.stream.streamId == preferredStreamId) {
+        return;
+      }
+      if (preferredStreamId == null &&
+          preferredHeight == widget.stream.height) {
+        return;
+      }
+      final videoId = context.read<VideoBloc>().state.videoDetail?.video.id;
+      if (videoId == null) return;
+      final repository = context.read<VideoDetailRepository>();
+      unawaited(
+        repository
+            .getMediaStream(
+              videoId,
+              preferHeight: preferredHeight,
+              preferStreamId: preferredStreamId,
+            )
+            .then((result) {
+              if (!mounted) return;
+              switch (result) {
+                case Ok(:final value):
+                  widget.controller.restorePositionSeconds =
+                      widget.controller.state.position.inSeconds;
+                  unawaited(widget.controller.open(value));
+                  context.read<VideoBloc>().add(MediaStreamChanged(value));
+                case Error():
+                  break;
+              }
+            }),
+      );
     } catch (_) {}
   }
 
@@ -454,9 +481,14 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             brightnessService: _brightnessService,
             boost: _boost,
             onTap: widget.fullscreen ? widget.onTapSurface : null,
-            child:
-                widget.surfaceBuilder?.call(widget.controller) ??
-                Video(controller: widget.controller.videoController),
+            onDoubleTapScreen: widget.onToggleFullscreen,
+            child: PlayerKeyboardShortcuts(
+              controller: widget.controller,
+              onToggleFullscreen: widget.onToggleFullscreen,
+              child:
+                  widget.surfaceBuilder?.call(widget.controller) ??
+                  Video(controller: widget.controller.videoController),
+            ),
           ),
         ),
         if (videoId != null)

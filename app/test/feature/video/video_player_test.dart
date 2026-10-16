@@ -372,6 +372,7 @@ class _NoStreamRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     return Completer<Result<MediaStream>>().future;
   }
@@ -538,6 +539,7 @@ class _HangingStreamRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     return Completer<Result<MediaStream>>().future;
   }
@@ -566,6 +568,7 @@ class _FailingStreamRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async => Result.error(Exception('签名过期'));
 }
 
@@ -593,6 +596,7 @@ class _ReadyStreamRepository() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async => Result.ok(
     MediaStream(
       videoUrl: 'https://example.com/v.m4s',

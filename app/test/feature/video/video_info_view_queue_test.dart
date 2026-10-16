@@ -202,6 +202,7 @@ class _QueueTestRepository implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     return streamResult;
   }

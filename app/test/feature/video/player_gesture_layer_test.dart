@@ -5,6 +5,7 @@ import 'package:app/feature/video/common_widgets/player_gesture_layer.dart';
 import 'package:app/feature/video/player/brightness_service.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -282,6 +283,46 @@ void main() {
       // 起点位置 30s，双击快退 10s。
       expect(fake.seekCalls, contains(const Duration(seconds: 20)));
     });
+    testWidgets(
+      'mouse double tap goes to the screen callback instead of seeking',
+      (tester) async {
+        await pumpLayer(tester);
+        var screenTaps = 0;
+        // 重建一层带鼠标回调的手势层。
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 200,
+                height: 100,
+                child: PlayerGestureLayer(
+                  controller: controller,
+                  brightnessService: BrightnessService(),
+                  boost: boost,
+                  onDoubleTapScreen: () => screenTaps++,
+                  child: const ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox.expand(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final pointer = TestPointer(7, PointerDeviceKind.mouse);
+        tester.binding.handlePointerEvent(pointer.down(const Offset(150, 50)));
+        tester.binding.handlePointerEvent(pointer.up());
+        await tester.pump(const Duration(milliseconds: 50));
+        tester.binding.handlePointerEvent(pointer.down(const Offset(150, 50)));
+        tester.binding.handlePointerEvent(pointer.up());
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(screenTaps, 1);
+        expect(fake.seekCalls, isEmpty);
+      },
+    );
     testWidgets('double tap exactly on the middle line seeks forward', (
       tester,
     ) async {
