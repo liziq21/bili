@@ -1129,6 +1129,22 @@
   "@sleepTimerCancel": {
     "description": "Cancel the running sleep timer"
   },
+  "sleepTimerActionNowLabel": "到时暂停",
+  "@sleepTimerActionNowLabel": {
+    "description": "Sleep timer group heading for pausing as soon as the countdown ends"
+  },
+  "sleepTimerAfterCurrentTitle": "播完本条即停",
+  "@sleepTimerAfterCurrentTitle": {
+    "description": "Sleep timer group heading for stopping after the current item finishes"
+  },
+  "sleepTimerAfterCurrentOptionSuffix": "（播完本条）",
+  "@sleepTimerAfterCurrentOptionSuffix": {
+    "description": "Suffix appended to sleep timer durations in the stop-after-current group so the two groups are not textually identical"
+  },
+  "sleepTimerAfterCurrentPending": "播完本条",
+  "@sleepTimerAfterCurrentPending": {
+    "description": "Sleep timer chip label while the countdown has ended and the stop is waiting for the current item to finish"
+  },
   "qualityPickerTitle": "画质选择",
   "@qualityPickerTitle": {
     "description": "Quality picker title"

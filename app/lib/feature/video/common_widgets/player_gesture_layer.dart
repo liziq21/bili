@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,11 +20,18 @@ import 'playback_speed_chip.dart';
 /// - 右半侧垂直拖动：音量，向下拉减小
 /// - 左半侧垂直拖动：屏幕亮度（经 [BrightnessService]），向下拉减小
 /// - 长按：临时 2x，由 [BoostRateController] 承载
+/// - 双击：右半屏快进、左半屏快退，步长 [kDoubleTapSeekDelta]
+/// - 单击：交给 [onTap]（全屏下用来唤出 / 收起控制层），为 null 时不注册
+
+/// 双击快进 / 快退的步长。
+const Duration kDoubleTapSeekDelta = Duration(seconds: 10);
+
 class const PlayerGestureLayer({
   super.key,
   required final MediaPlaybackController controller,
   required final BrightnessService brightnessService,
   required final BoostRateController boost,
+  final VoidCallback? onTap,
   required final Widget child,
 }) extends StatefulWidget {
   @override
@@ -43,6 +52,12 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
 
   /// 上次读到的窗口亮度，拖动起点。
   double _brightness = 0.5;
+
+  /// 双击后的快进 / 快退提示增量，非 null 时渲染浮层。
+  Duration? _skipHint;
+
+  /// 收起提示浮层的定时器。
+  Timer? _skipHintTimer;
 
   @override
   void initState() {
@@ -141,13 +156,51 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
     setState(() => _vertical = null);
   }
 
+  /// 双击：右半屏快进、左半屏快退。
+  ///
+  /// 分界取画面中线，与垂直拖动的左右分区同一条线，避免同一手势里出现两套
+  /// 空间约定。时长未知（尚未打开媒体）时只给提示不 seek。
+  void _onDoubleTapDown(TapDownDetails details) {
+    final width = context.size?.width ?? 1;
+    final forward = details.localPosition.dx >= width / 2;
+    final delta = forward ? kDoubleTapSeekDelta : -kDoubleTapSeekDelta;
+    final state = widget.controller.state;
+    final duration = state.duration;
+    if (duration > Duration.zero) {
+      final targetMs = (state.position.inMilliseconds + delta.inMilliseconds)
+          .clamp(0, duration.inMilliseconds)
+          .toInt();
+      widget.controller.seek(Duration(milliseconds: targetMs));
+    }
+    HapticFeedback.mediumImpact();
+    _showSkipHint(delta);
+  }
+
+  /// 浮层只闪一下，不阻塞后续手势。
+  void _showSkipHint(Duration delta) {
+    _skipHintTimer?.cancel();
+    setState(() => _skipHint = delta);
+    _skipHintTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      setState(() => _skipHint = null);
+    });
+  }
+
+  @override
+  void dispose() {
+    _skipHintTimer?.cancel();
+    super.dispose();
+  }
+
   /// 暴露给 widget 测试直接驱动：不经过手势竞技场也能验证状态机。
   PlayerGestureHandlers get gestureHandlers => PlayerGestureHandlers(
+    onHorizontalDragStart: _onHorizontalDragStart,
     onHorizontalDragUpdate: _onHorizontalDragUpdate,
     onHorizontalDragEnd: _onHorizontalDragEnd,
     onVerticalDragStart: _onVerticalDragStart,
     onVerticalDragUpdate: _onVerticalDragUpdate,
     onVerticalDragEnd: _onVerticalDragEnd,
+    onDoubleTapDown: _onDoubleTapDown,
   );
 
   @override
@@ -165,8 +218,10 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
                 onVerticalDragStart: _onVerticalDragStart,
                 onVerticalDragUpdate: _onVerticalDragUpdate,
                 onVerticalDragEnd: _onVerticalDragEnd,
+                onTap: widget.onTap,
                 onLongPress: widget.boost.onLongPress,
                 onLongPressEnd: (_) => widget.boost.onLongPressEnd(),
+                onDoubleTapDown: _onDoubleTapDown,
                 child: widget.child,
               ),
             ),
@@ -180,6 +235,8 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
               ),
             if (_vertical != null)
               Positioned.fill(child: _VerticalIndicator(vertical: _vertical!)),
+            if (_skipHint != null)
+              Positioned.fill(child: _SkipHint(delta: _skipHint!)),
           ],
         );
       },
@@ -301,12 +358,43 @@ class const _VerticalIndicator({required final _VerticalDrag vertical})
   }
 }
 
+/// 双击快进 / 快退的瞬时提示。
+class const _SkipHint({required final Duration delta}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final forward = delta.inMilliseconds > 0;
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: $styles.colors.scrim.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              forward ? Icons.forward_10 : Icons.replay_10,
+              color: $styles.colors.onScrim,
+              size: 28,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// 手势回调集合，供 widget 测试直接驱动。
 class const PlayerGestureHandlers({
+  required final void Function(DragStartDetails details) onHorizontalDragStart,
   required final void Function(DragUpdateDetails details)
   onHorizontalDragUpdate,
   required final void Function(DragEndDetails details) onHorizontalDragEnd,
   required final void Function(DragStartDetails details) onVerticalDragStart,
   required final void Function(DragUpdateDetails details) onVerticalDragUpdate,
   required final void Function(DragEndDetails details) onVerticalDragEnd,
+  required final void Function(TapDownDetails details) onDoubleTapDown,
+  final VoidCallback? onTap,
 });

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -156,11 +157,9 @@ class VideoScreenState extends State<VideoScreen> {
         addVideoToQueue: addVideoToQueue,
         child: Scaffold(
           backgroundColor: $styles.colors.surface,
-          body: SafeArea(
-            child: _VideoContent(
-              videoId: widget.videoId,
-              playbackController: controller,
-            ),
+          body: _VideoContent(
+            videoId: widget.videoId,
+            playbackController: controller,
           ),
         ),
       ),
@@ -187,7 +186,54 @@ class VideoScreenState extends State<VideoScreen> {
 class const _VideoContent({
   required final String videoId,
   required final MediaPlaybackController playbackController,
-}) extends StatelessWidget {
+}) extends StatefulWidget {
+  @override
+  State<_VideoContent> createState() => _VideoContentState();
+}
+
+/// 视频页布局：内嵌态播放器在上、信息区在下；全屏时播放器铺满整屏。
+///
+/// 全屏状态放在页面而非播放器组件里：铺满要求父级把播放器放进 [Expanded]，
+/// 而横屏与系统 UI 切换也是页面级副作用，两者都越不出页面这一层。
+class _VideoContentState extends State<_VideoContent> {
+  bool _fullscreen = false;
+
+  /// 进入 / 退出全屏：横屏 + 沉浸系统 UI，退出恢复竖屏与边缘到边缘。
+  Future<void> _toggleFullscreen() async {
+    setState(() => _fullscreen = !_fullscreen);
+    if (_fullscreen) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      await _restorePortrait();
+    }
+  }
+
+  /// 最小化：退出全屏并暂停，播放位置保留，再次进入可续播。
+  ///
+  /// 这里只做到「收起 + 暂停」。真正的跨路由小窗需要把播放会话提升到应用级，
+  /// 属独立范围，不在本页伪装实现。
+  void _minimize() {
+    if (_fullscreen) unawaited(_restorePortrait());
+    if (mounted) setState(() => _fullscreen = false);
+    unawaited(widget.playbackController.pause());
+  }
+
+  Future<void> _restorePortrait() async {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
+
+  @override
+  void dispose() {
+    // 带着横屏设置离开会把整个应用留在横屏，离开时必须还原。
+    if (_fullscreen) unawaited(_restorePortrait());
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
@@ -202,16 +248,27 @@ class const _VideoContent({
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower
     // layout tree (DefaultTabController, TabBar, TabBarView, VideoCommentsView).
     // Saves ~2-4ms per frame emission during video detail state changes.
-    return Column(
+    final player = VideoPlayer(
+      controller: widget.playbackController,
+      fullscreen: _fullscreen,
+      onToggleFullscreen: _toggleFullscreen,
+      onMinimize: _minimize,
+    );
+    final content = Column(
       children: [
-        VideoPlayer(controller: playbackController),
-        Expanded(
-          child: useTwoColumnLayout
-              ? _buildTwoColumnLayout()
-              : _buildNarrowTabContainer(),
-        ),
+        // 全屏时播放器铺满整屏，信息区一并收起。
+        if (_fullscreen) Expanded(child: player) else player,
+        if (!_fullscreen)
+          Expanded(
+            child: useTwoColumnLayout
+                ? _buildTwoColumnLayout()
+                : _buildNarrowTabContainer(),
+          ),
       ],
     );
+    // 全屏走沉浸模式，不套 SafeArea：系统栏 inset 会在画面四周压出一圈边。
+    if (_fullscreen) return content;
+    return SafeArea(child: content);
   }
 
   Widget _buildTwoColumnLayout() {

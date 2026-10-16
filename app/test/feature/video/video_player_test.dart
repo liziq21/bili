@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_player.dart';
+import 'package:app/feature/video/common_widgets/player_gesture_layer.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -169,6 +170,181 @@ void main() {
       expect(fake.openCalls, hasLength(2));
 
       addTearDown(controller.dispose);
+    });
+  });
+
+  group('fullscreen layout', () {
+    /// 把播放器放进固定尺寸的盒子，便于断言铺满与 16:9 内嵌的差别。
+    Future<void> pumpSurface(
+      WidgetTester tester, {
+      required VideoBloc bloc,
+      required MediaPlaybackController controller,
+      required bool fullscreen,
+      Size size = const Size(400, 400),
+      VoidCallback? onToggleFullscreen,
+      VoidCallback? onMinimize,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: bloc,
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: VideoPlayer(
+                  controller: controller,
+                  fullscreen: fullscreen,
+                  onToggleFullscreen: onToggleFullscreen,
+                  onMinimize: onMinimize,
+                  // 原生 Video 会让 widget 测试挂住，换成纯 Flutter 画面。
+                  surfaceBuilder: (_) =>
+                      const ColoredBox(color: Color(0xFF000000)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      // bloc 构造不自动加载，与既有用例一致地显式派发解析事件。
+      bloc.add(const LoadMediaStream('BV123'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.pump();
+    }
+
+    testWidgets('fills the whole box instead of a 16:9 area', (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+      );
+
+      // 全屏铺满：400x400 全给画面，不再是 400x225 的 16:9 内嵌。
+      expect(tester.getSize(find.byType(VideoPlayer)), const Size(400, 400));
+      expect(find.byType(AspectRatio), findsNothing);
+    });
+
+    testWidgets('embedded mode keeps the 16:9 area', (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+
+      // 画面本体受 AspectRatio 约束：宽 400 -> 16:9 高 225，盒内上下留白。
+      expect(tester.getSize(find.byType(AspectRatio)), const Size(400, 225));
+    });
+
+    testWidgets('hides the overlay controls until the surface is tapped', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+      );
+
+      expect(find.byTooltip('全屏'), findsNothing);
+
+      // 单击画面唤出控制层（含退出全屏按钮）。
+      await tester.tap(find.byType(PlayerGestureLayer));
+      // onTap 与 onDoubleTap 共存时，首次单击要等双击判定窗结束才回调。
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byTooltip('返回'), findsOneWidget);
+    });
+
+    testWidgets('restores the controls when leaving fullscreen', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+      expect(find.byTooltip('全屏'), findsOneWidget);
+
+      // 同一位置重建为全屏：控制层收起；再重建回内嵌：控制层常显。
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+      );
+      expect(find.byTooltip('返回'), findsNothing);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+      expect(find.byTooltip('全屏'), findsOneWidget);
+    });
+
+    testWidgets('the minimize button only exists in fullscreen', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+      var minimized = false;
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+        onMinimize: () => minimized = true,
+      );
+      expect(find.byIcon(Icons.picture_in_picture_alt), findsNothing);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+        onMinimize: () => minimized = true,
+      );
+      await tester.tap(find.byType(PlayerGestureLayer));
+      // onTap 与 onDoubleTap 共存时，首次单击要等双击判定窗结束才回调。
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.tap(find.byIcon(Icons.picture_in_picture_alt));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(minimized, isTrue);
     });
   });
 }
@@ -391,4 +567,37 @@ class _FailingStreamRepository() implements VideoDetailRepository {
     String id, {
     int? preferHeight,
   }) async => Result.error(Exception('签名过期'));
+}
+
+/// 立即返回可播流：让画面本体（含浮层控制）渲染出来。
+class _ReadyStreamRepository() implements VideoDetailRepository {
+  @override
+  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.error(Exception('unused'));
+
+  @override
+  Future<Result<MediaStream>> getMediaStream(
+    String id, {
+    int? preferHeight,
+  }) async => Result.ok(
+    MediaStream(
+      videoUrl: 'https://example.com/v.m4s',
+      height: 1080,
+      bitrate: 3000000,
+    ),
+  );
 }

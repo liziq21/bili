@@ -42,6 +42,24 @@ class const VideoPlayer({
   /// 测试用它注入假实现：真实的 [MediaPlaybackController] 会初始化原生库，
   /// 在 widget 测试环境里起不来。
   final MediaPlaybackController? controller,
+
+  /// 是否铺满所在区域（全屏）。
+  ///
+  /// 由页面持有而非本组件自持：铺满需要父级把本组件放进 [Expanded]，那是
+  /// 页面布局的决定。本组件只按该标志切换「16:9 内嵌」与「铺满」两种布局。
+  final bool fullscreen = false,
+
+  /// 进入 / 退出全屏。横屏与系统 UI 的切换由页面负责。
+  final VoidCallback? onToggleFullscreen,
+
+  /// 最小化：退出全屏并暂停播放，保留播放位置。
+  final VoidCallback? onMinimize,
+
+  /// 画面构建器，缺省渲染原生 [Video]。
+  ///
+  /// 真 [Video] 依赖平台 Texture Registry 与 libmpv OpenGL，widget 测试里
+  /// 渲染会挂住 pump，故测试经此参数注入纯 Flutter 画面，只测外围交互。
+  final Widget Function(MediaPlaybackController controller)? surfaceBuilder,
 }) extends StatefulWidget {
   @override
   State<VideoPlayer> createState() => _VideoPlayerState();
@@ -53,12 +71,55 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   /// 是否由本组件创建（进而由本组件释放），区别于外部注入的会话。
   bool _ownsPlayback = false;
 
+  /// 全屏下控制层是否展开。内嵌态恒展开，不做自动隐藏。
+  bool _controlsVisible = true;
+
+  /// 全屏下控制层的自动收起定时器。
+  Timer? _autoHideControls;
+
+  /// 全屏时展开控制层后多久自动收起。
+  static const Duration _autoHideDelay = Duration(seconds: 3);
+
+  @override
+  void initState() {
+    super.initState();
+    // 首次构建就处于全屏时同样先收起控制层，与切换进来的路径保持一致。
+    _controlsVisible = !widget.fullscreen;
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.fullscreen == widget.fullscreen) return;
+    // 进全屏先收起控制层（画面要干净），退出全屏恢复常显。
+    _controlsVisible = !widget.fullscreen;
+    _scheduleAutoHide();
+  }
+
   @override
   void dispose() {
+    _autoHideControls?.cancel();
     if (_ownsPlayback) {
       _playback?.dispose();
     }
     super.dispose();
+  }
+
+  /// 全屏下单击画面：展开则安排自动收起，收起则直接展开。
+  void _toggleControls() {
+    if (!widget.fullscreen) return;
+    setState(() => _controlsVisible = !_controlsVisible);
+    _scheduleAutoHide();
+  }
+
+  /// 重新计时：全屏且控制层展开时，到点自动收起。
+  void _scheduleAutoHide() {
+    _autoHideControls?.cancel();
+    if (!widget.fullscreen || !_controlsVisible) return;
+    _autoHideControls = Timer(_autoHideDelay, () {
+      if (!mounted) return;
+      setState(() => _controlsVisible = false);
+    });
   }
 
   void _ensurePlaybackCreated() {
@@ -74,38 +135,50 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   /// [widget.controller] 非空时直接使用注入的会话，不建原生播放器。
   MediaPlaybackController? get _externalController => widget.controller;
 
+  /// 画面本体：按播放态选错误 / 加载 / 播放器表面。
+  Widget _surface() =>
+      BlocSelector<
+        VideoBloc,
+        VideoState,
+        ({MediaStream? stream, String? streamError})
+      >(
+        selector: (state) =>
+            (stream: state.mediaStream, streamError: state.streamError),
+        builder: (context, data) {
+          if (data.streamError != null) {
+            return _ErrorView(message: data.streamError!);
+          }
+
+          final stream = data.stream;
+          if (stream == null) {
+            return const _LoadingView();
+          }
+
+          _ensurePlaybackCreated();
+          return _VideoSurface(
+            controller: _playback!,
+            stream: stream,
+            fullscreen: widget.fullscreen,
+            controlsVisible: _controlsVisible,
+            onToggleFullscreen: widget.onToggleFullscreen,
+            onMinimize: widget.onMinimize,
+            onTapSurface: _toggleControls,
+            surfaceBuilder: widget.surfaceBuilder,
+          );
+        },
+      );
+
   @override
   Widget build(BuildContext context) {
+    // 全屏时画面铺满所在区域，队列条并入控制层，故不套 Column。
+    if (widget.fullscreen) return _surface();
+
     final hasExternalController = widget.controller != null;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AspectRatio(
-          aspectRatio: widget.aspectRatio,
-          child:
-              BlocSelector<
-                VideoBloc,
-                VideoState,
-                ({MediaStream? stream, String? streamError})
-              >(
-                selector: (state) =>
-                    (stream: state.mediaStream, streamError: state.streamError),
-                builder: (context, data) {
-                  if (data.streamError != null) {
-                    return _ErrorView(message: data.streamError!);
-                  }
-
-                  final stream = data.stream;
-                  if (stream == null) {
-                    return const _LoadingView();
-                  }
-
-                  _ensurePlaybackCreated();
-                  return _VideoSurface(controller: _playback!, stream: stream);
-                },
-              ),
-        ),
+        AspectRatio(aspectRatio: widget.aspectRatio, child: _surface()),
         if (hasExternalController)
           _QueueControlBar(controller: _externalController!),
       ],
@@ -257,6 +330,13 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
 class const _VideoSurface({
   required final MediaPlaybackController controller,
   required final MediaStream stream,
+  required final bool fullscreen,
+  required final bool controlsVisible,
+  required final VoidCallback? onToggleFullscreen,
+  required final VoidCallback? onMinimize,
+  required final VoidCallback onTapSurface,
+  required final Widget Function(MediaPlaybackController controller)?
+  surfaceBuilder,
 }) extends StatefulWidget {
   @override
   State<_VideoSurface> createState() => _VideoSurfaceState();
@@ -267,7 +347,6 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   PlaybackState? _playbackState;
   late final BoostRateController _boost;
   late final BrightnessService _brightnessService;
-  bool _fullscreen = false;
 
   @override
   void initState() {
@@ -344,25 +423,6 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
     } catch (_) {}
   }
 
-  /// 全屏：横屏 + 沉浸系统 UI；退出时恢复竖屏与边缘到边缘。
-  ///
-  /// 不改页面布局，方向由系统响应；SystemChrome 在测试环境无效但不报错。
-  Future<void> _toggleFullscreen() async {
-    setState(() => _fullscreen = !_fullscreen);
-    if (_fullscreen) {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    } else {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
-  }
-
   @override
   void didUpdateWidget(covariant _VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -375,11 +435,6 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   void dispose() {
     _boost.dispose();
     _subscription?.cancel();
-    if (_fullscreen) {
-      // 离开时若仍处全屏，恢复竖屏，避免带着横屏设置回到列表页。
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    }
     super.dispose();
   }
 
@@ -398,33 +453,48 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             controller: widget.controller,
             brightnessService: _brightnessService,
             boost: _boost,
-            child: Video(controller: widget.controller.videoController),
+            onTap: widget.fullscreen ? widget.onTapSurface : null,
+            child:
+                widget.surfaceBuilder?.call(widget.controller) ??
+                Video(controller: widget.controller.videoController),
           ),
         ),
         if (videoId != null)
           DanmakuOverlay(controller: widget.controller, videoId: videoId),
-        Positioned(
-          top: $styles.insets.xs,
-          right: $styles.insets.xs,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SleepTimerChip(controller: widget.controller),
-              const Gap(6),
-              QualityPickerChip(
-                controller: widget.controller,
-                stream: widget.stream,
-              ),
-              const Gap(6),
-              PlaybackSpeedChip(controller: widget.controller),
-              const Gap(6),
-              _FullscreenButton(
-                fullscreen: _fullscreen,
-                onPressed: _toggleFullscreen,
-              ),
-            ],
+        if (widget.controlsVisible)
+          Positioned(
+            top: $styles.insets.xs,
+            right: $styles.insets.xs,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SleepTimerChip(controller: widget.controller),
+                const Gap(6),
+                QualityPickerChip(
+                  controller: widget.controller,
+                  stream: widget.stream,
+                ),
+                const Gap(6),
+                PlaybackSpeedChip(controller: widget.controller),
+                const Gap(6),
+                _FullscreenButton(
+                  fullscreen: widget.fullscreen,
+                  onPressed: widget.onToggleFullscreen,
+                ),
+                if (widget.fullscreen && widget.onMinimize != null) ...[
+                  const Gap(6),
+                  _OverlayIconButton(
+                    icon: Icons.picture_in_picture_alt,
+                    tooltip: '最小化',
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.onMinimize!();
+                    },
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
         ListenableBuilder(
           listenable: _boost,
           builder: (context, _) => _boost.boosted
@@ -515,25 +585,42 @@ class const _BoostBadge() extends StatelessWidget {
 /// 全屏 / 退出全屏按钮。
 class const _FullscreenButton({
   required final bool fullscreen,
-  required final VoidCallback onPressed,
+  required final VoidCallback? onPressed,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: $styles.colors.scrim.withValues(alpha: 0.6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onPressed();
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Icon(
-            fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-            size: 18,
-            color: $styles.colors.onScrim,
+    return _OverlayIconButton(
+      icon: fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+      tooltip: fullscreen ? '返回' : '全屏',
+      onPressed: onPressed == null
+          ? null
+          : () {
+              HapticFeedback.lightImpact();
+              onPressed!();
+            },
+    );
+  }
+}
+
+/// 画面浮层上的图标按钮：半透明圆角底 + 点击态。
+class const _OverlayIconButton({
+  required final IconData icon,
+  required final String tooltip,
+  required final VoidCallback? onPressed,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: $styles.colors.scrim.withValues(alpha: 0.6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(icon, size: 18, color: $styles.colors.onScrim),
           ),
         ),
       ),
