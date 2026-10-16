@@ -1,4 +1,5 @@
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -54,7 +55,10 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
             if (_operationError case final error?) _OperationError(error),
             if (_busy) const LinearProgressIndicator(),
             TabBar(
-              onTap: (index) => setState(() => _tabIndex = index),
+              onTap: (index) {
+                HapticFeedback.selectionClick();
+                setState(() => _tabIndex = index);
+              },
               tabs: const [
                 Tab(text: '历史'),
                 Tab(text: '收藏'),
@@ -394,7 +398,10 @@ class const _BookmarksTab({
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              onTap: () => onVideoTap(bookmark.sourceId, bookmark.originalId),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onVideoTap(bookmark.sourceId, bookmark.originalId);
+              },
               trailing: PopupMenuButton<_BookmarkAction>(
                 enabled: !busy,
                 tooltip: '收藏操作',
@@ -788,7 +795,10 @@ class const _PlaylistItemRow({
       dense: true,
       leading: const _LibraryLeading(icon: Icons.play_arrow_outlined),
       title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       trailing: PopupMenuButton<_PlaylistItemAction>(
         enabled: !busy,
         tooltip: '条目操作',
@@ -958,8 +968,10 @@ class const _SubscriptionGroup({
             ListTile(
               leading: const _LibraryLeading(icon: Icons.person_outline),
               title: Text(subscription.name),
-              onTap: () =>
-                  onCreatorTap(subscription.sourceId, subscription.originalId),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onCreatorTap(subscription.sourceId, subscription.originalId);
+              },
               trailing: PopupMenuButton<_SubscriptionAction>(
                 enabled: !busy,
                 tooltip: '订阅操作',
