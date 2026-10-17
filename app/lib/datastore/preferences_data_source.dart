@@ -169,6 +169,8 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   static const danmakuBottomMaxRows = PreferencesKey<int>._(
     'DANMAKU_BOTTOM_MAX_ROWS',
     2,
+  );
+
   /// 默认画质的源侧清晰度 id：精确记住「选的是哪一档」，不靠高度近似。
   ///
   /// 与 [preferredQualityHeight] 同时写入：id 用于精确匹配，高度是源不认得
@@ -176,7 +178,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   static const preferredQualityStreamId = PreferencesKey<int?>._(
     'PREFERRED_QUALITY_STREAM_ID',
     null,
-
   );
 
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
