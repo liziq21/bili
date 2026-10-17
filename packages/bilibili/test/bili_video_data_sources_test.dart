@@ -12,8 +12,18 @@ class MockNetworkVideoDataSource({
   required final List<dynamic> relatedVideosJson,
   required final Map<String, dynamic> replyListJson,
   required final Map<String, dynamic> replyReplyListJson,
+  this.playerInfoJson,
+  this.playerInfoError,
 }) implements NetworkVideoDataSource {
   final replyReplyCalls = <(int, int, int, int)>[];
+
+  /// 章节来源（player/v2）的响应；为 null 时按原始响应构造。
+  Map<String, dynamic>? playerInfoJson;
+
+  /// 让 player/v2 抛错，用来验证降级路径。
+  Object? playerInfoError;
+
+  final playerInfoCalls = <(String, int)>[];
 
   @override
   Future<VideoDetailData> getVideoDetail({required String bvid}) async {
@@ -80,7 +90,13 @@ class MockNetworkVideoDataSource({
     required String bvid,
     required int cid,
   }) async {
-    throw UnimplementedError();
+    playerInfoCalls.add((bvid, cid));
+    final error = playerInfoError;
+    if (error != null) throw error;
+    // retrofit 层已经把响应体的 data 拆出来，模型直接对应 data。
+    return NetworkBiliPlayerInfo.fromJson(
+      playerInfoJson ?? const <String, dynamic>{'aid': 0, 'bvid': '', 'cid': 0},
+    );
   }
 
   @override
@@ -160,6 +176,54 @@ void main() {
         expect(detail.creator, isNotNull);
         expect(detail.creator?.name, isNotEmpty);
         expect(detail.relatedVideos, isNotEmpty);
+      },
+    );
+
+    test(
+      'getVideoDetail maps player view_points into sorted chapters',
+      () async {
+        mockNetwork.playerInfoJson = {
+          'aid': 1,
+          'bvid': 'BV1GJ411x7vy',
+          'cid': 1,
+          'view_points': [
+            {'from': 90, 'to': 120, 'content': '第三段'},
+            {'from': 10, 'to': 40, 'content': '开场'},
+            {'from': 50, 'to': 80, 'content': '   '},
+            {'to': 80, 'content': '缺起点'},
+            {'from': 30.6, 'to': 45, 'content': '中段'},
+          ],
+        };
+
+        final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
+        expect(result.isOk, isTrue);
+
+        final chapters = (result as dynamic).value.chapters as List;
+        // 空白标题与缺起点的看点被丢掉，其余按起点升序。
+        expect(
+          chapters
+              .map((c) => (c.startSeconds as int, c.title as String))
+              .toList(),
+          [(10, '开场'), (31, '中段'), (90, '第三段')],
+        );
+        // 查询用的是第一个分 P 的 cid。
+        final detailJson =
+            loadJson('video_detail.json') as Map<String, dynamic>;
+        final firstCid =
+            (detailJson['data'] as Map<String, dynamic>)['pages'][0]['cid']
+                as int;
+        expect(mockNetwork.playerInfoCalls, [('BV1GJ411x7vy', firstCid)]);
+      },
+    );
+
+    test(
+      'getVideoDetail degrades to empty chapters when player/v2 fails',
+      () async {
+        mockNetwork.playerInfoError = Exception('player unavailable');
+
+        final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
+        expect(result.isOk, isTrue);
+        expect((result as dynamic).value.chapters, isEmpty);
       },
     );
 

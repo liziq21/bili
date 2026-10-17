@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../main.dart';
+import '../../../routing/router.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
@@ -733,7 +734,7 @@ class _SynopsisSectionState()
   }
 }
 
-/// 章节/分 P 区：从 [VideoDetail.chapters] 动态渲染，支持点击跳转。
+/// 章节区：从 [VideoDetail.chapters] 渲染时间轴点，点击 seek 到该点。
 class const _ChaptersSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -762,10 +763,9 @@ class const _ChaptersSection() extends StatelessWidget {
             ),
           ),
           const Gap(8),
-          for (int i = 0; i < chapters.length; i++)
+          for (final chapter in chapters)
             _ChapterItem(
-              chapter: chapters[i],
-              index: i + 1,
+              chapter: chapter,
               playbackController: playbackController,
             ),
         ],
@@ -776,16 +776,18 @@ class const _ChaptersSection() extends StatelessWidget {
 
 class const _ChapterItem({
   required final VideoChapter chapter,
-  required final int index,
   required final MediaPlaybackController playbackController,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final target = Duration(seconds: chapter.startSeconds);
     return InkWell(
       onTap: () {
         HapticFeedback.lightImpact();
-        final chapterStart = chapter.duration * (index - 1);
-        playbackController.seek(Duration(seconds: chapterStart));
+        // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
+        final duration = playbackController.state.duration;
+        if (duration <= Duration.zero) return;
+        playbackController.seek(target > duration ? duration : target);
       },
       borderRadius: BorderRadius.circular($styles.corners.sm),
       child: Padding(
@@ -795,11 +797,14 @@ class const _ChapterItem({
         ),
         child: Row(
           children: [
-            Text(
-              'P$index',
-              style: $styles.text.bodySmallBold.copyWith(
-                color: $styles.colors.accentText,
-                fontSize: 12,
+            SizedBox(
+              width: 44,
+              child: Text(
+                _formatDuration(chapter.startSeconds),
+                style: $styles.text.bodySmallBold.copyWith(
+                  color: $styles.colors.accentText,
+                  fontSize: 12,
+                ),
               ),
             ),
             const Gap(8),
@@ -814,13 +819,6 @@ class const _ChapterItem({
                 ),
               ),
             ),
-            Text(
-              _formatDuration(chapter.duration),
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onSurfaceVariant,
-                fontSize: 11,
-              ),
-            ),
           ],
         ),
       ),
@@ -828,22 +826,14 @@ class const _ChapterItem({
   }
 }
 
-/// UP 主信息块：点击跳转频道页（接 LIZ-35 频道页）。
+/// UP 主信息块：点击进入该 UP 主的空间页。
 class const _UpInfoSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final creatorData = context
-        .select<VideoBloc, ({CreatorProfile? creator, bool isSubscribed})?>((
-          bloc,
-        ) {
-          final detail = bloc.state.videoDetail;
-          if (detail == null) return null;
-          return (creator: detail.creator, isSubscribed: detail.isSubscribed);
-        });
-    if (creatorData == null || creatorData.creator == null) {
-      return const SizedBox.shrink();
-    }
-    final creator = creatorData.creator!;
+    final creator = context.select<VideoBloc, CreatorProfile?>(
+      (bloc) => bloc.state.videoDetail?.creator,
+    );
+    if (creator == null) return const SizedBox.shrink();
     return Container(
       margin: EdgeInsets.only(top: $styles.insets.md),
       padding: EdgeInsets.all($styles.insets.xs),
@@ -857,13 +847,7 @@ class const _UpInfoSection() extends StatelessWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.lightImpact();
-          // TODO: 跳转频道页 LIZ-35 - 需要 creator.id 路由参数
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('跳转 ${creator.name} 的频道页 (LIZ-35)'),
-              duration: $styles.times.fast,
-            ),
-          );
+          context.navigateToSpace(creator.id);
         },
         borderRadius: BorderRadius.circular($styles.corners.md),
         child: Row(
@@ -889,26 +873,14 @@ class const _UpInfoSection() extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          creator.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: $styles.text.bodyBold.copyWith(
-                            color: $styles.colors.onSurfaceStrong,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      const Gap(4),
-                      Icon(
-                        Icons.verified,
-                        size: 14,
-                        color: $styles.colors.secondary,
-                      ),
-                    ],
+                  Text(
+                    creator.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.bodyBold.copyWith(
+                      color: $styles.colors.onSurfaceStrong,
+                      fontSize: 14,
+                    ),
                   ),
                   Text(
                     '${_formatCount(creator.subscribers ?? 0)} 关注者',
