@@ -154,7 +154,9 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
           SizedBox(width: $styles.insets.xs),
           Expanded(
             child: Text(
-              sourceName == null ? l10n.allSources : l10n.sourceLabel(sourceName),
+              sourceName == null
+                  ? l10n.allSources
+                  : l10n.sourceLabel(sourceName),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: $styles.text.bodySmall.copyWith(
@@ -632,7 +634,9 @@ class const _PlaylistCard({
           Padding(
             padding: EdgeInsets.symmetric(horizontal: $styles.insets.sm),
             child: Text(
-              sourceName == null ? playlist.sourceId : l10n.sourceLabel(sourceName!),
+              sourceName == null
+                  ? playlist.sourceId
+                  : l10n.sourceLabel(sourceName!),
               style: $styles.text.bodySmall.copyWith(
                 color: $styles.colors.onSurfaceVariant,
               ),
@@ -926,7 +930,9 @@ class const _SubscriptionsTab({
           children: [
             for (final group in sortedGroups)
               _SubscriptionGroup(
-                groupName: group.groupName.isEmpty ? l10n.ungrouped : group.groupName,
+                groupName: group.groupName.isEmpty
+                    ? l10n.ungrouped
+                    : group.groupName,
                 sourceName: sourceName(group.sourceId),
                 subscriptions: groups[group]!,
                 onCreatorTap: onCreatorTap,
@@ -980,7 +986,9 @@ class const _SubscriptionGroup({
                 color: $styles.colors.onSurfaceStrong,
               ),
             ),
-            subtitle: sourceName == null ? null : Text(l10n.sourceLabel(sourceName!)),
+            subtitle: sourceName == null
+                ? null
+                : Text(l10n.sourceLabel(sourceName!)),
           ),
           for (final subscription in subscriptions)
             ListTile(
