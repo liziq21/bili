@@ -1,6 +1,7 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import 'filter_chip_item.dart';
 
 class const FilterGroupSection({
@@ -109,9 +110,10 @@ class const _DateRangeView({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final range = group.range;
     final label = range == null
-        ? '选择日期范围'
+        ? l10n.selectDateRange
         : '${range.start.year}-${range.end.year}';
 
     return Padding(

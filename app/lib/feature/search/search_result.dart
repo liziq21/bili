@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'bloc/search_result_bloc.dart';
 
@@ -59,6 +60,7 @@ class _SearchErrorView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
@@ -67,7 +69,7 @@ class _SearchErrorView<T> extends StatelessWidget {
           Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
-            '加载失败，请稍后重试',
+            l10n.loadFailedRetryLater,
             style: $styles.text.body.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -75,14 +77,14 @@ class _SearchErrorView<T> extends StatelessWidget {
           SizedBox(height: $styles.insets.xs),
           Semantics(
             button: true,
-            label: '加载失败，重试',
+            label: l10n.loadFailedRetry,
             excludeSemantics: true,
             child: TextButton(
               onPressed: () {
                 HapticFeedback.lightImpact();
                 context.read<SearchResultBloc<T>>().add(const FetchNextPage());
               },
-              child: const Text('重试'),
+              child: Text(l10n.retry),
             ),
           ),
         ],
@@ -97,13 +99,14 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
         child: Semantics(
           button: true,
-          label: '更多数据加载失败，重试',
+          label: l10n.moreLoadFailedRetry,
           excludeSemantics: true,
           child: InkWell(
             borderRadius: BorderRadius.circular($styles.corners.sm),
@@ -126,7 +129,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
                   ),
                   SizedBox(width: $styles.insets.xs),
                   Text(
-                    '更多数据加载失败，重试',
+                    l10n.moreLoadFailedRetry,
                     style: $styles.text.bodySmall.copyWith(
                       color: colorScheme.error,
                     ),
@@ -147,10 +150,11 @@ class _EmptySearchIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Semantics(
-        label: '未找到内容',
+        label: l10n.nothingFound,
         excludeSemantics: true,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -162,7 +166,7 @@ class _EmptySearchIndicator extends StatelessWidget {
             ),
             SizedBox(height: $styles.insets.xs),
             Text(
-              '未找到内容',
+              l10n.nothingFound,
               style: $styles.text.body.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
