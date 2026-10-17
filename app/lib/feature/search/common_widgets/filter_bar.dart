@@ -90,7 +90,10 @@ class const FilterBar({
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(effectiveTitle, style: Theme.of(context).textTheme.titleMedium),
+          child: Text(
+            effectiveTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         const Divider(height: 1),
       ],
