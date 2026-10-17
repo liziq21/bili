@@ -101,6 +101,14 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 ### Generated Files
 - 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。
 
+### 文案与本地化（Copy and Localization）
+
+- 面向用户的文案（label、title、tooltip、hint、SnackBar、错误提示、空态文案）必须放在 `app/lib/l10n/app_.arb`，通过 `AppLocalizations.of(context)` 读取，不得硬编码在 Dart 源文件里。
+- **日志与错误类文案可以硬编码英文**。这是本规则唯一需要的例外，且不需要任何豁免机制：护栏断言的是「不得有非 ASCII 字面量」，ASCII 天然满足。不要为此引入 ignore 注释或白名单。
+- 注释、文档、commit message 不受本规则约束（见 Language Flexibility 段）。
+- 这条规则由 `app/test/golden/hardcoded_copy_test.dart` 机器执行，不是纸面约定：断言 `app/lib` 下非生成的 `.dart` 文件里不存在非 ASCII 字符串字面量。唯一的路径级排除是 gen-l10n 的产物目录 `app/lib/l10n/localization_file/`（ARB 的值是它的源，不是硬编码处）。
+- 该护栏与 Screenshot Tests 段的字体子集契约是**两件事**：前者管文案放在哪，后者管渲染时有没有字形。新增中文文案只需改 ARB；子集缺字由 `tool/generate_subset_characters.py` 从生成产物自动收进，再跑 `bin/bili-fonts` 重切 OTF。
+
 ### Screenshot Tests
 
 - The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` disables `platformGoldensConfig`). Text renders as **real glyphs** from a repository-pinned font subset (`app/test/fonts/NotoSansSC-golden-subset.otf`, loaded with `FontLoader` in `app/test/golden/golden_font.dart`), not as Ahem boxes — `obscureText: false` in the same file's `ciGoldensConfig` is what allows it. Alchemist's `obscureText` default (`true`) forces the Ahem family onto the CI variant and ignores the theme's `fontFamily`, so the setting is load-bearing, not cosmetic.
