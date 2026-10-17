@@ -48,6 +48,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): L0 播放器外壳 (Part of LIZ-29) (#294)
 - feat(LIZ-30): build local library foundations (#303)
 - feat: LIZ-36 video detail completion - description, chapters, UP主 info (#316)
+- feat: add danmaku (弹幕) support for Bilibili video playback (#318)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
