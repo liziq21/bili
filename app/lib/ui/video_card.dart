@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/localization_file/app_localizations.dart';
 import '../main.dart';
 
 enum VideoCardVariant() {
@@ -31,34 +32,37 @@ class const VideoCard({
     return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
-  static String formatViewCount(int? count) {
+  static String formatViewCount(int? count, [AppLocalizations? l10n]) {
     if (count == null) return '';
     if (count >= 100000000) {
-      return '${(count / 100000000).toStringAsFixed(1)}亿';
+      return l10n?.countCompactYi(
+            (count / 100000000).toStringAsFixed(1),
+          ) ??
+          '';
     }
     if (count >= 10000) {
-      return '${(count / 10000).toStringAsFixed(1)}万';
+      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ?? '';
     }
     return '$count';
   }
 
-  static String formatRelativeDate(DateTime? dateTime) {
+  static String formatRelativeDate(DateTime? dateTime, [AppLocalizations? l10n]) {
     if (dateTime == null) return '';
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays >= 365) {
-      return '${(difference.inDays / 365).floor()} 年前';
+      return l10n?.yearsAgoCompact('${(difference.inDays / 365).floor()}') ?? '';
     } else if (difference.inDays >= 30) {
-      return '${(difference.inDays / 30).floor()} 个月前';
+      return l10n?.monthsAgoCompact('${(difference.inDays / 30).floor()}') ?? '';
     } else if (difference.inDays >= 1) {
-      return '${difference.inDays} 天前';
+      return l10n?.daysAgo('${difference.inDays}') ?? '';
     } else if (difference.inHours >= 1) {
-      return '${difference.inHours} 小时前';
+      return l10n?.hoursAgo('${difference.inHours}') ?? '';
     } else if (difference.inMinutes >= 1) {
-      return '${difference.inMinutes} 分钟前';
+      return l10n?.minutesAgo('${difference.inMinutes}') ?? '';
     } else {
-      return '刚刚';
+      return l10n?.justNow ?? '';
     }
   }
 
@@ -81,13 +85,14 @@ class const VideoCard({
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (variant == VideoCardVariant.feed) {
-      final formattedViews = formatViewCount(videoInfoBase.viewCount);
-      final formattedDate = formatRelativeDate(videoInfoBase.uploadDate);
+      final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
+      final formattedDate = formatRelativeDate(videoInfoBase.uploadDate, l10n);
       final feedSubtitle = formattedViews.isNotEmpty
           ? (formattedDate.isNotEmpty
-                ? '$formattedViews 观看 • $formattedDate'
-                : '$formattedViews 观看')
+                ? l10n?.viewsWithDate(formattedViews, formattedDate) ?? ''
+                : l10n?.viewsCount(formattedViews) ?? '')
           : (formattedDate.isNotEmpty
                 ? formattedDate
                 : (videoInfoBase.uploadDate != null
@@ -96,29 +101,33 @@ class const VideoCard({
       return _buildFeedCard(context, feedSubtitle);
     }
 
-    final formattedViews = formatViewCount(videoInfoBase.viewCount);
-    final formattedDate = formatRelativeDate(videoInfoBase.uploadDate);
+    final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
+    final formattedDate = formatRelativeDate(videoInfoBase.uploadDate, l10n);
     final creatorName = videoInfoBase.creatorProfileName;
     final durationStr = formatDuration(videoInfoBase.duration);
 
     final subtitleParts = <String>[
       if (creatorName != null && creatorName.isNotEmpty) creatorName,
-      if (formattedViews.isNotEmpty) '$formattedViews 观看',
+      if (formattedViews.isNotEmpty)
+        l10n?.viewsCount(formattedViews) ?? '',
       if (formattedDate.isNotEmpty) formattedDate,
     ];
     final subtitleText = subtitleParts.isNotEmpty
-        ? subtitleParts.join(' • ')
+        ? subtitleParts.join(l10n?.spacedBullet ?? ' • ')
         : (videoInfoBase.uploadDate != null
               ? '${videoInfoBase.uploadDate}'
               : '');
 
-    final semanticLabelParts = <String>[
+    final semanticLabelParts = <String?>[
       videoInfoBase.title,
-      if (creatorName != null && creatorName.isNotEmpty) '创作者: $creatorName',
-      if (durationStr.isNotEmpty) '时长 $durationStr',
+      if (creatorName != null && creatorName.isNotEmpty)
+        l10n?.creatorLabel(creatorName),
+      if (durationStr.isNotEmpty) l10n?.durationPrefix(durationStr),
       if (subtitleText.isNotEmpty) subtitleText,
     ];
-    final semanticLabel = semanticLabelParts.join('，');
+    final semanticLabel = semanticLabelParts
+        .whereType<String>()
+        .join(l10n?.commaSeparator ?? ',');
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -217,16 +226,18 @@ class const VideoCard({
 
   Widget _buildFeedCard(BuildContext context, String subtitleText) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final durationStr = formatDuration(videoInfoBase.duration);
-    final creatorName = videoInfoBase.creatorProfileName ?? '未知创作者';
+    final creatorName =
+        videoInfoBase.creatorProfileName ?? (l10n?.unknownCreator ?? 'Unknown');
 
-    final semanticLabel = <String>[
+    final semanticLabel = <String?>[
       if (sourceBadge != null && sourceBadge!.isNotEmpty) sourceBadge!,
       videoInfoBase.title,
-      '创作者: $creatorName',
-      if (durationStr.isNotEmpty) '时长 $durationStr',
+      l10n?.creatorLabel(creatorName),
+      if (durationStr.isNotEmpty) l10n?.durationPrefix(durationStr),
       if (subtitleText.isNotEmpty) subtitleText,
-    ].join('，');
+    ].whereType<String>().join(l10n?.commaSeparator ?? ',');
 
     // ⚡ Bolt Optimization: Replace nested Material + Container(decoration: BoxDecoration)
     // with a single Material using shape: RoundedRectangleBorder(...).
@@ -395,7 +406,11 @@ class const VideoCard({
                                     SizedBox(height: $styles.insets.xxs),
                                     Text(
                                       subtitleText.isNotEmpty
-                                          ? '$creatorName • $subtitleText'
+                                          ? l10n?.creatorWithSubtitle(
+                                                  creatorName,
+                                                  subtitleText,
+                                                ) ??
+                                              creatorName
                                           : creatorName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -415,10 +430,10 @@ class const VideoCard({
                       // 更多操作按钮
                       if (onMorePressed != null)
                         IconButton(
-                          tooltip: '更多选项',
+                          tooltip: l10n?.moreOptions ?? 'More options',
                           icon: Icon(
                             Icons.more_vert_rounded,
-                            semanticLabel: '更多选项',
+                            semanticLabel: l10n?.moreOptions ?? 'More options',
                             size: 20,
                             color: colorScheme.onSurfaceVariant,
                           ),

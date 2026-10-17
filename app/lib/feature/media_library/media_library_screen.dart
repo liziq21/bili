@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 import '../../ui/video_card.dart';
@@ -41,6 +42,7 @@ class const MediaLibraryScreen({
 
   Widget _header(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -52,7 +54,7 @@ class const MediaLibraryScreen({
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '我的',
+            l10n?.mine ?? 'Mine',
             style: $styles.text.h3.copyWith(color: colorScheme.onSurface),
           ),
           SizedBox(height: $styles.insets.sm),
@@ -74,8 +76,9 @@ class const MediaLibraryScreen({
               // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
               // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
               final label = headerState.itemCount == 0
-                  ? '观看历史'
-                  : '观看历史 · 已载入 ${headerState.itemCount} 条';
+                  ? (l10n?.watchHistory ?? 'Watch history')
+                  : l10n?.watchHistoryLoadedCount('${headerState.itemCount}') ??
+                        'Watch history';
 
               // 出错且已经有条目时不整页替换：列表内容比错误更该被看见，
               // 但错误不能因此消失，所以在这里补一条。
@@ -84,7 +87,7 @@ class const MediaLibraryScreen({
                   children: [
                     Expanded(
                       child: Text(
-                        '$label · 加载失败',
+                        l10n?.tabLoadFailed(label) ?? label,
                         style: $styles.text.bodySmall.copyWith(
                           color: colorScheme.error,
                         ),
@@ -95,7 +98,7 @@ class const MediaLibraryScreen({
                         HapticFeedback.lightImpact();
                         context.read<MediaHistoryCubit>().loadMore();
                       },
-                      child: const Text('重试'),
+                      child: Text(l10n?.retry ?? 'Retry'),
                     ),
                   ],
                 );
@@ -122,7 +125,11 @@ class const MediaLibraryScreen({
                             context.read<MediaHistoryCubit>().loadMore();
                           }
                         : null,
-                    child: Text(headerState.hasMore ? '加载更多' : '没有更多了'),
+                    child: Text(
+                          headerState.hasMore
+                              ? (l10n?.loadMore ?? 'Load more')
+                              : (l10n?.noMoreItems ?? 'No more items'),
+                        ),
                   ),
                 ],
               );
@@ -142,6 +149,7 @@ class const _HistoryList({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with BlocSelector for non-content states (loading, error, empty).
     // When items are present, history rows are rendered via context.select in _HistoryRowsContent,
     // avoiding top-level list container rebuilds when unrelated state fields (e.g., error string changes) occur.
@@ -168,17 +176,20 @@ class const _HistoryList({
             hasScrollBody: false,
             child: _Message(
               icon: Icons.error_outline_rounded,
-              message: '历史记录加载失败',
-              actionLabel: '重试',
+              message: l10n?.historyLoadFailed ?? 'Failed to load history',
+              actionLabel: l10n?.retry ?? 'Retry',
               onAction: () => context.read<MediaHistoryCubit>().loadMore(),
             ),
           );
         }
 
         if (listState.isEmpty) {
-          return const SliverFillRemaining(
+          return SliverFillRemaining(
             hasScrollBody: false,
-            child: _Message(icon: Icons.history_rounded, message: '还没有观看记录'),
+            child: _Message(
+              icon: Icons.history_rounded,
+              message: l10n?.noWatchHistory ?? 'No watch history yet',
+            ),
           );
         }
 
@@ -284,10 +295,11 @@ class const _HistoryRow({
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final video = item.video;
     final duration = VideoCard.formatDuration(video.duration);
-    final viewedAtLabel = _formatViewedAt(item.viewedAt);
-    final progressLabel = _formatProgress(progress);
+    final viewedAtLabel = _formatViewedAt(item.viewedAt, l10n);
+    final progressLabel = _formatProgress(progress, l10n);
     final progressSemantics = switch (progressLabel) {
       final label? => [label],
       _ => const <String>[],
@@ -297,13 +309,13 @@ class const _HistoryRow({
       message: video.title,
       child: Semantics(
         button: true,
-        label: <String>[
+        label: <String?>[
           if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
           video.title,
-          if (duration.isNotEmpty) '时长 $duration',
+          if (duration.isNotEmpty) l10n?.durationLabel(duration),
           ...progressSemantics,
-          '观看于 $viewedAtLabel',
-        ].join('，'),
+          l10n?.watchedAt(viewedAtLabel),
+        ].whereType<String>().join(l10n?.commaSeparator ?? ','),
         excludeSemantics: true,
         child: InkWell(
           onTap: () {
@@ -380,7 +392,12 @@ class const _HistoryRow({
                         ),
                         SizedBox(height: $styles.insets.xxs),
                         Text(
-                          _subtitle(video, viewedAtLabel, progressLabel),
+                          _subtitle(
+                            video,
+                            viewedAtLabel,
+                            progressLabel,
+                            l10n,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: $styles.text.bodySmall.copyWith(
@@ -419,7 +436,12 @@ class const _HistoryRow({
   ///
   /// 历史条目没有播放量（media 表无该列），播放量与上传时间都不适用于「回看」
   /// 这个语境，因此只留来源、播放进度与观看时间。
-  String _subtitle(VideoModel video, String viewedAt, String? progressLabel) {
+  String _subtitle(
+    VideoModel video,
+    String viewedAt,
+    String? progressLabel,
+    AppLocalizations? l10n,
+  ) {
     final creator = video.creatorProfileName;
     final progressParts = switch (progressLabel) {
       final label? => [label],
@@ -431,30 +453,40 @@ class const _HistoryRow({
       ...progressParts,
       viewedAt,
     ];
-    return parts.join(' · ');
+    return parts.join(l10n?.spacedDot ?? ' · ');
   }
 
   /// Formats saved progress without requiring a duration in the media cache.
-  static String? _formatProgress(MediaHistoryProgress? progress) {
+  static String? _formatProgress(
+    MediaHistoryProgress? progress,
+    AppLocalizations? l10n,
+  ) {
     if (progress == null) return null;
-    if (progress.completed) return '已看完';
+    if (progress.completed) return l10n?.finishedWatching ?? 'Finished';
     final seconds = progress.progressSeconds;
     final formatted = VideoCard.formatDuration(seconds);
-    return formatted.isEmpty ? null : '已观看 $formatted';
+    if (formatted.isEmpty) return null;
+    return l10n?.watchedDuration(formatted);
   }
 
   /// 观看时间的相对表述
   ///
   /// 用相对表述而不是绝对日期：历史是「回看」场景，「昨天 / 3 天前」比
   /// 「2026-10-02」更快传达新旧顺序。超过一周落到日期，跨年补上年份。
-  static String _formatViewedAt(DateTime viewedAt) {
+  static String _formatViewedAt(DateTime viewedAt, AppLocalizations? l10n) {
     // ⚡ Bolt Optimization: Instantiate system clock time once per row format.
     final now = DateTime.now();
     final difference = now.difference(viewedAt);
-    if (difference.inMinutes < 1) return '刚刚';
-    if (difference.inHours < 1) return '${difference.inMinutes} 分钟前';
-    if (difference.inDays < 1) return '${difference.inHours} 小时前';
-    if (difference.inDays < 7) return '${difference.inDays} 天前';
+    if (difference.inMinutes < 1) return l10n?.justNow ?? 'Just now';
+    if (difference.inHours < 1) {
+      return l10n?.minutesAgo('${difference.inMinutes}') ?? 'Just now';
+    }
+    if (difference.inDays < 1) {
+      return l10n?.hoursAgo('${difference.inHours}') ?? 'Earlier today';
+    }
+    if (difference.inDays < 7) {
+      return l10n?.daysAgo('${difference.inDays}') ?? 'This week';
+    }
     final sameYear = viewedAt.year == now.year;
     final month = viewedAt.month.toString().padLeft(2, '0');
     final day = viewedAt.day.toString().padLeft(2, '0');
