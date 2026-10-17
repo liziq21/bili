@@ -47,6 +47,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): add comment reply expansion and pagination (#290)
 - feat(video): L0 播放器外壳 (Part of LIZ-29) (#294)
 - feat(LIZ-30): build local library foundations (#303)
+- feat: LIZ-36 video detail completion - description, chapters, UP主 info (#316)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -99,6 +100,9 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: Sanitize and log routing exceptions in GoRouter.onException (#297)
 - fix(LIZ-24): validate iOS project configuration on Linux (#302)
 - 🛡️ Sentinel: Sanitize BV IDs and secure Bilibili watch URLs (#306)
+- fix(tool): keep changelog regeneration PRs out of CHANGELOG.md (#312)
+- fix(tool): narrow the changelog self-exclusion to the workflow branch (#314)
+- Fix duplicate search view route on search tab reselect (#321)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -168,6 +172,9 @@ so hand edits do not survive; change the generator instead.
 - ⚡ Bolt: optimize AppScaffold MediaQuery rebuild boundary (#296)
 - 🎨 Palette: Enhance CreatorProfileItem metadata formatting, accessibility, and button haptics (#298)
 - 🎨 Palette: [UX improvement] Add retry action and semantics to search result error and empty states (#308)
+- 🎨 Palette: Enhance playlist picker tactile feedback and accessible semantics (#317)
+- 🎨 Palette: Add tactile haptic feedback to local library tabs and list items (#320)
+- 🎨 Palette: Wire search result card navigation and format card subtitles (#324)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -201,6 +208,7 @@ so hand edits do not survive; change the generator instead.
 - docs(bolt): log learning on cold-path indicator builder micro-optimizations (#264)
 - docs: add Linear-synced Issue triage for Jules (#300)
 - docs(LIZ-25): 从合并 PR 自动生成 CHANGELOG (#309)
+- docs(triage): issue-triage-prompt v2 — ready-for-jules 档与授权收敛 (#322)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
