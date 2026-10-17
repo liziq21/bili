@@ -132,14 +132,14 @@ class const _RecentSearches({
                 children: [
                   Expanded(
                     child: Text(
-                      l10n.recentSearches,
+                      l10n?.recentSearches ?? 'Recent searches',
                       style: $styles.text.title2.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
                   Tooltip(
-                    message: l10n.clearRecentSearchHistory,
+                    message: l10n?.clearRecentSearchHistory ?? 'Clear recent search history',
                     child: TextButton(
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -147,14 +147,14 @@ class const _RecentSearches({
                           ClearRecentSearchesPressed(),
                         );
                       },
-                      child: Text(l10n.clear),
+                      child: Text(l10n?.clear ?? 'Clear'),
                     ),
                   ),
                 ],
               ),
               for (final q in queries.take(limit))
                 Tooltip(
-                  message: l10n.searchQueryLabel(q.query),
+                  message: l10n?.searchQueryLabel(q.query),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(

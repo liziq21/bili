@@ -142,7 +142,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     final anchor = widget.builder == null
         ? SearchAnchor.bar(
             searchController: _controller,
-            barHintText: l10n.searchHint,
+            barHintText: l10n?.searchHint ?? 'Search...',
             barElevation: const WidgetStatePropertyAll(0.0),
             suggestionsBuilder: _getSuggestions,
             textInputAction: .search,
@@ -220,7 +220,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
           // moving between rows can tell them apart. Wording stays inside the
           // golden font subset (app/test/fonts/subset-characters.txt); adding a
           // character outside it fails golden_font_contract_test.
-          tooltip: l10n.putIntoSearchBox(item),
+          tooltip: l10n?.putIntoSearchBox(item),
           onPressed: () {
             HapticFeedback.lightImpact();
             _controller.text = item;

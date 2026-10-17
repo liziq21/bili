@@ -113,7 +113,7 @@ class const _DateRangeView({
     final l10n = AppLocalizations.of(context);
     final range = group.range;
     final label = range == null
-        ? l10n.selectDateRange
+        ? l10n?.selectDateRange ?? 'Select date range'
         : '${range.start.year}-${range.end.year}';
 
     return Padding(

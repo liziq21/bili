@@ -92,9 +92,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Chinese fallback labels should be rendered when AppLocalizations is null
-      expect(find.text('创作者'), findsOneWidget);
-      expect(find.text('视频'), findsOneWidget);
+      // English fallback labels should be rendered when AppLocalizations is null
+      expect(find.text('Creators'), findsOneWidget);
+      expect(find.text('Videos'), findsOneWidget);
       expect(find.text('creatorProfile'), findsNothing);
     },
   );
@@ -132,10 +132,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('视频'));
+      await tester.tap(find.text('Videos'));
       await tester.pumpAndSettle();
 
-      expect(find.text('视频'), findsOneWidget);
+      expect(find.text('Videos'), findsOneWidget);
     },
   );
 
@@ -176,15 +176,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Video tab
-      await tester.tap(find.text('视频'));
+      await tester.tap(find.text('Videos'));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
-      expect(find.text('加载失败，请稍后重试'), findsOneWidget);
-      expect(find.text('重试'), findsOneWidget);
+      expect(find.text('Load failed. Please try again later.'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
 
       // Tap retry button
-      await tester.tap(find.text('重试'));
+      await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
 
       // Verify search repository was called again for retry
@@ -227,11 +227,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('视频'));
+      await tester.tap(find.text('Videos'));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
-      expect(find.text('未找到内容'), findsOneWidget);
+      expect(find.text('Nothing found'), findsOneWidget);
     },
   );
 }

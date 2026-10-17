@@ -16,7 +16,7 @@ class const FilterBar({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final effectiveTitle = title ?? l10n.filters;
+    final effectiveTitle = title ?? l10n?.filters ?? 'Filters';
 
     return IconButton(
       tooltip: effectiveTitle,
@@ -114,7 +114,7 @@ class const FilterBar({
                   // 实现重置逻辑
                   Navigator.pop(context);
                 },
-                child: Text(l10n.reset),
+                child: Text(l10n?.reset ?? 'Reset'),
               ),
             ),
             const SizedBox(width: 12),
@@ -124,7 +124,7 @@ class const FilterBar({
                   onChanged(filters);
                   Navigator.pop(context);
                 },
-                child: Text(l10n.confirm),
+                child: Text(l10n?.confirm ?? 'Confirm'),
               ),
             ),
           ],

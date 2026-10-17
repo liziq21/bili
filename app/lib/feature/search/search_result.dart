@@ -69,7 +69,7 @@ class _SearchErrorView<T> extends StatelessWidget {
           Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
-            l10n.loadFailedRetryLater,
+            l10n?.loadFailedRetryLater ?? 'Load failed. Please try again later.',
             style: $styles.text.body.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -77,14 +77,14 @@ class _SearchErrorView<T> extends StatelessWidget {
           SizedBox(height: $styles.insets.xs),
           Semantics(
             button: true,
-            label: l10n.loadFailedRetry,
+            label: l10n?.loadFailedRetry ?? 'Load failed. Retry.',
             excludeSemantics: true,
             child: TextButton(
               onPressed: () {
                 HapticFeedback.lightImpact();
                 context.read<SearchResultBloc<T>>().add(const FetchNextPage());
               },
-              child: Text(l10n.retry),
+              child: Text(l10n?.retry ?? 'Retry'),
             ),
           ),
         ],
@@ -106,7 +106,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
       child: Center(
         child: Semantics(
           button: true,
-          label: l10n.moreLoadFailedRetry,
+          label: l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
           excludeSemantics: true,
           child: InkWell(
             borderRadius: BorderRadius.circular($styles.corners.sm),
@@ -129,7 +129,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
                   ),
                   SizedBox(width: $styles.insets.xs),
                   Text(
-                    l10n.moreLoadFailedRetry,
+                    l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
                     style: $styles.text.bodySmall.copyWith(
                       color: colorScheme.error,
                     ),
@@ -154,7 +154,7 @@ class _EmptySearchIndicator extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Semantics(
-        label: l10n.nothingFound,
+        label: l10n?.nothingFound ?? 'Nothing found',
         excludeSemantics: true,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +166,7 @@ class _EmptySearchIndicator extends StatelessWidget {
             ),
             SizedBox(height: $styles.insets.xs),
             Text(
-              l10n.nothingFound,
+              l10n?.nothingFound ?? 'Nothing found',
               style: $styles.text.body.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
