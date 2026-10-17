@@ -7,11 +7,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
-import '../../../main.dart';
-import '../../../utils/platfrom_info.dart';
-import '../../../data/repository/video_detail_repository.dart';
-import '../../../database/dao/media_history_dao.dart';
-import '../../../database/table/media.dart';
+import '../../l10n/localization_file/app_localizations.dart';
+import '../../main.dart';
+import '../../utils/platfrom_info.dart';
+import '../../data/repository/video_detail_repository.dart';
+import '../../database/dao/media_history_dao.dart';
+import '../../database/table/media.dart';
 import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
@@ -236,6 +237,7 @@ class _VideoContentState extends State<_VideoContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
     // ⚡ Bolt Optimization: Use MediaQuery.sizeOf(context) instead of MediaQuery.of(context).size.
     // Targeted size lookup prevents _VideoContent and descendant subtrees from rebuilding
@@ -262,7 +264,7 @@ class _VideoContentState extends State<_VideoContent> {
           Expanded(
             child: useTwoColumnLayout
                 ? _buildTwoColumnLayout()
-                : _buildNarrowTabContainer(),
+                : _buildNarrowTabContainer(l10n),
           ),
       ],
     );
@@ -285,7 +287,7 @@ class _VideoContentState extends State<_VideoContent> {
     );
   }
 
-  Widget _buildNarrowTabContainer() {
+  Widget _buildNarrowTabContainer(AppLocalizations l10n) {
     // ⚡ Bolt Optimization: Match DefaultTabController length to the 2 actual tabs
     // ('简介与相关' and '评论区') to eliminate out-of-bounds tab index state tracking and invalid animation math.
     return DefaultTabController(
@@ -303,9 +305,9 @@ class _VideoContentState extends State<_VideoContent> {
                 fontWeight: FontWeight.bold,
               ),
               unselectedLabelStyle: $styles.text.btn,
-              tabs: const [
-                Tab(text: '简介与相关'),
-                Tab(text: '评论区 (1,429)'),
+              tabs: [
+                Tab(text: l10n.infoAndRelated),
+                Tab(text: l10n.commentsCountTab),
               ],
             ),
           ),
