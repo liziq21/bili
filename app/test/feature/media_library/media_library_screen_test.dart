@@ -213,9 +213,9 @@ void main() {
 
     // The row subtitle leads with the source display name rather than the raw
     // id: the id is an internal identifier and would mean nothing to a reader.
-    expect(find.text('Bilibili · Just now'), findsOneWidget);
-    expect(find.text('Bilibili · Earlier today'), findsOneWidget);
-    expect(find.text('Bilibili · This week'), findsOneWidget);
+    expect(find.text('Bilibili - Just now'), findsOneWidget);
+    expect(find.text('Bilibili - Earlier today'), findsOneWidget);
+    expect(find.text('Bilibili - This week'), findsOneWidget);
     expect(find.textContaining('bilibili'), findsNothing);
   });
 
@@ -244,7 +244,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Text &&
-            RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$')
+            RegExp(r'^Bilibili - (\d{4}-)?\d{2}-\d{2}$')
                 .hasMatch(widget.data ?? ''),
       ),
       findsOneWidget,
@@ -270,7 +270,7 @@ void main() {
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
-    expect(find.text('Bilibili · Just now'), findsOneWidget);
+    expect(find.text('Bilibili - Just now'), findsOneWidget);
   });
 
   testWidgets('tapping a row hands over the source that row was loaded from', (
