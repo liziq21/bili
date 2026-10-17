@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/model/recent_search_query.dart';
+import '../../l10n/localization_file/app_localizations.dart';
 import 'bloc/search_bloc.dart';
 
 class const AppSearchAnchor({
@@ -133,14 +134,15 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     // subscribe directly to SearchBloc via stream listeners in _getSuggestions, avoiding
     // unnecessary rebuild passes of the SearchAnchor and FocusScope subtrees whenever
     // recent search queries are added or updated in state.
-    return _buildAnchor();
+    return _buildAnchor(context);
   }
 
-  Widget _buildAnchor() {
+  Widget _buildAnchor(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final anchor = widget.builder == null
         ? SearchAnchor.bar(
             searchController: _controller,
-            barHintText: '搜索...',
+            barHintText: l10n?.searchHint ?? 'Search...',
             barElevation: const WidgetStatePropertyAll(0.0),
             suggestionsBuilder: _getSuggestions,
             textInputAction: .search,
@@ -173,6 +175,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     // suggestionsBuilder 是两种模式浮层输入的共同路径，所以在这里兜底。
     _enforceMaxQueryLength();
 
+    final l10n = AppLocalizations.of(context);
     final query = controller.text;
 
     // if (_searchingWithQuery!.isEmpty) {
@@ -217,7 +220,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
           // moving between rows can tell them apart. Wording stays inside the
           // golden font subset (app/test/fonts/subset-characters.txt); adding a
           // character outside it fails golden_font_contract_test.
-          tooltip: '$item 放入搜索框',
+          tooltip: l10n?.putIntoSearchBox(item),
           onPressed: () {
             HapticFeedback.lightImpact();
             _controller.text = item;
