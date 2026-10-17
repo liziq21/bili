@@ -20,9 +20,9 @@ class const SearchResultScreen({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final creatorLabel = l10n.creatorTab;
-    final videoLabel = l10n.videoTab;
+    final l10n = AppLocalizations.of(context);
+    final creatorLabel = l10n?.creatorTab ?? 'Creators';
+    final videoLabel = l10n?.videoTab ?? 'Videos';
 
     final Map<Widget, Widget> tabAndView = {
       Tab(text: creatorLabel): ?_creatorProfileResultView(context),
