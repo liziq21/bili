@@ -96,8 +96,29 @@ class const VideoCard({
       return _buildFeedCard(context, feedSubtitle);
     }
 
-    final subtitleText =
-        '${videoInfoBase.viewCount} 观看 • ${videoInfoBase.uploadDate}';
+    final formattedViews = formatViewCount(videoInfoBase.viewCount);
+    final formattedDate = formatRelativeDate(videoInfoBase.uploadDate);
+    final creatorName = videoInfoBase.creatorProfileName;
+    final durationStr = formatDuration(videoInfoBase.duration);
+
+    final subtitleParts = <String>[
+      if (creatorName != null && creatorName.isNotEmpty) creatorName,
+      if (formattedViews.isNotEmpty) '$formattedViews 观看',
+      if (formattedDate.isNotEmpty) formattedDate,
+    ];
+    final subtitleText = subtitleParts.isNotEmpty
+        ? subtitleParts.join(' • ')
+        : (videoInfoBase.uploadDate != null
+              ? '${videoInfoBase.uploadDate}'
+              : '');
+
+    final semanticLabelParts = <String>[
+      videoInfoBase.title,
+      if (creatorName != null && creatorName.isNotEmpty) '创作者: $creatorName',
+      if (durationStr.isNotEmpty) '时长 $durationStr',
+      if (subtitleText.isNotEmpty) subtitleText,
+    ];
+    final semanticLabel = semanticLabelParts.join('，');
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -106,7 +127,7 @@ class const VideoCard({
         child: Semantics(
           button: true,
           enabled: onTap != null,
-          label: '${videoInfoBase.title}, $subtitleText',
+          label: semanticLabel,
           excludeSemantics: true,
           child: InkWell(
             onTap: onTap != null
@@ -120,8 +141,40 @@ class const VideoCard({
               children: [
                 // 封面图区域
                 AspectRatio(
-                  aspectRatio: 16 / 9, // 固定的 16:9
-                  child: _thumbnail(Theme.of(context).colorScheme),
+                  aspectRatio: 16 / 9,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _thumbnail(Theme.of(context).colorScheme),
+                      if (durationStr.isNotEmpty)
+                        Positioned(
+                          bottom: $styles.insets.xs,
+                          right: $styles.insets.xs,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: $styles.insets.xs,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: $styles.colors.scrim.withValues(
+                                alpha: 0.75,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                $styles.corners.sm,
+                              ),
+                            ),
+                            child: Text(
+                              durationStr,
+                              style: $styles.text.bodySmall.copyWith(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: $styles.colors.onScrim,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
                 // 文字区域：用 Expanded 承接剩下的所有空间
                 Expanded(
@@ -140,15 +193,16 @@ class const VideoCard({
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          subtitleText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: $styles.colors.onSurfaceVariant,
+                        if (subtitleText.isNotEmpty)
+                          Text(
+                            subtitleText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: $styles.colors.onSurfaceVariant,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
