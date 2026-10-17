@@ -147,7 +147,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
         break;
       case Error(:final error):
         _log.warning('Failed to toggle favorite', error);
-        emit(state.copyWith(videoDetail: detail, actionError: 'Favorite failed'));
+        emit(
+          state.copyWith(videoDetail: detail, actionError: 'Favorite failed'),
+        );
     }
   }
 
