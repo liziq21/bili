@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 
 /// Shows the local playlists that belong to [sourceId] and appends [video] to
@@ -54,8 +55,9 @@ class _LocalPlaylistPickerDialogState()
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('添加到播放列表'),
+      title: Text(l10n.addToPlaylistTitle),
       content: SizedBox(
         width: 420,
         child: StreamBuilder<List<LocalPlaylistEntity>>(
@@ -70,8 +72,8 @@ class _LocalPlaylistPickerDialogState()
             }
             if (snapshot.hasError) {
               return _PickerMessage(
-                message: '播放列表加载失败',
-                actionLabel: '重试',
+                message: l10n.playlistLoadFailed,
+                actionLabel: l10n.retry,
                 onAction: _retry,
               );
             }
@@ -93,7 +95,7 @@ class _LocalPlaylistPickerDialogState()
                   SizedBox(height: $styles.insets.xs),
                 ],
                 if (playlists.isEmpty)
-                  const _PickerMessage(message: '还没有播放列表')
+                  _PickerMessage(message: l10n.noPlaylistsYet)
                 else
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 360),
@@ -104,11 +106,11 @@ class _LocalPlaylistPickerDialogState()
                       itemBuilder: (context, index) {
                         final playlist = playlists[index];
                         return Tooltip(
-                          message: '添加到 ${playlist.name}',
+                          message: l10n.addToNamedPlaylist(playlist.name),
                           child: Semantics(
                             button: true,
                             enabled: !_isSaving,
-                            label: '添加到播放列表 ${playlist.name}',
+                            label: l10n.addToNamedPlaylistLong(playlist.name),
                             child: ListTile(
                               enabled: !_isSaving,
                               leading: const Icon(Icons.queue_music_outlined),
@@ -132,7 +134,7 @@ class _LocalPlaylistPickerDialogState()
                           _createPlaylist();
                         },
                   icon: const Icon(Icons.add),
-                  label: const Text('新建播放列表'),
+                  label: Text(l10n.newPlaylist),
                 ),
               ],
             );
@@ -142,7 +144,7 @@ class _LocalPlaylistPickerDialogState()
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
       ],
     );
@@ -172,9 +174,10 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _isSaving = false;
-        _error = '添加失败：$error';
+        _error = l10n.addFailed(error.toString());
       });
     }
   }
@@ -205,9 +208,10 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _isSaving = false;
-        _error = '创建或添加失败：$error';
+        _error = l10n.createOrAddFailed(error.toString());
       });
     }
   }
@@ -271,15 +275,16 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('新建播放列表'),
+      title: Text(l10n.newPlaylist),
       content: TextField(
         controller: _controller,
         autofocus: true,
         maxLength: 60,
-        decoration: const InputDecoration(
-          labelText: '名称',
-          hintText: '请输入播放列表名称',
+        decoration: InputDecoration(
+          labelText: l10n.name,
+          hintText: l10n.playlistNameRequired,
         ),
         onSubmitted: (_) {
           HapticFeedback.lightImpact();
@@ -289,14 +294,14 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
             HapticFeedback.lightImpact();
             _submit();
           },
-          child: const Text('创建'),
+          child: Text(l10n.create),
         ),
       ],
     );
