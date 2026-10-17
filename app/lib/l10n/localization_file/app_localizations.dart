@@ -61,8 +61,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,8 +69,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -83,16 +81,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('zh')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('zh')
+  ];
 
   /// App name - DO NOT TRANSLATE
   ///
@@ -4376,20 +4375,13 @@ abstract class AppLocalizations {
   ///
   /// In zh, this message translates to:
   /// **'Convert from {sourceFormat} to {targetFormat} at {bitrate}?\n\nThe original file will be deleted after conversion.'**
-  String trackConvertConfirmMessage(
-    String sourceFormat,
-    String targetFormat,
-    String bitrate,
-  );
+  String trackConvertConfirmMessage(String sourceFormat, String targetFormat, String bitrate);
 
   /// Confirmation dialog message for lossless-to-lossless conversion
   ///
   /// In zh, this message translates to:
   /// **'Convert from {sourceFormat} to {targetFormat}? (Lossless — no quality loss)\n\nThe original file will be deleted after conversion.'**
-  String trackConvertConfirmMessageLossless(
-    String sourceFormat,
-    String targetFormat,
-  );
+  String trackConvertConfirmMessageLossless(String sourceFormat, String targetFormat);
 
   /// Hint shown when converting between lossless formats
   ///
@@ -4761,11 +4753,7 @@ abstract class AppLocalizations {
   ///
   /// In zh, this message translates to:
   /// **'Convert {count} {count, plural, =1{track} other{tracks}} to {format} at {bitrate}?\n\nOriginal files will be deleted after conversion.'**
-  String selectionBatchConvertConfirmMessage(
-    int count,
-    String format,
-    String bitrate,
-  );
+  String selectionBatchConvertConfirmMessage(int count, String format, String bitrate);
 
   /// Confirmation dialog message for lossless batch conversion
   ///
@@ -5809,11 +5797,7 @@ abstract class AppLocalizations {
   ///
   /// In zh, this message translates to:
   /// **'{scanned}/{total} files • {percentage}%'**
-  String notifLibraryScanProgressWithTotal(
-    int scanned,
-    int total,
-    int percentage,
-  );
+  String notifLibraryScanProgressWithTotal(int scanned, int total, int percentage);
 
   /// Notification body for library scan progress when total is unknown
   ///
@@ -7097,7 +7081,7 @@ abstract class AppLocalizations {
   ///
   /// In zh, this message translates to:
   /// **'切换'**
-  String get switchLabel;
+  String get switch;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7286,8 +7270,7 @@ abstract class AppLocalizations {
   String get videoDetailSourceUnsupported;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -7296,24 +7279,24 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'zh':
-      return AppLocalizationsZh();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }
