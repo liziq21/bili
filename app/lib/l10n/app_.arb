@@ -5544,10 +5544,6 @@
   "@play": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "switch": "切换",
-  "@switch": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
   "fullscreenToggle": "全屏切换",
   "@fullscreenToggle": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
@@ -5726,6 +5722,10 @@
   },
   "videoDetailSourceUnsupported": "当前数据源暂不支持查看视频详情",
   "@videoDetailSourceUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchAction": "切换",
+  "@switchAction": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   }
 }
