@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../l10n/localization_file/app_localizations.dart';
 import '../app_bloc.dart';
 import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
@@ -76,21 +77,27 @@ MediaSourceDefinition? _resolveSource(
 ///
 /// 只列仓内已有数据支撑的三项。设计稿里的「订阅更新」不做：它需要订阅表
 /// （`database/table/` 无此表），给出点开是空的导航项比不给更差。
-List<AppNavDestination> get _navDestinations => [
-  const AppNavDestination(label: '首页', icon: Icons.home_rounded),
-  AppNavDestination(
-    label: '搜索',
-    icon: Icons.search_rounded,
-    railIcon: Icons.search_rounded,
-    // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
-    onReselect: requestSearchFocus,
-  ),
-  const AppNavDestination(
-    label: '我的',
-    icon: Icons.video_library_rounded,
-    railIcon: Icons.video_library_rounded,
-  ),
-];
+List<AppNavDestination> _navDestinations(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  return [
+    AppNavDestination(
+      label: l10n?.navHomeLabel ?? 'Home',
+      icon: Icons.home_rounded,
+    ),
+    AppNavDestination(
+      label: l10n?.search ?? 'Search',
+      icon: Icons.search_rounded,
+      railIcon: Icons.search_rounded,
+      // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
+      onReselect: requestSearchFocus,
+    ),
+    AppNavDestination(
+      label: l10n?.mine ?? 'Mine',
+      icon: Icons.video_library_rounded,
+      railIcon: Icons.video_library_rounded,
+    ),
+  ];
+}
 
 final _log = Logger('Router');
 
@@ -117,7 +124,7 @@ final GoRouter router = GoRouter(
       builder: (context, state, navigationShell) => AppScaffold(
         child: AppNavigationShell(
           navigationShell: navigationShell,
-          destinations: _navDestinations,
+          destinations: _navDestinations(context),
         ),
       ),
       branches: [

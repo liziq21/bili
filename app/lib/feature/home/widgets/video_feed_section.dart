@@ -2,6 +2,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../../../ui/video_card.dart';
@@ -139,7 +140,10 @@ class const _FeedFooter({
       );
     }
 
-    final label = section.hasMore ? '继续加载' : '没有更多了';
+    final l10n = AppLocalizations.of(context);
+    final label = section.hasMore
+        ? (l10n?.continueLoading ?? 'Load more')
+        : (l10n?.noMoreItems ?? 'No more items');
     return Padding(
       padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
       child: Center(

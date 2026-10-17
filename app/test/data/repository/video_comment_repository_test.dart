@@ -120,7 +120,7 @@ void main() {
       expect(result.isError, isTrue);
       expect(
         (result as Error<Page<VideoComment>>).error.toString(),
-        contains('不支持'),
+        contains('does not support'),
       );
     });
 
@@ -136,7 +136,7 @@ void main() {
       expect(result.isError, isTrue);
       expect(
         (result as Error<Page<VideoComment>>).error.toString(),
-        contains('评论回复'),
+        contains('comment replies'),
       );
     });
   });

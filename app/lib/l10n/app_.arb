@@ -101,7 +101,7 @@
   },
   "downloadFolderOrganization": "Folder Organization",
   "@downloadFolderOrganization": {
-    "description": "Setting for folder structure"
+    "description": "Title of the folder organization picker bottom sheet"
   },
   "appearanceTitle": "Appearance",
   "@appearanceTitle": {
@@ -731,7 +731,7 @@
   },
   "dialogDownload": "Download",
   "@dialogDownload": {
-    "description": "Dialog button - download action"
+    "description": "Confirm button in Download All dialog"
   },
   "dialogDiscard": "Discard",
   "@dialogDiscard": {
@@ -3658,7 +3658,6 @@
   "@downloadUseAlbumArtistForFoldersTrackSubtitle": {
     "description": "Subtitle when Track Artist is used for folder naming"
   },
-
   "lyricsProvidersTitle": "Lyrics Providers",
   "@lyricsProvidersTitle": {
     "description": "Title for the lyrics provider priority page"
@@ -3725,7 +3724,6 @@
   "@lyricsProviderExtensionDesc": {
     "description": "Generic description for extension-based lyrics providers"
   },
-
   "safMigrationTitle": "Storage Update Required",
   "@safMigrationTitle": {
     "description": "Title of SAF migration dialog"
@@ -3742,7 +3740,6 @@
   "@safMigrationSuccess": {
     "description": "Snackbar after successfully migrating to SAF"
   },
-
   "settingsDonate": "Donate",
   "@settingsDonate": {
     "description": "Settings menu item - donate"
@@ -3751,7 +3748,6 @@
   "@settingsDonateSubtitle": {
     "description": "Subtitle for donate menu item"
   },
-
   "tooltipLoveAll": "Love All",
   "@tooltipLoveAll": {
     "description": "Tooltip for the Love All button on album/playlist screens"
@@ -3778,10 +3774,9 @@
       }
     }
   },
-
   "dialogDownloadAllTitle": "Download All",
   "@dialogDownloadAllTitle": {
-    "description": "Title of the Download All confirmation dialog"
+    "description": "Dialog title for bulk download confirmation"
   },
   "dialogDownloadAllMessage": "Download {count} tracks?",
   "@dialogDownloadAllMessage": {
@@ -3792,11 +3787,6 @@
       }
     }
   },
-  "dialogDownload": "Download",
-  "@dialogDownload": {
-    "description": "Confirm button in Download All dialog"
-  },
-
   "homeSkipAlreadyDownloaded": "Skip already downloaded songs",
   "@homeSkipAlreadyDownloaded": {
     "description": "Checkbox label in import dialog to skip already-downloaded songs"
@@ -3809,7 +3799,6 @@
   "@homeAlbumInfoUnavailable": {
     "description": "Snackbar when album info cannot be loaded"
   },
-
   "snackbarLoadingCueSheet": "Loading CUE sheet...",
   "@snackbarLoadingCueSheet": {
     "description": "Snackbar while loading a CUE sheet file"
@@ -3839,12 +3828,10 @@
   "@snackbarNoActionDefined": {
     "description": "Snackbar when an extension button has no action configured"
   },
-
   "noTracksFoundForAlbum": "No tracks found for this album",
   "@noTracksFoundForAlbum": {
     "description": "Empty state message when an album has no tracks"
   },
-
   "downloadLocationSubtitle": "Choose storage mode for downloaded files.",
   "@downloadLocationSubtitle": {
     "description": "Subtitle text in Android download location bottom sheet"
@@ -3921,7 +3908,6 @@
   "@downloadSelectServiceToEnable": {
     "description": "Hint shown instead of Ask-quality subtitle when no built-in service selected"
   },
-
   "downloadSelectTidalQobuz": "Select Tidal or Qobuz above to configure quality",
   "@downloadSelectTidalQobuz": {
     "description": "Info hint when non-Tidal/Qobuz service is selected"
@@ -3986,7 +3972,6 @@
   "@downloadFilterContributingDisabled": {
     "description": "Subtitle when contributing artist filter is disabled"
   },
-
   "downloadProvidersNoneEnabled": "None enabled",
   "@downloadProvidersNoneEnabled": {
     "description": "Subtitle for lyrics providers setting when no providers are enabled"
@@ -4007,7 +3992,6 @@
   "@downloadMusixmatchAuto": {
     "description": "Button to reset Musixmatch language to automatic"
   },
-
   "downloadNetworkAnySubtitle": "WiFi + Mobile Data",
   "@downloadNetworkAnySubtitle": {
     "description": "Subtitle for 'Any' network mode option"
@@ -4020,10 +4004,6 @@
   "@downloadSongLinkRegionDesc": {
     "description": "Description in the SongLink region picker"
   },
-  "downloadFolderOrganization": "Folder Organization",
-  "@downloadFolderOrganization": {
-    "description": "Title of the folder organization picker bottom sheet"
-  },
   "snackbarUnsupportedAudioFormat": "Unsupported audio format",
   "@snackbarUnsupportedAudioFormat": {
     "description": "Snackbar when the audio format is not supported for the requested operation"
@@ -4031,10 +4011,6 @@
   "cacheRefresh": "Refresh",
   "@cacheRefresh": {
     "description": "Tooltip for refresh button on cache management page"
-  },
-  "dialogDownloadAllTitle": "Download All",
-  "@dialogDownloadAllTitle": {
-    "description": "Dialog title for bulk download confirmation"
   },
   "dialogDownloadPlaylistsMessage": "Download {trackCount} {trackCount, plural, =1{track} other{tracks}} from {playlistCount} {playlistCount, plural, =1{playlist} other{playlists}}?",
   "@dialogDownloadPlaylistsMessage": {
@@ -4163,7 +4139,6 @@
   "@editMetadataSelectEmpty": {
     "description": "Button to select only fields that are currently empty"
   },
-
   "queueDownloadingCount": "Downloading ({count})",
   "@queueDownloadingCount": {
     "description": "Header for active downloads section with count",
@@ -4287,7 +4262,6 @@
   "@audioAnalysisSamples": {
     "description": "Total samples metric label"
   },
-
   "extensionsSearchWith": "Search with {providerName}",
   "@extensionsSearchWith": {
     "description": "Extensions page - subtitle for built-in search provider option",
@@ -4326,7 +4300,6 @@
   "@extensionsNoHomeFeedExtensions": {
     "description": "Extensions page - shown when no installed extension has home feed"
   },
-
   "sortAlphaAsc": "A-Z",
   "@sortAlphaAsc": {
     "description": "Sort option - alphabetical ascending"
@@ -4352,7 +4325,6 @@
   "@cancelDownloadKeep": {
     "description": "Dialog button - keep the active download (do not cancel)"
   },
-
   "metadataSaveFailedFfmpeg": "Failed to save metadata via FFmpeg",
   "@metadataSaveFailedFfmpeg": {
     "description": "Snackbar error when FFmpeg fails to write metadata"
@@ -4361,7 +4333,6 @@
   "@metadataSaveFailedStorage": {
     "description": "Snackbar error when writing metadata file back to storage fails"
   },
-
   "snackbarFolderPickerFailed": "Failed to open folder picker: {error}",
   "@snackbarFolderPickerFailed": {
     "description": "Snackbar shown when folder picker fails to open",
@@ -4371,7 +4342,6 @@
       }
     }
   },
-
   "errorLoadAlbum": "Failed to load album",
   "@errorLoadAlbum": {
     "description": "Error state shown when album fails to load"
@@ -4384,7 +4354,6 @@
   "@errorLoadArtist": {
     "description": "Error state shown when artist fails to load"
   },
-
   "notifChannelDownloadName": "Download Progress",
   "@notifChannelDownloadName": {
     "description": "Android notification channel name for download progress"
@@ -4598,5 +4567,1165 @@
   "notifUpdateFailedBody": "Could not download update. Try again later.",
   "@notifUpdateFailedBody": {
     "description": "Notification body when app update download fails"
+  },
+  "appLoadFailed": "应用加载失败，请重试",
+  "@appLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "settings": "设置",
+  "@settings": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "settingsWip": "设置开发中",
+  "@settingsWip": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sourceNoRecommendations": "{p1} 暂无可用推荐",
+  "@sourceNoRecommendations": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceNoHomeFeed": "该数据源未提供首页 Feed",
+  "@sourceNoHomeFeed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sectionLoadFailed": "{p1} 加载失败",
+  "@sectionLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "checkNetworkRetry": "请检查网络连接后重试",
+  "@checkNetworkRetry": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sectionEmpty": "{p1} 暂无内容",
+  "@sectionEmpty": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "retry": "重试",
+  "@retry": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchDataSource": "切换数据源",
+  "@switchDataSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchVideoMediaSource": "切换视频与媒体数据源",
+  "@switchVideoMediaSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "unknownStreamer": "未知主播",
+  "@unknownStreamer": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "streamerLabel": "主播: {p1}",
+  "@streamerLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "commaSeparator": "，",
+  "@commaSeparator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "continueLoading": "继续加载",
+  "@continueLoading": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noMoreItems": "没有更多了",
+  "@noMoreItems": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "searchHint": "搜索...",
+  "@searchHint": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "putIntoSearchBox": "{p1} 放入搜索框",
+  "@putIntoSearchBox": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "loadFailedRetryLater": "加载失败，请稍后重试",
+  "@loadFailedRetryLater": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loadFailedRetry": "加载失败，重试",
+  "@loadFailedRetry": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "moreLoadFailedRetry": "更多数据加载失败，重试",
+  "@moreLoadFailedRetry": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "nothingFound": "未找到内容",
+  "@nothingFound": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "creatorTab": "创作者",
+  "@creatorTab": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "videoTab": "视频",
+  "@videoTab": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "recentSearches": "最近搜索",
+  "@recentSearches": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "clearRecentSearchHistory": "清空最近搜索历史",
+  "@clearRecentSearchHistory": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "clear": "清空",
+  "@clear": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "searchQueryLabel": "搜索 \"{p1}\"",
+  "@searchQueryLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "recentSearchLoadFailed": "加载最近搜索失败",
+  "@recentSearchLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "filters": "筛选器",
+  "@filters": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "reset": "重置",
+  "@reset": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "confirm": "确定",
+  "@confirm": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "selectDateRange": "选择日期范围",
+  "@selectDateRange": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "localLibrary": "本地库",
+  "@localLibrary": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "history": "历史",
+  "@history": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "favorite": "收藏",
+  "@favorite": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playlists": "播放列表",
+  "@playlists": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "subscribe": "订阅",
+  "@subscribe": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "allSources": "全部来源",
+  "@allSources": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sourceLabel": "来源：{p1}",
+  "@sourceLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "filter": "筛选",
+  "@filter": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "selectSource": "选择来源",
+  "@selectSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "deletePlaylistConfirm": "删除播放列表？",
+  "@deletePlaylistConfirm": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "deletePlaylistNote": "列表中的本地条目也会被删除。",
+  "@deletePlaylistNote": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "cancel": "取消",
+  "@cancel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "delete": "删除",
+  "@delete": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noFavoritesFromSource": "该来源没有可添加的收藏",
+  "@noFavoritesFromSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "operationFailed": "操作失败：{p1}",
+  "@operationFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "loadingFavorites": "正在加载收藏",
+  "@loadingFavorites": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "favoritesLoadFailed": "收藏加载失败",
+  "@favoritesLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noFavoritesYet": "还没有收藏",
+  "@noFavoritesYet": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "spacedDot": " · ",
+  "@spacedDot": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "favoriteActions": "收藏操作",
+  "@favoriteActions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "openCreator": "打开创作者",
+  "@openCreator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "unfavorite": "取消收藏",
+  "@unfavorite": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loadingPlaylists": "正在加载播放列表",
+  "@loadingPlaylists": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playlistLoadFailed": "播放列表加载失败",
+  "@playlistLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noPlaylistsYet": "还没有播放列表",
+  "@noPlaylistsYet": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "newPlaylist": "新建播放列表",
+  "@newPlaylist": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playlistActions": "播放列表操作",
+  "@playlistActions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addFavorite": "添加收藏",
+  "@addFavorite": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "deletePlaylist": "删除播放列表",
+  "@deletePlaylist": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "itemsLoadFailed": "条目加载失败",
+  "@itemsLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "listEmpty": "列表为空",
+  "@listEmpty": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "itemActions": "条目操作",
+  "@itemActions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "moveUp": "上移",
+  "@moveUp": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "moveDown": "下移",
+  "@moveDown": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "removeThisEntry": "移除这一次",
+  "@removeThisEntry": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loadingSubscriptions": "正在加载订阅",
+  "@loadingSubscriptions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "subscriptionsLoadFailed": "订阅加载失败",
+  "@subscriptionsLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noSubscriptionsYet": "还没有订阅",
+  "@noSubscriptionsYet": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "ungrouped": "未分组",
+  "@ungrouped": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "subscriptionActions": "订阅操作",
+  "@subscriptionActions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "setGroup": "设置分组",
+  "@setGroup": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "unsubscribe": "取消订阅",
+  "@unsubscribe": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "add": "添加",
+  "@add": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "source": "来源",
+  "@source": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "name": "名称",
+  "@name": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "create": "创建",
+  "@create": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "groupName": "分组名称",
+  "@groupName": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "groupNameHint": "留空表示未分组",
+  "@groupNameHint": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "save": "保存",
+  "@save": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "mine": "我的",
+  "@mine": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "watchHistory": "观看历史",
+  "@watchHistory": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "watchHistoryLoadedCount": "观看历史 · 已载入 {p1} 条",
+  "@watchHistoryLoadedCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "tabLoadFailed": "{p1} · 加载失败",
+  "@tabLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "loadMore": "加载更多",
+  "@loadMore": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "historyLoadFailed": "历史记录加载失败",
+  "@historyLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noWatchHistory": "还没有观看记录",
+  "@noWatchHistory": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "durationLabel": "时长 {p1}",
+  "@durationLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "watchedAt": "观看于 {p1}",
+  "@watchedAt": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "finishedWatching": "已看完",
+  "@finishedWatching": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "watchedDuration": "已观看 {p1}",
+  "@watchedDuration": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "justNow": "刚刚",
+  "@justNow": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "minutesAgo": "{p1} 分钟前",
+  "@minutesAgo": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "hoursAgo": "{p1} 小时前",
+  "@hoursAgo": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "daysAgo": "{p1} 天前",
+  "@daysAgo": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "addToPlaylistTitle": "添加到播放列表",
+  "@addToPlaylistTitle": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addToNamedPlaylist": "添加到 {p1}",
+  "@addToNamedPlaylist": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "addToNamedPlaylistLong": "添加到播放列表 {p1}",
+  "@addToNamedPlaylistLong": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "addFailed": "添加失败：{p1}",
+  "@addFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "createOrAddFailed": "创建或添加失败：{p1}",
+  "@createOrAddFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "playlistNameRequired": "请输入播放列表名称",
+  "@playlistNameRequired": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "infoAndRelated": "简介与相关",
+  "@infoAndRelated": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "commentsCountTab": "评论区 (1,429)",
+  "@commentsCountTab": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "likeFailed": "点赞失败",
+  "@likeFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "favoriteFailed": "收藏失败",
+  "@favoriteFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "followFailed": "关注失败",
+  "@followFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuSettingsTitle": "弹幕设置",
+  "@danmakuSettingsTitle": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "showDanmaku": "显示弹幕",
+  "@showDanmaku": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "showTimelineDanmakuOnVideo": "在视频画面上显示时间轴弹幕",
+  "@showTimelineDanmakuOnVideo": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "regularDanmakuDuration": "普通弹幕时长",
+  "@regularDanmakuDuration": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "secondsValue": "{p1} 秒",
+  "@secondsValue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "topBottomDanmakuDuration": "顶/底弹幕时长",
+  "@topBottomDanmakuDuration": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "secondsValueTopBottom": "{p1} 秒",
+  "@secondsValueTopBottom": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "opacity": "不透明度",
+  "@opacity": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "fontSize": "字号",
+  "@fontSize": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "strokeRadius": "描边半径",
+  "@strokeRadius": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "topMaxRows": "顶部最大行数",
+  "@topMaxRows": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "topRowsValue": "{p1} 行",
+  "@topRowsValue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "bottomMaxRows": "底部最大行数",
+  "@bottomMaxRows": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "bottomRowsValue": "{p1} 行",
+  "@bottomRowsValue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "playbackSpeed": "倍速",
+  "@playbackSpeed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "auto": "自动",
+  "@auto": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "qualitySelect": "画质选择",
+  "@qualitySelect": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "singleQualityOnly": "当前源只提供一个档位",
+  "@singleQualityOnly": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "afterCurrentItem": "播完本条",
+  "@afterCurrentItem": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "timer": "定时",
+  "@timer": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "pauseWhenTimeUp": "到时暂停",
+  "@pauseWhenTimeUp": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "minutesValue": "{p1} 分钟",
+  "@minutesValue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "stopAfterCurrentItem": "播完本条即停",
+  "@stopAfterCurrentItem": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "minutesWithSuffix": "{p1} 分钟",
+  "@minutesWithSuffix": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelTimer": "取消定时",
+  "@cancelTimer": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "countCompactWan": "{p1}万",
+  "@countCompactWan": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "commentsUnsupportedSource": "当前数据源暂不支持评论",
+  "@commentsUnsupportedSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "commentsLoadFailed": "评论加载失败，请稍后重试",
+  "@commentsLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noComments": "暂无评论",
+  "@noComments": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "likeCommentCount": "点赞评论 {p1}",
+  "@likeCommentCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "unlikeComment": "取消点赞",
+  "@unlikeComment": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "likeComment": "点赞评论",
+  "@likeComment": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "collapseReplies": "收起回复",
+  "@collapseReplies": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "viewReplyCount": "查看 {p1} 条回复",
+  "@viewReplyCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "repliesUnavailable": "评论回复暂不可用",
+  "@repliesUnavailable": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "videoLoadFailed": "视频加载失败，请重试",
+  "@videoLoadFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noRecommendations": "暂无关联推荐",
+  "@noRecommendations": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "viewCountLabel": "{p1} 播放",
+  "@viewCountLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "dotSeparator": "·",
+  "@dotSeparator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuCountSample": "2.4万 弹幕",
+  "@danmakuCountSample": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "oneDayAgoSample": "1天前",
+  "@oneDayAgoSample": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "originalTech": "原创技术",
+  "@originalTech": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "subscribersWeeklyTagline": "{p1} 关注者 · 每周硬核解析",
+  "@subscribersWeeklyTagline": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "openInBrowser": "在浏览器中打开原链接",
+  "@openInBrowser": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "visitCreatorHome": "跳转原源作者主页",
+  "@visitCreatorHome": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "unfollowCreator": "取消关注创作者",
+  "@unfollowCreator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "followCreator": "关注创作者",
+  "@followCreator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "followingCreatorNamed": "已关注创作者 {p1}",
+  "@followingCreatorNamed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "followCreatorNamed": "关注创作者 {p1}",
+  "@followCreatorNamed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "following": "已关注",
+  "@following": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "follow": "关注",
+  "@follow": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "like": "点赞",
+  "@like": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "list": "列表",
+  "@list": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addToPlaylist": "加入播放列表",
+  "@addToPlaylist": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addToLocalPlaylist": "加入本地播放列表",
+  "@addToLocalPlaylist": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchSource": "多源换源",
+  "@switchSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchVideoSource": "切换视频数据源",
+  "@switchVideoSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "autoSwitchBestRoute": "自动切换至最优可用的解析线路",
+  "@autoSwitchBestRoute": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "share": "分享",
+  "@share": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "shareVideo": "分享视频",
+  "@shareVideo": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "shareMultiSourceLink": "分享多源视频链接",
+  "@shareMultiSourceLink": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuStateOn": "弹幕开",
+  "@danmakuStateOn": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuStateOff": "弹幕关",
+  "@danmakuStateOff": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmaku": "弹幕",
+  "@danmaku": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuActionOff": "关闭弹幕",
+  "@danmakuActionOff": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuActionOn": "开启弹幕",
+  "@danmakuActionOn": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "synopsisSectionTitle": "本期摘要 & 核心技术点",
+  "@synopsisSectionTitle": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "collapseSynopsis": "收起摘要",
+  "@collapseSynopsis": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "expandSynopsis": "展开完整大纲",
+  "@expandSynopsis": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "collapse": "收起",
+  "@collapse": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sampleSynopsisFallback": "探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。",
+  "@sampleSynopsisFallback": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "chapters": "章节",
+  "@chapters": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "followersCount": "{p1} 关注者",
+  "@followersCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "multiSourceRecommendations": "多源关联推荐",
+  "@multiSourceRecommendations": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addingToQueue": "正在加入队列",
+  "@addingToQueue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addToPlayQueue": "加入播放队列",
+  "@addToPlayQueue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addedToPlayQueue": "已加入播放队列",
+  "@addedToPlayQueue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "addToQueueFailed": "加入队列失败",
+  "@addToQueueFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "cancelAction": "取消{p1}",
+  "@cancelAction": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "previousItem": "上一首",
+  "@previousItem": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "nextItem": "下一首",
+  "@nextItem": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loopOff": "循环：关闭",
+  "@loopOff": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loopOne": "单首循环",
+  "@loopOne": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "loopQueue": "队列循环",
+  "@loopQueue": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "minimize": "最小化",
+  "@minimize": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playbackFailed": "播放失败：{p1}",
+  "@playbackFailed": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "返回",
+  "@back": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "fullscreen": "全屏",
+  "@fullscreen": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "highBitrate1080": "1080P 高码率",
+  "@highBitrate1080": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "pause": "暂停",
+  "@pause": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "play": "播放",
+  "@play": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "fullscreenToggle": "全屏切换",
+  "@fullscreenToggle": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "noAvailableSource": "当前没有可用的数据源",
+  "@noAvailableSource": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sourceUnavailable": "数据源不可用",
+  "@sourceUnavailable": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "danmakuUnsupported": "当前数据源不支持弹幕",
+  "@danmakuUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "commentsUnsupported": "当前数据源不支持获取评论",
+  "@commentsUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "commentRepliesUnsupported": "当前数据源不支持获取评论回复",
+  "@commentRepliesUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "videoDetailUnsupported": "当前数据源不支持获取视频详情",
+  "@videoDetailUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "likeUnsupported": "当前数据源不支持点赞",
+  "@likeUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "favoriteUnsupported": "当前数据源不支持收藏",
+  "@favoriteUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "followUnsupported": "当前数据源不支持关注创作者",
+  "@followUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playUrlUnsupported": "当前数据源不支持获取播放地址",
+  "@playUrlUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "countCompactYi": "{p1}亿",
+  "@countCompactYi": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "yearsAgoCompact": "{p1} 年前",
+  "@yearsAgoCompact": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "monthsAgoCompact": "{p1} 个月前",
+  "@monthsAgoCompact": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "viewsWithDate": "{p1} 观看 • {p2}",
+  "@viewsWithDate": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
+  "viewsCount": "{p1} 观看",
+  "@viewsCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "spacedBullet": " • ",
+  "@spacedBullet": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "creatorLabel": "创作者: {p1}",
+  "@creatorLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "durationPrefix": "时长 {p1}",
+  "@durationPrefix": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownCreator": "未知创作者",
+  "@unknownCreator": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "creatorWithSubtitle": "{p1} • {p2}",
+  "@creatorWithSubtitle": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      },
+      "p2": {
+        "type": "String"
+      }
+    }
+  },
+  "moreOptions": "更多选项",
+  "@moreOptions": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "subscribersCount": "{p1} 关注",
+  "@subscribersCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "videosCount": "{p1} 视频",
+  "@videosCount": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "liveNow": "直播中",
+  "@liveNow": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "navHomeLabel": "首页",
+  "@navHomeLabel": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "search": "搜索",
+  "@search": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "liveSourceUnavailable": "直播所属的数据源不可用",
+  "@liveSourceUnavailable": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "creatorSourceUnavailable": "创作者所属的数据源不可用",
+  "@creatorSourceUnavailable": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "videoSourceUnavailable": "视频所属的数据源不可用",
+  "@videoSourceUnavailable": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "videoDetailSourceUnsupported": "当前数据源暂不支持查看视频详情",
+  "@videoDetailSourceUnsupported": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "switchAction": "切换",
+  "@switchAction": {
+    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   }
 }
