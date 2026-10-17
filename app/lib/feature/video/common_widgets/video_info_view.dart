@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../main.dart';
+import '../../../routing/router.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
@@ -115,6 +116,8 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             const _ActionButtonsSection(),
             Divider(color: $styles.colors.outline.withValues(alpha: 0.2)),
             const _SynopsisSection(),
+            const _ChaptersSection(),
+            const _UpInfoSection(),
             Gap($styles.insets.md),
             const _RecommendationsHeader(),
             Gap($styles.insets.xs),
@@ -726,6 +729,178 @@ class _SynopsisSectionState()
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 章节区：从 [VideoDetail.chapters] 渲染时间轴点，点击 seek 到该点。
+class const _ChaptersSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final chapters = context.select<VideoBloc, List<VideoChapter>?>(
+      (bloc) => bloc.state.videoDetail?.chapters,
+    );
+    if (chapters == null || chapters.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final playbackController = context.read<MediaPlaybackController>();
+    return Container(
+      margin: EdgeInsets.only(top: $styles.insets.md),
+      padding: EdgeInsets.all($styles.insets.xs),
+      decoration: BoxDecoration(
+        color: $styles.colors.surface,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '章节',
+            style: $styles.text.bodyBold.copyWith(
+              color: $styles.colors.onSurfaceStrong,
+              fontSize: 13,
+            ),
+          ),
+          const Gap(8),
+          for (final chapter in chapters)
+            _ChapterItem(
+              chapter: chapter,
+              playbackController: playbackController,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class const _ChapterItem({
+  required final VideoChapter chapter,
+  required final MediaPlaybackController playbackController,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final target = Duration(seconds: chapter.startSeconds);
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
+        final duration = playbackController.state.duration;
+        if (duration <= Duration.zero) return;
+        playbackController.seek(target > duration ? duration : target);
+      },
+      borderRadius: BorderRadius.circular($styles.corners.sm),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: $styles.insets.xxs,
+          horizontal: $styles.insets.xs,
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 44,
+              child: Text(
+                _formatDuration(chapter.startSeconds),
+                style: $styles.text.bodySmallBold.copyWith(
+                  color: $styles.colors.accentText,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const Gap(8),
+            Expanded(
+              child: Text(
+                chapter.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onSurface,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// UP 主信息块：点击进入该 UP 主的空间页。
+class const _UpInfoSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final creator = context.select<VideoBloc, CreatorProfile?>(
+      (bloc) => bloc.state.videoDetail?.creator,
+    );
+    if (creator == null) return const SizedBox.shrink();
+    return Container(
+      margin: EdgeInsets.only(top: $styles.insets.md),
+      padding: EdgeInsets.all($styles.insets.xs),
+      decoration: BoxDecoration(
+        color: $styles.colors.surface,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+        border: Border.all(
+          color: $styles.colors.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          context.navigateToSpace(creator.id);
+        },
+        borderRadius: BorderRadius.circular($styles.corners.md),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  creator.thumbnailUrl != null &&
+                      creator.thumbnailUrl!.isNotEmpty
+                  ? ResizeImage.resizeIfNeeded(
+                      128,
+                      128,
+                      CachedNetworkImageProvider(creator.thumbnailUrl!),
+                    )
+                  : null,
+              child:
+                  creator.thumbnailUrl == null || creator.thumbnailUrl!.isEmpty
+                  ? const Icon(Icons.person)
+                  : null,
+            ),
+            Gap($styles.insets.xs),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    creator.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.bodyBold.copyWith(
+                      color: $styles.colors.onSurfaceStrong,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    '${_formatCount(creator.subscribers ?? 0)} 关注者',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.bodySmall.copyWith(
+                      color: $styles.colors.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: $styles.colors.onSurfaceVariant,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

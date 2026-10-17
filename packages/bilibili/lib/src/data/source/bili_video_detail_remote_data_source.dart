@@ -78,6 +78,8 @@ final class BiliVideoDetailRemoteDataSource({
           )
           .toList();
 
+      final chapters = await _chaptersOf(network, detailData);
+
       final detail = VideoDetail(
         video: video,
         creator: creator,
@@ -88,11 +90,43 @@ final class BiliVideoDetailRemoteDataSource({
         isFavorited: relation?.favorite ?? false,
         isSubscribed: relation?.attention ?? false,
         relatedVideos: relatedVideos,
+        chapters: chapters,
       );
 
       return Result.ok(detail);
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
+    }
+  }
+
+  /// 章节来自 `player/v2` 的 `view_points`（视频看点），按第一个分 P 的 cid
+  /// 查询：该端点要求 cid，而页面当前播的也是第一个分 P。
+  ///
+  /// 章节是可选项，查询失败降级为空列表，不让详情请求整体失败——详情页其余
+  /// 内容（描述、相关推荐、UP 主）仍然可用。
+  Future<List<VideoChapter>> _chaptersOf(
+    NetworkVideoDataSource network,
+    VideoDetailData detail,
+  ) async {
+    final cid = detail.pages?.firstOrNull?.cid;
+    if (cid == null) return const [];
+    try {
+      final playerInfo = await network.getPlayerInfo(
+        bvid: detail.bvid,
+        cid: cid,
+      );
+      final points = playerInfo.viewPoints ?? const [];
+      final chapters = <VideoChapter>[];
+      for (final point in points) {
+        final start = point.from;
+        final title = point.content?.trim() ?? '';
+        if (start == null || !start.isFinite || title.isEmpty) continue;
+        chapters.add(VideoChapter(startSeconds: start.round(), title: title));
+      }
+      chapters.sort((a, b) => a.startSeconds.compareTo(b.startSeconds));
+      return List.unmodifiable(chapters);
+    } catch (_) {
+      return const [];
     }
   }
 }
