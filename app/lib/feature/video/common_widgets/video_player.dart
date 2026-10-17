@@ -220,7 +220,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final state = _state;
     final queueActive = state != null && state.queueLength > 0;
     final displayIndex = state?.currentIndex != null
@@ -238,7 +238,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
       child: Row(
         children: [
           IconButton(
-            tooltip: l10n.previousItem,
+            tooltip: l10n?.previousItem ?? 'Previous',
             iconSize: 22,
             color: $styles.colors.onSurfaceVariant,
             onPressed: queueActive
@@ -250,7 +250,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
             icon: Icon(Icons.skip_previous),
           ),
           IconButton(
-            tooltip: l10n.nextItem,
+            tooltip: l10n?.nextItem ?? 'Next',
             iconSize: 22,
             color: $styles.colors.onSurfaceVariant,
             onPressed: queueActive
@@ -301,14 +301,14 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
     }
   }
 
-  String _queueModeTooltip(AppLocalizations l10n, PlaybackQueueMode mode) {
+  String _queueModeTooltip(AppLocalizations? l10n, PlaybackQueueMode mode) {
     switch (mode) {
       case PlaybackQueueMode.none:
-        return l10n.loopOff;
+        return l10n?.loopOff ?? 'Loop off';
       case PlaybackQueueMode.single:
-        return l10n.loopOne;
+        return l10n?.loopOne ?? 'Loop one';
       case PlaybackQueueMode.loop:
-        return l10n.loopQueue;
+        return l10n?.loopQueue ?? 'Loop queue';
     }
   }
 
@@ -467,7 +467,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final state = _playbackState;
     final hasError = state != null && state.error != null;
     final videoId = context.select<VideoBloc, String?>(
@@ -518,7 +518,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
                   const Gap(6),
                   _OverlayIconButton(
                     icon: Icons.picture_in_picture_alt,
-                    tooltip: l10n.minimize,
+                    tooltip: l10n?.minimize ?? 'Minimize',
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       widget.onMinimize!();
@@ -563,7 +563,7 @@ class const _ErrorView({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: $styles.colors.scrim,
       alignment: Alignment.center,
@@ -574,7 +574,7 @@ class const _ErrorView({
           Icon(Icons.error_outline, color: $styles.colors.onScrim, size: 32),
           const Gap(8),
           Text(
-            l10n.playbackFailed(message),
+            l10n?.playbackFailed(message) ?? 'Playback failed: $message',
             textAlign: TextAlign.center,
             style: $styles.text.bodySmall.copyWith(
               color: $styles.colors.onScrim,
@@ -585,7 +585,7 @@ class const _ErrorView({
             TextButton(
               onPressed: onRetry,
               child: Text(
-                l10n.retry,
+                l10n?.retry ?? 'Retry',
                 style: $styles.text.bodySmall.copyWith(
                   color: $styles.colors.accentText,
                 ),
@@ -623,10 +623,12 @@ class const _FullscreenButton({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return _OverlayIconButton(
       icon: fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-      tooltip: fullscreen ? l10n.back : l10n.fullscreen,
+      tooltip: fullscreen
+          ? (l10n?.back ?? 'Back')
+          : (l10n?.fullscreen ?? 'Fullscreen'),
       onPressed: onPressed == null
           ? null
           : () {

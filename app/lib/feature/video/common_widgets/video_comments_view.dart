@@ -10,18 +10,23 @@ import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
-  static String _formatCount(int count, AppLocalizations l10n) {
+  static String _formatCount(int count, AppLocalizations? l10n) {
     if (count >= 10000) {
-      return l10n.countCompactWan((count / 10000).toStringAsFixed(1));
+      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ??
+          '$count';
     }
     return '$count';
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     if (context.read<VideoCommentBloc?>() == null) {
-      return Center(child: Text(l10n.commentsUnsupportedSource));
+      return Center(
+        child: Text(
+          l10n?.commentsUnsupportedSource ?? 'Comments not supported',
+        ),
+      );
     }
 
     // ⚡ Bolt Optimization: Use BlocSelector to isolate list container state
@@ -56,7 +61,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                l10n.commentsLoadFailed,
+                l10n?.commentsLoadFailed ?? 'Failed to load comments',
                 style: $styles.text.body.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -70,7 +75,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                l10n.noComments,
+                l10n?.noComments ?? 'No comments yet',
                 style: $styles.text.body.copyWith(
                   color: $styles.colors.onSurfaceVariant,
                 ),
@@ -122,7 +127,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
 class const _CommentItem({required final int index}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final selection = context
         .select<
           VideoCommentBloc,
@@ -212,12 +217,12 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                     enabled: true,
                     selected: comment.isLiked,
                     excludeSemantics: true,
-                    label: l10n.likeCommentCount(
+                    label: l10n?.likeCommentCount(
                       VideoCommentsView._formatCount(comment.likeCount, l10n),
                     ),
                     tooltip: comment.isLiked
-                        ? l10n.unlikeComment
-                        : l10n.likeComment,
+                        ? (l10n?.unlikeComment ?? 'Unlike')
+                        : (l10n?.likeComment ?? 'Like'),
                     child: InkWell(
                       onTap: () {
                         HapticFeedback.lightImpact();
@@ -268,8 +273,8 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                   button: true,
                   enabled: true,
                   label: effectiveReplyState.isExpanded
-                      ? l10n.collapseReplies
-                      : l10n.viewReplyCount(
+                      ? (l10n?.collapseReplies ?? 'Collapse replies')
+                      : l10n?.viewReplyCount(
                           VideoCommentsView._formatCount(replyCount, l10n),
                         ),
                   child: TextButton(
@@ -281,10 +286,14 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                     },
                     child: Text(
                       effectiveReplyState.isExpanded
-                          ? l10n.collapseReplies
-                          : l10n.viewReplyCount(
-                              VideoCommentsView._formatCount(replyCount, l10n),
-                            ),
+                          ? (l10n?.collapseReplies ?? 'Collapse replies')
+                          : l10n?.viewReplyCount(
+                                  VideoCommentsView._formatCount(
+                                    replyCount,
+                                    l10n,
+                                  ),
+                                ) ??
+                                '$replyCount',
                     ),
                   ),
                 ),
@@ -308,7 +317,7 @@ class const _CommentReplies({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification.metrics.axis == Axis.vertical &&
@@ -353,7 +362,7 @@ class const _CommentReplies({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.repliesUnavailable,
+                          l10n?.repliesUnavailable ?? 'Replies unavailable',
                           style: $styles.text.bodySmall.copyWith(
                             color: $styles.colors.onSurfaceVariant,
                           ),
@@ -364,7 +373,7 @@ class const _CommentReplies({
                               FetchNextCommentRepliesPage(commentId),
                             );
                           },
-                          child: Text(l10n.retry),
+                          child: Text(l10n?.retry ?? 'Retry'),
                         ),
                       ],
                     );
