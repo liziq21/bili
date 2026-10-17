@@ -35,6 +35,12 @@ class MediaStream({
   /// 平均码率（bit/s），未知时为 null。用于清晰度比较，不做播放决策。
   final int? bitrate,
 
+  /// 源侧的流 id（B 站 dash 的 video id），跨视频稳定，未知时为 null。
+  ///
+  /// 用来判断「当前已经是记住的那一档」以及让源按 id 精确匹配；只有高度时
+  /// 同高度的多路码率无法区分。
+  final int? streamId,
+
   /// 画面编码标识（如 `avc1.640028`），未知时为 null。
   final String? codecs,
 
@@ -65,6 +71,12 @@ class MediaQualityOption({
 
   /// 可读标签，如 `1080P`。
   required final String label,
+
+  /// 源侧的清晰度 id，跨视频稳定（如 B 站 dash 的 video id）。
+  ///
+  /// 记忆「选的是哪一档」要用它而不是高度：同一高度可能有多个码率，按高度
+  /// 选只能就近命中其中一路。源不认识该 id 时忽略即可，不影响按高度回退。
+  final int? streamId,
 
   /// 平均码率（bit/s），未知时为 null。仅用于排序与展示。
   final int? bitrate,

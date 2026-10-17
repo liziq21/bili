@@ -127,7 +127,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
                             color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
-                  trailing: option.height == currentHeight
+                  trailing: _isCurrent(option, fallbackHeight: currentHeight)
                       ? Icon(Icons.check, color: $styles.colors.accentText)
                       : null,
                   onTap: () {
@@ -147,7 +147,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   Future<void> _applyQuality(MediaQualityOption option) async {
     final videoId = context.read<VideoBloc>().state.videoDetail?.video.id;
     if (videoId == null) return;
-    if (option.height == widget.stream.height) return;
+    if (_isCurrent(option)) return;
 
     setState(() => _switching = true);
     try {
@@ -155,6 +155,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
       final result = await repository.getMediaStream(
         videoId,
         preferHeight: option.height,
+        preferStreamId: option.streamId,
       );
       if (!mounted) return;
       switch (result) {
@@ -165,7 +166,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
           await widget.controller.open(value);
           if (!mounted) return;
           context.read<VideoBloc>().add(MediaStreamChanged(value));
-          _persistDefaultQuality(option.height);
+          _persistDefaultQuality(option);
         case Error():
           break;
       }
@@ -175,13 +176,25 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
     }
   }
 
-  /// 把选中高度记为默认画质。无 PreferencesDataSource 注入时跳过。
-  void _persistDefaultQuality(int height) {
+  /// 档位是否就是当前在播的那一档。
+  ///
+  /// 有源侧 id 时按 id 比：同高度可能有多个码率，只看高度会把两档当成一档。
+  bool _isCurrent(MediaQualityOption option, {int? fallbackHeight}) {
+    if (option.streamId != null && widget.stream.streamId != null) {
+      return option.streamId == widget.stream.streamId;
+    }
+    final height = option.height;
+    return height == (fallbackHeight ?? widget.stream.height);
+  }
+
+  /// 把选中的整档记为默认画质。无 PreferencesDataSource 注入时跳过。
+  ///
+  /// id 与高度都写：id 用于精确匹配，高度留给源不认得该 id 的情况。
+  void _persistDefaultQuality(MediaQualityOption option) {
     try {
-      context.read<PreferencesDataSource>().set(
-        PreferencesKey.preferredQualityHeight,
-        height,
-      );
+      final preferences = context.read<PreferencesDataSource>();
+      preferences.set(PreferencesKey.preferredQualityHeight, option.height);
+      preferences.set(PreferencesKey.preferredQualityStreamId, option.streamId);
     } catch (_) {}
   }
 }

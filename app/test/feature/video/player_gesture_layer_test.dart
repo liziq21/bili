@@ -5,6 +5,7 @@ import 'package:app/feature/video/common_widgets/player_gesture_layer.dart';
 import 'package:app/feature/video/player/brightness_service.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -176,6 +177,8 @@ void main() {
 
       // 起点位置 30s，落点 = 30s + 60s。
       expect(fake.seekCalls, contains(const Duration(seconds: 90)));
+      // 双击识别器留有 countdown timer，收尾前推进过去
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
     testWidgets('horizontal drag is clamped to the duration', (tester) async {
@@ -186,6 +189,8 @@ void main() {
       await tester.pump();
 
       expect(fake.seekCalls, contains(const Duration(minutes: 2)));
+      // 双击识别器留有 countdown timer，收尾前推进过去
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
     testWidgets('vertical drag on the right half lowers the volume', (
@@ -205,6 +210,8 @@ void main() {
       // 初值 1.0，下拉 50px（半屏高）= -0.5；平台层量程 0..100，
       // 控制器把 0..1 换算后下发。
       expect(fake.volumeCalls, contains(50.0));
+      // 双击识别器留有 countdown timer，收尾前推进过去
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
     testWidgets('vertical drag on the left half lowers the brightness', (
@@ -229,6 +236,8 @@ void main() {
         setBrightness.last.arguments['brightness'] as double,
         closeTo(0.3, 1e-9),
       );
+      // 双击识别器留有 countdown timer，收尾前推进过去
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
     testWidgets('dragging the left side to the bottom restores system', (
@@ -250,8 +259,81 @@ void main() {
           .toList();
       expect(setBrightness, isNotEmpty);
       expect(setBrightness.last.arguments['brightness'], isNull);
+      // 双击识别器留有 countdown timer，收尾前推进过去
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
+    testWidgets('double tap on the right half seeks forward', (tester) async {
+      await pumpLayer(tester);
+      // 画面宽 200，中线在 100；x=150 属右半屏（快进）。
+      await tester.tapAt(const Offset(150, 50));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(const Offset(150, 50));
+      await tester.pump(const Duration(milliseconds: 100));
+      // 起点位置 30s，双击快进 10s。
+      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
+    });
+    testWidgets('double tap on the left half seeks backward', (tester) async {
+      await pumpLayer(tester);
+      // x=50 属左半屏（快退）。
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump(const Duration(milliseconds: 100));
+      // 起点位置 30s，双击快退 10s。
+      expect(fake.seekCalls, contains(const Duration(seconds: 20)));
+    });
+    testWidgets(
+      'mouse double tap goes to the screen callback instead of seeking',
+      (tester) async {
+        await pumpLayer(tester);
+        var screenTaps = 0;
+        // 重建一层带鼠标回调的手势层。
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 200,
+                height: 100,
+                child: PlayerGestureLayer(
+                  controller: controller,
+                  brightnessService: BrightnessService(),
+                  boost: boost,
+                  onDoubleTapScreen: () => screenTaps++,
+                  child: const ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox.expand(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final pointer = TestPointer(7, PointerDeviceKind.mouse);
+        tester.binding.handlePointerEvent(pointer.down(const Offset(150, 50)));
+        tester.binding.handlePointerEvent(pointer.up());
+        await tester.pump(const Duration(milliseconds: 50));
+        tester.binding.handlePointerEvent(pointer.down(const Offset(150, 50)));
+        tester.binding.handlePointerEvent(pointer.up());
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(screenTaps, 1);
+        expect(fake.seekCalls, isEmpty);
+      },
+    );
+    testWidgets('double tap exactly on the middle line seeks forward', (
+      tester,
+    ) async {
+      await pumpLayer(tester);
+      // 中线 x=100 归右半屏，与垂直拖动的左右分区判定一致。
+      await tester.tapAt(const Offset(100, 50));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(const Offset(100, 50));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
+    });
     testWidgets('long press boosts the rate and releasing restores', (
       tester,
     ) async {

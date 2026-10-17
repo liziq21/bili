@@ -64,6 +64,16 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
   @override
   Future<void> dispose() async {}
 
+  /// 发射队列状态：用于让「播完当前这条再停」观察到序号前进。
+  void emitPlaylist({required int index, required int length}) {
+    _playlist.add(
+      Playlist(
+        List.generate(length, (i) => Media('https://e.com/$i.m4s')),
+        index: index,
+      ),
+    );
+  }
+
   void disposeStreams() {
     _playlist.close();
   }
@@ -153,6 +163,13 @@ void main() {
     });
   });
 
+  /// 弹窗分两组共 9 项，默认 600px 视口只构建首屏，放大到能一次建全。
+  void useTallViewport(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1000, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+  }
+
   group('SleepTimerChip', () {
     testWidgets('shows the idle label before starting', (tester) async {
       await pumpChip(tester);
@@ -187,6 +204,7 @@ void main() {
     });
 
     testWidgets('a running timer offers a cancel entry', (tester) async {
+      useTallViewport(tester);
       await pumpChip(tester);
 
       await tester.tap(find.text('定时'));
@@ -201,6 +219,129 @@ void main() {
       await tester.pump();
 
       expect(find.text('定时'), findsOneWidget);
+    });
+  });
+
+  group('SleepTimerController after-current mode', () {
+    testWidgets('does not pause when the countdown ends', (tester) async {
+      await pumpChip(tester);
+      final sleep = SleepTimerController(controller);
+      addTearDown(sleep.dispose);
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/a.m4s'),
+        MediaStream(videoUrl: 'https://e.com/b.m4s'),
+      ]);
+      fake.emitPlaylist(index: 0, length: 2);
+      await tester.pump();
+
+      sleep.start(1, action: SleepTimerAction.afterCurrent);
+      await tester.pump(const Duration(seconds: 61));
+
+      // 到点只标记待生效，不打断当前这条。
+      expect(fake.pauseCalls, isEmpty);
+      expect(sleep.pendingAfterCurrent, isTrue);
+      expect(sleep.isActive, isTrue);
+      sleep.cancel();
+    });
+
+    testWidgets('pauses once the queue advances to the next item', (
+      tester,
+    ) async {
+      await pumpChip(tester);
+      final sleep = SleepTimerController(controller);
+      addTearDown(sleep.dispose);
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/a.m4s'),
+        MediaStream(videoUrl: 'https://e.com/b.m4s'),
+      ]);
+      fake.emitPlaylist(index: 0, length: 2);
+      await tester.pump();
+
+      sleep.start(1, action: SleepTimerAction.afterCurrent);
+      await tester.pump(const Duration(seconds: 61));
+      expect(fake.pauseCalls, isEmpty);
+
+      // 本条播完、队列要进下一条：此刻才停。
+      fake.emitPlaylist(index: 1, length: 2);
+      await tester.pump();
+
+      expect(fake.pauseCalls, isNotEmpty);
+      expect(sleep.pendingAfterCurrent, isFalse);
+      sleep.cancel();
+    });
+
+    testWidgets('never pauses a single-item queue', (tester) async {
+      await pumpChip(tester);
+      final sleep = SleepTimerController(controller);
+      addTearDown(sleep.dispose);
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/a.m4s'),
+      ]);
+      await tester.pump();
+
+      sleep.start(1, action: SleepTimerAction.afterCurrent);
+      await tester.pump(const Duration(seconds: 61));
+
+      // 单条播放播完本就自然停，不该再插一次 pause（否则手动暂停会被误判）。
+      expect(fake.pauseCalls, isEmpty);
+      expect(sleep.pendingAfterCurrent, isTrue);
+      sleep.cancel();
+    });
+
+    testWidgets('cancel clears the pending stop', (tester) async {
+      await pumpChip(tester);
+      final sleep = SleepTimerController(controller);
+      addTearDown(sleep.dispose);
+      sleep.start(1, action: SleepTimerAction.afterCurrent);
+      await tester.pump(const Duration(seconds: 61));
+      expect(sleep.pendingAfterCurrent, isTrue);
+
+      sleep.cancel();
+
+      expect(sleep.pendingAfterCurrent, isFalse);
+      expect(sleep.isActive, isFalse);
+    });
+  });
+
+  group('SleepTimerChip after-current picker', () {
+    testWidgets('lists the after-current group below the pause group', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await pumpChip(tester);
+
+      await tester.tap(find.text('定时'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('到时暂停'), findsOneWidget);
+      expect(find.text('播完本条即停'), findsOneWidget);
+      // 两组各 4 个档位，同文案项取最后一个即 after-current 组。
+      // 两组档位文案不再相同，第一组是裸的「15 分钟」。
+      expect(find.text('15 分钟'), findsOneWidget);
+      expect(find.text('15 分钟（播完本条）'), findsOneWidget);
+    });
+
+    testWidgets('after-current selection shows the pending label', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await pumpChip(tester);
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/a.m4s'),
+      ]);
+      await tester.pump();
+
+      await tester.tap(find.text('定时'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('15 分钟（播完本条）'));
+      await tester.pumpAndSettle();
+      expect(find.text('15:00'), findsOneWidget);
+
+      // 15 分钟档 = 900s，推进 901s 让最后一次 tick 落地。
+      await tester.pump(const Duration(seconds: 901));
+      await tester.pump();
+
+      expect(find.text('播完本条'), findsOneWidget);
     });
   });
 }

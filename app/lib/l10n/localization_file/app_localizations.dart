@@ -1606,6 +1606,30 @@ abstract class AppLocalizations {
   /// **'取消定时'**
   String get sleepTimerCancel;
 
+  /// Sleep timer group heading for pausing as soon as the countdown ends
+  ///
+  /// In zh, this message translates to:
+  /// **'到时暂停'**
+  String get sleepTimerActionNowLabel;
+
+  /// Sleep timer group heading for stopping after the current item finishes
+  ///
+  /// In zh, this message translates to:
+  /// **'播完本条即停'**
+  String get sleepTimerAfterCurrentTitle;
+
+  /// Suffix appended to sleep timer durations in the stop-after-current group so the two groups are not textually identical
+  ///
+  /// In zh, this message translates to:
+  /// **'（播完本条）'**
+  String get sleepTimerAfterCurrentOptionSuffix;
+
+  /// Sleep timer chip label while the countdown has ended and the stop is waiting for the current item to finish
+  ///
+  /// In zh, this message translates to:
+  /// **'播完本条'**
+  String get sleepTimerAfterCurrentPending;
+
   /// Quality picker title
   ///
   /// In zh, this message translates to:

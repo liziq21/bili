@@ -263,6 +263,135 @@ void main() {
       expect(stream.videoUrl, 'https://cdn.example/v-1080.m4s');
     });
 
+    test('preferStreamId 精确命中同高度的另一路码率', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080-high.m4s',
+              'height': 1080,
+              'bandwidth': 4000000,
+            },
+            {
+              'id': 81,
+              'baseUrl': 'https://cdn.example/v-1080-low.m4s',
+              'height': 1080,
+              'bandwidth': 1000000,
+            },
+          ],
+        ),
+      );
+
+      // 两路同高度，按高度无法区分；id 能。
+      final stream = expectOk(
+        await source.getMediaStream('BV1GJ411x7vy', preferStreamId: 81),
+      );
+      expect(stream.videoUrl, 'https://cdn.example/v-1080-low.m4s');
+      expect(stream.streamId, 81);
+    });
+
+    test('preferStreamId 优先于 preferHeight', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 120,
+              'baseUrl': 'https://cdn.example/v-4k.m4s',
+              'height': 2160,
+            },
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(
+        await source.getMediaStream(
+          'BV1GJ411x7vy',
+          preferHeight: 2160,
+          preferStreamId: 32,
+        ),
+      );
+      expect(stream.videoUrl, 'https://cdn.example/v-720.m4s');
+    });
+
+    test('preferStreamId 已不存在时退回 preferHeight', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080.m4s',
+              'height': 1080,
+            },
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(
+        await source.getMediaStream(
+          'BV1GJ411x7vy',
+          preferHeight: 720,
+          preferStreamId: 999,
+        ),
+      );
+      expect(stream.videoUrl, 'https://cdn.example/v-720.m4s');
+    });
+
+    test('altogether 缺地址的条目不会被 id 精确匹配选中', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {'id': 80, 'baseUrl': '', 'height': 1080},
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+            },
+          ],
+        ),
+      );
+
+      // 不可播的档位不能被选中，否则会拿到一条播不了的流。
+      final stream = expectOk(
+        await source.getMediaStream('BV1GJ411x7vy', preferStreamId: 80),
+      );
+      expect(stream.videoUrl, 'https://cdn.example/v-720.m4s');
+    });
+
+    test('画质候选带源侧 id，供 UI 精确记忆', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 120,
+              'baseUrl': 'https://cdn.example/v-4k.m4s',
+              'height': 2160,
+            },
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080.m4s',
+              'height': 1080,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+      // 未给偏好时按码率最高选；两路都没带宽，排序落在后一项。
+      expect(stream.streamId, 80);
+      expect(stream.alternatives.single.streamId, 120);
+    });
+
     test('preferHeight 高于所有可用档时取最高一路', () async {
       final source = makeSource(
         buildPlayUrl(

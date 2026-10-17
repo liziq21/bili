@@ -10,13 +10,31 @@ import '../player/media_playback_controller.dart';
 /// 睡眠定时器档位（分钟）。
 const List<int> kSleepTimerMinutes = [15, 30, 45, 60];
 
-/// 睡眠定时器状态机：倒计时归零时暂停播放。
+/// 计时归零时的行为。
+enum SleepTimerAction {
+  /// 归零即暂停当前播放。
+  pauseNow,
+
+  /// 本条照播完，等队列要进下一条时再暂停。
+  ///
+  /// 队列循环 / 单曲循环下媒体播完会自动进下一条，故到点本身不干预，
+  /// 真正的停点在 [PlaybackState.currentIndex] 变化的那一刻。
+  afterCurrent,
+}
+
+/// 睡眠定时器状态机：倒计时归零时按 [SleepTimerAction] 停播。
 ///
 /// 单独存在是为了让倒计时逻辑可以被单元测试直接驱动，不必渲染 UI。
 /// 计时器在 [MediaPlaybackController.pause] 被调用后自动取消。
-class SleepTimerController(final MediaPlaybackController _controller)
-    extends ChangeNotifier {
+class SleepTimerController extends ChangeNotifier {
+  SleepTimerController(this._controller) {
+    _subscription = _controller.states.listen(_onState);
+  }
+
+  final MediaPlaybackController _controller;
+
   Timer? _timer;
+  StreamSubscription<PlaybackState>? _subscription;
 
   /// 剩余时间，未启动时为 null。
   Duration? _remaining;
@@ -28,13 +46,28 @@ class SleepTimerController(final MediaPlaybackController _controller)
 
   int? get selectedMinutes => _selectedMinutes;
 
-  /// 是否正在计时。
-  bool get isActive => _timer != null;
+  /// 启动时选择的归零行为，用于弹窗标记当前项。
+  SleepTimerAction get action => _action;
+  SleepTimerAction _action = SleepTimerAction.pauseNow;
+
+  /// 计时已归零、但要等当前这条播完才真正停。
+  bool get pendingAfterCurrent => _pendingStop;
+  bool _pendingStop = false;
+
+  /// 最近一次读到的队列序号，用来判定「要进下一条了」。
+  int _queueIndex = 0;
+
+  /// 是否正在计时或等待生效。
+  bool get isActive => _timer != null || _pendingStop;
 
   /// 按分钟启动倒计时。
-  void start(int minutes) {
+  void start(
+    int minutes, {
+    SleepTimerAction action = SleepTimerAction.pauseNow,
+  }) {
     cancel();
     _selectedMinutes = minutes;
+    _action = action;
     _remaining = Duration(minutes: minutes);
     notifyListeners();
     _timer = Timer.periodic(const Duration(seconds: 1), _tick);
@@ -48,11 +81,15 @@ class SleepTimerController(final MediaPlaybackController _controller)
     }
     final next = remaining - const Duration(seconds: 1);
     if (next <= Duration.zero) {
-      // 到点：暂停并取消，不清档位标记，让弹窗显示上次选择。
+      // 到点：不清档位标记，让弹窗显示上次选择。
       _remaining = null;
-      _controller.pause();
       timer.cancel();
       _timer = null;
+      if (_action == SleepTimerAction.afterCurrent) {
+        _pendingStop = true;
+      } else {
+        _controller.pause();
+      }
       notifyListeners();
       return;
     }
@@ -60,25 +97,47 @@ class SleepTimerController(final MediaPlaybackController _controller)
     notifyListeners();
   }
 
-  /// 取消计时。档位标记一并清掉，与「未启动」状态对齐。
+  /// 队列序号前进时，若处于「播完这条再停」就停住，不再进入下一条。
+  ///
+  /// 只在有队列时判定：单条播放播完本就自然停下，无需也不该再插一次
+  /// pause——否则用户手动暂停会被误当成播完。
+  void _onState(PlaybackState state) {
+    if (state.queueLength <= 0) return;
+    if (!_pendingStop) {
+      _queueIndex = state.currentIndex;
+      return;
+    }
+    if (state.currentIndex != _queueIndex) {
+      _pendingStop = false;
+      unawaited(_controller.pause());
+      notifyListeners();
+      return;
+    }
+    _queueIndex = state.currentIndex;
+  }
+
+  /// 取消计时。档位标记与待生效标记一并清掉，与「未启动」状态对齐。
   void cancel() {
     _timer?.cancel();
     _timer = null;
     _remaining = null;
     _selectedMinutes = null;
+    _pendingStop = false;
+    _action = SleepTimerAction.pauseNow;
     notifyListeners();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    unawaited(_subscription?.cancel());
     super.dispose();
   }
 }
 
-/// 睡眠定时按钮：未启动时显示「定时」，启动后显示剩余时间。
+/// 睡眠定时按钮：未启动时显示「定时」，启动后显示剩余时间或待生效标记。
 ///
-/// 点击弹底部选择器：未启动时列档位，启动后额外提供「取消定时」。
+/// 点击弹底部选择器：按归零行为分两组列档位，启动后额外提供「取消定时」。
 class const SleepTimerChip({
   super.key,
   required final MediaPlaybackController controller,
@@ -87,7 +146,7 @@ class const SleepTimerChip({
   State<SleepTimerChip> createState() => _SleepTimerChipState();
 }
 
-class _SleepTimerChipState() extends State<SleepTimerChip> {
+class _SleepTimerChipState extends State<SleepTimerChip> {
   late final SleepTimerController _sleep;
 
   @override
@@ -109,7 +168,9 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final active = _sleep.isActive;
-    final label = active
+    final label = _sleep.pendingAfterCurrent
+        ? (l10n?.sleepTimerAfterCurrentPending ?? '播完本条')
+        : active
         ? _formatRemaining(_sleep.remaining!)
         : (l10n?.sleepTimerLabel ?? '定时');
 
@@ -163,17 +224,31 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                   style: $styles.text.bodySmallBold,
                 ),
               ),
+              _groupLabel(l10n?.sleepTimerActionNowLabel ?? '到时暂停'),
               for (final minutes in kSleepTimerMinutes)
-                ListTile(
-                  title: Text('$minutes 分钟'),
-                  trailing: minutes == _sleep.selectedMinutes
-                      ? Icon(Icons.check, color: $styles.colors.accentText)
-                      : null,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    _sleep.start(minutes);
-                    Navigator.of(sheetContext).pop();
-                  },
+                _option(
+                  '$minutes 分钟',
+                  selected:
+                      minutes == _sleep.selectedMinutes &&
+                      !_sleep.pendingAfterCurrent &&
+                      _sleep.action == SleepTimerAction.pauseNow,
+                  onTap: () =>
+                      _pick(sheetContext, minutes, SleepTimerAction.pauseNow),
+                ),
+              _groupLabel(l10n?.sleepTimerAfterCurrentTitle ?? '播完本条即停'),
+              for (final minutes in kSleepTimerMinutes)
+                _option(
+                  // 两组都用「N 分钟」会让文案完全相同，分组标题之外再无区分，
+                  // 故本组加后缀。
+                  '$minutes 分钟${l10n?.sleepTimerAfterCurrentOptionSuffix ?? '（播完本条）'}',
+                  selected:
+                      minutes == _sleep.selectedMinutes &&
+                      _sleep.pendingAfterCurrent,
+                  onTap: () => _pick(
+                    sheetContext,
+                    minutes,
+                    SleepTimerAction.afterCurrent,
+                  ),
                 ),
               if (_sleep.isActive)
                 ListTile(
@@ -192,5 +267,35 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
         );
       },
     );
+  }
+
+  Widget _groupLabel(String text) => Padding(
+    padding: EdgeInsets.only(top: $styles.insets.sm, left: $styles.insets.sm),
+    child: Text(
+      text,
+      style: $styles.text.bodySmall.copyWith(
+        color: $styles.colors.onSurfaceVariant,
+      ),
+    ),
+  );
+
+  Widget _option(
+    String title, {
+    required bool selected,
+    required VoidCallback onTap,
+  }) => ListTile(
+    title: Text(title),
+    trailing: selected
+        ? Icon(Icons.check, color: $styles.colors.accentText)
+        : null,
+    onTap: () {
+      HapticFeedback.selectionClick();
+      onTap();
+    },
+  );
+
+  void _pick(BuildContext sheetContext, int minutes, SleepTimerAction action) {
+    _sleep.start(minutes, action: action);
+    Navigator.of(sheetContext).pop();
   }
 }

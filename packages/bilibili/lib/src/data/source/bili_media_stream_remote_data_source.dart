@@ -20,6 +20,7 @@ final class BiliMediaStreamRemoteDataSource({
   Future<Result<MediaStream>> getMediaStream(
     String videoId, {
     int? preferHeight,
+    int? preferStreamId,
   }) async {
     try {
       final sanitizedVideoId = videoId.replaceAll(_controlChars, '').trim();
@@ -51,6 +52,7 @@ final class BiliMediaStreamRemoteDataSource({
             dash,
             videoItems,
             preferHeight,
+            preferStreamId,
           );
         }
       }
@@ -86,13 +88,14 @@ final class BiliMediaStreamRemoteDataSource({
     DashData dash,
     List<MediaStreamItem> videoItems,
     int? preferHeight,
+    int? preferStreamId,
   ) {
     final audioItems = _playable(dash.audio);
     if (audioItems.isEmpty) {
       return Result.error(Exception('视频 $videoId 的分离流缺少可用音轨'));
     }
 
-    final video = _pickVideo(videoItems, preferHeight);
+    final video = _pickVideo(videoItems, preferHeight, preferStreamId);
     final audio = _pickAudio(audioItems);
 
     final rawVideoUrl = video.playUrls.firstWhere(
@@ -121,6 +124,7 @@ final class BiliMediaStreamRemoteDataSource({
         width: video.width,
         height: video.height,
         bitrate: video.bandwidth,
+        streamId: video.id,
         codecs: video.codecs,
         // dash.duration 以秒计，与视频详情的 duration 同量纲。
         duration: dash.duration == null
@@ -156,6 +160,7 @@ final class BiliMediaStreamRemoteDataSource({
       options.add(
         MediaQualityOption(
           height: height,
+          streamId: item.id,
           label: _qualityLabel(
             height,
             acceptQuality: acceptQuality,
@@ -205,12 +210,24 @@ final class BiliMediaStreamRemoteDataSource({
     return items.where((item) => item.playUrls.isNotEmpty).toList();
   }
 
-  /// 按期望高度就近选取视频流，缺省取码率最高的一路。
+  /// 选取视频流：优先按记忆的清晰度 id 精确匹配，其次按期望高度就近，最后取码率最高。
+  ///
+  /// 精确匹配优先是因为同高度可能有多路码率，按高度只能就近命中其中一路，
+  /// 用户记住的「那一档」就丢了。id 取不到（该视频换了档位）时退回高度。
   ///
   /// 就近 = 与期望高度绝对差最小的一档，故期望高于全部可用档时自然落到
   /// 最高档、低于全部时落到最低档，无需为两种边界另写分支。缺高度的条目
   /// 视为不可比（差值无穷大），只在所有条目都缺高度时才被选中。
-  MediaStreamItem _pickVideo(List<MediaStreamItem> items, int? preferHeight) {
+  MediaStreamItem _pickVideo(
+    List<MediaStreamItem> items,
+    int? preferHeight, [
+    int? preferStreamId,
+  ]) {
+    if (preferStreamId != null) {
+      for (final item in items) {
+        if (item.id == preferStreamId) return item;
+      }
+    }
     if (preferHeight == null) return _highestBandwidth(items);
     return items.reduce((best, item) {
       final candidateGap = _heightGap(item, preferHeight);

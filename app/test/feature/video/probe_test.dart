@@ -31,5 +31,6 @@ class _Repo() implements VideoDetailRepository {
   Future<Result<MediaStream>> getMediaStream(
     String id, {
     int? preferHeight,
+    int? preferStreamId,
   }) async => Completer<Result<MediaStream>>().future;
 }

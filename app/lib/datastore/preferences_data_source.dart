@@ -171,6 +171,15 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     2,
   );
 
+  /// 默认画质的源侧清晰度 id：精确记住「选的是哪一档」，不靠高度近似。
+  ///
+  /// 与 [preferredQualityHeight] 同时写入：id 用于精确匹配，高度是源不认得
+  /// 该 id 时的回退。均为 null 表示未选过，由源取默认档。
+  static const preferredQualityStreamId = PreferencesKey<int?>._(
+    'PREFERRED_QUALITY_STREAM_ID',
+    null,
+  );
+
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which

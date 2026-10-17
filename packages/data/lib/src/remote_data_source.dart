@@ -110,11 +110,13 @@ abstract class const VideoDetailRemoteDataSource() extends RemoteDataSource {
 abstract class const MediaStreamRemoteDataSource() extends RemoteDataSource {
   /// 解析指定媒体的播放地址
   ///
-  /// [videoId] 为该源体系内的媒体标识。[preferHeight] 为期望的画面高度，
-  /// 源按自身可用清晰度就近选取；为 null 时由源取默认档。
+  /// [videoId] 为该源体系内的媒体标识。[preferStreamId] 为记住的清晰度 id，
+  /// 源按它精确匹配，取不到时退回 [preferHeight] 就近选取；两者都为 null 时
+  /// 由源取默认档。
   Future<Result<MediaStream>> getMediaStream(
     String videoId, {
     int? preferHeight,
+    int? preferStreamId,
   });
 }
 

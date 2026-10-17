@@ -870,6 +870,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sleepTimerCancel => '取消定时';
 
   @override
+  String get sleepTimerActionNowLabel => '到时暂停';
+
+  @override
+  String get sleepTimerAfterCurrentTitle => '播完本条即停';
+
+  @override
+  String get sleepTimerAfterCurrentOptionSuffix => '（播完本条）';
+
+  @override
+  String get sleepTimerAfterCurrentPending => '播完本条';
+
+  @override
   String get qualityPickerTitle => '画质选择';
 
   @override
