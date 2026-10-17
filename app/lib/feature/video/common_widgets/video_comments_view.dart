@@ -5,21 +5,28 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
-  static String _formatCount(int count) {
+  static String _formatCount(int count, AppLocalizations? l10n) {
     if (count >= 10000) {
-      return '${(count / 10000).toStringAsFixed(1)}万';
+      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ??
+          '$count';
     }
     return '$count';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (context.read<VideoCommentBloc?>() == null) {
-      return const Center(child: Text('当前数据源暂不支持评论'));
+      return Center(
+        child: Text(
+          l10n?.commentsUnsupportedSource ?? 'Comments not supported',
+        ),
+      );
     }
 
     // ⚡ Bolt Optimization: Use BlocSelector to isolate list container state
@@ -54,7 +61,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                '评论加载失败，请稍后重试',
+                l10n?.commentsLoadFailed ?? 'Failed to load comments',
                 style: $styles.text.body.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -68,7 +75,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                '暂无评论',
+                l10n?.noComments ?? 'No comments yet',
                 style: $styles.text.body.copyWith(
                   color: $styles.colors.onSurfaceVariant,
                 ),
@@ -108,7 +115,7 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
                 );
               }
 
-              return _CommentItem(index: index, formatCount: _formatCount);
+              return _CommentItem(index: index);
             },
           ),
         );
@@ -117,12 +124,10 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
   }
 }
 
-class const _CommentItem({
-  required final int index,
-  required final String Function(int) formatCount,
-}) extends StatelessWidget {
+class const _CommentItem({required final int index}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selection = context
         .select<
           VideoCommentBloc,
@@ -212,8 +217,12 @@ class const _CommentItem({
                     enabled: true,
                     selected: comment.isLiked,
                     excludeSemantics: true,
-                    label: '点赞评论 ${formatCount(comment.likeCount)}',
-                    tooltip: comment.isLiked ? '取消点赞' : '点赞评论',
+                    label: l10n?.likeCommentCount(
+                      VideoCommentsView._formatCount(comment.likeCount, l10n),
+                    ),
+                    tooltip: comment.isLiked
+                        ? (l10n?.unlikeComment ?? 'Unlike')
+                        : (l10n?.likeComment ?? 'Like'),
                     child: InkWell(
                       onTap: () {
                         HapticFeedback.lightImpact();
@@ -240,7 +249,10 @@ class const _CommentItem({
                             ),
                             const Gap(4),
                             Text(
-                              formatCount(comment.likeCount),
+                              VideoCommentsView._formatCount(
+                                comment.likeCount,
+                                l10n,
+                              ),
                               style: $styles.text.bodySmall.copyWith(
                                 fontSize: 11,
                                 color: comment.isLiked
@@ -261,8 +273,10 @@ class const _CommentItem({
                   button: true,
                   enabled: true,
                   label: effectiveReplyState.isExpanded
-                      ? '收起回复'
-                      : '查看 ${formatCount(replyCount)} 条回复',
+                      ? (l10n?.collapseReplies ?? 'Collapse replies')
+                      : l10n?.viewReplyCount(
+                          VideoCommentsView._formatCount(replyCount, l10n),
+                        ),
                   child: TextButton(
                     key: ValueKey('comment-replies-${comment.id}'),
                     onPressed: () {
@@ -272,8 +286,14 @@ class const _CommentItem({
                     },
                     child: Text(
                       effectiveReplyState.isExpanded
-                          ? '收起回复'
-                          : '查看 ${formatCount(replyCount)} 条回复',
+                          ? (l10n?.collapseReplies ?? 'Collapse replies')
+                          : l10n?.viewReplyCount(
+                                  VideoCommentsView._formatCount(
+                                    replyCount,
+                                    l10n,
+                                  ),
+                                ) ??
+                                '$replyCount',
                     ),
                   ),
                 ),
@@ -297,6 +317,7 @@ class const _CommentReplies({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification.metrics.axis == Axis.vertical &&
@@ -341,7 +362,7 @@ class const _CommentReplies({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '评论回复暂不可用',
+                          l10n?.repliesUnavailable ?? 'Replies unavailable',
                           style: $styles.text.bodySmall.copyWith(
                             color: $styles.colors.onSurfaceVariant,
                           ),
@@ -352,7 +373,7 @@ class const _CommentReplies({
                               FetchNextCommentRepliesPage(commentId),
                             );
                           },
-                          child: const Text('重试'),
+                          child: Text(l10n?.retry ?? 'Retry'),
                         ),
                       ],
                     );

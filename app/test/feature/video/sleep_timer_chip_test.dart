@@ -174,7 +174,7 @@ void main() {
     testWidgets('shows the idle label before starting', (tester) async {
       await pumpChip(tester);
 
-      expect(find.text('定时'), findsOneWidget);
+      expect(find.text('Timer'), findsOneWidget);
     });
 
     testWidgets('tapping the chip opens the picker with all durations', (
@@ -182,10 +182,10 @@ void main() {
     ) async {
       await pumpChip(tester);
 
-      await tester.tap(find.text('定时'));
+      await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
 
-      for (final minutes in ['15 分钟', '30 分钟', '45 分钟', '60 分钟']) {
+      for (final minutes in ['15 min', '30 min', '45 min', '60 min']) {
         expect(find.text(minutes), findsOneWidget);
       }
     });
@@ -195,9 +195,9 @@ void main() {
     ) async {
       await pumpChip(tester);
 
-      await tester.tap(find.text('定时'));
+      await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('15 分钟'));
+      await tester.tap(find.text('15 min'));
       await tester.pump();
 
       expect(find.text('15:00'), findsOneWidget);
@@ -207,18 +207,18 @@ void main() {
       useTallViewport(tester);
       await pumpChip(tester);
 
-      await tester.tap(find.text('定时'));
+      await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('30 分钟'));
+      await tester.tap(find.text('30 min'));
       await tester.pump();
       await tester.tap(find.text('30:00'));
       await tester.pumpAndSettle();
 
-      expect(find.text('取消定时'), findsOneWidget);
-      await tester.tap(find.text('取消定时'));
+      expect(find.text('Cancel'), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
       await tester.pump();
 
-      expect(find.text('定时'), findsOneWidget);
+      expect(find.text('Timer'), findsOneWidget);
     });
   });
 
@@ -310,15 +310,15 @@ void main() {
       useTallViewport(tester);
       await pumpChip(tester);
 
-      await tester.tap(find.text('定时'));
+      await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
 
-      expect(find.text('到时暂停'), findsOneWidget);
-      expect(find.text('播完本条即停'), findsOneWidget);
+      expect(find.text('When time up'), findsOneWidget);
+      expect(find.text('15 min (after current)'), findsOneWidget);
       // 两组各 4 个档位，同文案项取最后一个即 after-current 组。
       // 两组档位文案不再相同，第一组是裸的「15 分钟」。
-      expect(find.text('15 分钟'), findsOneWidget);
-      expect(find.text('15 分钟（播完本条）'), findsOneWidget);
+      expect(find.text('15 min'), findsOneWidget);
+      expect(find.text('15 min (after current)'), findsOneWidget);
     });
 
     testWidgets('after-current selection shows the pending label', (
@@ -331,9 +331,9 @@ void main() {
       ]);
       await tester.pump();
 
-      await tester.tap(find.text('定时'));
+      await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('15 分钟（播完本条）'));
+      await tester.tap(find.text('15 min (after current)'));
       await tester.pumpAndSettle();
       expect(find.text('15:00'), findsOneWidget);
 
@@ -341,7 +341,7 @@ void main() {
       await tester.pump(const Duration(seconds: 901));
       await tester.pump();
 
-      expect(find.text('播完本条'), findsOneWidget);
+      expect(find.text('After current'), findsOneWidget);
     });
   });
 }

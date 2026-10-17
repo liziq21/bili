@@ -54,7 +54,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.textContaining('播放失败'), findsOneWidget);
+    expect(find.textContaining('Playback failed'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
     addTearDown(bloc.close);
@@ -70,8 +70,8 @@ void main() {
         final bloc = VideoBloc(repository: _NoStreamRepository());
         await pumpPlayer(tester, bloc: bloc, controller: controller);
 
-        expect(find.byTooltip('下一首'), findsOneWidget);
-        expect(find.byTooltip('上一首'), findsOneWidget);
+        expect(find.byTooltip('Next'), findsOneWidget);
+        expect(find.byTooltip('Previous'), findsOneWidget);
 
         await controller.openQueue([
           MediaStream(videoUrl: 'https://example.com/1.m4s'),
@@ -79,12 +79,12 @@ void main() {
         ]);
         await tester.pump();
 
-        await tester.tap(find.byTooltip('下一首'));
+        await tester.tap(find.byTooltip('Next'));
         await tester.pump();
         expect(fake.nextCalls, hasLength(1));
         expect(fake.previousCalls, isEmpty);
 
-        await tester.tap(find.byTooltip('上一首'));
+        await tester.tap(find.byTooltip('Previous'));
         await tester.pump();
         expect(fake.nextCalls, hasLength(1));
         expect(fake.previousCalls, hasLength(1));
@@ -108,19 +108,19 @@ void main() {
       ]);
       await tester.pump();
 
-      expect(find.byTooltip('循环：关闭'), findsOneWidget);
+      expect(find.byTooltip('Loop off'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('循环：关闭'));
+      await tester.tap(find.byTooltip('Loop off'));
       await tester.pump();
-      expect(find.byTooltip('单首循环'), findsOneWidget);
+      expect(find.byTooltip('Loop one'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('单首循环'));
+      await tester.tap(find.byTooltip('Loop one'));
       await tester.pump();
-      expect(find.byTooltip('队列循环'), findsOneWidget);
+      expect(find.byTooltip('Loop queue'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('队列循环'));
+      await tester.tap(find.byTooltip('Loop queue'));
       await tester.pump();
-      expect(find.byTooltip('循环：关闭'), findsOneWidget);
+      expect(find.byTooltip('Loop off'), findsOneWidget);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
@@ -266,14 +266,14 @@ void main() {
         fullscreen: true,
       );
 
-      expect(find.byTooltip('全屏'), findsNothing);
+      expect(find.byTooltip('Fullscreen'), findsNothing);
 
       // 单击画面唤出控制层（含退出全屏按钮）。
       await tester.tap(find.byType(PlayerGestureLayer));
       // onTap 与 onDoubleTap 共存时，首次单击要等双击判定窗结束才回调。
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(find.byTooltip('返回'), findsOneWidget);
+      expect(find.byTooltip('Back'), findsOneWidget);
     });
 
     testWidgets('restores the controls when leaving fullscreen', (
@@ -291,7 +291,7 @@ void main() {
         controller: controller,
         fullscreen: false,
       );
-      expect(find.byTooltip('全屏'), findsOneWidget);
+      expect(find.byTooltip('Fullscreen'), findsOneWidget);
 
       // 同一位置重建为全屏：控制层收起；再重建回内嵌：控制层常显。
       await pumpSurface(
@@ -300,7 +300,7 @@ void main() {
         controller: controller,
         fullscreen: true,
       );
-      expect(find.byTooltip('返回'), findsNothing);
+      expect(find.byTooltip('Back'), findsNothing);
 
       await pumpSurface(
         tester,
@@ -308,7 +308,7 @@ void main() {
         controller: controller,
         fullscreen: false,
       );
-      expect(find.byTooltip('全屏'), findsOneWidget);
+      expect(find.byTooltip('Fullscreen'), findsOneWidget);
     });
 
     testWidgets('the minimize button only exists in fullscreen', (
