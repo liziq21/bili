@@ -5544,8 +5544,8 @@
   "@play": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "switch": "切换",
-  "@switch": {
+  "switchLabel": "切换",
+  "@switchLabel": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
   "fullscreenToggle": "全屏切换",
