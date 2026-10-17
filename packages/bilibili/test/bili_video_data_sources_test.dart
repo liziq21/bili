@@ -284,6 +284,61 @@ void main() {
       expect(comments.single.content, '顶部弹幕');
     });
 
+    test('getDanmaku sanitizes control characters in comment content and filters out empty items', () async {
+      final customNetwork = MockNetworkVideoDataSource(
+        videoDetailJson: loadJson('video_detail.json') as Map<String, dynamic>,
+        videoRelationJson:
+            loadJson('video_relation.json') as Map<String, dynamic>,
+        relatedVideosJson:
+            (loadJson('related_videos.json') as Map<String, dynamic>)['data']
+                as List<dynamic>,
+        replyListJson: loadJson('reply_list.json') as Map<String, dynamic>,
+        replyReplyListJson:
+            loadJson('reply_reply_list.json') as Map<String, dynamic>,
+        danmakuDocument: const NetworkBiliDanmakuDocument(
+          chatServer: 'chat.bilibili.com',
+          chatId: 137646676,
+          mission: 0,
+          maxLimit: 500,
+          state: 0,
+          realName: 0,
+          comments: [
+            NetworkBiliDanmaku(
+              startSeconds: 1.0,
+              mode: 1,
+              fontSize: 25,
+              color: 0xFFFFFF,
+              sentAt: 1,
+              pool: 0,
+              userHash: 'hash1',
+              rowId: 1,
+              content: '  弹幕\r\n\x00内容  ',
+            ),
+            NetworkBiliDanmaku(
+              startSeconds: 2.0,
+              mode: 1,
+              fontSize: 25,
+              color: 0xFFFFFF,
+              sentAt: 2,
+              pool: 0,
+              userHash: 'hash2',
+              rowId: 2,
+              content: '\r\n\x00\x1F  ',
+            ),
+          ],
+        ),
+      );
+      final customDanmakuDataSource = BiliDanmakuRemoteDataSource(
+        network: customNetwork,
+      );
+
+      final result = await customDanmakuDataSource.getDanmaku('BV1GJ411x7vy');
+      expect(result.isOk, isTrue);
+      final comments = (result as Ok<List<DanmakuComment>>).value;
+      expect(comments, hasLength(1));
+      expect(comments.single.content, '弹幕内容');
+    });
+
     test('getVideoCommentReplies maps and paginates nested replies', () async {
       final result = await commentDataSource.getVideoCommentReplies(
         '80431228',

@@ -27,8 +27,11 @@ final class BiliDanmakuRemoteDataSource({
       final document = await network.getDanmaku(cid: cid);
       return Result.ok(
         document.comments
-            .map(
-              (comment) => DanmakuComment(
+            .map((comment) {
+              final sanitizedContent = comment.content
+                  .replaceAll(_controlChars, '')
+                  .trim();
+              return DanmakuComment(
                 startTime: Duration(
                   microseconds:
                       (comment.startSeconds * Duration.microsecondsPerSecond)
@@ -37,11 +40,11 @@ final class BiliDanmakuRemoteDataSource({
                 mode: _modeOf(comment.mode),
                 fontSize: comment.fontSize,
                 colorArgb: 0xFF000000 | comment.color,
-                content: comment.content,
+                content: sanitizedContent,
                 rowId: comment.rowId,
-              ),
-            )
-            .where((comment) => comment.content.trim().isNotEmpty)
+              );
+            })
+            .where((comment) => comment.content.isNotEmpty)
             .toList(growable: false),
       );
     } catch (error) {
