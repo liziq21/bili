@@ -141,9 +141,18 @@ void main() {
       log.current!();
       await tester.pumpAndSettle();
 
+      final searchBarsAfterOpen = tester
+          .widgetList<SearchBar>(find.byType(SearchBar))
+          .length;
+      expect(searchBarsAfterOpen, greaterThan(routesBefore));
+
+      // 再次调用时，由于搜索视图已经处于打开状态，不会重复推进新的搜索视图
+      log.current!();
+      await tester.pumpAndSettle();
+
       expect(
         tester.widgetList<SearchBar>(find.byType(SearchBar)).length,
-        greaterThan(routesBefore),
+        equals(searchBarsAfterOpen),
       );
     });
 

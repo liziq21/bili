@@ -82,10 +82,11 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   /// bar 模式下输入框由 [SearchBar] 自建焦点节点，`SearchAnchor.bar` 不透传
   /// `focusNode`，外部拿不到那个节点。可用的入口只有 [SearchController.openView]：
   /// 它推进搜索视图路由，视图内的输入框会自行获得焦点（material_ui 的
-  /// `_SearchPageState` 在路由就位后请求焦点）。视图已开着时重开无副作用，
-  /// 因此这里不额外判断状态。
+  /// `_SearchPageState` 在路由就位后请求焦点）。若搜索视图已处于打开状态
+  /// （[_controller.isOpen] 为 true），直接返回以防止重复推入新的视图路由。
   void focusInput() {
     if (!_controller.isAttached) return;
+    if (_controller.isOpen) return;
     _controller.openView();
   }
 
