@@ -44,7 +44,7 @@ class AppVideoCommentRepository([
         pageSize: pageSize,
       );
     }
-    return Result.error(Exception('当前数据源不支持获取评论'));
+    return Result.error(Exception('Current source does not support comments'));
   }
 
   @override
@@ -62,6 +62,8 @@ class AppVideoCommentRepository([
         pageSize: pageSize,
       );
     }
-    return Result.error(Exception('当前数据源不支持获取评论回复'));
+    return Result.error(
+      Exception('Current source does not support comment replies'),
+    );
   }
 }

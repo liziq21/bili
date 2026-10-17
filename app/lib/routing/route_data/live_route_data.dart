@@ -14,7 +14,11 @@ class const LiveRouteData({required final String roomId, final String? source})
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
-      return const NoMediaSourceScreen(message: '直播所属的数据源不可用');
+      return NoMediaSourceScreen(
+        message:
+            AppLocalizations.of(context)?.liveSourceUnavailable ??
+            'Live source unavailable',
+      );
     }
 
     return ServiceSourceProviders(

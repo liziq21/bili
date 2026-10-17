@@ -44,7 +44,9 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.getVideoDetail(id);
     }
-    return Result.error(Exception('当前数据源不支持获取视频详情'));
+    return Result.error(
+      Exception('Current source does not support video details'),
+    );
   }
 
   @override
@@ -52,7 +54,7 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleLike(id, isLiked);
     }
-    return Result.error(Exception('当前数据源不支持点赞'));
+    return Result.error(Exception('Current source does not support liking'));
   }
 
   @override
@@ -60,7 +62,9 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleFavorite(id, isFavorited);
     }
-    return Result.error(Exception('当前数据源不支持收藏'));
+    return Result.error(
+      Exception('Current source does not support favoriting'),
+    );
   }
 
   @override
@@ -71,7 +75,9 @@ class AppVideoDetailRepository([
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleSubscribe(creatorId, isSubscribed);
     }
-    return Result.error(Exception('当前数据源不支持关注创作者'));
+    return Result.error(
+      Exception('Current source does not support following creators'),
+    );
   }
 
   @override
@@ -87,6 +93,8 @@ class AppVideoDetailRepository([
         preferStreamId: preferStreamId,
       );
     }
-    return Result.error(Exception('当前数据源不支持获取播放地址'));
+    return Result.error(
+      Exception('Current source does not support playback URLs'),
+    );
   }
 }
