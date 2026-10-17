@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
+import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
 import '../bloc/video_bloc.dart';
@@ -65,7 +66,7 @@ extension QueueAddControllerX on BuildContext {
 class const VideoInfoView({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Use BlocSelector to check top-level loading/error/hasDetail state.
     // Isolates status view (loading / error) from frequent child state updates (e.g. like, favorite, subscribe).
     return BlocSelector<
@@ -137,7 +138,7 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
 class const _RecommendationsSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final relatedVideos = context.select<VideoBloc, List<VideoModel>?>(
       (bloc) => bloc.state.videoDetail?.relatedVideos,
     );
@@ -165,7 +166,7 @@ class const _RecommendationsSection() extends StatelessWidget {
 class const _VideoHeaderSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for VideoModel fields (title, viewCount, id).
     // Prevents header from rebuilding when user likes, favorites, or subscribes.
     final video = context.select<VideoBloc, VideoModel?>(
@@ -288,7 +289,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
 class const _CreatorProfileSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for creator profile and subscription state.
     // Keeps creator profile widget isolated so like/favorite toggles do not rebuild it.
     final creatorData = context
@@ -503,7 +504,7 @@ class _ActionButtonsSectionState()
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for action metrics (likes, favorites, shares).
     // Rebuilds ONLY this action bar when like/favorite status changes, without rebuilding
     // the title, creator info, synopsis, or recommendation list.
@@ -675,7 +676,7 @@ class _SynopsisSectionState()
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for video description.
     // Localizes expansion state (_isDescExpanded) so toggling synopsis does not rebuild
     // surrounding widgets (header, creator info, recommendations).
@@ -768,7 +769,7 @@ class _SynopsisSectionState()
 class const _ChaptersSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final chapters = context.select<VideoBloc, List<VideoChapter>?>(
       (bloc) => bloc.state.videoDetail?.chapters,
     );
@@ -861,7 +862,7 @@ class const _ChapterItem({
 class const _UpInfoSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final creator = context.select<VideoBloc, CreatorProfile?>(
       (bloc) => bloc.state.videoDetail?.creator,
     );
@@ -943,7 +944,7 @@ class const _UpInfoSection() extends StatelessWidget {
 class const _RecommendationsHeader() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -983,7 +984,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final video = widget.video;
     final queueAddController = context.queueAddController;
 
@@ -1170,7 +1171,7 @@ class const _ActionButton({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final semanticLabel = '$actionName $label';
     final computedTooltip =
         tooltip ?? (isActive ? l10n.cancelAction(actionName) : actionName);

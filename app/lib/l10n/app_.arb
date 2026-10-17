@@ -5544,7 +5544,7 @@
   "@play": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "switch": "切换",
+  "switch_": "切换",
   "@switch": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },

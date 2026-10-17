@@ -8,6 +8,7 @@ import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
+import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../utils/platfrom_info.dart';
 import '../../data/repository/video_detail_repository.dart';
@@ -237,7 +238,7 @@ class _VideoContentState extends State<_VideoContent> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
     // ⚡ Bolt Optimization: Use MediaQuery.sizeOf(context) instead of MediaQuery.of(context).size.
     // Targeted size lookup prevents _VideoContent and descendant subtrees from rebuilding
