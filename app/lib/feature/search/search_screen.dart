@@ -112,7 +112,7 @@ class const _RecentSearches({
     final bloc = context.read<SearchBloc?>();
     if (bloc == null) return const SliverToBoxAdapter();
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
       selector: (state) => state.recentSearchQueries,
       builder: (context, queries) {

@@ -15,7 +15,7 @@ class const FilterBar({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final effectiveTitle = title ?? l10n.filters;
 
     return IconButton(
@@ -101,7 +101,7 @@ class const FilterBar({
   }
 
   Widget _buildFooter(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       top: false,
       child: Padding(

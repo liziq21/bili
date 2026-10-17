@@ -110,7 +110,7 @@ class const _DateRangeView({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final range = group.range;
     final label = range == null
         ? l10n.selectDateRange

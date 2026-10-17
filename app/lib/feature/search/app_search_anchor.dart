@@ -138,7 +138,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   }
 
   Widget _buildAnchor(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final anchor = widget.builder == null
         ? SearchAnchor.bar(
             searchController: _controller,
@@ -175,7 +175,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     // suggestionsBuilder 是两种模式浮层输入的共同路径，所以在这里兜底。
     _enforceMaxQueryLength();
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final query = controller.text;
 
     // if (_searchingWithQuery!.isEmpty) {

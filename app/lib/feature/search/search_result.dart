@@ -60,7 +60,7 @@ class _SearchErrorView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
@@ -99,7 +99,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
@@ -150,7 +150,7 @@ class _EmptySearchIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Semantics(
