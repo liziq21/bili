@@ -69,7 +69,8 @@ class _SearchErrorView<T> extends StatelessWidget {
           Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
-            l10n?.loadFailedRetryLater ?? 'Load failed. Please try again later.',
+            l10n?.loadFailedRetryLater ??
+                'Load failed. Please try again later.',
             style: $styles.text.body.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),

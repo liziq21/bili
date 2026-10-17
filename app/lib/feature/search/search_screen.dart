@@ -139,7 +139,9 @@ class const _RecentSearches({
                     ),
                   ),
                   Tooltip(
-                    message: l10n?.clearRecentSearchHistory ?? 'Clear recent search history',
+                    message:
+                        l10n?.clearRecentSearchHistory ??
+                        'Clear recent search history',
                     child: TextButton(
                       onPressed: () {
                         HapticFeedback.lightImpact();
