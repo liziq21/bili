@@ -34,7 +34,8 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
 
   @override
   Widget build(BuildContext context) {
-    final currentLabel = _currentLabel();
+    final l10n = AppLocalizations.of(context)!;
+    final currentLabel = _currentLabel(l10n);
 
     return Material(
       color: $styles.colors.scrim.withValues(alpha: 0.6),
@@ -64,10 +65,9 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   }
 
   /// 当前档标签：与候选项取同一来源，保证列表标记与按钮文案一致。
-  String _currentLabel() {
-    final l10n = AppLocalizations.of(context);
+  String _currentLabel(AppLocalizations l10n) {
     final height = widget.stream.height;
-    if (height == null) return l10n?.qualityAutoLabel ?? '自动';
+    if (height == null) return l10n.auto;
     return _heightLabel(height);
   }
 
@@ -96,7 +96,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   }
 
   void _showQualityPicker(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final options = _allOptions;
     final currentHeight = widget.stream.height;
 
@@ -110,12 +110,12 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
                 child: Text(
-                  l10n?.qualityPickerTitle ?? '画质选择',
+                  l10n.qualitySelect,
                   style: $styles.text.bodySmallBold,
                 ),
               ),
               if (options.isEmpty)
-                ListTile(title: Text(l10n?.qualitySingleOnly ?? '当前源只提供一个档位')),
+                ListTile(title: Text(l10n.singleQualityOnly)),
               for (final option in options)
                 ListTile(
                   title: Text(option.label),

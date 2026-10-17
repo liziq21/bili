@@ -166,13 +166,13 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final active = _sleep.isActive;
     final label = _sleep.pendingAfterCurrent
-        ? (l10n?.sleepTimerAfterCurrentPending ?? '播完本条')
+        ? l10n.afterCurrentItem
         : active
         ? _formatRemaining(_sleep.remaining!)
-        : (l10n?.sleepTimerLabel ?? '定时');
+        : l10n.timer;
 
     return Material(
       color: active
@@ -209,7 +209,7 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
   }
 
   void _showPicker(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
@@ -220,14 +220,14 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
                 child: Text(
-                  l10n?.sleepTimerTitle ?? '睡眠定时器',
+                  l10n.sleepTimerTitle,
                   style: $styles.text.bodySmallBold,
                 ),
               ),
-              _groupLabel(l10n?.sleepTimerActionNowLabel ?? '到时暂停'),
+              _groupLabel(l10n.pauseWhenTimeUp),
               for (final minutes in kSleepTimerMinutes)
                 _option(
-                  '$minutes 分钟',
+                  l10n.minutesValue('$minutes'),
                   selected:
                       minutes == _sleep.selectedMinutes &&
                       !_sleep.pendingAfterCurrent &&
@@ -235,12 +235,12 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
                   onTap: () =>
                       _pick(sheetContext, minutes, SleepTimerAction.pauseNow),
                 ),
-              _groupLabel(l10n?.sleepTimerAfterCurrentTitle ?? '播完本条即停'),
+              _groupLabel(l10n.stopAfterCurrentItem),
               for (final minutes in kSleepTimerMinutes)
                 _option(
                   // 两组都用「N 分钟」会让文案完全相同，分组标题之外再无区分，
                   // 故本组加后缀。
-                  '$minutes 分钟${l10n?.sleepTimerAfterCurrentOptionSuffix ?? '（播完本条）'}',
+                  '${l10n.minutesWithSuffix('$minutes')}${l10n.sleepTimerAfterCurrentOptionSuffix}',
                   selected:
                       minutes == _sleep.selectedMinutes &&
                       _sleep.pendingAfterCurrent,
@@ -253,7 +253,7 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
               if (_sleep.isActive)
                 ListTile(
                   title: Text(
-                    l10n?.sleepTimerCancel ?? '取消定时',
+                    l10n.cancelTimer,
                     style: TextStyle(color: $styles.colors.accentText),
                   ),
                   onTap: () {

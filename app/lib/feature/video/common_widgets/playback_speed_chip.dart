@@ -79,7 +79,7 @@ class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
   }
 
   void _showSpeedPicker(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
@@ -90,7 +90,7 @@ class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
                 child: Text(
-                  l10n?.playbackSpeedLabel ?? '倍速',
+                  l10n.playbackSpeed,
                   style: $styles.text.bodySmallBold,
                 ),
               ),

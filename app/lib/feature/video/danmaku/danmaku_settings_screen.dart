@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../datastore/preferences_data_source.dart';
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import 'danmaku_settings.dart';
 
@@ -40,44 +41,47 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('弹幕设置')),
+      appBar: AppBar(title: Text(l10n.danmakuSettingsTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
                 SwitchListTile(
-                  title: const Text('显示弹幕'),
-                  subtitle: const Text('在视频画面上显示时间轴弹幕'),
+                  title: Text(l10n.showDanmaku),
+                  subtitle: Text(l10n.showTimelineDanmakuOnVideo),
                   value: _settings.enabled,
                   onChanged: (enabled) =>
                       _update(_settings.copyWith(enabled: enabled)),
                 ),
                 _SliderSetting(
-                  title: '普通弹幕时长',
+                  title: l10n.regularDanmakuDuration,
                   value: _settings.regularDuration,
                   min: 4,
                   max: 16,
                   divisions: 12,
-                  valueLabel:
-                      '${_settings.regularDuration.toStringAsFixed(1)} 秒',
+                  valueLabel: l10n.secondsValue(
+                    _settings.regularDuration.toStringAsFixed(1),
+                  ),
                   onChanged: (value) =>
                       _update(_settings.copyWith(regularDuration: value)),
                 ),
                 _SliderSetting(
-                  title: '顶/底弹幕时长',
+                  title: l10n.topBottomDanmakuDuration,
                   value: _settings.topBottomDuration,
                   min: 3,
                   max: 12,
                   divisions: 9,
-                  valueLabel:
-                      '${_settings.topBottomDuration.toStringAsFixed(1)} 秒',
+                  valueLabel: l10n.secondsValueTopBottom(
+                    _settings.topBottomDuration.toStringAsFixed(1),
+                  ),
                   onChanged: (value) =>
                       _update(_settings.copyWith(topBottomDuration: value)),
                 ),
                 _SliderSetting(
-                  title: '不透明度',
+                  title: l10n.opacity,
                   value: _settings.opacity,
                   min: .2,
                   max: 1,
@@ -87,7 +91,7 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                       _update(_settings.copyWith(opacity: value)),
                 ),
                 _SliderSetting(
-                  title: '字号',
+                  title: l10n.fontSize,
                   value: _settings.fontSize,
                   min: 12,
                   max: 32,
@@ -97,7 +101,7 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                       _update(_settings.copyWith(fontSize: value)),
                 ),
                 _SliderSetting(
-                  title: '描边半径',
+                  title: l10n.strokeRadius,
                   value: _settings.outlineRadius,
                   min: 0,
                   max: 5,
@@ -107,22 +111,24 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                       _update(_settings.copyWith(outlineRadius: value)),
                 ),
                 _SliderSetting(
-                  title: '顶部最大行数',
+                  title: l10n.topMaxRows,
                   value: _settings.topMaxRows.toDouble(),
                   min: 1,
                   max: 6,
                   divisions: 5,
-                  valueLabel: '${_settings.topMaxRows} 行',
+                  valueLabel: l10n.topRowsValue('${_settings.topMaxRows}'),
                   onChanged: (value) =>
                       _update(_settings.copyWith(topMaxRows: value.round())),
                 ),
                 _SliderSetting(
-                  title: '底部最大行数',
+                  title: l10n.bottomMaxRows,
                   value: _settings.bottomMaxRows.toDouble(),
                   min: 1,
                   max: 6,
                   divisions: 5,
-                  valueLabel: '${_settings.bottomMaxRows} 行',
+                  valueLabel: l10n.bottomRowsValue(
+                    '${_settings.bottomMaxRows}',
+                  ),
                   onChanged: (value) =>
                       _update(_settings.copyWith(bottomMaxRows: value.round())),
                 ),
