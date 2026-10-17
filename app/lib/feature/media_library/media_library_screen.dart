@@ -126,10 +126,10 @@ class const MediaLibraryScreen({
                           }
                         : null,
                     child: Text(
-                          headerState.hasMore
-                              ? (l10n?.loadMore ?? 'Load more')
-                              : (l10n?.noMoreItems ?? 'No more items'),
-                        ),
+                      headerState.hasMore
+                          ? (l10n?.loadMore ?? 'Load more')
+                          : (l10n?.noMoreItems ?? 'No more items'),
+                    ),
                   ),
                 ],
               );
@@ -392,12 +392,7 @@ class const _HistoryRow({
                         ),
                         SizedBox(height: $styles.insets.xxs),
                         Text(
-                          _subtitle(
-                            video,
-                            viewedAtLabel,
-                            progressLabel,
-                            l10n,
-                          ),
+                          _subtitle(video, viewedAtLabel, progressLabel, l10n),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: $styles.text.bodySmall.copyWith(
@@ -453,7 +448,7 @@ class const _HistoryRow({
       ...progressParts,
       viewedAt,
     ];
-    return parts.join(l10n?.spacedDot ?? ' · ');
+    return parts.join(l10n?.spacedDot ?? ' - ');
   }
 
   /// Formats saved progress without requiring a duration in the media cache.

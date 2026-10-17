@@ -42,13 +42,12 @@ class const CreatorProfileItem({
       '@${creatorProfile.id}',
       if (formattedSubscribers.isNotEmpty)
         l10n?.subscribersCount(formattedSubscribers) ?? '',
-      if (formattedVideos.isNotEmpty)
-        l10n?.videosCount(formattedVideos) ?? '',
+      if (formattedVideos.isNotEmpty) l10n?.videosCount(formattedVideos) ?? '',
       if (creatorProfile.isLive == true) l10n?.liveNow ?? '',
     ];
-    final subtitleText = statsParts
-        .whereType<String>()
-        .join(l10n?.spacedBullet ?? ' • ');
+    final subtitleText = statsParts.whereType<String>().join(
+      l10n?.spacedBullet ?? ' - ',
+    );
 
     final semanticStatsParts = <String?>[
       if (formattedSubscribers.isNotEmpty)

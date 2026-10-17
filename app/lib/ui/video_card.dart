@@ -35,10 +35,7 @@ class const VideoCard({
   static String formatViewCount(int? count, [AppLocalizations? l10n]) {
     if (count == null) return '';
     if (count >= 100000000) {
-      return l10n?.countCompactYi(
-            (count / 100000000).toStringAsFixed(1),
-          ) ??
-          '';
+      return l10n?.countCompactYi((count / 100000000).toStringAsFixed(1)) ?? '';
     }
     if (count >= 10000) {
       return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ?? '';
@@ -46,15 +43,20 @@ class const VideoCard({
     return '$count';
   }
 
-  static String formatRelativeDate(DateTime? dateTime, [AppLocalizations? l10n]) {
+  static String formatRelativeDate(
+    DateTime? dateTime, [
+    AppLocalizations? l10n,
+  ]) {
     if (dateTime == null) return '';
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inDays >= 365) {
-      return l10n?.yearsAgoCompact('${(difference.inDays / 365).floor()}') ?? '';
+      return l10n?.yearsAgoCompact('${(difference.inDays / 365).floor()}') ??
+          '';
     } else if (difference.inDays >= 30) {
-      return l10n?.monthsAgoCompact('${(difference.inDays / 30).floor()}') ?? '';
+      return l10n?.monthsAgoCompact('${(difference.inDays / 30).floor()}') ??
+          '';
     } else if (difference.inDays >= 1) {
       return l10n?.daysAgo('${difference.inDays}') ?? '';
     } else if (difference.inHours >= 1) {
@@ -108,12 +110,11 @@ class const VideoCard({
 
     final subtitleParts = <String>[
       if (creatorName != null && creatorName.isNotEmpty) creatorName,
-      if (formattedViews.isNotEmpty)
-        l10n?.viewsCount(formattedViews) ?? '',
+      if (formattedViews.isNotEmpty) l10n?.viewsCount(formattedViews) ?? '',
       if (formattedDate.isNotEmpty) formattedDate,
     ];
     final subtitleText = subtitleParts.isNotEmpty
-        ? subtitleParts.join(l10n?.spacedBullet ?? ' • ')
+        ? subtitleParts.join(l10n?.spacedBullet ?? ' - ')
         : (videoInfoBase.uploadDate != null
               ? '${videoInfoBase.uploadDate}'
               : '');
@@ -125,9 +126,9 @@ class const VideoCard({
       if (durationStr.isNotEmpty) l10n?.durationPrefix(durationStr),
       if (subtitleText.isNotEmpty) subtitleText,
     ];
-    final semanticLabel = semanticLabelParts
-        .whereType<String>()
-        .join(l10n?.commaSeparator ?? ',');
+    final semanticLabel = semanticLabelParts.whereType<String>().join(
+      l10n?.commaSeparator ?? ',',
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -410,7 +411,7 @@ class const VideoCard({
                                                   creatorName,
                                                   subtitleText,
                                                 ) ??
-                                              creatorName
+                                                creatorName
                                           : creatorName,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
