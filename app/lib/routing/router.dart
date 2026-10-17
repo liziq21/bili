@@ -28,6 +28,7 @@ import '../feature/search/search_result_screen.dart';
 import '../feature/search/search_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
+import '../feature/video/danmaku/danmaku_settings_screen.dart';
 
 part 'route_data/live_route_data.dart';
 part 'route_data/not_found_route_data.dart';
@@ -161,6 +162,10 @@ final GoRouter router = GoRouter(
         $videoRouteData,
         $searchRouteData,
         $notFoundRouteData,
+        GoRoute(
+          path: Routes.danmakuSettings,
+          builder: (_, _) => const DanmakuSettingsScreen(),
+        ),
       ],
     ),
   ],

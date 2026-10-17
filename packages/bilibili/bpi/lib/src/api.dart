@@ -35,6 +35,14 @@ final class ApiPath {
   static const String bangumiPlayUrl = '/pgc/player/web/playurl';
 }
 
+final class DanmakuApi {
+  static const host = 'comment.bilibili.com';
+
+  static const base = 'https://$host';
+
+  static String comment(int cid) => '$base/$cid.xml';
+}
+
 final class WbiApiPath {
   static const String searchByType = '/x/web-interface/wbi/search/type';
   static const String searchAll = '/x/web-interface/wbi/search/all/v2';

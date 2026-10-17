@@ -17,6 +17,7 @@ import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/video/network_bangumi_season.dart';
+import '../model/video/network_bili_danmaku.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_bili_player_info.dart';
 import '../model/video/network_related_video.dart';
@@ -507,6 +508,70 @@ class BiliNetworkSearch
     required String bvid,
     required int cid,
   }) => _networkApi.getPlayerInfo(bvid: bvid, cid: cid);
+
+  @override
+  Future<NetworkBiliDanmakuDocument> getDanmaku({required int cid}) async {
+    if (cid <= 0) {
+      throw const BpiSerializationException('Danmaku cid must be positive');
+    }
+
+    final uri = Uri.parse(DanmakuApi.comment(cid));
+    late final http.Response response;
+    try {
+      response = await _httpClient.get(
+        uri,
+        headers: const {
+          'User-Agent': 'Mozilla/5.0',
+          'Referer': 'https://www.bilibili.com/',
+        },
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili danmaku request failed.',
+        uri: uri,
+        cause: error,
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw BpiHttpException(
+        'Bilibili danmaku request returned HTTP ${response.statusCode}.',
+        statusCode: response.statusCode,
+        uri: uri,
+      );
+    }
+
+    try {
+      final bodyBytes = _decodeResponseBody(response);
+      return NetworkBiliDanmakuDocument.fromXml(utf8.decode(bodyBytes));
+    } on BpiException {
+      rethrow;
+    } on Object catch (error) {
+      throw BpiSerializationException(
+        'Bilibili danmaku response is not valid XML.',
+        uri: uri,
+        cause: error,
+      );
+    }
+  }
+
+  List<int> _decodeResponseBody(http.Response response) {
+    final encoding = response.headers['content-encoding']?.toLowerCase();
+    return switch (encoding) {
+      'deflate' => _decodeDeflate(response.bodyBytes),
+      'gzip' => GZipCodec().decode(response.bodyBytes),
+      _ => response.bodyBytes,
+    };
+  }
+
+  List<int> _decodeDeflate(List<int> bytes) {
+    try {
+      return ZLibCodec().decode(bytes);
+    } on Object {
+      // Some CDN edges label a raw DEFLATE stream as `deflate`.
+      return ZLibCodec(raw: true).decode(bytes);
+    }
+  }
 
   @override
   Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) =>

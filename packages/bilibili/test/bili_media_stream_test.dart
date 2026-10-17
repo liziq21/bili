@@ -70,6 +70,10 @@ class MockMediaStreamNetwork({
   }) => throw UnimplementedError();
 
   @override
+  Future<NetworkBiliDanmakuDocument> getDanmaku({required int cid}) =>
+      throw UnimplementedError();
+
+  @override
   Future<NetworkBangumiSeasonData> getBangumiSeason({
     int? seasonId,
     int? epId,

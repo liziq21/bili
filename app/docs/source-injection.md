@@ -12,7 +12,7 @@
   该作用域使用的网络客户端和远程数据源对象。
 - **能力（capability）**：`packages/data` 中的可选接口，例如
   `VideoSearchRemoteDataSource`、`VideoDetailRemoteDataSource` 和
-  `VideoCommentRemoteDataSource`。
+  `VideoCommentRemoteDataSource`、`DanmakuRemoteDataSource`。
 - **源作用域（source scope）**：由 `ServiceSourceProviders` 创建的子树。它拥有一个
   源实例，并向子树注入由该实例能力派生的 Repository。
 
@@ -68,6 +68,7 @@ LiveRoomSearchRemoteDataSource       -> LiveRoomSearchRepository
 VideoDetailRemoteDataSource           -> VideoDetailRepository
 VideoCommentRemoteDataSource          -> VideoCommentRepository
 VideoCommentRepliesRemoteDataSource   -> VideoCommentRepository
+DanmakuRemoteDataSource                -> DanmakuRepository
 ```
 
 - 一个领域能力一个 Repository；同一评论聚合下的评论列表与评论回复可以由同一个

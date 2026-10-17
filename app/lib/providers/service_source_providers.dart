@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../data/repository/app_search_suggest_repository.dart';
+import '../data/repository/danmaku_repository.dart';
 import '../data/repository/search/app_creator_profile_search_repository.dart';
 import '../data/repository/search/app_live_room_search_repository.dart';
 import '../data/repository/search/app_video_search_repository.dart';
@@ -146,6 +147,10 @@ class _SourceScopeState() extends State<_SourceScope> {
             videoCommentDataSource,
             repliesDataSource,
           ),
+        ),
+      if (source.danmakuDataSource case final danmakuDataSource?)
+        RepositoryProvider<DanmakuRepository>(
+          create: (_) => AppDanmakuRepository(danmakuDataSource),
         ),
     ];
   }

@@ -67,6 +67,8 @@ class const HomeScreen({
                   tooltip: AppLocalizations.of(context)?.navSettings ?? '设置',
                   onPressed: () {
                     HapticFeedback.lightImpact();
+                    // 通用设置入口尚未成型（LIZ-31）。弹幕设置有独立路由，
+                    // 不挂在这个按钮上，避免把未完成的设置页当成全局设置。
                     ScaffoldMessenger.of(context)
                         .showSnackBar(const SnackBar(content: Text('设置开发中')));
                   },

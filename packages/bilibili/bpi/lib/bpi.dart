@@ -19,6 +19,7 @@ export 'src/model/search/concrete_results/network_video_search_result.dart';
 export 'src/model/search/network_search_result.dart';
 export 'src/model/search_suggest/network_search_suggest.dart';
 export 'src/model/video/network_bangumi_season.dart';
+export 'src/model/video/network_bili_danmaku.dart';
 export 'src/model/video/network_play_url.dart';
 export 'src/model/video/network_bili_player_info.dart';
 export 'src/model/video/network_related_video.dart';

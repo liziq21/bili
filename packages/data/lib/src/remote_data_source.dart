@@ -3,6 +3,7 @@ import 'package:model/model.dart';
 import 'search_query.dart';
 
 import 'model/creator_profile_model.dart';
+import 'model/danmaku.dart';
 import 'model/filter_group.dart';
 import 'model/live_room_model.dart';
 import 'model/media_stream.dart';
@@ -140,6 +141,12 @@ abstract class const VideoCommentRepliesRemoteDataSource()
     int page = 1,
     int pageSize = 20,
   });
+}
+
+/// Timed danmaku capability.
+abstract class const DanmakuRemoteDataSource() extends RemoteDataSource {
+  /// Gets comments for the source-specific video identifier.
+  Future<Result<List<DanmakuComment>>> getDanmaku(String videoId);
 }
 
 /// 推荐Feed/流数据源泛型能力接口

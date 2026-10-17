@@ -16,6 +16,7 @@ import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
 import 'quality_picker_chip.dart';
 import 'sleep_timer_chip.dart';
+import '../danmaku/danmaku_overlay.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
@@ -386,6 +387,9 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   Widget build(BuildContext context) {
     final state = _playbackState;
     final hasError = state != null && state.error != null;
+    final videoId = context.select<VideoBloc, String?>(
+      (bloc) => bloc.state.videoDetail?.video.id,
+    );
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -397,6 +401,8 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             child: Video(controller: widget.controller.videoController),
           ),
         ),
+        if (videoId != null)
+          DanmakuOverlay(controller: widget.controller, videoId: videoId),
         Positioned(
           top: $styles.insets.xs,
           right: $styles.insets.xs,

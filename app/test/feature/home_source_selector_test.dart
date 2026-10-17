@@ -9,6 +9,9 @@ class const FakeMediaSource(
   @override final String name,
 ) implements MediaSource {
   @override
+  DanmakuRemoteDataSource? get danmakuDataSource => null;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
