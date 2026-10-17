@@ -75,3 +75,9 @@
 **Learning:** Plain text error indicators in paginated search grids (e.g., `'加载失败，请稍后重试'`) leave users without an accessible tap-to-retry action, while screen readers lack structured button announcements (`button: true`). Extracting error views into dedicated widgets (`_SearchErrorView`, `_NewPageErrorIndicator`) featuring error icons, interactive retry buttons, `HapticFeedback.lightImpact()`, and `Semantics(button: true, label: ...)` allows users to recover from search network errors effortlessly without re-navigating.
 
 **Action:** Always pair pagination and search error indicators with explicit retry action buttons, `HapticFeedback.lightImpact()`, and concise `Semantics(button: true, label: ...)` announcements while verifying all CJK characters exist in `app/test/fonts/subset-characters.txt`.
+
+## 2026-10-15 - Search Result Card Navigation Handlers & Formatted Subtitle Semantics
+
+**Learning:** Static grid item builders in paginated search result views (`SearchResultScreen`) omitted `onTap` navigation handlers on `VideoCard` and `CreatorProfileItem`, leaving search cards inert to touch and causing screen readers to announce cards as "disabled buttons". Wiring `onTap` to `context.navigateToVideo` / `context.navigateToSpace` restores touch navigation and enables active button semantics, while formatting `VideoCard` subtitles with `formatViewCount`, `formatRelativeDate`, `creatorProfileName`, and duration overlays prevents `null` text fragments.
+
+**Action:** Always wire explicit `onTap` navigation handlers on search result item builders and format component subtitles using helper methods to prevent unhandled touch gestures and unformatted string fragments.

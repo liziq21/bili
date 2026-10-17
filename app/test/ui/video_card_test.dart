@@ -39,7 +39,7 @@ void main() {
       );
 
       expect(
-        find.bySemanticsLabel(RegExp(r'Test Video Card Title.*100000 观看')),
+        find.bySemanticsLabel(RegExp(r'Test Video Card Title.*10\.0万 观看')),
         findsOneWidget,
       );
 
