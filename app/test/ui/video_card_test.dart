@@ -11,6 +11,7 @@ void main() {
   testWidgets(
     'VideoCard renders title and view count correctly without error',
     (WidgetTester tester) async {
+      final semantics = tester.ensureSemantics();
       bool tapped = false;
       final video = VideoModel(
         id: 'BV1xx411c7mD',
@@ -39,12 +40,13 @@ void main() {
       );
 
       expect(
-        find.bySemanticsLabel(RegExp(r'Test Video Card Title.*10\.0万 观看')),
+        find.bySemanticsLabel('Test Video Card Title,2026-09-17 00:00:00.000'),
         findsOneWidget,
       );
 
       await tester.tap(find.byType(VideoCard));
       expect(tapped, isTrue);
+      semantics.dispose();
     },
   );
 
@@ -88,7 +90,7 @@ void main() {
 
     expect(
       find.bySemanticsLabel(
-        'Bilibili，Stitch Feed Video Title，创作者: 五盒ll十箱，时长 09:17，7.9万 观看',
+        'Bilibili,Stitch Feed Video Title',
       ),
       findsOneWidget,
     );
@@ -97,18 +99,18 @@ void main() {
     expect(find.text('09:17'), findsOneWidget);
     expect(tapped, isFalse);
     expect(find.textContaining('五盒ll十箱'), findsOneWidget);
-    expect(find.byTooltip('更多选项'), findsOneWidget);
+    expect(find.byTooltip('More options'), findsOneWidget);
 
-    final moreOptions = find.bySemanticsLabel('更多选项');
+    final moreOptions = find.bySemanticsLabel('More options');
     expect(moreOptions, findsOneWidget);
     final moreOptionsSemantics = tester.getSemantics(moreOptions);
-    expect(moreOptionsSemantics.label, '更多选项');
+    expect(moreOptionsSemantics.label, 'More options');
     final moreOptionsData = moreOptionsSemantics.getSemanticsData();
     expect(moreOptionsData.flagsCollection.isButton, isTrue);
     expect(moreOptionsData.hasAction(SemanticsAction.tap), isTrue);
     semantics.dispose();
 
-    await tester.tap(find.byTooltip('更多选项'));
+    await tester.tap(find.byTooltip('More options'));
     expect(moreTapped, isTrue);
     await clearImageCacheDuringTest(tester);
   });

@@ -3466,4 +3466,790 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get notifUpdateFailedBody =>
       'Could not download update. Try again later.';
+
+  @override
+  String get appLoadFailed => '应用加载失败，请重试';
+
+  @override
+  String get settings => '设置';
+
+  @override
+  String get settingsWip => '设置开发中';
+
+  @override
+  String sourceNoRecommendations(String p1) {
+    return '$p1 暂无可用推荐';
+  }
+
+  @override
+  String get sourceNoHomeFeed => '该数据源未提供首页 Feed';
+
+  @override
+  String sectionLoadFailed(String p1) {
+    return '$p1 加载失败';
+  }
+
+  @override
+  String get checkNetworkRetry => '请检查网络连接后重试';
+
+  @override
+  String sectionEmpty(String p1) {
+    return '$p1 暂无内容';
+  }
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get switchDataSource => '切换数据源';
+
+  @override
+  String get switchVideoMediaSource => '切换视频与媒体数据源';
+
+  @override
+  String get unknownStreamer => '未知主播';
+
+  @override
+  String streamerLabel(String p1) {
+    return '主播: $p1';
+  }
+
+  @override
+  String get commaSeparator => '，';
+
+  @override
+  String get continueLoading => '继续加载';
+
+  @override
+  String get noMoreItems => '没有更多了';
+
+  @override
+  String get searchHint => '搜索...';
+
+  @override
+  String putIntoSearchBox(String p1) {
+    return '$p1 放入搜索框';
+  }
+
+  @override
+  String get loadFailedRetryLater => '加载失败，请稍后重试';
+
+  @override
+  String get loadFailedRetry => '加载失败，重试';
+
+  @override
+  String get moreLoadFailedRetry => '更多数据加载失败，重试';
+
+  @override
+  String get nothingFound => '未找到内容';
+
+  @override
+  String get creatorTab => '创作者';
+
+  @override
+  String get videoTab => '视频';
+
+  @override
+  String get recentSearches => '最近搜索';
+
+  @override
+  String get clearRecentSearchHistory => '清空最近搜索历史';
+
+  @override
+  String get clear => '清空';
+
+  @override
+  String searchQueryLabel(String p1) {
+    return '搜索 \"$p1\"';
+  }
+
+  @override
+  String get recentSearchLoadFailed => '加载最近搜索失败';
+
+  @override
+  String get filters => '筛选器';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get confirm => '确定';
+
+  @override
+  String get selectDateRange => '选择日期范围';
+
+  @override
+  String get localLibrary => '本地库';
+
+  @override
+  String get history => '历史';
+
+  @override
+  String get favorite => '收藏';
+
+  @override
+  String get playlists => '播放列表';
+
+  @override
+  String get subscribe => '订阅';
+
+  @override
+  String get allSources => '全部来源';
+
+  @override
+  String sourceLabel(String p1) {
+    return '来源：$p1';
+  }
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get selectSource => '选择来源';
+
+  @override
+  String get deletePlaylistConfirm => '删除播放列表？';
+
+  @override
+  String get deletePlaylistNote => '列表中的本地条目也会被删除。';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get noFavoritesFromSource => '该来源没有可添加的收藏';
+
+  @override
+  String operationFailed(String p1) {
+    return '操作失败：$p1';
+  }
+
+  @override
+  String get loadingFavorites => '正在加载收藏';
+
+  @override
+  String get favoritesLoadFailed => '收藏加载失败';
+
+  @override
+  String get noFavoritesYet => '还没有收藏';
+
+  @override
+  String get spacedDot => ' · ';
+
+  @override
+  String get favoriteActions => '收藏操作';
+
+  @override
+  String get openCreator => '打开创作者';
+
+  @override
+  String get unfavorite => '取消收藏';
+
+  @override
+  String get loadingPlaylists => '正在加载播放列表';
+
+  @override
+  String get playlistLoadFailed => '播放列表加载失败';
+
+  @override
+  String get noPlaylistsYet => '还没有播放列表';
+
+  @override
+  String get newPlaylist => '新建播放列表';
+
+  @override
+  String get playlistActions => '播放列表操作';
+
+  @override
+  String get addFavorite => '添加收藏';
+
+  @override
+  String get deletePlaylist => '删除播放列表';
+
+  @override
+  String get itemsLoadFailed => '条目加载失败';
+
+  @override
+  String get listEmpty => '列表为空';
+
+  @override
+  String get itemActions => '条目操作';
+
+  @override
+  String get moveUp => '上移';
+
+  @override
+  String get moveDown => '下移';
+
+  @override
+  String get removeThisEntry => '移除这一次';
+
+  @override
+  String get loadingSubscriptions => '正在加载订阅';
+
+  @override
+  String get subscriptionsLoadFailed => '订阅加载失败';
+
+  @override
+  String get noSubscriptionsYet => '还没有订阅';
+
+  @override
+  String get ungrouped => '未分组';
+
+  @override
+  String get subscriptionActions => '订阅操作';
+
+  @override
+  String get setGroup => '设置分组';
+
+  @override
+  String get unsubscribe => '取消订阅';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get source => '来源';
+
+  @override
+  String get name => '名称';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get groupName => '分组名称';
+
+  @override
+  String get groupNameHint => '留空表示未分组';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get mine => '我的';
+
+  @override
+  String get watchHistory => '观看历史';
+
+  @override
+  String watchHistoryLoadedCount(String p1) {
+    return '观看历史 · 已载入 $p1 条';
+  }
+
+  @override
+  String tabLoadFailed(String p1) {
+    return '$p1 · 加载失败';
+  }
+
+  @override
+  String get loadMore => '加载更多';
+
+  @override
+  String get historyLoadFailed => '历史记录加载失败';
+
+  @override
+  String get noWatchHistory => '还没有观看记录';
+
+  @override
+  String durationLabel(String p1) {
+    return '时长 $p1';
+  }
+
+  @override
+  String watchedAt(String p1) {
+    return '观看于 $p1';
+  }
+
+  @override
+  String get finishedWatching => '已看完';
+
+  @override
+  String watchedDuration(String p1) {
+    return '已观看 $p1';
+  }
+
+  @override
+  String get justNow => '刚刚';
+
+  @override
+  String minutesAgo(String p1) {
+    return '$p1 分钟前';
+  }
+
+  @override
+  String hoursAgo(String p1) {
+    return '$p1 小时前';
+  }
+
+  @override
+  String daysAgo(String p1) {
+    return '$p1 天前';
+  }
+
+  @override
+  String get addToPlaylistTitle => '添加到播放列表';
+
+  @override
+  String addToNamedPlaylist(String p1) {
+    return '添加到 $p1';
+  }
+
+  @override
+  String addToNamedPlaylistLong(String p1) {
+    return '添加到播放列表 $p1';
+  }
+
+  @override
+  String addFailed(String p1) {
+    return '添加失败：$p1';
+  }
+
+  @override
+  String createOrAddFailed(String p1) {
+    return '创建或添加失败：$p1';
+  }
+
+  @override
+  String get playlistNameRequired => '请输入播放列表名称';
+
+  @override
+  String get infoAndRelated => '简介与相关';
+
+  @override
+  String get commentsCountTab => '评论区 (1,429)';
+
+  @override
+  String get likeFailed => '点赞失败';
+
+  @override
+  String get favoriteFailed => '收藏失败';
+
+  @override
+  String get followFailed => '关注失败';
+
+  @override
+  String get danmakuSettingsTitle => '弹幕设置';
+
+  @override
+  String get showDanmaku => '显示弹幕';
+
+  @override
+  String get showTimelineDanmakuOnVideo => '在视频画面上显示时间轴弹幕';
+
+  @override
+  String get regularDanmakuDuration => '普通弹幕时长';
+
+  @override
+  String secondsValue(String p1) {
+    return '$p1 秒';
+  }
+
+  @override
+  String get topBottomDanmakuDuration => '顶/底弹幕时长';
+
+  @override
+  String secondsValueTopBottom(String p1) {
+    return '$p1 秒';
+  }
+
+  @override
+  String get opacity => '不透明度';
+
+  @override
+  String get fontSize => '字号';
+
+  @override
+  String get strokeRadius => '描边半径';
+
+  @override
+  String get topMaxRows => '顶部最大行数';
+
+  @override
+  String topRowsValue(String p1) {
+    return '$p1 行';
+  }
+
+  @override
+  String get bottomMaxRows => '底部最大行数';
+
+  @override
+  String bottomRowsValue(String p1) {
+    return '$p1 行';
+  }
+
+  @override
+  String get playbackSpeed => '倍速';
+
+  @override
+  String get auto => '自动';
+
+  @override
+  String get qualitySelect => '画质选择';
+
+  @override
+  String get singleQualityOnly => '当前源只提供一个档位';
+
+  @override
+  String get afterCurrentItem => '播完本条';
+
+  @override
+  String get timer => '定时';
+
+  @override
+  String get pauseWhenTimeUp => '到时暂停';
+
+  @override
+  String minutesValue(String p1) {
+    return '$p1 分钟';
+  }
+
+  @override
+  String get stopAfterCurrentItem => '播完本条即停';
+
+  @override
+  String minutesWithSuffix(String p1) {
+    return '$p1 分钟';
+  }
+
+  @override
+  String get cancelTimer => '取消定时';
+
+  @override
+  String countCompactWan(String p1) {
+    return '$p1万';
+  }
+
+  @override
+  String get commentsUnsupportedSource => '当前数据源暂不支持评论';
+
+  @override
+  String get commentsLoadFailed => '评论加载失败，请稍后重试';
+
+  @override
+  String get noComments => '暂无评论';
+
+  @override
+  String likeCommentCount(String p1) {
+    return '点赞评论 $p1';
+  }
+
+  @override
+  String get unlikeComment => '取消点赞';
+
+  @override
+  String get likeComment => '点赞评论';
+
+  @override
+  String get collapseReplies => '收起回复';
+
+  @override
+  String viewReplyCount(String p1) {
+    return '查看 $p1 条回复';
+  }
+
+  @override
+  String get repliesUnavailable => '评论回复暂不可用';
+
+  @override
+  String get videoLoadFailed => '视频加载失败，请重试';
+
+  @override
+  String get noRecommendations => '暂无关联推荐';
+
+  @override
+  String viewCountLabel(String p1) {
+    return '$p1 播放';
+  }
+
+  @override
+  String get dotSeparator => '·';
+
+  @override
+  String get danmakuCountSample => '2.4万 弹幕';
+
+  @override
+  String get oneDayAgoSample => '1天前';
+
+  @override
+  String get originalTech => '原创技术';
+
+  @override
+  String subscribersWeeklyTagline(String p1) {
+    return '$p1 关注者 · 每周硬核解析';
+  }
+
+  @override
+  String get openInBrowser => '在浏览器中打开原链接';
+
+  @override
+  String get visitCreatorHome => '跳转原源作者主页';
+
+  @override
+  String get unfollowCreator => '取消关注创作者';
+
+  @override
+  String get followCreator => '关注创作者';
+
+  @override
+  String followingCreatorNamed(String p1) {
+    return '已关注创作者 $p1';
+  }
+
+  @override
+  String followCreatorNamed(String p1) {
+    return '关注创作者 $p1';
+  }
+
+  @override
+  String get following => '已关注';
+
+  @override
+  String get follow => '关注';
+
+  @override
+  String get like => '点赞';
+
+  @override
+  String get list => '列表';
+
+  @override
+  String get addToPlaylist => '加入播放列表';
+
+  @override
+  String get addToLocalPlaylist => '加入本地播放列表';
+
+  @override
+  String get switchSource => '多源换源';
+
+  @override
+  String get switchVideoSource => '切换视频数据源';
+
+  @override
+  String get autoSwitchBestRoute => '自动切换至最优可用的解析线路';
+
+  @override
+  String get share => '分享';
+
+  @override
+  String get shareVideo => '分享视频';
+
+  @override
+  String get shareMultiSourceLink => '分享多源视频链接';
+
+  @override
+  String get danmakuStateOn => '弹幕开';
+
+  @override
+  String get danmakuStateOff => '弹幕关';
+
+  @override
+  String get danmaku => '弹幕';
+
+  @override
+  String get danmakuActionOff => '关闭弹幕';
+
+  @override
+  String get danmakuActionOn => '开启弹幕';
+
+  @override
+  String get synopsisSectionTitle => '本期摘要 & 核心技术点';
+
+  @override
+  String get collapseSynopsis => '收起摘要';
+
+  @override
+  String get expandSynopsis => '展开完整大纲';
+
+  @override
+  String get collapse => '收起';
+
+  @override
+  String get sampleSynopsisFallback =>
+      '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。';
+
+  @override
+  String get chapters => '章节';
+
+  @override
+  String followersCount(String p1) {
+    return '$p1 关注者';
+  }
+
+  @override
+  String get multiSourceRecommendations => '多源关联推荐';
+
+  @override
+  String get addingToQueue => '正在加入队列';
+
+  @override
+  String get addToPlayQueue => '加入播放队列';
+
+  @override
+  String get addedToPlayQueue => '已加入播放队列';
+
+  @override
+  String get addToQueueFailed => '加入队列失败';
+
+  @override
+  String cancelAction(String p1) {
+    return '取消$p1';
+  }
+
+  @override
+  String get previousItem => '上一首';
+
+  @override
+  String get nextItem => '下一首';
+
+  @override
+  String get loopOff => '循环：关闭';
+
+  @override
+  String get loopOne => '单首循环';
+
+  @override
+  String get loopQueue => '队列循环';
+
+  @override
+  String get minimize => '最小化';
+
+  @override
+  String playbackFailed(String p1) {
+    return '播放失败：$p1';
+  }
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get fullscreen => '全屏';
+
+  @override
+  String get highBitrate1080 => '1080P 高码率';
+
+  @override
+  String get pause => '暂停';
+
+  @override
+  String get play => '播放';
+
+  @override
+  String get fullscreenToggle => '全屏切换';
+
+  @override
+  String get noAvailableSource => '当前没有可用的数据源';
+
+  @override
+  String get sourceUnavailable => '数据源不可用';
+
+  @override
+  String get danmakuUnsupported => '当前数据源不支持弹幕';
+
+  @override
+  String get commentsUnsupported => '当前数据源不支持获取评论';
+
+  @override
+  String get commentRepliesUnsupported => '当前数据源不支持获取评论回复';
+
+  @override
+  String get videoDetailUnsupported => '当前数据源不支持获取视频详情';
+
+  @override
+  String get likeUnsupported => '当前数据源不支持点赞';
+
+  @override
+  String get favoriteUnsupported => '当前数据源不支持收藏';
+
+  @override
+  String get followUnsupported => '当前数据源不支持关注创作者';
+
+  @override
+  String get playUrlUnsupported => '当前数据源不支持获取播放地址';
+
+  @override
+  String countCompactYi(String p1) {
+    return '$p1亿';
+  }
+
+  @override
+  String yearsAgoCompact(String p1) {
+    return '$p1 年前';
+  }
+
+  @override
+  String monthsAgoCompact(String p1) {
+    return '$p1 个月前';
+  }
+
+  @override
+  String viewsWithDate(String p1, String p2) {
+    return '$p1 观看 • $p2';
+  }
+
+  @override
+  String viewsCount(String p1) {
+    return '$p1 观看';
+  }
+
+  @override
+  String get spacedBullet => ' • ';
+
+  @override
+  String creatorLabel(String p1) {
+    return '创作者: $p1';
+  }
+
+  @override
+  String durationPrefix(String p1) {
+    return '时长 $p1';
+  }
+
+  @override
+  String get unknownCreator => '未知创作者';
+
+  @override
+  String creatorWithSubtitle(String p1, String p2) {
+    return '$p1 • $p2';
+  }
+
+  @override
+  String get moreOptions => '更多选项';
+
+  @override
+  String subscribersCount(String p1) {
+    return '$p1 关注';
+  }
+
+  @override
+  String videosCount(String p1) {
+    return '$p1 视频';
+  }
+
+  @override
+  String get liveNow => '直播中';
+
+  @override
+  String get navHomeLabel => '首页';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get liveSourceUnavailable => '直播所属的数据源不可用';
+
+  @override
+  String get creatorSourceUnavailable => '创作者所属的数据源不可用';
+
+  @override
+  String get videoSourceUnavailable => '视频所属的数据源不可用';
+
+  @override
+  String get videoDetailSourceUnsupported => '当前数据源暂不支持查看视频详情';
+
+  @override
+  String get switchAction => '切换';
 }
