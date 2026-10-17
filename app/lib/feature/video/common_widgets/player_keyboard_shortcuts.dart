@@ -129,11 +129,12 @@ class _PlayerKeyboardShortcutsState extends State<PlayerKeyboardShortcuts> {
     widget.controller.setVolume(_volumeBeforeMute);
   }
 
-  /// 在 [kPlaybackRates] 里升降一档；当前不在档位表里时按最接近的一档处理。
+  /// 在 [kPlaybackRates] 里升降一档；当前不在档位表里时先落到 1.0，再按 delta 走。
   void _stepRate(int delta) {
     final current = widget.controller.state.rate;
     var index = kPlaybackRates.indexOf(current);
-    index = index < 0 ? kPlaybackRates.indexOf(1.0) : index + delta;
+    if (index < 0) index = kPlaybackRates.indexOf(1.0);
+    index += delta;
     final next = kPlaybackRates[index.clamp(0, kPlaybackRates.length - 1)];
     widget.controller.setRate(next);
   }

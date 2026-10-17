@@ -90,6 +90,7 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
   void emitPosition(Duration position) => _position.add(position);
 
   void emitDuration(Duration duration) => _duration.add(duration);
+  void emitRate(double rate) => _rate.add(rate);
 
   void disposeStreams() {
     _position.close();
@@ -250,6 +251,19 @@ void main() {
 
     // 默认 1.0，升一档 1.25，再降回 1.0。
     expect(fake.rateCalls, containsAllInOrder([1.25, 1.0]));
+  });
+
+  testWidgets('brackets step from a rate outside the table', (tester) async {
+    await pumpShortcuts(tester);
+    fake.emitDuration(const Duration(minutes: 10));
+    // 平台侧上报的倍速未必落在 kPlaybackRates 表内。
+    fake.emitRate(0.6);
+    await tester.pump();
+
+    await press(tester, LogicalKeyboardKey.bracketRight);
+
+    // 先落到 1.0 档，再按 delta 升一档；不是吞掉 delta 停在 1.0。
+    expect(fake.rateCalls, containsAllInOrder([1.25]));
   });
 
   testWidgets('mouse wheel changes the volume', (tester) async {
