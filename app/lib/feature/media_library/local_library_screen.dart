@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
 import '../../l10n/localization_file/app_localizations.dart';
+import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 
@@ -45,7 +46,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final catalog = context.read<MediaSourceCatalog>();
     return DefaultTabController(
       length: 4,
@@ -139,7 +140,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
   }
 
   Widget _scopeBar(MediaSourceCatalog catalog) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final sourceName = _sourceName(_sourceId);
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -184,7 +185,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final selected = await showDialog<({String? sourceId})>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         return AlertDialog(
           title: Text(l10n.selectSource),
           content: ConstrainedBox(
@@ -230,7 +231,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         return AlertDialog(
           title: Text(l10n.deletePlaylistConfirm),
           content: Text(l10n.deletePlaylistNote),
@@ -254,7 +255,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   Future<void> _addBookmarks(LocalPlaylistEntity playlist) =>
       _runOperation(() async {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         final bookmarks = (await _repository.getBookmarks())
             .where((bookmark) => bookmark.sourceId == playlist.sourceId)
             .toList(growable: false);
@@ -311,7 +312,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
       await operation();
     } on Object catch (error) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         _reportError(l10n.operationFailed(error.toString()));
       }
     } finally {
@@ -357,7 +358,7 @@ class const _BookmarksTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalBookmarkEntity>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -478,7 +479,7 @@ class const _PlaylistsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalPlaylistEntity>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -574,7 +575,7 @@ class const _PlaylistCard({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -696,7 +697,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalPlaylistItemEntity>>(
       stream: _items,
       builder: (context, snapshot) {
@@ -810,7 +811,7 @@ class const _PlaylistItemRow({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return ListTile(
       dense: true,
       leading: const _LibraryLeading(icon: Icons.play_arrow_outlined),
@@ -874,7 +875,7 @@ class const _SubscriptionsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalSubscriptionEntity>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -966,7 +967,7 @@ class const _SubscriptionGroup({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -1105,7 +1106,7 @@ class _BookmarkSelectionDialogState() extends State<_BookmarkSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final viewport = MediaQuery.sizeOf(context);
     final dialogWidth = (viewport.width - 80).clamp(160.0, 460.0).toDouble();
     final dialogHeight = (viewport.height - 240).clamp(120.0, 360.0).toDouble();
@@ -1191,7 +1192,7 @@ class _CreatePlaylistDialogState() extends State<_CreatePlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.newPlaylist),
       content: Column(
@@ -1275,7 +1276,7 @@ class _GroupDialogState() extends State<_GroupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.setGroup),
       content: TextField(

@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
 import '../../l10n/localization_file/app_localizations.dart';
+import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 
 /// Shows the local playlists that belong to [sourceId] and appends [video] to
@@ -55,7 +56,7 @@ class _LocalPlaylistPickerDialogState()
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.addToPlaylistTitle),
       content: SizedBox(
@@ -174,7 +175,7 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
       setState(() {
         _isSaving = false;
         _error = l10n.addFailed(error.toString());
@@ -208,7 +209,7 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
+      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
       setState(() {
         _isSaving = false;
         _error = l10n.createOrAddFailed(error.toString());
@@ -275,7 +276,7 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.newPlaylist),
       content: TextField(
