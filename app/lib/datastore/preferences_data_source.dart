@@ -115,8 +115,18 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
   }
 
   Future<void> _readAndEmitData() async {
-    final data = UserData.fromJson(await _pref.getAll());
-    _controller?.add(data);
+    UserData? data;
+    Object? error;
+    try {
+      data = UserData.fromJson(await _pref.getAll());
+    } on Object catch (e) {
+      error = e;
+    }
+    if (error != null) {
+      _controller?.addError(error);
+      return;
+    }
+    _controller?.add(data!);
   }
 }
 
