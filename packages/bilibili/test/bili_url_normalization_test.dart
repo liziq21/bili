@@ -98,34 +98,28 @@ void main() {
       expect(BiliUtils.getRoutePath(uri), equals('/search?q=flutter'));
     });
 
-    test(
-      'preserves encoded delimiters in query parameter values without parameter pollution',
-      () {
-        final uri = Uri.parse('bilibili://search?q=a%26b%3Dc%23d');
-        final routePath = BiliUtils.getRoutePath(uri);
-        expect(routePath, equals('/search?q=a%26b%3Dc%23d'));
+    test('preserves encoded delimiters without parameter pollution', () {
+      final uri = Uri.parse('bilibili://search?q=a%26b%3Dc%23d');
+      final routePath = BiliUtils.getRoutePath(uri);
+      expect(routePath, equals('/search?q=a%26b%3Dc%23d'));
 
-        final parsed = Uri.parse(routePath!);
-        expect(parsed.path, equals('/search'));
-        expect(parsed.queryParameters, equals({'q': 'a&b=c#d'}));
-        expect(parsed.fragment, isEmpty);
-      },
-    );
+      final parsed = Uri.parse(routePath!);
+      expect(parsed.path, equals('/search'));
+      expect(parsed.queryParameters, equals({'q': 'a&b=c#d'}));
+      expect(parsed.fragment, isEmpty);
+    });
 
-    test(
-      'strips non-printable ASCII control characters from route paths and parameters',
-      () {
-        final uri = Uri.parse(
-          'bilibili://search\r\n?q=test\x00key\x1f=val\r\n#frag\x00ment',
-        );
-        final routePath = BiliUtils.getRoutePath(uri);
-        expect(routePath, isNotNull);
-        expect(routePath!.contains('\r'), isFalse);
-        expect(routePath.contains('\n'), isFalse);
-        expect(routePath.contains('\x00'), isFalse);
-        expect(routePath.contains('\x1f'), isFalse);
-      },
-    );
+    test('strips non-printable ASCII control characters', () {
+      final uri = Uri.parse(
+        'bilibili://search\r\n?q=test\x00key\x1f=val\r\n#frag\x00ment',
+      );
+      final routePath = BiliUtils.getRoutePath(uri);
+      expect(routePath, isNotNull);
+      expect(routePath!.contains('\r'), isFalse);
+      expect(routePath.contains('\n'), isFalse);
+      expect(routePath.contains('\x00'), isFalse);
+      expect(routePath.contains('\x1f'), isFalse);
+    });
 
     test('returns null for empty host or unsupported bilibili:/// URI', () {
       expect(BiliUtils.getRoutePath(Uri.parse('bilibili:///')), isNull);
@@ -149,20 +143,17 @@ void main() {
       },
     );
 
-    test(
-      'NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture',
-      () {
-        final json = loadFake('search_live');
-        final data = json['data'] as Map<String, dynamic>;
-        final result = NetworkSearchResult.fromJson(data);
-        final liveUser = result.result.liveUser.first;
+    test('NetworkLiveUserSearchResultX.asModel normalizes thumbnailUrl from fixture', () {
+      final json = loadFake('search_live');
+      final data = json['data'] as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(data);
+      final liveUser = result.result.liveUser.first;
 
-        final model = liveUser.asModel();
-        expect(model.thumbnailUrl, isNotNull);
-        expect(model.thumbnailUrl, startsWith('https://'));
-        expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
-      },
-    );
+      final model = liveUser.asModel();
+      expect(model.thumbnailUrl, isNotNull);
+      expect(model.thumbnailUrl, startsWith('https://'));
+      expect(model.thumbnailUrl, isNot(startsWith('https:https://')));
+    });
 
     test('NetworkVideoSearchResultX.asModel normalizes video url to https', () {
       final json = loadFake('search_video');
