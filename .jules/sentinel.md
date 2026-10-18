@@ -125,3 +125,9 @@ Prevention: Normalize all DASH audio/video stream URLs and durl segment URLs wit
 Vulnerability: Model mappers across Bilibili feed (`NetworkBiliPopularVideo`, `NetworkBiliRankingVideo`) and video detail (`BiliVideoDetailRemoteDataSource`) directly interpolated `bvid` strings into watch URLs (`https://www.bilibili.com/video/$bvid`) without sanitization, risking control-character injection (`\r\n`, `\x00`).
 Learning: Video identifiers obtained from external API feeds can contain non-printable control characters that propagate into URI consumers and web view / browser intent launchers if not sanitized at the DTO mapping boundary.
 Prevention: Standardize watch URL construction using a centralized utility (`buildBiliWatchUrl`) that strips ASCII control characters (`[\x00-\x1F\x7F]`) and whitespace from BV IDs.
+
+## 2026-10-13 - Sanitize Control Characters in Bilibili Danmaku Comment Contents
+
+Vulnerability: `BiliDanmakuRemoteDataSource` mapped XML danmaku comments (`comment.content`) into `DanmakuComment` objects without sanitizing ASCII control characters (`\r\n`, `\x00`, `\x1f`, `\x7f`), propagating raw control characters to danmaku overlay UI widgets (`DanmakuOverlay` / `TextPainter`).
+Learning: External network XML and Protobuf payloads (such as danmaku overlays) can contain non-printable control characters that trigger rendering glitches or text painter layout issues in Flutter UI overlays.
+Prevention: Strip ASCII control characters (`RegExp(r'[\x00-\x1F\x7F]')`) and trim whitespace from comment content strings before constructing `DanmakuComment` instances and filtering empty comments.
