@@ -271,6 +271,12 @@ jobs:
       # path. The debug variant uses the debug keystore and keeps symbols.
       - name: Build debug APK
         run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=${{ github.run_number }}
+        env:
+          # build.gradle.kts throws at configuration time when no release
+          # signing config exists, even for a pure debug build; CI sets this
+          # so configuration passes. The debug variant itself uses the debug
+          # keystore regardless.
+          BILI_ALLOW_UNSIGNED_RELEASE: "1"
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
