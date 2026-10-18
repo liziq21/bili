@@ -147,7 +147,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
 
 /// 空搜索结果视图：图标 + 文字 + 屏幕阅读器整体语义
 class _EmptySearchIndicator extends StatelessWidget {
-  const _EmptySearchIndicator({super.key});
+  const _EmptySearchIndicator();
 
   @override
   Widget build(BuildContext context) {
