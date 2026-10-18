@@ -107,6 +107,7 @@ so hand edits do not survive; change the generator instead.
 - fix(tool): keep changelog regeneration PRs out of CHANGELOG.md (#312)
 - fix(tool): narrow the changelog self-exclusion to the workflow branch (#314)
 - Fix duplicate search view route on search tab reselect (#321)
+- 🛡️ Sentinel: Sanitize control characters in Bilibili danmaku comment content (#344)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -183,6 +184,7 @@ so hand edits do not survive; change the generator instead.
 - refactor(search): migrate hardcoded copy to ARB keys for search domain (LIZ-51) (#339)
 - refactor(l10n): LIZ-51 B3 media library + card copy (#342)
 - refactor(l10n): LIZ-51 B6 home + routing + data layer copy (#343)
+- 🎨 Palette: Enhance Media Library load-more button semantics and tooltips (#345)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
