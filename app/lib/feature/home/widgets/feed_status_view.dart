@@ -68,7 +68,7 @@ class const FeedStatusView({
           if (desc != null) ...[
             SizedBox(height: $styles.insets.xxs),
             Text(
-              desc!,
+              desc,
               textAlign: TextAlign.center,
               style: $styles.text.bodySmall.copyWith(
                 color: colorScheme.onSurfaceVariant,
