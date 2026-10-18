@@ -14,7 +14,11 @@ class const SpaceRouteData({required final String mid, final String? source})
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
-      return const NoMediaSourceScreen(message: '创作者所属的数据源不可用');
+      return NoMediaSourceScreen(
+        message:
+            AppLocalizations.of(context)?.creatorSourceUnavailable ??
+            'Creator source unavailable',
+      );
     }
 
     return ServiceSourceProviders(
