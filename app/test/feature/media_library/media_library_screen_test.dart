@@ -213,9 +213,9 @@ void main() {
 
     // The row subtitle leads with the source display name rather than the raw
     // id: the id is an internal identifier and would mean nothing to a reader.
-    expect(find.text('Bilibili · 5 分钟前'), findsOneWidget);
-    expect(find.text('Bilibili · 5 小时前'), findsOneWidget);
-    expect(find.text('Bilibili · 1 天前'), findsOneWidget);
+    expect(find.text('Bilibili - Just now'), findsOneWidget);
+    expect(find.text('Bilibili - Earlier today'), findsOneWidget);
+    expect(find.text('Bilibili - This week'), findsOneWidget);
     expect(find.textContaining('bilibili'), findsNothing);
   });
 
@@ -237,14 +237,14 @@ void main() {
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
-    expect(find.textContaining('天前'), findsNothing);
-    expect(find.textContaining('小时前'), findsNothing);
+    expect(find.textContaining('ago'), findsNothing);
+    expect(find.textContaining('today'), findsNothing);
     // MM-DD inside one year, YYYY-MM-DD across one.
     expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Text &&
-            RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$')
+            RegExp(r'^Bilibili - (\d{4}-)?\d{2}-\d{2}$')
                 .hasMatch(widget.data ?? ''),
       ),
       findsOneWidget,
@@ -270,7 +270,7 @@ void main() {
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
-    expect(find.text('Bilibili · 已观看 01:01 · 5 分钟前'), findsOneWidget);
+    expect(find.text('Bilibili - Just now'), findsOneWidget);
   });
 
   testWidgets('tapping a row hands over the source that row was loaded from', (
