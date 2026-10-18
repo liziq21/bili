@@ -177,7 +177,7 @@ void main() {
 
     // Header load button should expose Semantics and Tooltip for accessibility.
     expect(find.byType(Tooltip), findsWidgets);
-    expect(find.byTooltip('加载更多历史记录'), findsOneWidget);
+    expect(find.byTooltip('Load more history'), findsOneWidget);
   });
 
   testWidgets(
@@ -194,7 +194,7 @@ void main() {
       expect(cubit.state.items, isEmpty);
       expect(cubit.state.hasMore, isFalse);
 
-      expect(find.byTooltip('已加载全部历史记录'), findsOneWidget);
+      expect(find.byTooltip('All history loaded'), findsOneWidget);
     },
   );
 
