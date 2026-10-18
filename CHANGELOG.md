@@ -263,6 +263,7 @@ so hand edits do not survive; change the generator instead.
 - ci: 钉死 SDK 版本并要求 agent 执行前核对 (#239)
 - chore(mcp): add GitHub MCP server to project MCP configs (#268)
 - ci: add environment-aware local test runner (#288)
+- ci: skip CI for ci-generated PRs; enable auto-merge on changelog PR (#348)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
