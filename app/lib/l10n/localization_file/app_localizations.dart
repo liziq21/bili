@@ -6421,6 +6421,24 @@ abstract class AppLocalizations {
   /// **'加载更多'**
   String get loadMore;
 
+  /// Migrated from hardcoded literal (PR #345 tooltip)
+  ///
+  /// In zh, this message translates to:
+  /// **'正在加载历史记录...'**
+  String get loadingHistory;
+
+  /// Migrated from hardcoded literal (PR #345 tooltip)
+  ///
+  /// In zh, this message translates to:
+  /// **'加载更多历史记录'**
+  String get loadMoreHistory;
+
+  /// Migrated from hardcoded literal (PR #345 tooltip)
+  ///
+  /// In zh, this message translates to:
+  /// **'已加载全部历史记录'**
+  String get allHistoryLoaded;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In zh, this message translates to:

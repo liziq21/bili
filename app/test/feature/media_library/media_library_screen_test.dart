@@ -174,7 +174,29 @@ void main() {
     // is the only one: it must not be disabled just because the list is empty.
     final button = tester.widget<TextButton>(find.byType(TextButton));
     expect(button.onPressed, isNotNull);
+
+    // Header load button should expose Semantics and Tooltip for accessibility.
+    expect(find.byType(Tooltip), findsWidgets);
+    expect(find.byTooltip('Load more history'), findsOneWidget);
   });
+
+  testWidgets(
+    'header load button exposes semantics and disabled tooltip when no more items',
+    (tester) async {
+      final cubit = MediaHistoryCubit(
+        mediaHistoryDao: db.mediaHistoryDao,
+        pageSize: 10,
+      );
+      registerHistoryCleanup(tester, cubit);
+      await settle(cubit);
+      await pumpLibrary(tester, cubit);
+
+      expect(cubit.state.items, isEmpty);
+      expect(cubit.state.hasMore, isFalse);
+
+      expect(find.byTooltip('All history loaded'), findsOneWidget);
+    },
+  );
 
   testWidgets('labels each row with its source and when it was watched', (
     tester,

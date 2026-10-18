@@ -3749,6 +3749,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadMore => '加载更多';
 
   @override
+  String get loadingHistory => '正在加载历史记录...';
+
+  @override
+  String get loadMoreHistory => '加载更多历史记录';
+
+  @override
+  String get allHistoryLoaded => '已加载全部历史记录';
+
+  @override
   String get historyLoadFailed => '历史记录加载失败';
 
   @override

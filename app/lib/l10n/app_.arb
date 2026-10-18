@@ -4966,6 +4966,18 @@
   "@loadMore": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "loadingHistory": "正在加载历史记录...",
+  "@loadingHistory": {
+    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+  },
+  "loadMoreHistory": "加载更多历史记录",
+  "@loadMoreHistory": {
+    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+  },
+  "allHistoryLoaded": "已加载全部历史记录",
+  "@allHistoryLoaded": {
+    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+  },
   "historyLoadFailed": "历史记录加载失败",
   "@historyLoadFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
