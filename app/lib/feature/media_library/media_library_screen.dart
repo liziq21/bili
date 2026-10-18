@@ -73,6 +73,10 @@ class const MediaLibraryScreen({
               hasMore: state.hasMore,
             ),
             builder: (context, headerState) {
+              final buttonEnabled = _loadMoreButtonEnabled(
+                hasMore: headerState.hasMore,
+                isLoading: headerState.isLoading,
+              );
               // 条数只反映已加载的部分：DAO 是分页查的，表里总数没查过，
               // 写「共 N 项」会让人以为这是全部，翻页后数字还会变。
               final label = headerState.itemCount == 0
@@ -118,17 +122,25 @@ class const MediaLibraryScreen({
                   ),
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
-                  TextButton(
-                    onPressed: headerState.hasMore && !headerState.isLoading
-                        ? () {
-                            HapticFeedback.lightImpact();
-                            context.read<MediaHistoryCubit>().loadMore();
-                          }
-                        : null,
-                    child: Text(
-                      headerState.hasMore
-                          ? (l10n?.loadMore ?? 'Load more')
-                          : (l10n?.noMoreItems ?? 'No more items'),
+                  Tooltip(
+                    message: tooltipMessage(l10n, headerState: headerState),
+                    child: Semantics(
+                      button: true,
+                      enabled: buttonEnabled,
+                      label: tooltipMessage(l10n, headerState: headerState),
+                      child: TextButton(
+                        onPressed: buttonEnabled
+                            ? () {
+                                HapticFeedback.lightImpact();
+                                context.read<MediaHistoryCubit>().loadMore();
+                              }
+                            : null,
+                        child: Text(
+                          headerState.hasMore
+                              ? (l10n?.loadMore ?? 'Load more')
+                              : (l10n?.noMoreItems ?? 'No more items'),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -139,6 +151,22 @@ class const MediaLibraryScreen({
       ),
     );
   }
+}
+
+bool _loadMoreButtonEnabled({required bool hasMore, required bool isLoading}) =>
+    hasMore && !isLoading;
+
+String tooltipMessage(
+  AppLocalizations? l10n, {
+  required ({int itemCount, bool hasError, bool isLoading, bool hasMore})
+  headerState,
+}) {
+  if (headerState.isLoading) {
+    return l10n?.loadingHistory ?? 'Loading history...';
+  }
+  return headerState.hasMore
+      ? (l10n?.loadMoreHistory ?? 'Load more history')
+      : (l10n?.allHistoryLoaded ?? 'All history loaded');
 }
 
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
