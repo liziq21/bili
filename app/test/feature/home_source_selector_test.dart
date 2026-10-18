@@ -51,15 +51,15 @@ void main() {
     // Verify Tooltip presence
     expect(find.byType(Tooltip), findsOneWidget);
     final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
-    expect(tooltip.message, '切换数据源');
+    expect(tooltip.message, 'Switch source');
 
     // Verify Semantics
     final semanticsFinder = find.byWidgetPredicate(
       (widget) =>
           widget is Semantics &&
-          widget.properties.label == '切换数据源' &&
+          widget.properties.label == 'Switch source' &&
           widget.properties.value == 'Bilibili' &&
-          widget.properties.hint == '切换视频与媒体数据源',
+          widget.properties.hint == 'Switch video and media source',
     );
     expect(semanticsFinder, findsOneWidget);
   });
