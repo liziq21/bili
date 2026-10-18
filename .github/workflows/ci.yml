@@ -266,20 +266,17 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
       
-      # CI has no release keystore, so BILI_ALLOW_UNSIGNED_RELEASE lets the release
-      # build fall back to the debug keystore to verify that the variant compiles.
-      # The resulting artifact is not publishable. Release builds outside CI must
-      # supply android/key.properties or they fail (see app/android/app/build.gradle.kts).
-      - name: Build release APK (unsigned)
-        run: cd app && flutter build apk --release --split-per-abi --pub --build-number=${{ github.run_number }}
-        env:
-          BILI_ALLOW_UNSIGNED_RELEASE: "1"
+      # LIZ-50 debugging: build a debug APK so the artifact can be installed
+      # directly for local reproduction, without the release signing/obfuscation
+      # path. The debug variant uses the debug keystore and keeps symbols.
+      - name: Build debug APK
+        run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=${{ github.run_number }}
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: app-arm64-v8a-release-unsigned-${{ matrix.release.flutter }}.apk
-          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          name: app-arm64-v8a-debug-${{ matrix.release.flutter }}.apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
 
 
 #  build_iOSApp:
