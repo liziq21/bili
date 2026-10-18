@@ -50,6 +50,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
-    expect(find.text('未找到内容'), findsOneWidget);
+    expect(find.text('Nothing found'), findsOneWidget);
   });
 }
