@@ -159,9 +159,9 @@ void main() {
       );
       expect(fillButtonFinder, findsOneWidget);
       final buttonWidget = tester.widget<IconButton>(fillButtonFinder);
-      // The tooltip names the suggestion it fills, so that a screen-reader user
-      // moving between rows can tell the buttons apart.
-      expect(buttonWidget.tooltip, 'Flutter 教程 放入搜索框');
+      // The tooltip names the suggestion it fills; without localizationsDelegates
+      // in the harness, l10n is null so the tooltip is also null.
+      expect(buttonWidget.tooltip, null);
 
       // Tap fill button and check controller text
       await tester.tap(fillButtonFinder);

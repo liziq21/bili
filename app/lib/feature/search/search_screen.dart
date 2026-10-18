@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../data/model/recent_search_query.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_search_anchor.dart';
 import 'bloc/search_bloc.dart';
@@ -111,6 +112,7 @@ class const _RecentSearches({
     final bloc = context.read<SearchBloc?>();
     if (bloc == null) return const SliverToBoxAdapter();
 
+    final l10n = AppLocalizations.of(context);
     return BlocSelector<SearchBloc, SearchState, List<RecentSearchQuery>>(
       selector: (state) => state.recentSearchQueries,
       builder: (context, queries) {
@@ -130,14 +132,16 @@ class const _RecentSearches({
                 children: [
                   Expanded(
                     child: Text(
-                      '最近搜索',
+                      l10n?.recentSearches ?? 'Recent searches',
                       style: $styles.text.title2.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
                   Tooltip(
-                    message: '清空最近搜索历史',
+                    message:
+                        l10n?.clearRecentSearchHistory ??
+                        'Clear recent search history',
                     child: TextButton(
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -145,14 +149,14 @@ class const _RecentSearches({
                           ClearRecentSearchesPressed(),
                         );
                       },
-                      child: const Text('清空'),
+                      child: Text(l10n?.clear ?? 'Clear'),
                     ),
                   ),
                 ],
               ),
               for (final q in queries.take(limit))
                 Tooltip(
-                  message: '搜索 "${q.query}"',
+                  message: l10n?.searchQueryLabel(q.query),
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(

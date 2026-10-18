@@ -39,7 +39,7 @@ class SearchBloc({
       _getRentSearchQueriesUseCase.invoke(),
       onData: (queries) => state.copyWith(recentSearchQueries: queries),
       onError: (error, stackTrace) {
-        _log.warning('加载最近搜索失败', error);
+        _log.warning('Failed to load recent searches', error);
         return state.copyWith(recentSearchQueries: []);
       },
     );
