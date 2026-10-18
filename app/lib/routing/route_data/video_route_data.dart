@@ -3,8 +3,14 @@ part of '../router.dart';
 extension BuildContextVideo on BuildContext {
   void navigateToVideo(String id, {String? source}) {
     if (source != null && read<MediaSourceCatalog>().find(source) == null) {
-      ScaffoldMessenger.of(this)
-          .showSnackBar(const SnackBar(content: Text('视频所属的数据源不可用')));
+      ScaffoldMessenger.of(this).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(this)?.videoSourceUnavailable ??
+                'Video source unavailable',
+          ),
+        ),
+      );
       return;
     }
 
@@ -30,7 +36,11 @@ class const VideoRouteData({
   Widget build(BuildContext context, GoRouterState state) {
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
-      return const NoMediaSourceScreen(message: '视频所属的数据源不可用');
+      return NoMediaSourceScreen(
+        message:
+            AppLocalizations.of(context)?.videoSourceUnavailable ??
+            'Video source unavailable',
+      );
     }
 
     return ServiceSourceProviders(
@@ -39,7 +49,11 @@ class const VideoRouteData({
       child: Builder(
         builder: (context) {
           if (context.read<VideoDetailRepository?>() == null) {
-            return const NoMediaSourceScreen(message: '当前数据源暂不支持查看视频详情');
+            return NoMediaSourceScreen(
+              message:
+                  AppLocalizations.of(context)?.videoDetailSourceUnsupported ??
+                  'Source does not support video details',
+            );
           }
           return VideoScreen(videoId: id);
         },

@@ -180,7 +180,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
       case Error(:final error):
         _log.warning('Failed to toggle subscribe', error);
         emit(
-          state.copyWith(videoDetail: detail, actionError: 'Subscribe failed'),
+          state.copyWith(videoDetail: detail, actionError: 'Follow failed'),
         );
     }
   }

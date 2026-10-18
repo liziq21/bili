@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 
 class const CreatorProfileItem({
@@ -10,13 +11,13 @@ class const CreatorProfileItem({
   required final CreatorProfile creatorProfile,
   final Function()? onTap,
 }) extends StatelessWidget {
-  static String formatCount(int? count) {
+  static String formatCount(int? count, [AppLocalizations? l10n]) {
     if (count == null) return '';
     if (count >= 100000000) {
-      return '${(count / 100000000).toStringAsFixed(1)}亿';
+      return l10n?.countCompactYi((count / 100000000).toStringAsFixed(1)) ?? '';
     }
     if (count >= 10000) {
-      return '${(count / 10000).toStringAsFixed(1)}万';
+      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ?? '';
     }
     return '$count';
   }
@@ -33,24 +34,29 @@ class const CreatorProfileItem({
     // cheap opt-in — see `feature/video/video_screen.dart` for the long form.
     final colorScheme = Theme.of(context).colorScheme;
 
-    final formattedSubscribers = formatCount(creatorProfile.subscribers);
-    final formattedVideos = formatCount(creatorProfile.videos);
+    final l10n = AppLocalizations.of(context);
+    final formattedSubscribers = formatCount(creatorProfile.subscribers, l10n);
+    final formattedVideos = formatCount(creatorProfile.videos, l10n);
 
     final statsParts = <String>[
       '@${creatorProfile.id}',
-      if (formattedSubscribers.isNotEmpty) '$formattedSubscribers 关注',
-      if (formattedVideos.isNotEmpty) '$formattedVideos 视频',
-      if (creatorProfile.isLive == true) '直播中',
+      if (formattedSubscribers.isNotEmpty)
+        l10n?.subscribersCount(formattedSubscribers) ?? '',
+      if (formattedVideos.isNotEmpty) l10n?.videosCount(formattedVideos) ?? '',
+      if (creatorProfile.isLive == true) l10n?.liveNow ?? '',
     ];
-    final subtitleText = statsParts.join(' • ');
+    final subtitleText = statsParts.whereType<String>().join(
+      l10n?.spacedBullet ?? ' - ',
+    );
 
-    final semanticStatsParts = <String>[
-      if (formattedSubscribers.isNotEmpty) '$formattedSubscribers 关注',
-      if (formattedVideos.isNotEmpty) '$formattedVideos 视频',
-      if (creatorProfile.isLive == true) '直播中',
+    final semanticStatsParts = <String?>[
+      if (formattedSubscribers.isNotEmpty)
+        l10n?.subscribersCount(formattedSubscribers),
+      if (formattedVideos.isNotEmpty) l10n?.videosCount(formattedVideos),
+      if (creatorProfile.isLive == true) l10n?.liveNow ?? '',
     ];
     final semanticStatsText = semanticStatsParts.isNotEmpty
-        ? '，${semanticStatsParts.join('，')}'
+        ? '${l10n?.commaSeparator ?? ','}${semanticStatsParts.whereType<String>().join(l10n?.commaSeparator ?? ',')}'
         : '';
     final semanticLabel =
         '${creatorProfile.name}, @${creatorProfile.id}$semanticStatsText';

@@ -168,7 +168,7 @@ void main() {
         await tester.tap(find.text('go'));
         await tester.pumpAndSettle();
 
-        expect(find.text('视频所属的数据源不可用'), findsOneWidget);
+        expect(find.text('Video source unavailable'), findsOneWidget);
       },
     );
 
@@ -202,7 +202,7 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('go')));
         await tester.pump();
 
-        expect(find.text('视频所属的数据源不可用'), findsNothing);
+        expect(find.text('Video source unavailable'), findsNothing);
       },
     );
   });

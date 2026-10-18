@@ -25,7 +25,7 @@ void main() {
 
       expect(find.text('网络错误'), findsOneWidget);
       expect(find.text('请重试'), findsOneWidget);
-      expect(find.text('重试'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
 
       await tester.tap(find.byType(OutlinedButton));
       await tester.pump();
@@ -52,8 +52,8 @@ void main() {
       ),
     );
 
-    expect(find.text('推荐 Feed 加载失败'), findsOneWidget);
-    expect(find.text('请检查网络连接后重试'), findsOneWidget);
+    expect(find.text('推荐 Feed failed'), findsOneWidget);
+    expect(find.text('Check your connection and retry'), findsOneWidget);
 
     await tester.tap(find.byType(OutlinedButton));
     await tester.pump();

@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../providers/media_sources_provider.dart';
 import '../bloc/home_bloc.dart';
@@ -15,8 +16,9 @@ class const HomeSourceSelector({
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
-    const semanticLabel = '切换数据源';
+    final semanticLabel = l10n?.switchDataSource ?? 'Switch source';
     MediaSourceDefinition activeSource;
     try {
       activeSource = sources.firstWhere((s) => s.id == activeSourceId);
@@ -26,12 +28,12 @@ class const HomeSourceSelector({
     final activeSourceName = activeSource.name;
 
     return Tooltip(
-      message: '切换数据源',
+      message: l10n?.switchDataSource ?? 'Switch source',
       child: Semantics(
         button: true,
         label: semanticLabel,
         value: activeSourceName,
-        hint: '切换视频与媒体数据源',
+        hint: l10n?.switchVideoMediaSource ?? 'Switch video and media source',
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: activeSourceId,

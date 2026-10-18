@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
+import '../../l10n/localization_file/app_localizations.dart';
+import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 
@@ -44,11 +46,12 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final catalog = context.read<MediaSourceCatalog>();
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        appBar: AppBar(title: const Text('本地库')),
+        appBar: AppBar(title: Text(l10n.localLibrary)),
         body: Column(
           children: [
             if (_tabIndex != 0) _scopeBar(catalog),
@@ -59,11 +62,11 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                 HapticFeedback.selectionClick();
                 setState(() => _tabIndex = index);
               },
-              tabs: const [
-                Tab(text: '历史'),
-                Tab(text: '收藏'),
-                Tab(text: '播放列表'),
-                Tab(text: '订阅'),
+              tabs: [
+                Tab(text: l10n.history),
+                Tab(text: l10n.favorite),
+                Tab(text: l10n.playlists),
+                Tab(text: l10n.subscribe),
               ],
             ),
             Expanded(
@@ -137,6 +140,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
   }
 
   Widget _scopeBar(MediaSourceCatalog catalog) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final sourceName = _sourceName(_sourceId);
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -151,7 +155,9 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
           SizedBox(width: $styles.insets.xs),
           Expanded(
             child: Text(
-              sourceName == null ? '全部来源' : '来源：$sourceName',
+              sourceName == null
+                  ? l10n.allSources
+                  : l10n.sourceLabel(sourceName),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: $styles.text.bodySmall.copyWith(
@@ -161,7 +167,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
           ),
           TextButton(
             onPressed: catalog.definitions.isEmpty ? null : _chooseSource,
-            child: const Text('筛选'),
+            child: Text(l10n.filter),
           ),
         ],
       ),
@@ -179,8 +185,9 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final selected = await showDialog<({String? sourceId})>(
       context: context,
       builder: (context) {
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         return AlertDialog(
-          title: const Text('选择来源'),
+          title: Text(l10n.selectSource),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 360),
             child: SingleChildScrollView(
@@ -190,7 +197,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                   SimpleDialogOption(
                     onPressed: () =>
                         Navigator.of(context).pop((sourceId: null)),
-                    child: const Text('全部来源'),
+                    child: Text(l10n.allSources),
                   ),
                   for (final definition in catalog.definitions)
                     SimpleDialogOption(
@@ -223,20 +230,23 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
   Future<void> _deletePlaylist(int playlistId) => _runOperation(() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('删除播放列表？'),
-        content: const Text('列表中的本地条目也会被删除。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        return AlertDialog(
+          title: Text(l10n.deletePlaylistConfirm),
+          content: Text(l10n.deletePlaylistNote),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
     );
     if (mounted && confirmed == true) {
       await _repository.deletePlaylist(playlistId);
@@ -245,12 +255,13 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   Future<void> _addBookmarks(LocalPlaylistEntity playlist) =>
       _runOperation(() async {
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
         final bookmarks = (await _repository.getBookmarks())
             .where((bookmark) => bookmark.sourceId == playlist.sourceId)
             .toList(growable: false);
         if (!mounted) return;
         if (bookmarks.isEmpty) {
-          _reportError('该来源没有可添加的收藏');
+          _reportError(l10n.noFavoritesFromSource);
           return;
         }
         final selected = await showDialog<List<LocalBookmarkEntity>>(
@@ -300,7 +311,10 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     try {
       await operation();
     } on Object catch (error) {
-      _reportError('操作失败：$error');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        _reportError(l10n.operationFailed(error.toString()));
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -344,22 +358,23 @@ class const _BookmarksTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalBookmarkEntity>>(
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
-          return const _LibraryMessage(
+          return _LibraryMessage(
             icon: Icons.bookmark_outline,
-            message: '正在加载收藏',
+            message: l10n.loadingFavorites,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
             icon: Icons.error_outline,
-            message: '收藏加载失败',
-            actionLabel: '重试',
+            message: l10n.favoritesLoadFailed,
+            actionLabel: l10n.retry,
             onAction: onRetry,
           );
         }
@@ -369,9 +384,9 @@ class const _BookmarksTab({
             )
             .toList(growable: false);
         if (bookmarks.isEmpty) {
-          return const _LibraryMessage(
+          return _LibraryMessage(
             icon: Icons.bookmark_border,
-            message: '还没有收藏',
+            message: l10n.noFavoritesYet,
           );
         }
         return ListView.separated(
@@ -394,7 +409,7 @@ class const _BookmarksTab({
                   if (bookmark.creatorProfileName case final name?
                       when name.isNotEmpty)
                     name,
-                ].join(' · '),
+                ].join(l10n.spacedDot),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -404,7 +419,7 @@ class const _BookmarksTab({
               },
               trailing: PopupMenuButton<_BookmarkAction>(
                 enabled: !busy,
-                tooltip: '收藏操作',
+                tooltip: l10n.favoriteActions,
                 onSelected: (action) {
                   switch (action) {
                     case _BookmarkAction.remove:
@@ -417,13 +432,13 @@ class const _BookmarksTab({
                 },
                 itemBuilder: (context) => [
                   if (creatorId != null && creatorId.isNotEmpty)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: _BookmarkAction.creator,
-                      child: Text('打开创作者'),
+                      child: Text(l10n.openCreator),
                     ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: _BookmarkAction.remove,
-                    child: Text('取消收藏'),
+                    child: Text(l10n.unfavorite),
                   ),
                 ],
               ),
@@ -464,22 +479,23 @@ class const _PlaylistsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalPlaylistEntity>>(
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
-          return const _LibraryMessage(
+          return _LibraryMessage(
             icon: Icons.queue_music_outlined,
-            message: '正在加载播放列表',
+            message: l10n.loadingPlaylists,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
             icon: Icons.error_outline,
-            message: '播放列表加载失败',
-            actionLabel: '重试',
+            message: l10n.playlistLoadFailed,
+            actionLabel: l10n.retry,
             onAction: onRetry,
           );
         }
@@ -491,8 +507,8 @@ class const _PlaylistsTab({
         if (playlists.isEmpty) {
           return _LibraryMessage(
             icon: Icons.queue_music_outlined,
-            message: '还没有播放列表',
-            actionLabel: '新建播放列表',
+            message: l10n.noPlaylistsYet,
+            actionLabel: l10n.newPlaylist,
             onAction: onCreate,
           );
         }
@@ -511,7 +527,7 @@ class const _PlaylistsTab({
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onCreate,
                   icon: const Icon(Icons.add),
-                  label: const Text('新建播放列表'),
+                  label: Text(l10n.newPlaylist),
                 ),
               ),
             ),
@@ -559,6 +575,7 @@ class const _PlaylistCard({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -590,7 +607,7 @@ class const _PlaylistCard({
                   ),
                 ),
                 PopupMenuButton<_PlaylistAction>(
-                  tooltip: '播放列表操作',
+                  tooltip: l10n.playlistActions,
                   onSelected: (action) {
                     switch (action) {
                       case _PlaylistAction.addBookmarks:
@@ -603,12 +620,12 @@ class const _PlaylistCard({
                     PopupMenuItem(
                       value: _PlaylistAction.addBookmarks,
                       enabled: !busy,
-                      child: Text('添加收藏'),
+                      child: Text(l10n.addFavorite),
                     ),
                     PopupMenuItem(
                       value: _PlaylistAction.delete,
                       enabled: !busy,
-                      child: Text('删除播放列表'),
+                      child: Text(l10n.deletePlaylist),
                     ),
                   ],
                 ),
@@ -618,7 +635,9 @@ class const _PlaylistCard({
           Padding(
             padding: EdgeInsets.symmetric(horizontal: $styles.insets.sm),
             child: Text(
-              sourceName == null ? playlist.sourceId : '来源：$sourceName',
+              sourceName == null
+                  ? playlist.sourceId
+                  : l10n.sourceLabel(sourceName!),
               style: $styles.text.bodySmall.copyWith(
                 color: $styles.colors.onSurfaceVariant,
               ),
@@ -678,6 +697,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalPlaylistItemEntity>>(
       stream: _items,
       builder: (context, snapshot) {
@@ -695,14 +715,14 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
                 child: Padding(
                   padding: EdgeInsets.all($styles.insets.sm),
                   child: Text(
-                    '条目加载失败',
+                    l10n.itemsLoadFailed,
                     style: $styles.text.bodySmall.copyWith(
                       color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
               ),
-              TextButton(onPressed: widget.onRetry, child: const Text('重试')),
+              TextButton(onPressed: widget.onRetry, child: Text(l10n.retry)),
             ],
           );
         }
@@ -719,7 +739,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
               $styles.insets.xs,
             ),
             child: Text(
-              '列表为空',
+              l10n.listEmpty,
               style: $styles.text.bodySmall.copyWith(
                 color: $styles.colors.onSurfaceVariant,
               ),
@@ -791,6 +811,7 @@ class const _PlaylistItemRow({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return ListTile(
       dense: true,
       leading: const _LibraryLeading(icon: Icons.play_arrow_outlined),
@@ -801,7 +822,7 @@ class const _PlaylistItemRow({
       },
       trailing: PopupMenuButton<_PlaylistItemAction>(
         enabled: !busy,
-        tooltip: '条目操作',
+        tooltip: l10n.itemActions,
         onSelected: (action) {
           switch (action) {
             case _PlaylistItemAction.up:
@@ -816,16 +837,16 @@ class const _PlaylistItemRow({
           PopupMenuItem(
             value: _PlaylistItemAction.up,
             enabled: !isFirst,
-            child: const Text('上移'),
+            child: Text(l10n.moveUp),
           ),
           PopupMenuItem(
             value: _PlaylistItemAction.down,
             enabled: !isLast,
-            child: const Text('下移'),
+            child: Text(l10n.moveDown),
           ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: _PlaylistItemAction.remove,
-            child: Text('移除这一次'),
+            child: Text(l10n.removeThisEntry),
           ),
         ],
       ),
@@ -854,22 +875,23 @@ class const _SubscriptionsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalSubscriptionEntity>>(
       stream: stream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
-          return const _LibraryMessage(
+          return _LibraryMessage(
             icon: Icons.person_add_alt_outlined,
-            message: '正在加载订阅',
+            message: l10n.loadingSubscriptions,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
             icon: Icons.error_outline,
-            message: '订阅加载失败',
-            actionLabel: '重试',
+            message: l10n.subscriptionsLoadFailed,
+            actionLabel: l10n.retry,
             onAction: onRetry,
           );
         }
@@ -881,9 +903,9 @@ class const _SubscriptionsTab({
                 )
                 .toList(growable: false);
         if (subscriptions.isEmpty) {
-          return const _LibraryMessage(
+          return _LibraryMessage(
             icon: Icons.person_add_alt_outlined,
-            message: '还没有订阅',
+            message: l10n.noSubscriptionsYet,
           );
         }
 
@@ -909,7 +931,9 @@ class const _SubscriptionsTab({
           children: [
             for (final group in sortedGroups)
               _SubscriptionGroup(
-                groupName: group.groupName.isEmpty ? '未分组' : group.groupName,
+                groupName: group.groupName.isEmpty
+                    ? l10n.ungrouped
+                    : group.groupName,
                 sourceName: sourceName(group.sourceId),
                 subscriptions: groups[group]!,
                 onCreatorTap: onCreatorTap,
@@ -943,6 +967,7 @@ class const _SubscriptionGroup({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -962,7 +987,9 @@ class const _SubscriptionGroup({
                 color: $styles.colors.onSurfaceStrong,
               ),
             ),
-            subtitle: sourceName == null ? null : Text('来源：$sourceName'),
+            subtitle: sourceName == null
+                ? null
+                : Text(l10n.sourceLabel(sourceName!)),
           ),
           for (final subscription in subscriptions)
             ListTile(
@@ -974,7 +1001,7 @@ class const _SubscriptionGroup({
               },
               trailing: PopupMenuButton<_SubscriptionAction>(
                 enabled: !busy,
-                tooltip: '订阅操作',
+                tooltip: l10n.subscriptionActions,
                 onSelected: (action) {
                   switch (action) {
                     case _SubscriptionAction.group:
@@ -983,14 +1010,14 @@ class const _SubscriptionGroup({
                       if (!busy) onUnsubscribe(subscription);
                   }
                 },
-                itemBuilder: (context) => const [
+                itemBuilder: (context) => [
                   PopupMenuItem(
                     value: _SubscriptionAction.group,
-                    child: Text('设置分组'),
+                    child: Text(l10n.setGroup),
                   ),
                   PopupMenuItem(
                     value: _SubscriptionAction.remove,
-                    child: Text('取消订阅'),
+                    child: Text(l10n.unsubscribe),
                   ),
                 ],
               ),
@@ -1079,12 +1106,13 @@ class _BookmarkSelectionDialogState() extends State<_BookmarkSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final viewport = MediaQuery.sizeOf(context);
     final dialogWidth = (viewport.width - 80).clamp(160.0, 460.0).toDouble();
     final dialogHeight = (viewport.height - 240).clamp(120.0, 360.0).toDouble();
 
     return AlertDialog(
-      title: const Text('添加收藏'),
+      title: Text(l10n.addFavorite),
       content: SizedBox(
         width: dialogWidth,
         height: dialogHeight,
@@ -1116,9 +1144,9 @@ class _BookmarkSelectionDialogState() extends State<_BookmarkSelectionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('添加')),
+        FilledButton(onPressed: _submit, child: Text(l10n.add)),
       ],
     );
   }
@@ -1164,14 +1192,15 @@ class _CreatePlaylistDialogState() extends State<_CreatePlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
-      title: const Text('新建播放列表'),
+      title: Text(l10n.newPlaylist),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
             initialValue: _sourceId,
-            decoration: const InputDecoration(labelText: '来源'),
+            decoration: InputDecoration(labelText: l10n.source),
             items: [
               for (final definition in widget.definitions)
                 DropdownMenuItem(
@@ -1186,7 +1215,7 @@ class _CreatePlaylistDialogState() extends State<_CreatePlaylistDialog> {
             controller: _nameController,
             autofocus: true,
             maxLength: 60,
-            decoration: const InputDecoration(labelText: '名称'),
+            decoration: InputDecoration(labelText: l10n.name),
             onSubmitted: (_) => _submit(),
           ),
         ],
@@ -1194,9 +1223,9 @@ class _CreatePlaylistDialogState() extends State<_CreatePlaylistDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('创建')),
+        FilledButton(onPressed: _submit, child: Text(l10n.create)),
       ],
     );
   }
@@ -1247,24 +1276,25 @@ class _GroupDialogState() extends State<_GroupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
-      title: const Text('设置分组'),
+      title: Text(l10n.setGroup),
       content: TextField(
         controller: _controller,
         autofocus: true,
         maxLength: 40,
-        decoration: const InputDecoration(
-          labelText: '分组名称',
-          hintText: '留空表示未分组',
+        decoration: InputDecoration(
+          labelText: l10n.groupName,
+          hintText: l10n.groupNameHint,
         ),
         onSubmitted: (_) => _submit(),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('保存')),
+        FilledButton(onPressed: _submit, child: Text(l10n.save)),
       ],
     );
   }

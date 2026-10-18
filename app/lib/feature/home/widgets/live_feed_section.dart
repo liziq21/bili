@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../bloc/home_bloc.dart';
@@ -103,11 +104,13 @@ class const _LiveRoomCard({
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final streamerName = liveRoom.creatorProfileName ?? '未知主播';
-    final semanticLabel = <String>[
+    final l10n = AppLocalizations.of(context);
+    final streamerName =
+        liveRoom.creatorProfileName ?? (l10n?.unknownStreamer ?? 'Unknown');
+    final semanticLabel = <String?>[
       liveRoom.title,
-      '主播: $streamerName',
-    ].join('，');
+      l10n?.streamerLabel(streamerName),
+    ].whereType<String>().join(l10n?.commaSeparator ?? ',');
 
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
