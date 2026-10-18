@@ -108,7 +108,7 @@ void main() {
 
         await tester.pump();
 
-        expect(find.text('评论加载失败，请稍后重试'), findsOneWidget);
+        expect(find.text('Failed to load comments'), findsOneWidget);
         expect(find.textContaining('CRITICAL_SERVER_EXCEPTION'), findsNothing);
         expect(find.textContaining('Bearer eyJ'), findsNothing);
 
