@@ -111,7 +111,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
         break;
       case Error(:final error):
         _log.warning('Failed to toggle like', error);
-        emit(state.copyWith(videoDetail: detail, actionError: '点赞失败'));
+        emit(state.copyWith(videoDetail: detail, actionError: 'Like failed'));
     }
   }
 
@@ -147,7 +147,9 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
         break;
       case Error(:final error):
         _log.warning('Failed to toggle favorite', error);
-        emit(state.copyWith(videoDetail: detail, actionError: '收藏失败'));
+        emit(
+          state.copyWith(videoDetail: detail, actionError: 'Favorite failed'),
+        );
     }
   }
 
@@ -177,7 +179,7 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
         break;
       case Error(:final error):
         _log.warning('Failed to toggle subscribe', error);
-        emit(state.copyWith(videoDetail: detail, actionError: '关注失败'));
+        emit(state.copyWith(videoDetail: detail, actionError: 'Follow failed'));
     }
   }
 
