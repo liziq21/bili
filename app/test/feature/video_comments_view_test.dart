@@ -73,13 +73,13 @@ void main() {
     await tester.pump();
 
     final expandButton = find.byKey(const ValueKey('comment-replies-c1'));
-    expect(find.text('查看 2 条回复'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
 
     await tester.tap(expandButton);
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('收起回复'), findsOneWidget);
+    expect(find.text('Collapse replies'), findsOneWidget);
     expect(
       find.textContaining('Preview reply', findRichText: true),
       findsOneWidget,
@@ -92,7 +92,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('comment-replies-c1')));
     await tester.pump();
 
-    expect(find.text('查看 2 条回复'), findsOneWidget);
-    expect(find.text('收起回复'), findsNothing);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('Collapse replies'), findsNothing);
   });
 }

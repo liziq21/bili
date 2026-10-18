@@ -13,16 +13,16 @@ void main() {
       );
 
       // Verify tooltips exist for action buttons
-      expect(find.byTooltip('返回'), findsOneWidget);
-      expect(find.byTooltip('播放'), findsNWidgets(2));
-      expect(find.byTooltip('切换'), findsOneWidget);
-      expect(find.byTooltip('全屏'), findsOneWidget);
+      expect(find.byTooltip('Back'), findsOneWidget);
+      expect(find.byTooltip('Play'), findsNWidgets(2));
+      expect(find.byTooltip('Switch source'), findsOneWidget);
+      expect(find.byTooltip('Fullscreen'), findsOneWidget);
 
-      // Tap play button and verify tooltips update to '暂停'
-      await tester.tap(find.byTooltip('播放').first);
+      // Tap play button and verify tooltips update to 'Pause'
+      await tester.tap(find.byTooltip('Play').first);
       await tester.pump();
 
-      expect(find.byTooltip('暂停'), findsNWidgets(2));
+      expect(find.byTooltip('Pause'), findsNWidgets(2));
     },
   );
 }

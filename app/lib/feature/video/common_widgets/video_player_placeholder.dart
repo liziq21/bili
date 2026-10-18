@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 
 class const VideoPlayerPlaceholder({
@@ -16,14 +17,21 @@ class const VideoPlayerPlaceholder({
 }
 
 class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
+  static const List<String> _qualityIds = ['4K 60FPS', '1080P', '720P', '480P'];
+
   bool _isPlaying = false;
   double _progress = 0.25;
-  String _selectedQuality = '4K 60FPS';
-
-  final List<String> _qualities = ['4K 60FPS', '1080P 高码率', '720P', '480P'];
+  String _selectedQuality = _qualityIds.first;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final qualityLabels = <String, String>{
+      '4K 60FPS': '4K 60FPS',
+      '1080P': l10n?.highBitrate1080 ?? '1080P',
+      '720P': '720P',
+      '480P': '480P',
+    };
     return AspectRatio(
       aspectRatio: widget.aspectRatio,
       child: Container(
@@ -77,7 +85,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back, color: $styles.colors.onScrim),
-                    tooltip: '返回',
+                    tooltip: l10n?.back ?? 'Back',
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       if (Navigator.canPop(context)) {
@@ -104,7 +112,9 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
             // Center Big Play / Pause Trigger
             IconButton(
               iconSize: 56,
-              tooltip: _isPlaying ? '暂停' : '播放',
+              tooltip: _isPlaying
+                  ? (l10n?.pause ?? 'Pause')
+                  : (l10n?.play ?? 'Play'),
               icon: Icon(
                 _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
                 color: $styles.colors.accentFill,
@@ -141,7 +151,9 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                   children: [
                     IconButton(
                       iconSize: 22,
-                      tooltip: _isPlaying ? '暂停' : '播放',
+                      tooltip: _isPlaying
+                          ? (l10n?.pause ?? 'Pause')
+                          : (l10n?.play ?? 'Play'),
                       icon: Icon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,
                         color: $styles.colors.onScrim,
@@ -185,18 +197,18 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     PopupMenuButton<String>(
                       initialValue: _selectedQuality,
-                      tooltip: '切换',
+                      tooltip: l10n?.switchAction ?? 'Switch source',
                       onSelected: (val) {
                         setState(() {
                           _selectedQuality = val;
                         });
                       },
-                      itemBuilder: (context) => _qualities
+                      itemBuilder: (context) => _qualityIds
                           .map(
                             (q) => PopupMenuItem(
                               value: q,
                               child: Text(
-                                q,
+                                qualityLabels[q]!,
                                 style: $styles.text.bodySmall.copyWith(
                                   color: q == _selectedQuality
                                       ? $styles.colors.accentText
@@ -218,7 +230,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           ),
                         ),
                         child: Text(
-                          _selectedQuality,
+                          qualityLabels[_selectedQuality]!,
                           style: $styles.text.btn.copyWith(
                             color: $styles.colors.onScrim,
                             fontSize: 10,
@@ -228,7 +240,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                     ),
                     IconButton(
                       iconSize: 20,
-                      tooltip: '全屏',
+                      tooltip: l10n?.fullscreen ?? 'Fullscreen',
                       icon: Icon(
                         Icons.fullscreen,
                         color: $styles.colors.onScrim,
@@ -237,7 +249,9 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                         HapticFeedback.lightImpact();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text('全屏切换'),
+                            content: Text(
+                              l10n?.fullscreenToggle ?? 'Toggle fullscreen',
+                            ),
                             duration: $styles.times.fast,
                           ),
                         );

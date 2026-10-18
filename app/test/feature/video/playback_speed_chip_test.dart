@@ -153,7 +153,7 @@ void main() {
       await tester.tap(find.text('1x'));
       await tester.pumpAndSettle();
 
-      expect(find.text('倍速'), findsOneWidget);
+      expect(find.text('Speed'), findsOneWidget);
       // 底部条目可能落在视口外（默认测口 800x600），滚进来再断言。
       await tester.scrollUntilVisible(
         find.text('2x'),
