@@ -89,9 +89,7 @@ void main() {
     );
 
     expect(
-      find.bySemanticsLabel(
-        'Bilibili,Stitch Feed Video Title',
-      ),
+      find.bySemanticsLabel('Bilibili,Stitch Feed Video Title'),
       findsOneWidget,
     );
     expect(find.text('Stitch Feed Video Title'), findsOneWidget);
