@@ -42,7 +42,14 @@ class const App({super.key}) extends StatelessWidget {
     return BlocBuilder<AppBloc, AppState>(
       builder: (_, state) => switch (state) {
         Loading() => const Center(child: CircularProgressIndicator()),
-        LoadFailure(:final error) => Text('Failed to load the app: $error'),
+        LoadFailure(:final error) => Text(
+          'Failed to load the app: $error',
+          // This branch renders above MaterialApp, so no Directionality
+          // ancestor exists; Text without an explicit direction crashes with
+          // "Null check operator used on a null value" in Directionality.of
+          // (release path, LIZ-50 stack trace).
+          textDirection: TextDirection.ltr,
+        ),
         LoadSuccess(:final userData) => ThemeWrapper(
           useDynamicColor: userData.useDynamicColor,
           themeConfig: userData.themeConfig,
