@@ -50,6 +50,8 @@ so hand edits do not survive; change the generator instead.
 - feat: LIZ-36 video detail completion - description, chapters, UP主 info (#316)
 - feat: add danmaku (弹幕) support for Bilibili video playback (#318)
 - feat(video): fullscreen fill, double-tap seek, stop-after-current sleep timer (Part of LIZ-29) (#323)
+- feat(video): migrate hardcoded Chinese copy to ARB getters in video domain (LIZ-51) (#340)
+- feat(video): migrate hardcoded copy to ARB getters in video player domain (LIZ-51) (#341)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -177,6 +179,10 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Enhance playlist picker tactile feedback and accessible semantics (#317)
 - 🎨 Palette: Add tactile haptic feedback to local library tabs and list items (#320)
 - 🎨 Palette: Wire search result card navigation and format card subtitles (#324)
+- refactor(l10n): LIZ-51 migrate hardcoded copy in local library domain (#338)
+- refactor(search): migrate hardcoded copy to ARB keys for search domain (LIZ-51) (#339)
+- refactor(l10n): LIZ-51 B3 media library + card copy (#342)
+- refactor(l10n): LIZ-51 B6 home + routing + data layer copy (#343)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -225,6 +231,7 @@ so hand edits do not survive; change the generator instead.
 - test(golden): 补齐四个零覆盖区域的 golden 基线 (#273)
 - test(ypi): cover channel search playlist lockups (#289)
 - test(LIZ-21): publish per-package coverage reports (#301)
+- test(golden): guardrail against hardcoded user-visible copy (Part of LIZ-51) (#330)
 
 ### Maintenance
 - ci: comment out iOS build job in CI workflow (#5)
