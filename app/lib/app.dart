@@ -42,10 +42,7 @@ class const App({super.key}) extends StatelessWidget {
     return BlocBuilder<AppBloc, AppState>(
       builder: (_, state) => switch (state) {
         Loading() => const Center(child: CircularProgressIndicator()),
-        LoadFailure() => Text(
-          AppLocalizations.of(context)?.appLoadFailed ??
-              'Failed to load the app. Please retry.',
-        ),
+        LoadFailure(:final error) => Text('Failed to load the app: $error'),
         LoadSuccess(:final userData) => ThemeWrapper(
           useDynamicColor: userData.useDynamicColor,
           themeConfig: userData.themeConfig,

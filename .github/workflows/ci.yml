@@ -266,9 +266,11 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
       
-      # LIZ-50 debugging: build a debug APK so the artifact can be installed
-      # directly for local reproduction, without the release signing/obfuscation
-      # path. The debug variant uses the debug keystore and keeps symbols.
+      # LIZ-50 debugging: build both variants. The debug APK installs cleanly
+      # for reproduction; the release APK (debug-keystore signed, CI-only,
+      # not publishable) carries the real data path for on-device diagnosis
+      # without adb: with the stream-error fix, a startup failure now shows
+      # the actual error text on screen instead of a permanent spinner.
       - name: Build debug APK
         run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=${{ github.run_number }}
         env:
@@ -278,11 +280,22 @@ jobs:
           # keystore regardless.
           BILI_ALLOW_UNSIGNED_RELEASE: "1"
 
-      - name: Upload APK as artifact
+      - name: Upload debug APK as artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: app-arm64-v8a-debug-${{ matrix.release.flutter }}.apk
           path: app/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+
+      - name: Build release APK (unsigned)
+        run: cd app && flutter build apk --release --split-per-abi --pub --build-number=${{ github.run_number }}
+        env:
+          BILI_ALLOW_UNSIGNED_RELEASE: "1"
+
+      - name: Upload release APK as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: app-arm64-v8a-release-unsigned-${{ matrix.release.flutter }}.apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
 
 #  build_iOSApp:
