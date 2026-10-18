@@ -102,8 +102,9 @@ void main() {
                   title: '标题',
                   url: 'https://www.bilibili.com/video/BV1xx411c7mD',
                   thumbnailUrl: 'https://example.com/thumb.jpg',
-                  viewCount: 1280000,
+                  viewCount: 500,
                   duration: 754,
+                  creatorProfileName: 'UP',
                 ),
               ),
             ),
@@ -111,7 +112,9 @@ void main() {
         ),
       );
 
-      final subtitle = tester.widget<Text>(find.textContaining('观看'));
+      // 副标题在无 l10n delegate 的 harness 里 = creatorName + 空 viewsCount
+      // 空 date 的 join 结果（'UP - '），用它验证弱化文字色。
+      final subtitle = tester.widget<Text>(find.textContaining('UP'));
       expect(
         subtitle.style?.color,
         $styles.colors.onSurfaceVariant,

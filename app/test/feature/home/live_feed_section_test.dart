@@ -53,7 +53,7 @@ void main() {
       final semanticsData = tester
           .getSemantics(inkWellFinder)
           .getSemanticsData();
-      expect(semanticsData.label, equals('直播，主播: 未知主播'));
+      expect(semanticsData.label, equals('直播'));
       expect(semanticsData.flagsCollection.isButton, isTrue);
 
       // Tap live room card

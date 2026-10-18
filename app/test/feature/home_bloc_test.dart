@@ -556,7 +556,7 @@ void main() {
       await tester.pumpWidget(buildScreen(bloc));
       await tester.pumpAndSettle();
       expect(find.text('Bilibili'), findsWidgets);
-      expect(find.byTooltip('设置'), findsOneWidget);
+      expect(find.byTooltip('Settings'), findsOneWidget);
       // The by-ID entries (live room, creator space) and the search icon are
       // gone from the app bar, so neither the source having live support nor
       // not having it may bring them back.
@@ -564,7 +564,7 @@ void main() {
       expect(find.byTooltip('访问创作者空间'), findsNothing);
       expect(find.byTooltip('搜索'), findsNothing);
 
-      expect(find.byTooltip('设置'), findsOneWidget);
+      expect(find.byTooltip('Settings'), findsOneWidget);
     });
 
     testWidgets('Never offers filters the source does not implement', (

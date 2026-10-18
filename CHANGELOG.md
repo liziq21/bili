@@ -49,6 +49,7 @@ so hand edits do not survive; change the generator instead.
 - feat(LIZ-30): build local library foundations (#303)
 - feat: LIZ-36 video detail completion - description, chapters, UP主 info (#316)
 - feat: add danmaku (弹幕) support for Bilibili video playback (#318)
+- feat(video): fullscreen fill, double-tap seek, stop-after-current sleep timer (Part of LIZ-29) (#323)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)

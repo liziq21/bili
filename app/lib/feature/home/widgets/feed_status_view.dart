@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 
 /// Feed 加载失败 / 空结果 / 功能占位的统一提示视图
@@ -10,6 +11,8 @@ class const FeedStatusView({
   required final String message,
   final String? description,
   final VoidCallback? onRetry,
+  final String? failureTitle,
+  final String? emptyTitle,
 }) extends StatelessWidget {
   /// 加载失败提示
   factory failure({
@@ -19,8 +22,8 @@ class const FeedStatusView({
   }) => FeedStatusView(
     key: key,
     icon: Icons.cloud_off_rounded,
-    message: '$title 加载失败',
-    description: '请检查网络连接后重试',
+    message: title,
+    failureTitle: title,
     onRetry: onRetry,
   );
 
@@ -28,12 +31,22 @@ class const FeedStatusView({
   factory empty({Key? key, required String title}) => FeedStatusView(
     key: key,
     icon: Icons.inbox_rounded,
-    message: '$title 暂无内容',
+    message: title,
+    emptyTitle: title,
   );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final resolvedMessage = failureTitle != null
+        ? (l10n?.sectionLoadFailed(failureTitle!) ?? '$failureTitle failed')
+        : emptyTitle != null
+        ? (l10n?.sectionEmpty(emptyTitle!) ?? '$emptyTitle is empty')
+        : message;
+    final desc = failureTitle != null
+        ? (l10n?.checkNetworkRetry ?? 'Check your connection and retry')
+        : description;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -46,16 +59,16 @@ class const FeedStatusView({
           Icon(icon, size: $styles.insets.lg, color: colorScheme.outline),
           SizedBox(height: $styles.insets.xs),
           Text(
-            message,
+            resolvedMessage,
             textAlign: TextAlign.center,
             style: $styles.text.bodySmallBold.copyWith(
               color: colorScheme.onSurface,
             ),
           ),
-          if (description != null) ...[
+          if (desc != null) ...[
             SizedBox(height: $styles.insets.xxs),
             Text(
-              description!,
+              desc,
               textAlign: TextAlign.center,
               style: $styles.text.bodySmall.copyWith(
                 color: colorScheme.onSurfaceVariant,
@@ -70,7 +83,7 @@ class const FeedStatusView({
                 onRetry!();
               },
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('重试'),
+              label: Text(l10n?.retry ?? 'Retry'),
             ),
           ],
         ],

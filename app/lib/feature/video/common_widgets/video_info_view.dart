@@ -9,15 +9,17 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../l10n/localization_file/app_localizations.dart';
+import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
 
-String _formatCount(int count) {
+String _formatCount(int count, AppLocalizations l10n) {
   if (count >= 10000) {
-    return '${(count / 10000).toStringAsFixed(1)}万';
+    return l10n.countCompactWan((count / 10000).toStringAsFixed(1));
   }
   return '$count';
 }
@@ -64,6 +66,7 @@ extension QueueAddControllerX on BuildContext {
 class const VideoInfoView({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Use BlocSelector to check top-level loading/error/hasDetail state.
     // Isolates status view (loading / error) from frequent child state updates (e.g. like, favorite, subscribe).
     return BlocSelector<
@@ -93,7 +96,7 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
               child: Text(
-                '视频加载失败，请重试',
+                l10n.videoLoadFailed,
                 style: $styles.text.body.copyWith(
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -135,6 +138,7 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
 class const _RecommendationsSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final relatedVideos = context.select<VideoBloc, List<VideoModel>?>(
       (bloc) => bloc.state.videoDetail?.relatedVideos,
     );
@@ -143,7 +147,7 @@ class const _RecommendationsSection() extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.all($styles.insets.sm),
         child: Text(
-          '暂无关联推荐',
+          l10n.noRecommendations,
           style: $styles.text.bodySmall.copyWith(
             color: $styles.colors.onSurfaceVariant,
           ),
@@ -162,6 +166,7 @@ class const _RecommendationsSection() extends StatelessWidget {
 class const _VideoHeaderSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for VideoModel fields (title, viewCount, id).
     // Prevents header from rebuilding when user likes, favorites, or subscribes.
     final video = context.select<VideoBloc, VideoModel?>(
@@ -199,7 +204,9 @@ class const _VideoHeaderSection() extends StatelessWidget {
                 ),
                 const Gap(2),
                 Text(
-                  '${_formatCount(video.viewCount ?? 386000)} 播放',
+                  l10n.viewCountLabel(
+                    _formatCount(video.viewCount ?? 386000, l10n),
+                  ),
                   style: $styles.text.bodySmall.copyWith(
                     color: $styles.colors.onSurfaceVariant,
                     fontSize: 12,
@@ -207,14 +214,17 @@ class const _VideoHeaderSection() extends StatelessWidget {
                 ),
               ],
             ),
-            Text('·', style: TextStyle(color: $styles.colors.outline)),
+            Text(
+              l10n.dotSeparator,
+              style: TextStyle(color: $styles.colors.outline),
+            ),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.forum, size: 14, color: $styles.colors.secondary),
                 const Gap(2),
                 Text(
-                  '2.4万 弹幕',
+                  l10n.danmakuCountSample,
                   style: $styles.text.bodySmall.copyWith(
                     color: $styles.colors.onSurfaceVariant,
                     fontSize: 12,
@@ -222,15 +232,21 @@ class const _VideoHeaderSection() extends StatelessWidget {
                 ),
               ],
             ),
-            Text('·', style: TextStyle(color: $styles.colors.outline)),
             Text(
-              '1天前',
+              l10n.dotSeparator,
+              style: TextStyle(color: $styles.colors.outline),
+            ),
+            Text(
+              l10n.oneDayAgoSample,
               style: $styles.text.bodySmall.copyWith(
                 color: $styles.colors.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
-            Text('·', style: TextStyle(color: $styles.colors.outline)),
+            Text(
+              l10n.dotSeparator,
+              style: TextStyle(color: $styles.colors.outline),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
@@ -240,7 +256,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
                 borderRadius: BorderRadius.circular($styles.corners.sm),
               ),
               child: Text(
-                '原创技术',
+                l10n.originalTech,
                 style: $styles.text.btn.copyWith(
                   color: $styles.colors.tertiary,
                   fontSize: 11,
@@ -273,6 +289,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
 class const _CreatorProfileSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for creator profile and subscription state.
     // Keeps creator profile widget isolated so like/favorite toggles do not rebuild it.
     final creatorData = context
@@ -302,7 +319,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar with Verified Badge
+          // Avatar
           Stack(
             children: [
               CircleAvatar(
@@ -311,8 +328,8 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     creator.thumbnailUrl != null &&
                         creator.thumbnailUrl!.isNotEmpty
                     ? ResizeImage.resizeIfNeeded(
-                        128,
-                        128,
+                        96,
+                        96,
                         CachedNetworkImageProvider(creator.thumbnailUrl!),
                       )
                     : null,
@@ -368,7 +385,9 @@ class const _CreatorProfileSection() extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '${_formatCount(creator.subscribers ?? 528000)} 关注者 · 每周硬核解析',
+                  l10n.subscribersWeeklyTagline(
+                    _formatCount(creator.subscribers ?? 528000, l10n),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: $styles.text.bodySmall.copyWith(
@@ -382,7 +401,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
           Gap($styles.insets.xs),
           // Open External Origin Link & Follow Button
           IconButton(
-            tooltip: '在浏览器中打开原链接',
+            tooltip: l10n.openInBrowser,
             iconSize: 18,
             icon: Icon(
               Icons.open_in_new,
@@ -392,22 +411,22 @@ class const _CreatorProfileSection() extends StatelessWidget {
               HapticFeedback.lightImpact();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('跳转原源作者主页'),
+                  content: Text(l10n.visitCreatorHome),
                   duration: $styles.times.fast,
                 ),
               );
             },
           ),
           Tooltip(
-            message: isSubscribed ? '取消关注创作者' : '关注创作者',
+            message: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
             child: Semantics(
               button: true,
               selected: isSubscribed,
               excludeSemantics: true,
               label: isSubscribed
-                  ? '已关注创作者 ${creator.name}'
-                  : '关注创作者 ${creator.name}',
-              tooltip: isSubscribed ? '取消关注创作者' : '关注创作者',
+                  ? l10n.followingCreatorNamed(creator.name)
+                  : l10n.followCreatorNamed(creator.name),
+              tooltip: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
               onTap: () {
                 HapticFeedback.lightImpact();
                 context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
@@ -451,7 +470,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     ),
                   ),
                   label: Text(
-                    isSubscribed ? '已关注' : '关注',
+                    isSubscribed ? l10n.following : l10n.follow,
                     style: $styles.text.btn.copyWith(fontSize: 12),
                   ),
                 ),
@@ -485,6 +504,7 @@ class _ActionButtonsSectionState()
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for action metrics (likes, favorites, shares).
     // Rebuilds ONLY this action bar when like/favorite status changes, without rebuilding
     // the title, creator info, synopsis, or recommendation list.
@@ -540,8 +560,8 @@ class _ActionButtonsSectionState()
             _ActionButton(
               icon: Icons.thumb_up_outlined,
               activeIcon: Icons.thumb_up,
-              label: _formatCount(metrics.likeCount),
-              actionName: '点赞',
+              label: _formatCount(metrics.likeCount, l10n),
+              actionName: l10n.like,
               isActive: metrics.isLiked,
               color: $styles.colors.accentFill,
               onTap: () {
@@ -551,8 +571,8 @@ class _ActionButtonsSectionState()
             _ActionButton(
               icon: Icons.grade_outlined,
               activeIcon: Icons.grade,
-              label: _formatCount(metrics.favoriteCount),
-              actionName: '收藏',
+              label: _formatCount(metrics.favoriteCount, l10n),
+              actionName: l10n.favorite,
               isActive: metrics.isFavorited,
               color: $styles.colors.tertiary,
               onTap: () {
@@ -562,9 +582,9 @@ class _ActionButtonsSectionState()
             _ActionButton(
               icon: Icons.queue_music_outlined,
               activeIcon: Icons.queue_music,
-              label: '列表',
-              actionName: '加入播放列表',
-              tooltip: '加入本地播放列表',
+              label: l10n.list,
+              actionName: l10n.addToPlaylist,
+              tooltip: l10n.addToLocalPlaylist,
               isActive: false,
               color: $styles.colors.secondary,
               onTap: () {
@@ -580,15 +600,15 @@ class _ActionButtonsSectionState()
             _ActionButton(
               icon: Icons.cloud_sync,
               activeIcon: Icons.cloud_sync,
-              label: '多源换源',
-              actionName: '多源换源',
-              tooltip: '切换视频数据源',
+              label: l10n.switchSource,
+              actionName: l10n.switchSource,
+              tooltip: l10n.switchVideoSource,
               isActive: true,
               color: $styles.colors.accentFill,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('自动切换至最优可用的解析线路'),
+                    content: Text(l10n.autoSwitchBestRoute),
                     duration: $styles.times.fast,
                   ),
                 );
@@ -597,15 +617,15 @@ class _ActionButtonsSectionState()
             _ActionButton(
               icon: Icons.share_outlined,
               activeIcon: Icons.share,
-              label: _formatCount(metrics.shareCount),
-              actionName: '分享',
-              tooltip: '分享视频',
+              label: _formatCount(metrics.shareCount, l10n),
+              actionName: l10n.share,
+              tooltip: l10n.shareVideo,
               isActive: false,
-              color: $styles.colors.secondary,
+              color: $styles.colors.accentFill,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('分享多源视频链接'),
+                    content: Text(l10n.shareMultiSourceLink),
                     duration: $styles.times.fast,
                   ),
                 );
@@ -613,12 +633,16 @@ class _ActionButtonsSectionState()
             ),
             _ActionButton(
               icon: _isDanmakuActive
-                  ? Icons.closed_caption
-                  : Icons.closed_caption_disabled,
-              activeIcon: Icons.closed_caption,
-              label: _isDanmakuActive ? '弹幕开' : '弹幕关',
-              actionName: '弹幕',
-              tooltip: _isDanmakuActive ? '关闭弹幕' : '开启弹幕',
+                  ? Icons.subtitles
+                  : Icons.subtitles_off_outlined,
+              activeIcon: Icons.subtitles,
+              label: _isDanmakuActive
+                  ? l10n.danmakuStateOn
+                  : l10n.danmakuStateOff,
+              actionName: l10n.danmaku,
+              tooltip: _isDanmakuActive
+                  ? l10n.danmakuActionOff
+                  : l10n.danmakuActionOn,
               isActive: _isDanmakuActive,
               color: $styles.colors.accentFill,
               onTap: () {
@@ -652,6 +676,7 @@ class _SynopsisSectionState()
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     // ⚡ Bolt Optimization: Scoped selector for video description.
     // Localizes expansion state (_isDescExpanded) so toggling synopsis does not rebuild
     // surrounding widgets (header, creator info, recommendations).
@@ -672,7 +697,7 @@ class _SynopsisSectionState()
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '本期摘要 & 核心技术点',
+                l10n.synopsisSectionTitle,
                 style: $styles.text.bodyBold.copyWith(
                   color: $styles.colors.onSurfaceStrong,
                   fontSize: 13,
@@ -681,8 +706,12 @@ class _SynopsisSectionState()
               Semantics(
                 button: true,
                 expanded: _isDescExpanded,
-                label: _isDescExpanded ? '收起摘要' : '展开完整大纲',
-                tooltip: _isDescExpanded ? '收起摘要' : '展开完整大纲',
+                label: _isDescExpanded
+                    ? l10n.collapseSynopsis
+                    : l10n.expandSynopsis,
+                tooltip: _isDescExpanded
+                    ? l10n.collapseSynopsis
+                    : l10n.expandSynopsis,
                 child: InkWell(
                   onTap: () {
                     HapticFeedback.lightImpact();
@@ -698,7 +727,7 @@ class _SynopsisSectionState()
                     ),
                     child: ExcludeSemantics(
                       child: Text(
-                        _isDescExpanded ? '收起' : '展开完整大纲',
+                        _isDescExpanded ? l10n.collapse : l10n.expandSynopsis,
                         style: $styles.text.bodySmall.copyWith(
                           color: $styles.colors.accentText,
                           fontSize: 12,
@@ -717,7 +746,9 @@ class _SynopsisSectionState()
             curve: Motion.easingEmphasized,
             alignment: Alignment.topCenter,
             child: Text(
-              desc != null && desc.isNotEmpty ? desc : '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。',
+              desc != null && desc.isNotEmpty
+                  ? desc
+                  : l10n.sampleSynopsisFallback,
               maxLines: _isDescExpanded ? null : 2,
               overflow: _isDescExpanded
                   ? TextOverflow.visible
@@ -738,6 +769,7 @@ class _SynopsisSectionState()
 class const _ChaptersSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final chapters = context.select<VideoBloc, List<VideoChapter>?>(
       (bloc) => bloc.state.videoDetail?.chapters,
     );
@@ -756,7 +788,7 @@ class const _ChaptersSection() extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '章节',
+            l10n.chapters,
             style: $styles.text.bodyBold.copyWith(
               color: $styles.colors.onSurfaceStrong,
               fontSize: 13,
@@ -830,6 +862,7 @@ class const _ChapterItem({
 class const _UpInfoSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final creator = context.select<VideoBloc, CreatorProfile?>(
       (bloc) => bloc.state.videoDetail?.creator,
     );
@@ -883,7 +916,9 @@ class const _UpInfoSection() extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${_formatCount(creator.subscribers ?? 0)} 关注者',
+                    l10n.followersCount(
+                      _formatCount(creator.subscribers ?? 0, l10n),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: $styles.text.bodySmall.copyWith(
@@ -909,6 +944,7 @@ class const _UpInfoSection() extends StatelessWidget {
 class const _RecommendationsHeader() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -924,7 +960,7 @@ class const _RecommendationsHeader() extends StatelessWidget {
             ),
             const Gap(6),
             Text(
-              '多源关联推荐',
+              l10n.multiSourceRecommendations,
               style: $styles.text.title2.copyWith(
                 color: $styles.colors.onSurfaceStrong,
                 fontWeight: FontWeight.bold,
@@ -948,6 +984,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final video = widget.video;
     final queueAddController = context.queueAddController;
 
@@ -961,7 +998,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
           button: true,
           label:
               '${video.title}, ${video.creatorProfileName ?? ''} '
-              '${_formatCount(video.viewCount ?? 0)}',
+              '${_formatCount(video.viewCount ?? 0, l10n)}',
           child: InkWell(
             onTap: null,
             child: Padding(
@@ -1053,8 +1090,8 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                         ),
                         const Gap(4),
                         Text(
-                          '${video.creatorProfileName ?? ''} · '
-                          '${_formatCount(video.viewCount ?? 0)}',
+                          '${video.creatorProfileName ?? ''} ${l10n.dotSeparator} '
+                          '${_formatCount(video.viewCount ?? 0, l10n)}',
                           style: $styles.text.bodySmall.copyWith(
                             color: $styles.colors.onSurfaceVariant,
                             fontSize: 11,
@@ -1075,7 +1112,9 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                               ),
                             )
                           : const Icon(Icons.playlist_add),
-                      tooltip: _isAddingToQueue ? '正在加入队列' : '加入播放队列',
+                      tooltip: _isAddingToQueue
+                          ? l10n.addingToQueue
+                          : l10n.addToPlayQueue,
                       iconSize: 20,
                       color: $styles.colors.accentText,
                       onPressed: _isAddingToQueue
@@ -1100,7 +1139,9 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                     messenger.showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                          success ? '已加入播放队列' : '加入队列失败',
+                                          success
+                                              ? l10n.addedToPlayQueue
+                                              : l10n.addToQueueFailed,
                                         ),
                                         duration: $styles.times.fast,
                                       ),
@@ -1130,9 +1171,10 @@ class const _ActionButton({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final semanticLabel = '$actionName $label';
     final computedTooltip =
-        tooltip ?? (isActive ? '取消$actionName' : actionName);
+        tooltip ?? (isActive ? l10n.cancelAction(actionName) : actionName);
 
     return Tooltip(
       message: computedTooltip,

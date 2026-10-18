@@ -13,7 +13,9 @@ final class AppDanmakuRepository([
   Future<Result<List<DanmakuComment>>> getDanmaku(String videoId) {
     final remote = _remoteDataSource;
     if (remote == null) {
-      return Future.value(Result.error(Exception('当前数据源不支持弹幕')));
+      return Future.value(
+        Result.error(Exception('Current source does not support danmaku')),
+      );
     }
     return remote.getDanmaku(videoId);
   }

@@ -121,7 +121,10 @@ void main() {
       final result = await repository.getVideoDetail('BV123');
 
       expect(result.isError, isTrue);
-      expect((result as Error<VideoDetail>).error.toString(), contains('不支持'));
+      expect(
+        (result as Error<VideoDetail>).error.toString(),
+        contains('does not support'),
+      );
     });
 
     // The three writes below used to return `Result.ok(!current)`, i.e. success
@@ -133,21 +136,30 @@ void main() {
       final result = await repository.toggleLike('BV1', false);
 
       expect(result.isError, isTrue);
-      expect((result as Error<bool>).error.toString(), contains('不支持'));
+      expect(
+        (result as Error<bool>).error.toString(),
+        contains('does not support'),
+      );
     });
 
     test('toggleFavorite reports the capability as missing', () async {
       final result = await repository.toggleFavorite('BV1', false);
 
       expect(result.isError, isTrue);
-      expect((result as Error<bool>).error.toString(), contains('不支持'));
+      expect(
+        (result as Error<bool>).error.toString(),
+        contains('does not support'),
+      );
     });
 
     test('toggleSubscribe reports the capability as missing', () async {
       final result = await repository.toggleSubscribe('c1', false);
 
       expect(result.isError, isTrue);
-      expect((result as Error<bool>).error.toString(), contains('不支持'));
+      expect(
+        (result as Error<bool>).error.toString(),
+        contains('does not support'),
+      );
     });
 
     test('the requested value cannot change a missing capability', () async {

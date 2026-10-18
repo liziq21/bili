@@ -64,13 +64,20 @@ class const HomeScreen({
                     Icons.settings_outlined,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  tooltip: AppLocalizations.of(context)?.navSettings ?? '设置',
+                  tooltip:
+                      AppLocalizations.of(context)?.navSettings ?? 'Settings',
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     // 通用设置入口尚未成型（LIZ-31）。弹幕设置有独立路由，
                     // 不挂在这个按钮上，避免把未完成的设置页当成全局设置。
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(const SnackBar(content: Text('设置开发中')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)?.settingsWip ??
+                              'Settings coming soon',
+                        ),
+                      ),
+                    );
                   },
                 ),
                 SizedBox(width: $styles.insets.xs),
@@ -119,8 +126,13 @@ class const HomeScreen({
           hasScrollBody: false,
           child: FeedStatusView(
             icon: Icons.inbox_rounded,
-            message: '$sourceName 暂无可用推荐',
-            description: '该数据源未提供首页 Feed',
+            message:
+                AppLocalizations.of(context)
+                    ?.sourceNoRecommendations(sourceName) ??
+                'No recommendations from $sourceName',
+            description:
+                AppLocalizations.of(context)?.sourceNoHomeFeed ??
+                'This source has no home feed',
             onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           ),
         ),
@@ -136,8 +148,13 @@ class const HomeScreen({
           hasScrollBody: false,
           child: FeedStatusView(
             icon: Icons.inbox_rounded,
-            message: '$sourceName 暂无可用推荐',
-            description: '该数据源未提供首页 Feed',
+            message:
+                AppLocalizations.of(context)
+                    ?.sourceNoRecommendations(sourceName) ??
+                'No recommendations from $sourceName',
+            description:
+                AppLocalizations.of(context)?.sourceNoHomeFeed ??
+                'This source has no home feed',
             onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           ),
         ),
