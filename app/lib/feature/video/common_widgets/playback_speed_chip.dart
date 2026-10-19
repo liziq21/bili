@@ -72,7 +72,9 @@ class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
         excludeSemantics: true,
         child: Material(
           color: $styles.colors.scrim.withValues(alpha: 0.6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();

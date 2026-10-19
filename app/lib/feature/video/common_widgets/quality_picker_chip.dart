@@ -47,7 +47,9 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
         excludeSemantics: true,
         child: Material(
           color: $styles.colors.scrim.withValues(alpha: 0.6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: _switching
                 ? null
@@ -56,7 +58,10 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
                     _showQualityPicker(context);
                   },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
+              ),
               child: _switching
                   ? SizedBox(
                       width: 14,

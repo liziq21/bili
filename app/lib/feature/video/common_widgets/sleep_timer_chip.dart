@@ -185,14 +185,19 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
           color: active
               ? $styles.colors.accentFill.withValues(alpha: 0.9)
               : $styles.colors.scrim.withValues(alpha: 0.6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();
               _showPicker(context);
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
+              ),
               child: Text(
                 label,
                 style: $styles.text.bodySmall.copyWith(
