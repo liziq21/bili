@@ -188,3 +188,28 @@ Flutter's own guidance for this layer is `docs/rules/rules.md` (Testing) in the 
 - **Widget test shell**: Build the tree with the `material_ui` fork's `MaterialApp` and register `GlobalMaterialLocalizations.delegates`. Flutter's own `MaterialApp` does not supply the fork's `MaterialLocalizations` and throws under a non-English locale.
 - **Assert on the widget tree**: When the code under test reads mutable global state such as `$styles`, the test must change that state and assert on rendered output. Reading the same static back from the test passes whether or not the widget tree rebuilt.
 - **Leak tracking**: Run `LEAK_TRACKING=true flutter test` from `app/` to report disposables that were never disposed. A leak caused by a test that threw before it could clean up is an acceptable exception; mark it as one rather than deleting the test.
+
+### Flutter Test Runner Host Failures
+
+- `flutter test` is a Flutter test command, but the test process is actually
+  started by the platform-specific `flutter_tester` binary. A failure before a
+  test is loaded is therefore not evidence that the test or application code
+  failed.
+- On Linux/Termux hosts, a known failure is
+  `CANNOT LINK EXECUTABLE ... flutter_tester: library "libvk_swiftshader.so"
+  not found`. First confirm the pinned SDK versions, then try
+  `flutter precache --linux`. If the library is still absent, the local Flutter
+  SDK does not contain a compatible Linux test engine for that host.
+- Do **not** solve this by symlinking an arbitrary `libvulkan*.so` as
+  `libvk_swiftshader.so`: the ABI and renderer are different, and this can
+  turn a clear startup error into a `flutter_tester` crash or invalid test
+  result. Do not add a host-specific library or a test skip to the repository.
+- Use `dart run tool/test_local.dart` to run the pure-Dart fallback. It probes
+  the runner first, reports the Flutter suites it could not execute, and runs
+  the offline Dart package checks. The fallback is not a full pass: CI must run
+  the complete Flutter matrix from `.github/workflows/ci.yml`. Use
+  `dart run tool/test_local.dart --require-flutter` when a local Flutter runner
+  is mandatory and an unavailable runner must fail immediately.
+- For a pull request, verify the CI `Run Flutter Test (…)` checks rather than
+  declaring a widget or golden test passed from the fallback. Keep the runner
+  failure visible in the handoff or PR verification notes.
