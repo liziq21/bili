@@ -19,3 +19,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+hooks:
+  user_defines:
+    sqlite3:
+      source:
+        linux: system
