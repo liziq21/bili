@@ -70,8 +70,9 @@ class const VideoFeedSection({
               }
 
               final width = constraints.crossAxisExtent;
-              final columns = LayoutSize.fromWidth(width).feedColumnsFor(width);
               final spacing = $styles.insets.sm;
+              final columns = LayoutSize.fromWidth(width)
+                  .feedColumnsFor(width, spacing: spacing);
               final cardWidth = (width - spacing * (columns - 1)) / columns;
 
               return SliverGrid(

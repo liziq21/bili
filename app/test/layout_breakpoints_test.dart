@@ -17,6 +17,13 @@ void main() {
       expect(LayoutSize.fromWidth(1920).feedColumnsFor(1920), 8);
     });
 
+    test('accounts for grid spacing before adding a column', () {
+      final size = LayoutSize.fromWidth(1008);
+
+      expect(size.feedColumnsFor(1007, spacing: 16), 3);
+      expect(size.feedColumnsFor(1008, spacing: 16), 4);
+    });
+
     test('never drops below the tier floor', () {
       // A narrow window must not fall back to zero columns.
       for (final double width in [320, 480, 640, 960, 1400, 2560]) {

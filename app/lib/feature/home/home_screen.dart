@@ -91,6 +91,7 @@ class const HomeScreen({
           return RefreshIndicator(
             onRefresh: () => _onRefresh(context),
             child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 // 数据源没有提供任何 Feed 时不挂筛选栏：空列表配一排空 chip
                 // 比什么都不显示更像故障。

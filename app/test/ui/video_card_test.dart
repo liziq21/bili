@@ -95,6 +95,7 @@ void main() {
     expect(find.text('Stitch Feed Video Title'), findsOneWidget);
     expect(find.text('Bilibili'), findsOneWidget);
     expect(find.text('09:17'), findsOneWidget);
+    expect(find.byTooltip('Stitch Feed Video Title'), findsOneWidget);
     expect(tapped, isFalse);
     expect(find.textContaining('五盒ll十箱'), findsOneWidget);
     expect(find.byTooltip('More options'), findsOneWidget);
