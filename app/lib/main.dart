@@ -17,6 +17,18 @@ import 'design/design.dart';
 void main() {
   initDebugOverlayBridge();
 
+  // Release ErrorWidget renders an opaque grey box with no message (debug
+  // shows the exception inline). LIZ-50 on-device diagnosis has no adb
+  // available, so surface build-phase exceptions as text in release too;
+  // the widget tree is otherwise unusable at that point anyway.
+  ErrorWidget.builder = (details) => SingleChildScrollView(
+    padding: const EdgeInsets.all(12),
+    child: Text(
+      'Build error: ${details.exception}\n\n${details.stack}',
+      textDirection: TextDirection.ltr,
+    ),
+  );
+
   runApp(
     MultiRepositoryProvider(
       providers: repoProviders,

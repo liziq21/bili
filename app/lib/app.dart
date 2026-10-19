@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
@@ -42,10 +43,7 @@ class const App({super.key}) extends StatelessWidget {
     return BlocBuilder<AppBloc, AppState>(
       builder: (_, state) => switch (state) {
         Loading() => const Center(child: CircularProgressIndicator()),
-        LoadFailure() => Text(
-          AppLocalizations.of(context)?.appLoadFailed ??
-              'Failed to load the app. Please retry.',
-        ),
+        LoadFailure(:final error) => AppFailureView(error: error),
         LoadSuccess(:final userData) => ThemeWrapper(
           useDynamicColor: userData.useDynamicColor,
           themeConfig: userData.themeConfig,
@@ -90,6 +88,71 @@ class const App({super.key}) extends StatelessWidget {
           },
         ),
       },
+    );
+  }
+}
+
+/// Full-screen error view rendered when [AppBloc] reports [LoadFailure].
+///
+/// This widget renders above [MaterialApp], so no Material/Scaffold ancestor
+/// exists: it must not rely on Material widgets (SnackBar, IconButton themes,
+/// etc.). Text is selectable and a plain button copies the full error to the
+/// clipboard so failures can be reported without screenshots (LIZ-50).
+class AppFailureView extends StatefulWidget {
+  const AppFailureView({super.key, required this.error});
+
+  final Object error;
+
+  @override
+  State<AppFailureView> createState() => _AppFailureViewState();
+}
+
+class _AppFailureViewState extends State<AppFailureView> {
+  bool _copied = false;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(
+      ClipboardData(text: 'Failed to load the app: ${widget.error}'),
+    );
+    if (mounted) {
+      setState(() => _copied = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // No Directionality ancestor above MaterialApp (LIZ-50).
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: SelectableText(
+                    'Failed to load the app: ${widget.error}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: ElevatedButton.icon(
+                  onPressed: _copy,
+                  icon: Icon(_copied ? Icons.check : Icons.copy),
+                  label: Text(_copied ? 'Copied' : 'Copy error'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

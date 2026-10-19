@@ -12,6 +12,7 @@ import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
@@ -178,6 +179,49 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  // LIZ-50 follow-up: the failure view renders above MaterialApp (no
+  // Material/Directionality ancestor), shows selectable text, and copies the
+  // full error to the clipboard on tap.
+  testWidgets('AppFailureView shows selectable text and copies error', (
+    tester,
+  ) async {
+    final error = PlatformException(
+      code: 'platform',
+      message: 'java.lang.NoSuchMethodError: boom',
+    );
+
+    await tester.pumpWidget(AppFailureView(error: error));
+
+    final fullText = 'Failed to load the app: $error';
+    expect(
+      find.byWidgetPredicate((w) => w is SelectableText && w.data == fullText),
+      findsOneWidget,
+    );
+
+    // Clipboard's platform channel has no real handler under the test
+    // binding; provide one so `Clipboard.setData` resolves.
+    String? copiedText;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (message) async {
+        if (message.method == 'Clipboard.setData') {
+          copiedText = message.arguments['text'] as String?;
+          return null;
+        }
+        if (message.method == 'Clipboard.getData') {
+          return copiedText;
+        }
+        return null;
+      },
+    );
+
+    await tester.tap(find.text('Copy error'));
+    await tester.pumpAndSettle();
+    expect(find.text('Copied'), findsOneWidget);
+
+    expect(copiedText, fullText);
+  });
 }
 
 MediaSource _createFakeBilibili() => FakeMediaSource('bilibili', 'Bilibili');
