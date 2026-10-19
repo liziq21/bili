@@ -8,6 +8,9 @@ class CreatorProfile() extends Table {
   TextColumn get url => text()();
   TextColumn get name => text()();
   TextColumn get thumbnailUrl => text().nullable()();
+  TextColumn get description => text().nullable()();
+  IntColumn get subscribers => integer().nullable()();
+  IntColumn get videos => integer().nullable()();
 
   @override
   String get tableName => 'creator_profile';

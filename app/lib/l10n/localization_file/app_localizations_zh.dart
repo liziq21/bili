@@ -3547,6 +3547,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get creatorTab => '创作者';
 
   @override
+  String get spaceDescriptionUnavailable => '暂无简介';
+
+  @override
   String get videoTab => '视频';
 
   @override

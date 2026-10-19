@@ -6037,6 +6037,12 @@ abstract class AppLocalizations {
   /// **'创作者'**
   String get creatorTab;
 
+  /// Fallback text when a creator has no profile description
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无简介'**
+  String get spaceDescriptionUnavailable;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In zh, this message translates to:

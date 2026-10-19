@@ -35,22 +35,14 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
   Future<Result<T>> get<T>(PreferencesKey<T> key) async {
     try {
       return .ok(await key._getData(_pref));
-    } on Exception catch (e) {
-      return .error(e);
+    } on Object catch (error, stackTrace) {
+      return .error(_asException(error, stackTrace));
     }
   }
 
   Future<Result<void>> set<T>(PreferencesKey<T> prefKey, T? value) async {
     try {
-      await switch (value) {
-        final String v => _pref.setString(prefKey.name, v),
-        final bool v => _pref.setBool(prefKey.name, v),
-        final int v => _pref.setInt(prefKey.name, v),
-        final double v => _pref.setDouble(prefKey.name, v),
-        final List<String> v => _pref.setStringList(prefKey.name, v),
-        null => _pref.remove(prefKey.name),
-        _ => throw UnsupportedError('Unsupported type: ${value.runtimeType}'),
-      };
+      await prefKey._setData(_pref, value);
       await _readAndEmitData();
       if (_keyControllers.containsKey(prefKey)) {
         _keyControllers[prefKey]!.add(value ?? prefKey.defaultValue);
@@ -62,8 +54,8 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
         }
       }
       return .ok(null);
-    } on Exception catch (e) {
-      return .error(e);
+    } on Object catch (error, stackTrace) {
+      return .error(_asException(error, stackTrace));
     }
   }
 
@@ -129,6 +121,9 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
     _controller?.add(data!);
   }
 }
+
+Exception _asException(Object error, StackTrace stackTrace) =>
+    error is Exception ? error : Exception('$error\n$stackTrace');
 
 class const PreferencesKey<T>._(final String name, final T defaultValue) {
   /// 无默认服务名：未选择过时为 null，由 app 层按当前服务源清单解析。
@@ -197,6 +192,43 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   // `Type` value for each supported argument once; the dispatch below compares
   // those values directly, so no printed type name is involved.
   static Type _typeOf<T>() => T;
+
+  Future<void> _setData(SharedPreferencesAsync pref, Object? value) async {
+    if (value == null) {
+      await pref.remove(name);
+      return;
+    }
+
+    final runtimeType = _typeOf<T>();
+    if ((runtimeType == _typeOf<String>() ||
+            runtimeType == _typeOf<String?>()) &&
+        value is String) {
+      await pref.setString(name, value);
+      return;
+    }
+    if (runtimeType == _typeOf<bool>() && value is bool) {
+      await pref.setBool(name, value);
+      return;
+    }
+    if ((runtimeType == _typeOf<int>() || runtimeType == _typeOf<int?>()) &&
+        value is int) {
+      await pref.setInt(name, value);
+      return;
+    }
+    if (runtimeType == _typeOf<double>() && value is double) {
+      await pref.setDouble(name, value);
+      return;
+    }
+    if (runtimeType == _typeOf<List<String>>() && value is List<String>) {
+      await pref.setStringList(name, value);
+      return;
+    }
+
+    throw UnsupportedError(
+      'Value for $name must match PreferencesKey<$T>, '
+      'got ${value.runtimeType}',
+    );
+  }
 
   Future<T> _getData(SharedPreferencesAsync pref) async {
     final runtimeType = _typeOf<T>();

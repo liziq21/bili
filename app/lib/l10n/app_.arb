@@ -4685,6 +4685,10 @@
   "@creatorTab": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "spaceDescriptionUnavailable": "暂无简介",
+  "@spaceDescriptionUnavailable": {
+    "description": "Fallback text when a creator has no profile description"
+  },
   "videoTab": "视频",
   "@videoTab": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
