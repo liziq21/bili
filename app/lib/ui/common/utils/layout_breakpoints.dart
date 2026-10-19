@@ -39,10 +39,11 @@ enum LayoutSize() {
   /// 按实际可用宽度 [width] 解析视频网格列数
   ///
   /// [feedColumns] 只是各档位的下限：当可用宽度超过该档位的起点之后，按目标
-  /// 卡片宽度继续增加列数。否则桌面与超宽屏会沿用档位下限，把卡片拉成稀疏的
-  /// 巨型网格（1280 宽仍是 3 列、每张 400+ 逻辑像素）。
-  int feedColumnsFor(double width) {
-    final int byTargetWidth = (width / feedTargetCardWidth).floor();
+  /// 卡片宽度继续增加列数。列间距也要计入预算，否则新增一列后卡片会立刻小于
+  /// [feedTargetCardWidth]。
+  int feedColumnsFor(double width, {double spacing = 0}) {
+    final int byTargetWidth =
+        ((width + spacing) / (feedTargetCardWidth + spacing)).floor();
     return byTargetWidth > feedColumns ? byTargetWidth : feedColumns;
   }
 

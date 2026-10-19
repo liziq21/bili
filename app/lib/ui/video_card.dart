@@ -394,14 +394,17 @@ class const VideoCard({
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      videoInfoBase.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: $styles.text.title2.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.onSurface,
-                                        height: 1.25,
+                                    Tooltip(
+                                      message: videoInfoBase.title,
+                                      child: Text(
+                                        videoInfoBase.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: $styles.text.title2.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.onSurface,
+                                          height: 1.25,
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: $styles.insets.xxs),
