@@ -205,7 +205,11 @@ void main() {
         }
 
         // Back from the index returns to the same home destination.
-        await tester.tap(find.byType(BackButton));
+        // The root settings page is a ShellRoute destination and does not
+        // guarantee an AppBar BackButton on every Flutter version. Exercise
+        // the same user-visible system-back behavior without depending on an
+        // implementation detail of the app bar.
+        await tester.pageBack();
         await tester.pumpAndSettle();
         expect(router.state.uri.path, Routes.home);
         expect(find.byType(HomeScreen), findsOneWidget);
