@@ -130,11 +130,15 @@ void main() {
   });
 
   group('PlaybackSpeedChip', () {
-    testWidgets('shows 1x before any selection', (tester) async {
-      await pumpChip(tester);
+    testWidgets(
+      'shows 1x before any selection and provides accessible semantics',
+      (tester) async {
+        await pumpChip(tester);
 
-      expect(find.text('1x'), findsOneWidget);
-    });
+        expect(find.text('1x'), findsOneWidget);
+        expect(find.bySemanticsLabel('Speed 1x'), findsOneWidget);
+      },
+    );
 
     testWidgets('updates the label when the rate changes', (tester) async {
       await pumpChip(tester);
