@@ -92,6 +92,41 @@ void main() {
     );
   });
 
+  group('BiliUtils.getRoutePath tests', () {
+    test('extracts route path for bilibili scheme uri', () {
+      final uri = Uri.parse('bilibili://search?q=flutter');
+      expect(BiliUtils.getRoutePath(uri), equals('/search?q=flutter'));
+    });
+
+    test('preserves encoded delimiters without parameter pollution', () {
+      final uri = Uri.parse('bilibili://search?q=a%26b%3Dc%23d');
+      final routePath = BiliUtils.getRoutePath(uri);
+      expect(routePath, equals('/search?q=a%26b%3Dc%23d'));
+
+      final parsed = Uri.parse(routePath!);
+      expect(parsed.path, equals('/search'));
+      expect(parsed.queryParameters, equals({'q': 'a&b=c#d'}));
+      expect(parsed.fragment, isEmpty);
+    });
+
+    test('strips non-printable ASCII control characters', () {
+      final uri = Uri.parse(
+        'bilibili://search\r\n?q=test\x00key\x1f=val\r\n#frag\x00ment',
+      );
+      final routePath = BiliUtils.getRoutePath(uri);
+      expect(routePath, isNotNull);
+      expect(routePath!.contains('\r'), isFalse);
+      expect(routePath.contains('\n'), isFalse);
+      expect(routePath.contains('\x00'), isFalse);
+      expect(routePath.contains('\x1f'), isFalse);
+    });
+
+    test('returns null for empty host or unsupported bilibili:/// URI', () {
+      expect(BiliUtils.getRoutePath(Uri.parse('bilibili:///')), isNull);
+      expect(BiliUtils.getRoutePath(Uri.parse('custom://')), isNull);
+    });
+  });
+
   group('Model DTO URL normalization tests', () {
     test(
       'NetworkVideoSearchResultX.asModel normalizes thumbnailUrl from fixture',

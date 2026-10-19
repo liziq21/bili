@@ -131,3 +131,9 @@ Prevention: Standardize watch URL construction using a centralized utility (`bui
 Vulnerability: `BiliDanmakuRemoteDataSource` mapped XML danmaku comments (`comment.content`) into `DanmakuComment` objects without sanitizing ASCII control characters (`\r\n`, `\x00`, `\x1f`, `\x7f`), propagating raw control characters to danmaku overlay UI widgets (`DanmakuOverlay` / `TextPainter`).
 Learning: External network XML and Protobuf payloads (such as danmaku overlays) can contain non-printable control characters that trigger rendering glitches or text painter layout issues in Flutter UI overlays.
 Prevention: Strip ASCII control characters (`RegExp(r'[\x00-\x1F\x7F]')`) and trim whitespace from comment content strings before constructing `DanmakuComment` instances and filtering empty comments.
+
+## 2026-10-14 - Preserve Percent-Encoded Query Delimiters and Sanitize Control Characters in Route URI Extraction
+
+Vulnerability: `BiliUtils._buildDecodedUri` invoked `Uri.decodeComponent` on the entire serialized URI string returned by `Uri(...).toString()`, decoding percent-encoded query parameter delimiters (`%26` -> `&`, `%3D` -> `=`, `%23` -> `#`, `%3F` -> `?`) and percent-encoded ASCII control characters (`%0D%0A` -> `\r\n`) across full route URIs, leading to HTTP parameter pollution, fragment injection, and CRLF injection during deep-link route parsing.
+Learning: Decoding a complete, formatted URI string using `Uri.decodeComponent` destroys component boundaries and unescapes reserved URI delimiters in query parameter values, corrupting route structures when parsed by routing engines or loggers.
+Prevention: Construct route URIs using standard `Uri(...)` constructor without calling `Uri.decodeComponent` on the whole string, and sanitize non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from path, query parameters, and fragments.

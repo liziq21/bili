@@ -1,5 +1,8 @@
 import 'uri_extensions.dart';
 
+/// Non-printable ASCII control characters.
+final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
+
 /// ASCII 控制字符，加上会把 BV id 从路径段里「放出去」的 URI 分隔符：
 /// `?` 起查询串、`#` 起片段、`/` 与 `\` 能把剩余部分挪到别的路径段或主机。
 final RegExp _unsafeBvidChars = RegExp(r'[\x00-\x1F\x7F?#/\\]');
@@ -41,7 +44,7 @@ class BiliUtils() {
 
     if (path == null) return null;
 
-    return _buildDecodedUri(path, uri);
+    return _buildRouteUri(path, uri);
   }
 
   static String? _extractPath(Uri uri) {
@@ -76,13 +79,24 @@ class BiliUtils() {
            domain == Routes.spaceRelative*/ false;
   }
 
-  static String _buildDecodedUri(String path, Uri uri) => Uri.decodeComponent(
-    Uri(
-      path: path,
-      queryParameters: uri.queryParametersAll.isEmpty
-          ? null
-          : uri.queryParametersAll,
-      fragment: uri.fragment.isEmpty ? null : uri.fragment,
-    ).toString(),
-  );
+  static String _buildRouteUri(String path, Uri uri) {
+    final sanitizedPath = path.replaceAll(_controlChars, '');
+    final sanitizedQueryParams = uri.queryParametersAll.isEmpty
+        ? null
+        : uri.queryParametersAll.map(
+            (key, values) => MapEntry(
+              key.replaceAll(_controlChars, ''),
+              values.map((v) => v.replaceAll(_controlChars, '')).toList(),
+            ),
+          );
+    final sanitizedFragment = uri.fragment.isEmpty
+        ? null
+        : uri.fragment.replaceAll(_controlChars, '');
+
+    return Uri(
+      path: sanitizedPath,
+      queryParameters: sanitizedQueryParams,
+      fragment: sanitizedFragment,
+    ).toString();
+  }
 }
