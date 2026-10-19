@@ -124,7 +124,7 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get navLibrary;
 
-  /// Bottom navigation - Settings tab
+  /// Home app bar - settings entry tooltip
   ///
   /// In zh, this message translates to:
   /// **'Settings'**
@@ -189,6 +189,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'Settings'**
   String get settingsTitle;
+
+  /// Settings group and subpage title - player
+  ///
+  /// In zh, this message translates to:
+  /// **'Player'**
+  String get settingsPlayer;
+
+  /// Settings group and subpage title - watch history
+  ///
+  /// In zh, this message translates to:
+  /// **'History'**
+  String get settingsHistory;
+
+  /// Settings group and subpage title - local library
+  ///
+  /// In zh, this message translates to:
+  /// **'Library'**
+  String get settingsLibrary;
+
+  /// Settings group and subpage title - advanced options
+  ///
+  /// In zh, this message translates to:
+  /// **'Advanced'**
+  String get settingsAdvanced;
 
   /// Settings section - download options
   ///
@@ -5910,12 +5934,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'设置'**
   String get settings;
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In zh, this message translates to:
-  /// **'设置开发中'**
-  String get settingsWip;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///

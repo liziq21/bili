@@ -27,6 +27,12 @@ import '../feature/media_library/media_library_screen.dart';
 import '../feature/not_found/not_found_screen.dart';
 import '../feature/search/search_result_screen.dart';
 import '../feature/search/search_screen.dart';
+import '../feature/setting/advanced_settings_screen.dart';
+import '../feature/setting/appearance_settings_screen.dart';
+import '../feature/setting/history_settings_screen.dart';
+import '../feature/setting/library_settings_screen.dart';
+import '../feature/setting/player_settings_screen.dart';
+import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
 import '../feature/video/danmaku/danmaku_settings_screen.dart';
@@ -170,6 +176,41 @@ final GoRouter router = GoRouter(
         $searchRouteData,
         $notFoundRouteData,
         GoRoute(
+          path: Routes.settings,
+          builder: (context, _) => SettingScreen(
+            onSectionSelected: (section) =>
+                context.push<void>(switch (section) {
+                  SettingsSection.player => Routes.settingsPlayer,
+                  SettingsSection.appearance => Routes.settingsAppearance,
+                  SettingsSection.history => Routes.settingsHistory,
+                  SettingsSection.library => Routes.settingsLibrary,
+                  SettingsSection.advanced => Routes.settingsAdvanced,
+                }),
+          ),
+          routes: [
+            GoRoute(
+              path: Routes.settingsPlayerRelative,
+              builder: (_, _) => const PlayerSettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsAppearanceRelative,
+              builder: (_, _) => const AppearanceSettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsHistoryRelative,
+              builder: (_, _) => const HistorySettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsLibraryRelative,
+              builder: (_, _) => const LibrarySettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsAdvancedRelative,
+              builder: (_, _) => const AdvancedSettingsScreen(),
+            ),
+          ],
+        ),
+        GoRoute(
           path: Routes.danmakuSettings,
           builder: (_, _) => const DanmakuSettingsScreen(),
         ),
@@ -209,6 +250,7 @@ Widget _buildHome(BuildContext context) {
               builder: (context) => _withSearchBloc(
                 context,
                 HomeScreen(
+                  onSettings: () => context.push<void>(Routes.settings),
                   onLive: (roomId) => context.navigateToLive(
                     roomId,
                     source: context.read<MediaSource>().id,

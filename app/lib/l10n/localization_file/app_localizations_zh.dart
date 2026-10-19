@@ -58,6 +58,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsPlayer => 'Player';
+
+  @override
+  String get settingsHistory => 'History';
+
+  @override
+  String get settingsLibrary => 'Library';
+
+  @override
+  String get settingsAdvanced => 'Advanced';
+
+  @override
   String get settingsDownload => 'Download';
 
   @override
@@ -3472,9 +3484,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings => '设置';
-
-  @override
-  String get settingsWip => '设置开发中';
 
   @override
   String sourceNoRecommendations(String p1) {

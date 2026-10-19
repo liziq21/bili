@@ -257,7 +257,7 @@ void main() {
       child: MaterialApp(
         home: BlocProvider<HomeBloc>.value(
           value: bloc,
-          child: HomeScreen(onLive: (_) {}, onVideo: (_) {}),
+          child: HomeScreen(onLive: (_) {}, onVideo: (_) {}, onSettings: () {}),
         ),
       ),
     ),

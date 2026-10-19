@@ -17,6 +17,7 @@ class const HomeScreen({
   super.key,
   required final Function(String roomId) _onLive,
   required final Function(String id) _onVideo,
+  required final VoidCallback onSettings,
 }) extends StatelessWidget {
   Function(String roomId) get onLive => _onLive;
   Function(String id) get onVideo => _onVideo;
@@ -68,16 +69,7 @@ class const HomeScreen({
                       AppLocalizations.of(context)?.navSettings ?? 'Settings',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    // 通用设置入口尚未成型（LIZ-31）。弹幕设置有独立路由，
-                    // 不挂在这个按钮上，避免把未完成的设置页当成全局设置。
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)?.settingsWip ??
-                              'Settings coming soon',
-                        ),
-                      ),
-                    );
+                    onSettings();
                   },
                 ),
                 SizedBox(width: $styles.insets.xs),
