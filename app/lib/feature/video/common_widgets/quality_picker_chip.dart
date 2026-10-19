@@ -36,29 +36,44 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final currentLabel = _currentLabel(l10n);
+    final qualityLabel = l10n?.qualitySelect ?? 'Quality';
 
-    return Material(
-      color: $styles.colors.scrim.withValues(alpha: 0.6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: _switching ? null : () => _showQualityPicker(context),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          child: _switching
-              ? SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: $styles.colors.onScrim,
-                  ),
-                )
-              : Text(
-                  currentLabel,
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onScrim,
-                  ),
-                ),
+    return Tooltip(
+      message: qualityLabel,
+      child: Semantics(
+        button: true,
+        enabled: !_switching,
+        label: '$qualityLabel $currentLabel',
+        excludeSemantics: true,
+        child: Material(
+          color: $styles.colors.scrim.withValues(alpha: 0.6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            onTap: _switching
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    _showQualityPicker(context);
+                  },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: _switching
+                  ? SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: $styles.colors.onScrim,
+                      ),
+                    )
+                  : Text(
+                      currentLabel,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onScrim,
+                      ),
+                    ),
+            ),
+          ),
         ),
       ),
     );

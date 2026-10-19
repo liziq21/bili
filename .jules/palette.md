@@ -81,3 +81,9 @@
 **Learning:** Static grid item builders in paginated search result views (`SearchResultScreen`) omitted `onTap` navigation handlers on `VideoCard` and `CreatorProfileItem`, leaving search cards inert to touch and causing screen readers to announce cards as "disabled buttons". Wiring `onTap` to `context.navigateToVideo` / `context.navigateToSpace` restores touch navigation and enables active button semantics, while formatting `VideoCard` subtitles with `formatViewCount`, `formatRelativeDate`, `creatorProfileName`, and duration overlays prevents `null` text fragments.
 
 **Action:** Always wire explicit `onTap` navigation handlers on search result item builders and format component subtitles using helper methods to prevent unhandled touch gestures and unformatted string fragments.
+
+## 2026-10-18 - Video Player Overlay Chips Accessibility & Tactile Feedback
+
+**Learning:** Overlay control chips in the video player (`PlaybackSpeedChip`, `QualityPickerChip`, `SleepTimerChip`) wrapped `InkWell` directly without `Semantics` or `Tooltip`, causing screen readers (TalkBack/VoiceOver) to read raw text values (e.g. "1x", "1080P", "Timer") without button roles or contextual description (e.g., "Speed 1x"), while taps lacked tactile response. Wrapping chip contents with `Tooltip`, `Semantics(button: true, label: '$title $value', excludeSemantics: true)`, and adding `HapticFeedback.lightImpact()` on tap creates a clear, tactile, and screen-reader accessible control interface.
+
+**Action:** Always wrap video player control chips with explicit `Tooltip`, state-aware `Semantics(button: true, label: '$title $value', excludeSemantics: true)`, and `HapticFeedback.lightImpact()` on selection trigger.

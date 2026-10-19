@@ -171,10 +171,14 @@ void main() {
   }
 
   group('SleepTimerChip', () {
-    testWidgets('shows the idle label before starting', (tester) async {
+    testWidgets('shows the idle label before starting and exposes accessible semantics', (tester) async {
       await pumpChip(tester);
 
       expect(find.text('Timer'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Sleep timer Timer'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping the chip opens the picker with all durations', (

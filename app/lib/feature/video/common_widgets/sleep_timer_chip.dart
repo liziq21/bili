@@ -173,22 +173,34 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
         : active
         ? _formatRemaining(_sleep.remaining!)
         : (l10n?.timer ?? 'Timer');
+    final timerTitle = l10n?.sleepTimerTitle ?? 'Sleep timer';
 
-    return Material(
-      color: active
-          ? $styles.colors.accentFill.withValues(alpha: 0.9)
-          : $styles.colors.scrim.withValues(alpha: 0.6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => _showPicker(context),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          child: Text(
-            label,
-            style: $styles.text.bodySmall.copyWith(
-              color: active
-                  ? $styles.colors.onAccentFill
-                  : $styles.colors.onScrim,
+    return Tooltip(
+      message: timerTitle,
+      child: Semantics(
+        button: true,
+        label: '$timerTitle $label',
+        excludeSemantics: true,
+        child: Material(
+          color: active
+              ? $styles.colors.accentFill.withValues(alpha: 0.9)
+              : $styles.colors.scrim.withValues(alpha: 0.6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showPicker(context);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                label,
+                style: $styles.text.bodySmall.copyWith(
+                  color: active
+                      ? $styles.colors.onAccentFill
+                      : $styles.colors.onScrim,
+                ),
+              ),
             ),
           ),
         ),

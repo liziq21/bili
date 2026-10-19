@@ -60,17 +60,32 @@ class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: $styles.colors.scrim.withValues(alpha: 0.6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => _showSpeedPicker(context),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          child: Text(
-            rateLabel(_rate),
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onScrim,
+    final l10n = AppLocalizations.of(context);
+    final currentText = rateLabel(_rate);
+    final speedLabel = l10n?.playbackSpeed ?? 'Speed';
+
+    return Tooltip(
+      message: speedLabel,
+      child: Semantics(
+        button: true,
+        label: '$speedLabel $currentText',
+        excludeSemantics: true,
+        child: Material(
+          color: $styles.colors.scrim.withValues(alpha: 0.6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showSpeedPicker(context);
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                currentText,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onScrim,
+                ),
+              ),
             ),
           ),
         ),
