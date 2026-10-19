@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../data/repository/app_search_suggest_repository.dart';
+import '../data/repository/creator_profile_repository.dart';
 import '../data/repository/danmaku_repository.dart';
 import '../data/repository/search/app_creator_profile_search_repository.dart';
 import '../data/repository/search/app_live_room_search_repository.dart';
@@ -16,6 +17,7 @@ import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_comment_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import 'media_sources_provider.dart';
+import '../database/dao/creator_profile_dao.dart';
 
 /// Injects one route-scoped [MediaSource] and the repositories for its
 /// optional capabilities.
@@ -109,6 +111,8 @@ class _SourceScopeState() extends State<_SourceScope> {
   }
 
   List<SingleChildWidget> _buildProviders(MediaSource source) {
+    final creatorProfileSearchDataSource =
+        source.creatorProfileSearchDataSource;
     final videoCommentDataSource = source.videoCommentDataSource;
     final repliesDataSource = source.videoCommentRepliesDataSource;
 
@@ -120,11 +124,19 @@ class _SourceScopeState() extends State<_SourceScope> {
         RepositoryProvider<VideoSearchRepository>(
           create: (_) => AppVideoSearchRepository(videoSearchDataSource),
         ),
-      if (source.creatorProfileSearchDataSource
+      if (creatorProfileSearchDataSource
           case final creatorProfileSearchDataSource?)
         RepositoryProvider<CreatorProfileSearchRepository>(
           create: (_) =>
               AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),
+        ),
+      if (creatorProfileSearchDataSource != null)
+        RepositoryProvider<CreatorProfileRepository>(
+          create: (context) => AppCreatorProfileRepository(
+            source.id,
+            context.read<CreatorProfileDao>(),
+            context.read<CreatorProfileSearchRepository>(),
+          ),
         ),
       if (source.searchSuggestDataSource case final searchSuggestDataSource?)
         RepositoryProvider<SearchSuggestRepository>(

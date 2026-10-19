@@ -8,6 +8,7 @@ extension NetworkBiliUserSearchResultX on NetworkBiliUserSearchResult {
     id: '$mid',
     name: uname,
     thumbnailUrl: normalizeBiliUrl(upic),
+    description: usign,
     isLive: isLive == 1,
     liveRoomId: roomId,
     subscribers: fans,

@@ -1567,6 +1567,37 @@ class $CreatorProfileTable extends CreatorProfile
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subscribersMeta = const VerificationMeta(
+    'subscribers',
+  );
+  @override
+  late final GeneratedColumn<int> subscribers = GeneratedColumn<int>(
+    'subscribers',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _videosMeta = const VerificationMeta('videos');
+  @override
+  late final GeneratedColumn<int> videos = GeneratedColumn<int>(
+    'videos',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     internalId,
@@ -1575,6 +1606,9 @@ class $CreatorProfileTable extends CreatorProfile
     url,
     name,
     thumbnailUrl,
+    description,
+    subscribers,
+    videos,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1632,6 +1666,30 @@ class $CreatorProfileTable extends CreatorProfile
         ),
       );
     }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('subscribers')) {
+      context.handle(
+        _subscribersMeta,
+        subscribers.isAcceptableOrUnknown(
+          data['subscribers']!,
+          _subscribersMeta,
+        ),
+      );
+    }
+    if (data.containsKey('videos')) {
+      context.handle(
+        _videosMeta,
+        videos.isAcceptableOrUnknown(data['videos']!, _videosMeta),
+      );
+    }
     return context;
   }
 
@@ -1669,6 +1727,18 @@ class $CreatorProfileTable extends CreatorProfile
         DriftSqlType.string,
         data['${effectivePrefix}thumbnail_url'],
       ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      subscribers: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}subscribers'],
+      ),
+      videos: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}videos'],
+      ),
     );
   }
 
@@ -1686,6 +1756,9 @@ class CreatorProfileEntity extends DataClass
   final String url;
   final String name;
   final String? thumbnailUrl;
+  final String? description;
+  final int? subscribers;
+  final int? videos;
   const CreatorProfileEntity({
     required this.internalId,
     required this.serviceId,
@@ -1693,6 +1766,9 @@ class CreatorProfileEntity extends DataClass
     required this.url,
     required this.name,
     this.thumbnailUrl,
+    this.description,
+    this.subscribers,
+    this.videos,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1704,6 +1780,15 @@ class CreatorProfileEntity extends DataClass
     map['name'] = Variable<String>(name);
     if (!nullToAbsent || thumbnailUrl != null) {
       map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || subscribers != null) {
+      map['subscribers'] = Variable<int>(subscribers);
+    }
+    if (!nullToAbsent || videos != null) {
+      map['videos'] = Variable<int>(videos);
     }
     return map;
   }
@@ -1718,6 +1803,15 @@ class CreatorProfileEntity extends DataClass
       thumbnailUrl: thumbnailUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(thumbnailUrl),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      subscribers: subscribers == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subscribers),
+      videos: videos == null && nullToAbsent
+          ? const Value.absent()
+          : Value(videos),
     );
   }
 
@@ -1733,6 +1827,9 @@ class CreatorProfileEntity extends DataClass
       url: serializer.fromJson<String>(json['url']),
       name: serializer.fromJson<String>(json['name']),
       thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      description: serializer.fromJson<String?>(json['description']),
+      subscribers: serializer.fromJson<int?>(json['subscribers']),
+      videos: serializer.fromJson<int?>(json['videos']),
     );
   }
   @override
@@ -1745,6 +1842,9 @@ class CreatorProfileEntity extends DataClass
       'url': serializer.toJson<String>(url),
       'name': serializer.toJson<String>(name),
       'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'description': serializer.toJson<String?>(description),
+      'subscribers': serializer.toJson<int?>(subscribers),
+      'videos': serializer.toJson<int?>(videos),
     };
   }
 
@@ -1755,6 +1855,9 @@ class CreatorProfileEntity extends DataClass
     String? url,
     String? name,
     Value<String?> thumbnailUrl = const Value.absent(),
+    Value<String?> description = const Value.absent(),
+    Value<int?> subscribers = const Value.absent(),
+    Value<int?> videos = const Value.absent(),
   }) => CreatorProfileEntity(
     internalId: internalId ?? this.internalId,
     serviceId: serviceId ?? this.serviceId,
@@ -1762,6 +1865,9 @@ class CreatorProfileEntity extends DataClass
     url: url ?? this.url,
     name: name ?? this.name,
     thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    description: description.present ? description.value : this.description,
+    subscribers: subscribers.present ? subscribers.value : this.subscribers,
+    videos: videos.present ? videos.value : this.videos,
   );
   CreatorProfileEntity copyWithCompanion(CreatorProfileCompanion data) {
     return CreatorProfileEntity(
@@ -1775,6 +1881,13 @@ class CreatorProfileEntity extends DataClass
       thumbnailUrl: data.thumbnailUrl.present
           ? data.thumbnailUrl.value
           : this.thumbnailUrl,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      subscribers: data.subscribers.present
+          ? data.subscribers.value
+          : this.subscribers,
+      videos: data.videos.present ? data.videos.value : this.videos,
     );
   }
 
@@ -1786,14 +1899,26 @@ class CreatorProfileEntity extends DataClass
           ..write('id: $id, ')
           ..write('url: $url, ')
           ..write('name: $name, ')
-          ..write('thumbnailUrl: $thumbnailUrl')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('description: $description, ')
+          ..write('subscribers: $subscribers, ')
+          ..write('videos: $videos')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(internalId, serviceId, id, url, name, thumbnailUrl);
+  int get hashCode => Object.hash(
+    internalId,
+    serviceId,
+    id,
+    url,
+    name,
+    thumbnailUrl,
+    description,
+    subscribers,
+    videos,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1803,7 +1928,10 @@ class CreatorProfileEntity extends DataClass
           other.id == this.id &&
           other.url == this.url &&
           other.name == this.name &&
-          other.thumbnailUrl == this.thumbnailUrl);
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.description == this.description &&
+          other.subscribers == this.subscribers &&
+          other.videos == this.videos);
 }
 
 class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
@@ -1813,6 +1941,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
   final Value<String> url;
   final Value<String> name;
   final Value<String?> thumbnailUrl;
+  final Value<String?> description;
+  final Value<int?> subscribers;
+  final Value<int?> videos;
   const CreatorProfileCompanion({
     this.internalId = const Value.absent(),
     this.serviceId = const Value.absent(),
@@ -1820,6 +1951,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
     this.url = const Value.absent(),
     this.name = const Value.absent(),
     this.thumbnailUrl = const Value.absent(),
+    this.description = const Value.absent(),
+    this.subscribers = const Value.absent(),
+    this.videos = const Value.absent(),
   });
   CreatorProfileCompanion.insert({
     this.internalId = const Value.absent(),
@@ -1828,6 +1962,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
     required String url,
     required String name,
     this.thumbnailUrl = const Value.absent(),
+    this.description = const Value.absent(),
+    this.subscribers = const Value.absent(),
+    this.videos = const Value.absent(),
   }) : serviceId = Value(serviceId),
        id = Value(id),
        url = Value(url),
@@ -1839,6 +1976,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
     Expression<String>? url,
     Expression<String>? name,
     Expression<String>? thumbnailUrl,
+    Expression<String>? description,
+    Expression<int>? subscribers,
+    Expression<int>? videos,
   }) {
     return RawValuesInsertable({
       if (internalId != null) 'internal_id': internalId,
@@ -1847,6 +1987,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
       if (url != null) 'url': url,
       if (name != null) 'name': name,
       if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (description != null) 'description': description,
+      if (subscribers != null) 'subscribers': subscribers,
+      if (videos != null) 'videos': videos,
     });
   }
 
@@ -1857,6 +2000,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
     Value<String>? url,
     Value<String>? name,
     Value<String?>? thumbnailUrl,
+    Value<String?>? description,
+    Value<int?>? subscribers,
+    Value<int?>? videos,
   }) {
     return CreatorProfileCompanion(
       internalId: internalId ?? this.internalId,
@@ -1865,6 +2011,9 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
       url: url ?? this.url,
       name: name ?? this.name,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      description: description ?? this.description,
+      subscribers: subscribers ?? this.subscribers,
+      videos: videos ?? this.videos,
     );
   }
 
@@ -1889,6 +2038,15 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
     if (thumbnailUrl.present) {
       map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
     }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (subscribers.present) {
+      map['subscribers'] = Variable<int>(subscribers.value);
+    }
+    if (videos.present) {
+      map['videos'] = Variable<int>(videos.value);
+    }
     return map;
   }
 
@@ -1900,7 +2058,10 @@ class CreatorProfileCompanion extends UpdateCompanion<CreatorProfileEntity> {
           ..write('id: $id, ')
           ..write('url: $url, ')
           ..write('name: $name, ')
-          ..write('thumbnailUrl: $thumbnailUrl')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('description: $description, ')
+          ..write('subscribers: $subscribers, ')
+          ..write('videos: $videos')
           ..write(')'))
         .toString();
   }
@@ -5988,6 +6149,9 @@ typedef $$CreatorProfileTableCreateCompanionBuilder =
       required String url,
       required String name,
       Value<String?> thumbnailUrl,
+      Value<String?> description,
+      Value<int?> subscribers,
+      Value<int?> videos,
     });
 typedef $$CreatorProfileTableUpdateCompanionBuilder =
     CreatorProfileCompanion Function({
@@ -5997,6 +6161,9 @@ typedef $$CreatorProfileTableUpdateCompanionBuilder =
       Value<String> url,
       Value<String> name,
       Value<String?> thumbnailUrl,
+      Value<String?> description,
+      Value<int?> subscribers,
+      Value<int?> videos,
     });
 
 class $$CreatorProfileTableFilterComposer
@@ -6035,6 +6202,21 @@ class $$CreatorProfileTableFilterComposer
 
   ColumnFilters<String> get thumbnailUrl => $composableBuilder(
     column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get subscribers => $composableBuilder(
+    column: $table.subscribers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get videos => $composableBuilder(
+    column: $table.videos,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6077,6 +6259,21 @@ class $$CreatorProfileTableOrderingComposer
     column: $table.thumbnailUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get subscribers => $composableBuilder(
+    column: $table.subscribers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get videos => $composableBuilder(
+    column: $table.videos,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CreatorProfileTableAnnotationComposer
@@ -6109,6 +6306,19 @@ class $$CreatorProfileTableAnnotationComposer
     column: $table.thumbnailUrl,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get subscribers => $composableBuilder(
+    column: $table.subscribers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get videos =>
+      $composableBuilder(column: $table.videos, builder: (column) => column);
 }
 
 class $$CreatorProfileTableTableManager
@@ -6154,6 +6364,9 @@ class $$CreatorProfileTableTableManager
                 Value<String> url = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<int?> subscribers = const Value.absent(),
+                Value<int?> videos = const Value.absent(),
               }) => CreatorProfileCompanion(
                 internalId: internalId,
                 serviceId: serviceId,
@@ -6161,6 +6374,9 @@ class $$CreatorProfileTableTableManager
                 url: url,
                 name: name,
                 thumbnailUrl: thumbnailUrl,
+                description: description,
+                subscribers: subscribers,
+                videos: videos,
               ),
           createCompanionCallback:
               ({
@@ -6170,6 +6386,9 @@ class $$CreatorProfileTableTableManager
                 required String url,
                 required String name,
                 Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<int?> subscribers = const Value.absent(),
+                Value<int?> videos = const Value.absent(),
               }) => CreatorProfileCompanion.insert(
                 internalId: internalId,
                 serviceId: serviceId,
@@ -6177,6 +6396,9 @@ class $$CreatorProfileTableTableManager
                 url: url,
                 name: name,
                 thumbnailUrl: thumbnailUrl,
+                description: description,
+                subscribers: subscribers,
+                videos: videos,
               ),
           withReferenceMapper: (p0) => p0
               .map(

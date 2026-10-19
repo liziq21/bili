@@ -157,11 +157,11 @@ void main() {
     expect(history, hasLength(1));
     expect(history.single.media.originalId, 'legacy-video');
     expect(history.single.history.progressSeconds, BigInt.from(42));
-    expect(migrated.schemaVersion, 3);
+    expect(migrated.schemaVersion, 4);
     expect(
       (await migrated.customSelect('PRAGMA user_version').getSingle())
           .read<int>('user_version'),
-      3,
+      4,
     );
 
     final playlistId = await migrated.localLibraryDao.createPlaylist(

@@ -49,7 +49,7 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -81,6 +81,11 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
         await m.createTable(localPlaylist);
         await m.createTable(localPlaylistItem);
         await m.createTable(localSubscription);
+      }
+      if (from < 4) {
+        await m.addColumn(creatorProfile, creatorProfile.description);
+        await m.addColumn(creatorProfile, creatorProfile.subscribers);
+        await m.addColumn(creatorProfile, creatorProfile.videos);
       }
     },
   );
