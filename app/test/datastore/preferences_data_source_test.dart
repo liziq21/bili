@@ -22,7 +22,7 @@ class _SourceAndThemeSet() implements PreferencesKeySet<String> {
 }
 
 /// 平台假件：getPreferences 恒抛异常，模拟底层存储读失败。
-final class _ThrowingPlatform extends SharedPreferencesAsyncPlatform {
+final class _ThrowingPlatform() extends SharedPreferencesAsyncPlatform {
   @override
   Future<Map<String, Object>> getPreferences(
     GetPreferencesParameters parameters,
@@ -152,6 +152,34 @@ void main() {
       final result = await ds.get(PreferencesKey.themeConfig);
 
       expect((result as Ok<String>).value, 'FOLLOW_SYSTEM');
+    });
+
+    test('returns an error when the stored value has the wrong type', () async {
+      final invalidData = InMemorySharedPreferencesAsync.withData({
+        'USE_DYNAMIC_COLOR': 'true',
+      });
+      SharedPreferencesAsyncPlatform.instance = invalidData;
+
+      final dataSource = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(dataSource.dispose);
+
+      final result = await dataSource.get(PreferencesKey.useDynamicColor);
+
+      expect(result, isA<Error<bool>>());
+      expect((result as Error<bool>).error.toString(), contains('String'));
+    });
+
+    test('returns an error instead of writing a mismatched value', () async {
+      final dynamic key = PreferencesKey.useDynamicColor;
+      final dynamic value = 'true';
+
+      final result = await ds.set(key, value);
+
+      expect(result, isA<Error<void>>());
+      final readBack = await ds.get(PreferencesKey.useDynamicColor);
+      expect((readBack as Ok<bool>).value, isTrue);
     });
 
     test('reads back false after writing false to a bool key', () async {

@@ -36,29 +36,25 @@ final class const DanmakuSettings({
 
   static Future<DanmakuSettings> load(PreferencesDataSource preferences) async {
     return DanmakuSettings(
-      enabled: await _read(preferences, PreferencesKey.danmakuEnabled, true),
+      enabled: await _read(preferences, PreferencesKey.danmakuEnabled),
       regularDuration: await _read(
         preferences,
         PreferencesKey.danmakuRegularDuration,
-        8,
       ),
       topBottomDuration: await _read(
         preferences,
         PreferencesKey.danmakuTopBottomDuration,
-        6,
       ),
-      opacity: await _read(preferences, PreferencesKey.danmakuOpacity, .9),
-      fontSize: await _read(preferences, PreferencesKey.danmakuFontSize, 18),
+      opacity: await _read(preferences, PreferencesKey.danmakuOpacity),
+      fontSize: await _read(preferences, PreferencesKey.danmakuFontSize),
       outlineRadius: await _read(
         preferences,
         PreferencesKey.danmakuOutlineRadius,
-        2,
       ),
-      topMaxRows: await _read(preferences, PreferencesKey.danmakuTopMaxRows, 2),
+      topMaxRows: await _read(preferences, PreferencesKey.danmakuTopMaxRows),
       bottomMaxRows: await _read(
         preferences,
         PreferencesKey.danmakuBottomMaxRows,
-        2,
       ),
     );
   }
@@ -83,12 +79,11 @@ final class const DanmakuSettings({
   static Future<T> _read<T>(
     PreferencesDataSource preferences,
     PreferencesKey<T> key,
-    T fallback,
   ) async {
     final result = await preferences.get(key);
     return switch (result) {
       Ok(:final value) => value,
-      Error() => fallback,
+      Error() => key.defaultValue,
     };
   }
 

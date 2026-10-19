@@ -205,11 +205,15 @@ Flutter's own guidance for this layer is `docs/rules/rules.md` (Testing) in the 
   turn a clear startup error into a `flutter_tester` crash or invalid test
   result. Do not add a host-specific library or a test skip to the repository.
 - Use `dart run tool/test_local.dart` to run the pure-Dart fallback. It probes
-  the runner first, reports the Flutter suites it could not execute, and runs
-  the offline Dart package checks. The fallback is not a full pass: CI must run
-  the complete Flutter matrix from `.github/workflows/ci.yml`. Use
-  `dart run tool/test_local.dart --require-flutter` when a local Flutter runner
-  is mandatory and an unavailable runner must fail immediately.
-- For a pull request, verify the CI `Run Flutter Test (…)` checks rather than
-  declaring a widget or golden test passed from the fallback. Keep the runner
-  failure visible in the handoff or PR verification notes.
+  the runner first and runs every offline check available on the host. On
+  Termux, a missing `libvk_swiftshader.so` is a known Flutter SDK host
+  limitation, not a repository test failure: complete the checks that can run
+  locally, and do not report the unavailable Flutter suites as failed solely
+  for this reason. CI must still run the complete Flutter matrix from
+  `.github/workflows/ci.yml`. Use `dart run tool/test_local.dart --require-flutter`
+  only when a local Flutter runner is explicitly required and an unavailable
+  runner must fail immediately.
+- For a pull request, verify the CI `Run Flutter Test (…)` checks for
+  Flutter/widget/golden coverage. The pure-Dart fallback is sufficient
+  evidence for the local checks it actually ran; no special runner-failure
+  report is needed for the known Termux limitation unless requested.

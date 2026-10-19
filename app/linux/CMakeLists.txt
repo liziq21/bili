@@ -112,6 +112,14 @@ install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
    COMPONENT Runtime)
 
+# In Termux/Android environment, use Termux's native Bionic-compiled SQLite library
+# to prevent dlopen failure caused by glibc-compiled binary expecting libc.so.6.
+if(EXISTS "/data/data/com.termux/files/usr/lib/libsqlite3.so")
+  install(FILES "/data/data/com.termux/files/usr/lib/libsqlite3.so"
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+endif()
+
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")
