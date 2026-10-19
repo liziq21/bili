@@ -52,6 +52,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): fullscreen fill, double-tap seek, stop-after-current sleep timer (Part of LIZ-29) (#323)
 - feat(video): migrate hardcoded Chinese copy to ARB getters in video domain (LIZ-51) (#340)
 - feat(video): migrate hardcoded copy to ARB getters in video player domain (LIZ-51) (#341)
+- feat: implement creator profile space header (#382)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -108,6 +109,8 @@ so hand edits do not survive; change the generator instead.
 - fix(tool): narrow the changelog self-exclusion to the workflow branch (#314)
 - Fix duplicate search view route on search tab reselect (#321)
 - 🛡️ Sentinel: Sanitize control characters in Bilibili danmaku comment content (#344)
+- 🛡️ Sentinel: preserve route query delimiters and sanitize control chars (#352)
+- fix(home): harden feed layout and refresh behavior (#354)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -185,6 +188,7 @@ so hand edits do not survive; change the generator instead.
 - refactor(l10n): LIZ-51 B3 media library + card copy (#342)
 - refactor(l10n): LIZ-51 B6 home + routing + data layer copy (#343)
 - 🎨 Palette: Enhance Media Library load-more button semantics and tooltips (#345)
+- 🎨 Palette: Enhance video player control chips accessibility and feedback (#353)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -264,6 +268,7 @@ so hand edits do not survive; change the generator instead.
 - chore(mcp): add GitHub MCP server to project MCP configs (#268)
 - ci: add environment-aware local test runner (#288)
 - ci: skip CI for ci-generated PRs; enable auto-merge on changelog PR (#348)
+- ci: build debug APK instead of release (LIZ-50) (#350)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
