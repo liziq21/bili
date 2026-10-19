@@ -30,6 +30,12 @@ Find and implement at most ONE small improvement with a demonstrable usability o
 - Investigate the current search widget and focus behavior before proposing form-specific fixes. Do not introduce a form, confirmation dialog, or animation solely because it appears in a generic checklist.
 - Respect reduced-motion behavior and actual loading/disabled state if adding motion or async feedback. Keep the change within the original user flow.
 
+## Candidate investigation: Localization hygiene
+
+- Scan `app/l10n/app_*.arb` for keys that are defined but never referenced via `AppLocalizations` in Dart source under `app/lib/` and `app/test/`. Dead translations waste translator effort and bloat generated locale delegates. Report unused keys with file/line context; removal requires maintainer approval since it may affect in-flight translations.
+- Scan `app/lib/` for hardcoded Chinese string literals in widget trees that should route through `AppLocalizations` (excluding: logging/debug/error messages that are intentionally English, test assertion strings, and generated code). Each candidate must be mapped to an existing or new ARB key with placeholders where needed, and verified against the font subset contract (`golden_font_contract_test.dart`). Migration of a cohesive area (one feature screen or widget family) counts as one small improvement; do not attempt a whole-app sweep in a single run.
+- Before proposing any ARB removal or migration, verify the change passes `flutter analyze --fatal-infos --fatal-warnings` and the relevant widget tests. Do not weaken the font subset test or analyzer rules to accommodate the change.
+
 ## Observe, implement, verify
 
 1. Reproduce the gap with a concrete widget/interaction, locale, viewport, text scale, or semantics tree. Explain what the user cannot discover, activate, read, or understand.
