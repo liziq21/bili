@@ -194,10 +194,7 @@ class _SleepTimerChipState extends State<SleepTimerChip> {
               _showPicker(context);
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Text(
                 label,
                 style: $styles.text.bodySmall.copyWith(

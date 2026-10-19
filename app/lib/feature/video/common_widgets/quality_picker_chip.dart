@@ -58,10 +58,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
                     _showQualityPicker(context);
                   },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: _switching
                   ? SizedBox(
                       width: 14,
