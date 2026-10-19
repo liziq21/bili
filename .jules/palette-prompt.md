@@ -36,6 +36,31 @@ Find and implement at most ONE small improvement with a demonstrable usability o
 - Scan `app/lib/` for hardcoded Chinese string literals in widget trees that should route through `AppLocalizations` (excluding: logging/debug/error messages that are intentionally English, test assertion strings, and generated code). Each candidate must be mapped to an existing or new ARB key with placeholders where needed, and verified against the font subset contract (`golden_font_contract_test.dart`). Migration of a cohesive area (one feature screen or widget family) counts as one small improvement; do not attempt a whole-app sweep in a single run.
 - Before proposing any ARB removal or migration, verify the change passes `flutter analyze --fatal-infos --fatal-warnings` and the relevant widget tests. Do not weaken the font subset test or analyzer rules to accommodate the change.
 
+### ARB metadata best practices (for new keys and migrations)
+
+ARB files are JSON and do not support traditional comments. Context for translators is provided via `@key` metadata entries. The following fields are recognized by `flutter gen-l10n` and major localization platforms (SimpleLocalize, Localazy, Crowdin, Phrase):
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `description` | Translator-facing context: where the string appears, tone, constraints | `"description": "Bottom navigation label, max 10 chars"` |
+| `placeholders` | Placeholder type, example, and description | See placeholder example below |
+| `type` | Message type: `text`, `html`, `markdown` | `"type": "text"` |
+| `example` | Rendered example value at runtime | `"example": "Welcome, John!"` |
+| `context` | Extra context (platform-supported): character limit, gender, screen | `"context": "Button label, imperative mood"` |
+
+Placeholder definition structure:
+```json
+"@downloadProgress": {
+  "description": "Download queue item progress",
+  "placeholders": {
+    "current": { "type": "int", "example": "3", "description": "Completed count" },
+    "total": { "type": "int", "example": "10", "description": "Total tasks" }
+  }
+}
+```
+
+When adding or migrating keys, follow the existing pattern in `app/l10n/app_.arb`: every key has a `@key` entry with `description`; keys with placeholders include `placeholders` with `type`, `example`, and `description` per placeholder. Do not hand-write `//` comments — they are invalid JSON and ignored by tooling.
+
 ## Observe, implement, verify
 
 1. Reproduce the gap with a concrete widget/interaction, locale, viewport, text scale, or semantics tree. Explain what the user cannot discover, activate, read, or understand.
