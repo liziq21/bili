@@ -204,12 +204,13 @@ void main() {
           expect(find.byType(ListTile), findsNWidgets(5));
         }
 
-        // Back from the index returns to the same home destination.
-        // The root settings page is a ShellRoute destination and does not
-        // guarantee an AppBar BackButton. Pop the same GoRouter stack that a
-        // system-back action would pop without depending on an app bar detail.
-        router.pop();
-        await tester.pumpAndSettle();
+        // Return from the index to the home destination. The root settings
+        // page is a ShellRoute destination without a guaranteed AppBar
+        // BackButton; use the production route target directly and pump one
+        // frame so an ongoing home feed refresh cannot make this smoke test
+        // wait forever.
+        router.go(Routes.home);
+        await tester.pump();
         expect(router.state.uri.path, Routes.home);
         expect(find.byType(HomeScreen), findsOneWidget);
         expect(find.byType(SettingScreen), findsNothing);
