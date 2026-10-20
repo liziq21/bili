@@ -188,8 +188,6 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                 fullscreen: false,
                 onToggleFullscreen: widget.onToggleFullscreen,
               ),
-              if (widget.controller != null)
-                _QueueControlBar(controller: widget.controller!),
             ],
           );
         },
@@ -197,7 +195,16 @@ class _VideoPlayerState() extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return _surface();
+    final surface = _surface();
+    if (widget.fullscreen || widget.controller == null) return surface;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        surface,
+        _QueueControlBar(controller: widget.controller!),
+      ],
+    );
   }
 }
 
