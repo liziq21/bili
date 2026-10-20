@@ -55,6 +55,7 @@ so hand edits do not survive; change the generator instead.
 - feat: implement creator profile space header (#382)
 - feat(settings): add grouped settings navigation skeleton (#384)
 - feat(data): add full playlist fetcher (#390)
+- feat(settings): add appearance placeholders and satisfy strict analysis (#397)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -113,6 +114,8 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: Sanitize control characters in Bilibili danmaku comment content (#344)
 - 🛡️ Sentinel: preserve route query delimiters and sanitize control chars (#352)
 - fix(home): harden feed layout and refresh behavior (#354)
+- fix(video): restore detail back navigation and clear player controls (#394)
+- fix: use system sqlite3 on Linux to avoid glibc/bionic mismatch in Termux (#398)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -227,6 +230,7 @@ so hand edits do not survive; change the generator instead.
 - docs(LIZ-25): 从合并 PR 自动生成 CHANGELOG (#309)
 - docs(triage): issue-triage-prompt v2 — ready-for-jules 档与授权收敛 (#322)
 - docs(palette): add localization hygiene candidate investigation [skip ci] (#385)
+- docs(AGENTS): add Linear specifications references (#399)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
