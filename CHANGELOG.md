@@ -54,6 +54,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): migrate hardcoded copy to ARB getters in video player domain (LIZ-51) (#341)
 - feat: implement creator profile space header (#382)
 - feat(settings): add grouped settings navigation skeleton (#384)
+- feat(data): add full playlist fetcher (#390)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -190,6 +191,7 @@ so hand edits do not survive; change the generator instead.
 - refactor(l10n): LIZ-51 B6 home + routing + data layer copy (#343)
 - 🎨 Palette: Enhance Media Library load-more button semantics and tooltips (#345)
 - 🎨 Palette: Enhance video player control chips accessibility and feedback (#353)
+- 🎨 Palette: Enable related video card navigation and tactile feedback (#387)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
