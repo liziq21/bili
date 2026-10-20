@@ -30,16 +30,15 @@ String rateLabel(double rate) {
 ///
 /// 选择后立即套用到播放器，并写入 preferences 记为默认倍速；
 /// 无 PreferencesDataSource 注入（widget 测试单独使用）时只套用不记忆。
-class PlaybackSpeedChip extends StatefulWidget {
-  const PlaybackSpeedChip({required this.controller, super.key});
-
-  final MediaPlaybackController controller;
-
+class const PlaybackSpeedChip({
+  required final MediaPlaybackController controller,
+  super.key,
+}) extends StatefulWidget {
   @override
   State<PlaybackSpeedChip> createState() => _PlaybackSpeedChipState();
 }
 
-class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
+class _PlaybackSpeedChipState() extends State<PlaybackSpeedChip> {
   StreamSubscription<PlaybackState>? _subscription;
   double _rate = 1.0;
 
@@ -146,11 +145,8 @@ class _PlaybackSpeedChipState extends State<PlaybackSpeedChip> {
 ///
 /// 单独存在是为了让手势回调可以被单元测试直接驱动，不必渲染
 /// `Video`（真 `VideoController` 在有 libmpv 的环境会走原生 ffi）。
-class BoostRateController extends ChangeNotifier {
-  BoostRateController(this._controller);
-
-  final MediaPlaybackController _controller;
-
+class BoostRateController(final MediaPlaybackController _controller)
+    extends ChangeNotifier {
   bool _boosted = false;
   double? _rateBeforeBoost;
 

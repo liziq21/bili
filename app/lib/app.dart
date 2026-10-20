@@ -98,16 +98,13 @@ class const App({super.key}) extends StatelessWidget {
 /// exists: it must not rely on Material widgets (SnackBar, IconButton themes,
 /// etc.). Text is selectable and a plain button copies the full error to the
 /// clipboard so failures can be reported without screenshots (LIZ-50).
-class AppFailureView extends StatefulWidget {
-  const AppFailureView({super.key, required this.error});
-
-  final Object error;
-
+class const AppFailureView({super.key, required final Object error})
+    extends StatefulWidget {
   @override
   State<AppFailureView> createState() => _AppFailureViewState();
 }
 
-class _AppFailureViewState extends State<AppFailureView> {
+class _AppFailureViewState() extends State<AppFailureView> {
   bool _copied = false;
 
   Future<void> _copy() async {

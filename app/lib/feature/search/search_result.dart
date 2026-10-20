@@ -55,9 +55,7 @@ class const SearchResult<T>({
 }
 
 /// 首页搜索失败视图：图标 + 提示文案 + 明确重试按钮 + 触觉反馈 + 屏幕阅读器语义
-class _SearchErrorView<T> extends StatelessWidget {
-  const _SearchErrorView({super.key});
-
+class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -95,9 +93,7 @@ class _SearchErrorView<T> extends StatelessWidget {
 }
 
 /// 翻页加载失败视图：单行可点击重试区域 + 触觉反馈 + 屏幕阅读器语义
-class _NewPageErrorIndicator<T> extends StatelessWidget {
-  const _NewPageErrorIndicator({super.key});
-
+class const _NewPageErrorIndicator<T>({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -146,9 +142,7 @@ class _NewPageErrorIndicator<T> extends StatelessWidget {
 }
 
 /// 空搜索结果视图：图标 + 文字 + 屏幕阅读器整体语义
-class _EmptySearchIndicator extends StatelessWidget {
-  const _EmptySearchIndicator();
-
+class const _EmptySearchIndicator() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);

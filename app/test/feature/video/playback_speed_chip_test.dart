@@ -14,7 +14,7 @@ import 'package:shared_preferences_platform_interface/in_memory_shared_preferenc
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 /// 假播放器：只实现倍速路径需要的方法。
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   final _rate = StreamController<double>.broadcast();
   final _playlist = StreamController<Playlist>.broadcast();
   final List<double> rateCalls = [];

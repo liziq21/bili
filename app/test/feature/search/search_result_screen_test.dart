@@ -7,12 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
 
-class FakeVideoSearchRepository
+class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
     implements SearchContentsRepository<VideoModel> {
-  const FakeVideoSearchRepository({this.items = const []});
-
-  final List<VideoModel> items;
-
   @override
   List<FilterGroup> get filters => const [];
 
@@ -25,7 +21,7 @@ class FakeVideoSearchRepository
   }
 }
 
-class TrackingFailingVideoSearchRepository
+class TrackingFailingVideoSearchRepository()
     implements SearchContentsRepository<VideoModel> {
   int searchCallCount = 0;
 
@@ -42,10 +38,8 @@ class TrackingFailingVideoSearchRepository
   }
 }
 
-class FakeCreatorProfileSearchRepository
+class const FakeCreatorProfileSearchRepository()
     implements SearchContentsRepository<CreatorProfile> {
-  const FakeCreatorProfileSearchRepository();
-
   @override
   List<FilterGroup> get filters => const [];
 

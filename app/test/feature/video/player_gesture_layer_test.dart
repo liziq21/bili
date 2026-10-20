@@ -12,7 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 
 /// 假播放器：只实现手势层路径需要的方法。
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   final _playlist = StreamController<Playlist>.broadcast();
   final _position = StreamController<Duration>.broadcast();
   final _duration = StreamController<Duration>.broadcast();

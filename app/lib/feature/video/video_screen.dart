@@ -20,16 +20,16 @@ import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
 import 'player/media_playback_controller.dart';
 
-class VideoScreen extends StatefulWidget {
-  const VideoScreen({super.key, this.videoId = 'demo_video', this.onBackClick});
-  final String videoId;
-  final VoidCallback? onBackClick;
-
+class const VideoScreen({
+  super.key,
+  final String videoId = 'demo_video',
+  final VoidCallback? onBackClick,
+}) extends StatefulWidget {
   @override
   State<VideoScreen> createState() => VideoScreenState();
 }
 
-class VideoScreenState extends State<VideoScreen> {
+class VideoScreenState() extends State<VideoScreen> {
   MediaPlaybackController? _playbackController;
   MediaHistoryDao? _mediaHistoryDao;
   String? _sourceId;
@@ -40,9 +40,7 @@ class VideoScreenState extends State<VideoScreen> {
   /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
   /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
   MediaPlaybackController _ensurePlaybackController() {
-    if (_playbackController == null) {
-      _playbackController = MediaPlaybackController();
-    }
+    _playbackController ??= MediaPlaybackController();
     return _playbackController!;
   }
 
@@ -200,7 +198,7 @@ class const _VideoContent({
 ///
 /// 全屏状态放在页面而非播放器组件里：铺满要求父级把播放器放进 [Expanded]，
 /// 而横屏与系统 UI 切换也是页面级副作用，两者都越不出页面这一层。
-class _VideoContentState extends State<_VideoContent> {
+class _VideoContentState() extends State<_VideoContent> {
   bool _fullscreen = false;
 
   /// 进入 / 退出全屏：横屏 + 沉浸系统 UI，退出恢复竖屏与边缘到边缘。

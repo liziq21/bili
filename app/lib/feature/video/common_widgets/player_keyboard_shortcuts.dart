@@ -37,7 +37,7 @@ class const PlayerKeyboardShortcuts({
       _PlayerKeyboardShortcutsState();
 }
 
-class _PlayerKeyboardShortcutsState extends State<PlayerKeyboardShortcuts> {
+class _PlayerKeyboardShortcutsState() extends State<PlayerKeyboardShortcuts> {
   /// 静音前的音量，供再次按 M 时恢复。
   ///
   /// 静音不是把音量记成 0 就完事：那样第二次按 M 只能回到 0，用户得重新调。
