@@ -17,7 +17,19 @@ abstract final class Routes() {
   static const library = '/$libraryRelative';
   static const libraryRelative = 'library';
 
-  static const danmakuSettings = '/settings/danmaku';
+  static const settings = '/settings';
+  static const settingsPlayerRelative = 'player';
+  static const settingsPlayer = '$settings/$settingsPlayerRelative';
+  static const settingsAppearanceRelative = 'appearance';
+  static const settingsAppearance = '$settings/$settingsAppearanceRelative';
+  static const settingsHistoryRelative = 'history';
+  static const settingsHistory = '$settings/$settingsHistoryRelative';
+  static const settingsLibraryRelative = 'library';
+  static const settingsLibrary = '$settings/$settingsLibraryRelative';
+  static const settingsAdvancedRelative = 'advanced';
+  static const settingsAdvanced = '$settings/$settingsAdvancedRelative';
+
+  static const danmakuSettings = '$settings/danmaku';
 
   static const space = '/$spaceRelative';
   static const spaceRelative = 'space';

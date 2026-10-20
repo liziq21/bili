@@ -17,7 +17,7 @@
   },
   "navSettings": "Settings",
   "@navSettings": {
-    "description": "Bottom navigation - Settings tab"
+    "description": "Home app bar - settings entry tooltip"
   },
   "navStore": "Repo",
   "@navStore": {
@@ -58,6 +58,22 @@
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Settings screen title"
+  },
+  "settingsPlayer": "Player",
+  "@settingsPlayer": {
+    "description": "Settings group and subpage title - player"
+  },
+  "settingsHistory": "History",
+  "@settingsHistory": {
+    "description": "Settings group and subpage title - watch history"
+  },
+  "settingsLibrary": "Library",
+  "@settingsLibrary": {
+    "description": "Settings group and subpage title - local library"
+  },
+  "settingsAdvanced": "Advanced",
+  "@settingsAdvanced": {
+    "description": "Settings group and subpage title - advanced options"
   },
   "settingsDownload": "Download",
   "@settingsDownload": {
@@ -4574,10 +4590,6 @@
   },
   "settings": "设置",
   "@settings": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "settingsWip": "设置开发中",
-  "@settingsWip": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
   "sourceNoRecommendations": "{p1} 暂无可用推荐",

@@ -169,5 +169,61 @@ void main() {
       expect(match.fullPath, Routes.search);
       expect(match.uri.queryParameters['keyword'], 'abc');
     });
+
+    group('Settings routes', () {
+      for (final (path, expectedPath) in [
+        (Routes.settings, '/settings'),
+        (Routes.settingsPlayer, '/settings/player'),
+        (Routes.settingsAppearance, '/settings/appearance'),
+        (Routes.settingsHistory, '/settings/history'),
+        (Routes.settingsLibrary, '/settings/library'),
+        (Routes.settingsAdvanced, '/settings/advanced'),
+        (Routes.danmakuSettings, '/settings/danmaku'),
+      ]) {
+        test('$expectedPath resolves outside every bottom bar branch', () {
+          // Given a public settings destination and the production routes.
+          expect(path, expectedPath);
+
+          // When a direct location is matched by the real router.
+          final match = router.configuration.findMatch(Uri.parse(path));
+          final entries = table.where((entry) => entry.fullPath == path);
+
+          // Then it resolves exactly once without belonging to a bottom branch.
+          expect(match.error, isNull);
+          expect(match.fullPath, expectedPath);
+          expect(match.uri.path, expectedPath);
+          expect(entries, hasLength(1));
+          expect(entries.single.branchIndex, isNull);
+        });
+      }
+
+      test('groups nest under settings while danmaku remains its sibling', () {
+        // Given the existing plain shell for pushed secondary pages.
+        final shell = router.configuration.routes
+            .whereType<ShellRoute>()
+            .single;
+
+        // When its settings index and danmaku routes are located.
+        final settings = shell.routes.whereType<GoRoute>().singleWhere(
+          (route) => route.path == Routes.settings,
+        );
+        final danmaku = shell.routes.whereType<GoRoute>().where(
+          (route) => route.path == Routes.danmakuSettings,
+        );
+
+        // Then all five children are relative and danmaku stays a sibling.
+        expect(
+          settings.routes.whereType<GoRoute>().map((route) => route.path),
+          unorderedEquals([
+            'player',
+            'appearance',
+            'history',
+            'library',
+            'advanced',
+          ]),
+        );
+        expect(danmaku, hasLength(1));
+      });
+    });
   });
 }
