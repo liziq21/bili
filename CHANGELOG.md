@@ -283,3 +283,4 @@ so hand edits do not survive; change the generator instead.
 - abstract FeedRemoteDataSource and dynamic MediaSource feeds (#52)
 - Update local workspace dependencies to relative paths (#53)
 - Complete issue triage for LIZ-31, LIZ-32, LIZ-33 (#386)
+- [LIZ-73] 本地播放列表数据层：CRUD、排序与搜索 (#391)
