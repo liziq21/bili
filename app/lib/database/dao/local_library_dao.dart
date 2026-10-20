@@ -137,15 +137,32 @@ class LocalLibraryDao(super.db)
     )..where((playlist) => playlist.internalId.equals(playlistId))).go();
   }
 
+  Future<void> renamePlaylist(int playlistId, String name) async {
+    _requireNonBlank(name, 'name');
+    await _requirePlaylist(playlistId);
+    await (update(
+      localPlaylist,
+    )..where((playlist) => playlist.internalId.equals(playlistId))).write(
+      LocalPlaylistCompanion(
+        name: Value(name),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<List<LocalPlaylistEntity>> getPlaylists() => _playlists().get();
 
   Stream<List<LocalPlaylistEntity>> watchPlaylists() => _playlists().watch();
 
-  Future<List<LocalPlaylistItemEntity>> getPlaylistItems(int playlistId) =>
-      _playlistItems(playlistId).get();
+  Future<List<LocalPlaylistItemEntity>> getPlaylistItems(
+    int playlistId, {
+    String query = '',
+  }) => _playlistItems(playlistId, query: query).get();
 
-  Stream<List<LocalPlaylistItemEntity>> watchPlaylistItems(int playlistId) =>
-      _playlistItems(playlistId).watch();
+  Stream<List<LocalPlaylistItemEntity>> watchPlaylistItems(
+    int playlistId, {
+    String query = '',
+  }) => _playlistItems(playlistId, query: query).watch();
 
   Future<void> addPlaylistItem({
     required int playlistId,
@@ -159,7 +176,14 @@ class LocalLibraryDao(super.db)
     await transaction(() async {
       final playlist = await _requirePlaylist(playlistId);
       if (items.isEmpty) return;
-      var nextPosition = (await getPlaylistItems(playlistId)).length;
+      final existingItems = await getPlaylistItems(playlistId);
+      var nextPosition = existingItems.isEmpty
+          ? 0
+          : existingItems
+                    .map((item) => item.position)
+                    .reduce((left, right) => left > right ? left : right) +
+                1;
+      final insertions = <LocalPlaylistItemCompanion>[];
 
       for (final item in items) {
         final sourceId = _requiredCompanionValue(item.sourceId, 'sourceId');
@@ -177,7 +201,7 @@ class LocalLibraryDao(super.db)
           );
         }
 
-        await into(localPlaylistItem).insert(
+        insertions.add(
           item.copyWith(
             internalId: const Value.absent(),
             playlistId: Value(playlistId),
@@ -185,6 +209,9 @@ class LocalLibraryDao(super.db)
           ),
         );
       }
+      await batch((batch) {
+        batch.insertAll(localPlaylistItem, insertions);
+      });
       await _touchPlaylist(playlistId);
     });
   }
@@ -258,13 +285,30 @@ class LocalLibraryDao(super.db)
         (playlist) => OrderingTerm.desc(playlist.internalId),
       ]);
 
-  Selectable<LocalPlaylistItemEntity> _playlistItems(int playlistId) =>
-      (select(localPlaylistItem)
-        ..where((item) => item.playlistId.equals(playlistId))
-        ..orderBy([
-          (item) => OrderingTerm.asc(item.position),
-          (item) => OrderingTerm.asc(item.internalId),
-        ]));
+  Selectable<LocalPlaylistItemEntity> _playlistItems(
+    int playlistId, {
+    String query = '',
+  }) {
+    final normalizedQuery = query.trim();
+    return select(localPlaylistItem)
+      ..where((item) {
+        final playlistMatch = item.playlistId.equals(playlistId);
+        if (normalizedQuery.isEmpty) return playlistMatch;
+
+        final escapedQuery = _escapeLikePattern(normalizedQuery);
+        return playlistMatch &
+            item.title.like('%$escapedQuery%', escapeChar: '\\');
+      })
+      ..orderBy([
+        (item) => OrderingTerm.asc(item.position),
+        (item) => OrderingTerm.asc(item.internalId),
+      ]);
+  }
+
+  String _escapeLikePattern(String value) => value
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_');
 
   Future<LocalPlaylistEntity> _requirePlaylist(int playlistId) async {
     final playlist = await (select(
