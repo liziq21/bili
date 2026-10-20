@@ -30,7 +30,7 @@ import 'package:data/src/remote_data_source.dart';
 /// A fake AppBloc that doesn't use emit.forEach on a stream.
 /// The real AppBloc uses emit.forEach in _onStarted which creates a subscription
 /// that the test framework can't clean up properly during teardown.
-/// 
+///
 /// This fake uses a repository with Stream.value that emits once and completes
 /// synchronously, so emit.forEach completes immediately and no subscription
 /// remains active during test teardown.
@@ -46,44 +46,49 @@ class FakeAppBloc extends AppBloc {
 
 class _FakeUserDataRepository implements UserDataRepository {
   @override
-  Stream<UserData> get data => Stream.value(const UserData(sourceId: 'bilibili'));
+  Stream<UserData> get data =>
+      Stream.value(const UserData(sourceId: 'bilibili'));
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) async => const Result.ok(null);
+  Future<Result<void>> setSourceId(String sourceId) async =>
+      const Result.ok(null);
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async => const Result.ok(null);
+  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async =>
+      const Result.ok(null);
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async => const Result.ok(null);
+  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async =>
+      const Result.ok(null);
 }
 
 /// FakeUserDataRepository is kept for the second test if needed.
 /// The smoke test uses FakeAppBloc with _FakeUserDataRepository.
 class FakeUserDataRepository implements UserDataRepository {
-  FakeUserDataRepository() : _currentData = const UserData(sourceId: 'bilibili');
+  FakeUserDataRepository()
+    : _currentData = const UserData(sourceId: 'bilibili');
 
   UserData _currentData;
 
   @override
   Stream<UserData> get data => Stream.value(_currentData);
-  
+
   @override
   Future<Result<void>> setSourceId(String sourceId) async {
     _currentData = _currentData.copyWith(sourceId: sourceId);
     return const Result.ok(null);
   }
-  
+
   @override
   Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
     return const Result.ok(null);
   }
-  
+
   @override
   Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
     return const Result.ok(null);
   }
-  
+
   Future<void> dispose() async {}
 }
 
@@ -95,7 +100,7 @@ class FakeRecentSearchQueryRepository implements RecentSearchQueryRepository {
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       const Stream.empty();
-  
+
   Future<void> insertOrReplaceRecentSearch(String searchQuery) async {}
   Future<void> clearRecentSearchQueries() async {}
 }
@@ -104,13 +109,11 @@ class _FakeVideoFeed extends VideoFeedRemoteDataSource {
   String get id => 'fake_video_feed';
   String get title => 'Fake Video Feed';
   String get sourceId => 'bilibili';
-  
+
   Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(Page<VideoModel>(
-      number: pageKey ?? 1,
-      totalPages: 1,
-      data: const [],
-    ));
+    return Result.ok(
+      Page<VideoModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
+    );
   }
 }
 
@@ -118,13 +121,11 @@ class _FakeLiveFeed extends LiveRoomFeedRemoteDataSource {
   String get id => 'fake_live_feed';
   String get title => 'Fake Live Feed';
   String get sourceId => 'bilibili';
-  
+
   Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(Page<LiveRoomModel>(
-      number: pageKey ?? 1,
-      totalPages: 1,
-      data: const [],
-    ));
+    return Result.ok(
+      Page<LiveRoomModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
+    );
   }
 }
 
@@ -247,11 +248,7 @@ void main() {
       code: 'platform',
       message: 'java.lang.NoSuchMethodError: boom',
     );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: AppFailureView(error: error),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: AppFailureView(error: error)));
     final fullText = 'Failed to load the app: $error';
     expect(
       find.byWidgetPredicate((w) => w is SelectableText && w.data == fullText),
