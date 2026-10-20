@@ -1002,9 +1002,10 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();
+              final source = RepositoryProvider.of<MediaSource?>(context);
               context.navigateToVideo(
                 video.id,
-                source: context.read<MediaSource?>()?.id,
+                source: source?.id,
               );
             },
             child: Padding(
