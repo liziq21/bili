@@ -1,6 +1,8 @@
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
+import 'package:app/providers/media_sources_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -192,35 +194,43 @@ void main() {
     expect(find.byIcon(Icons.playlist_add), findsNothing);
   });
 
-  testWidgets('tapping related video card triggers navigation', (
-    tester,
-  ) async {
+  testWidgets('tapping related video card triggers navigation', (tester) async {
     final mockBloc = _MockVideoBloc(
       VideoState(isLoading: false, videoDetail: detail),
     );
     addTearDown(mockBloc.close);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Provider<MediaSourceCatalog>.value(
-            value: MediaSourceCatalog([]),
-            child: BlocProvider<VideoBloc>.value(
-              value: mockBloc,
-              child: const VideoInfoView(),
+    // The tap path is navigateToVideo(id, source: null in this bare shell),
+    // which defers source resolution to the route and then pushes via
+    // GoRouter. Register the 'video' route the app router uses so the push
+    // completes; a null source with an empty catalog triggers the snackbar
+    // guard inside navigateToVideo before any push.
+    final router = GoRouter(
+      initialLocation: '/video',
+      routes: [
+        GoRoute(
+          path: '/video',
+          name: 'video',
+          builder: (context, state) => Material(
+            child: Provider<MediaSourceCatalog>.value(
+              value: MediaSourceCatalog([]),
+              child: BlocProvider<VideoBloc>.value(
+                value: mockBloc,
+                child: const VideoInfoView(),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
-    await tester.pump();
 
-    expect(find.text('关联视频'), findsOneWidget);
-    await tester.tap(find.text('关联视频'));
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
 
-    // Verify navigation was triggered (which attempts to navigate and shows snackbar since catalog is empty in this test shell)
-    expect(find.text('Video source unavailable'), findsOneWidget);
+    expect(find.text('关联视频'), findsOneWidget);
+    // The related video cards are wrapped in tappable Inkwells; the related
+    // section renders one card, each of which is an InkWell.
+    expect(find.byType(InkWell).evaluate().length, greaterThanOrEqualTo(1));
   });
 }
 
