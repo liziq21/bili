@@ -53,6 +53,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): migrate hardcoded Chinese copy to ARB getters in video domain (LIZ-51) (#340)
 - feat(video): migrate hardcoded copy to ARB getters in video player domain (LIZ-51) (#341)
 - feat: implement creator profile space header (#382)
+- feat(settings): add grouped settings navigation skeleton (#384)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -223,6 +224,7 @@ so hand edits do not survive; change the generator instead.
 - docs: add Linear-synced Issue triage for Jules (#300)
 - docs(LIZ-25): 从合并 PR 自动生成 CHANGELOG (#309)
 - docs(triage): issue-triage-prompt v2 — ready-for-jules 档与授权收敛 (#322)
+- docs(palette): add localization hygiene candidate investigation [skip ci] (#385)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
@@ -278,3 +280,4 @@ so hand edits do not survive; change the generator instead.
 - Redesign home feed screen based on Stitch UI design specs (#43)
 - abstract FeedRemoteDataSource and dynamic MediaSource feeds (#52)
 - Update local workspace dependencies to relative paths (#53)
+- Complete issue triage for LIZ-31, LIZ-32, LIZ-33 (#386)
