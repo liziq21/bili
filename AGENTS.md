@@ -33,6 +33,16 @@ Before writing or modifying code in this repository, read the specification file
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
 
+### Linear Specifications
+
+Linear is the authoritative project tracking, scheduling, and progress synchronization system. Its specifications live in:
+
+- [`docs/issue-triage-validation.md`](docs/issue-triage-validation.md) — real trial record of Linear MCP reviewing GitHub Issue sync entries; documents the sync boundary, comment threading, and evidence standards.
+- [`.jules/issue-triage-prompt.md`](.jules/issue-triage-prompt.md) — the Jules agent prompt for Linear issue triage (entry review). Defines configuration, scope, identity verification, review budget, result taxonomy, write protocol, and handoff format. Versioned (current v2).
+- [`CHANGELOG.md`](CHANGELOG.md) — generated changelog; bucketing uses `c:` label attached by Linear sync (see Release section).
+- Linear team: `LIZ`; project: `bili` / `P-LIZ-2`. Sync entry issues may not yet be added to the project — **do not only query project-scoped issues**.
+- GitHub mirror issues are an intentional sync mechanism; do not propose disabling it. Close the mirror issue in the same turn after verifying the work is landed (PATCH `state=closed` + closing rationale comment).
+
 **When to read each file:**
 
 | You are about to… | Read first |
@@ -217,3 +227,17 @@ Flutter's own guidance for this layer is `docs/rules/rules.md` (Testing) in the 
   Flutter/widget/golden coverage. The pure-Dart fallback is sufficient
   evidence for the local checks it actually ran; no special runner-failure
   report is needed for the known Termux limitation unless requested.
+
+---
+
+## Appendix: Linear Specifications (require Linear MCP access)
+
+These three specifications live in Linear (team `LIZ`, project `bili` / `P-LIZ-2`) and are read via Linear MCP. They are **not** in the git repository.
+
+| 规范 | 作用 | 读取方式 |
+|---|---|---|
+| **《AI 工单接取规范》** | 定义 Backlog → Todo 移交条件、实现接取使用 Draft PR + `[AI CLAIM]` 标记 | Linear MCP `get_document` / `list_documents` |
+| **《Backlog HITL/AFK 分类》** | Backlog 项按「有没有岔路口需人拍板」分 HITL/AFK，与 P0–P3 正交 | Linear MCP `get_document` / `list_documents` |
+| **《项目标签规范》** | 项目标签体系、单选/多选分组、标签命名约定 | Linear MCP `get_document` / `list_documents` |
+
+**读取提示**：这些文档在 Linear 的 project resources 或 team 文档区。通过 Linear MCP 搜索标题精确匹配；若同步到 GitHub 会有对应 issue 附件，但以 Linear 侧最新版为准。`.jules/issue-triage-prompt.md` §1 第 5 条要求 triage agent 开工前读取这三份最新版。
