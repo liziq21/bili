@@ -123,6 +123,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appearanceDynamicColorSubtitle => 'Use colors from your wallpaper';
 
   @override
+  String get appearanceTheme => 'Theme';
+
+  @override
+  String get appearanceNightMode => 'Night Mode';
+
+  @override
+  String get appearanceEyeComfort => 'Eye Comfort';
+
+  @override
   String get appearanceHistoryView => 'History View';
 
   @override

@@ -11,7 +11,7 @@ import '../player/media_playback_controller.dart';
 const List<int> kSleepTimerMinutes = [15, 30, 45, 60];
 
 /// 计时归零时的行为。
-enum SleepTimerAction {
+enum SleepTimerAction() {
   /// 归零即暂停当前播放。
   pauseNow,
 
@@ -26,12 +26,11 @@ enum SleepTimerAction {
 ///
 /// 单独存在是为了让倒计时逻辑可以被单元测试直接驱动，不必渲染 UI。
 /// 计时器在 [MediaPlaybackController.pause] 被调用后自动取消。
-class SleepTimerController extends ChangeNotifier {
-  SleepTimerController(this._controller) {
+class SleepTimerController(final MediaPlaybackController _controller)
+    extends ChangeNotifier {
+  this {
     _subscription = _controller.states.listen(_onState);
   }
-
-  final MediaPlaybackController _controller;
 
   Timer? _timer;
   StreamSubscription<PlaybackState>? _subscription;
@@ -146,7 +145,7 @@ class const SleepTimerChip({
   State<SleepTimerChip> createState() => _SleepTimerChipState();
 }
 
-class _SleepTimerChipState extends State<SleepTimerChip> {
+class _SleepTimerChipState() extends State<SleepTimerChip> {
   late final SleepTimerController _sleep;
 
   @override

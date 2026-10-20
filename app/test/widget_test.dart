@@ -19,13 +19,12 @@ import 'package:app/routing/router.dart';
 import 'package:app/routing/routes.dart';
 import 'package:data/data.dart' hide Page;
 import 'package:data/src/model/paged_result.dart' show Page;
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
-import 'package:data/src/remote_data_source.dart';
 
 /// A fake AppBloc that doesn't use emit.forEach on a stream.
 /// The real AppBloc uses emit.forEach in _onStarted which creates a subscription
@@ -34,8 +33,8 @@ import 'package:data/src/remote_data_source.dart';
 /// This fake uses a repository with Stream.value that emits once and completes
 /// synchronously, so emit.forEach completes immediately and no subscription
 /// remains active during test teardown.
-class FakeAppBloc extends AppBloc {
-  FakeAppBloc() : super(userDataRepository: _FakeUserDataRepository());
+class FakeAppBloc() extends AppBloc {
+  this : super(userDataRepository: _FakeUserDataRepository());
 
   @override
   Future<void> close() {
@@ -44,7 +43,7 @@ class FakeAppBloc extends AppBloc {
   }
 }
 
-class _FakeUserDataRepository implements UserDataRepository {
+class _FakeUserDataRepository() implements UserDataRepository {
   @override
   Stream<UserData> get data =>
       Stream.value(const UserData(sourceId: 'bilibili'));
@@ -64,11 +63,8 @@ class _FakeUserDataRepository implements UserDataRepository {
 
 /// FakeUserDataRepository is kept for the second test if needed.
 /// The smoke test uses FakeAppBloc with _FakeUserDataRepository.
-class FakeUserDataRepository implements UserDataRepository {
-  FakeUserDataRepository()
-    : _currentData = const UserData(sourceId: 'bilibili');
-
-  UserData _currentData;
+class FakeUserDataRepository() implements UserDataRepository {
+  UserData _currentData = const UserData(sourceId: 'bilibili');
 
   @override
   Stream<UserData> get data => Stream.value(_currentData);
@@ -88,28 +84,35 @@ class FakeUserDataRepository implements UserDataRepository {
   Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
     return const Result.ok(null);
   }
-
-  Future<void> dispose() async {}
 }
 
 /// 首页搜索入口（`HomeRouteData` 里的 `_withSearchBloc`）会 `read` 这个仓库来
 /// 构造 `SearchBloc`。生产环境由 `main.dart` 的 `repoProviders` 提供，本测试
 /// 之前没提供，于是 `SearchBloc` 一旦真的被创建就会抛
 /// `ProviderNotFoundException`。
-class FakeRecentSearchQueryRepository implements RecentSearchQueryRepository {
+class FakeRecentSearchQueryRepository() implements RecentSearchQueryRepository {
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       const Stream.empty();
 
+  @override
   Future<void> insertOrReplaceRecentSearch(String searchQuery) async {}
+
+  @override
   Future<void> clearRecentSearchQueries() async {}
 }
 
-class _FakeVideoFeed extends VideoFeedRemoteDataSource {
+class _FakeVideoFeed() extends VideoFeedRemoteDataSource {
+  @override
   String get id => 'fake_video_feed';
+
+  @override
   String get title => 'Fake Video Feed';
+
+  @override
   String get sourceId => 'bilibili';
 
+  @override
   Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) async {
     return Result.ok(
       Page<VideoModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
@@ -117,11 +120,17 @@ class _FakeVideoFeed extends VideoFeedRemoteDataSource {
   }
 }
 
-class _FakeLiveFeed extends LiveRoomFeedRemoteDataSource {
+class _FakeLiveFeed() extends LiveRoomFeedRemoteDataSource {
+  @override
   String get id => 'fake_live_feed';
+
+  @override
   String get title => 'Fake Live Feed';
+
+  @override
   String get sourceId => 'bilibili';
 
+  @override
   Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) async {
     return Result.ok(
       Page<LiveRoomModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
@@ -129,32 +138,49 @@ class _FakeLiveFeed extends LiveRoomFeedRemoteDataSource {
   }
 }
 
-class FakeMediaSource implements MediaSource {
+class FakeMediaSource(@override final String id, @override final String name)
+    implements MediaSource {
   @override
-  final String id;
-  @override
-  final String name;
-
-  FakeMediaSource(@override this.id, @override this.name);
-
   final List<VideoFeedRemoteDataSource> videoFeedDataSources = [
     _FakeVideoFeed(),
   ];
+  @override
   final List<LiveRoomFeedRemoteDataSource> liveRoomFeedDataSources = [
     _FakeLiveFeed(),
   ];
+  @override
   final LiveRoomSearchRemoteDataSource? liveRoomSearchDataSource = null;
+
+  @override
   MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+
+  @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
+
+  @override
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
       null;
+
+  @override
   VideoSearchRemoteDataSource? get videoSearchDataSource => null;
+
+  @override
   SearchSuggestRemoteDataSource? get searchSuggestDataSource => null;
+
+  @override
   VideoDetailRemoteDataSource? get videoDetailDataSource => null;
+
+  @override
   DanmakuRemoteDataSource? get danmakuDataSource => null;
+
+  @override
   VideoCommentRemoteDataSource? get videoCommentDataSource => null;
+
+  @override
   VideoCommentRepliesRemoteDataSource? get videoCommentRepliesDataSource =>
       null;
+
+  @override
   Future<void> close() async {}
 }
 
@@ -221,6 +247,7 @@ void main() {
         ]) {
           await tester.tap(find.widgetWithText(ListTile, label));
           await tester.pumpAndSettle();
+          expect(router.state.uri.path, path);
           expect(find.byType(screenType), findsOneWidget);
           expect(find.widgetWithText(AppBar, label), findsOneWidget);
           expect(find.byType(NavigationBar), findsNothing);

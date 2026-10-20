@@ -13,17 +13,15 @@ class MockNetworkVideoDataSource({
   required final List<dynamic> relatedVideosJson,
   required final Map<String, dynamic> replyListJson,
   required final Map<String, dynamic> replyReplyListJson,
-  this.playerInfoJson,
-  this.playerInfoError,
+
+  /// 章节来源（player/v2）的响应；为 null 时按原始响应构造。
+  var Map<String, dynamic>? playerInfoJson,
+
+  /// 让 player/v2 抛错，用来验证降级路径。
+  var Object? playerInfoError,
   final NetworkBiliDanmakuDocument? danmakuDocument,
 }) implements NetworkVideoDataSource {
   final replyReplyCalls = <(int, int, int, int)>[];
-
-  /// 章节来源（player/v2）的响应；为 null 时按原始响应构造。
-  Map<String, dynamic>? playerInfoJson;
-
-  /// 让 player/v2 抛错，用来验证降级路径。
-  Object? playerInfoError;
 
   final playerInfoCalls = <(String, int)>[];
 

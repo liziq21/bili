@@ -11,7 +11,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:app/feature/video/common_widgets/player_keyboard_shortcuts.dart';
 
 /// 假播放器：只实现快捷键路径需要的方法。
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   final _position = StreamController<Duration>.broadcast(sync: true);
   final _duration = StreamController<Duration>.broadcast(sync: true);
   final _volume = StreamController<double>.broadcast(sync: true);
@@ -104,7 +104,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   /// 有序浮点比较：media_kit 量程换算带 1e-14 级误差，逐项 closeTo。
-  void _expectVolumes(List<double> actual, List<double> expected) {
+  void expectVolumes(List<double> actual, List<double> expected) {
     expect(actual, hasLength(expected.length));
     for (var i = 0; i < expected.length; i++) {
       expect(actual[i], closeTo(expected[i], 0.01), reason: 'index $i');
@@ -208,7 +208,7 @@ void main() {
     await press(tester, LogicalKeyboardKey.arrowDown);
     await press(tester, LogicalKeyboardKey.arrowUp);
 
-    _expectVolumes(fake.volumeCalls, [95.0, 90.0, 95.0]);
+    expectVolumes(fake.volumeCalls, [95.0, 90.0, 95.0]);
   });
 
   testWidgets('volume never goes below zero', (tester) async {
@@ -219,7 +219,7 @@ void main() {
     }
 
     expect(fake.volumeCalls.every((v) => v >= 0), isTrue);
-    _expectVolumes([fake.volumeCalls.last], [85.0]);
+    expectVolumes([fake.volumeCalls.last], [85.0]);
   });
 
   testWidgets('m mutes and restores the previous volume', (tester) async {
@@ -230,7 +230,7 @@ void main() {
     await press(tester, LogicalKeyboardKey.keyM);
 
     // 静音时置 0，再按恢复静音前的 0.95，而不是回到默认 1.0。
-    _expectVolumes(fake.volumeCalls, [95.0, 0.0, 95.0]);
+    expectVolumes(fake.volumeCalls, [95.0, 0.0, 95.0]);
   });
 
   testWidgets('f toggles fullscreen', (tester) async {

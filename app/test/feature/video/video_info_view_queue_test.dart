@@ -18,9 +18,9 @@ import 'package:provider/provider.dart';
 /// videoId 解析为 [MediaStream] 再追加到 [MediaPlaybackController]。
 /// 此处覆盖解析成功 / 解析失败 / 无 QueueAddController 三条分支。
 /// 供本测试使用的假 bloc：构造即给出含 relatedVideos 的详情状态。
-class _MockVideoBloc extends Cubit<VideoState> implements VideoBloc {
-  _MockVideoBloc(super.initialState);
-
+class _MockVideoBloc(super.initialState)
+    extends Cubit<VideoState>
+    implements VideoBloc {
   @override
   void add(VideoEvent event) {}
 
@@ -234,11 +234,8 @@ void main() {
   });
 }
 
-class _QueueTestRepository implements VideoDetailRepository {
-  _QueueTestRepository({required this.streamResult});
-
-  final Result<MediaStream> streamResult;
-
+class _QueueTestRepository({required final Result<MediaStream> streamResult})
+    implements VideoDetailRepository {
   @override
   Future<Result<MediaStream>> getMediaStream(
     String id, {
@@ -268,7 +265,7 @@ class _QueueTestRepository implements VideoDetailRepository {
 }
 
 /// 记录追加动作，不触碰原生播放库。
-class _RecordingPlaybackController implements MediaPlaybackController {
+class _RecordingPlaybackController() implements MediaPlaybackController {
   final List<MediaStream> added = [];
 
   @override

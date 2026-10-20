@@ -12,15 +12,12 @@ import '../../../data/repository/local_library_repository.dart';
 part 'video_event.dart';
 part 'video_state.dart';
 
-class VideoBloc extends Bloc<VideoEvent, VideoState> {
-  VideoBloc({
-    required VideoDetailRepository repository,
-    LocalLibraryRepository? localLibraryRepository,
-    String? sourceId,
-  }) : _repository = repository,
-       _localLibraryRepository = localLibraryRepository,
-       _sourceId = sourceId,
-       super(const VideoState()) {
+class VideoBloc({
+  required final VideoDetailRepository _repository,
+  final LocalLibraryRepository? _localLibraryRepository,
+  final String? _sourceId,
+}) extends Bloc<VideoEvent, VideoState> {
+  this : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
     on<LoadMediaStream>(_onLoadMediaStream);
     on<ToggleVideoLike>(_onToggleVideoLike);
@@ -30,10 +27,6 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
   }
 
   final _log = Logger('VideoBloc');
-  final VideoDetailRepository _repository;
-  final LocalLibraryRepository? _localLibraryRepository;
-  final String? _sourceId;
-
   Future<void> _onLoadVideoDetail(
     LoadVideoDetail event,
     Emitter<VideoState> emit,

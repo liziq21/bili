@@ -143,6 +143,18 @@
   "@appearanceDynamicColorSubtitle": {
     "description": "Subtitle for dynamic color"
   },
+  "appearanceTheme": "Theme",
+  "@appearanceTheme": {
+    "description": "Appearance settings placeholder entry for theme"
+  },
+  "appearanceNightMode": "Night Mode",
+  "@appearanceNightMode": {
+    "description": "Appearance settings placeholder entry for night mode"
+  },
+  "appearanceEyeComfort": "Eye Comfort",
+  "@appearanceEyeComfort": {
+    "description": "Appearance settings placeholder entry for eye comfort"
+  },
   "appearanceHistoryView": "History View",
   "@appearanceHistoryView": {
     "description": "Layout style for history"

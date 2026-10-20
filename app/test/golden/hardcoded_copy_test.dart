@@ -102,9 +102,7 @@ void main() {
 /// 收集所有非注释字符串字面量与插值片段中的码位。
 ///
 /// ignore: use_declaring_parameters
-class _RuneCollector extends RecursiveAstVisitor<dynamic> {
-  _RuneCollector(this._sink);
-
+class _RuneCollector(this._sink) extends RecursiveAstVisitor<dynamic> {
   final Set<int> _sink;
 
   @override
