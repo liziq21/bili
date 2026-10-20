@@ -191,6 +191,37 @@ void main() {
     expect(find.text('关联视频'), findsOneWidget);
     expect(find.byIcon(Icons.playlist_add), findsNothing);
   });
+
+  testWidgets('tapping related video card triggers navigation', (
+    tester,
+  ) async {
+    final mockBloc = _MockVideoBloc(
+      VideoState(isLoading: false, videoDetail: detail),
+    );
+    addTearDown(mockBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Provider<MediaSourceCatalog>.value(
+            value: MediaSourceCatalog([]),
+            child: BlocProvider<VideoBloc>.value(
+              value: mockBloc,
+              child: const VideoInfoView(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('关联视频'), findsOneWidget);
+    await tester.tap(find.text('关联视频'));
+    await tester.pumpAndSettle();
+
+    // Verify navigation was triggered (which attempts to navigate and shows snackbar since catalog is empty in this test shell)
+    expect(find.text('Video source unavailable'), findsOneWidget);
+  });
 }
 
 class _QueueTestRepository implements VideoDetailRepository {

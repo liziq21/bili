@@ -1000,7 +1000,13 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
               '${video.title}, ${video.creatorProfileName ?? ''} '
               '${_formatCount(video.viewCount ?? 0, l10n)}',
           child: InkWell(
-            onTap: null,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.navigateToVideo(
+                video.id,
+                source: context.read<MediaSource?>()?.id,
+              );
+            },
             child: Padding(
               padding: EdgeInsets.all($styles.insets.xxs),
               child: Row(
