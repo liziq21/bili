@@ -316,6 +316,24 @@ abstract class AppLocalizations {
   /// **'Use colors from your wallpaper'**
   String get appearanceDynamicColorSubtitle;
 
+  /// Appearance settings placeholder entry for theme
+  ///
+  /// In zh, this message translates to:
+  /// **'Theme'**
+  String get appearanceTheme;
+
+  /// Appearance settings placeholder entry for night mode
+  ///
+  /// In zh, this message translates to:
+  /// **'Night Mode'**
+  String get appearanceNightMode;
+
+  /// Appearance settings placeholder entry for eye comfort
+  ///
+  /// In zh, this message translates to:
+  /// **'Eye Comfort'**
+  String get appearanceEyeComfort;
+
   /// Layout style for history
   ///
   /// In zh, this message translates to:

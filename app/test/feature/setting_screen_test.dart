@@ -96,7 +96,6 @@ void main() {
   group('Settings subpages', () {
     for (final (screen, title) in const [
       (PlayerSettingsScreen(), 'Player'),
-      (AppearanceSettingsScreen(), 'Appearance'),
       (HistorySettingsScreen(), 'History'),
       (LibrarySettingsScreen(), 'Library'),
       (AdvancedSettingsScreen(), 'Advanced'),
@@ -128,5 +127,32 @@ void main() {
         }
       });
     }
+
+    testWidgets('appearance page shows the three placeholder entries', (
+      tester,
+    ) async {
+      // Given the localized appearance settings page.
+      try {
+        // When the page is rendered.
+        await tester.pumpWidget(_buildScreen(const AppearanceSettingsScreen()));
+        await tester.pumpAndSettle();
+
+        // Then the planned entry points are visible in order and remain inert.
+        final context = tester.element(find.byType(AppearanceSettingsScreen));
+        final l10n = AppLocalizations.of(context)!;
+        expect(
+          find.widgetWithText(AppBar, l10n.settingsAppearance),
+          findsOneWidget,
+        );
+        expect(find.byType(ListTile), findsNWidgets(3));
+        expect(find.text(l10n.appearanceTheme), findsOneWidget);
+        expect(find.text(l10n.appearanceNightMode), findsOneWidget);
+        expect(find.text(l10n.appearanceEyeComfort), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
   });
 }
