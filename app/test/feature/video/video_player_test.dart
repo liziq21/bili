@@ -250,6 +250,25 @@ void main() {
       expect(tester.getSize(find.byType(AspectRatio)), const Size(400, 225));
     });
 
+    testWidgets('embedded controls stay below the video area', (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+
+      final videoRect = tester.getRect(find.byType(AspectRatio));
+      final controlsRect = tester.getRect(find.byTooltip('Fullscreen'));
+      expect(controlsRect.top, greaterThanOrEqualTo(videoRect.bottom));
+    });
+
     testWidgets('hides the overlay controls until the surface is tapped', (
       tester,
     ) async {
