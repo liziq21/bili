@@ -133,9 +133,6 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     _ownsPlayback = true;
   }
 
-  /// [widget.controller] 非空时直接使用注入的会话，不建原生播放器。
-  MediaPlaybackController? get _externalController => widget.controller;
-
   /// 画面本体：按播放态选错误 / 加载 / 播放器表面。
   Widget _surface() =>
       BlocSelector<
@@ -147,16 +144,28 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             (stream: state.mediaStream, streamError: state.streamError),
         builder: (context, data) {
           if (data.streamError != null) {
-            return _ErrorView(message: data.streamError!);
+            final errorView = _ErrorView(message: data.streamError!);
+            return widget.fullscreen
+                ? errorView
+                : AspectRatio(
+                    aspectRatio: widget.aspectRatio,
+                    child: errorView,
+                  );
           }
 
           final stream = data.stream;
           if (stream == null) {
-            return const _LoadingView();
+            const loadingView = _LoadingView();
+            return widget.fullscreen
+                ? loadingView
+                : AspectRatio(
+                    aspectRatio: widget.aspectRatio,
+                    child: loadingView,
+                  );
           }
 
           _ensurePlaybackCreated();
-          return _VideoSurface(
+          final surface = _VideoSurface(
             controller: _playback!,
             stream: stream,
             fullscreen: widget.fullscreen,
@@ -166,24 +175,29 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             onTapSurface: _toggleControls,
             surfaceBuilder: widget.surfaceBuilder,
           );
+
+          if (widget.fullscreen) return surface;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AspectRatio(aspectRatio: widget.aspectRatio, child: surface),
+              _PlayerControlBar(
+                controller: _playback!,
+                stream: stream,
+                fullscreen: false,
+                onToggleFullscreen: widget.onToggleFullscreen,
+              ),
+              if (widget.controller != null)
+                _QueueControlBar(controller: widget.controller!),
+            ],
+          );
         },
       );
 
   @override
   Widget build(BuildContext context) {
-    // 全屏时画面铺满所在区域，队列条并入控制层，故不套 Column。
-    if (widget.fullscreen) return _surface();
-
-    final hasExternalController = widget.controller != null;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AspectRatio(aspectRatio: widget.aspectRatio, child: _surface()),
-        if (hasExternalController)
-          _QueueControlBar(controller: _externalController!),
-      ],
-    );
+    return _surface();
   }
 }
 
@@ -467,7 +481,6 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final state = _playbackState;
     final hasError = state != null && state.error != null;
     final videoId = context.select<VideoBloc, String?>(
@@ -494,38 +507,16 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
         ),
         if (videoId != null)
           DanmakuOverlay(controller: widget.controller, videoId: videoId),
-        if (widget.controlsVisible)
+        if (widget.fullscreen && widget.controlsVisible)
           Positioned(
             top: $styles.insets.xs,
             right: $styles.insets.xs,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SleepTimerChip(controller: widget.controller),
-                const Gap(6),
-                QualityPickerChip(
-                  controller: widget.controller,
-                  stream: widget.stream,
-                ),
-                const Gap(6),
-                PlaybackSpeedChip(controller: widget.controller),
-                const Gap(6),
-                _FullscreenButton(
-                  fullscreen: widget.fullscreen,
-                  onPressed: widget.onToggleFullscreen,
-                ),
-                if (widget.fullscreen && widget.onMinimize != null) ...[
-                  const Gap(6),
-                  _OverlayIconButton(
-                    icon: Icons.picture_in_picture_alt,
-                    tooltip: l10n?.minimize ?? 'Minimize',
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.onMinimize!();
-                    },
-                  ),
-                ],
-              ],
+            child: _PlayerControlBar(
+              controller: widget.controller,
+              stream: widget.stream,
+              fullscreen: true,
+              onToggleFullscreen: widget.onToggleFullscreen,
+              onMinimize: widget.onMinimize,
             ),
           ),
         ListenableBuilder(
@@ -543,6 +534,63 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
           ),
       ],
     );
+  }
+}
+
+/// 播放器操作栏。
+///
+/// 内嵌模式下放在视频画面下方，避免控制项遮挡视频；全屏模式下仍作为
+/// 可自动隐藏的浮层显示，因为全屏播放器没有可供控制栏占用的额外布局空间。
+class const _PlayerControlBar({
+  required final MediaPlaybackController controller,
+  required final MediaStream stream,
+  required final bool fullscreen,
+  required final VoidCallback? onToggleFullscreen,
+  final VoidCallback? onMinimize,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final items = <Widget>[
+      SleepTimerChip(controller: controller),
+      QualityPickerChip(controller: controller, stream: stream),
+      PlaybackSpeedChip(controller: controller),
+      _FullscreenButton(fullscreen: fullscreen, onPressed: onToggleFullscreen),
+      if (fullscreen && onMinimize != null)
+        _OverlayIconButton(
+          icon: Icons.picture_in_picture_alt,
+          tooltip: l10n?.minimize ?? 'Minimize',
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            onMinimize!();
+          },
+        ),
+    ];
+
+    if (fullscreen) {
+      return Row(mainAxisSize: MainAxisSize.min, children: _withGaps(items));
+    }
+
+    return Container(
+      color: $styles.colors.surface,
+      padding: EdgeInsets.symmetric(
+        horizontal: $styles.insets.sm,
+        vertical: $styles.insets.xs,
+      ),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Wrap(spacing: 6, runSpacing: 6, children: items),
+      ),
+    );
+  }
+
+  List<Widget> _withGaps(List<Widget> items) {
+    final result = <Widget>[];
+    for (final item in items) {
+      if (result.isNotEmpty) result.add(const Gap(6));
+      result.add(item);
+    }
+    return result;
   }
 }
 

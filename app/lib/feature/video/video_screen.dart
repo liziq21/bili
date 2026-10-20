@@ -21,8 +21,9 @@ import 'common_widgets/video_player.dart';
 import 'player/media_playback_controller.dart';
 
 class VideoScreen extends StatefulWidget {
-  const VideoScreen({super.key, this.videoId = 'demo_video'});
+  const VideoScreen({super.key, this.videoId = 'demo_video', this.onBackClick});
   final String videoId;
+  final VoidCallback? onBackClick;
 
   @override
   State<VideoScreen> createState() => VideoScreenState();
@@ -162,6 +163,7 @@ class VideoScreenState extends State<VideoScreen> {
           body: _VideoContent(
             videoId: widget.videoId,
             playbackController: controller,
+            onBackClick: widget.onBackClick,
           ),
         ),
       ),
@@ -188,6 +190,7 @@ class VideoScreenState extends State<VideoScreen> {
 class const _VideoContent({
   required final String videoId,
   required final MediaPlaybackController playbackController,
+  final VoidCallback? onBackClick,
 }) extends StatefulWidget {
   @override
   State<_VideoContent> createState() => _VideoContentState();
@@ -247,7 +250,7 @@ class _VideoContentState extends State<_VideoContent> {
     final bool useTwoColumnLayout =
         size.aspectRatio > twoColumnAspect || size.width >= 800;
 
-    // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayerPlaceholder.
+    // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayer.
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower
     // layout tree (DefaultTabController, TabBar, TabBarView, VideoCommentsView).
     // Saves ~2-4ms per frame emission during video detail state changes.
@@ -259,6 +262,15 @@ class _VideoContentState extends State<_VideoContent> {
     );
     final content = Column(
       children: [
+        if (!_fullscreen && widget.onBackClick != null)
+          AppBar(
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              onPressed: widget.onBackClick,
+              tooltip: l10n.back,
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
         // 全屏时播放器铺满整屏，信息区一并收起。
         if (_fullscreen) Expanded(child: player) else player,
         if (!_fullscreen)

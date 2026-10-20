@@ -55,7 +55,7 @@ class const VideoRouteData({
                   'Source does not support video details',
             );
           }
-          return VideoScreen(videoId: id);
+          return VideoScreen(videoId: id, onBackClick: () => context.pop());
         },
       ),
     );
