@@ -12,5 +12,6 @@ export 'src/model/sort_option.dart';
 export 'src/model/video_comment_model.dart';
 export 'src/model/video_detail_model.dart';
 export 'src/model/video_model.dart';
+export 'src/playlist/full_playlist_fetcher.dart';
 export 'src/remote_data_source.dart';
 export 'src/search_query.dart';
