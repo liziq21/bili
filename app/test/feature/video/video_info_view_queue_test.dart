@@ -192,9 +192,7 @@ void main() {
     expect(find.byIcon(Icons.playlist_add), findsNothing);
   });
 
-  testWidgets('tapping related video card triggers navigation', (
-    tester,
-  ) async {
+  testWidgets('tapping related video card triggers navigation', (tester) async {
     final mockBloc = _MockVideoBloc(
       VideoState(isLoading: false, videoDetail: detail),
     );
