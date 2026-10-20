@@ -102,6 +102,16 @@ void main() {
       expect(initialItems.map((item) => item.internalId).toSet(), hasLength(3));
       expect(initialItems.map((item) => item.position), [0, 1, 2]);
 
+      await repository.renamePlaylist(playlistId, 'Renamed queue');
+      expect((await repository.getPlaylists()).single.name, 'Renamed queue');
+      expect(
+        (await repository.getPlaylistItems(
+          playlistId,
+          query: 'VIDEO-2',
+        )).map((item) => item.originalId),
+        ['video-2'],
+      );
+
       await repository.movePlaylistItem(
         playlistId: playlistId,
         fromIndex: 0,

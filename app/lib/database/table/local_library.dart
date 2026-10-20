@@ -45,6 +45,10 @@ class LocalPlaylist() extends Table {
 
 /// An ordered playlist entry. There is intentionally no uniqueness constraint:
 /// users may add the same video more than once.
+@TableIndex(
+  name: 'local_playlist_item_order',
+  columns: {#playlistId, #position, #internalId},
+)
 @DataClassName('LocalPlaylistItemEntity')
 class LocalPlaylistItem() extends Table {
   IntColumn get internalId => integer().autoIncrement()();

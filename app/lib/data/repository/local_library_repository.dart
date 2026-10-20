@@ -85,15 +85,22 @@ class LocalLibraryRepository({required final LocalLibraryDao dao}) {
 
   Future<void> deletePlaylist(int playlistId) => dao.deletePlaylist(playlistId);
 
+  Future<void> renamePlaylist(int playlistId, String name) =>
+      dao.renamePlaylist(playlistId, name);
+
   Future<List<LocalPlaylistEntity>> getPlaylists() => dao.getPlaylists();
 
   Stream<List<LocalPlaylistEntity>> watchPlaylists() => dao.watchPlaylists();
 
-  Future<List<LocalPlaylistItemEntity>> getPlaylistItems(int playlistId) =>
-      dao.getPlaylistItems(playlistId);
+  Future<List<LocalPlaylistItemEntity>> getPlaylistItems(
+    int playlistId, {
+    String query = '',
+  }) => dao.getPlaylistItems(playlistId, query: query);
 
-  Stream<List<LocalPlaylistItemEntity>> watchPlaylistItems(int playlistId) =>
-      dao.watchPlaylistItems(playlistId);
+  Stream<List<LocalPlaylistItemEntity>> watchPlaylistItems(
+    int playlistId, {
+    String query = '',
+  }) => dao.watchPlaylistItems(playlistId, query: query);
 
   Future<void> addToPlaylist({
     required int playlistId,

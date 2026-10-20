@@ -4635,6 +4635,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalPlaylistItemTable(this);
   late final $LocalSubscriptionTable localSubscription =
       $LocalSubscriptionTable(this);
+  late final Index localPlaylistItemOrder = Index(
+    'local_playlist_item_order',
+    'CREATE INDEX local_playlist_item_order ON local_playlist_item (playlist_id, position, internal_id)',
+  );
   late final RecentSearchQueryDao recentSearchQueryDao = RecentSearchQueryDao(
     this as AppDatabase,
   );
@@ -4666,6 +4670,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localPlaylist,
     localPlaylistItem,
     localSubscription,
+    localPlaylistItemOrder,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

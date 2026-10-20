@@ -49,7 +49,7 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -86,6 +86,9 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
         await m.addColumn(creatorProfile, creatorProfile.description);
         await m.addColumn(creatorProfile, creatorProfile.subscribers);
         await m.addColumn(creatorProfile, creatorProfile.videos);
+      }
+      if (from < 5) {
+        await m.createIndex(localPlaylistItemOrder);
       }
     },
   );
