@@ -133,6 +133,10 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     'FOLLOW_SYSTEM',
   );
 
+  /// JSON-encoded home-feed configuration. An empty object is deliberately
+  /// decoded by [HomeConfig] as the default configuration.
+  static const homeConfig = PreferencesKey<String>._('HOME_CONFIG', '{}');
+
   static const useDynamicColor = PreferencesKey<bool>._(
     'USE_DYNAMIC_COLOR',
     true,
@@ -230,12 +234,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   /// 是否把播放进度写入本地观看历史。关掉只停止新增/更新，不删除已落库的行。
   static const historyRecordingEnabled = PreferencesKey<bool>._(
     'HISTORY_RECORDING_ENABLED',
-    true,
-  );
-
-  /// 是否按本地观看历史续播。关闭后进入播放页不再 seek 到记录位置。
-  static const resumePlaybackEnabled = PreferencesKey<bool>._(
-    'RESUME_PLAYBACK_ENABLED',
     true,
   );
 
