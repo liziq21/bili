@@ -185,6 +185,49 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     null,
   );
 
+  /// 睡眠定时器默认档位（分钟）。0 表示进入播放器不自动开始计时。
+  static const sleepTimerDefaultMinutes = PreferencesKey<int>._(
+    'SLEEP_TIMER_DEFAULT_MINUTES',
+    0,
+  );
+
+  /// 播放器手势开关：水平滑动快进。默认开启，新增开关不改变既有操作习惯。
+  static const gestureSeekEnabled = PreferencesKey<bool>._(
+    'GESTURE_SEEK_ENABLED',
+    true,
+  );
+
+  /// 播放器手势开关：右侧垂直滑动调音量。
+  static const gestureVolumeEnabled = PreferencesKey<bool>._(
+    'GESTURE_VOLUME_ENABLED',
+    true,
+  );
+
+  /// 播放器手势开关：左侧垂直滑动调屏幕亮度。
+  static const gestureBrightnessEnabled = PreferencesKey<bool>._(
+    'GESTURE_BRIGHTNESS_ENABLED',
+    true,
+  );
+
+  /// 播放器手势开关：长按临时加速。
+  static const gestureBoostEnabled = PreferencesKey<bool>._(
+    'GESTURE_BOOST_ENABLED',
+    true,
+  );
+
+  /// 是否把播放进度写入本地观看历史。关掉只停止新增/更新，不删除已落库的行。
+  static const historyRecordingEnabled = PreferencesKey<bool>._(
+    'HISTORY_RECORDING_ENABLED',
+    true,
+  );
+
+  /// 是否按本地观看历史续播。关闭后进入播放页不再 seek 到记录位置。
+  static const resumePlaybackEnabled = PreferencesKey<bool>._(
+    'RESUME_PLAYBACK_ENABLED',
+    true,
+  );
+
+  // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
   // types relies on `Type.toString()` being stable in release builds, which
