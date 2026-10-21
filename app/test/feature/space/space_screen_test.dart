@@ -7,14 +7,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class _FakeCreatorProfileRepository(final CreatorProfile profile)
-    implements CreatorProfileRepository {
+class _FakeCreatorProfileRepository implements CreatorProfileRepository {
+  _FakeCreatorProfileRepository(this.result);
+
+  Result<CreatorProfile> result;
   String? requestedId;
 
   @override
   Future<Result<CreatorProfile>> getProfile(String id) async {
     requestedId = id;
-    return Result.ok(profile);
+    return result;
   }
 }
 
@@ -29,7 +31,7 @@ void main() {
       subscribers: 12000,
       videos: 42,
     );
-    final repository = _FakeCreatorProfileRepository(profile);
+    final repository = _FakeCreatorProfileRepository(Result.ok(profile));
     final l10n = AppLocalizationsZh();
 
     await tester.pumpWidget(
@@ -42,6 +44,7 @@ void main() {
 
     expect(repository.requestedId, 'creator-1');
     expect(find.byType(CircleAvatar), findsOneWidget);
+    expect(find.byTooltip('CodeCraft'), findsOneWidget);
     expect(find.text('CodeCraft'), findsOneWidget);
     expect(find.text('Builds useful videos'), findsOneWidget);
     expect(find.text(l10n.creatorLabel('@creator-1')), findsOneWidget);
@@ -50,5 +53,64 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(l10n.videosCount('42')), findsOneWidget);
+  });
+
+  testWidgets('triggers back callback when back button pressed', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final repository = _FakeCreatorProfileRepository(Result.ok(profile));
+    var backPressed = false;
+
+    await tester.pumpWidget(
+      RepositoryProvider<CreatorProfileRepository>.value(
+        value: repository,
+        child: MaterialApp(
+          home: SpaceScreen(
+            mid: 'creator-1',
+            onBackClick: () => backPressed = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final backButton = find.byIcon(Icons.arrow_back);
+    expect(backButton, findsOneWidget);
+
+    await tester.tap(backButton);
+    await tester.pumpAndSettle();
+
+    expect(backPressed, isTrue);
+  });
+
+  testWidgets('renders error view and triggers retry when pressed', (
+    tester,
+  ) async {
+    final repository = _FakeCreatorProfileRepository(
+      Result.error(Exception('Failed to load')),
+    );
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      RepositoryProvider<CreatorProfileRepository>.value(
+        value: repository,
+        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.loadFailedRetryLater), findsOneWidget);
+    final retryButton = find.text(l10n.retry);
+    expect(retryButton, findsOneWidget);
+
+    repository.result = Result.ok(
+      const CreatorProfile(id: 'creator-1', name: 'CodeCraft'),
+    );
+
+    await tester.tap(retryButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('CodeCraft'), findsOneWidget);
   });
 }
