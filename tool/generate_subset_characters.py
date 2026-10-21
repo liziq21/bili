@@ -32,6 +32,14 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 
+def _is_ascii_identifier_start(char: str) -> bool:
+    return char == "_" or (char.isascii() and char.isalpha())
+
+
+def _is_ascii_identifier_part(char: str) -> bool:
+    return char == "_" or (char.isascii() and char.isalnum())
+
+
 def _scan_string_literals(source: str) -> str:
     """Return the concatenated text-body of every string literal in *source*.
 
@@ -109,13 +117,9 @@ def _scan_string_literals(source: str) -> str:
                             elif source[i] == "}":
                                 depth -= 1
                             i += 1
-                    elif i + 1 < n and (
-                        source[i + 1].isalpha() or source[i + 1] == "_"
-                    ):
+                    elif i + 1 < n and _is_ascii_identifier_start(source[i + 1]):
                         i += 1
-                        while i < n and (
-                            source[i].isalnum() or source[i] == "_"
-                        ):
+                        while i < n and _is_ascii_identifier_part(source[i]):
                             i += 1
                     else:
                         i += 1
@@ -159,13 +163,9 @@ def _scan_string_literals(source: str) -> str:
                                 elif source[i] == "}":
                                     depth -= 1
                                 i += 1
-                        elif i + 1 < n and (
-                            source[i + 1].isalpha() or source[i + 1] == "_"
-                        ):
+                        elif i + 1 < n and _is_ascii_identifier_start(source[i + 1]):
                             i += 1
-                            while i < n and (
-                                source[i].isalnum() or source[i] == "_"
-                            ):
+                            while i < n and _is_ascii_identifier_part(source[i]):
                                 i += 1
                         else:
                             i += 1

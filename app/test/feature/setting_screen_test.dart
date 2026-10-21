@@ -1,7 +1,6 @@
 import 'package:app/app_scaffold.dart';
 import 'package:app/feature/setting/advanced_settings_screen.dart';
 import 'package:app/feature/setting/appearance_settings_screen.dart';
-import 'package:app/feature/setting/history_settings_screen.dart';
 import 'package:app/feature/setting/library_settings_screen.dart';
 import 'package:app/feature/setting/player_settings_screen.dart';
 import 'package:app/feature/setting/setting_screen.dart';
