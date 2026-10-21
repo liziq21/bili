@@ -202,6 +202,30 @@ abstract class AppLocalizations {
   /// **'History'**
   String get settingsHistory;
 
+  /// Toggle for recording watched videos in local history
+  ///
+  /// In zh, this message translates to:
+  /// **'Save watch history'**
+  String get historyRecording;
+
+  /// Subtitle for the watch history recording toggle
+  ///
+  /// In zh, this message translates to:
+  /// **'Keep watched videos in the local history'**
+  String get historyRecordingSubtitle;
+
+  /// Toggle for restoring the last saved video position
+  ///
+  /// In zh, this message translates to:
+  /// **'Resume playback'**
+  String get historyResumePlayback;
+
+  /// Subtitle for the resume playback toggle
+  ///
+  /// In zh, this message translates to:
+  /// **'Continue videos from the last saved position'**
+  String get historyResumePlaybackSubtitle;
+
   /// Settings group and subpage title - local library
   ///
   /// In zh, this message translates to:

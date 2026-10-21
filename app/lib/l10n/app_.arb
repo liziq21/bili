@@ -67,6 +67,22 @@
   "@settingsHistory": {
     "description": "Settings group and subpage title - watch history"
   },
+  "historyRecording": "Save watch history",
+  "@historyRecording": {
+    "description": "Toggle for recording watched videos in local history"
+  },
+  "historyRecordingSubtitle": "Keep watched videos in the local history",
+  "@historyRecordingSubtitle": {
+    "description": "Subtitle for the watch history recording toggle"
+  },
+  "historyResumePlayback": "Resume playback",
+  "@historyResumePlayback": {
+    "description": "Toggle for restoring the last saved video position"
+  },
+  "historyResumePlaybackSubtitle": "Continue videos from the last saved position",
+  "@historyResumePlaybackSubtitle": {
+    "description": "Subtitle for the resume playback toggle"
+  },
   "settingsLibrary": "Library",
   "@settingsLibrary": {
     "description": "Settings group and subpage title - local library"

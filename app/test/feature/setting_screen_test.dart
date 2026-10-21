@@ -96,7 +96,6 @@ void main() {
   group('Settings subpages', () {
     for (final (screen, title) in const [
       (PlayerSettingsScreen(), 'Player'),
-      (HistorySettingsScreen(), 'History'),
       (LibrarySettingsScreen(), 'Library'),
       (AdvancedSettingsScreen(), 'Advanced'),
     ]) {
