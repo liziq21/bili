@@ -141,6 +141,18 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   /// 播放器默认倍速：用户在倍速弹窗里选过就记住，下次进入播放器自动套用。
   static const playbackRate = PreferencesKey<double>._('PLAYBACK_RATE', 1.0);
 
+  /// Whether new video views are added to the local watch history.
+  static const watchHistoryEnabled = PreferencesKey<bool>._(
+    'WATCH_HISTORY_ENABLED',
+    true,
+  );
+
+  /// Whether saved video progress is restored when playback starts.
+  static const resumePlaybackEnabled = PreferencesKey<bool>._(
+    'RESUME_PLAYBACK_ENABLED',
+    true,
+  );
+
   /// 默认画质高度：用户在画质弹窗里选过就记住，下次进入播放器就近套用。
   ///
   /// null 表示未选过，由源取默认档。

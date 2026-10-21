@@ -64,6 +64,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsHistory => 'History';
 
   @override
+  String get historyRecording => 'Save watch history';
+
+  @override
+  String get historyRecordingSubtitle =>
+      'Keep watched videos in the local history';
+
+  @override
+  String get historyResumePlayback => 'Resume playback';
+
+  @override
+  String get historyResumePlaybackSubtitle =>
+      'Continue videos from the last saved position';
+
+  @override
   String get settingsLibrary => 'Library';
 
   @override

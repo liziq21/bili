@@ -14,6 +14,8 @@ import '../../utils/platfrom_info.dart';
 import '../../data/repository/video_detail_repository.dart';
 import '../../database/dao/media_history_dao.dart';
 import '../../database/table/media.dart';
+import '../../datastore/media_history_settings.dart';
+import '../../datastore/preferences_data_source.dart';
 import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
@@ -32,7 +34,9 @@ class const VideoScreen({
 class VideoScreenState() extends State<VideoScreen> {
   MediaPlaybackController? _playbackController;
   MediaHistoryDao? _mediaHistoryDao;
+  PreferencesDataSource? _preferences;
   String? _sourceId;
+  MediaHistorySettings _historySettings = const MediaHistorySettings();
   Future<void>? _progressLoadFuture;
   int _restorePositionSeconds = 0;
   int _progressGeneration = 0;
@@ -50,20 +54,30 @@ class VideoScreenState() extends State<VideoScreen> {
     if (_progressLoadFuture == null) {
       try {
         _mediaHistoryDao ??= context.read<MediaHistoryDao>();
+        _preferences ??= context.read<PreferencesDataSource>();
         _sourceId ??= context.read<MediaSource>().id;
       } catch (_) {}
     }
     if (_progressLoadFuture == null &&
         _mediaHistoryDao != null &&
         _sourceId != null) {
-      _progressLoadFuture = _loadProgressAsync();
+      _progressLoadFuture = _initializeProgressAsync();
     }
+  }
+
+  Future<void> _initializeProgressAsync() async {
+    final preferences = _preferences;
+    if (preferences != null) {
+      _historySettings = await MediaHistorySettings.load(preferences);
+    }
+    if (_historySettings.shouldReadProgress) await _loadProgressAsync();
   }
 
   /// 查 [media_history] 里这条视频的播放进度，
   /// 拿到后写入 [MediaPlaybackController.restorePositionSeconds]，
   /// [_VideoSurface] 在 open 完成后自动 seek。
   Future<void> _loadProgressAsync({String? videoId}) async {
+    if (!_historySettings.shouldReadProgress) return;
     final dao = _mediaHistoryDao;
     final sourceId = _sourceId;
     if (dao == null || sourceId == null) return;
@@ -87,12 +101,18 @@ class VideoScreenState() extends State<VideoScreen> {
     if (oldWidget.videoId == widget.videoId) return;
     _restorePositionSeconds = 0;
     _playbackController?.restorePositionSeconds = 0;
-    _progressLoadFuture = _loadProgressAsync(videoId: widget.videoId);
+    ++_progressGeneration;
+    _progressLoadFuture = _historySettings.shouldReadProgress
+        ? _loadProgressAsync(videoId: widget.videoId)
+        : Future<void>.value();
   }
 
   /// 把当前播放位置写回 [media_history]，供下次进入本视频时 seek 起播。
   /// 不足 10s 不记，避免刚开进来就退出时把进度打回零。
   Future<void> _saveProgress() async {
+    final progressLoadFuture = _progressLoadFuture;
+    if (progressLoadFuture != null) await progressLoadFuture;
+    if (!_historySettings.shouldWriteHistory) return;
     final controller = _playbackController;
     final dao = _mediaHistoryDao;
     if (controller == null || dao == null || _sourceId == null) return;
