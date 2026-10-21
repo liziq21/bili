@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:data/data.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:model/model.dart';
@@ -124,19 +125,17 @@ class HomeConfig(
     _validateGridColumns(gridColumnsLandscape, 'gridColumnsLandscape');
   }
 
-  /// The configuration that preserves the current home-feed behavior.
+  /// Builds the configuration that preserves the current home-feed behavior.
   ///
-  /// Labels are stable source-neutral identifiers here. The feed data source
-  /// remains the owner of localized display titles until the home consumer
-  /// configuration is implemented in the follow-up issue.
-  factory defaults() => HomeConfig({
-    'bilibili': HomeSourceConfig(const [
-      HomeTabConfig(id: 'popular', label: 'popular'),
-      HomeTabConfig(id: 'ranking', label: 'ranking', sortOrder: 1),
-      HomeTabConfig(id: 'live', label: 'live', sortOrder: 2),
-    ], mainTabId: 'popular'),
-    'youtube': HomeSourceConfig(const []),
-  });
+  /// Feed sources own their display titles, so defaults are derived from the
+  /// same source capabilities that currently populate the home state. This keeps
+  /// localized/source-specific labels out of app code and prevents a default
+  /// migration from replacing them with internal feed IDs.
+  factory defaults({Iterable<MediaSource> sources = const []}) {
+    return HomeConfig({
+      for (final source in sources) source.id: _sourceDefaults(source),
+    });
+  }
 
   factory fromJson(Map<String, dynamic> json) {
     final rawSources = json['sources'];
@@ -171,28 +170,33 @@ class HomeConfig(
 
   /// Decodes persisted data and returns defaults for malformed or incompatible
   /// values. A bad preference must not prevent the app from starting.
-  static HomeConfig fromJsonOrDefault(Object? value) {
-    if (value is! Map) return HomeConfig.defaults();
+  static HomeConfig fromJsonOrDefault(Object? value, {HomeConfig? fallback}) {
+    final defaultConfig = fallback ?? HomeConfig.defaults();
+    if (value is! Map) return defaultConfig;
     try {
       return HomeConfig.fromJson(Map<String, dynamic>.from(value));
     } on Object {
-      return HomeConfig.defaults();
+      return defaultConfig;
     }
   }
 
   /// Reads the home configuration from the shared-preferences data source.
-  static Future<HomeConfig> load(PreferencesDataSource preferences) async {
+  static Future<HomeConfig> load(
+    PreferencesDataSource preferences, {
+    Iterable<MediaSource> sources = const [],
+  }) async {
+    final defaults = HomeConfig.defaults(sources: sources);
     final result = await preferences.get(PreferencesKey.homeConfig);
     if (result case Ok<String>(:final value)) {
       try {
-        return fromJsonOrDefault(jsonDecode(value));
+        return fromJsonOrDefault(jsonDecode(value), fallback: defaults);
       } on FormatException {
-        return HomeConfig.defaults();
+        return defaults;
       } on Object {
-        return HomeConfig.defaults();
+        return defaults;
       }
     }
-    return HomeConfig.defaults();
+    return defaults;
   }
 
   Future<Result<void>> save(PreferencesDataSource preferences) {
@@ -222,5 +226,21 @@ class HomeConfig(
         'Grid columns must be between 1 and 8',
       );
     }
+  }
+
+  static HomeSourceConfig _sourceDefaults(MediaSource source) {
+    final tabs = <HomeTabConfig>[];
+    for (final feed in source.videoFeedDataSources) {
+      tabs.add(
+        HomeTabConfig(id: feed.id, label: feed.title, sortOrder: tabs.length),
+      );
+    }
+    for (final feed in source.liveRoomFeedDataSources) {
+      tabs.add(
+        HomeTabConfig(id: feed.id, label: feed.title, sortOrder: tabs.length),
+      );
+    }
+
+    return HomeSourceConfig(tabs, mainTabId: tabs.firstOrNull?.id);
   }
 }
