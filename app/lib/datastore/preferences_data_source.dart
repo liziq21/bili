@@ -233,12 +233,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
-  /// 是否按本地观看历史续播。关闭后进入播放页不再 seek 到记录位置。
-  static const resumePlaybackEnabled = PreferencesKey<bool>._(
-    'RESUME_PLAYBACK_ENABLED',
-    true,
-  );
-
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable
