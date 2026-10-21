@@ -1,5 +1,6 @@
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -67,7 +68,10 @@ class _SpaceScreenState() extends State<SpaceScreen> {
         leading: widget.onBackClick == null
             ? null
             : IconButton(
-                onPressed: widget.onBackClick,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.onBackClick?.call();
+                },
                 tooltip: l10n.back,
                 icon: const Icon(Icons.arrow_back),
               ),
@@ -122,7 +126,13 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
               ),
             ),
             SizedBox(height: $styles.insets.xs),
-            FilledButton(onPressed: onRetry, child: Text(l10n.retry)),
+            FilledButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                onRetry();
+              },
+              child: Text(l10n.retry),
+            ),
           ],
         ),
       ),
@@ -248,24 +258,27 @@ class const _CreatorAvatar({
         ? profile.name[0].toUpperCase()
         : '?';
 
-    return CircleAvatar(
-      radius: 40,
-      backgroundColor: colorScheme.primaryContainer,
-      backgroundImage: hasThumbnail
-          ? ResizeImage.resizeIfNeeded(
-              160,
-              160,
-              CachedNetworkImageProvider(thumbnailUrl),
-            )
-          : null,
-      child: hasThumbnail
-          ? null
-          : Text(
-              initial,
-              style: $styles.text.h3.copyWith(
-                color: colorScheme.onPrimaryContainer,
+    return Tooltip(
+      message: profile.name,
+      child: CircleAvatar(
+        radius: 40,
+        backgroundColor: colorScheme.primaryContainer,
+        backgroundImage: hasThumbnail
+            ? ResizeImage.resizeIfNeeded(
+                160,
+                160,
+                CachedNetworkImageProvider(thumbnailUrl),
+              )
+            : null,
+        child: hasThumbnail
+            ? null
+            : Text(
+                initial,
+                style: $styles.text.h3.copyWith(
+                  color: colorScheme.onPrimaryContainer,
+                ),
               ),
-            ),
+      ),
     );
   }
 }
