@@ -195,6 +195,8 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Enhance Media Library load-more button semantics and tooltips (#345)
 - 🎨 Palette: Enhance video player control chips accessibility and feedback (#353)
 - 🎨 Palette: Enable related video card navigation and tactile feedback (#387)
+- ⚡ Bolt: Measurement environment unavailable (No-Change Report) (#400)
+- 🎨 Palette: Improve SpaceScreen accessibility and tactile feedback (#401)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -231,6 +233,7 @@ so hand edits do not survive; change the generator instead.
 - docs(triage): issue-triage-prompt v2 — ready-for-jules 档与授权收敛 (#322)
 - docs(palette): add localization hygiene candidate investigation [skip ci] (#385)
 - docs(AGENTS): add Linear specifications references (#399)
+- docs(github): add issue label, backlog classification, and AI work acceptance specs (#403)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
