@@ -56,6 +56,8 @@ so hand edits do not survive; change the generator instead.
 - feat(settings): add grouped settings navigation skeleton (#384)
 - feat(data): add full playlist fetcher (#390)
 - feat(settings): add appearance placeholders and satisfy strict analysis (#397)
+- feat: LIZ-31 settings skeleton - add PreferencesKey constants and data models (#404)
+- feat(home): add persisted home configuration model (Issue #364) (#408)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -280,6 +282,8 @@ so hand edits do not survive; change the generator instead.
 - ci: add environment-aware local test runner (#288)
 - ci: skip CI for ci-generated PRs; enable auto-merge on changelog PR (#348)
 - ci: build debug APK instead of release (LIZ-50) (#350)
+- chore: upgrade Flutter SDK to 3.47.7 and Dart to 3.13.5 (#402)
+- ci: run required checks for changelog PR to enable auto-merge (#409)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
