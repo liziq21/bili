@@ -35,12 +35,13 @@ class const VideoFeedSection({
     final subtitleHeight =
         textScaler.scale(12) * ($styles.text.bodySmall.height ?? 1);
 
-    return cardWidth * 9 / 16 +
-        titleHeight +
-        subtitleHeight +
-        $styles.insets.sm * 2 +
-        $styles.insets.xxs +
-        2; // Material 内层 Padding(EdgeInsets.all(1)) 的上下各 1px
+    return (cardWidth * 9 / 16 +
+            titleHeight +
+            subtitleHeight +
+            $styles.insets.sm * 2 +
+            $styles.insets.xxs +
+            2) // Material 内层 Padding(EdgeInsets.all(1)) 的上下各 1px
+        .ceilToDouble();
   }
 
   @override
