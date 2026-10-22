@@ -6,6 +6,8 @@ import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/user_data/user_data_repository.dart';
+import '../../../datastore/preferences_data_source.dart';
+import '../home_config.dart';
 import 'feed_section_state.dart';
 
 export 'feed_section_state.dart';
@@ -15,12 +17,14 @@ part 'home_state.dart';
 
 class HomeBloc({
   required final UserDataRepository userDataRepository,
+  required final PreferencesDataSource? preferences,
   required final MediaSource source,
 }) extends Bloc<HomeEvent, HomeState> {
   this
     : _userDataRepository = userDataRepository,
+      _preferences = preferences,
       _source = source,
-      super(HomeState(sourceId: source.id)) {
+      super(HomeState(sourceId: source.id, homeConfig: HomeConfig({}))) {
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
     on<FilterSelected>(_onFilterSelected);
@@ -30,6 +34,7 @@ class HomeBloc({
   }
 
   final UserDataRepository _userDataRepository;
+  final PreferencesDataSource? _preferences;
   final MediaSource _source;
   final _log = Logger('HomeBloc');
   final Map<String, int> _videoRequestVersions = {};
@@ -58,12 +63,21 @@ class HomeBloc({
     Emitter<HomeState> emit,
   ) async {
     final source = _source;
+    final homeConfig = switch (_preferences) {
+      final preferences? => await HomeConfig.load(
+        preferences,
+        sources: [source],
+      ),
+      null => HomeConfig({}),
+    };
+    if (emit.isDone) return;
 
     final videoFeeds = source.videoFeedDataSources;
     final liveFeeds = source.liveRoomFeedDataSources;
 
     emit(
       state.copyWith(
+        homeConfig: homeConfig,
         isRefreshing: event.refresh,
         videoSections: [
           for (final feed in videoFeeds)

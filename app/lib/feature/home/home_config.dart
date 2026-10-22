@@ -232,15 +232,40 @@ class HomeConfig(
     final tabs = <HomeTabConfig>[];
     for (final feed in source.videoFeedDataSources) {
       tabs.add(
-        HomeTabConfig(id: feed.id, label: feed.title, sortOrder: tabs.length),
+        HomeTabConfig(
+          id: _uniqueTabId(tabs, feed.id, 'video'),
+          label: feed.title,
+          sortOrder: tabs.length,
+        ),
       );
     }
     for (final feed in source.liveRoomFeedDataSources) {
       tabs.add(
-        HomeTabConfig(id: feed.id, label: feed.title, sortOrder: tabs.length),
+        HomeTabConfig(
+          id: _uniqueTabId(tabs, feed.id, 'live'),
+          label: feed.title,
+          sortOrder: tabs.length,
+        ),
       );
     }
 
     return HomeSourceConfig(tabs, mainTabId: tabs.firstOrNull?.id);
+  }
+
+  static String _uniqueTabId(
+    List<HomeTabConfig> tabs,
+    String feedId,
+    String kind,
+  ) {
+    final existingIds = tabs.map((tab) => tab.id).toSet();
+    if (!existingIds.contains(feedId)) return feedId;
+
+    var suffix = 2;
+    var candidate = '$feedId:$kind';
+    while (existingIds.contains(candidate)) {
+      candidate = '$feedId:$kind$suffix';
+      suffix++;
+    }
+    return candidate;
   }
 }

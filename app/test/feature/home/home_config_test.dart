@@ -87,6 +87,24 @@ void main() {
     expect(config.gridColumnsLandscape, 2);
   });
 
+  test('defaults keep video and live feeds with the same id distinct', () {
+    final config = HomeConfig.defaults(
+      sources: [
+        _FakeSource(
+          'bilibili',
+          'Bilibili',
+          videoFeeds: [_FakeVideoFeed('shared', '视频')],
+          liveFeeds: [_FakeLiveFeed('shared', '直播')],
+        ),
+      ],
+    );
+
+    expect(config.sources['bilibili']!.tabs.map((tab) => tab.id), [
+      'shared',
+      'shared:live',
+    ]);
+  });
+
   test('round-trips a configured home model through JSON', () {
     final original = HomeConfig(
       {

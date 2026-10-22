@@ -4,15 +4,16 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
-import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../../../ui/video_card.dart';
 import '../bloc/home_bloc.dart';
+import '../home_config.dart';
 import 'feed_status_view.dart';
 
 /// 单个视频 Feed 区块（标题 + 响应式网格 + 加载更多）
 class const VideoFeedSection({
   super.key,
   required final FeedSectionState<VideoModel> section,
+  required final HomeConfig homeConfig,
   required final String sourceName,
   required final ValueChanged<VideoModel> onVideoTap,
   required final VoidCallback onRetry,
@@ -34,12 +35,13 @@ class const VideoFeedSection({
     final subtitleHeight =
         textScaler.scale(12) * ($styles.text.bodySmall.height ?? 1);
 
-    return cardWidth * 9 / 16 +
-        titleHeight +
-        subtitleHeight +
-        $styles.insets.sm * 2 +
-        $styles.insets.xxs +
-        2; // Material 内层 Padding(EdgeInsets.all(1)) 的上下各 1px
+    return (cardWidth * 9 / 16 +
+            titleHeight +
+            subtitleHeight +
+            $styles.insets.sm * 2 +
+            $styles.insets.xxs +
+            2) // Material 内层 Padding(EdgeInsets.all(1)) 的上下各 1px
+        .ceilToDouble();
   }
 
   @override
@@ -71,8 +73,10 @@ class const VideoFeedSection({
 
               final width = constraints.crossAxisExtent;
               final spacing = $styles.insets.sm;
-              final columns = LayoutSize.fromWidth(width)
-                  .feedColumnsFor(width, spacing: spacing);
+              final columns = switch (MediaQuery.orientationOf(context)) {
+                Orientation.portrait => homeConfig.gridColumnsPortrait,
+                Orientation.landscape => homeConfig.gridColumnsLandscape,
+              };
               final cardWidth = (width - spacing * (columns - 1)) / columns;
 
               return SliverGrid(
