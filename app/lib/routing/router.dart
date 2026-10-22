@@ -11,6 +11,7 @@ import '../app_scaffold.dart';
 import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
+import '../datastore/preferences_data_source.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
 import '../feature/media_library/local_library_screen.dart';
@@ -244,6 +245,7 @@ Widget _buildHome(BuildContext context) {
           builder: (context) => BlocProvider<HomeBloc>(
             create: (context) => HomeBloc(
               userDataRepository: context.read(),
+              preferences: context.read<PreferencesDataSource>(),
               source: context.read<MediaSource>(),
             ),
             child: Builder(

@@ -1,5 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:app/feature/home/bloc/feed_section_state.dart';
+import 'package:app/feature/home/home_config.dart';
 import 'package:app/feature/home/widgets/video_feed_section.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,7 @@ Widget _sectionUnder({
   required FeedSectionState<VideoModel> section,
   required double width,
   required double height,
+  HomeConfig? homeConfig,
 }) => SizedBox(
   width: width,
   height: height,
@@ -39,6 +41,7 @@ Widget _sectionUnder({
     slivers: [
       VideoFeedSection(
         section: section,
+        homeConfig: homeConfig ?? HomeConfig.defaults(),
         sourceName: '哔哩哔哩',
         onVideoTap: (_) {},
         onRetry: () {},
@@ -49,12 +52,20 @@ Widget _sectionUnder({
 );
 
 void main() {
-  testWidgets('expanded width resolves to three columns', (tester) async {
-    // Guards the golden scenario above: the image alone cannot prove the grid
-    // rendered three columns, and the column count is derived from the sliver
-    // width rather than from the scenario name.
-    for (final (width, expected) in [(960.0, 3), (1100.0, 4)]) {
-      tester.view.physicalSize = Size(width, 600);
+  testWidgets('configured columns follow the screen orientation', (
+    tester,
+  ) async {
+    final homeConfig = HomeConfig(
+      {},
+      gridColumnsPortrait: 4,
+      gridColumnsLandscape: 3,
+    );
+    for (final (size, expected) in [
+      (const Size(400, 800), 4),
+      (const Size(900, 600), 3),
+    ]) {
+      final width = size.width;
+      tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -67,6 +78,7 @@ void main() {
                   section: _section(FeedStatus.success, 6),
                   width: width,
                   height: 600,
+                  homeConfig: homeConfig,
                 ),
               ),
             ),
@@ -81,16 +93,15 @@ void main() {
       expect(
         delegate.crossAxisCount,
         expected,
-        reason: 'width $width should render $expected columns',
+        reason: 'orientation for $size should render $expected columns',
       );
     }
   });
 
   group('VideoFeedSection golden', () {
-    // The grid column count is derived from the incoming sliver width
-    // (LayoutSize.fromWidth: <600 -> 1 col, <900 -> 2 cols, else 3), so each
-    // scenario pins its own width. This is the guard for the cross-platform
-    // responsive layout work.
+    // The grid column count is read from HomeConfig based on the screen
+    // orientation. The visual scenarios still cover the different feed states
+    // and widths, while the widget test above guards the configuration branch.
     goldenTest(
       'renders every status and breakpoint',
       fileName: 'video_feed_section',
@@ -110,7 +121,7 @@ void main() {
         columns: 1,
         children: [
           GoldenTestScenario(
-            name: 'compact 1 column, populated',
+            name: 'compact width, configured columns, populated',
             child: _sectionUnder(
               section: _section(FeedStatus.success, 3),
               width: 380,
@@ -118,7 +129,7 @@ void main() {
             ),
           ),
           GoldenTestScenario(
-            name: 'medium 2 columns, populated',
+            name: 'medium width, configured columns, populated',
             child: _sectionUnder(
               section: _section(FeedStatus.success, 6),
               width: 700,
@@ -126,13 +137,9 @@ void main() {
             ),
           ),
           GoldenTestScenario(
-            name: 'expanded 3 columns, populated',
+            name: 'expanded width, configured columns, populated',
             child: _sectionUnder(
               section: _section(FeedStatus.success, 6),
-              // 960 leaves 928 after the `sm` horizontal padding, which is the
-              // upper half of the [900, 960) band `feedColumnsFor` maps to three
-              // columns. 1100 would resolve to 928 -> 4 columns and the
-              // scenario name would lie; the guard below pins the real count.
               width: 960,
               height: 600,
             ),

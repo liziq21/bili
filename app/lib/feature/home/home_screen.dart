@@ -164,6 +164,7 @@ class const HomeScreen({
       for (final section in videoSections)
         VideoFeedSection(
           section: section,
+          homeConfig: state.homeConfig,
           sourceName: sourceName,
           onVideoTap: (video) => onVideo(video.id),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),

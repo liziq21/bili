@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:app/data/repository/user_data/user_data_repository.dart';
+import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
+import 'package:app/feature/home/home_config.dart';
 import 'package:app/feature/home/home_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart' hide Page;
@@ -11,6 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 class MockUserDataRepository() implements UserDataRepository {
   final StreamController<UserData> _controller =
@@ -234,12 +239,16 @@ class FakeMediaSource({
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockUserDataRepository mockUserDataRepository;
+  late PreferencesDataSource preferences;
   late FakeVideoFeed biliVideoFeed;
   late List<MediaSource> mediaSources;
 
   HomeBloc buildBloc() => HomeBloc(
     userDataRepository: mockUserDataRepository,
+    preferences: preferences,
     source: mediaSources.first,
   );
 
@@ -264,6 +273,11 @@ void main() {
   );
 
   setUp(() {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    preferences = PreferencesDataSource(
+      sharedPreferences: SharedPreferencesAsync(),
+    );
     mockUserDataRepository = MockUserDataRepository();
     biliVideoFeed = FakeVideoFeed(id: 'recommend', title: '推荐视频', pages: 2);
     mediaSources = [
@@ -288,6 +302,7 @@ void main() {
 
   tearDown(() {
     mockUserDataRepository.dispose();
+    preferences.dispose();
   });
 
   group('HomeBloc Tests', () {
@@ -306,6 +321,26 @@ void main() {
       expect(bloc.state.videoSections.first.items, hasLength(1));
       expect(bloc.state.liveSections.first.items, hasLength(1));
       expect(bloc.state.videoSections.first.hasMore, isTrue);
+    });
+
+    test('Loads the persisted home grid configuration on start', () async {
+      final configured = HomeConfig(
+        {},
+        gridColumnsPortrait: 4,
+        gridColumnsLandscape: 3,
+      );
+      await configured.save(preferences);
+
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await bloc.stream.firstWhere(
+        (state) =>
+            state.videoSections.isNotEmpty &&
+            state.videoSections.first.status == FeedStatus.success,
+      );
+
+      expect(bloc.state.homeConfig, configured);
     });
 
     test('Appends the next page for a video feed', () async {
@@ -431,6 +466,7 @@ void main() {
     test('Namespaces filter IDs while preserving raw feed IDs', () {
       final state = HomeState(
         sourceId: 'test',
+        homeConfig: HomeConfig.defaults(),
         videoSections: const [
           FeedSectionState<VideoModel>(id: 'shared', title: '视频'),
         ],

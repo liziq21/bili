@@ -24,6 +24,7 @@ final class const HomeFilter({
 @immutable
 class const HomeState({
   required final String sourceId,
+  required final HomeConfig homeConfig,
   final String? filterId,
   final bool isRefreshing = false,
   final List<FeedSectionState<VideoModel>> videoSections = const [],
@@ -100,6 +101,7 @@ class const HomeState({
   /// `??` 分不出「没传」和「传 null」，切换数据源时无法清掉旧源的选中项。
   HomeState copyWith({
     String? sourceId,
+    HomeConfig? homeConfig,
     String? filterId,
     bool clearFilter = false,
     bool? isRefreshing,
@@ -108,6 +110,7 @@ class const HomeState({
   }) {
     return HomeState(
       sourceId: sourceId ?? this.sourceId,
+      homeConfig: homeConfig ?? this.homeConfig,
       filterId: clearFilter ? null : (filterId ?? this.filterId),
       isRefreshing: isRefreshing ?? this.isRefreshing,
       videoSections: videoSections ?? this.videoSections,
@@ -118,6 +121,7 @@ class const HomeState({
   @override
   List<Object?> get props => [
     sourceId,
+    homeConfig,
     filterId,
     isRefreshing,
     videoSections,
