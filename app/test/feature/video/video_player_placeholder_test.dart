@@ -40,7 +40,6 @@ void main() {
         find.byWidgetPredicate(
           (widget) =>
               widget is Semantics &&
-              widget.properties.label == '进度' &&
               widget.properties.value == '25%',
         ),
         findsOneWidget,

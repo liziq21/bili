@@ -186,7 +186,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           thumbColor: $styles.colors.accentFill,
                         ),
                         child: Semantics(
-                          label: '进度',
+                          label: l10n?.progress ?? 'Progress',
                           value: '${(_progress * 100).round()}%',
                           child: Slider(
                             value: _progress,
