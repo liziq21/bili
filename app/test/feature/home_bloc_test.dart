@@ -500,6 +500,50 @@ void main() {
       );
     });
 
+    test('Consumes configured tab visibility, order, and main tab', () {
+      final state = HomeState(
+        sourceId: 'test',
+        homeConfig: HomeConfig({
+          'test': HomeSourceConfig([
+            const HomeTabConfig(
+              id: 'popular',
+              label: 'Popular configured',
+              sortOrder: 2,
+            ),
+            const HomeTabConfig(
+              id: 'ranking',
+              label: 'Ranking configured',
+              sortOrder: 1,
+            ),
+            const HomeTabConfig(
+              id: 'live',
+              label: 'Live configured',
+              isVisible: false,
+            ),
+          ], mainTabId: 'popular'),
+        }),
+        videoSections: const [
+          FeedSectionState<VideoModel>(id: 'popular', title: 'Popular'),
+          FeedSectionState<VideoModel>(id: 'ranking', title: 'Ranking'),
+        ],
+        liveSections: const [
+          FeedSectionState<LiveRoomModel>(id: 'live', title: 'Live'),
+        ],
+      );
+
+      expect(state.filters.map((filter) => filter.id), [
+        HomeState.videoFilterId('ranking'),
+        HomeState.videoFilterId('popular'),
+      ]);
+      expect(state.filters.map((filter) => filter.label), [
+        'Ranking configured',
+        'Popular configured',
+      ]);
+      expect(state.activeFilter?.id, HomeState.videoFilterId('popular'));
+      expect(state.visibleVideoSections.single.id, 'popular');
+      expect(state.visibleLiveSections, isEmpty);
+    });
+
     test('Refresh with a source with no feeds emits refreshing then not refreshing', () async {
       mediaSources = [FakeMediaSource(id: 'empty', name: 'Empty')];
       final bloc = buildBloc();
