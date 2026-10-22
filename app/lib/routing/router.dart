@@ -245,7 +245,7 @@ Widget _buildHome(BuildContext context) {
           builder: (context) => BlocProvider<HomeBloc>(
             create: (context) => HomeBloc(
               userDataRepository: context.read(),
-              preferences: context.read<PreferencesDataSource>(),
+              preferences: context.read<PreferencesDataSource?>(),
               source: context.read<MediaSource>(),
             ),
             child: Builder(
