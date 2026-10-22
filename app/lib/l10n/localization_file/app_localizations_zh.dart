@@ -4295,5 +4295,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoDetailSourceUnsupported => '当前数据源暂不支持查看视频详情';
 
   @override
+  String get progress => 'Progress';
+
+  @override
   String get switchAction => '切换';
 }

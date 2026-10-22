@@ -185,13 +185,18 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           ),
                           thumbColor: $styles.colors.accentFill,
                         ),
-                        child: Slider(
-                          value: _progress,
-                          onChanged: (val) {
-                            setState(() {
-                              _progress = val;
-                            });
-                          },
+                        child: Semantics(
+                          label: l10n?.progress ?? 'Progress',
+                          value: '${(_progress * 100).round()}%',
+                          child: Slider(
+                            value: _progress,
+                            onChanged: (val) {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _progress = val;
+                              });
+                            },
+                          ),
                         ),
                       ),
                     ),
