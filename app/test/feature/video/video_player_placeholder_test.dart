@@ -38,9 +38,7 @@ void main() {
       // Verify Semantics for the progress slider
       expect(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics &&
-              widget.properties.value == '25%',
+          (widget) => widget is Semantics && widget.properties.value == '25%',
         ),
         findsOneWidget,
       );
