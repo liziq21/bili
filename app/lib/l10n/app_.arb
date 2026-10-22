@@ -5780,6 +5780,10 @@
   "@videoDetailSourceUnsupported": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "progress": "Progress",
+  "@progress": {
+    "description": "Video player placeholder slider progress label"
+  },
   "switchAction": "切换",
   "@switchAction": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"

@@ -7363,6 +7363,12 @@ abstract class AppLocalizations {
   /// **'当前数据源暂不支持查看视频详情'**
   String get videoDetailSourceUnsupported;
 
+  /// Video player placeholder slider progress label
+  ///
+  /// In zh, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In zh, this message translates to:
