@@ -544,6 +544,33 @@ void main() {
       expect(state.visibleLiveSections, isEmpty);
     });
 
+    test(
+      'Consumes generated IDs for repeated feeds beyond the first duplicate',
+      () {
+        final state = HomeState(
+          sourceId: 'test',
+          homeConfig: HomeConfig({
+            'test': HomeSourceConfig(const [
+              HomeTabConfig(id: 'shared', label: 'First'),
+              HomeTabConfig(id: 'shared:video', label: 'Second', sortOrder: 1),
+              HomeTabConfig(id: 'shared:video2', label: 'Third', sortOrder: 2),
+            ]),
+          }),
+          videoSections: const [
+            FeedSectionState<VideoModel>(id: 'shared', title: 'First'),
+            FeedSectionState<VideoModel>(id: 'shared', title: 'Second'),
+            FeedSectionState<VideoModel>(id: 'shared', title: 'Third'),
+          ],
+        );
+
+        expect(state.filters.map((filter) => filter.label), [
+          'First',
+          'Second',
+          'Third',
+        ]);
+      },
+    );
+
     test('Refresh with a source with no feeds emits refreshing then not refreshing', () async {
       mediaSources = [FakeMediaSource(id: 'empty', name: 'Empty')];
       final bloc = buildBloc();

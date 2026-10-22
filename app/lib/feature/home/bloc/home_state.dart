@@ -44,8 +44,17 @@ class const HomeState({
     final sourceConfig = homeConfig.sources[sourceId];
     if (sourceConfig == null) return _defaultFilters;
 
-    final remainingVideoSections = [...videoSections];
-    final remainingLiveSections = [...liveSections];
+    final usedTabIds = <String>{};
+    final videoSectionsByTabId = _sectionMap(
+      videoSections,
+      kind: 'video',
+      usedTabIds: usedTabIds,
+    );
+    final liveSectionsByTabId = _sectionMap(
+      liveSections,
+      kind: 'live',
+      usedTabIds: usedTabIds,
+    );
     final List<({int index, HomeTabConfig tab})> configuredTabs =
         [
           for (var index = 0; index < sourceConfig.tabs.length; index++)
@@ -58,18 +67,13 @@ class const HomeState({
     final result = <HomeFilter>[];
     for (final configuredTab in configuredTabs) {
       final tab = configuredTab.tab;
-      final videoIndex = _findSectionIndex(
-        remainingVideoSections,
-        tab,
-        'video',
-      );
-      if (videoIndex != null) {
-        final section = remainingVideoSections.removeAt(videoIndex);
+      final videoSection = videoSectionsByTabId.remove(tab.id);
+      if (videoSection != null) {
         if (tab.isVisible) {
           result.add(
             HomeFilter(
-              id: videoFilterId(section.id),
-              rawId: section.id,
+              id: videoFilterId(videoSection.id),
+              rawId: videoSection.id,
               label: tab.label,
               kind: HomeFilterKind.videoFeed,
               configId: tab.id,
@@ -79,15 +83,14 @@ class const HomeState({
         continue;
       }
 
-      final liveIndex = _findSectionIndex(remainingLiveSections, tab, 'live');
-      if (liveIndex == null) continue;
+      final liveSection = liveSectionsByTabId.remove(tab.id);
+      if (liveSection == null) continue;
 
-      final section = remainingLiveSections.removeAt(liveIndex);
       if (tab.isVisible) {
         result.add(
           HomeFilter(
-            id: liveFilterId(section.id),
-            rawId: section.id,
+            id: liveFilterId(liveSection.id),
+            rawId: liveSection.id,
             label: tab.label,
             kind: HomeFilterKind.liveFeed,
             configId: tab.id,
@@ -115,26 +118,33 @@ class const HomeState({
       ),
   ];
 
-  static int? _findSectionIndex<T>(
-    List<FeedSectionState<T>> sections,
-    HomeTabConfig tab,
-    String kind,
-  ) {
-    final directIndex = sections.indexWhere((section) => section.id == tab.id);
-    if (directIndex >= 0) return directIndex;
-
-    final generatedIndex = sections.indexWhere(
-      (section) => '${section.id}:$kind' == tab.id,
-    );
-    if (generatedIndex >= 0) return generatedIndex;
-    return null;
+  static Map<String, FeedSectionState<T>> _sectionMap<T>(
+    List<FeedSectionState<T>> sections, {
+    required String kind,
+    required Set<String> usedTabIds,
+  }) {
+    final result = <String, FeedSectionState<T>>{};
+    for (final section in sections) {
+      var tabId = section.id;
+      if (usedTabIds.contains(tabId)) {
+        var suffix = 2;
+        tabId = '${section.id}:$kind';
+        while (usedTabIds.contains(tabId)) {
+          tabId = '${section.id}:$kind$suffix';
+          suffix++;
+        }
+      }
+      usedTabIds.add(tabId);
+      result[tabId] = section;
+    }
+    return result;
   }
 
   /// 当前生效的筛选项
   ///
   /// [filterId] 可空且会在数据源切换后失效（各源的 Feed id 不同），此时回退到
-  /// 首个可用 Feed。没有可用 Feed 时返回 null，由界面表达「该数据源未提供
-  /// 首页 Feed」，不假装有第一项。
+  /// 配置的主 tab，再回退到首个可见 Feed。没有可用 Feed 时返回 null，由界面
+  /// 表达「该数据源未提供首页 Feed」，不假装有第一项。
   HomeFilter? get activeFilter {
     final all = filters;
     if (all.isEmpty) return null;
@@ -182,7 +192,7 @@ class const HomeState({
     ];
   }
 
-  /// [clearFilter] 把选中项复位成「跟随首个 Feed」
+  /// [clearFilter] 把选中项复位成「跟随配置的主 tab」
   ///
   /// 单独给一个开关而不是靠 `filterId ?? this.filterId`：[filterId] 本身可空，
   /// `??` 分不出「没传」和「传 null」，切换数据源时无法清掉旧源的选中项。
