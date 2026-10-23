@@ -52,8 +52,13 @@ void main() {
         final tiles = find.byType(ListTile);
         expect(tiles, findsNWidgets(5));
         for (final (index, (_, label)) in sections.indexed) {
+          final tile = tiles.at(index);
           expect(
-            find.descendant(of: tiles.at(index), matching: find.text(label)),
+            find.descendant(of: tile, matching: find.text(label)),
+            findsOneWidget,
+          );
+          expect(
+            find.ancestor(of: tile, matching: find.byType(Tooltip)),
             findsOneWidget,
           );
         }

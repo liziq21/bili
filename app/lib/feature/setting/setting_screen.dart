@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
@@ -42,19 +43,25 @@ class const SettingScreen({
             ),
             (SettingsSection.advanced, l10n.settingsAdvanced, Icons.tune),
           ])
-            ListTile(
-              leading: Icon(icon, color: $styles.colors.onSurfaceVariant),
-              title: Text(
-                label,
-                style: $styles.text.body.copyWith(
-                  color: $styles.colors.onSurface,
+            Tooltip(
+              message: label,
+              child: ListTile(
+                leading: Icon(icon, color: $styles.colors.onSurfaceVariant),
+                title: Text(
+                  label,
+                  style: $styles.text.body.copyWith(
+                    color: $styles.colors.onSurface,
+                  ),
                 ),
+                trailing: Icon(
+                  Icons.chevron_right,
+                  color: $styles.colors.onSurfaceVariant,
+                ),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onSectionSelected(section);
+                },
               ),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: $styles.colors.onSurfaceVariant,
-              ),
-              onTap: () => onSectionSelected(section),
             ),
         ],
       ),
