@@ -1,14 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:model/model.dart';
 
+import '../../../datastore/preferences_data_source.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
+import '../../setting/app_settings.dart' as settings;
 import '../player/media_playback_controller.dart';
 
-/// 睡眠定时器档位（分钟）。
-const List<int> kSleepTimerMinutes = [15, 30, 45, 60];
+/// Backwards-compatible export for the player chip's duration list.
+const kSleepTimerMinutes = settings.kSleepTimerMinutes;
 
 /// 计时归零时的行为。
 enum SleepTimerAction() {
@@ -147,6 +151,8 @@ class const SleepTimerChip({
 
 class _SleepTimerChipState() extends State<SleepTimerChip> {
   late final SleepTimerController _sleep;
+  PreferencesDataSource? _preferences;
+  bool _userSelected = false;
 
   @override
   void initState() {
@@ -155,6 +161,26 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
     _sleep.addListener(() {
       if (mounted) setState(() {});
     });
+    try {
+      _preferences = context.read<PreferencesDataSource>();
+    } on Object catch (_) {}
+    _restoreDefaultTimer();
+  }
+
+  Future<void> _restoreDefaultTimer() async {
+    final preferences = _preferences;
+    if (preferences == null) return;
+    final result = await preferences.get(
+      PreferencesKey.sleepTimerDefaultMinutes,
+    );
+    if (!mounted || _userSelected) return;
+    switch (result) {
+      case Ok(:final value)
+          when value > 0 && kSleepTimerMinutes.contains(value):
+        _sleep.start(value);
+      case Ok() || Error():
+        break;
+    }
   }
 
   @override
@@ -190,6 +216,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();
+              _userSelected = true;
               _showPicker(context);
             },
             child: Padding(
@@ -271,6 +298,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                   ),
                   onTap: () {
                     HapticFeedback.selectionClick();
+                    _userSelected = true;
                     _sleep.cancel();
                     Navigator.of(sheetContext).pop();
                   },
@@ -308,6 +336,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   );
 
   void _pick(BuildContext sheetContext, int minutes, SleepTimerAction action) {
+    _userSelected = true;
     _sleep.start(minutes, action: action);
     Navigator.of(sheetContext).pop();
   }

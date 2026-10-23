@@ -1,11 +1,16 @@
 import 'dart:async';
 
+import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/video/common_widgets/sleep_timer_chip.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 /// 假播放器：只实现睡眠定时器路径需要的方法。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
@@ -97,14 +102,22 @@ void main() {
 
   /// 直接 pump chip，不经过 `Video`：真 `VideoController` 在有 libmpv 的
   /// 环境会走原生 ffi，widget 测试里渲染它会段错误。
-  Future<void> pumpChip(WidgetTester tester) async {
+  Future<void> pumpChip(
+    WidgetTester tester, {
+    PreferencesDataSource? preferences,
+  }) async {
     // [MediaPlaybackController._subscribe] 由 openQueue 触发。
     await controller.openQueue([MediaStream(videoUrl: 'https://e.com/v.m4s')]);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(body: SleepTimerChip(controller: controller)),
-      ),
+    Widget child = MaterialApp(
+      home: Scaffold(body: SleepTimerChip(controller: controller)),
     );
+    if (preferences != null) {
+      child = Provider<PreferencesDataSource>.value(
+        value: preferences,
+        child: child,
+      );
+    }
+    await tester.pumpWidget(child);
   }
 
   group('SleepTimerController', () {
@@ -180,6 +193,23 @@ void main() {
         expect(find.bySemanticsLabel('Sleep timer Timer'), findsOneWidget);
       },
     );
+
+    testWidgets('starts the configured default timer on player entry', (
+      tester,
+    ) async {
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      final preferences = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(preferences.dispose);
+      await preferences.set(PreferencesKey.sleepTimerDefaultMinutes, 15);
+
+      await pumpChip(tester, preferences: preferences);
+      await tester.pump();
+
+      expect(find.text('15:00'), findsOneWidget);
+    });
 
     testWidgets('tapping the chip opens the picker with all durations', (
       tester,

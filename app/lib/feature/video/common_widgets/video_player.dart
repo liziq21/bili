@@ -12,6 +12,7 @@ import 'package:model/model.dart';
 
 import '../../../datastore/preferences_data_source.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../setting/app_settings.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
 import 'player_keyboard_shortcuts.dart';
@@ -367,6 +368,7 @@ class const _VideoSurface({
 class _VideoSurfaceState() extends State<_VideoSurface> {
   StreamSubscription<PlaybackState>? _subscription;
   PlaybackState? _playbackState;
+  GestureSettings _gestureSettings = const GestureSettings();
   late final BoostRateController _boost;
   late final BrightnessService _brightnessService;
 
@@ -382,6 +384,17 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
     widget.controller.open(widget.stream);
     _restoreSavedRate();
     _applyPreferredQuality();
+    _loadGestureSettings();
+  }
+
+  Future<void> _loadGestureSettings() async {
+    try {
+      final settings = await GestureSettings.load(
+        context.read<PreferencesDataSource>(),
+      );
+      if (!mounted) return;
+      setState(() => _gestureSettings = settings);
+    } on Object catch (_) {}
   }
 
   /// 套用上次记住的默认倍速。
@@ -501,6 +514,10 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             controller: widget.controller,
             brightnessService: _brightnessService,
             boost: _boost,
+            seekEnabled: _gestureSettings.seekEnabled,
+            volumeEnabled: _gestureSettings.volumeEnabled,
+            brightnessEnabled: _gestureSettings.brightnessEnabled,
+            boostEnabled: _gestureSettings.boostEnabled,
             onTap: widget.fullscreen ? widget.onTapSurface : null,
             onDoubleTapScreen: widget.onToggleFullscreen,
             child: PlayerKeyboardShortcuts(

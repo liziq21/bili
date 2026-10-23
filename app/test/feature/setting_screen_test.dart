@@ -2,7 +2,6 @@ import 'package:app/app_scaffold.dart';
 import 'package:app/feature/setting/advanced_settings_screen.dart';
 import 'package:app/feature/setting/appearance_settings_screen.dart';
 import 'package:app/feature/setting/library_settings_screen.dart';
-import 'package:app/feature/setting/player_settings_screen.dart';
 import 'package:app/feature/setting/setting_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -99,7 +98,6 @@ void main() {
 
   group('Settings subpages', () {
     for (final (screen, title) in const [
-      (PlayerSettingsScreen(), 'Player'),
       (LibrarySettingsScreen(), 'Library'),
       (AdvancedSettingsScreen(), 'Advanced'),
     ]) {

@@ -32,6 +32,10 @@ class const PlayerGestureLayer({
   required final MediaPlaybackController controller,
   required final BrightnessService brightnessService,
   required final BoostRateController boost,
+  final bool seekEnabled = true,
+  final bool volumeEnabled = true,
+  final bool brightnessEnabled = true,
+  final bool boostEnabled = true,
   final VoidCallback? onTap,
 
   /// 鼠标双击画面时的回调（桌面端用来进出全屏）。
@@ -85,6 +89,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   }
 
   void _onHorizontalDragStart(DragStartDetails details) {
+    if (!widget.seekEnabled) return;
     final state = widget.controller.state;
     _seekBase = state.position;
     _seekStart = details.localPosition;
@@ -95,6 +100,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   }
 
   void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    if (!widget.seekEnabled) return;
     final base = _seekBase;
     if (base == null || _seekStart == null) return;
     final dx = details.localPosition.dx - _seekStart!.dx;
@@ -110,6 +116,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   }
 
   void _onHorizontalDragEnd(DragEndDetails details) {
+    if (!widget.seekEnabled) return;
     final target = _seekTarget;
     _seekBase = null;
     _seekStart = null;
@@ -123,6 +130,11 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   void _onVerticalDragStart(DragStartDetails details) {
     final width = context.size?.width ?? 1;
     final isVolume = details.localPosition.dx >= width / 2;
+    if ((isVolume && !widget.volumeEnabled) ||
+        (!isVolume && !widget.brightnessEnabled)) {
+      _vertical = null;
+      return;
+    }
     if (isVolume) {
       _vertical = _VerticalDrag(
         isVolume: true,
@@ -175,6 +187,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
       widget.onDoubleTapScreen?.call();
       return;
     }
+    if (!widget.seekEnabled) return;
     // 鼠标双击交回外部（桌面端全屏），触摸双击才做左右半屏快进快退。
 
     final width = context.size?.width ?? 1;
@@ -230,15 +243,25 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
                 onPointerDown: (event) => _lastPointerKind = event.kind,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onHorizontalDragStart: _onHorizontalDragStart,
-                  onHorizontalDragUpdate: _onHorizontalDragUpdate,
-                  onHorizontalDragEnd: _onHorizontalDragEnd,
+                  onHorizontalDragStart: widget.seekEnabled
+                      ? _onHorizontalDragStart
+                      : null,
+                  onHorizontalDragUpdate: widget.seekEnabled
+                      ? _onHorizontalDragUpdate
+                      : null,
+                  onHorizontalDragEnd: widget.seekEnabled
+                      ? _onHorizontalDragEnd
+                      : null,
                   onVerticalDragStart: _onVerticalDragStart,
                   onVerticalDragUpdate: _onVerticalDragUpdate,
                   onVerticalDragEnd: _onVerticalDragEnd,
                   onTap: widget.onTap,
-                  onLongPress: widget.boost.onLongPress,
-                  onLongPressEnd: (_) => widget.boost.onLongPressEnd(),
+                  onLongPress: widget.boostEnabled
+                      ? widget.boost.onLongPress
+                      : null,
+                  onLongPressEnd: widget.boostEnabled
+                      ? (_) => widget.boost.onLongPressEnd()
+                      : null,
                   onDoubleTapDown: _onDoubleTapDown,
                   child: widget.child,
                 ),
