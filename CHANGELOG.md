@@ -58,6 +58,8 @@ so hand edits do not survive; change the generator instead.
 - feat(settings): add appearance placeholders and satisfy strict analysis (#397)
 - feat: LIZ-31 settings skeleton - add PreferencesKey constants and data models (#404)
 - feat(home): add persisted home configuration model (Issue #364) (#408)
+- feat(home): connect grid columns configuration (#363) (#413)
+- feat(home): consume configurable home tabs (#415)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -118,6 +120,7 @@ so hand edits do not survive; change the generator instead.
 - fix(home): harden feed layout and refresh behavior (#354)
 - fix(video): restore detail back navigation and clear player controls (#394)
 - fix: use system sqlite3 on Linux to avoid glibc/bionic mismatch in Termux (#398)
+- 🛡️ Sentinel: mask sensitive build error exceptions in release builds (#410)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -199,6 +202,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Enable related video card navigation and tactile feedback (#387)
 - ⚡ Bolt: Measurement environment unavailable (No-Change Report) (#400)
 - 🎨 Palette: Improve SpaceScreen accessibility and tactile feedback (#401)
+- 🎨 Palette: Improve video player placeholder slider accessibility and haptics (#411)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
