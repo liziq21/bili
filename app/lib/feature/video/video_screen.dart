@@ -43,10 +43,13 @@ class VideoScreenState() extends State<VideoScreen> {
 
   /// 进度周期性保存定时器（每 10 秒）。
   Timer? _progressSaveTimer;
+
   /// 播放器状态流订阅，用于监听队列切换。
   StreamSubscription<PlaybackState>? _playbackStateSubscription;
+
   /// 最后一次保存进度时的播放位置（秒），避免频繁写入。
   int _lastSavedPositionSeconds = -1;
+
   /// 最后一次保存进度时的队列索引，用于检测队列切换。
   int _lastSavedQueueIndex = -1;
 
@@ -121,7 +124,8 @@ class VideoScreenState() extends State<VideoScreen> {
     final controller = _playbackController;
     if (controller == null) return;
     // 避免重复启动。
-    if (_progressSaveTimer != null || _playbackStateSubscription != null) return;
+    if (_progressSaveTimer != null || _playbackStateSubscription != null)
+      return;
 
     _progressSaveTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _saveProgressPeriodic();
