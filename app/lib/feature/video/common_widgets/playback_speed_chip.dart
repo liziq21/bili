@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../datastore/preferences_data_source.dart';
+import '../../setting/app_settings.dart' as settings;
 
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -10,21 +11,14 @@ import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../player/media_playback_controller.dart';
 
-/// 倍速档位：覆盖常用播放速度，1.0 为正常。
-const List<double> kPlaybackRates = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
-
 /// 长按临时加速的目标倍速。
 const double kBoostRate = 2.0;
 
+/// Backwards-compatible export for the player chip's rate list.
+const kPlaybackRates = settings.kPlaybackRates;
+
 /// 把倍速值格式成短标签：1.0 → "1x"，1.5 → "1.5x"，0.75 → "0.75x"。
-String rateLabel(double rate) {
-  var text = rate.toStringAsFixed(2);
-  // 去掉结尾的零与可能跟着的小数点："1.00" → "1"，"1.50" → "1.5"。
-  if (text.contains('.')) {
-    text = text.replaceFirst(RegExp(r'\.?0+$'), '');
-  }
-  return '${text}x';
-}
+String rateLabel(double rate) => settings.playbackRateLabel(rate);
 
 /// 倍速按钮：显示当前倍速，点击弹底部选择器。
 ///

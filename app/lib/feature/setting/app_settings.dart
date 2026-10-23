@@ -9,23 +9,82 @@ import '../../datastore/preferences_data_source.dart';
 /// 「默认 90 分钟」而播放器里没有任何一项能对上的状态。
 const List<int> kSleepTimerMinutes = [15, 30, 45, 60];
 
+/// 播放器可记忆的倍速档位。
+const List<double> kPlaybackRates = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+
+/// 设置页可表达的通用画质高度。
+///
+/// 设置页不知道当前服务实际提供哪些档位，因此只写高度偏好；播放器进入
+/// 视频后由服务源就近解析。`null` 表示交给服务源自动选择。
+const List<int?> kPreferredQualityHeights = [null, 2160, 1080, 720, 480];
+
+const Object _unset = Object();
+
+/// 将倍速显示为紧凑标签：1.0 → "1x"，1.5 → "1.5x"。
+String playbackRateLabel(double rate) {
+  var text = rate.toStringAsFixed(2);
+  if (text.contains('.')) {
+    text = text.replaceFirst(RegExp(r'\.?0+$'), '');
+  }
+  return '${text}x';
+}
+
 /// 播放器分组里的标量配置。
 ///
-/// 默认倍速与默认画质高度的键已由播放器进入时消费
+/// 默认倍速与默认画质的键已由播放器进入时消费
 /// （`feature/video/common_widgets/video_player.dart`），这里不新增第二条读取
-/// 路径，只给这两个键一个可写入口，并补上只有设置页才有的睡眠定时默认档。
+/// 路径，只给这些键一个统一的读写入口，并补上只有设置页才有的睡眠定时默认档。
 @immutable
 final class const PlayerSettings({
+  /// 进入播放器时套用的倍速。
+  final double playbackRate = 1.0,
+
+  /// 进入播放器时优先请求的画面高度。
+  final int? preferredQualityHeight,
+
+  /// 进入播放器时优先请求的源侧画质 id。
+  ///
+  /// 设置页只编辑高度，因此从设置页选择任意高度时会清掉这个精确 id，
+  /// 避免旧服务源的 id 覆盖用户刚选的通用高度。
+  final int? preferredQualityStreamId,
+
   /// 睡眠定时器的默认档位（分钟）。0 表示进入播放器不自动开始计时。
   final int sleepTimerDefaultMinutes = 0,
 }) {
-  PlayerSettings copyWith({int? sleepTimerDefaultMinutes}) => PlayerSettings(
+  PlayerSettings copyWith({
+    double? playbackRate,
+    Object? preferredQualityHeight = _unset,
+    Object? preferredQualityStreamId = _unset,
+    int? sleepTimerDefaultMinutes,
+  }) => PlayerSettings(
+    playbackRate: playbackRate ?? this.playbackRate,
+    preferredQualityHeight: identical(preferredQualityHeight, _unset)
+        ? this.preferredQualityHeight
+        : preferredQualityHeight as int?,
+    preferredQualityStreamId: identical(preferredQualityStreamId, _unset)
+        ? this.preferredQualityStreamId
+        : preferredQualityStreamId as int?,
     sleepTimerDefaultMinutes:
         sleepTimerDefaultMinutes ?? this.sleepTimerDefaultMinutes,
   );
 
   static Future<PlayerSettings> load(PreferencesDataSource preferences) async =>
       PlayerSettings(
+        playbackRate: await readSetting(
+          preferences,
+          PreferencesKey.playbackRate,
+          1.0,
+        ),
+        preferredQualityHeight: await readSetting<int?>(
+          preferences,
+          PreferencesKey.preferredQualityHeight,
+          null,
+        ),
+        preferredQualityStreamId: await readSetting<int?>(
+          preferences,
+          PreferencesKey.preferredQualityStreamId,
+          null,
+        ),
         sleepTimerDefaultMinutes: await readSetting(
           preferences,
           PreferencesKey.sleepTimerDefaultMinutes,
@@ -33,11 +92,24 @@ final class const PlayerSettings({
         ),
       );
 
-  Future<void> save(PreferencesDataSource preferences) => writeSetting(
-    preferences,
-    PreferencesKey.sleepTimerDefaultMinutes,
-    sleepTimerDefaultMinutes,
-  );
+  Future<void> save(PreferencesDataSource preferences) => Future.wait([
+    writeSetting(preferences, PreferencesKey.playbackRate, playbackRate),
+    writeSetting<int?>(
+      preferences,
+      PreferencesKey.preferredQualityHeight,
+      preferredQualityHeight,
+    ),
+    writeSetting<int?>(
+      preferences,
+      PreferencesKey.preferredQualityStreamId,
+      preferredQualityStreamId,
+    ),
+    writeSetting(
+      preferences,
+      PreferencesKey.sleepTimerDefaultMinutes,
+      sleepTimerDefaultMinutes,
+    ),
+  ]);
 }
 
 /// 手势分组里的开关，四类手势各自独立。

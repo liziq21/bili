@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../setting/app_settings.dart';
 import '../player/media_playback_controller.dart';
-import 'playback_speed_chip.dart';
 
 /// 键盘一次调整的音量步长。
 const double kVolumeStep = 0.05;
