@@ -113,11 +113,13 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 ### 文案与本地化（Copy and Localization）
 
-- 面向用户的文案（label、title、tooltip、hint、SnackBar、错误提示、空态文案）必须放在 `app/lib/l10n/app_.arb`，通过 `AppLocalizations.of(context)` 读取，不得硬编码在 Dart 源文件里。
+- 面向用户的文案（label、title、tooltip、hint、SnackBar、错误提示、空态文案）必须放在 `app/lib/l10n/app_.arb`（英文，模板/默认语言）与 `app/lib/l10n/app_zh.arb`（中文），两个文件**键必须完全一致**，值分别为英文与中文。通过 `AppLocalizations.of(context)` 读取，不得硬编码在 Dart 源文件里。
 - **日志与错误类文案可以硬编码英文**。这是本规则唯一需要的例外，且不需要任何豁免机制：护栏断言的是「不得有非 ASCII 字面量」，ASCII 天然满足。不要为此引入 ignore 注释或白名单。
 - 注释、文档、commit message 不受本规则约束（见 Language Flexibility 段）。
 - 这条规则由 `app/test/golden/hardcoded_copy_test.dart` 机器执行，不是纸面约定：断言 `app/lib` 下非生成的 `.dart` 文件里不存在非 ASCII 字符串字面量。唯一的路径级排除是 gen-l10n 的产物目录 `app/lib/l10n/localization_file/`（ARB 的值是它的源，不是硬编码处）。
-- 该护栏与 Screenshot Tests 段的字体子集契约是**两件事**：前者管文案放在哪，后者管渲染时有没有字形。新增中文文案只需改 ARB；子集缺字由 `tool/generate_subset_characters.py` 从生成产物自动收进，再跑 `bin/bili-fonts` 重切 OTF。
+- 该护栏与 Screenshot Tests 段的字体子集契约是**两件事**：前者管文案放在哪，后者管渲染时有没有字形。新增中文文案需同步改 `app_zh.arb`；子集缺字由 `tool/generate_subset_characters.py` 从生成产物自动收进，再跑 `bin/bili-fonts` 重切 OTF。
+- `l10n.yaml` 的 `supported-locales` 必须显式列出 `en` 与 `zh`，确保生成的 `AppLocalizations.supportedLocales` 以英文为首（默认语言）。
+
 
 ### Screenshot Tests
 

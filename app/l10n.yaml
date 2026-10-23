@@ -3,3 +3,6 @@ template-arb-file: app_.arb
 output-localization-file: app_localizations.dart
 output-dir: lib/l10n/localization_file
 #nullable-getter: false
+supported-locales:
+  - en
+  - zh

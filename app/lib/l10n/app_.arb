@@ -1,7 +1,7 @@
 {
-  "@@locale": "zh",
-  "@@last_modified": "2026-01-16",
-  "appName": "pili",
+  "@@locale": "en",
+  "@@last_modified": "2026-10-23",
+  "appName": "Pili",
   "@appName": {
     "description": "App name - DO NOT TRANSLATE"
   },
@@ -10,7 +10,7 @@
     "description": "Bottom navigation - Home tab"
   },
   "searchResultTypeAll": "All",
-  "searchResultTypeVideo": "视频",
+  "searchResultTypeVideo": "Video",
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"
@@ -1157,11 +1157,11 @@
   "@queueModeLoop": {
     "description": "Tooltip for player queue loop mode: playlist loop"
   },
-  "playbackSpeedLabel": "倍速",
+  "playbackSpeedLabel": "Speed",
   "@playbackSpeedLabel": {
     "description": "Playback speed picker title in the player"
   },
-  "sleepTimerLabel": "定时",
+  "sleepTimerLabel": "Timer",
   "@sleepTimerLabel": {
     "description": "Sleep timer chip label when no timer is running"
   },
@@ -1193,7 +1193,7 @@
   "@qualityPickerTitle": {
     "description": "Quality picker title"
   },
-  "qualityAutoLabel": "自动",
+  "qualityAutoLabel": "Auto",
   "@qualityAutoLabel": {
     "description": "Label shown when the stream has no reported height"
   },
@@ -4616,7 +4616,7 @@
   "@appLoadFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "settings": "设置",
+  "settings": "Settings",
   "@settings": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4655,7 +4655,7 @@
       }
     }
   },
-  "retry": "重试",
+  "retry": "Retry",
   "@retry": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4729,7 +4729,7 @@
   "@spaceDescriptionUnavailable": {
     "description": "Fallback text when a creator has no profile description"
   },
-  "videoTab": "视频",
+  "videoTab": "Video",
   "@videoTab": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4766,7 +4766,7 @@
   "@reset": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "confirm": "确定",
+  "confirm": "OK",
   "@confirm": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4778,15 +4778,15 @@
   "@localLibrary": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "history": "历史",
+  "history": "History",
   "@history": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "favorite": "收藏",
+  "favorite": "Favorites",
   "@favorite": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "playlists": "播放列表",
+  "playlists": "Playlist",
   "@playlists": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4807,7 +4807,7 @@
       }
     }
   },
-  "filter": "筛选",
+  "filter": "Filter",
   "@filter": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4823,11 +4823,11 @@
   "@deletePlaylistNote": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "cancel": "取消",
+  "cancel": "Cancel",
   "@cancel": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "delete": "删除",
+  "delete": "Delete",
   "@delete": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4960,7 +4960,7 @@
   "@source": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "name": "名称",
+  "name": "Name",
   "@name": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -4976,11 +4976,11 @@
   "@groupNameHint": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "save": "保存",
+  "save": "Save",
   "@save": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "mine": "我的",
+  "mine": "Me",
   "@mine": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5061,7 +5061,7 @@
       }
     }
   },
-  "justNow": "刚刚",
+  "justNow": "Just Now",
   "@justNow": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5092,7 +5092,7 @@
       }
     }
   },
-  "addToPlaylistTitle": "添加到播放列表",
+  "addToPlaylistTitle": "Add to Playlist",
   "@addToPlaylistTitle": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5232,11 +5232,11 @@
       }
     }
   },
-  "playbackSpeed": "倍速",
+  "playbackSpeed": "Speed",
   "@playbackSpeed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "auto": "自动",
+  "auto": "Auto",
   "@auto": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5252,7 +5252,7 @@
   "@afterCurrentItem": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "timer": "定时",
+  "timer": "Timer",
   "@timer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5425,7 +5425,7 @@
   "@follow": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "like": "点赞",
+  "like": "Like",
   "@like": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5453,7 +5453,7 @@
   "@autoSwitchBestRoute": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "share": "分享",
+  "share": "Share",
   "@share": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5473,7 +5473,7 @@
   "@danmakuStateOff": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "danmaku": "弹幕",
+  "danmaku": "Danmaku",
   "@danmaku": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5497,7 +5497,7 @@
   "@expandSynopsis": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "collapse": "收起",
+  "collapse": "Collapse",
   "@collapse": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5584,7 +5584,7 @@
   "@back": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "fullscreen": "全屏",
+  "fullscreen": "Fullscreen",
   "@fullscreen": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5592,11 +5592,11 @@
   "@highBitrate1080": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "pause": "暂停",
+  "pause": "Pause",
   "@pause": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "play": "播放",
+  "play": "Play",
   "@play": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5756,11 +5756,11 @@
   "@liveNow": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "navHomeLabel": "首页",
+  "navHomeLabel": "Home",
   "@navHomeLabel": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "search": "搜索",
+  "search": "Search",
   "@search": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
