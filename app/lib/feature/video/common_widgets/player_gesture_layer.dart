@@ -100,6 +100,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
 
   /// 上次读到的窗口亮度，拖动起点。
   double _brightness = 0.5;
+
   /// 最近一次按下的指针设备类型，用于区分触摸双击与鼠标双击。
   PointerDeviceKind? _lastPointerKind;
   int _pointerCount = 0;
