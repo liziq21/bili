@@ -205,6 +205,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Improve SpaceScreen accessibility and tactile feedback (#401)
 - 🎨 Palette: Improve video player placeholder slider accessibility and haptics (#411)
 - 🎨 Palette: Add tooltip and tactile feedback to settings section items (#417)
+- 🎨 Palette: Consolidate HomeSourceSelector dropdown button semantics (#469)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
