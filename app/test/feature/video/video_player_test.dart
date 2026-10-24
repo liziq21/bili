@@ -400,8 +400,8 @@ class _NoStreamRepository() implements VideoDetailRepository {
 }
 
 // ignore_for_file: close_sinks
-class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
-  this {
+class _FakePlatformPlayer extends Fake implements PlatformPlayer {
+  _FakePlatformPlayer() {
     stream = PlayerStream(
       _playlist.stream,
       _playing.stream,
