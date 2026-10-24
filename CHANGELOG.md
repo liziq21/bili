@@ -123,6 +123,7 @@ so hand edits do not survive; change the generator instead.
 - fix(video): restore detail back navigation and clear player controls (#394)
 - fix: use system sqlite3 on Linux to avoid glibc/bionic mismatch in Termux (#398)
 - 🛡️ Sentinel: mask sensitive build error exceptions in release builds (#410)
+- fix: resolve flutter analyze issues (#470)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
