@@ -61,6 +61,7 @@ so hand edits do not survive; change the generator instead.
 - feat(home): connect grid columns configuration (#363) (#413)
 - feat(home): consume configurable home tabs (#415)
 - feat(settings): add player preferences UI (#418)
+- feat(LIZ-90): periodic progress persistence + queue-switch progress save (#468)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
