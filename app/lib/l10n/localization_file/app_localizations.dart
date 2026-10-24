@@ -202,109 +202,109 @@ abstract class AppLocalizations {
 
   /// Player setting - default video quality
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'默认画质'**
   String get playerDefaultQuality;
 
   /// Subtitle for the default video quality setting
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'进入播放器时优先使用的画质'**
   String get playerDefaultQualitySubtitle;
 
   /// Player setting - default playback speed
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'默认倍速'**
   String get playerDefaultSpeed;
 
   /// Subtitle for the default playback speed setting
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'进入播放器时优先使用的播放速度'**
   String get playerDefaultSpeedSubtitle;
 
   /// Heading for player gesture settings
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'播放手势'**
   String get playerGestures;
 
   /// Toggle for seeking with player gestures
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'滑动与双击快进'**
   String get playerGestureSeek;
 
   /// Subtitle for the player seek gesture toggle
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'在画面上滑动或双击调整播放位置'**
   String get playerGestureSeekSubtitle;
 
   /// Toggle for changing volume with vertical gestures
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'滑动调节音量'**
   String get playerGestureVolume;
 
   /// Subtitle for the player volume gesture toggle
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'在画面右侧上下滑动调节音量'**
   String get playerGestureVolumeSubtitle;
 
   /// Toggle for changing brightness with vertical gestures
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'滑动调节亮度'**
   String get playerGestureBrightness;
 
   /// Subtitle for the player brightness gesture toggle
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'在画面左侧上下滑动调节亮度'**
   String get playerGestureBrightnessSubtitle;
 
   /// Toggle for temporary long-press playback boost
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'长按临时加速'**
   String get playerGestureBoost;
 
   /// Subtitle for the player boost gesture toggle
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'长按画面临时切换到 2 倍速'**
   String get playerGestureBoostSubtitle;
 
   /// Player setting - default sleep timer duration
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'睡眠定时器默认值'**
   String get playerSleepTimerDefault;
 
   /// Subtitle for the default sleep timer setting
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'进入播放器时自动开始倒计时，关闭则不自动计时'**
   String get playerSleepTimerDefaultSubtitle;
 
   /// Value meaning that the default sleep timer is disabled
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'关闭'**
   String get playerSleepTimerOff;
 
   /// Automatic player quality selection
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'自动'**
   String get playerQualityAuto;
 
   /// Video quality height shown in player settings
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'{p1}P'**
   String playerQualityHeight(String p1);
 
@@ -7256,8 +7256,50 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播放失败：{p1}'**
+  /// **'Playback failed: {p1}'**
   String playbackFailed(String p1);
+
+  /// Playback error category - network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get playbackErrorNetwork;
+
+  /// Playback error category - media decoding failure
+  ///
+  /// In en, this message translates to:
+  /// **'Decoder error'**
+  String get playbackErrorDecoder;
+
+  /// Playback error category - DRM failure
+  ///
+  /// In en, this message translates to:
+  /// **'DRM error'**
+  String get playbackErrorDrm;
+
+  /// Playback error category - authorization failure
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization error'**
+  String get playbackErrorAuthorization;
+
+  /// Playback error category - unknown failure
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown playback error'**
+  String get playbackErrorUnknown;
+
+  /// Playback status shown while retrying a network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying...'**
+  String get playbackRetrying;
+
+  /// Player error action - skip the current queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///

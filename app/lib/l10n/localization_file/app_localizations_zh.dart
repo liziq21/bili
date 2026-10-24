@@ -4223,6 +4223,27 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get playbackErrorNetwork => '网络错误';
+
+  @override
+  String get playbackErrorDecoder => '解码错误';
+
+  @override
+  String get playbackErrorDrm => 'DRM 错误';
+
+  @override
+  String get playbackErrorAuthorization => '授权错误';
+
+  @override
+  String get playbackErrorUnknown => '未知播放错误';
+
+  @override
+  String get playbackRetrying => '正在重试...';
+
+  @override
+  String get skip => '跳过';
+
+  @override
   String get back => '返回';
 
   @override
