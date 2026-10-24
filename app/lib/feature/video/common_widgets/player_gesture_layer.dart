@@ -27,6 +27,43 @@ import 'playback_speed_chip.dart';
 /// 双击快进 / 快退的步长。
 const Duration kDoubleTapSeekDelta = Duration(seconds: 10);
 
+/// 垂直拖动所控制的播放器属性。
+enum PlayerVerticalControl() {
+  brightness,
+  volume,
+}
+
+/// 根据画面左右位置选择垂直拖动控制的属性。
+PlayerVerticalControl playerVerticalControlFor({
+  required double localX,
+  required double width,
+}) => localX >= width / 2
+    ? PlayerVerticalControl.volume
+    : PlayerVerticalControl.brightness;
+
+/// 根据水平拖动距离计算快进浮层和最终 seek 使用的目标时间。
+///
+/// [durationPerPixel] 由画面宽度和媒体时长计算，单位：秒/像素。
+/// 返回值会被钳制在 [0, duration] 区间内。
+Duration calculatePlayerSeekTarget({
+  required Duration base,
+  required double deltaX,
+  required double durationPerPixel,
+  required Duration duration,
+}) {
+  final deltaSec = deltaX * durationPerPixel;
+  final targetSec = (base.inSeconds + deltaSec).clamp(0, duration.inSeconds);
+  return Duration(seconds: targetSec.round());
+}
+
+/// 将 [Duration] 格式化为 H:MM:SS 或 MM:SS 供浮层显示。
+String formatPlayerTimestamp(Duration d) {
+  final h = d.inHours;
+  final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+  return h > 0 ? '$h:$m:$s' : '$m:$s';
+}
+
 class const PlayerGestureLayer({
   super.key,
   required final MediaPlaybackController controller,
@@ -64,14 +101,9 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   /// 上次读到的窗口亮度，拖动起点。
   double _brightness = 0.5;
 
-  /// 双击后的快进 / 快退提示增量，非 null 时渲染浮层。
-  Duration? _skipHint;
-
-  /// 收起提示浮层的定时器。
-  Timer? _skipHintTimer;
-
   /// 最近一次按下的指针设备类型，用于区分触摸双击与鼠标双击。
   PointerDeviceKind? _lastPointerKind;
+  int _pointerCount = 0;
 
   @override
   void initState() {
@@ -183,41 +215,12 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   /// 分界取画面中线，与垂直拖动的左右分区同一条线，避免同一手势里出现两套
   /// 空间约定。时长未知（尚未打开媒体）时只给提示不 seek。
   void _onDoubleTapDown(TapDownDetails details) {
-    if (_lastPointerKind == PointerDeviceKind.mouse) {
-      widget.onDoubleTapScreen?.call();
-      return;
-    }
-    if (!widget.seekEnabled) return;
-    // 鼠标双击交回外部（桌面端全屏），触摸双击才做左右半屏快进快退。
-
-    final width = context.size?.width ?? 1;
-    final forward = details.localPosition.dx >= width / 2;
-    final delta = forward ? kDoubleTapSeekDelta : -kDoubleTapSeekDelta;
-    final state = widget.controller.state;
-    final duration = state.duration;
-    if (duration > Duration.zero) {
-      final targetMs = (state.position.inMilliseconds + delta.inMilliseconds)
-          .clamp(0, duration.inMilliseconds)
-          .toInt();
-      widget.controller.seek(Duration(milliseconds: targetMs));
-    }
-    HapticFeedback.mediumImpact();
-    _showSkipHint(delta);
+    widget.onDoubleTapScreen?.call();
   }
 
   /// 浮层只闪一下，不阻塞后续手势。
-  void _showSkipHint(Duration delta) {
-    _skipHintTimer?.cancel();
-    setState(() => _skipHint = delta);
-    _skipHintTimer = Timer(const Duration(milliseconds: 900), () {
-      if (!mounted) return;
-      setState(() => _skipHint = null);
-    });
-  }
-
   @override
   void dispose() {
-    _skipHintTimer?.cancel();
     super.dispose();
   }
 
@@ -240,7 +243,14 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
           children: [
             Positioned.fill(
               child: Listener(
-                onPointerDown: (event) => _lastPointerKind = event.kind,
+                onPointerDown: (event) {
+                  _lastPointerKind = event.kind;
+                  _pointerCount++;
+                  if (_pointerCount == 2) {
+                    widget.onDoubleTapScreen?.call();
+                    _pointerCount = 0;
+                  }
+                },
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragStart: widget.seekEnabled
@@ -262,7 +272,6 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
                   onLongPressEnd: widget.boostEnabled
                       ? (_) => widget.boost.onLongPressEnd()
                       : null,
-                  onDoubleTapDown: _onDoubleTapDown,
                   child: widget.child,
                 ),
               ),
@@ -277,8 +286,6 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
               ),
             if (_vertical != null)
               Positioned.fill(child: _VerticalIndicator(vertical: _vertical!)),
-            if (_skipHint != null)
-              Positioned.fill(child: _SkipHint(delta: _skipHint!)),
           ],
         );
       },

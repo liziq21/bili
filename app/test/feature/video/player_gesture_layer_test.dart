@@ -113,9 +113,48 @@ void main() {
     boost.dispose();
   });
 
+  test('vertical gesture zones map to brightness and volume', () {
+    expect(
+      playerVerticalControlFor(localX: 49, width: 100),
+      PlayerVerticalControl.brightness,
+    );
+    expect(
+      playerVerticalControlFor(localX: 50, width: 100),
+      PlayerVerticalControl.volume,
+    );
+  });
+
+  test('seek preview clamps and formats its target timestamp', () {
+    final target = calculatePlayerSeekTarget(
+      base: const Duration(seconds: 30),
+      deltaX: 50,
+      durationPerPixel: 1.2,
+      duration: const Duration(minutes: 2),
+    );
+
+    expect(target, const Duration(seconds: 90));
+    expect(formatPlayerTimestamp(target), '01:30');
+    expect(
+      formatPlayerTimestamp(const Duration(hours: 1, minutes: 2, seconds: 3)),
+      '1:02:03',
+    );
+    expect(
+      calculatePlayerSeekTarget(
+        base: const Duration(seconds: 115),
+        deltaX: 50,
+        durationPerPixel: 1.2,
+        duration: const Duration(minutes: 2),
+      ),
+      const Duration(minutes: 2),
+    );
+  });
+
   /// 直接 pump 手势层，不经过原生 `Video`：真 `VideoController` 在有
   /// libmpv 的环境会走原生 ffi，widget 测试里渲染它会段错误。
-  Future<void> pumpLayer(WidgetTester tester) async {
+  Future<void> pumpLayer(
+    WidgetTester tester, {
+    VoidCallback? onDoubleTapScreen,
+  }) async {
     // [_subscribe] 由 openQueue 触发：不打开队列，位置/时长流无人监听。
     await controller.openQueue([MediaStream(videoUrl: 'https://e.com/v.m4s')]);
     fake.emitPosition(const Duration(seconds: 30));
@@ -143,6 +182,7 @@ void main() {
               controller: controller,
               brightnessService: BrightnessService(),
               boost: boost,
+              onDoubleTapScreen: onDoubleTapScreen,
               child: const ColoredBox(
                 color: Color(0xFF000000),
                 child: SizedBox.expand(),
@@ -172,6 +212,8 @@ void main() {
       // 整屏 200px 扫过两倍时长（120s），即 1.2s/px；拖 50px = +60s。
       await gesture.moveBy(const Offset(50, 0));
       await tester.pump();
+
+      expect(find.text('01:30 / 02:00'), findsOneWidget);
       await gesture.up();
       await tester.pump();
 
@@ -263,53 +305,38 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('double tap on the right half seeks forward', (tester) async {
-      await pumpLayer(tester);
-      // 画面宽 200，中线在 100；x=150 属右半屏（快进）。
+    testWidgets('touch double tap toggles fullscreen', (tester) async {
+      var fullscreenToggles = 0;
+      await pumpLayer(tester, onDoubleTapScreen: () => fullscreenToggles++);
+
       await tester.tapAt(const Offset(150, 50));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(const Offset(150, 50));
       await tester.pump(const Duration(milliseconds: 100));
-      // 起点位置 30s，双击快进 10s。
-      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
+
+      expect(fullscreenToggles, 1);
+      expect(fake.seekCalls, isEmpty);
     });
-    testWidgets('double tap on the left half seeks backward', (tester) async {
-      await pumpLayer(tester);
-      // x=50 属左半屏（快退）。
-      await tester.tapAt(const Offset(50, 50));
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(const Offset(50, 50));
-      await tester.pump(const Duration(milliseconds: 100));
-      // 起点位置 30s，双击快退 10s。
-      expect(fake.seekCalls, contains(const Duration(seconds: 20)));
+    testWidgets('two-finger tap toggles fullscreen', (tester) async {
+      var fullscreenToggles = 0;
+      await pumpLayer(tester, onDoubleTapScreen: () => fullscreenToggles++);
+
+      final first = TestPointer(1, PointerDeviceKind.touch);
+      final second = TestPointer(2, PointerDeviceKind.touch);
+      tester.binding.handlePointerEvent(first.down(const Offset(60, 50)));
+      tester.binding.handlePointerEvent(second.down(const Offset(140, 50)));
+      tester.binding.handlePointerEvent(first.up());
+      tester.binding.handlePointerEvent(second.up());
+      await tester.pump();
+
+      expect(fullscreenToggles, 1);
+      expect(fake.seekCalls, isEmpty);
     });
     testWidgets(
       'mouse double tap goes to the screen callback instead of seeking',
       (tester) async {
-        await pumpLayer(tester);
         var screenTaps = 0;
-        // 重建一层带鼠标回调的手势层。
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 200,
-                height: 100,
-                child: PlayerGestureLayer(
-                  controller: controller,
-                  brightnessService: BrightnessService(),
-                  boost: boost,
-                  onDoubleTapScreen: () => screenTaps++,
-                  child: const ColoredBox(
-                    color: Color(0xFF000000),
-                    child: SizedBox.expand(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pump();
+        await pumpLayer(tester, onDoubleTapScreen: () => screenTaps++);
 
         final pointer = TestPointer(7, PointerDeviceKind.mouse);
         tester.binding.handlePointerEvent(pointer.down(const Offset(150, 50)));
@@ -323,17 +350,6 @@ void main() {
         expect(fake.seekCalls, isEmpty);
       },
     );
-    testWidgets('double tap exactly on the middle line seeks forward', (
-      tester,
-    ) async {
-      await pumpLayer(tester);
-      // 中线 x=100 归右半屏，与垂直拖动的左右分区判定一致。
-      await tester.tapAt(const Offset(100, 50));
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(const Offset(100, 50));
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
-    });
     testWidgets('long press boosts the rate and releasing restores', (
       tester,
     ) async {

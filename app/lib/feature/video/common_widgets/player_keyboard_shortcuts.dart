@@ -14,6 +14,34 @@ const Duration kKeyboardSeekStep = Duration(seconds: 5);
 /// 配合 Shift 的长步长。
 const Duration kKeyboardSeekStepLong = Duration(seconds: 10);
 
+/// 播放器桌面键盘动作。
+enum PlayerKeyboardAction() {
+  togglePlayback,
+  seekBackward,
+  seekForward,
+  volumeUp,
+  volumeDown,
+  toggleFullscreen,
+  toggleMute,
+  slower,
+  faster,
+}
+
+/// 把逻辑键映射成播放器动作，供 UI 和单测共用同一份映射表。
+PlayerKeyboardAction? playerKeyboardActionFor(LogicalKeyboardKey key) =>
+    switch (key) {
+      LogicalKeyboardKey.space => PlayerKeyboardAction.togglePlayback,
+      LogicalKeyboardKey.arrowLeft => PlayerKeyboardAction.seekBackward,
+      LogicalKeyboardKey.arrowRight => PlayerKeyboardAction.seekForward,
+      LogicalKeyboardKey.arrowUp => PlayerKeyboardAction.volumeUp,
+      LogicalKeyboardKey.arrowDown => PlayerKeyboardAction.volumeDown,
+      LogicalKeyboardKey.keyF => PlayerKeyboardAction.toggleFullscreen,
+      LogicalKeyboardKey.keyM => PlayerKeyboardAction.toggleMute,
+      LogicalKeyboardKey.bracketLeft => PlayerKeyboardAction.slower,
+      LogicalKeyboardKey.bracketRight => PlayerKeyboardAction.faster,
+      _ => null,
+    };
+
 /// 桌面端键盘与鼠标滚轮映射。
 ///
 /// 键位：
@@ -25,11 +53,14 @@ const Duration kKeyboardSeekStepLong = Duration(seconds: 10);
 /// - `[` `]` 倍速降 / 升一档
 ///
 /// 鼠标滚轮同样调音量，与常见桌面播放器一致。鼠标双击全屏在
-/// [PlayerGestureLayer] 内按指针类型分流，不在本组件——那里才有手势竞技场。
+/// [PlayerGestureLayer] 内处理，不在本组件——那里才有手势竞技场。
 class const PlayerKeyboardShortcuts({
   super.key,
   required final MediaPlaybackController controller,
   required final VoidCallback? onToggleFullscreen,
+  final Duration seekStep = kKeyboardSeekStep,
+  final Duration seekStepWithShift = kKeyboardSeekStepLong,
+  final double volumeStep = kVolumeStep,
   required final Widget child,
 }) extends StatefulWidget {
   @override
@@ -57,39 +88,39 @@ class _PlayerKeyboardShortcutsState() extends State<PlayerKeyboardShortcuts> {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final state = widget.controller.state;
     final shift = HardwareKeyboard.instance.isShiftPressed;
-    switch (event.logicalKey) {
-      case LogicalKeyboardKey.space:
+    switch (playerKeyboardActionFor(event.logicalKey)) {
+      case PlayerKeyboardAction.togglePlayback:
         widget.controller.playOrPause();
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.arrowLeft:
+      case PlayerKeyboardAction.seekBackward:
         _seekTo(
-          state.position - (shift ? kKeyboardSeekStepLong : kKeyboardSeekStep),
+          state.position - (shift ? widget.seekStepWithShift : widget.seekStep),
         );
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.arrowRight:
+      case PlayerKeyboardAction.seekForward:
         _seekTo(
-          state.position + (shift ? kKeyboardSeekStepLong : kKeyboardSeekStep),
+          state.position + (shift ? widget.seekStepWithShift : widget.seekStep),
         );
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.arrowUp:
-        _setVolume(state.volume + kVolumeStep);
+      case PlayerKeyboardAction.volumeUp:
+        _setVolume(state.volume + widget.volumeStep);
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.arrowDown:
-        _setVolume(state.volume - kVolumeStep);
+      case PlayerKeyboardAction.volumeDown:
+        _setVolume(state.volume - widget.volumeStep);
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.keyM:
+      case PlayerKeyboardAction.toggleMute:
         _toggleMute(state.volume);
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.keyF:
+      case PlayerKeyboardAction.toggleFullscreen:
         widget.onToggleFullscreen?.call();
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.bracketLeft:
+      case PlayerKeyboardAction.slower:
         _stepRate(-1);
         return KeyEventResult.handled;
-      case LogicalKeyboardKey.bracketRight:
+      case PlayerKeyboardAction.faster:
         _stepRate(1);
         return KeyEventResult.handled;
-      default:
+      case null:
         return KeyEventResult.ignored;
     }
   }
@@ -101,7 +132,8 @@ class _PlayerKeyboardShortcutsState() extends State<PlayerKeyboardShortcuts> {
     if (delta == 0) return;
     // 向下滚（dy 正）降低，与常见桌面播放器一致。
     _setVolume(
-      widget.controller.state.volume - (delta > 0 ? kVolumeStep : -kVolumeStep),
+      widget.controller.state.volume -
+          (delta > 0 ? widget.volumeStep : -widget.volumeStep),
     );
   }
 
