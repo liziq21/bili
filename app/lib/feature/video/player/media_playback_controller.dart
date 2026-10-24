@@ -1,16 +1,20 @@
 import 'dart:async';
 
 import 'package:data/data.dart';
+import 'package:equatable/equatable.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meta/meta.dart';
 
 import 'media_edl.dart';
+import 'playback_error.dart';
 
 /// 播放层的对外状态。
 ///
 /// 播放层不暴露 media_kit 的类型：具体播放器库的 API 变化不应该波及
 /// 业务代码，UI 只消费本状态。
-class PlaybackState({
+@immutable
+class const PlaybackState({
   /// 是否正在播放。缓冲中为 false——此时进度并未推进，进度条不该继续走。
   required final bool isPlaying,
 
@@ -23,12 +27,18 @@ class PlaybackState({
   /// 媒体总时长，源未提供时为零。
   required final Duration duration,
 
-  /// 播放错误信息，无错误时为 null。
+  /// 播放错误，无错误时为 null。
   ///
   /// 播放器库以流的形式异步抛出错误，加载完成后才能拿到，因此打开成功
   /// 不代表一定能播下去。错误一经产生就保持到下次 [MediaPlaybackController.open]，
   /// 不被后续位置、时长等状态更新冲掉。
-  final String? error,
+  final MediaPlaybackException? error,
+
+  /// 是否正在等待或执行一次自动重试。
+  final bool isRetrying = false,
+
+  /// 当前自动重试序号，从 1 开始；未重试时为 0。
+  final int retryAttempt = 0,
 
   /// 当前播放速率，1.0 为正常速度。
   final double rate = 1.0,
@@ -44,7 +54,23 @@ class PlaybackState({
 
   /// 队列播放模式，无队列时为 [PlaybackQueueMode.none]。
   final PlaybackQueueMode queueMode = PlaybackQueueMode.none,
-});
+}) extends Equatable {
+  @override
+  List<Object?> get props => [
+    isPlaying,
+    isBuffering,
+    position,
+    duration,
+    error,
+    isRetrying,
+    retryAttempt,
+    rate,
+    volume,
+    queueLength,
+    currentIndex,
+    queueMode,
+  ];
+}
 
 /// 队列播放模式，语义对齐播放器库的 [PlaylistMode]。
 enum PlaybackQueueMode() {
@@ -65,7 +91,10 @@ extension on PlaybackState {
     bool? isBuffering,
     Duration? position,
     Duration? duration,
-    String? error,
+    MediaPlaybackException? error,
+    bool clearError = false,
+    bool? isRetrying,
+    int? retryAttempt,
     double? rate,
     double? volume,
     int? queueLength,
@@ -77,7 +106,9 @@ extension on PlaybackState {
       isBuffering: isBuffering ?? this.isBuffering,
       position: position ?? this.position,
       duration: duration ?? this.duration,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
+      isRetrying: isRetrying ?? this.isRetrying,
+      retryAttempt: retryAttempt ?? this.retryAttempt,
       rate: rate ?? this.rate,
       volume: volume ?? this.volume,
       queueLength: queueLength ?? this.queueLength,
@@ -109,9 +140,13 @@ class MediaPlaybackController([
   // 故此处用位置参数 + 字段声明，并压掉随之而来的建议。
   // ignore: use_declaring_parameters
   PlatformPlayer? platformPlayer,
+  PlaybackRetryPolicy retryPolicy = const PlaybackRetryPolicy(),
 ]) {
   /// 测试注入的播放器实现，为 null 时用真实的原生播放器。
   final PlatformPlayer? _platformPlayer = platformPlayer;
+
+  /// 自动重试配置。网络错误才会使用该策略，其他错误保留给用户手动处理。
+  final PlaybackRetryPolicy _retryPolicy = retryPolicy;
 
   /// 惰性建 Player：原生库须先初始化，故由 [_createPlayer] 承担。
   late final Player _player = _createPlayer(_platformPlayer);
@@ -126,6 +161,15 @@ class MediaPlaybackController([
   final StreamController<PlaybackState> _stateController =
       StreamController<PlaybackState>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
+  StreamSubscription<String>? _errorSubscription;
+  bool _acceptPlayerErrors = false;
+
+  Timer? _retryTimer;
+  final List<MediaStream> _queueStreams = [];
+  MediaStream? _currentStream;
+  bool _queueModeActive = false;
+  int _retryAttempt = 0;
+  int _openGeneration = 0;
 
   PlaybackState _state = _initialPlaybackState();
 
@@ -153,6 +197,9 @@ class MediaPlaybackController([
   /// 当前状态快照。
   PlaybackState get state => _state;
 
+  /// 当前正在播放的媒体；队列切换时跟随播放器的当前序号更新。
+  MediaStream? get currentStream => _currentStream;
+
   /// 暂停。
   Future<void> pause() => _player.pause();
 
@@ -167,8 +214,14 @@ class MediaPlaybackController([
 
   /// 重新打开指定 stream（用于播放错误后重试）。
   ///
-  /// 重新走完整 [open] 流程，状态归零后重新加载。
-  Future<void> retry(MediaStream stream) => open(stream);
+  /// 用户手动重试会取消等待中的自动重试，并重新开始自动重试预算。
+  Future<void> retry(MediaStream stream) async {
+    _cancelAutomaticRetry();
+    _retryAttempt = 0;
+    _currentStream = stream;
+    final generation = ++_openGeneration;
+    await _openStream(stream, generation: generation, preserveQueue: true);
+  }
 
   /// 设置音量，取值 0 到 1。
   ///
@@ -183,11 +236,29 @@ class MediaPlaybackController([
   /// 每条 [MediaStream] 各自拼成 EDL 虚拟媒体，互不干扰。队列为空时
   /// 交给播放器库的空 [Playlist] 不会播放任何内容。
   Future<void> openQueue(List<MediaStream> streams, {int index = 0}) async {
+    await _detachErrorSubscription();
+    _cancelAutomaticRetry();
+    _queueStreams
+      ..clear()
+      ..addAll(streams);
+    _queueModeActive = true;
+    _currentStream = streams.isEmpty ? null : streams[index];
+    _retryAttempt = 0;
+    final generation = ++_openGeneration;
     _playerTouched = true;
     _subscribe();
     _isPlaying = false;
     _isBuffering = false;
-    _emit(_initialPlaybackState());
+    _emit(
+      PlaybackState(
+        isPlaying: false,
+        isBuffering: false,
+        position: Duration.zero,
+        duration: Duration.zero,
+        queueLength: streams.length,
+        currentIndex: index,
+      ),
+    );
     await _player.open(
       Playlist(
         streams
@@ -199,17 +270,36 @@ class MediaPlaybackController([
         index: index,
       ),
     );
+    if (generation == _openGeneration) _subscribeToPlayerErrors(generation);
   }
 
   /// 追加一条媒体到队列末尾。
-  Future<void> addToQueue(MediaStream stream) =>
-      _player.add(Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers));
+  Future<void> addToQueue(MediaStream stream) async {
+    await _player.add(
+      Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
+    );
+    _queueStreams.add(stream);
+  }
 
   /// 移除队列中指定序号的条目。
-  Future<void> removeFromQueue(int index) => _player.remove(index);
+  Future<void> removeFromQueue(int index) async {
+    await _player.remove(index);
+    if (index >= 0 && index < _queueStreams.length) {
+      _queueStreams.removeAt(index);
+    }
+  }
 
   /// 移动队列条目：把 [from] 挪到 [to] 的位置。
-  Future<void> moveQueueItem(int from, int to) => _player.move(from, to);
+  Future<void> moveQueueItem(int from, int to) async {
+    await _player.move(from, to);
+    if (from >= 0 &&
+        from < _queueStreams.length &&
+        to >= 0 &&
+        to < _queueStreams.length) {
+      final stream = _queueStreams.removeAt(from);
+      _queueStreams.insert(to, stream);
+    }
+  }
 
   /// 跳到队列的下一首。
   Future<void> next() => _player.next();
@@ -256,6 +346,11 @@ class MediaPlaybackController([
 
   /// 释放原生播放器资源。
   Future<void> dispose() async {
+    await _detachErrorSubscription();
+    _cancelAutomaticRetry();
+    _currentStream = null;
+    _queueModeActive = false;
+    _openGeneration++;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
@@ -270,17 +365,64 @@ class MediaPlaybackController([
   /// 错误经 [states] 的 [PlaybackState.error] 报出。重复打开会先把状态
   /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
   Future<void> open(MediaStream stream) async {
+    _cancelAutomaticRetry();
+    _retryAttempt = 0;
+    _queueStreams
+      ..clear()
+      ..add(stream);
+    _queueModeActive = false;
+    _currentStream = stream;
+    final generation = ++_openGeneration;
+    await _openStream(stream, generation: generation);
+  }
+
+  Future<void> _openStream(
+    MediaStream stream, {
+    required int generation,
+    bool automaticRetry = false,
+    bool preserveQueue = false,
+  }) async {
+    await _detachErrorSubscription();
+    if (generation != _openGeneration) return;
     _playerTouched = true;
     _subscribe();
     _isPlaying = false;
     _isBuffering = false;
-    _emit(_initialPlaybackState());
-    await _player.open(
-      Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
-    );
-    if (restorePositionSeconds > 0) {
-      await _player.seek(Duration(seconds: restorePositionSeconds));
-      restorePositionSeconds = 0;
+    final initialState = preserveQueue
+        ? _state.copyWith(
+            isPlaying: false,
+            isBuffering: false,
+            position: Duration.zero,
+            duration: Duration.zero,
+            clearError: !automaticRetry,
+            isRetrying: automaticRetry,
+            retryAttempt: _retryAttempt,
+          )
+        : _initialPlaybackState();
+    _emit(initialState);
+    try {
+      final playable = preserveQueue && _queueModeActive
+          ? Playlist(
+              _queueStreams
+                  .map(
+                    (item) =>
+                        Media(MediaEdl.uriOf(item), httpHeaders: item.headers),
+                  )
+                  .toList(),
+              index: _state.currentIndex,
+            )
+          : Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers);
+      await _player.open(playable);
+      if (generation != _openGeneration) return;
+      _subscribeToPlayerErrors(generation);
+      if (restorePositionSeconds > 0) {
+        await _player.seek(Duration(seconds: restorePositionSeconds));
+        restorePositionSeconds = 0;
+      }
+    } on Object catch (error) {
+      if (generation != _openGeneration) return;
+      _subscribeToPlayerErrors(generation);
+      _handlePlayerError(error, generation: generation);
     }
   }
 
@@ -292,7 +434,20 @@ class MediaPlaybackController([
     _subscriptions.addAll([
       _player.stream.playing.listen((playing) {
         _isPlaying = playing;
-        _emit(_state.copyWith(isPlaying: _reportedPlaying));
+        if (playing && _state.isRetrying) {
+          _cancelAutomaticRetry();
+          _retryAttempt = 0;
+          _emit(
+            _state.copyWith(
+              clearError: true,
+              isRetrying: false,
+              retryAttempt: 0,
+              isPlaying: _reportedPlaying,
+            ),
+          );
+        } else {
+          _emit(_state.copyWith(isPlaying: _reportedPlaying));
+        }
       }),
       _player.stream.buffering.listen((buffering) {
         _isBuffering = buffering;
@@ -313,10 +468,15 @@ class MediaPlaybackController([
       _player.stream.duration.listen((duration) {
         _emit(_state.copyWith(duration: duration));
       }),
-      _player.stream.error.listen((error) {
-        _emit(_state.copyWith(error: error));
-      }),
       _player.stream.playlist.listen((playlist) {
+        if (_queueModeActive && playlist.index != _state.currentIndex) {
+          _cancelAutomaticRetry();
+          _retryAttempt = 0;
+          _openGeneration++;
+          _currentStream = playlist.index < _queueStreams.length
+              ? _queueStreams[playlist.index]
+              : null;
+        }
         _emit(
           _state.copyWith(
             queueLength: playlist.medias.length,
@@ -328,6 +488,72 @@ class MediaPlaybackController([
         _emit(_state.copyWith(queueMode: _queueModeOf(mode)));
       }),
     ]);
+  }
+
+  void _subscribeToPlayerErrors(int generation) {
+    _errorSubscription?.cancel();
+    _acceptPlayerErrors = true;
+    _errorSubscription = _player.stream.error.listen(
+      (error) => _handlePlayerError(error, generation: generation),
+    );
+  }
+
+  Future<void> _detachErrorSubscription() async {
+    _acceptPlayerErrors = false;
+    final subscription = _errorSubscription;
+    _errorSubscription = null;
+    await subscription?.cancel();
+  }
+
+  void _handlePlayerError(Object error, {int? generation}) {
+    if (!_acceptPlayerErrors) return;
+    if (generation != null && generation != _openGeneration) return;
+
+    final playbackError = error is MediaPlaybackException
+        ? error
+        : MediaPlaybackException.fromMessage(error.toString());
+    final stream = _currentStream;
+    final canRetry =
+        stream != null &&
+        _retryPolicy.shouldAutomaticallyRetry(playbackError) &&
+        _retryAttempt < _retryPolicy.maxRetries;
+
+    if (!canRetry) {
+      _emit(_state.copyWith(error: playbackError, isRetrying: false));
+      return;
+    }
+
+    _retryTimer?.cancel();
+    final retryAttempt = ++_retryAttempt;
+    final scheduledGeneration = _openGeneration;
+    final delay = _retryPolicy.delayForRetry(retryAttempt);
+    _emit(
+      _state.copyWith(
+        error: playbackError,
+        isRetrying: true,
+        retryAttempt: retryAttempt,
+      ),
+    );
+    _retryTimer = Timer(delay, () {
+      _retryTimer = null;
+      if (scheduledGeneration != _openGeneration || stream != _currentStream) {
+        return;
+      }
+      final retryGeneration = ++_openGeneration;
+      unawaited(
+        _openStream(
+          stream,
+          generation: retryGeneration,
+          automaticRetry: true,
+          preserveQueue: true,
+        ),
+      );
+    });
+  }
+
+  void _cancelAutomaticRetry() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
   }
 
   /// 对外报的播放状态：播放开关打开且不在缓冲才算在播。

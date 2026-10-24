@@ -269,6 +269,64 @@ void main() {
       expect(controlsRect.top, greaterThanOrEqualTo(videoRect.bottom));
     });
 
+    testWidgets('shows the categorized error with retry action', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+
+      fake.injectPlaybackError('decoder rejected codec');
+      await tester.pump();
+
+      expect(find.textContaining('Decoder error'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Skip'), findsNothing);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      expect(find.textContaining('Decoder error'), findsNothing);
+    });
+
+    testWidgets('offers skip when a later queue item is available', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://example.com/1.m4s'),
+        MediaStream(videoUrl: 'https://example.com/2.m4s'),
+      ]);
+      await tester.pump();
+
+      fake.injectPlaybackError('decoder rejected codec');
+      await tester.pump();
+      expect(find.text('Skip'), findsOneWidget);
+
+      await tester.tap(find.text('Skip'));
+      await tester.pump();
+      expect(fake.nextCalls, hasLength(1));
+    });
+
     testWidgets('hides the overlay controls until the surface is tapped', (
       tester,
     ) async {

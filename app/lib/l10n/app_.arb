@@ -5648,7 +5648,7 @@
   "@minimize": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "playbackFailed": "播放失败：{p1}",
+  "playbackFailed": "Playback failed: {p1}",
   "@playbackFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
@@ -5656,6 +5656,34 @@
         "type": "String"
       }
     }
+  },
+  "playbackErrorNetwork": "Network error",
+  "@playbackErrorNetwork": {
+    "description": "Playback error category - network failure"
+  },
+  "playbackErrorDecoder": "Decoder error",
+  "@playbackErrorDecoder": {
+    "description": "Playback error category - media decoding failure"
+  },
+  "playbackErrorDrm": "DRM error",
+  "@playbackErrorDrm": {
+    "description": "Playback error category - DRM failure"
+  },
+  "playbackErrorAuthorization": "Authorization error",
+  "@playbackErrorAuthorization": {
+    "description": "Playback error category - authorization failure"
+  },
+  "playbackErrorUnknown": "Unknown playback error",
+  "@playbackErrorUnknown": {
+    "description": "Playback error category - unknown failure"
+  },
+  "playbackRetrying": "Retrying...",
+  "@playbackRetrying": {
+    "description": "Playback status shown while retrying a network failure"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Player error action - skip the current queue item"
   },
   "back": "返回",
   "@back": {

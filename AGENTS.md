@@ -98,6 +98,8 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 门禁刻意不跑矩阵版本：`dart_style` 会在 patch release 里带非语言版本化的样式修复（例如枚举主构造函数的尾逗号），两个 SDK 版本的 formatter 输出可能不同，同一份代码在一个版本绿、另一个版本红，门禁本身就变成随机失败。一个权威版本足够拦住「未格式化的代码进 main」这件事。**因此 `.fvmrc` 升级时门禁行为可能一次性变化**：先用 CI 同款命令 `dart format --output=none --set-exit-if-changed .` 评估变化；只有明确把全仓库格式迁移纳入该升级 PR 时，才按迁移清单逐文件格式化，否则仍只格式化本次改动触及的文件。
 
+注意：代码格式化命令严禁频繁使用，理想情况下仅完成所有代码修改后使用一次。
+
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
 - 保持代码库内的一致性，同类文件建议统一语言。
