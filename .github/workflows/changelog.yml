@@ -71,11 +71,31 @@ jobs:
           labels: |
             ci-generated
 
+      - name: Get PR node ID for auto-merge
+        if: ${{ steps.cpr.outputs.pull-request-number != '' }}
+        id: pr-id
+        run: |
+          # peter-evans/create-pull-request 仅在创建新 PR 时输出 pull-request-node-id
+          # 更新既有 PR 时需自行查询
+          if [ -n "${{ steps.cpr.outputs.pull-request-node-id }}" ]; then
+            echo "node_id=${{ steps.cpr.outputs.pull-request-node-id }}" >> "$GITHUB_OUTPUT"
+          else
+            node_id=$(gh api graphql -f query='
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) { id }
+                }
+              }' -F owner=liziq21 -F repo=bili -F number=${{ steps.cpr.outputs.pull-request-number }} --jq '.data.repository.pullRequest.id')
+            echo "node_id=$node_id" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
       - name: Enable auto-merge for the changelog PR
         if: ${{ steps.cpr.outputs.pull-request-number != '' }}
         run: |
           gh api graphql \
             -f query='mutation($id:ID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH}){clientMutationId}}' \
-            -F id="${{ steps.cpr.outputs.pull-request-node-id }}" >/dev/null
+            -F id="${{ steps.pr-id.outputs.node_id }}" >/dev/null
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
