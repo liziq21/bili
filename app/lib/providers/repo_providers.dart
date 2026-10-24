@@ -20,14 +20,14 @@ List<RepositoryProvider> get databaseProviders => [
   RepositoryProvider<AppDatabase>(
     create: (_) => .new(),
     dispose: (database) {
-      _log.fine('Provider dispose called for BiliDatabase');
+      _log.fine('Provider dispose called for AppDatabase');
       database
           .close()
           .then((_) {
             _log.fine('AppDatabase successfully closed.');
           })
           .catchError((e) {
-            _log.warning('Error closing BiliDatabase: $e');
+            _log.warning('Error closing AppDatabase: $e');
           });
       _log.fine('Provider dispose finished');
     },

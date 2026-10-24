@@ -171,11 +171,12 @@ final GoRouter router = GoRouter(
         return AppScaffold(child: navigator);
       },
       routes: [
-        $liveRouteData,
+        ...$appRoutes,
+        /* $liveRouteData,
         $spaceRouteData,
         $videoRouteData,
         $searchRouteData,
-        $notFoundRouteData,
+        $notFoundRouteData, */
         GoRoute(
           path: Routes.settings,
           builder: (context, _) => SettingScreen(

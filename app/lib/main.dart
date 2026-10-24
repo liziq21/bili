@@ -54,14 +54,15 @@ void initDebugOverlayBridge() {
   // disabled in production release builds to prevent exposing internal logs,
   // stack traces, and network request/response payloads to end users or
   // background screen recordings.
-  if (kReleaseMode) {
-    DebugOverlay.enabled = false;
-    configureMediaSourceClients(
-      biliClient: http.IOClient(),
-      youtubeClient: http.IOClient(),
-    );
-    return;
-  }
+  // 在应用版本 1.0.0 后取消注释
+  // if (kReleaseMode) {
+  // DebugOverlay.enabled = false;
+  // configureMediaSourceClients(
+  // biliClient: http.IOClient(),
+  // youtubeClient: http.IOClient(),
+  // );
+  // return;
+  // }
 
   DebugOverlay.enabled = true;
 
