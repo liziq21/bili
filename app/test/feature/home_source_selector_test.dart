@@ -59,7 +59,8 @@ void main() {
           widget is Semantics &&
           widget.properties.label == 'Switch source' &&
           widget.properties.value == 'Bilibili' &&
-          widget.properties.hint == 'Switch video and media source',
+          widget.properties.hint == 'Switch video and media source' &&
+          widget.properties.explicitChildNodes == false,
     );
     expect(semanticsFinder, findsOneWidget);
   });
