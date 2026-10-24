@@ -60,7 +60,7 @@ void main() {
           widget.properties.label == 'Switch source' &&
           widget.properties.value == 'Bilibili' &&
           widget.properties.hint == 'Switch video and media source' &&
-          widget.properties.explicitChildNodes == false,
+          widget.excludeSemantics == true,
     );
     expect(semanticsFinder, findsOneWidget);
   });
