@@ -60,6 +60,7 @@ so hand edits do not survive; change the generator instead.
 - feat(home): add persisted home configuration model (Issue #364) (#408)
 - feat(home): connect grid columns configuration (#363) (#413)
 - feat(home): consume configurable home tabs (#415)
+- feat(settings): add player preferences UI (#418)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -203,6 +204,7 @@ so hand edits do not survive; change the generator instead.
 - ⚡ Bolt: Measurement environment unavailable (No-Change Report) (#400)
 - 🎨 Palette: Improve SpaceScreen accessibility and tactile feedback (#401)
 - 🎨 Palette: Improve video player placeholder slider accessibility and haptics (#411)
+- 🎨 Palette: Add tooltip and tactile feedback to settings section items (#417)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -288,6 +290,7 @@ so hand edits do not survive; change the generator instead.
 - ci: build debug APK instead of release (LIZ-50) (#350)
 - chore: upgrade Flutter SDK to 3.47.7 and Dart to 3.13.5 (#402)
 - ci: run required checks for changelog PR to enable auto-merge (#409)
+- ci(changelog): fix auto-merge when updating existing PR (#419)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
