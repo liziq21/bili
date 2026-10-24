@@ -656,7 +656,7 @@ class const _ErrorView({
           Icon(Icons.error_outline, color: $styles.colors.onScrim, size: 32),
           const Gap(8),
           Text(
-            l10n?.playbackFailed(message) ?? 'Playback failed: $message',
+            l10n?.videoLoadFailed ?? 'Playback failed',
             textAlign: TextAlign.center,
             style: $styles.text.bodySmall.copyWith(
               color: $styles.colors.onScrim,

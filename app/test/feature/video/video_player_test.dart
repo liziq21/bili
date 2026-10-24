@@ -44,7 +44,7 @@ void main() {
     addTearDown(bloc.close);
   });
 
-  testWidgets('renders the stream error inside the player area', (
+  testWidgets('renders generic error message without leaking raw exception details', (
     WidgetTester tester,
   ) async {
     final bloc = VideoBloc(repository: _FailingStreamRepository());
@@ -54,8 +54,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.textContaining('Playback failed'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    // Verifies generic error text is rendered and raw exception string '签名过期' is masked from UI.
+    expect(find.textContaining('签名过期'), findsNothing);
 
     addTearDown(bloc.close);
   });
