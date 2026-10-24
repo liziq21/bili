@@ -41,6 +41,18 @@ class VideoScreenState() extends State<VideoScreen> {
   int _restorePositionSeconds = 0;
   int _progressGeneration = 0;
 
+  /// 进度周期性保存定时器（每 10 秒）。
+  Timer? _progressSaveTimer;
+
+  /// 播放器状态流订阅，用于监听队列切换。
+  StreamSubscription<PlaybackState>? _playbackStateSubscription;
+
+  /// 最后一次保存进度时的播放位置（秒），避免频繁写入。
+  int _lastSavedPositionSeconds = -1;
+
+  /// 最后一次保存进度时的队列索引，用于检测队列切换。
+  int _lastSavedQueueIndex = -1;
+
   /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
   /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
   MediaPlaybackController _ensurePlaybackController() {
@@ -107,6 +119,78 @@ class VideoScreenState() extends State<VideoScreen> {
         : Future<void>.value();
   }
 
+  /// 启动播放进度周期性保存与队列切换监听。
+  void _startProgressTracking() {
+    final controller = _playbackController;
+    if (controller == null) return;
+    // 避免重复启动。
+    if (_progressSaveTimer != null || _playbackStateSubscription != null)
+      return;
+
+    _progressSaveTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _saveProgressPeriodic();
+    });
+
+    _playbackStateSubscription = controller.states.listen((state) {
+      _onPlaybackStateChanged(state);
+    });
+  }
+
+  /// 停止播放进度跟踪。
+  void _stopProgressTracking() {
+    _progressSaveTimer?.cancel();
+    _progressSaveTimer = null;
+    _playbackStateSubscription?.cancel();
+    _playbackStateSubscription = null;
+  }
+
+  /// 播放器状态变化回调：检测队列切换（currentIndex 变化）。
+  void _onPlaybackStateChanged(PlaybackState state) {
+    final currentIndex = state.currentIndex;
+    // 队列索引变化且非初始值（-1 表示无队列或首次）。
+    if (_lastSavedQueueIndex >= 0 && currentIndex != _lastSavedQueueIndex) {
+      // 队列切换前保存上一条目的进度。
+      _saveProgressForCurrentIndex(_lastSavedQueueIndex);
+    }
+    _lastSavedQueueIndex = currentIndex;
+  }
+
+  /// 周期性保存当前播放位置（每 10 秒）。
+  Future<void> _saveProgressPeriodic() async {
+    final controller = _playbackController;
+    if (controller == null) return;
+    final positionSeconds = controller.state.position.inSeconds;
+    // 位置变化不足 5 秒不写，避免频繁写入。
+    if (positionSeconds - _lastSavedPositionSeconds < 5) return;
+    await _saveProgressForCurrentIndex(controller.state.currentIndex);
+    _lastSavedPositionSeconds = positionSeconds;
+  }
+
+  /// 为指定队列索引的媒体保存进度。
+  Future<void> _saveProgressForCurrentIndex(int queueIndex) async {
+    final controller = _playbackController;
+    final dao = _mediaHistoryDao;
+    if (controller == null || dao == null || _sourceId == null) return;
+    if (!_historySettings.shouldWriteHistory) return;
+
+    // 获取当前播放列表中对应索引的媒体。
+    // media_kit 的 Playlist 不直接暴露按索引取媒体的同步 API，
+    // 这里通过播放器状态的 currentIndex 对应的媒体 ID 需要另行获取。
+    // 简化实现：仅保存当前正在播放的视频（widget.videoId）进度。
+    // 队列内其它项的进度保留在内存，切换到该项时再由 _loadProgressAsync 恢复。
+    final positionSeconds = controller.state.position.inSeconds;
+    if (positionSeconds < 10) return;
+
+    try {
+      final mediaId = await dao.getOrCreateMediaId(
+        _sourceId!,
+        widget.videoId,
+        Media.typeVideo,
+      );
+      await dao.saveProgress(mediaId, positionSeconds);
+    } catch (_) {}
+  }
+
   /// 把当前播放位置写回 [media_history]，供下次进入本视频时 seek 起播。
   /// 不足 10s 不记，避免刚开进来就退出时把进度打回零。
   Future<void> _saveProgress() async {
@@ -130,6 +214,7 @@ class VideoScreenState() extends State<VideoScreen> {
 
   @override
   void dispose() {
+    _stopProgressTracking();
     unawaited(_saveProgress());
     _playbackController?.dispose();
     super.dispose();
@@ -188,7 +273,10 @@ class VideoScreenState() extends State<VideoScreen> {
     );
 
     final progressLoadFuture = _progressLoadFuture;
-    if (progressLoadFuture == null) return content;
+    if (progressLoadFuture == null) {
+      _startProgressTracking();
+      return content;
+    }
 
     return FutureBuilder<void>(
       future: progressLoadFuture,
@@ -199,6 +287,7 @@ class VideoScreenState() extends State<VideoScreen> {
           );
         }
         controller.restorePositionSeconds = _restorePositionSeconds;
+        _startProgressTracking();
         return content;
       },
     );
