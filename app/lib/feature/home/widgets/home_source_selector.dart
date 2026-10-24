@@ -34,6 +34,7 @@ class const HomeSourceSelector({
         label: semanticLabel,
         value: activeSourceName,
         hint: l10n?.switchVideoMediaSource ?? 'Switch video and media source',
+        excludeSemantics: true,
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: activeSourceId,
