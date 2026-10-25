@@ -370,7 +370,7 @@ void main() {
   });
 }
 
-class _NoStreamRepository() implements VideoDetailRepository {
+class _NoStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -537,7 +537,7 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
   void injectPlaybackError(String message) => _error.add(message);
 }
 
-class _HangingStreamRepository() implements VideoDetailRepository {
+class _HangingStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -566,7 +566,7 @@ class _HangingStreamRepository() implements VideoDetailRepository {
   }
 }
 
-class _FailingStreamRepository() implements VideoDetailRepository {
+class _FailingStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -594,7 +594,7 @@ class _FailingStreamRepository() implements VideoDetailRepository {
 }
 
 /// 立即返回可播流：让画面本体（含浮层控制）渲染出来。
-class _ReadyStreamRepository() implements VideoDetailRepository {
+class _ReadyStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
