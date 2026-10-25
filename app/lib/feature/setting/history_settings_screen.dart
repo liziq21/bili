@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -65,15 +66,19 @@ class _HistorySettingsScreenState() extends State<HistorySettingsScreen> {
                   title: Text(l10n.historyRecording),
                   subtitle: Text(l10n.historyRecordingSubtitle),
                   value: _settings.recordHistory,
-                  onChanged: (enabled) =>
-                      _update(_settings.copyWith(recordHistory: enabled)),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _update(_settings.copyWith(recordHistory: enabled));
+                  },
                 ),
                 SwitchListTile(
                   title: Text(l10n.historyResumePlayback),
                   subtitle: Text(l10n.historyResumePlaybackSubtitle),
                   value: _settings.resumePlayback,
-                  onChanged: (enabled) =>
-                      _update(_settings.copyWith(resumePlayback: enabled)),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _update(_settings.copyWith(resumePlayback: enabled));
+                  },
                 ),
               ],
             ),
