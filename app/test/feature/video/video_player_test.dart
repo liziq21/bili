@@ -44,7 +44,7 @@ void main() {
     addTearDown(bloc.close);
   });
 
-  testWidgets('renders generic error message without leaking raw exception details', (
+  testWidgets('renders generic error message', (
     WidgetTester tester,
   ) async {
     final bloc = VideoBloc(repository: _FailingStreamRepository());
