@@ -1,26 +1,14 @@
-name: f_biuli
-description: A new Flutter project.
-publish_to: 'none'
-
 # Flutter and Dart SDK version constraints for the project and CI workflow matrix generation.
-# flutter-actions/pubspec-matrix-action and subosito/flutter-action parse this file to determine Flutter version.
-environment:
-  sdk: "^3.13.5"
-  flutter: ">=3.47.7"
 
-workspace:
-  - app
-  - packages/*
+name: bili
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 dev_dependencies:
-  build_runner: ^2.15.1
-  flutter_lints: ^6.0.0
-dependencies:
-  flutter:
-    sdk: flutter
+  flutter_lints: ^4.0.0
+  lints: ^4.0.0
 
-hooks:
-  user_defines:
-    sqlite3:
-      source:
-        linux: system
+# CI uses .fvmrc for the pinned SDK version; pubspec only drives the matrix.
