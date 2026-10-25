@@ -74,6 +74,9 @@ void main() {
     controller.completeCurrent();
     await _flush();
     await _flush();
+    await _flush();
+    await _flush();
+    await _flush();
 
     expect(controller.nextCalls, 1);
     expect(bloc.state.currentIndex, 1);
@@ -93,7 +96,7 @@ void main() {
     addTearDown(bloc.close);
     addTearDown(controller.dispose);
     bloc.add(QueueSetCurrent(_item('first', 'First')));
-    await _flush();
+    await tester.pump();
 
     await tester.pumpWidget(
       MaterialApp(
