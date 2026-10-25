@@ -125,6 +125,13 @@ final class BiliMediaStreamRemoteDataSource({
         height: video.height,
         bitrate: video.bandwidth,
         streamId: video.id,
+        qualityLabel: _qualityLabel(
+          video.id,
+          video.height,
+          acceptQuality: playUrl.acceptQuality,
+          acceptDescription: playUrl.acceptDescription,
+          supportFormats: playUrl.supportFormats,
+        ),
         codecs: video.codecs,
         // dash.duration 以秒计，与视频详情的 duration 同量纲。
         duration: dash.duration == null
@@ -132,7 +139,7 @@ final class BiliMediaStreamRemoteDataSource({
             : Duration(seconds: dash.duration!),
         alternatives: _qualityOptions(
           videoItems,
-          currentHeight: video.height,
+          currentStreamId: video.id,
           acceptQuality: playUrl.acceptQuality,
           acceptDescription: playUrl.acceptDescription,
           supportFormats: playUrl.supportFormats,
@@ -148,7 +155,7 @@ final class BiliMediaStreamRemoteDataSource({
   /// 等长对应），取不到时退回 `{height}P`。
   List<MediaQualityOption> _qualityOptions(
     List<MediaStreamItem> videoItems, {
-    required int? currentHeight,
+    required int currentStreamId,
     List<int>? acceptQuality,
     List<String>? acceptDescription,
     List<FormatDescription>? supportFormats,
@@ -156,12 +163,13 @@ final class BiliMediaStreamRemoteDataSource({
     final options = <MediaQualityOption>[];
     for (final item in videoItems) {
       final height = item.height;
-      if (height == null || height == currentHeight) continue;
+      if (height == null || item.id == currentStreamId) continue;
       options.add(
         MediaQualityOption(
           height: height,
           streamId: item.id,
           label: _qualityLabel(
+            item.id,
             height,
             acceptQuality: acceptQuality,
             acceptDescription: acceptDescription,
@@ -175,18 +183,19 @@ final class BiliMediaStreamRemoteDataSource({
     return options;
   }
 
-  /// 画质高度 → 可读标签。
+  /// 源侧画质 id 与画面高度 → 可读标签。
   ///
   /// acceptQuality 与 acceptDescription 等长且按序对应，是源的官方描述；
   /// supportFormats 的 new_description 是次要来源（部分响应才带）；
   /// 两者都没有时用 `{height}P` 兜底。
   String _qualityLabel(
-    int height, {
+    int streamId,
+    int? height, {
     List<int>? acceptQuality,
     List<String>? acceptDescription,
     List<FormatDescription>? supportFormats,
   }) {
-    final qualityIndex = acceptQuality?.indexOf(height);
+    final qualityIndex = acceptQuality?.indexOf(streamId);
     if (qualityIndex != null &&
         qualityIndex >= 0 &&
         acceptDescription != null &&
@@ -195,12 +204,12 @@ final class BiliMediaStreamRemoteDataSource({
       return acceptDescription[qualityIndex];
     }
     final format = supportFormats?.firstWhere(
-      (format) => format.quality == height,
+      (format) => format.quality == streamId,
       orElse: () => FormatDescription(),
     );
     final description = format?.newDescription;
     if (description != null && description.isNotEmpty) return description;
-    return '${height}P';
+    return height == null ? '' : '${height}P';
   }
 
   /// 只保留带可用地址的条目。缺地址的条目不能参与择优，否则会选中一条

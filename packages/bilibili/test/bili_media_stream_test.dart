@@ -122,6 +122,8 @@ void main() {
     List<Map<String, dynamic>> video = const [],
     List<Map<String, dynamic>>? audio,
     List<Map<String, dynamic>> durl = const [],
+    List<int>? acceptQuality,
+    List<String>? acceptDescription,
     int duration = 105,
   }) => <String, dynamic>{
     'code': 0,
@@ -142,6 +144,8 @@ void main() {
             ],
       },
       'durl': durl,
+      'accept_quality': acceptQuality,
+      'accept_description': acceptDescription,
     },
   };
 
@@ -392,6 +396,44 @@ void main() {
       expect(stream.alternatives.single.streamId, 120);
     });
 
+    test('按服务端画质 id 映射标签，并保留同分辨率的其他码率', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          acceptQuality: [80, 81, 32],
+          acceptDescription: ['1080P 高码率', '1080P 低码率', '720P'],
+          video: [
+            {
+              'id': 80,
+              'baseUrl': 'https://cdn.example/v-1080-high.m4s',
+              'height': 1080,
+              'bandwidth': 4000000,
+            },
+            {
+              'id': 81,
+              'baseUrl': 'https://cdn.example/v-1080-low.m4s',
+              'height': 1080,
+              'bandwidth': 1000000,
+            },
+            {
+              'id': 32,
+              'baseUrl': 'https://cdn.example/v-720.m4s',
+              'height': 720,
+              'bandwidth': 2000000,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+
+      expect(stream.streamId, 80);
+      expect(stream.qualityLabel, '1080P 高码率');
+      expect(stream.alternatives, hasLength(2));
+      expect(stream.alternatives.map((option) => option.streamId), [81, 32]);
+      expect(stream.alternatives.first.label, '1080P 低码率');
+      expect(stream.alternatives.first.bitrate, 1000000);
+    });
+
     test('preferHeight 高于所有可用档时取最高一路', () async {
       final source = makeSource(
         buildPlayUrl(
@@ -622,6 +664,8 @@ void main() {
       expect(stream.duration, const Duration(seconds: 105));
       // 音频取码率最高的一路（30280，321815）。
       expect(stream.codecs, 'avc1.64001F');
+      expect(stream.qualityLabel, '清晰 480P');
+      expect(stream.alternatives.single.label, '流畅 360P');
     });
 
     test('既无 dash 视频流也无 durl 时报不可播放', () async {

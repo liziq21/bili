@@ -41,6 +41,12 @@ class MediaStream({
   /// 同高度的多路码率无法区分。
   final int? streamId,
 
+  /// 当前流的可读画质标签，如 `高清 1080P`。
+  ///
+  /// 该字段与 [alternatives] 中的 [MediaQualityOption.label] 使用同一来源，
+  /// 因而在同一分辨率存在多路码率时，当前档的文案也不会误用另一档的标签。
+  final String? qualityLabel,
+
   /// 画面编码标识（如 `avc1.640028`），未知时为 null。
   final String? codecs,
 
