@@ -1234,6 +1234,34 @@
   "@queueModeLoop": {
     "description": "Tooltip for player queue loop mode: playlist loop"
   },
+  "playbackQueueTitle": "Playback queue",
+  "@playbackQueueTitle": {
+    "description": "Title for the in-memory playback queue"
+  },
+  "playbackQueueEmpty": "Your queue is empty",
+  "@playbackQueueEmpty": {
+    "description": "Empty state for the playback queue"
+  },
+  "playbackQueueClear": "Clear queue",
+  "@playbackQueueClear": {
+    "description": "Tooltip for clearing the playback queue"
+  },
+  "playbackQueueRemove": "Remove from queue",
+  "@playbackQueueRemove": {
+    "description": "Tooltip for removing an item from the playback queue"
+  },
+  "playbackQueueMoveUp": "Move up",
+  "@playbackQueueMoveUp": {
+    "description": "Tooltip for moving a playback queue item up"
+  },
+  "playbackQueueMoveDown": "Move down",
+  "@playbackQueueMoveDown": {
+    "description": "Tooltip for moving a playback queue item down"
+  },
+  "playbackQueuePlaying": "Playing",
+  "@playbackQueuePlaying": {
+    "description": "Label for the currently playing queue item"
+  },
   "playbackSpeedLabel": "Speed",
   "@playbackSpeedLabel": {
     "description": "Playback speed picker title in the player"
