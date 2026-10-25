@@ -44,9 +44,7 @@ void main() {
     addTearDown(bloc.close);
   });
 
-  testWidgets('renders generic error message', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('renders generic error message', (WidgetTester tester) async {
     final bloc = VideoBloc(repository: _FailingStreamRepository());
 
     await pumpPlayer(tester, bloc: bloc);
