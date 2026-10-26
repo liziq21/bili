@@ -47,14 +47,18 @@ typedef AddVideoToQueue = Future<bool> Function(
   MediaPlaybackController controller,
 );
 
+typedef AddVideoModelToQueue = Future<bool> Function(VideoModel video);
+
 class const QueueAddController({
-  required final AddVideoToQueue addVideoToQueue,
+  final AddVideoToQueue? addVideoToQueue,
+  final AddVideoModelToQueue? addVideo,
   required super.child,
   super.key,
 }) extends InheritedWidget {
   @override
   bool updateShouldNotify(QueueAddController oldWidget) =>
-      addVideoToQueue != oldWidget.addVideoToQueue;
+      addVideoToQueue != oldWidget.addVideoToQueue ||
+      addVideo != oldWidget.addVideo;
 }
 
 extension QueueAddControllerX on BuildContext {
@@ -1126,31 +1130,9 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                           : () {
                               HapticFeedback.lightImpact();
                               setState(() => _isAddingToQueue = true);
-                              final repository = context
-                                  .read<VideoDetailRepository>();
-                              final controller = context
-                                  .read<MediaPlaybackController>();
-                              final messenger = ScaffoldMessenger.of(context);
-                              queueAddController
-                                  .addVideoToQueue(
-                                    video.id,
-                                    repository,
-                                    controller,
-                                  )
-                                  .then((success) {
-                                    if (!mounted) return;
-                                    setState(() => _isAddingToQueue = false);
-                                    messenger.showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          success
-                                              ? l10n.addedToPlayQueue
-                                              : l10n.addToQueueFailed,
-                                        ),
-                                        duration: $styles.times.fast,
-                                      ),
-                                    );
-                                  });
+                              unawaited(
+                                _addToQueue(context, video, queueAddController),
+                              );
                             },
                     ),
                 ],
@@ -1158,6 +1140,36 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _addToQueue(
+    BuildContext context,
+    VideoModel video,
+    QueueAddController controller,
+  ) async {
+    final add = controller.addVideo;
+    final legacyAdd = controller.addVideoToQueue;
+    final repository = legacyAdd == null
+        ? null
+        : context.read<VideoDetailRepository>();
+    final playback = legacyAdd == null
+        ? null
+        : context.read<MediaPlaybackController>();
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final messenger = ScaffoldMessenger.of(context);
+    final success = add != null
+        ? await add(video)
+        : legacyAdd != null
+        ? await legacyAdd(video.id, repository!, playback!)
+        : false;
+    if (!mounted) return;
+    setState(() => _isAddingToQueue = false);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(success ? l10n.addedToPlayQueue : l10n.addToQueueFailed),
+        duration: $styles.times.fast,
       ),
     );
   }

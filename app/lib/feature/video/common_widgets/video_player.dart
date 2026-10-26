@@ -21,7 +21,9 @@ import 'sleep_timer_chip.dart';
 import '../danmaku/danmaku_overlay.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
+import '../bloc/queue_bloc.dart';
 import '../bloc/video_bloc.dart';
+import 'playback_queue_view.dart';
 import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
 
@@ -44,6 +46,9 @@ class const VideoPlayer({
   /// 测试用它注入假实现：真实的 [MediaPlaybackController] 会初始化原生库，
   /// 在 widget 测试环境里起不来。
   final MediaPlaybackController? controller,
+
+  /// 页面级队列接管媒体加载时为 true，避免将队列重置成单条媒体。
+  final bool queueManaged = false,
 
   /// 是否铺满所在区域（全屏）。
   ///
@@ -180,6 +185,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             onToggleFullscreen: widget.onToggleFullscreen,
             onMinimize: widget.onMinimize,
             onTapSurface: _toggleControls,
+            queueManaged: widget.queueManaged,
             surfaceBuilder: widget.surfaceBuilder,
           );
 
@@ -366,6 +372,7 @@ class const _VideoSurface({
   required final VoidCallback? onToggleFullscreen,
   required final VoidCallback? onMinimize,
   required final VoidCallback onTapSurface,
+  required final bool queueManaged,
   required final Widget Function(MediaPlaybackController controller)?
   surfaceBuilder,
 }) extends StatefulWidget {
@@ -389,7 +396,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
-    widget.controller.open(widget.stream);
+    if (!widget.queueManaged) widget.controller.open(widget.stream);
     _restoreSavedRate();
     _applyPreferredQuality();
     _loadGestureSettings();
@@ -482,7 +489,12 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
                 case Ok(:final value):
                   widget.controller.restorePositionSeconds =
                       widget.controller.state.position.inSeconds;
-                  unawaited(widget.controller.open(value));
+                  final queue = context.read<QueueBloc?>();
+                  if (queue != null) {
+                    queue.updateCurrentStream(value);
+                  } else {
+                    unawaited(widget.controller.open(value));
+                  }
                   context.read<VideoBloc>().add(MediaStreamChanged(value));
                 case Error():
                   break;
@@ -495,7 +507,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   @override
   void didUpdateWidget(covariant _VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.stream != oldWidget.stream) {
+    if (widget.stream != oldWidget.stream && !widget.queueManaged) {
       widget.controller.open(widget.stream);
     }
   }
@@ -589,6 +601,23 @@ class const _PlayerControlBar({
       SleepTimerChip(controller: controller),
       QualityPickerChip(controller: controller, stream: stream),
       PlaybackSpeedChip(controller: controller),
+      if (context.read<QueueBloc?>() case final queue?)
+        IconButton(
+          tooltip: l10n?.playbackQueueTitle ?? 'Playback queue',
+          iconSize: 22,
+          color: fullscreen
+              ? $styles.colors.onScrim
+              : $styles.colors.onSurfaceVariant,
+          onPressed: () => showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => BlocProvider.value(
+              value: queue,
+              child: const PlaybackQueueView(),
+            ),
+          ),
+          icon: const Icon(Icons.queue_music),
+        ),
       _FullscreenButton(fullscreen: fullscreen, onPressed: onToggleFullscreen),
       if (fullscreen && onMinimize != null)
         _OverlayIconButton(

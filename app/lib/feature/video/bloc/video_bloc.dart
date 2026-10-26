@@ -24,6 +24,7 @@ class VideoBloc({
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
     on<ToggleCreatorSubscribe>(_onToggleCreatorSubscribe);
     on<MediaStreamChanged>(_onMediaStreamChanged);
+    on<SelectQueuedVideo>(_onSelectQueuedVideo);
   }
 
   final _log = Logger('VideoBloc');
@@ -182,6 +183,11 @@ class VideoBloc({
     Emitter<VideoState> emit,
   ) {
     emit(state.copyWith(mediaStream: event.stream, streamError: null));
+  }
+
+  void _onSelectQueuedVideo(SelectQueuedVideo event, Emitter<VideoState> emit) {
+    emit(state.copyWith(mediaStream: event.stream, streamError: null));
+    add(LoadVideoDetail(event.videoId));
   }
 
   Future<Result<void>> _setLocalBookmark(

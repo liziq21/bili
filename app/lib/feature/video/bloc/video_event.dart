@@ -34,3 +34,12 @@ final class const MediaStreamChanged(final MediaStream stream)
   @override
   List<Object?> get props => [stream];
 }
+
+/// Selects a queue item without resolving its stream a second time.
+final class const SelectQueuedVideo(
+  final String videoId,
+  final MediaStream stream,
+) extends VideoEvent {
+  @override
+  List<Object?> get props => [videoId, stream.videoUrl];
+}

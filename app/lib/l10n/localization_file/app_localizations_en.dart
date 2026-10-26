@@ -956,6 +956,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueModeLoop => '队列循环';
 
   @override
+  String get playbackQueueTitle => 'Playback queue';
+
+  @override
+  String get playbackQueueEmpty => 'Your queue is empty';
+
+  @override
+  String get playbackQueueClear => 'Clear queue';
+
+  @override
+  String get playbackQueueRemove => 'Remove from queue';
+
+  @override
+  String get playbackQueueMoveUp => 'Move up';
+
+  @override
+  String get playbackQueueMoveDown => 'Move down';
+
+  @override
+  String get playbackQueuePlaying => 'Playing';
+
+  @override
   String get playbackSpeedLabel => 'Speed';
 
   @override

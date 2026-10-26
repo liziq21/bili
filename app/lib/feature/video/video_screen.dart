@@ -4,7 +4,6 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
@@ -16,7 +15,9 @@ import '../../database/dao/media_history_dao.dart';
 import '../../database/table/media.dart';
 import '../../datastore/media_history_settings.dart';
 import '../../datastore/preferences_data_source.dart';
+import 'bloc/queue_bloc.dart';
 import 'bloc/providers.dart';
+import 'bloc/video_bloc.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
@@ -237,37 +238,53 @@ class VideoScreenState() extends State<VideoScreen> {
     // and bloc state. A dependency read is the cheap way to opt in.
     Theme.of(context);
 
-    // 把关联视频 id 解析为可播地址并追加到页面级播放队列。
-    // 解析失败返回 false，调用方（卡片按钮）据此提示。
-    Future<bool> addVideoToQueue(
-      String videoId,
-      VideoDetailRepository repository,
-      MediaPlaybackController controller,
-    ) async {
-      final result = await repository.getMediaStream(videoId);
-      switch (result) {
-        case Ok(:final value):
-          await controller.addToQueue(value);
-          return true;
-        case Error():
-          return false;
-      }
-    }
-
     final content = MultiBlocProvider(
       providers: [
         ...getVideoBlocProviders(context, videoId: widget.videoId),
         Provider<MediaPlaybackController>.value(value: controller),
-      ],
-      child: QueueAddController(
-        addVideoToQueue: addVideoToQueue,
-        child: Scaffold(
-          backgroundColor: $styles.colors.surface,
-          body: _VideoContent(
-            videoId: widget.videoId,
-            playbackController: controller,
-            onBackClick: widget.onBackClick,
+        BlocProvider<QueueBloc>(
+          create: (context) => QueueBloc(
+            sourceId: context.read<MediaSource>().id,
+            controller: controller,
+            repository: context.read<VideoDetailRepository>(),
+            onItemSelected: (item) {
+              context.read<VideoBloc>().add(
+                SelectQueuedVideo(item.video.id, item.stream),
+              );
+            },
           ),
+        ),
+      ],
+      child: BlocListener<VideoBloc, VideoState>(
+        listenWhen: (previous, current) {
+          final previousVideoId = previous.videoDetail?.video.id;
+          final currentVideoId = current.videoDetail?.video.id;
+          return current.mediaStream != null &&
+              current.videoDetail != null &&
+              (previous.mediaStream != current.mediaStream ||
+                  previousVideoId != currentVideoId);
+        },
+        listener: (context, state) {
+          final queue = context.read<QueueBloc>();
+          if (queue.state.items.isEmpty) {
+            queue.setCurrent(state.videoDetail!.video, state.mediaStream!);
+          }
+        },
+        child: Builder(
+          builder: (context) {
+            final queue = context.read<QueueBloc>();
+            return QueueAddController(
+              addVideo: queue.enqueue,
+              child: Scaffold(
+                backgroundColor: $styles.colors.surface,
+                body: _VideoContent(
+                  videoId: widget.videoId,
+                  playbackController: controller,
+                  onBackClick: widget.onBackClick,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -363,6 +380,7 @@ class _VideoContentState() extends State<_VideoContent> {
     // Saves ~2-4ms per frame emission during video detail state changes.
     final player = VideoPlayer(
       controller: widget.playbackController,
+      queueManaged: true,
       fullscreen: _fullscreen,
       onToggleFullscreen: _toggleFullscreen,
       onMinimize: _minimize,

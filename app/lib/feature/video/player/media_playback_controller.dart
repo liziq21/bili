@@ -125,6 +125,8 @@ class MediaPlaybackController([
 
   final StreamController<PlaybackState> _stateController =
       StreamController<PlaybackState>.broadcast();
+  final StreamController<void> _completedController =
+      StreamController<void>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   PlaybackState _state = _initialPlaybackState();
@@ -149,6 +151,13 @@ class MediaPlaybackController([
   ///
   /// 订阅本身不触发原生库初始化：未 [open] 过时不产出任何状态。
   Stream<PlaybackState> get states => _stateController.stream;
+
+  /// Emits when the underlying player reaches the end of the current media.
+  ///
+  /// Playlist implementations may advance themselves after this event. Queue
+  /// coordination therefore checks the controller index before requesting the
+  /// next item, avoiding a skipped item when the engine already advanced.
+  Stream<void> get completions => _completedController.stream;
 
   /// 当前状态快照。
   PlaybackState get state => _state;
@@ -261,6 +270,7 @@ class MediaPlaybackController([
     }
     _subscriptions.clear();
     await _stateController.close();
+    await _completedController.close();
     if (_playerTouched) await _player.dispose();
   }
 
@@ -315,6 +325,11 @@ class MediaPlaybackController([
       }),
       _player.stream.error.listen((error) {
         _emit(_state.copyWith(error: error));
+      }),
+      _player.stream.completed.listen((completed) {
+        if (completed && !_completedController.isClosed) {
+          _completedController.add(null);
+        }
       }),
       _player.stream.playlist.listen((playlist) {
         _emit(

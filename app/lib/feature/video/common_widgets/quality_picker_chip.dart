@@ -11,6 +11,7 @@ import '../../../data/repository/video_detail_repository.dart';
 import '../../../datastore/preferences_data_source.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
+import '../bloc/queue_bloc.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 
@@ -184,7 +185,12 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
           // 续接：重开前把当前位置交给播放层，open 完成后自动 seek 回去。
           widget.controller.restorePositionSeconds =
               widget.controller.state.position.inSeconds;
-          await widget.controller.open(value);
+          final queue = context.read<QueueBloc?>();
+          if (queue != null) {
+            queue.updateCurrentStream(value);
+          } else {
+            await widget.controller.open(value);
+          }
           if (!mounted) return;
           context.read<VideoBloc>().add(MediaStreamChanged(value));
           _persistDefaultQuality(option);
