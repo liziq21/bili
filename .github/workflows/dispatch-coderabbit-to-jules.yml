@@ -24,7 +24,11 @@ jobs:
       github.event.review.state == 'changes_requested' &&
       github.event.review.user.login == 'coderabbitai[bot]' &&
       github.event.pull_request.draft == false &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (
+        github.event.pull_request.user.login == 'google-labs-jules[bot]' ||
+        contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]')
+      )
     runs-on: ubuntu-latest
     steps:
       # 幂等（同一 head 只派一次）+ 轮次上限 + 采集本轮新增的 finding
