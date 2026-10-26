@@ -61,6 +61,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPlayer => 'Player';
 
   @override
+  String get playerDefaultQuality => 'Default video quality';
+
+  @override
+  String get playerDefaultQualitySubtitle =>
+      'Preferred quality when opening the player';
+
+  @override
+  String get playerDefaultSpeed => 'Default playback speed';
+
+  @override
+  String get playerDefaultSpeedSubtitle =>
+      'Preferred playback speed when opening the player';
+
+  @override
+  String get playerGestures => 'Playback gestures';
+
+  @override
+  String get playerGestureSeek => 'Swipe and double-tap to seek';
+
+  @override
+  String get playerGestureSeekSubtitle =>
+      'Swipe or double-tap the video to change position';
+
+  @override
+  String get playerGestureVolume => 'Swipe to adjust volume';
+
+  @override
+  String get playerGestureVolumeSubtitle =>
+      'Swipe up and down on the right side of the video to adjust volume';
+
+  @override
+  String get playerGestureBrightness => 'Swipe to adjust brightness';
+
+  @override
+  String get playerGestureBrightnessSubtitle =>
+      'Swipe up and down on the left side of the video to adjust brightness';
+
+  @override
+  String get playerGestureBoost => 'Hold to temporarily speed up';
+
+  @override
+  String get playerGestureBoostSubtitle =>
+      'Hold the video to temporarily switch to 2x speed';
+
+  @override
+  String get playerSleepTimerDefault => 'Default sleep timer';
+
+  @override
+  String get playerSleepTimerDefaultSubtitle =>
+      'Start a countdown automatically when opening the player; disabled means no automatic timer';
+
+  @override
+  String get playerSleepTimerOff => 'Off';
+
+  @override
+  String get playerQualityAuto => 'Auto';
+
+  @override
+  String playerQualityHeight(String p1) {
+    return '${p1}P';
+  }
+
+  @override
   String get settingsHistory => 'History';
 
   @override

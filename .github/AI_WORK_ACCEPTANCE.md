@@ -139,15 +139,19 @@ When the agent believes the work is complete:
 - **Never** hand-edit or commit baseline images.
 
 ### Generated Files
-- Do not commit generated files (Drift, l10n, changelog) unless the issue explicitly requires it.
-- Run the generator in CI; commit the output only if the issue is "regenerate X".
+- Do not hand-edit generated files (Drift, l10n, changelog).
+- When a source file requires regenerated output, run the narrowest generator locally,
+  review the generated diff, and commit the output together with its source change.
+- `CHANGELOG.md` remains workflow-generated and must not be hand-edited; l10n and
+  other generated outputs that are version-controlled follow their owning package's
+  generator rules.
 
 ### Formatting
 - Format only touched files: `dart format --set-exit-if-changed <files>`
 - Do not run formatter on the whole tree.
 
 ### SDK Version
-- All `dart`/`flutter` commands must use the version in `.fvmrc` (currently Flutter 3.47.5 / Dart 3.13.4).
+- All `dart`/`flutter` commands must use the version in `.fvmrc` (currently Flutter 3.47.7 / Dart 3.13.5).
 - Agent must verify `dart --version` and `flutter --version` match before running commands.
 
 ---

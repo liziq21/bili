@@ -10,11 +10,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-Widget _buildScreen(PreferencesDataSource preferences) {
+Widget _buildScreen(
+  PreferencesDataSource preferences, {
+  Locale locale = const Locale('zh'),
+}) {
   return Provider<PreferencesDataSource>.value(
     value: preferences,
     child: MaterialApp(
-      locale: const Locale('zh'),
+      locale: locale,
       localizationsDelegates: const [
         ...AppLocalizations.localizationsDelegates,
         ...GlobalMaterialLocalizations.delegates,
@@ -91,5 +94,22 @@ void main() {
     expect(settings.preferredQualityStreamId, isNull);
     expect(settings.playbackRate, 1.5);
     expect(settings.sleepTimerDefaultMinutes, 30);
+  });
+
+  testWidgets('uses English translations when English is selected', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildScreen(preferences, locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(PlayerSettingsScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    expect(l10n.playerDefaultQuality, 'Default video quality');
+    expect(l10n.playerGestures, 'Playback gestures');
+    expect(find.text(l10n.playerDefaultQuality), findsOneWidget);
+    expect(find.text('默认画质'), findsNothing);
   });
 }

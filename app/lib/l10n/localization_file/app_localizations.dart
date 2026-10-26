@@ -202,109 +202,109 @@ abstract class AppLocalizations {
 
   /// Player setting - default video quality
   ///
-  /// In zh, this message translates to:
-  /// **'默认画质'**
+  /// In en, this message translates to:
+  /// **'Default video quality'**
   String get playerDefaultQuality;
 
   /// Subtitle for the default video quality setting
   ///
-  /// In zh, this message translates to:
-  /// **'进入播放器时优先使用的画质'**
+  /// In en, this message translates to:
+  /// **'Preferred quality when opening the player'**
   String get playerDefaultQualitySubtitle;
 
   /// Player setting - default playback speed
   ///
-  /// In zh, this message translates to:
-  /// **'默认倍速'**
+  /// In en, this message translates to:
+  /// **'Default playback speed'**
   String get playerDefaultSpeed;
 
   /// Subtitle for the default playback speed setting
   ///
-  /// In zh, this message translates to:
-  /// **'进入播放器时优先使用的播放速度'**
+  /// In en, this message translates to:
+  /// **'Preferred playback speed when opening the player'**
   String get playerDefaultSpeedSubtitle;
 
   /// Heading for player gesture settings
   ///
-  /// In zh, this message translates to:
-  /// **'播放手势'**
+  /// In en, this message translates to:
+  /// **'Playback gestures'**
   String get playerGestures;
 
   /// Toggle for seeking with player gestures
   ///
-  /// In zh, this message translates to:
-  /// **'滑动与双击快进'**
+  /// In en, this message translates to:
+  /// **'Swipe and double-tap to seek'**
   String get playerGestureSeek;
 
   /// Subtitle for the player seek gesture toggle
   ///
-  /// In zh, this message translates to:
-  /// **'在画面上滑动或双击调整播放位置'**
+  /// In en, this message translates to:
+  /// **'Swipe or double-tap the video to change position'**
   String get playerGestureSeekSubtitle;
 
   /// Toggle for changing volume with vertical gestures
   ///
-  /// In zh, this message translates to:
-  /// **'滑动调节音量'**
+  /// In en, this message translates to:
+  /// **'Swipe to adjust volume'**
   String get playerGestureVolume;
 
   /// Subtitle for the player volume gesture toggle
   ///
-  /// In zh, this message translates to:
-  /// **'在画面右侧上下滑动调节音量'**
+  /// In en, this message translates to:
+  /// **'Swipe up and down on the right side of the video to adjust volume'**
   String get playerGestureVolumeSubtitle;
 
   /// Toggle for changing brightness with vertical gestures
   ///
-  /// In zh, this message translates to:
-  /// **'滑动调节亮度'**
+  /// In en, this message translates to:
+  /// **'Swipe to adjust brightness'**
   String get playerGestureBrightness;
 
   /// Subtitle for the player brightness gesture toggle
   ///
-  /// In zh, this message translates to:
-  /// **'在画面左侧上下滑动调节亮度'**
+  /// In en, this message translates to:
+  /// **'Swipe up and down on the left side of the video to adjust brightness'**
   String get playerGestureBrightnessSubtitle;
 
   /// Toggle for temporary long-press playback boost
   ///
-  /// In zh, this message translates to:
-  /// **'长按临时加速'**
+  /// In en, this message translates to:
+  /// **'Hold to temporarily speed up'**
   String get playerGestureBoost;
 
   /// Subtitle for the player boost gesture toggle
   ///
-  /// In zh, this message translates to:
-  /// **'长按画面临时切换到 2 倍速'**
+  /// In en, this message translates to:
+  /// **'Hold the video to temporarily switch to 2x speed'**
   String get playerGestureBoostSubtitle;
 
   /// Player setting - default sleep timer duration
   ///
-  /// In zh, this message translates to:
-  /// **'睡眠定时器默认值'**
+  /// In en, this message translates to:
+  /// **'Default sleep timer'**
   String get playerSleepTimerDefault;
 
   /// Subtitle for the default sleep timer setting
   ///
-  /// In zh, this message translates to:
-  /// **'进入播放器时自动开始倒计时，关闭则不自动计时'**
+  /// In en, this message translates to:
+  /// **'Start a countdown automatically when opening the player; disabled means no automatic timer'**
   String get playerSleepTimerDefaultSubtitle;
 
   /// Value meaning that the default sleep timer is disabled
   ///
-  /// In zh, this message translates to:
-  /// **'关闭'**
+  /// In en, this message translates to:
+  /// **'Off'**
   String get playerSleepTimerOff;
 
   /// Automatic player quality selection
   ///
-  /// In zh, this message translates to:
-  /// **'自动'**
+  /// In en, this message translates to:
+  /// **'Auto'**
   String get playerQualityAuto;
 
   /// Video quality height shown in player settings
   ///
-  /// In zh, this message translates to:
+  /// In en, this message translates to:
   /// **'{p1}P'**
   String playerQualityHeight(String p1);
 
