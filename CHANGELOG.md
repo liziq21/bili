@@ -62,6 +62,7 @@ so hand edits do not survive; change the generator instead.
 - feat(home): consume configurable home tabs (#415)
 - feat(settings): add player preferences UI (#418)
 - feat(LIZ-90): periodic progress persistence + queue-switch progress save (#468)
+- feat(video): add playback queue and fix strict analysis (#480)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -210,6 +211,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Add tooltip and tactile feedback to settings section items (#417)
 - 🎨 Palette: Consolidate HomeSourceSelector dropdown button semantics (#469)
 - 🎨 Palette: Add tactile haptic feedback to settings toggle switches (#476)
+- 🎨 Palette: Improve playlist picker item screen reader semantics (#483)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -296,6 +298,7 @@ so hand edits do not survive; change the generator instead.
 - chore: upgrade Flutter SDK to 3.47.7 and Dart to 3.13.5 (#402)
 - ci: run required checks for changelog PR to enable auto-merge (#409)
 - ci(changelog): fix auto-merge when updating existing PR (#419)
+- ci: add PR author check to dispatch-coderabbit-to-jules workflow (#482)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
@@ -307,3 +310,4 @@ so hand edits do not survive; change the generator instead.
 - Update local workspace dependencies to relative paths (#53)
 - Complete issue triage for LIZ-31, LIZ-32, LIZ-33 (#386)
 - [LIZ-73] 本地播放列表数据层：CRUD、排序与搜索 (#391)
+- Issue Triage: Review LIZ-135, LIZ-134, and LIZ-133 (#481)
