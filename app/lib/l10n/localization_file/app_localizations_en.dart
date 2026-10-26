@@ -61,55 +61,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPlayer => 'Player';
 
   @override
-  String get playerDefaultQuality => '默认画质';
+  String get playerDefaultQuality => 'Default video quality';
 
   @override
-  String get playerDefaultQualitySubtitle => '进入播放器时优先使用的画质';
+  String get playerDefaultQualitySubtitle =>
+      'Preferred quality when opening the player';
 
   @override
-  String get playerDefaultSpeed => '默认倍速';
+  String get playerDefaultSpeed => 'Default playback speed';
 
   @override
-  String get playerDefaultSpeedSubtitle => '进入播放器时优先使用的播放速度';
+  String get playerDefaultSpeedSubtitle =>
+      'Preferred playback speed when opening the player';
 
   @override
-  String get playerGestures => '播放手势';
+  String get playerGestures => 'Playback gestures';
 
   @override
-  String get playerGestureSeek => '滑动与双击快进';
+  String get playerGestureSeek => 'Swipe and double-tap to seek';
 
   @override
-  String get playerGestureSeekSubtitle => '在画面上滑动或双击调整播放位置';
+  String get playerGestureSeekSubtitle =>
+      'Swipe or double-tap the video to change position';
 
   @override
-  String get playerGestureVolume => '滑动调节音量';
+  String get playerGestureVolume => 'Swipe to adjust volume';
 
   @override
-  String get playerGestureVolumeSubtitle => '在画面右侧上下滑动调节音量';
+  String get playerGestureVolumeSubtitle =>
+      'Swipe up and down on the right side of the video to adjust volume';
 
   @override
-  String get playerGestureBrightness => '滑动调节亮度';
+  String get playerGestureBrightness => 'Swipe to adjust brightness';
 
   @override
-  String get playerGestureBrightnessSubtitle => '在画面左侧上下滑动调节亮度';
+  String get playerGestureBrightnessSubtitle =>
+      'Swipe up and down on the left side of the video to adjust brightness';
 
   @override
-  String get playerGestureBoost => '长按临时加速';
+  String get playerGestureBoost => 'Hold to temporarily speed up';
 
   @override
-  String get playerGestureBoostSubtitle => '长按画面临时切换到 2 倍速';
+  String get playerGestureBoostSubtitle =>
+      'Hold the video to temporarily switch to 2x speed';
 
   @override
-  String get playerSleepTimerDefault => '睡眠定时器默认值';
+  String get playerSleepTimerDefault => 'Default sleep timer';
 
   @override
-  String get playerSleepTimerDefaultSubtitle => '进入播放器时自动开始倒计时，关闭则不自动计时';
+  String get playerSleepTimerDefaultSubtitle =>
+      'Start a countdown automatically when opening the player; disabled means no automatic timer';
 
   @override
-  String get playerSleepTimerOff => '关闭';
+  String get playerSleepTimerOff => 'Off';
 
   @override
-  String get playerQualityAuto => '自动';
+  String get playerQualityAuto => 'Auto';
 
   @override
   String playerQualityHeight(String p1) {

@@ -126,6 +126,34 @@ void main() {
     fake.disposeStreams();
   });
 
+  test('keyboard mapping resolves each player action', () {
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.space),
+      PlayerKeyboardAction.togglePlayback,
+    );
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.arrowLeft),
+      PlayerKeyboardAction.seekBackward,
+    );
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.arrowRight),
+      PlayerKeyboardAction.seekForward,
+    );
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.arrowUp),
+      PlayerKeyboardAction.volumeUp,
+    );
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.arrowDown),
+      PlayerKeyboardAction.volumeDown,
+    );
+    expect(
+      playerKeyboardActionFor(LogicalKeyboardKey.keyF),
+      PlayerKeyboardAction.toggleFullscreen,
+    );
+    expect(playerKeyboardActionFor(LogicalKeyboardKey.keyQ), isNull);
+  });
+
   /// 只 pump 快捷键层，不经过原生 `Video` 与手势层。
   Future<void> pumpShortcuts(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -187,6 +215,35 @@ void main() {
     await tester.pump();
 
     expect(fake.seekCalls, contains(const Duration(seconds: 70)));
+  });
+
+  testWidgets('arrow seek step can be configured', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PlayerKeyboardShortcuts(
+            controller: controller,
+            seekStep: const Duration(seconds: 12),
+            seekStepWithShift: const Duration(seconds: 24),
+            onToggleFullscreen: () {},
+            child: const ColoredBox(
+              color: Color(0xFF000000),
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await controller.openQueue([
+      MediaStream(videoUrl: 'https://example.com/v.m4s'),
+    ]);
+    fake.emitPosition(const Duration(seconds: 60));
+    fake.emitDuration(const Duration(minutes: 10));
+    await tester.pump();
+
+    await press(tester, LogicalKeyboardKey.arrowRight);
+
+    expect(fake.seekCalls, contains(const Duration(seconds: 72)));
   });
 
   testWidgets('seek is clamped to the media duration', (tester) async {

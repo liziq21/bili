@@ -19,7 +19,7 @@ Before writing or modifying code in this repository, read the specification file
 - `README.md`, learning journeys, journals, and postmortems provide context or history. They must link to the owning rule instead of creating a second source of truth. `docs/runbook.md` is normative only for incident recovery steps.
 - If a document and executable configuration disagree, do not guess: fix the document or configuration in the same change, and state which behavior is intended.
 
-**Before starting work, read:**
+**工作开始前按需读取，在工作范围扩大时增量读取:**
 
 - [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, Dart 3.13 syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.

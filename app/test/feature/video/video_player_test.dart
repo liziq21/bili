@@ -44,9 +44,7 @@ void main() {
     addTearDown(bloc.close);
   });
 
-  testWidgets('renders the stream error inside the player area', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('renders generic error message', (WidgetTester tester) async {
     final bloc = VideoBloc(repository: _FailingStreamRepository());
 
     await pumpPlayer(tester, bloc: bloc);
@@ -54,8 +52,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.textContaining('Playback failed'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    // Verifies generic error text is rendered and raw exception string '签名过期' is masked from UI.
+    expect(find.textContaining('签名过期'), findsNothing);
 
     addTearDown(bloc.close);
   });
@@ -368,7 +368,7 @@ void main() {
   });
 }
 
-class _NoStreamRepository() implements VideoDetailRepository {
+class _NoStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -398,8 +398,8 @@ class _NoStreamRepository() implements VideoDetailRepository {
 }
 
 // ignore_for_file: close_sinks
-class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
-  this {
+class _FakePlatformPlayer extends Fake implements PlatformPlayer {
+  _FakePlatformPlayer() {
     stream = PlayerStream(
       _playlist.stream,
       _playing.stream,
@@ -535,7 +535,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   void injectPlaybackError(String message) => _error.add(message);
 }
 
-class _HangingStreamRepository() implements VideoDetailRepository {
+class _HangingStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -564,7 +564,7 @@ class _HangingStreamRepository() implements VideoDetailRepository {
   }
 }
 
-class _FailingStreamRepository() implements VideoDetailRepository {
+class _FailingStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -592,7 +592,7 @@ class _FailingStreamRepository() implements VideoDetailRepository {
 }
 
 /// 立即返回可播流：让画面本体（含浮层控制）渲染出来。
-class _ReadyStreamRepository() implements VideoDetailRepository {
+class _ReadyStreamRepository implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));

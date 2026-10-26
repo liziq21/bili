@@ -137,3 +137,9 @@ Prevention: Strip ASCII control characters (`RegExp(r'[\x00-\x1F\x7F]')`) and tr
 Vulnerability: `BiliUtils._buildDecodedUri` invoked `Uri.decodeComponent` on the entire serialized URI string returned by `Uri(...).toString()`, decoding percent-encoded query parameter delimiters (`%26` -> `&`, `%3D` -> `=`, `%23` -> `#`, `%3F` -> `?`) and percent-encoded ASCII control characters (`%0D%0A` -> `\r\n`) across full route URIs, leading to HTTP parameter pollution, fragment injection, and CRLF injection during deep-link route parsing.
 Learning: Decoding a complete, formatted URI string using `Uri.decodeComponent` destroys component boundaries and unescapes reserved URI delimiters in query parameter values, corrupting route structures when parsed by routing engines or loggers.
 Prevention: Construct route URIs using standard `Uri(...)` constructor without calling `Uri.decodeComponent` on the whole string, and sanitize non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from path, query parameters, and fragments.
+
+## 2026-10-25 - Sanitize and Mask Exception Outputs in VideoPlayer Error Views
+
+Vulnerability: `_ErrorView` in `app/lib/feature/video/common_widgets/video_player.dart` directly interpolated raw `message` exception strings (`l10n?.playbackFailed(message) ?? 'Playback failed: $message'`), exposing raw system file paths, network URLs, or exception stack traces to end users during stream loading failures.
+Learning: Displaying raw exception strings in UI widgets leaks sensitive internal application details, system paths, or network parameters in production builds.
+Prevention: Replace raw exception string interpolations in UI error widgets with generic, localized error messages (`l10n?.videoLoadFailed ?? 'Playback failed'`) and confine detailed exception logging to background loggers.

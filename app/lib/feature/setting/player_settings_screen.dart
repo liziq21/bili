@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -89,33 +90,45 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                   title: Text(l10n.playerGestureSeek),
                   subtitle: Text(l10n.playerGestureSeekSubtitle),
                   value: _gestureSettings.seekEnabled,
-                  onChanged: (enabled) => _updateGestures(
-                    _gestureSettings.copyWith(seekEnabled: enabled),
-                  ),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _updateGestures(
+                      _gestureSettings.copyWith(seekEnabled: enabled),
+                    );
+                  },
                 ),
                 SwitchListTile(
                   title: Text(l10n.playerGestureVolume),
                   subtitle: Text(l10n.playerGestureVolumeSubtitle),
                   value: _gestureSettings.volumeEnabled,
-                  onChanged: (enabled) => _updateGestures(
-                    _gestureSettings.copyWith(volumeEnabled: enabled),
-                  ),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _updateGestures(
+                      _gestureSettings.copyWith(volumeEnabled: enabled),
+                    );
+                  },
                 ),
                 SwitchListTile(
                   title: Text(l10n.playerGestureBrightness),
                   subtitle: Text(l10n.playerGestureBrightnessSubtitle),
                   value: _gestureSettings.brightnessEnabled,
-                  onChanged: (enabled) => _updateGestures(
-                    _gestureSettings.copyWith(brightnessEnabled: enabled),
-                  ),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _updateGestures(
+                      _gestureSettings.copyWith(brightnessEnabled: enabled),
+                    );
+                  },
                 ),
                 SwitchListTile(
                   title: Text(l10n.playerGestureBoost),
                   subtitle: Text(l10n.playerGestureBoostSubtitle),
                   value: _gestureSettings.boostEnabled,
-                  onChanged: (enabled) => _updateGestures(
-                    _gestureSettings.copyWith(boostEnabled: enabled),
-                  ),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _updateGestures(
+                      _gestureSettings.copyWith(boostEnabled: enabled),
+                    );
+                  },
                 ),
                 _valueTile(
                   title: l10n.playerSleepTimerDefault,

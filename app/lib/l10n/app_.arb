@@ -63,71 +63,71 @@
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"
   },
-  "playerDefaultQuality": "默认画质",
+  "playerDefaultQuality": "Default video quality",
   "@playerDefaultQuality": {
     "description": "Player setting - default video quality"
   },
-  "playerDefaultQualitySubtitle": "进入播放器时优先使用的画质",
+  "playerDefaultQualitySubtitle": "Preferred quality when opening the player",
   "@playerDefaultQualitySubtitle": {
     "description": "Subtitle for the default video quality setting"
   },
-  "playerDefaultSpeed": "默认倍速",
+  "playerDefaultSpeed": "Default playback speed",
   "@playerDefaultSpeed": {
     "description": "Player setting - default playback speed"
   },
-  "playerDefaultSpeedSubtitle": "进入播放器时优先使用的播放速度",
+  "playerDefaultSpeedSubtitle": "Preferred playback speed when opening the player",
   "@playerDefaultSpeedSubtitle": {
     "description": "Subtitle for the default playback speed setting"
   },
-  "playerGestures": "播放手势",
+  "playerGestures": "Playback gestures",
   "@playerGestures": {
     "description": "Heading for player gesture settings"
   },
-  "playerGestureSeek": "滑动与双击快进",
+  "playerGestureSeek": "Swipe and double-tap to seek",
   "@playerGestureSeek": {
     "description": "Toggle for seeking with player gestures"
   },
-  "playerGestureSeekSubtitle": "在画面上滑动或双击调整播放位置",
+  "playerGestureSeekSubtitle": "Swipe or double-tap the video to change position",
   "@playerGestureSeekSubtitle": {
     "description": "Subtitle for the player seek gesture toggle"
   },
-  "playerGestureVolume": "滑动调节音量",
+  "playerGestureVolume": "Swipe to adjust volume",
   "@playerGestureVolume": {
     "description": "Toggle for changing volume with vertical gestures"
   },
-  "playerGestureVolumeSubtitle": "在画面右侧上下滑动调节音量",
+  "playerGestureVolumeSubtitle": "Swipe up and down on the right side of the video to adjust volume",
   "@playerGestureVolumeSubtitle": {
     "description": "Subtitle for the player volume gesture toggle"
   },
-  "playerGestureBrightness": "滑动调节亮度",
+  "playerGestureBrightness": "Swipe to adjust brightness",
   "@playerGestureBrightness": {
     "description": "Toggle for changing brightness with vertical gestures"
   },
-  "playerGestureBrightnessSubtitle": "在画面左侧上下滑动调节亮度",
+  "playerGestureBrightnessSubtitle": "Swipe up and down on the left side of the video to adjust brightness",
   "@playerGestureBrightnessSubtitle": {
     "description": "Subtitle for the player brightness gesture toggle"
   },
-  "playerGestureBoost": "长按临时加速",
+  "playerGestureBoost": "Hold to temporarily speed up",
   "@playerGestureBoost": {
     "description": "Toggle for temporary long-press playback boost"
   },
-  "playerGestureBoostSubtitle": "长按画面临时切换到 2 倍速",
+  "playerGestureBoostSubtitle": "Hold the video to temporarily switch to 2x speed",
   "@playerGestureBoostSubtitle": {
     "description": "Subtitle for the player boost gesture toggle"
   },
-  "playerSleepTimerDefault": "睡眠定时器默认值",
+  "playerSleepTimerDefault": "Default sleep timer",
   "@playerSleepTimerDefault": {
     "description": "Player setting - default sleep timer duration"
   },
-  "playerSleepTimerDefaultSubtitle": "进入播放器时自动开始倒计时，关闭则不自动计时",
+  "playerSleepTimerDefaultSubtitle": "Start a countdown automatically when opening the player; disabled means no automatic timer",
   "@playerSleepTimerDefaultSubtitle": {
     "description": "Subtitle for the default sleep timer setting"
   },
-  "playerSleepTimerOff": "关闭",
+  "playerSleepTimerOff": "Off",
   "@playerSleepTimerOff": {
     "description": "Value meaning that the default sleep timer is disabled"
   },
-  "playerQualityAuto": "自动",
+  "playerQualityAuto": "Auto",
   "@playerQualityAuto": {
     "description": "Automatic player quality selection"
   },

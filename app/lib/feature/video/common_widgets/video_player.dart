@@ -56,6 +56,10 @@ class const VideoPlayer({
   /// 页面布局的决定。本组件只按该标志切换「16:9 内嵌」与「铺满」两种布局。
   final bool fullscreen = false,
 
+  /// 桌面端方向键的普通 / Shift 快进步长。
+  final Duration keyboardSeekStep = kKeyboardSeekStep,
+  final Duration keyboardSeekStepWithShift = kKeyboardSeekStepLong,
+
   /// 进入 / 退出全屏。横屏与系统 UI 的切换由页面负责。
   final VoidCallback? onToggleFullscreen,
 
@@ -176,6 +180,8 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             stream: stream,
             fullscreen: widget.fullscreen,
             controlsVisible: _controlsVisible,
+            keyboardSeekStep: widget.keyboardSeekStep,
+            keyboardSeekStepWithShift: widget.keyboardSeekStepWithShift,
             onToggleFullscreen: widget.onToggleFullscreen,
             onMinimize: widget.onMinimize,
             onTapSurface: _toggleControls,
@@ -361,6 +367,8 @@ class const _VideoSurface({
   required final MediaStream stream,
   required final bool fullscreen,
   required final bool controlsVisible,
+  required final Duration keyboardSeekStep,
+  required final Duration keyboardSeekStepWithShift,
   required final VoidCallback? onToggleFullscreen,
   required final VoidCallback? onMinimize,
   required final VoidCallback onTapSurface,
@@ -534,6 +542,8 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             onDoubleTapScreen: widget.onToggleFullscreen,
             child: PlayerKeyboardShortcuts(
               controller: widget.controller,
+              seekStep: widget.keyboardSeekStep,
+              seekStepWithShift: widget.keyboardSeekStepWithShift,
               onToggleFullscreen: widget.onToggleFullscreen,
               child:
                   widget.surfaceBuilder?.call(widget.controller) ??
@@ -675,7 +685,7 @@ class const _ErrorView({
           Icon(Icons.error_outline, color: $styles.colors.onScrim, size: 32),
           const Gap(8),
           Text(
-            l10n?.playbackFailed(message) ?? 'Playback failed: $message',
+            l10n?.videoLoadFailed ?? 'Playback failed',
             textAlign: TextAlign.center,
             style: $styles.text.bodySmall.copyWith(
               color: $styles.colors.onScrim,

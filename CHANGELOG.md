@@ -61,6 +61,7 @@ so hand edits do not survive; change the generator instead.
 - feat(home): connect grid columns configuration (#363) (#413)
 - feat(home): consume configurable home tabs (#415)
 - feat(settings): add player preferences UI (#418)
+- feat(LIZ-90): periodic progress persistence + queue-switch progress save (#468)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -122,6 +123,8 @@ so hand edits do not survive; change the generator instead.
 - fix(video): restore detail back navigation and clear player controls (#394)
 - fix: use system sqlite3 on Linux to avoid glibc/bionic mismatch in Termux (#398)
 - 🛡️ Sentinel: mask sensitive build error exceptions in release builds (#410)
+- fix: resolve flutter analyze issues (#470)
+- 🛡️ Sentinel: Sanitize and mask exception outputs in VideoPlayer _ErrorView (#475)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -206,6 +209,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Improve video player placeholder slider accessibility and haptics (#411)
 - 🎨 Palette: Add tooltip and tactile feedback to settings section items (#417)
 - 🎨 Palette: Consolidate HomeSourceSelector dropdown button semantics (#469)
+- 🎨 Palette: Add tactile haptic feedback to settings toggle switches (#476)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
