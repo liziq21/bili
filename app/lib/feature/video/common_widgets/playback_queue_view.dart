@@ -129,8 +129,9 @@ class const _PlaybackQueueItem({
               )
             : null,
         trailing: SizedBox(
-          width: 104,
+          width: 144,
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(

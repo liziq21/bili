@@ -22,7 +22,6 @@ void main() {
     );
     addTearDown(bloc.close);
     addTearDown(controller.dispose);
-
     final first = _item('first', 'First');
     final second = _item('second', 'Second');
     bloc.add(QueueSetCurrent(first));
@@ -67,15 +66,11 @@ void main() {
     addTearDown(bloc.close);
     addTearDown(controller.dispose);
 
-    bloc.add(QueueSetCurrent(_item('first', 'First')));
+    bloc.add(QueueSetCurrent(_item('first', 'First', sourceId: 'youtube')));
     await _flush();
     expect(await bloc.enqueue(_video('second', 'Second')), isTrue);
 
     controller.completeCurrent();
-    await _flush();
-    await _flush();
-    await _flush();
-    await _flush();
     await _flush();
 
     expect(controller.nextCalls, 1);
@@ -110,13 +105,17 @@ void main() {
   });
 }
 
-Future<void> _flush() => Future<void>.delayed(Duration.zero);
+Future<void> _flush() => pumpEventQueue(times: 20);
 
 VideoModel _video(String id, String title) =>
     VideoModel(id: id, title: title, url: 'https://example.com/$id');
 
-PlaybackQueueItem _item(String id, String title) => PlaybackQueueItem(
-  sourceId: 'bilibili',
+PlaybackQueueItem _item(
+  String id,
+  String title, {
+  String sourceId = 'bilibili',
+}) => PlaybackQueueItem(
+  sourceId: sourceId,
   video: _video(id, title),
   stream: MediaStream(videoUrl: 'https://cdn.example.com/$id.m4s'),
 );
