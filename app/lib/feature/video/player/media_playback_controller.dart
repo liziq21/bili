@@ -467,7 +467,7 @@ class MediaPlaybackController([
 
   /// 释放原生播放器资源。
   Future<void> dispose() async {
-    await _detachErrorSubscription();
+    unawaited(_detachErrorSubscription());
     _cancelAutomaticRetry();
     _currentStream = null;
     _queueModeActive = false;
