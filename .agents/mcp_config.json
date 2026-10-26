@@ -2,7 +2,18 @@
   "mcpServers": {
     "dart": {
       "command": "dart",
-      "args": ["mcp-server"]
+      "args": [
+        "mcp-server",
+        "--enable",
+        "dart_format"
+      ]
+    },
+    "very-good-cli": {
+      "command": "very_good",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
     }
   }
 }

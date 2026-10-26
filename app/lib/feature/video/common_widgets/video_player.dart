@@ -16,6 +16,7 @@ import '../../setting/app_settings.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
 import 'player_keyboard_shortcuts.dart';
+import 'playback_queue_sheet.dart';
 import 'quality_picker_chip.dart';
 import 'sleep_timer_chip.dart';
 import '../danmaku/danmaku_overlay.dart';
@@ -148,10 +149,26 @@ class _VideoPlayerState() extends State<VideoPlayer> {
       BlocSelector<
         VideoBloc,
         VideoState,
-        ({MediaStream? stream, String? streamError})
+        ({
+          MediaStream? stream,
+          String? streamError,
+          String? videoId,
+          String? title,
+          String? creatorName,
+          String? thumbnailUrl,
+        })
       >(
-        selector: (state) =>
-            (stream: state.mediaStream, streamError: state.streamError),
+        selector: (state) {
+          final video = state.videoDetail?.video;
+          return (
+            stream: state.mediaStream,
+            streamError: state.streamError,
+            videoId: video?.id,
+            title: video?.title,
+            creatorName: video?.creatorProfileName,
+            thumbnailUrl: video?.thumbnailUrl,
+          );
+        },
         builder: (context, data) {
           if (data.streamError != null) {
             final errorView = _ErrorView(message: data.streamError!);
@@ -178,6 +195,10 @@ class _VideoPlayerState() extends State<VideoPlayer> {
           final surface = _VideoSurface(
             controller: _playback!,
             stream: stream,
+            videoId: data.videoId,
+            title: data.title,
+            creatorName: data.creatorName,
+            thumbnailUrl: data.thumbnailUrl,
             fullscreen: widget.fullscreen,
             controlsVisible: _controlsVisible,
             keyboardSeekStep: widget.keyboardSeekStep,
@@ -235,20 +256,28 @@ class const _QueueControlBar({
 
 class _QueueControlBarState() extends State<_QueueControlBar> {
   StreamSubscription<PlaybackState>? _subscription;
+  StreamSubscription<List<PlaybackQueueItem>>? _queueSubscription;
   PlaybackState? _state;
+  List<PlaybackQueueItem> _queueItems = const [];
 
   @override
   void initState() {
     super.initState();
+    _queueItems = widget.controller.queueItems;
     _subscription = widget.controller.states.listen((state) {
       if (!mounted) return;
       setState(() => _state = state);
+    });
+    _queueSubscription = widget.controller.queueItemStates.listen((items) {
+      if (!mounted) return;
+      setState(() => _queueItems = items);
     });
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _queueSubscription?.cancel();
     super.dispose();
   }
 
@@ -256,11 +285,14 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final state = _state;
-    final queueActive = state != null && state.queueLength > 0;
+    final queueActive = _queueItems.isNotEmpty ||
+        (state != null && state.queueLength > 0);
     final displayIndex = state?.currentIndex != null
         ? state!.currentIndex + 1
         : 0;
-    final displayLength = state?.queueLength ?? 0;
+    final displayLength = _queueItems.isNotEmpty
+        ? _queueItems.length
+        : (state?.queueLength ?? 0);
     final currentQueueMode = state?.queueMode ?? PlaybackQueueMode.none;
 
     return Container(
@@ -309,6 +341,16 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
                   }
                 : null,
             icon: Icon(_queueModeIcon(currentQueueMode)),
+          ),
+          IconButton(
+            tooltip: l10n?.playbackQueue ?? 'Playback queue',
+            iconSize: 20,
+            color: $styles.colors.onSurfaceVariant,
+            onPressed: () => showPlaybackQueueSheet(
+              context,
+              controller: widget.controller,
+            ),
+            icon: const Icon(Icons.queue_music),
           ),
           const Spacer(),
           if (queueActive)

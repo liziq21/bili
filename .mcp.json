@@ -2,14 +2,18 @@
   "mcpServers": {
     "dart": {
       "command": "dart",
-      "args": ["mcp-server"]
+      "args": [
+        "mcp-server",
+        "--enable",
+        "dart_format"
+      ]
     },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
+    "very-good-cli": {
+      "command": "very_good",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
     }
   }
 }

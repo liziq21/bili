@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:data/data.dart';
+import 'package:equatable/equatable.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:meta/meta.dart';
 
 import 'media_edl.dart';
 
@@ -56,6 +58,45 @@ enum PlaybackQueueMode() {
 
   /// 整队列循环。
   loop,
+}
+
+/// Metadata shown for one item in the playback queue.
+///
+/// [MediaStream] deliberately contains only playback data. Keeping the
+/// presentation metadata here lets the player remain source-neutral while the
+/// queue can still show useful titles and thumbnails.
+@immutable
+class const PlaybackQueueItem({
+  required final MediaStream stream,
+  final String? videoId,
+  final String? title,
+  final String? creatorName,
+  final String? thumbnailUrl,
+}) with EquatableMixin {
+  @override
+  List<Object?> get props => [
+    stream.videoUrl,
+    stream.audioUrl,
+    videoId,
+    title,
+    creatorName,
+    thumbnailUrl,
+  ];
+
+  PlaybackQueueItem copyWith({
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) {
+    return PlaybackQueueItem(
+      stream: stream,
+      videoId: videoId ?? this.videoId,
+      title: title ?? this.title,
+      creatorName: creatorName ?? this.creatorName,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+    );
+  }
 }
 
 extension on PlaybackState {
@@ -125,11 +166,12 @@ class MediaPlaybackController([
 
   final StreamController<PlaybackState> _stateController =
       StreamController<PlaybackState>.broadcast();
-  final StreamController<void> _completedController =
-      StreamController<void>.broadcast();
+  final StreamController<List<PlaybackQueueItem>> _queueController =
+      StreamController<List<PlaybackQueueItem>>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
   PlaybackState _state = _initialPlaybackState();
+  List<PlaybackQueueItem> _queueItems = const [];
 
   /// 播放器的播放与缓冲开关各自的状态。
   ///
@@ -162,6 +204,13 @@ class MediaPlaybackController([
   /// 当前状态快照。
   PlaybackState get state => _state;
 
+  /// 队列条目的元数据快照。
+  List<PlaybackQueueItem> get queueItems => _queueItems;
+
+  /// 队列条目的变化流。订阅者应使用 [queueItems] 读取初始快照。
+  Stream<List<PlaybackQueueItem>> get queueItemStates =>
+      _queueController.stream;
+
   /// 暂停。
   Future<void> pause() => _player.pause();
 
@@ -177,7 +226,16 @@ class MediaPlaybackController([
   /// 重新打开指定 stream（用于播放错误后重试）。
   ///
   /// 重新走完整 [open] 流程，状态归零后重新加载。
-  Future<void> retry(MediaStream stream) => open(stream);
+  Future<void> retry(MediaStream stream) {
+    final current = _currentQueueItem;
+    return open(
+      stream,
+      videoId: current?.videoId,
+      title: current?.title,
+      creatorName: current?.creatorName,
+      thumbnailUrl: current?.thumbnailUrl,
+    );
+  }
 
   /// 设置音量，取值 0 到 1。
   ///
@@ -192,17 +250,31 @@ class MediaPlaybackController([
   /// 每条 [MediaStream] 各自拼成 EDL 虚拟媒体，互不干扰。队列为空时
   /// 交给播放器库的空 [Playlist] 不会播放任何内容。
   Future<void> openQueue(List<MediaStream> streams, {int index = 0}) async {
+    await openQueueItems(
+      streams.map((stream) => PlaybackQueueItem(stream: stream)).toList(),
+      index: index,
+    );
+  }
+
+  /// 打开带展示元数据的播放队列。
+  Future<void> openQueueItems(
+    List<PlaybackQueueItem> items, {
+    int index = 0,
+  }) async {
     _playerTouched = true;
     _subscribe();
+    _setQueueItems(items);
     _isPlaying = false;
     _isBuffering = false;
     _emit(_initialPlaybackState());
     await _player.open(
       Playlist(
-        streams
+        items
             .map(
-              (stream) =>
-                  Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers),
+              (item) => Media(
+                MediaEdl.uriOf(item.stream),
+                httpHeaders: item.stream.headers,
+              ),
             )
             .toList(),
         index: index,
@@ -211,14 +283,81 @@ class MediaPlaybackController([
   }
 
   /// 追加一条媒体到队列末尾。
-  Future<void> addToQueue(MediaStream stream) =>
-      _player.add(Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers));
+  Future<void> addToQueue(
+    MediaStream stream, {
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) async {
+    await _player.add(Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers));
+    _setQueueItems([
+      ..._queueItems,
+      PlaybackQueueItem(
+        stream: stream,
+        videoId: videoId,
+        title: title,
+        creatorName: creatorName,
+        thumbnailUrl: thumbnailUrl,
+      ),
+    ]);
+  }
 
   /// 移除队列中指定序号的条目。
-  Future<void> removeFromQueue(int index) => _player.remove(index);
+  Future<void> removeFromQueue(int index) async {
+    await _player.remove(index);
+    if (index < 0 || index >= _queueItems.length) return;
+    final nextItems = [..._queueItems]..removeAt(index);
+    _setQueueItems(nextItems);
+  }
 
   /// 移动队列条目：把 [from] 挪到 [to] 的位置。
-  Future<void> moveQueueItem(int from, int to) => _player.move(from, to);
+  Future<void> moveQueueItem(int from, int to) async {
+    await _player.move(from, to);
+    if (from < 0 || from >= _queueItems.length ||
+        to < 0 || to >= _queueItems.length || from == to) {
+      return;
+    }
+    final nextItems = [..._queueItems];
+    final item = nextItems.removeAt(from);
+    nextItems.insert(to, item);
+    _setQueueItems(nextItems);
+  }
+
+  /// Fills in metadata after a queue item has been resolved from a video id.
+  void updateQueueItemMetadata({
+    required String videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) {
+    final index = _queueItems.lastIndexWhere((item) => item.videoId == videoId);
+    if (index < 0) return;
+    _updateQueueItem(
+      index,
+      title: title,
+      creatorName: creatorName,
+      thumbnailUrl: thumbnailUrl,
+    );
+  }
+
+  /// Updates the item currently shown by the player.
+  void updateCurrentQueueItemMetadata({
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) {
+    if (_queueItems.isEmpty) return;
+    final index = _state.currentIndex.clamp(0, _queueItems.length - 1);
+    _updateQueueItem(
+      index,
+      videoId: videoId,
+      title: title,
+      creatorName: creatorName,
+      thumbnailUrl: thumbnailUrl,
+    );
+  }
 
   /// 跳到队列的下一首。
   Future<void> next() => _player.next();
@@ -270,7 +409,7 @@ class MediaPlaybackController([
     }
     _subscriptions.clear();
     await _stateController.close();
-    await _completedController.close();
+    await _queueController.close();
     if (_playerTouched) await _player.dispose();
   }
 
@@ -279,9 +418,24 @@ class MediaPlaybackController([
   /// [stream] 携带的地址可能已失效（各服务的地址签名都有时效），此时
   /// 错误经 [states] 的 [PlaybackState.error] 报出。重复打开会先把状态
   /// 归零，避免上一条媒体的位置与时长被当成本条媒体的。
-  Future<void> open(MediaStream stream) async {
+  Future<void> open(
+    MediaStream stream, {
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) async {
     _playerTouched = true;
     _subscribe();
+    _setQueueItems([
+      PlaybackQueueItem(
+        stream: stream,
+        videoId: videoId,
+        title: title,
+        creatorName: creatorName,
+        thumbnailUrl: thumbnailUrl,
+      ),
+    ]);
     _isPlaying = false;
     _isBuffering = false;
     _emit(_initialPlaybackState());
@@ -351,5 +505,34 @@ class MediaPlaybackController([
   void _emit(PlaybackState next) {
     _state = next;
     if (!_stateController.isClosed) _stateController.add(next);
+  }
+
+  void _updateQueueItem(
+    int index, {
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) {
+    if (index < 0 || index >= _queueItems.length) return;
+    final nextItems = [..._queueItems];
+    nextItems[index] = nextItems[index].copyWith(
+      videoId: videoId,
+      title: title,
+      creatorName: creatorName,
+      thumbnailUrl: thumbnailUrl,
+    );
+    _setQueueItems(nextItems);
+  }
+
+  void _setQueueItems(List<PlaybackQueueItem> items) {
+    _queueItems = List.unmodifiable(items);
+    if (!_queueController.isClosed) _queueController.add(_queueItems);
+  }
+
+  PlaybackQueueItem? get _currentQueueItem {
+    if (_queueItems.isEmpty) return null;
+    final index = _state.currentIndex.clamp(0, _queueItems.length - 1);
+    return _queueItems[index];
   }
 }
