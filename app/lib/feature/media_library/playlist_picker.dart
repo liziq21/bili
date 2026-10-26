@@ -112,6 +112,7 @@ class _LocalPlaylistPickerDialogState()
                             button: true,
                             enabled: !_isSaving,
                             label: l10n.addToNamedPlaylistLong(playlist.name),
+                            excludeSemantics: true,
                             child: ListTile(
                               enabled: !_isSaving,
                               leading: const Icon(Icons.queue_music_outlined),

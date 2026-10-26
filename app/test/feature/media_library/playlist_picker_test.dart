@@ -157,6 +157,15 @@ void main() {
 
       expect(find.byTooltip('添加到 Watch later'), findsOneWidget);
       expect(find.bySemanticsLabel('添加到播放列表 Watch later'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == '添加到播放列表 Watch later' &&
+              widget.excludeSemantics == true,
+        ),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Watch later'));
       await pumpDb(tester);
