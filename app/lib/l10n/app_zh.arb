@@ -5657,6 +5657,34 @@
       }
     }
   },
+  "playbackErrorNetwork": "网络错误",
+  "@playbackErrorNetwork": {
+    "description": "Playback error category - network failure"
+  },
+  "playbackErrorDecoder": "解码错误",
+  "@playbackErrorDecoder": {
+    "description": "Playback error category - media decoding failure"
+  },
+  "playbackErrorDrm": "DRM 错误",
+  "@playbackErrorDrm": {
+    "description": "Playback error category - DRM failure"
+  },
+  "playbackErrorAuthorization": "授权错误",
+  "@playbackErrorAuthorization": {
+    "description": "Playback error category - authorization failure"
+  },
+  "playbackErrorUnknown": "未知播放错误",
+  "@playbackErrorUnknown": {
+    "description": "Playback error category - unknown failure"
+  },
+  "playbackRetrying": "正在重试...",
+  "@playbackRetrying": {
+    "description": "Playback status shown while retrying a network failure"
+  },
+  "skip": "跳过",
+  "@skip": {
+    "description": "Player error action - skip the current queue item"
+  },
   "back": "返回",
   "@back": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
