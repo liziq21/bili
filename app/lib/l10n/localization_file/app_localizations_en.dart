@@ -61,62 +61,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPlayer => 'Player';
 
   @override
-  String get playerDefaultQuality => 'Default video quality';
+  String get playerDefaultQuality => '默认画质';
 
   @override
-  String get playerDefaultQualitySubtitle =>
-      'Preferred quality when opening the player';
+  String get playerDefaultQualitySubtitle => '进入播放器时优先使用的画质';
 
   @override
-  String get playerDefaultSpeed => 'Default playback speed';
+  String get playerDefaultSpeed => '默认倍速';
 
   @override
-  String get playerDefaultSpeedSubtitle =>
-      'Preferred playback speed when opening the player';
+  String get playerDefaultSpeedSubtitle => '进入播放器时优先使用的播放速度';
 
   @override
-  String get playerGestures => 'Playback gestures';
+  String get playerGestures => '播放手势';
 
   @override
-  String get playerGestureSeek => 'Swipe and double-tap to seek';
+  String get playerGestureSeek => '滑动与双击快进';
 
   @override
-  String get playerGestureSeekSubtitle =>
-      'Swipe or double-tap the video to change position';
+  String get playerGestureSeekSubtitle => '在画面上滑动或双击调整播放位置';
 
   @override
-  String get playerGestureVolume => 'Swipe to adjust volume';
+  String get playerGestureVolume => '滑动调节音量';
 
   @override
-  String get playerGestureVolumeSubtitle =>
-      'Swipe up and down on the right side of the video to adjust volume';
+  String get playerGestureVolumeSubtitle => '在画面右侧上下滑动调节音量';
 
   @override
-  String get playerGestureBrightness => 'Swipe to adjust brightness';
+  String get playerGestureBrightness => '滑动调节亮度';
 
   @override
-  String get playerGestureBrightnessSubtitle =>
-      'Swipe up and down on the left side of the video to adjust brightness';
+  String get playerGestureBrightnessSubtitle => '在画面左侧上下滑动调节亮度';
 
   @override
-  String get playerGestureBoost => 'Hold to temporarily speed up';
+  String get playerGestureBoost => '长按临时加速';
 
   @override
-  String get playerGestureBoostSubtitle =>
-      'Hold the video to temporarily switch to 2x speed';
+  String get playerGestureBoostSubtitle => '长按画面临时切换到 2 倍速';
 
   @override
-  String get playerSleepTimerDefault => 'Default sleep timer';
+  String get playerSleepTimerDefault => '睡眠定时器默认值';
 
   @override
-  String get playerSleepTimerDefaultSubtitle =>
-      'Start a countdown automatically when opening the player; disabled means no automatic timer';
+  String get playerSleepTimerDefaultSubtitle => '进入播放器时自动开始倒计时，关闭则不自动计时';
 
   @override
-  String get playerSleepTimerOff => 'Off';
+  String get playerSleepTimerOff => '关闭';
 
   @override
-  String get playerQualityAuto => 'Auto';
+  String get playerQualityAuto => '自动';
 
   @override
   String playerQualityHeight(String p1) {
@@ -4222,12 +4215,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loopQueue => '队列循环';
 
   @override
+  String get playbackQueue => 'Playback queue';
+
+  @override
+  String playbackQueueCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String queueItemFallback(int count) {
+    return 'Video $count';
+  }
+
+  @override
+  String get queueEmpty => 'Your playback queue is empty';
+
+  @override
+  String get removeFromQueue => 'Remove from queue';
+
+  @override
+  String get currentlyPlaying => 'Currently playing';
+
+  @override
   String get minimize => '最小化';
 
   @override
   String playbackFailed(String p1) {
-    return '播放失败：$p1';
+    return 'Playback failed: $p1';
   }
+
+  @override
+  String get playbackErrorNetwork => 'Network error';
+
+  @override
+  String get playbackErrorDecoder => 'Decoder error';
+
+  @override
+  String get playbackErrorDrm => 'DRM error';
+
+  @override
+  String get playbackErrorAuthorization => 'Authorization error';
+
+  @override
+  String get playbackErrorUnknown => 'Unknown playback error';
+
+  @override
+  String get playbackRetrying => 'Retrying...';
+
+  @override
+  String get skip => 'Skip';
 
   @override
   String get back => '返回';

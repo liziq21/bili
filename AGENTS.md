@@ -19,7 +19,7 @@ Before writing or modifying code in this repository, read the specification file
 - `README.md`, learning journeys, journals, and postmortems provide context or history. They must link to the owning rule instead of creating a second source of truth. `docs/runbook.md` is normative only for incident recovery steps.
 - If a document and executable configuration disagree, do not guess: fix the document or configuration in the same change, and state which behavior is intended.
 
-**工作开始前按需读取，在工作范围扩大时增量读取:**
+**Before starting work, read:**
 
 - [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, Dart 3.13 syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
@@ -97,6 +97,8 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 **CI 有 `Check Formatting` 门禁**；对全库跑 `dart format --output=none --set-exit-if-changed .`，用 `.fvmrc` 里的单个版本，不跑 pubspec 矩阵。门禁覆盖全库，但仍按上面的纪律只格式化本次改动触及的文件：全库已经是当前 SDK 的排版，改动未触及的文件本来就不会被改写，纪律是为了让你在提交前就看清自己那几个文件的变化，而不是依赖 CI 回头打回。
 
 门禁刻意不跑矩阵版本：`dart_style` 会在 patch release 里带非语言版本化的样式修复（例如枚举主构造函数的尾逗号），两个 SDK 版本的 formatter 输出可能不同，同一份代码在一个版本绿、另一个版本红，门禁本身就变成随机失败。一个权威版本足够拦住「未格式化的代码进 main」这件事。**因此 `.fvmrc` 升级时门禁行为可能一次性变化**：先用 CI 同款命令 `dart format --output=none --set-exit-if-changed .` 评估变化；只有明确把全仓库格式迁移纳入该升级 PR 时，才按迁移清单逐文件格式化，否则仍只格式化本次改动触及的文件。
+
+注意：代码格式化命令严禁频繁使用，理想情况下仅完成所有代码修改后使用一次。
 
 ### Language Flexibility
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。

@@ -63,71 +63,71 @@
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"
   },
-  "playerDefaultQuality": "Default video quality",
+  "playerDefaultQuality": "默认画质",
   "@playerDefaultQuality": {
     "description": "Player setting - default video quality"
   },
-  "playerDefaultQualitySubtitle": "Preferred quality when opening the player",
+  "playerDefaultQualitySubtitle": "进入播放器时优先使用的画质",
   "@playerDefaultQualitySubtitle": {
     "description": "Subtitle for the default video quality setting"
   },
-  "playerDefaultSpeed": "Default playback speed",
+  "playerDefaultSpeed": "默认倍速",
   "@playerDefaultSpeed": {
     "description": "Player setting - default playback speed"
   },
-  "playerDefaultSpeedSubtitle": "Preferred playback speed when opening the player",
+  "playerDefaultSpeedSubtitle": "进入播放器时优先使用的播放速度",
   "@playerDefaultSpeedSubtitle": {
     "description": "Subtitle for the default playback speed setting"
   },
-  "playerGestures": "Playback gestures",
+  "playerGestures": "播放手势",
   "@playerGestures": {
     "description": "Heading for player gesture settings"
   },
-  "playerGestureSeek": "Swipe and double-tap to seek",
+  "playerGestureSeek": "滑动与双击快进",
   "@playerGestureSeek": {
     "description": "Toggle for seeking with player gestures"
   },
-  "playerGestureSeekSubtitle": "Swipe or double-tap the video to change position",
+  "playerGestureSeekSubtitle": "在画面上滑动或双击调整播放位置",
   "@playerGestureSeekSubtitle": {
     "description": "Subtitle for the player seek gesture toggle"
   },
-  "playerGestureVolume": "Swipe to adjust volume",
+  "playerGestureVolume": "滑动调节音量",
   "@playerGestureVolume": {
     "description": "Toggle for changing volume with vertical gestures"
   },
-  "playerGestureVolumeSubtitle": "Swipe up and down on the right side of the video to adjust volume",
+  "playerGestureVolumeSubtitle": "在画面右侧上下滑动调节音量",
   "@playerGestureVolumeSubtitle": {
     "description": "Subtitle for the player volume gesture toggle"
   },
-  "playerGestureBrightness": "Swipe to adjust brightness",
+  "playerGestureBrightness": "滑动调节亮度",
   "@playerGestureBrightness": {
     "description": "Toggle for changing brightness with vertical gestures"
   },
-  "playerGestureBrightnessSubtitle": "Swipe up and down on the left side of the video to adjust brightness",
+  "playerGestureBrightnessSubtitle": "在画面左侧上下滑动调节亮度",
   "@playerGestureBrightnessSubtitle": {
     "description": "Subtitle for the player brightness gesture toggle"
   },
-  "playerGestureBoost": "Hold to temporarily speed up",
+  "playerGestureBoost": "长按临时加速",
   "@playerGestureBoost": {
     "description": "Toggle for temporary long-press playback boost"
   },
-  "playerGestureBoostSubtitle": "Hold the video to temporarily switch to 2x speed",
+  "playerGestureBoostSubtitle": "长按画面临时切换到 2 倍速",
   "@playerGestureBoostSubtitle": {
     "description": "Subtitle for the player boost gesture toggle"
   },
-  "playerSleepTimerDefault": "Default sleep timer",
+  "playerSleepTimerDefault": "睡眠定时器默认值",
   "@playerSleepTimerDefault": {
     "description": "Player setting - default sleep timer duration"
   },
-  "playerSleepTimerDefaultSubtitle": "Start a countdown automatically when opening the player; disabled means no automatic timer",
+  "playerSleepTimerDefaultSubtitle": "进入播放器时自动开始倒计时，关闭则不自动计时",
   "@playerSleepTimerDefaultSubtitle": {
     "description": "Subtitle for the default sleep timer setting"
   },
-  "playerSleepTimerOff": "Off",
+  "playerSleepTimerOff": "关闭",
   "@playerSleepTimerOff": {
     "description": "Value meaning that the default sleep timer is disabled"
   },
-  "playerQualityAuto": "Auto",
+  "playerQualityAuto": "自动",
   "@playerQualityAuto": {
     "description": "Automatic player quality selection"
   },
@@ -5644,11 +5644,45 @@
   "@loopQueue": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "playbackQueue": "Playback queue",
+  "@playbackQueue": {
+    "description": "Title and tooltip for the playback queue"
+  },
+  "playbackQueueCount": "{count} items",
+  "@playbackQueueCount": {
+    "description": "Number of items shown in the playback queue",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueItemFallback": "Video {count}",
+  "@queueItemFallback": {
+    "description": "Fallback title for a queue item without video metadata",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueEmpty": "Your playback queue is empty",
+  "@queueEmpty": {
+    "description": "Empty state for the playback queue"
+  },
+  "removeFromQueue": "Remove from queue",
+  "@removeFromQueue": {
+    "description": "Tooltip for removing an item from the playback queue"
+  },
+  "currentlyPlaying": "Currently playing",
+  "@currentlyPlaying": {
+    "description": "Accessibility label for the current playback queue item"
+  },
   "minimize": "最小化",
   "@minimize": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "playbackFailed": "播放失败：{p1}",
+  "playbackFailed": "Playback failed: {p1}",
   "@playbackFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
@@ -5656,6 +5690,34 @@
         "type": "String"
       }
     }
+  },
+  "playbackErrorNetwork": "Network error",
+  "@playbackErrorNetwork": {
+    "description": "Playback error category - network failure"
+  },
+  "playbackErrorDecoder": "Decoder error",
+  "@playbackErrorDecoder": {
+    "description": "Playback error category - media decoding failure"
+  },
+  "playbackErrorDrm": "DRM error",
+  "@playbackErrorDrm": {
+    "description": "Playback error category - DRM failure"
+  },
+  "playbackErrorAuthorization": "Authorization error",
+  "@playbackErrorAuthorization": {
+    "description": "Playback error category - authorization failure"
+  },
+  "playbackErrorUnknown": "Unknown playback error",
+  "@playbackErrorUnknown": {
+    "description": "Playback error category - unknown failure"
+  },
+  "playbackRetrying": "Retrying...",
+  "@playbackRetrying": {
+    "description": "Playback status shown while retrying a network failure"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Player error action - skip the current queue item"
   },
   "back": "返回",
   "@back": {

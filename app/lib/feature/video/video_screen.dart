@@ -16,6 +16,7 @@ import '../../database/dao/media_history_dao.dart';
 import '../../database/table/media.dart';
 import '../../datastore/media_history_settings.dart';
 import '../../datastore/preferences_data_source.dart';
+import 'bloc/video_bloc.dart';
 import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
@@ -247,7 +248,7 @@ class VideoScreenState() extends State<VideoScreen> {
       final result = await repository.getMediaStream(videoId);
       switch (result) {
         case Ok(:final value):
-          await controller.addToQueue(value);
+          await controller.addToQueue(value, videoId: videoId);
           return true;
         case Error():
           return false;
@@ -365,6 +366,8 @@ class _VideoContentState() extends State<_VideoContent> {
       controller: widget.playbackController,
       fullscreen: _fullscreen,
       onToggleFullscreen: _toggleFullscreen,
+      onRetry: () =>
+          context.read<VideoBloc>().add(LoadMediaStream(widget.videoId)),
       onMinimize: _minimize,
     );
     final content = Column(
