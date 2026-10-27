@@ -2,16 +2,16 @@
 
 This repository is a Flutter workspace project with a modular structure separating the main application in `app/` and reusable sub-packages in `packages/`.
 
-## Project Structure
+## 项目结构
 
 - `app/`: The main Flutter application.
 - `packages/`: Shared packages/modules (`bilibili`, `youtube`, `data`, `model`). `packages/components/` is currently reserved and has no `pubspec.yaml`, so it is not a workspace package.
 
-## Normative Documents
+## 规范文档
 
-Before writing or modifying code in this repository, read the specification files that govern your change. This list is the map; each file is the source of truth — no rule is restated here.
+Before writing or modifying code in this repository, read the specification files that govern your change. 这份清单是地图；每个文件是事实源——规则不在此重复。
 
-### Rule ownership and precedence
+### 规则归属与优先级
 
 - Executable configuration is authoritative for what the tooling actually does: `.fvmrc`, the root `pubspec.yaml`, `analysis_options.yaml`, package `pubspec.yaml` files, and `.github/workflows/`.
 - `AGENTS.md` rules apply to the directory they are in. When rules overlap, the most specific applicable `AGENTS.md` wins; a package rule may narrow a root rule but must not silently contradict it.
@@ -19,7 +19,13 @@ Before writing or modifying code in this repository, read the specification file
 - `README.md`, learning journeys, journals, and postmortems provide context or history. They must link to the owning rule instead of creating a second source of truth. `docs/runbook.md` is normative only for incident recovery steps.
 - If a document and executable configuration disagree, do not guess: fix the document or configuration in the same change, and state which behavior is intended.
 
-**Before starting work, read:**
+### 文档维护义务
+
+- 修改 workflow、SDK 版本、命令或版本号时，同一次改动必须检查并更新所有 AGENTS.md 中的引用。
+- 文档与可执行配置不一致时，以可执行配置为准，文档须在同一次改动中修复。
+- 改 CI workflow 或 golden 基线时，同步更新 `docs/postmortems/README.md` 中的引用。
+
+**开工前必读：**
 
 - [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, Dart 3.13 syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
@@ -33,7 +39,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
 
-### Linear Specifications
+### Linear 规范
 
 Linear is the authoritative project tracking, scheduling, and progress synchronization system. Its specifications live in:
 
@@ -43,7 +49,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 - Linear team: `LIZ`; project: `bili` / `P-LIZ-2`. Sync entry issues may not yet be added to the project — **do not only query project-scoped issues**.
 - GitHub mirror issues are an intentional sync mechanism; do not propose disabling it. Close the mirror issue in the same turn after verifying the work is landed (PATCH `state=closed` + closing rationale comment).
 
-**When to read each file:**
+**何时读哪个文件：**
 
 | You are about to… | Read first |
 |---|---|
@@ -58,7 +64,24 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 | Dispatch a task to an external coding agent | `docs/postmortems/README.md` + the relevant `.github/workflows/` files — check that the brief has a satisfiable CI path before dispatching |
 | Bump the app version or cut a release | The Release section below |
 
-## Release
+### CI Workflow Map
+
+| Workflow | 触发条件 | 产出 check |
+|---|---|---|
+| `ci-format.yml` | push / PR | Check Formatting |
+| `ci-test.yml` | push / PR | Run Flutter Test (矩阵) |
+| `ci-build.yml` | push / PR | Build Flutter App (android) (矩阵) |
+| `ci-tools.yml` | push / PR | Tool Tests |
+| `rerecord-goldens.yml` | workflow_dispatch | 生成 golden 基线 PR |
+| `changelog.yml` | push to main | 直接推送 CHANGELOG.md 到 main |
+| `code-scanning.yml` | push / PR | Code Scanning |
+| `skills_lint.yml` | push / PR | Skills Lint |
+| `scan-skills.yml` | push / PR | Skills Code Scanning |
+| `dispatch-coderabbit-to-jules.yml` | PR opened / synchronize | 派单到 Jules |
+| `automerge-for-google-labs-jules-bot.yml` | PR from Jules bot | 自动合并 |
+| `release.yml` | workflow_dispatch / tag | 发布构建 |
+
+## 发布
 
 - **Version source of truth** is `app/pubspec.yaml` `version: X.Y.Z+N`, not the git tag. Local `flutter build` reads the pubspec, so making the tag authoritative would silently produce a wrong `versionCode` on developer machines. The tag is a release marker; `.github/workflows/release.yml` fails the build when `vX.Y.Z` disagrees with the pubspec's `X.Y.Z`.
 - **Build number** is injected by CI and never committed. The verification build in `ci-build.yml` uses `--build-number=${{ github.run_number }}`; the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
@@ -71,7 +94,37 @@ For architectural walkthroughs — not prescriptive rules, but context on why bo
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).
 - [`docs/modularization-learning-journey.md`](docs/modularization-learning-journey.md).
 
-## Universal Development Guidelines
+## 通用开发指南
+
+### 提交信息格式
+
+PR 标题的 conventional-commit 前缀决定 CHANGELOG.md 的分桶（`tool/generate_changelog.py` 的 `TITLE_SECTIONS`）：
+
+| 前缀 | CHANGELOG 分桶 |
+|---|---|
+| `feat:` / `feat(` / `Add ` / `Implement ` | Added |
+| `fix:` / `fix(` / `Fix ` | Fixed |
+| `docs:` / `docs(` | Documentation |
+| `test:` / `test(` | Tests |
+| `refactor:` / `refactor(` / `design:` / `design(` / `style:` / `style(` / `perf:` / `perf(` | Changed |
+| `chore:` / `chore(` / `ci:` / `ci(` | Maintenance |
+| `⚡ Bolt:` | Changed |
+| `🎨 Palette:` | Changed |
+| `🛡️ Sentinel:` | Fixed |
+| 无前缀（中文标题含「修复」「修正」等关键词） | Fixed / Other |
+
+Linear sync 附带的 `c:` 标签优先于标题前缀分桶。agent 派单时须在 brief 中指定 PR 标题前缀。
+
+### 不得触碰
+
+- 不得手动修改生成文件（Drift .drift 产物、l10n 等）。修改源文件后运行对应生成命令。
+- 不得硬编码面向用户的文案（日志与错误类文案除外）。
+- 不得在测试中访问真实网络。
+- 不得使用 `material.dart` 或 `cupertino.dart`，使用 `material_ui`。
+- 不得降级 Dart SDK 版本。
+- 不得对全库跑 `dart format`，只格式化本次改动触及的文件。
+- 不得手写 golden 基线。
+- 不得用 `ci/changelog` 分支开 PR（changelog 已改为直推 main）。
 
 ### SDK 版本
 
@@ -79,11 +132,11 @@ For architectural walkthroughs — not prescriptive rules, but context on why bo
 
 **执行任何 `dart` / `flutter` 命令前，先分别确认两个 SDK 与 `.fvmrc` 一致**（`dart --version` 与 `flutter --version`）。不一致时不要继续，改用 `fvm dart` / `fvm flutter`，或先切到 3.47.7。两个都要看：PATH 里的 Dart 与 Flutter 可能来自不同 SDK，且 Flutter 自带的 Dart 可能与独立安装的 Dart 冲突——只核对 `dart --version` 匹配，仍可能让后续 `flutter` 命令跑在另一个版本上。
 
-原因不是洁癖：`dart format` 的输出随 SDK 版本变化，同一份源码在不同 formatter 上会得到不同排版。agent 在与仓库不一致的 SDK 上跑一次格式化，它碰过的每个文件都会被整体重排；如果这些文件此后又与 main 前进过的版本撞车，PR 就会变成 dirty，而这类 dirty 的净差异里混着「把 main 已合内容改回旧写法」的回退，只能关单重开。2026-10-04 的 #220、#222、#232、#234、#235、#236 六条 PR 全部是这个成因。
+原因：`dart format` 的输出随 SDK 版本变化，同一份源码在不同 formatter 上会得到不同排版。agent 在与仓库不一致的 SDK 上跑一次格式化，它碰过的每个文件都会被整体重排；如果这些文件此后又与 main 前进过的版本撞车，PR 就会变成 dirty，而这类 dirty 的净差异里混着「把 main 已合内容改回旧写法」的回退，只能关单重开。2026-10-04 的六条 PR 全部是这个成因。
 
 CI 的 Flutter 版本由根 `pubspec.yaml` 的 `environment` 约束经 `pubspec-matrix-action` 展开，当前产出 `3.47.7, 3.13.5`（下限）与最新 stable 两项；`.fvmrc` 与下限项一致，也是 `rerecord-goldens.yml` 录制 golden 基线所用的版本。**升级 SDK 时 `.fvmrc`、`pubspec.yaml`、ruleset 的 required check 名三者必须同一次改动里一起改。**
 
-### Formatting
+### 格式
 提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。
 
 **只格式化本次改动触及的文件**，不要对整个目录或全库跑，也不要把目录作为参数传给 `dart format`——它会递归处理目录下所有 Dart 文件并改写它们，其中未改动的文件也会被重排。格式化一个你没改过的文件，会把它的排版整体换成当前 SDK formatter 的风格，与 main 上尚未重排的部分形成无意义的大范围差异。
@@ -100,20 +153,20 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 注意：代码格式化命令严禁频繁使用，理想情况下仅完成所有代码修改后使用一次。
 
-### Language Flexibility
+### 语言灵活性
 - 注释、文档、commit message 可用中文或英文，根据上下文灵活选择。
 - 保持代码库内的一致性，同类文件建议统一语言。
 
-### Modular Separation
-- Add app features in `app/lib/feature/`. Add shared logic, utilities, or data models to the appropriate package under `packages/`.
+### 模块分离
+- 在 `app/lib/feature/` 中添加应用功能。将共享逻辑、工具或数据模型添加到 `packages/` 下的对应包。
 
-### UI Framework
-- Do not use `flutter/material.dart` or `flutter/cupertino.dart`. Use `material_ui` instead.
+### UI 框架
+- 不得使用 `flutter/material.dart` 或 `flutter/cupertino.dart`，改用 `material_ui`。
 
-### Generated Files
+### 生成文件
 - 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。
 
-### 文案与本地化（Copy and Localization）
+### 文案与本地化
 
 - 面向用户的文案（label、title、tooltip、hint、SnackBar、错误提示、空态文案）必须放在 `app/lib/l10n/app_.arb`（英文，模板/默认语言）与 `app/lib/l10n/app_zh.arb`（中文），两个文件**键必须完全一致**，值分别为英文与中文。通过 `AppLocalizations.of(context)` 读取，不得硬编码在 Dart 源文件里。
 - **日志与错误类文案可以硬编码英文**。这是本规则唯一需要的例外，且不需要任何豁免机制：护栏断言的是「不得有非 ASCII 字面量」，ASCII 天然满足。不要为此引入 ignore 注释或白名单。
@@ -123,25 +176,21 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 - `l10n.yaml` 的 `supported-locales` 必须显式列出 `en` 与 `zh`，确保生成的 `AppLocalizations.supportedLocales` 以英文为首（默认语言）。
 
 
-### Screenshot Tests
+### 截图测试
 
-- The app uses **alchemist's CI goldens** (`app/test/flutter_test_config.dart` disables `platformGoldensConfig`). Text renders as **real glyphs** from a repository-pinned font subset (`app/test/fonts/NotoSansSC-golden-subset.otf`, loaded with `FontLoader` in `app/test/golden/golden_font.dart`), not as Ahem boxes — `obscureText: false` in the same file's `ciGoldensConfig` is what allows it. Alchemist's `obscureText` default (`true`) forces the Ahem family onto the CI variant and ignores the theme's `fontFamily`, so the setting is load-bearing, not cosmetic.
-- **Why readable glyphs**: Ahem draws every glyph 1em wide and renders identical pixels for any two characters, so with Ahem a 12-character title of `i` and one of `W` are byte-identical (measured: 0 differing bytes) and text wrapping, overflow, and glyph-width regressions are invisible to the gate. The subset makes those visible, at the cost below.
-- **The cost, stated plainly**: readable glyphs buy width sensitivity at the price of depending on the rasteriser. Identical font bytes do not guarantee identical pixels across differing Flutter versions or platforms — the same caveat the Flutter docs give for `matchesGoldenFile` (https://api.flutter.dev/flutter_test/matchesGoldenFile.html). Cross-machine agreement therefore rests on `diffThreshold`, and a baseline recorded under one toolchain is not automatically valid under another.
-- **What has actually been verified**: byte-exact agreement across two independent Linux machines at Flutter 3.47.5 stable. A sandbox recording (commit `5321b5c`, git blob `634d67a4…` / `1bd5f1dd…`) and the `ubuntu-latest` recording made by `rerecord-goldens.yml` run 36560934576 produced **identical blob SHAs** for both baselines — byte-for-byte equal, not a tolerance pass. Both sides used the version the workflows pin (`rerecord-goldens.yml` reads the version from `.fvmrc`, and `ci-test.yml`'s matrix both resolve to 3.47.7). Recording is also stable across commits that change the font: `ea5089e` added 13 code points to the subset (new font blob `df51cba9…`) and all three baselines kept their original blob SHAs, so extending the subset does not perturb existing glyph rendering. Re-run the blob-SHA comparison after any Flutter version bump, platform change, or font re-subset; a green `Run Flutter Test` alone does **not** demonstrate byte-exactness, because a pass within `diffThreshold` is indistinguishable from a smaller-but-real difference.
-- The font is a **test asset only**. It must never reach the app bundle: `pubspec.yaml` declares no `fonts:` or `assets:` entry for it, and `golden_font_contract_test.dart` fails if one appears. `FontLoader` keeps it inside the test process, so production pixels and APK size are unaffected.
-- The subset must keep covering every character the app can render; a character it lacks silently renders as a tofu box, and the baseline still looks plausible. `golden_font_contract_test.dart` reads coverage from the OTF's own `cmap` (not from the `subset-characters.txt` input snapshot) and walks `lib/`+`test/` string literals through `package:analyzer`. When it reports missing characters, re-subset rather than editing the list alone. Astral characters (U+1F44D) are outside the subset's reach: Noto Sans CJK stops at U+3106C and carries no emoji, and that character belongs to a widget test, not a golden fixture.
-- **Never hand-edit a baseline.** Baselines are generated, not drawn.
-- **The target is for CI to record baselines, not workstations.** Baseline re-recording is performed exclusively by the [`rerecord-goldens.yml`](.github/workflows/rerecord-goldens.yml) workflow (manual trigger only); `ci-test.yml` compares but does not update baselines. A local re-record is never a substitute. When a golden comparison has loaded a readable baseline and its matcher setup succeeds, a pixel-difference failure occurs only when the difference exceeds `diffThreshold` — a rendering change small enough to fall inside the 0.01 tolerance may pass without a baseline update, so a green check does not mean the baseline is current.
-- **Feature branch recording**: `rerecord-goldens.yml` declares a required `target_ref` input under `on.workflow_dispatch.inputs` (default `main`), passes it to the `actions/checkout` step as its `ref:` input, and opens the generated PR with `create-pull-request`'s `base: ${{ inputs.target_ref }}`, so a PR that changes a widget covered by an existing golden test can have its baseline updated from the PR's own branch — dispatch the workflow with `target_ref` set to that branch. A `/` in the branch name is sanitised to `-` for the generated PR branch name, because a branch name cannot contain `/` without becoming a nested ref. Such a PR targets a non-`main` base, and `ci-test.yml` runs on pull requests to any base, so the generated baseline PR is not merged without the same checks a `main` PR gets.
-- `diffThreshold` is `0.01`, a comparison tolerance — the maximum fraction of differing pixels that still passes. A passing golden test does not prove pixel-exact equality.
-- **Coverage limit**: a golden test proves only the widgets it renders, under the theme it records. Treating "the goldens did not change" as proof that no visible pixel changed anywhere is unsupported — anything outside a test's own `pumpWidget` tree is unverified.
+- 应用使用 Alchemist 的 CI golden 基线（`app/test/flutter_test_config.dart` 禁用了 `platformGoldensConfig`）。文字以仓库锁定的字体子集（`app/test/fonts/NotoSansSC-golden-subset.otf`，通过 `FontLoader` 加载）的真实字形渲染，而非 Ahem 占位框——同文件的 `ciGoldensConfig` 中 `obscureText: false` 允许此行为。Alchemist 的 `obscureText` 默认值（`true`）会强制 CI 变体使用 Ahem 字体并忽略主题的 `fontFamily`，该设置是关键配置。
+- **为什么用可读字形**：Ahem 将每个字形绘制为 1em 宽且任意两个字符渲染为相同像素，因此 12 个 `i` 的标题与 12 个 `W` 的标题字节完全相同（实测 0 字节差异），文字换行、溢出和字形宽度回归对门禁不可见。字体子集使这些差异可见。
+- **代价明确说明**：可读字形换来了对栅格化的依赖。相同字体字节不保证跨 Flutter 版本或平台的相同像素。跨机器一致性依赖 `diffThreshold`，在一个工具链下录制的基线不自动适用于另一个工具链。
+- **基线只由 `rerecord-goldens.yml` 录制**：`ci-test.yml` 只比较不更新基线。不得手写基线，不得用本地 PNG 让 CI 变绿。功能分支需要更新基线时，用 `rerecord-goldens.yml` 的 `target_ref` 输入指向该分支。
+- `diffThreshold` 为 `0.01`，是比较容差——差异像素比例低于此值的测试仍会通过，通过不等于像素精确相等。
+- **覆盖范围限制**：golden test 只证明其渲染的 widget 在该主题下的表现。测试 `pumpWidget` 树外的任何像素变化均未被验证。
+- **经验教训**：格式不一致（同一 SDK 下 `dart format` 输出不同）曾导致 2026-10-04 的六条 PR 全部 dirty，只能关单重开。
 
-### Dart Version & Syntax
+### Dart 版本与语法
 - Do not arbitrarily downgrade the Dart SDK version.
 - Prioritize using the repository's **Dart 3.13.x** primary constructors and concise syntax features; do not write syntax that requires a newer SDK than the root constraint.
 
-#### Primary Constructors & Concise Syntax (Dart 3.13+)
+#### 主构造函数与简洁语法（Dart 3.13+）
 权威规范见 Dart constructors — Concise constructor syntax: https://dart.dev/language/constructors#concise-constructor-syntax；本仓库特例见下文的无参类规则。
 
 - **Primary constructors may be parameterless for enums.** Keep explicit empty parentheses for parameterless enum constructors.
@@ -174,74 +223,33 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
   }
   ```
 
-#### Immutability & Value Equality
+#### 不可变性与值相等
 - **`@immutable`**: Always apply `@immutable` from `package:meta` to data models, state classes, DTOs, and value objects.
 - **`EquatableMixin`**: Use `package:equatable` (preferably `EquatableMixin` to preserve class hierarchies) for structural equality on state classes and models. Include all identifying properties in `props`.
 
-## External agent dispatch
+## 外部 agent 派单
 
-Before dispatching an external coding agent, read [`docs/postmortems/README.md`](docs/postmortems/README.md) and compare the brief with the actual workflow capabilities. The brief must state the expected CI state and the compliant recovery path when a gate depends on generated output.
+派单给外部编码 agent 前，先读 [`docs/postmortems/README.md`](docs/postmortems/README.md) 并对照实际 workflow 能力。brief 必须说明预期 CI 状态和依赖生成产物的门禁的合规恢复路径。
 
-For any golden-test task, the brief must explicitly state all three items:
+派单前核实 brief 中的每条要求在 `.github/workflows/` 中有可执行路径（交集检查），不存在合规路径时停止并升级。
 
-1. CI may remain red until a baseline is present; do not create a local PNG to make it green.
-2. The only recording path is `rerecord-goldens.yml`; use `target_ref` for the branch that owns the change.
-3. The task must not merge or hand-edit baselines; review the CI-generated baseline PR and its provenance instead.
+## 测试
 
-Before dispatching, verify that each requirement in the brief has an executable path in `.github/workflows/` (an intersection check), and stop/escalate when no compliant path exists.
+Flutter 自身对该层的指导见 `flutter/flutter` 仓库的 `docs/rules/rules.md`（Testing）；以下规则是本仓库实际需要的。
 
-## Testing
+- **测试位置**：单元测试覆盖领域逻辑、仓库和状态管理；widget 测试覆盖 UI；渲染回归由 Alchemist CI golden 覆盖而非断言。
+- **准备-执行-断言**：每个测试按 given / when / then 编写，一个行为一个测试。
+- **优先 fake 而非 mock**：优先使用手写 fake 和通过构造函数注入的依赖。仅当没有 fake 的接缝时才使用生成的 mock。
+- **禁止真实网络**：测试和 CI 均不得访问网络。使用录制 fixture、fake client 或 `MockClient`。
+- **Widget 测试框架**：断言缩略图实际**加载**的测试必须将其 pump 包裹在 `network_image_mock` 的 `mockNetworkImagesFor` 中——加载失败的 `CachedNetworkImage` 仍留在树中，断言组件存在证明不了任何事。只断言文字、布局或语义的测试无需 mock。`app/test/flutter_test_config.dart` 已安装假 `path_provider` 和按文件的临时根目录，测试文件中无需再次设置。
+- **Widget 测试外壳**：用 `material_ui` fork 的 `MaterialApp` 构建树并注册 `GlobalMaterialLocalizations.delegates`。Flutter 自身的 `MaterialApp` 不提供 fork 的 `MaterialLocalizations`，在非英文 locale 下会抛出异常。
+- **断言 widget 树**：当被测代码读取可变全局状态（如 `$styles`）时，测试必须改变该状态并断言渲染输出。从测试中读回同一静态值无论 widget 树是否重建都会通过。
+- **泄漏追踪**：从 `app/` 运行 `LEAK_TRACKING=true flutter test` 报告未释放的 disposable。测试在清理前抛出导致的泄漏是可接受的例外；将其标记为例外而非删除测试。
 
-Flutter's own guidance for this layer is `docs/rules/rules.md` (Testing) in the `flutter/flutter` repository; the rules below are the ones this repository actually needs.
+### Flutter 测试运行器主机故障
 
-- **Where a test goes**: Unit tests cover domain logic, repositories, and state management; widget tests cover UI; rendering regressions are covered by Alchemist CI goldens rather than by assertions.
-- **Arrange-Act-Assert**: Write each test as given / when / then, one behaviour per test.
-- **Fakes over mocks**: Prefer hand-written fakes and dependencies injected through the constructor. Use a generated mock only where no seam exists for a fake.
-- **No real network**: Neither tests nor CI may reach the network. Use a recorded fixture, a fake client, or `MockClient`.
-- **Widget test harness**: A test that asserts a thumbnail actually **loaded** must wrap its pumps in `mockNetworkImagesFor` from `network_image_mock` — a `CachedNetworkImage` that fails to load still stays in the tree, so asserting the component exists proves nothing. Tests that assert only text, layout, or semantics need no mock. `app/test/flutter_test_config.dart` already installs a fake `path_provider` and a per-file temp root, so neither is set up again in the test file.
-- **Widget test shell**: Build the tree with the `material_ui` fork's `MaterialApp` and register `GlobalMaterialLocalizations.delegates`. Flutter's own `MaterialApp` does not supply the fork's `MaterialLocalizations` and throws under a non-English locale.
-- **Assert on the widget tree**: When the code under test reads mutable global state such as `$styles`, the test must change that state and assert on rendered output. Reading the same static back from the test passes whether or not the widget tree rebuilt.
-- **Leak tracking**: Run `LEAK_TRACKING=true flutter test` from `app/` to report disposables that were never disposed. A leak caused by a test that threw before it could clean up is an acceptable exception; mark it as one rather than deleting the test.
-
-### Flutter Test Runner Host Failures
-
-- `flutter test` is a Flutter test command, but the test process is actually
-  started by the platform-specific `flutter_tester` binary. A failure before a
-  test is loaded is therefore not evidence that the test or application code
-  failed.
-- On Linux/Termux hosts, a known failure is
-  `CANNOT LINK EXECUTABLE ... flutter_tester: library "libvk_swiftshader.so"
-  not found`. First confirm the pinned SDK versions, then try
-  `flutter precache --linux`. If the library is still absent, the local Flutter
-  SDK does not contain a compatible Linux test engine for that host.
-- Do **not** solve this by symlinking an arbitrary `libvulkan*.so` as
-  `libvk_swiftshader.so`: the ABI and renderer are different, and this can
-  turn a clear startup error into a `flutter_tester` crash or invalid test
-  result. Do not add a host-specific library or a test skip to the repository.
-- Use `dart run tool/test_local.dart` to run the pure-Dart fallback. It probes
-  the runner first and runs every offline check available on the host. On
-  Termux, a missing `libvk_swiftshader.so` is a known Flutter SDK host
-  limitation, not a repository test failure: complete the checks that can run
-  locally, and do not report the unavailable Flutter suites as failed solely
-  for this reason. CI must still run the complete Flutter matrix from
-  `.github/workflows/ci-test.yml`. Use `dart run tool/test_local.dart --require-flutter`
-  only when a local Flutter runner is explicitly required and an unavailable
-  runner must fail immediately.
-- For a pull request, verify the CI `Run Flutter Test (…)` checks for
-  Flutter/widget/golden coverage. The pure-Dart fallback is sufficient
-  evidence for the local checks it actually ran; no special runner-failure
-  report is needed for the known Termux limitation unless requested.
-
----
-
-## Appendix: Linear Specifications (require Linear MCP access)
-
-These three specifications live in Linear (team `LIZ`, project `bili` / `P-LIZ-2`) and are read via Linear MCP. They are **not** in the git repository.
-
-| 规范 | 作用 | 读取方式 |
-|---|---|---|
-| **《AI 工单接取规范》** | 定义 Backlog → Todo 移交条件、实现接取使用 Draft PR + `[AI CLAIM]` 标记 | Linear MCP `get_document` / `list_documents` |
-| **《Backlog HITL/AFK 分类》** | Backlog 项按「有没有岔路口需人拍板」分 HITL/AFK，与 P0–P3 正交 | Linear MCP `get_document` / `list_documents` |
-| **《项目标签规范》** | 项目标签体系、单选/多选分组、标签命名约定 | Linear MCP `get_document` / `list_documents` |
-
-**读取提示**：这些文档在 Linear 的 project resources 或 team 文档区。通过 Linear MCP 搜索标题精确匹配；若同步到 GitHub 会有对应 issue 附件，但以 Linear 侧最新版为准。`.jules/issue-triage-prompt.md` §1 第 5 条要求 triage agent 开工前读取这三份最新版。
+- `flutter test` 是 Flutter 测试命令，但测试进程实际由平台特定的 `flutter_tester` 二进制启动。测试加载前的失败不证明测试或应用代码有问题。
+- 在 Linux/Termux 主机上，已知失败为 `CANNOT LINK EXECUTABLE ... flutter_tester: library "libvk_swiftshader.so" not found`。先确认锁定的 SDK 版本，再尝试 `flutter precache --linux`。若库仍缺失，本地 Flutter SDK 不含该主机兼容的 Linux 测试引擎。
+- **不得**通过将任意 `libvulkan*.so` 符号链接为 `libvk_swiftshader.so` 来解决此问题：ABI 和渲染器不同，这会将清晰的启动错误变成 `flutter_tester` 崩溃或无效测试结果。不得向仓库添加主机特定库或测试跳过。
+- 使用 `dart run tool/test_local.dart` 运行纯 Dart 回退。它先探测运行器，再运行主机上可用的全部离线检查。在 Termux 上，缺失 `libvk_swiftshader.so` 是已知的 Flutter SDK 主机限制，不是仓库测试失败：完成可本地运行的检查，不要仅因此原因将不可用的 Flutter 套件报告为失败。CI 仍须运行 `.github/workflows/ci-test.yml` 的完整 Flutter 矩阵。仅在明确要求本地 Flutter 运行器且不可用运行器必须立即失败时，使用 `dart run tool/test_local.dart --require-flutter`。
+- 对于 PR，核实 CI 的 `Run Flutter Test (…)` 检查覆盖 Flutter/widget/golden。纯 Dart 回退对其实际运行的本地检查是充分证据；已知 Termux 限制无需特殊运行器故障报告（除非有要求）。

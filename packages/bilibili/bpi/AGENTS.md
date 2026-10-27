@@ -45,14 +45,12 @@
 
 ## 抓取与测试
 
-- 真实抓取脚本放在 `tool/capture/`，从 `packages/bilibili/bpi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
-- fixture 保存 HTTP response body 本身，不保存 headers、Cookie、Token 或追踪凭据。`play_url.json` 的媒体流 URL 带 `e=`、`uparams`、`equery` 等时效签名参数，必须原样保留，解析测试依赖完整查询串。
+- `play_url.json` 的媒体流 URL 带 `e=`、`uparams`、`equery` 等时效签名参数，必须原样保留，解析测试依赖完整查询串。
 - 写盘前脚本按 JSON 键扫描凭据（WBI key、Token、Cookie 等），命中即拒绝写入并非零退出；不做静默改写，因为重编码会改变 fixture 字节。
-- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应仍属业务失败，人工确认也不得写入或覆盖成功 fixture。
-- 抓取遇到非 2xx、Bilibili 业务失败或无法识别结构时不得写入或覆盖成功 fixture，并返回非零状态；本包当前不登记 negative fixture。
-- fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`（如 `search_<type>.json`、`reply_<variant>.json`）；分页续页单独存 `<endpoint>_continuation.json`。
-- 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 Bilibili 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
+- 本包当前不登记 negative fixture。
+- fixture 文件名：同端点多变体用 `<endpoint>_<variant>.json`（如 `search_<type>.json`、`reply_<variant>.json`）；分页续页单独存 `<endpoint>_continuation.json`。
+
+通用抓取规则（`tool/capture/` 脚本管理、离线测试、四项测试要求、`--force` 覆盖行为等）见 [`packages/AGENTS.md`](../../AGENTS.md) 的「API 子包通用规范」段。
 
 ## 新增 endpoint 流程
 
