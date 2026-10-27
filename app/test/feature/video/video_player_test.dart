@@ -212,6 +212,43 @@ void main() {
     });
   });
 
+  testWidgets(
+    'opens a changed stream once and leaves reopening to the surface',
+    (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _NoStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: bloc,
+              child: VideoPlayer(
+                controller: controller,
+                surfaceBuilder: (_) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final first = MediaStream(videoUrl: 'https://example.com/first.m4s');
+      final second = MediaStream(videoUrl: 'https://example.com/second.m4s');
+      bloc.add(MediaStreamChanged(first));
+      await tester.pump();
+      await tester.pump();
+      expect(fake.openCalls, hasLength(1));
+
+      bloc.add(MediaStreamChanged(second));
+      await tester.pump();
+      await tester.pump();
+      expect(fake.openCalls, hasLength(2));
+    },
+  );
+
   group('fullscreen layout', () {
     /// 把播放器放进固定尺寸的盒子，便于断言铺满与 16:9 内嵌的差别。
     Future<void> pumpSurface(

@@ -85,6 +85,8 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   String _currentLabel(AppLocalizations? l10n) {
     final height = widget.stream.height;
     if (height == null) return l10n?.auto ?? 'Auto';
+    final qualityLabel = widget.stream.qualityLabel;
+    if (qualityLabel != null && qualityLabel.isNotEmpty) return qualityLabel;
     return _heightLabel(height);
   }
 
@@ -103,7 +105,8 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
         ? null
         : MediaQualityOption(
             height: height,
-            label: _heightLabel(height),
+            label: _currentLabel(AppLocalizations.of(context)),
+            streamId: widget.stream.streamId,
             bitrate: widget.stream.bitrate,
           );
     final options = <MediaQualityOption>[...widget.stream.alternatives];
@@ -181,11 +184,10 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
       if (!mounted) return;
       switch (result) {
         case Ok(:final value):
-          // 续接：重开前把当前位置交给播放层，open 完成后自动 seek 回去。
+          // 续接：由 _VideoSurface 在收到新状态后统一重开播放器，避免这里
+          // 先 open 一次、状态更新触发 didUpdateWidget 又 open 一次。
           widget.controller.restorePositionSeconds =
               widget.controller.state.position.inSeconds;
-          await widget.controller.open(value);
-          if (!mounted) return;
           context.read<VideoBloc>().add(MediaStreamChanged(value));
           _persistDefaultQuality(option);
         case Error():
