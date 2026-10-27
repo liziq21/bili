@@ -7256,8 +7256,50 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播放失败：{p1}'**
+  /// **'Playback failed: {p1}'**
   String playbackFailed(String p1);
+
+  /// Playback error category - network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get playbackErrorNetwork;
+
+  /// Playback error category - media decoding failure
+  ///
+  /// In en, this message translates to:
+  /// **'Decoder error'**
+  String get playbackErrorDecoder;
+
+  /// Playback error category - DRM failure
+  ///
+  /// In en, this message translates to:
+  /// **'DRM error'**
+  String get playbackErrorDrm;
+
+  /// Playback error category - authorization failure
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization error'**
+  String get playbackErrorAuthorization;
+
+  /// Playback error category - unknown failure
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown playback error'**
+  String get playbackErrorUnknown;
+
+  /// Playback status shown while retrying a network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying...'**
+  String get playbackRetrying;
+
+  /// Player error action - skip the current queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7522,48 +7564,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Currently playing'**
   String get currentlyPlaying;
-
-  /// Playback error category - network failure
-  ///
-  /// In en, this message translates to:
-  /// **'Network error'**
-  String get playbackErrorNetwork;
-
-  /// Playback error category - media decoding failure
-  ///
-  /// In en, this message translates to:
-  /// **'Decoder error'**
-  String get playbackErrorDecoder;
-
-  /// Playback error category - DRM failure
-  ///
-  /// In en, this message translates to:
-  /// **'DRM error'**
-  String get playbackErrorDrm;
-
-  /// Playback error category - authorization failure
-  ///
-  /// In en, this message translates to:
-  /// **'Authorization error'**
-  String get playbackErrorAuthorization;
-
-  /// Playback error category - unknown failure
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown playback error'**
-  String get playbackErrorUnknown;
-
-  /// Playback status shown while retrying a network failure
-  ///
-  /// In en, this message translates to:
-  /// **'Retrying...'**
-  String get playbackRetrying;
-
-  /// Player error action - skip the current queue item
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get skip;
 }
 
 class _AppLocalizationsDelegate

@@ -4226,8 +4226,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String playbackFailed(String p1) {
-    return '播放失败：$p1';
+    return 'Playback failed: $p1';
   }
+
+  @override
+  String get playbackErrorNetwork => 'Network error';
+
+  @override
+  String get playbackErrorDecoder => 'Decoder error';
+
+  @override
+  String get playbackErrorDrm => 'DRM error';
+
+  @override
+  String get playbackErrorAuthorization => 'Authorization error';
+
+  @override
+  String get playbackErrorUnknown => 'Unknown playback error';
+
+  @override
+  String get playbackRetrying => 'Retrying...';
+
+  @override
+  String get skip => 'Skip';
 
   @override
   String get back => '返回';
@@ -4384,25 +4405,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currentlyPlaying => 'Currently playing';
-
-  @override
-  String get playbackErrorNetwork => 'Network error';
-
-  @override
-  String get playbackErrorDecoder => 'Decoder error';
-
-  @override
-  String get playbackErrorDrm => 'DRM error';
-
-  @override
-  String get playbackErrorAuthorization => 'Authorization error';
-
-  @override
-  String get playbackErrorUnknown => 'Unknown playback error';
-
-  @override
-  String get playbackRetrying => 'Retrying...';
-
-  @override
-  String get skip => 'Skip';
 }
