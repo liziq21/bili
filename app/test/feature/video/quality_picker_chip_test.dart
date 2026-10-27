@@ -87,7 +87,15 @@ class _RecordingPlaybackController() extends MediaPlaybackController {
   final List<MediaStream> openedStreams = [];
 
   @override
-  Future<void> open(MediaStream stream) async => openedStreams.add(stream);
+  Future<void> open(
+    MediaStream stream, {
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) async {
+    openedStreams.add(stream);
+  }
 }
 
 class _RecordingVideoDetailRepository() implements VideoDetailRepository {
