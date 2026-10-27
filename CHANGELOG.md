@@ -212,6 +212,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Consolidate HomeSourceSelector dropdown button semantics (#469)
 - 🎨 Palette: Add tactile haptic feedback to settings toggle switches (#476)
 - 🎨 Palette: Improve playlist picker item screen reader semantics (#483)
+- 🎨 Palette: Improve SpaceScreen creator profile card accessibility semantics (#485)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -311,3 +312,4 @@ so hand edits do not survive; change the generator instead.
 - Complete issue triage for LIZ-31, LIZ-32, LIZ-33 (#386)
 - [LIZ-73] 本地播放列表数据层：CRUD、排序与搜索 (#391)
 - Issue Triage: Review LIZ-135, LIZ-134, and LIZ-133 (#481)
+- feat/playback-queue-ui (#486)
