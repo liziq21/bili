@@ -13,14 +13,14 @@
 
 | Endpoint | Method / Path | 鉴权/签名 | 来源 | Fixture | 实测日期 |
 |---|---|---|---|---|---|
-| 搜索建议 | `GET /main/suggest` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录 |
-| 全站搜索 | `GET /x/web-interface/wbi/search/all/v2` | WBI | [WBI 文档](https://github.com/pskdje/bilibili-API-collect/blob/main/docs/misc/sign/wbi.md) | `testing/search_all.json` | 已有原始 fixture；抓取日期未记录 |
-| 按类型搜索 | `GET /x/web-interface/wbi/search/type` | WBI | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/search_*.json` | 已有原始 fixture；抓取日期未记录 |
-| 视频详情 | `GET /x/web-interface/view` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/video_detail.json` | 已有原始 fixture；抓取日期未记录 |
-| 视频关系 | `GET /x/web-interface/archive/relation` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/video_relation.json` | 已有原始 fixture；抓取日期未记录 |
-| 相关视频 | `GET /x/web-interface/archive/related` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/related_videos.json` | 已有原始 fixture；抓取日期未记录 |
-| 评论 | `GET /x/v2/reply/*` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/reply_*.json` | 已有原始 fixture；抓取日期未记录 |
-| 播放地址 | `GET /x/player/wbi/playurl` | WBI | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/play_url.json` | 已有原始 fixture；抓取日期未记录 |
+| 搜索建议 | `GET /main/suggest` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 全站搜索 | `GET /x/web-interface/wbi/search/all/v2` | WBI | [WBI 文档](https://github.com/pskdje/bilibili-API-collect/blob/main/docs/misc/sign/wbi.md) | `testing/search_all.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 按类型搜索 | `GET /x/web-interface/wbi/search/type` | WBI | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/search_*.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 视频详情 | `GET /x/web-interface/view` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/video_detail.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 视频关系 | `GET /x/web-interface/archive/relation` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/video_relation.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 相关视频 | `GET /x/web-interface/archive/related` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/related_videos.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 评论 | `GET /x/v2/reply/*` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/reply_*.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
+| 播放地址 | `GET /x/player/wbi/playurl` | WBI | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/play_url.json` | 已有原始 fixture；抓取日期未记录（规则引入前已存在） |
 | 视频播放器信息/字幕 | `GET /x/player/v2` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/player_v2.json` | 2026-09-25 |
 | 热门视频 | `GET /x/web-interface/popular` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/popular.json` | 2026-09-25 |
 | 排行榜 | `GET /x/web-interface/ranking/v2` | 公共请求 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/ranking.json` | 2026-09-25 |
