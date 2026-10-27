@@ -127,6 +127,7 @@ so hand edits do not survive; change the generator instead.
 - 🛡️ Sentinel: mask sensitive build error exceptions in release builds (#410)
 - fix: resolve flutter analyze issues (#470)
 - 🛡️ Sentinel: Sanitize and mask exception outputs in VideoPlayer _ErrorView (#475)
+- fix(video): complete quality selection (#423) (#478)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
