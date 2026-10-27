@@ -171,6 +171,7 @@ class const _CreatorProfileHeader({
                 if (description != null && description.isNotEmpty) description,
                 ...stats,
               ].join(l10n.commaSeparator),
+              excludeSemantics: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
