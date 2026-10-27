@@ -326,15 +326,15 @@ void main() {
 
       fake.injectPlaybackError('decoder rejected codec');
       await tester.pump();
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
 
       expect(find.textContaining('Decoder error'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
       expect(find.text('Skip'), findsNothing);
 
-      await tester.tap(find.byType(TextButton));
+      await tester.tap(find.text('Retry'));
       await tester.pump();
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.textContaining('Decoder error'), findsNothing);
     });
 
@@ -361,7 +361,7 @@ void main() {
 
       fake.injectPlaybackError('decoder rejected codec');
       await tester.pump();
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
       expect(find.text('Skip'), findsOneWidget);
 
       await tester.tap(find.text('Skip'));
@@ -612,6 +612,17 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     openCalls.add(playable);
     if (playable is Playlist) {
       _playlist.add(playable);
+    }
+    // 模拟 real.dart stop(open:true, notify:true) 的 reset 事件序列：
+    // playing=false、completed=false、position/duration/buffer=zero、buffering=false。
+    _playing.add(false);
+    _completed.add(false);
+    _position.add(Duration.zero);
+    _duration.add(Duration.zero);
+    _buffering.add(false);
+    _buffer.add(Duration.zero);
+    if (play) {
+      _playing.add(true);
     }
   }
 
