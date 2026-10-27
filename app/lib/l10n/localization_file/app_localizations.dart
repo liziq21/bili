@@ -7486,6 +7486,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'切换'**
   String get switchAction;
+
+  /// Title and tooltip for the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Playback queue'**
+  String get playbackQueue;
+
+  /// Number of items shown in the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String playbackQueueCount(int count);
+
+  /// Fallback title for a queue item without video metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Video {count}'**
+  String queueItemFallback(int count);
+
+  /// Empty state for the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Your playback queue is empty'**
+  String get queueEmpty;
+
+  /// Tooltip for removing an item from the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from queue'**
+  String get removeFromQueue;
+
+  /// Accessibility label for the current playback queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Currently playing'**
+  String get currentlyPlaying;
+
+  /// Playback error category - network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get playbackErrorNetwork;
+
+  /// Playback error category - media decoding failure
+  ///
+  /// In en, this message translates to:
+  /// **'Decoder error'**
+  String get playbackErrorDecoder;
+
+  /// Playback error category - DRM failure
+  ///
+  /// In en, this message translates to:
+  /// **'DRM error'**
+  String get playbackErrorDrm;
+
+  /// Playback error category - authorization failure
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization error'**
+  String get playbackErrorAuthorization;
+
+  /// Playback error category - unknown failure
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown playback error'**
+  String get playbackErrorUnknown;
+
+  /// Playback status shown while retrying a network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying...'**
+  String get playbackRetrying;
+
+  /// Player error action - skip the current queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
 }
 
 class _AppLocalizationsDelegate

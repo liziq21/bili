@@ -16,6 +16,7 @@ import '../../setting/app_settings.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
 import 'player_keyboard_shortcuts.dart';
+import 'playback_queue_sheet.dart';
 import 'quality_picker_chip.dart';
 import 'sleep_timer_chip.dart';
 import '../danmaku/danmaku_overlay.dart';
@@ -24,6 +25,7 @@ import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
+import '../player/playback_error.dart';
 
 /// 视频播放器：把 [MediaStream] 接到原生播放管线并渲染画面。
 ///
@@ -57,6 +59,9 @@ class const VideoPlayer({
 
   /// 进入 / 退出全屏。横屏与系统 UI 的切换由页面负责。
   final VoidCallback? onToggleFullscreen,
+
+  /// 重新解析播放地址。用于媒体地址在播放器打开前就失败的情况。
+  final VoidCallback? onRetry,
 
   /// 最小化：退出全屏并暂停播放，保留播放位置。
   final VoidCallback? onMinimize,
@@ -165,7 +170,10 @@ class _VideoPlayerState() extends State<VideoPlayer> {
         },
         builder: (context, data) {
           if (data.streamError != null) {
-            final errorView = _ErrorView(message: data.streamError!);
+            final errorView = _ErrorView(
+              error: MediaPlaybackException.fromMessage(data.streamError!),
+              onRetry: widget.onRetry,
+            );
             return widget.fullscreen
                 ? errorView
                 : AspectRatio(
@@ -335,6 +343,14 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
                 : null,
             icon: Icon(_queueModeIcon(currentQueueMode)),
           ),
+          IconButton(
+            tooltip: l10n?.playbackQueue ?? 'Playback queue',
+            iconSize: 20,
+            color: $styles.colors.onSurfaceVariant,
+            onPressed: () =>
+                showPlaybackQueueSheet(context, controller: widget.controller),
+            icon: const Icon(Icons.queue_music),
+          ),
           const Spacer(),
           if (queueActive)
             Text(
@@ -390,6 +406,10 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
 class const _VideoSurface({
   required final MediaPlaybackController controller,
   required final MediaStream stream,
+  final String? videoId,
+  final String? title,
+  final String? creatorName,
+  final String? thumbnailUrl,
   required final bool fullscreen,
   required final bool controlsVisible,
   required final Duration keyboardSeekStep,
@@ -420,7 +440,13 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
-    widget.controller.open(widget.stream);
+    widget.controller.open(
+      widget.stream,
+      videoId: widget.videoId,
+      title: widget.title,
+      creatorName: widget.creatorName,
+      thumbnailUrl: widget.thumbnailUrl,
+    );
     _restoreSavedRate();
     _applyPreferredQuality();
     _loadGestureSettings();
@@ -513,7 +539,15 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
                 case Ok(:final value):
                   widget.controller.restorePositionSeconds =
                       widget.controller.state.position.inSeconds;
-                  unawaited(widget.controller.open(value));
+                  unawaited(
+                    widget.controller.open(
+                      value,
+                      videoId: widget.videoId,
+                      title: widget.title,
+                      creatorName: widget.creatorName,
+                      thumbnailUrl: widget.thumbnailUrl,
+                    ),
+                  );
                   context.read<VideoBloc>().add(MediaStreamChanged(value));
                 case Error():
                   break;
@@ -527,7 +561,25 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   void didUpdateWidget(covariant _VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.stream != oldWidget.stream) {
-      widget.controller.open(widget.stream);
+      widget.controller.open(
+        widget.stream,
+        videoId: widget.videoId,
+        title: widget.title,
+        creatorName: widget.creatorName,
+        thumbnailUrl: widget.thumbnailUrl,
+      );
+      return;
+    }
+    if (widget.videoId != oldWidget.videoId ||
+        widget.title != oldWidget.title ||
+        widget.creatorName != oldWidget.creatorName ||
+        widget.thumbnailUrl != oldWidget.thumbnailUrl) {
+      widget.controller.updateCurrentQueueItemMetadata(
+        videoId: widget.videoId,
+        title: widget.title,
+        creatorName: widget.creatorName,
+        thumbnailUrl: widget.thumbnailUrl,
+      );
     }
   }
 
@@ -593,13 +645,22 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
         if (hasError)
           Positioned.fill(
             child: _ErrorView(
-              message: state.error!,
-              onRetry: () => widget.controller.retry(widget.stream),
+              error: state.error!,
+              isRetrying: state.isRetrying,
+              onRetry: () => widget.controller.retry(
+                widget.controller.currentStream ?? widget.stream,
+              ),
+              onSkip: _canSkip(state)
+                  ? () => unawaited(widget.controller.next())
+                  : null,
             ),
           ),
       ],
     );
   }
+
+  bool _canSkip(PlaybackState state) =>
+      state.queueLength > 0 && state.currentIndex < state.queueLength - 1;
 }
 
 /// 播放器操作栏。
@@ -671,12 +732,15 @@ class const _LoadingView() extends StatelessWidget {
 }
 
 class const _ErrorView({
-  required final String message,
+  required final MediaPlaybackException error,
   final VoidCallback? onRetry,
+  final VoidCallback? onSkip,
+  final bool isRetrying = false,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final category = _categoryLabel(l10n, error.category);
     return Container(
       color: $styles.colors.scrim,
       alignment: Alignment.center,
@@ -687,22 +751,48 @@ class const _ErrorView({
           Icon(Icons.error_outline, color: $styles.colors.onScrim, size: 32),
           const Gap(8),
           Text(
-            l10n?.videoLoadFailed ?? 'Playback failed',
+            l10n?.playbackFailed(category) ?? 'Playback failed: $category',
             textAlign: TextAlign.center,
             style: $styles.text.bodySmall.copyWith(
               color: $styles.colors.onScrim,
             ),
           ),
-          if (onRetry != null) ...[
+          if (isRetrying) ...[
             const Gap(8),
-            TextButton(
-              onPressed: onRetry,
-              child: Text(
-                l10n?.retry ?? 'Retry',
-                style: $styles.text.bodySmall.copyWith(
-                  color: $styles.colors.accentText,
-                ),
+            Text(
+              l10n?.playbackRetrying ?? 'Retrying...',
+              style: $styles.text.bodySmall.copyWith(
+                color: $styles.colors.onScrim,
               ),
+            ),
+          ],
+          if (onRetry != null || onSkip != null) ...[
+            const Gap(8),
+            Wrap(
+              spacing: $styles.insets.sm,
+              alignment: WrapAlignment.center,
+              children: [
+                if (onRetry != null)
+                  TextButton(
+                    onPressed: onRetry,
+                    child: Text(
+                      l10n?.retry ?? 'Retry',
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.accentText,
+                      ),
+                    ),
+                  ),
+                if (onSkip != null)
+                  TextButton(
+                    onPressed: onSkip,
+                    child: Text(
+                      l10n?.skip ?? 'Skip',
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.accentText,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ],
@@ -710,6 +800,19 @@ class const _ErrorView({
     );
   }
 }
+
+String _categoryLabel(AppLocalizations? l10n, PlaybackErrorCategory category) =>
+    switch (category) {
+      PlaybackErrorCategory.network =>
+        l10n?.playbackErrorNetwork ?? 'Network error',
+      PlaybackErrorCategory.decoder =>
+        l10n?.playbackErrorDecoder ?? 'Decoder error',
+      PlaybackErrorCategory.drm => l10n?.playbackErrorDrm ?? 'DRM error',
+      PlaybackErrorCategory.authorization =>
+        l10n?.playbackErrorAuthorization ?? 'Authorization error',
+      PlaybackErrorCategory.unknown =>
+        l10n?.playbackErrorUnknown ?? 'Unknown error',
+    };
 
 /// 长按 2x 期间的临时标记。
 class const _BoostBadge() extends StatelessWidget {

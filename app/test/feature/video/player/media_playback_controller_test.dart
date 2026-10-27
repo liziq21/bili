@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/feature/video/player/playback_error.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart';
@@ -84,6 +85,8 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// 记录收到的媒体地址。
   final List<String> openedUris = [];
 
+  void Function()? onOpen;
+
   /// 记录收到的请求头。
   final List<Map<String, String>> openedHeaders = [];
 
@@ -129,6 +132,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     bool play = true,
     bool synchronized = true,
   }) async {
+    onOpen?.call();
     if (playable is Media) {
       openedUris.add(playable.uri);
       openedHeaders.add(playable.httpHeaders ?? const {});
@@ -285,7 +289,7 @@ void main() {
       );
       fake.emitError('403 forbidden');
       await pumpEventQueue();
-      expect(recorder.last.error, '403 forbidden');
+      expect(recorder.last.error?.message, '403 forbidden');
 
       await controller.open(
         MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
@@ -293,6 +297,20 @@ void main() {
       await pumpEventQueue();
 
       expect(recorder.last.error, isNull);
+    });
+
+    test('ignores an error emitted while switching media', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.onOpen = () => fake.emitError('stale network timeout');
+
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      );
+      await pumpEventQueue();
+
+      expect(controller.state.error, isNull);
     });
   });
 
@@ -367,7 +385,7 @@ void main() {
       fake.emitPosition(const Duration(seconds: 5));
       await pumpEventQueue();
 
-      expect(recorder.last.error, 'EDL parsing failed');
+      expect(recorder.last.error?.message, 'EDL parsing failed');
     });
 
     test('a duration and a buffering update do not erase the error', () async {
@@ -381,7 +399,112 @@ void main() {
       fake.emitBuffering(true);
       await pumpEventQueue();
 
-      expect(recorder.last.error, '403 forbidden');
+      expect(recorder.last.error?.message, '403 forbidden');
+    });
+  });
+
+  group('MediaPlaybackController automatic retry', () {
+    test('retries network failures with the configured budget', () async {
+      final retryFake = _FakePlatformPlayer();
+      final retryingController = MediaPlaybackController(
+        retryFake,
+        const PlaybackRetryPolicy(maxRetries: 2, initialDelay: Duration.zero),
+      );
+      final stream = MediaStream(videoUrl: 'https://cdn.example.com/v.m4s');
+      addTearDown(retryingController.dispose);
+
+      await retryingController.open(stream);
+      retryFake.emitError('network timeout');
+      await pumpEventQueue();
+
+      expect(retryFake.openedUris, hasLength(2));
+      expect(retryingController.state.isRetrying, isTrue);
+      expect(retryingController.state.retryAttempt, 1);
+
+      retryFake.emitError('connection reset');
+      await pumpEventQueue();
+      expect(retryFake.openedUris, hasLength(3));
+      expect(retryingController.state.retryAttempt, 2);
+
+      retryFake.emitError('host unreachable');
+      await pumpEventQueue();
+      expect(retryFake.openedUris, hasLength(3));
+      expect(retryingController.state.isRetrying, isFalse);
+      expect(
+        retryingController.state.error?.category,
+        PlaybackErrorCategory.network,
+      );
+    });
+
+    test('does not automatically retry non-network failures', () async {
+      final retryFake = _FakePlatformPlayer();
+      final retryingController = MediaPlaybackController(
+        retryFake,
+        const PlaybackRetryPolicy(maxRetries: 2, initialDelay: Duration.zero),
+      );
+      final stream = MediaStream(videoUrl: 'https://cdn.example.com/v.m4s');
+      addTearDown(retryingController.dispose);
+
+      await retryingController.open(stream);
+      retryFake.emitError('decoder rejected codec');
+      await pumpEventQueue();
+
+      expect(retryFake.openedUris, hasLength(1));
+      expect(
+        retryingController.state.error?.category,
+        PlaybackErrorCategory.decoder,
+      );
+      expect(retryingController.state.isRetrying, isFalse);
+    });
+
+    test('clears the retry state after playback resumes', () async {
+      final retryFake = _FakePlatformPlayer();
+      final retryingController = MediaPlaybackController(
+        retryFake,
+        const PlaybackRetryPolicy(initialDelay: Duration(seconds: 1)),
+      );
+      final stream = MediaStream(videoUrl: 'https://cdn.example.com/v.m4s');
+      addTearDown(retryingController.dispose);
+
+      await retryingController.open(stream);
+      retryFake.emitError('network timeout');
+      await pumpEventQueue();
+      expect(retryingController.state.isRetrying, isTrue);
+
+      retryFake.emitPlaying(true);
+      await pumpEventQueue();
+      await Future<void>.delayed(const Duration(seconds: 1));
+      await pumpEventQueue();
+
+      expect(retryingController.state.error, isNull);
+      expect(retryingController.state.isRetrying, isFalse);
+      expect(retryingController.state.retryAttempt, 0);
+      expect(retryFake.openedUris, hasLength(1));
+    });
+
+    test('tracks the current stream when a queue item changes', () async {
+      final queueFake = _FakePlatformPlayer();
+      final queueController = MediaPlaybackController(queueFake);
+      final first = MediaStream(videoUrl: 'https://example.com/first.m4s');
+      final second = MediaStream(videoUrl: 'https://example.com/second.m4s');
+      addTearDown(queueController.dispose);
+
+      await queueController.openQueue([first, second]);
+      expect(queueController.currentStream, same(first));
+
+      queueFake.emitPlaylist(
+        Playlist([
+          Media('https://example.com/first.m4s'),
+          Media('https://example.com/second.m4s'),
+        ], index: 1),
+      );
+      await pumpEventQueue();
+
+      expect(queueController.currentStream, same(second));
+
+      await queueController.retry(queueController.currentStream!);
+      expect(queueFake.openedUris.last, contains('second.m4s'));
+      expect(queueFake.openedPlaylists.last.index, 1);
     });
   });
 

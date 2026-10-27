@@ -44,7 +44,9 @@ void main() {
     addTearDown(bloc.close);
   });
 
-  testWidgets('renders generic error message', (WidgetTester tester) async {
+  testWidgets('renders the stream error inside the player area', (
+    WidgetTester tester,
+  ) async {
     final bloc = VideoBloc(repository: _FailingStreamRepository());
 
     await pumpPlayer(tester, bloc: bloc);
@@ -52,10 +54,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.textContaining('Playback failed'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    // Verifies generic error text is rendered and raw exception string '签名过期' is masked from UI.
-    expect(find.textContaining('签名过期'), findsNothing);
 
     addTearDown(bloc.close);
   });
@@ -121,6 +121,45 @@ void main() {
       await tester.tap(find.byTooltip('Loop queue'));
       await tester.pump();
       expect(find.byTooltip('Loop off'), findsOneWidget);
+
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+    });
+
+    testWidgets('opens a sheet with queue metadata and edit controls', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _NoStreamRepository());
+      await pumpPlayer(tester, bloc: bloc, controller: controller);
+
+      await controller.openQueueItems([
+        PlaybackQueueItem(
+          stream: MediaStream(videoUrl: 'https://example.com/1.m4s'),
+          videoId: 'one',
+          title: 'First video',
+          creatorName: 'First creator',
+        ),
+        PlaybackQueueItem(
+          stream: MediaStream(videoUrl: 'https://example.com/2.m4s'),
+          videoId: 'two',
+          title: 'Second video',
+        ),
+      ]);
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Playback queue'));
+      // The player below the sheet is still loading in this harness, so its
+      // progress indicator keeps an animation scheduled indefinitely.
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('First video'), findsOneWidget);
+      expect(find.text('First creator'), findsOneWidget);
+      expect(find.text('Second video'), findsOneWidget);
+      // The current item stays in the queue; only the following item has a
+      // remove action.
+      expect(find.byIcon(Icons.remove_circle_outline), findsOneWidget);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
@@ -269,6 +308,67 @@ void main() {
       expect(controlsRect.top, greaterThanOrEqualTo(videoRect.bottom));
     });
 
+    testWidgets('shows the categorized error with retry action', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+
+      fake.injectPlaybackError('decoder rejected codec');
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.textContaining('Decoder error'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.text('Skip'), findsNothing);
+
+      await tester.tap(find.byType(TextButton));
+      await tester.pump();
+      await tester.pump();
+      expect(find.textContaining('Decoder error'), findsNothing);
+    });
+
+    testWidgets('offers skip when a later queue item is available', (
+      tester,
+    ) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: false,
+      );
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://example.com/1.m4s'),
+        MediaStream(videoUrl: 'https://example.com/2.m4s'),
+      ]);
+      await tester.pump();
+
+      fake.injectPlaybackError('decoder rejected codec');
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Skip'), findsOneWidget);
+
+      await tester.tap(find.text('Skip'));
+      await tester.pump();
+      expect(fake.nextCalls, hasLength(1));
+    });
+
     testWidgets('hides the overlay controls until the surface is tapped', (
       tester,
     ) async {
@@ -368,7 +468,7 @@ void main() {
   });
 }
 
-class _NoStreamRepository implements VideoDetailRepository {
+class _NoStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -398,8 +498,8 @@ class _NoStreamRepository implements VideoDetailRepository {
 }
 
 // ignore_for_file: close_sinks
-class _FakePlatformPlayer extends Fake implements PlatformPlayer {
-  _FakePlatformPlayer() {
+class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
+  this {
     stream = PlayerStream(
       _playlist.stream,
       _playing.stream,
@@ -535,7 +635,7 @@ class _FakePlatformPlayer extends Fake implements PlatformPlayer {
   void injectPlaybackError(String message) => _error.add(message);
 }
 
-class _HangingStreamRepository implements VideoDetailRepository {
+class _HangingStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -564,7 +664,7 @@ class _HangingStreamRepository implements VideoDetailRepository {
   }
 }
 
-class _FailingStreamRepository implements VideoDetailRepository {
+class _FailingStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
@@ -592,7 +692,7 @@ class _FailingStreamRepository implements VideoDetailRepository {
 }
 
 /// 立即返回可播流：让画面本体（含浮层控制）渲染出来。
-class _ReadyStreamRepository implements VideoDetailRepository {
+class _ReadyStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));

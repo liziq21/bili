@@ -1139,6 +1139,14 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                   )
                                   .then((success) {
                                     if (!mounted) return;
+                                    if (success) {
+                                      controller.updateQueueItemMetadata(
+                                        videoId: video.id,
+                                        title: video.title,
+                                        creatorName: video.creatorProfileName,
+                                        thumbnailUrl: video.thumbnailUrl,
+                                      );
+                                    }
                                     setState(() => _isAddingToQueue = false);
                                     messenger.showSnackBar(
                                       SnackBar(

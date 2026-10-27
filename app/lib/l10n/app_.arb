@@ -5864,5 +5864,67 @@
   "switchAction": "切换",
   "@switchAction": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playbackQueue": "Playback queue",
+  "@playbackQueue": {
+    "description": "Title and tooltip for the playback queue"
+  },
+  "playbackQueueCount": "{count} items",
+  "@playbackQueueCount": {
+    "description": "Number of items shown in the playback queue",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueItemFallback": "Video {count}",
+  "@queueItemFallback": {
+    "description": "Fallback title for a queue item without video metadata",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueEmpty": "Your playback queue is empty",
+  "@queueEmpty": {
+    "description": "Empty state for the playback queue"
+  },
+  "removeFromQueue": "Remove from queue",
+  "@removeFromQueue": {
+    "description": "Tooltip for removing an item from the playback queue"
+  },
+  "currentlyPlaying": "Currently playing",
+  "@currentlyPlaying": {
+    "description": "Accessibility label for the current playback queue item"
+  },
+  "playbackErrorNetwork": "Network error",
+  "@playbackErrorNetwork": {
+    "description": "Playback error category - network failure"
+  },
+  "playbackErrorDecoder": "Decoder error",
+  "@playbackErrorDecoder": {
+    "description": "Playback error category - media decoding failure"
+  },
+  "playbackErrorDrm": "DRM error",
+  "@playbackErrorDrm": {
+    "description": "Playback error category - DRM failure"
+  },
+  "playbackErrorAuthorization": "Authorization error",
+  "@playbackErrorAuthorization": {
+    "description": "Playback error category - authorization failure"
+  },
+  "playbackErrorUnknown": "Unknown playback error",
+  "@playbackErrorUnknown": {
+    "description": "Playback error category - unknown failure"
+  },
+  "playbackRetrying": "Retrying...",
+  "@playbackRetrying": {
+    "description": "Playback status shown while retrying a network failure"
+  },
+  "skip": "Skip",
+  "@skip": {
+    "description": "Player error action - skip the current queue item"
   }
 }

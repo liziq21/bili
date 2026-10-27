@@ -269,7 +269,13 @@ class _RecordingPlaybackController() implements MediaPlaybackController {
   final List<MediaStream> added = [];
 
   @override
-  Future<void> addToQueue(MediaStream stream) async => added.add(stream);
+  Future<void> addToQueue(
+    MediaStream stream, {
+    String? videoId,
+    String? title,
+    String? creatorName,
+    String? thumbnailUrl,
+  }) async => added.add(stream);
 
   @override
   dynamic noSuchMethod(Invocation invocation) {}

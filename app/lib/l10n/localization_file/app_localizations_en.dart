@@ -4362,4 +4362,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get switchAction => '切换';
+
+  @override
+  String get playbackQueue => 'Playback queue';
+
+  @override
+  String playbackQueueCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String queueItemFallback(int count) {
+    return 'Video $count';
+  }
+
+  @override
+  String get queueEmpty => 'Your playback queue is empty';
+
+  @override
+  String get removeFromQueue => 'Remove from queue';
+
+  @override
+  String get currentlyPlaying => 'Currently playing';
+
+  @override
+  String get playbackErrorNetwork => 'Network error';
+
+  @override
+  String get playbackErrorDecoder => 'Decoder error';
+
+  @override
+  String get playbackErrorDrm => 'DRM error';
+
+  @override
+  String get playbackErrorAuthorization => 'Authorization error';
+
+  @override
+  String get playbackErrorUnknown => 'Unknown playback error';
+
+  @override
+  String get playbackRetrying => 'Retrying...';
+
+  @override
+  String get skip => 'Skip';
 }
