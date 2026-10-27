@@ -63,6 +63,7 @@ so hand edits do not survive; change the generator instead.
 - feat(settings): add player preferences UI (#418)
 - feat(LIZ-90): periodic progress persistence + queue-switch progress save (#468)
 - feat(video): add playback queue and fix strict analysis (#480)
+- feat(android): per-variant launcher icons for debug and dev builds (LIZ-59) (#488)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
