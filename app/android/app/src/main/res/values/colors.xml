@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_foreground">#FF5CB67B</color>
-    <color name="ic_launcher_background">#FFFFFFFF</color>
+    <!-- LIZ-59: launcher icon tints are referenced from the vector drawables
+     (ic_launcher_background / ic_launcher_foreground); build variants override
+     these two colors so debug/dev builds are distinguishable at a glance. -->
+    <color name="ic_launcher_foreground_tint">#FF5CB67B</color>
+    <color name="ic_launcher_background_tint">#FFFFFFFF</color>
 </resources>
