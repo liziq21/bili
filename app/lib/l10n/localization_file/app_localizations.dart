@@ -1760,48 +1760,6 @@ abstract class AppLocalizations {
   /// **'队列循环'**
   String get queueModeLoop;
 
-  /// Title for the in-memory playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Playback queue'**
-  String get playbackQueueTitle;
-
-  /// Empty state for the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Your queue is empty'**
-  String get playbackQueueEmpty;
-
-  /// Tooltip for clearing the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Clear queue'**
-  String get playbackQueueClear;
-
-  /// Tooltip for removing an item from the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Remove from queue'**
-  String get playbackQueueRemove;
-
-  /// Tooltip for moving a playback queue item up
-  ///
-  /// In en, this message translates to:
-  /// **'Move up'**
-  String get playbackQueueMoveUp;
-
-  /// Tooltip for moving a playback queue item down
-  ///
-  /// In en, this message translates to:
-  /// **'Move down'**
-  String get playbackQueueMoveDown;
-
-  /// Label for the currently playing queue item
-  ///
-  /// In en, this message translates to:
-  /// **'Playing'**
-  String get playbackQueuePlaying;
-
   /// Playback speed picker title in the player
   ///
   /// In en, this message translates to:

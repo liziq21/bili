@@ -1234,34 +1234,6 @@
   "@queueModeLoop": {
     "description": "Tooltip for player queue loop mode: playlist loop"
   },
-  "playbackQueueTitle": "播放队列",
-  "@playbackQueueTitle": {
-    "description": "Title for the in-memory playback queue"
-  },
-  "playbackQueueEmpty": "播放队列为空",
-  "@playbackQueueEmpty": {
-    "description": "Empty state for the playback queue"
-  },
-  "playbackQueueClear": "清空队列",
-  "@playbackQueueClear": {
-    "description": "Tooltip for clearing the playback queue"
-  },
-  "playbackQueueRemove": "从队列移除",
-  "@playbackQueueRemove": {
-    "description": "Tooltip for removing an item from the playback queue"
-  },
-  "playbackQueueMoveUp": "上移",
-  "@playbackQueueMoveUp": {
-    "description": "Tooltip for moving a playback queue item up"
-  },
-  "playbackQueueMoveDown": "下移",
-  "@playbackQueueMoveDown": {
-    "description": "Tooltip for moving a playback queue item down"
-  },
-  "playbackQueuePlaying": "正在播放",
-  "@playbackQueuePlaying": {
-    "description": "Label for the currently playing queue item"
-  },
   "playbackSpeedLabel": "倍速",
   "@playbackSpeedLabel": {
     "description": "Playback speed picker title in the player"

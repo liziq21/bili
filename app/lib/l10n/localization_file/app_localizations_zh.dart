@@ -949,27 +949,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get queueModeLoop => '队列循环';
 
   @override
-  String get playbackQueueTitle => '播放队列';
-
-  @override
-  String get playbackQueueEmpty => '播放队列为空';
-
-  @override
-  String get playbackQueueClear => '清空队列';
-
-  @override
-  String get playbackQueueRemove => '从队列移除';
-
-  @override
-  String get playbackQueueMoveUp => '上移';
-
-  @override
-  String get playbackQueueMoveDown => '下移';
-
-  @override
-  String get playbackQueuePlaying => '正在播放';
-
-  @override
   String get playbackSpeedLabel => '倍速';
 
   @override
