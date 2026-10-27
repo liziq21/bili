@@ -252,6 +252,7 @@ so hand edits do not survive; change the generator instead.
 - docs(palette): add localization hygiene candidate investigation [skip ci] (#385)
 - docs(AGENTS): add Linear specifications references (#399)
 - docs(github): add issue label, backlog classification, and AI work acceptance specs (#403)
+- docs(agents): fix P0 stale facts in AGENTS.md (#489)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
