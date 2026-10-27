@@ -51,6 +51,25 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(l10n.videosCount('42')), findsOneWidget);
+
+    final expectedLabel = [
+      'CodeCraft',
+      l10n.creatorLabel('@creator-1'),
+      'Builds useful videos',
+      l10n.subscribersCount(l10n.countCompactWan('1.2')),
+      l10n.videosCount('42'),
+    ].join(l10n.commaSeparator);
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.container == true &&
+            widget.excludeSemantics == true &&
+            widget.properties.label == expectedLabel,
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('triggers back callback when back button pressed', (
