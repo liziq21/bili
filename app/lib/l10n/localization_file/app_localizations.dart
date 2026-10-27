@@ -203,103 +203,103 @@ abstract class AppLocalizations {
   /// Player setting - default video quality
   ///
   /// In en, this message translates to:
-  /// **'默认画质'**
+  /// **'Default video quality'**
   String get playerDefaultQuality;
 
   /// Subtitle for the default video quality setting
   ///
   /// In en, this message translates to:
-  /// **'进入播放器时优先使用的画质'**
+  /// **'Preferred quality when opening the player'**
   String get playerDefaultQualitySubtitle;
 
   /// Player setting - default playback speed
   ///
   /// In en, this message translates to:
-  /// **'默认倍速'**
+  /// **'Default playback speed'**
   String get playerDefaultSpeed;
 
   /// Subtitle for the default playback speed setting
   ///
   /// In en, this message translates to:
-  /// **'进入播放器时优先使用的播放速度'**
+  /// **'Preferred playback speed when opening the player'**
   String get playerDefaultSpeedSubtitle;
 
   /// Heading for player gesture settings
   ///
   /// In en, this message translates to:
-  /// **'播放手势'**
+  /// **'Playback gestures'**
   String get playerGestures;
 
   /// Toggle for seeking with player gestures
   ///
   /// In en, this message translates to:
-  /// **'滑动与双击快进'**
+  /// **'Swipe and double-tap to seek'**
   String get playerGestureSeek;
 
   /// Subtitle for the player seek gesture toggle
   ///
   /// In en, this message translates to:
-  /// **'在画面上滑动或双击调整播放位置'**
+  /// **'Swipe or double-tap the video to change position'**
   String get playerGestureSeekSubtitle;
 
   /// Toggle for changing volume with vertical gestures
   ///
   /// In en, this message translates to:
-  /// **'滑动调节音量'**
+  /// **'Swipe to adjust volume'**
   String get playerGestureVolume;
 
   /// Subtitle for the player volume gesture toggle
   ///
   /// In en, this message translates to:
-  /// **'在画面右侧上下滑动调节音量'**
+  /// **'Swipe up and down on the right side of the video to adjust volume'**
   String get playerGestureVolumeSubtitle;
 
   /// Toggle for changing brightness with vertical gestures
   ///
   /// In en, this message translates to:
-  /// **'滑动调节亮度'**
+  /// **'Swipe to adjust brightness'**
   String get playerGestureBrightness;
 
   /// Subtitle for the player brightness gesture toggle
   ///
   /// In en, this message translates to:
-  /// **'在画面左侧上下滑动调节亮度'**
+  /// **'Swipe up and down on the left side of the video to adjust brightness'**
   String get playerGestureBrightnessSubtitle;
 
   /// Toggle for temporary long-press playback boost
   ///
   /// In en, this message translates to:
-  /// **'长按临时加速'**
+  /// **'Hold to temporarily speed up'**
   String get playerGestureBoost;
 
   /// Subtitle for the player boost gesture toggle
   ///
   /// In en, this message translates to:
-  /// **'长按画面临时切换到 2 倍速'**
+  /// **'Hold the video to temporarily switch to 2x speed'**
   String get playerGestureBoostSubtitle;
 
   /// Player setting - default sleep timer duration
   ///
   /// In en, this message translates to:
-  /// **'睡眠定时器默认值'**
+  /// **'Default sleep timer'**
   String get playerSleepTimerDefault;
 
   /// Subtitle for the default sleep timer setting
   ///
   /// In en, this message translates to:
-  /// **'进入播放器时自动开始倒计时，关闭则不自动计时'**
+  /// **'Start a countdown automatically when opening the player; disabled means no automatic timer'**
   String get playerSleepTimerDefaultSubtitle;
 
   /// Value meaning that the default sleep timer is disabled
   ///
   /// In en, this message translates to:
-  /// **'关闭'**
+  /// **'Off'**
   String get playerSleepTimerOff;
 
   /// Automatic player quality selection
   ///
   /// In en, this message translates to:
-  /// **'自动'**
+  /// **'Auto'**
   String get playerQualityAuto;
 
   /// Video quality height shown in player settings
@@ -7247,42 +7247,6 @@ abstract class AppLocalizations {
   /// **'队列循环'**
   String get loopQueue;
 
-  /// Title and tooltip for the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Playback queue'**
-  String get playbackQueue;
-
-  /// Number of items shown in the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'{count} items'**
-  String playbackQueueCount(int count);
-
-  /// Fallback title for a queue item without video metadata
-  ///
-  /// In en, this message translates to:
-  /// **'Video {count}'**
-  String queueItemFallback(int count);
-
-  /// Empty state for the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Your playback queue is empty'**
-  String get queueEmpty;
-
-  /// Tooltip for removing an item from the playback queue
-  ///
-  /// In en, this message translates to:
-  /// **'Remove from queue'**
-  String get removeFromQueue;
-
-  /// Accessibility label for the current playback queue item
-  ///
-  /// In en, this message translates to:
-  /// **'Currently playing'**
-  String get currentlyPlaying;
-
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
@@ -7292,50 +7256,8 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'Playback failed: {p1}'**
+  /// **'播放失败：{p1}'**
   String playbackFailed(String p1);
-
-  /// Playback error category - network failure
-  ///
-  /// In en, this message translates to:
-  /// **'Network error'**
-  String get playbackErrorNetwork;
-
-  /// Playback error category - media decoding failure
-  ///
-  /// In en, this message translates to:
-  /// **'Decoder error'**
-  String get playbackErrorDecoder;
-
-  /// Playback error category - DRM failure
-  ///
-  /// In en, this message translates to:
-  /// **'DRM error'**
-  String get playbackErrorDrm;
-
-  /// Playback error category - authorization failure
-  ///
-  /// In en, this message translates to:
-  /// **'Authorization error'**
-  String get playbackErrorAuthorization;
-
-  /// Playback error category - unknown failure
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown playback error'**
-  String get playbackErrorUnknown;
-
-  /// Playback status shown while retrying a network failure
-  ///
-  /// In en, this message translates to:
-  /// **'Retrying...'**
-  String get playbackRetrying;
-
-  /// Player error action - skip the current queue item
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get skip;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7564,6 +7486,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'切换'**
   String get switchAction;
+
+  /// Title and tooltip for the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Playback queue'**
+  String get playbackQueue;
+
+  /// Number of items shown in the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String playbackQueueCount(int count);
+
+  /// Fallback title for a queue item without video metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Video {count}'**
+  String queueItemFallback(int count);
+
+  /// Empty state for the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Your playback queue is empty'**
+  String get queueEmpty;
+
+  /// Tooltip for removing an item from the playback queue
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from queue'**
+  String get removeFromQueue;
+
+  /// Accessibility label for the current playback queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Currently playing'**
+  String get currentlyPlaying;
+
+  /// Playback error category - network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Network error'**
+  String get playbackErrorNetwork;
+
+  /// Playback error category - media decoding failure
+  ///
+  /// In en, this message translates to:
+  /// **'Decoder error'**
+  String get playbackErrorDecoder;
+
+  /// Playback error category - DRM failure
+  ///
+  /// In en, this message translates to:
+  /// **'DRM error'**
+  String get playbackErrorDrm;
+
+  /// Playback error category - authorization failure
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization error'**
+  String get playbackErrorAuthorization;
+
+  /// Playback error category - unknown failure
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown playback error'**
+  String get playbackErrorUnknown;
+
+  /// Playback status shown while retrying a network failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying...'**
+  String get playbackRetrying;
+
+  /// Player error action - skip the current queue item
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
 }
 
 class _AppLocalizationsDelegate

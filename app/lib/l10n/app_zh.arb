@@ -63,6 +63,83 @@
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"
   },
+  "playerDefaultQuality": "默认画质",
+  "@playerDefaultQuality": {
+    "description": "Player setting - default video quality"
+  },
+  "playerDefaultQualitySubtitle": "进入播放器时优先使用的画质",
+  "@playerDefaultQualitySubtitle": {
+    "description": "Subtitle for the default video quality setting"
+  },
+  "playerDefaultSpeed": "默认倍速",
+  "@playerDefaultSpeed": {
+    "description": "Player setting - default playback speed"
+  },
+  "playerDefaultSpeedSubtitle": "进入播放器时优先使用的播放速度",
+  "@playerDefaultSpeedSubtitle": {
+    "description": "Subtitle for the default playback speed setting"
+  },
+  "playerGestures": "播放手势",
+  "@playerGestures": {
+    "description": "Heading for player gesture settings"
+  },
+  "playerGestureSeek": "滑动与双击快进",
+  "@playerGestureSeek": {
+    "description": "Toggle for seeking with player gestures"
+  },
+  "playerGestureSeekSubtitle": "在画面上滑动或双击调整播放位置",
+  "@playerGestureSeekSubtitle": {
+    "description": "Subtitle for the player seek gesture toggle"
+  },
+  "playerGestureVolume": "滑动调节音量",
+  "@playerGestureVolume": {
+    "description": "Toggle for changing volume with vertical gestures"
+  },
+  "playerGestureVolumeSubtitle": "在画面右侧上下滑动调节音量",
+  "@playerGestureVolumeSubtitle": {
+    "description": "Subtitle for the player volume gesture toggle"
+  },
+  "playerGestureBrightness": "滑动调节亮度",
+  "@playerGestureBrightness": {
+    "description": "Toggle for changing brightness with vertical gestures"
+  },
+  "playerGestureBrightnessSubtitle": "在画面左侧上下滑动调节亮度",
+  "@playerGestureBrightnessSubtitle": {
+    "description": "Subtitle for the player brightness gesture toggle"
+  },
+  "playerGestureBoost": "长按临时加速",
+  "@playerGestureBoost": {
+    "description": "Toggle for temporary long-press playback boost"
+  },
+  "playerGestureBoostSubtitle": "长按画面临时切换到 2 倍速",
+  "@playerGestureBoostSubtitle": {
+    "description": "Subtitle for the player boost gesture toggle"
+  },
+  "playerSleepTimerDefault": "睡眠定时器默认值",
+  "@playerSleepTimerDefault": {
+    "description": "Player setting - default sleep timer duration"
+  },
+  "playerSleepTimerDefaultSubtitle": "进入播放器时自动开始倒计时，关闭则不自动计时",
+  "@playerSleepTimerDefaultSubtitle": {
+    "description": "Subtitle for the default sleep timer setting"
+  },
+  "playerSleepTimerOff": "关闭",
+  "@playerSleepTimerOff": {
+    "description": "Value meaning that the default sleep timer is disabled"
+  },
+  "playerQualityAuto": "自动",
+  "@playerQualityAuto": {
+    "description": "Automatic player quality selection"
+  },
+  "playerQualityHeight": "{p1}P",
+  "@playerQualityHeight": {
+    "description": "Video quality height shown in player settings",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
   "settingsHistory": "History",
   "@settingsHistory": {
     "description": "Settings group and subpage title - watch history"
@@ -5567,40 +5644,6 @@
   "@loopQueue": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "playbackQueue": "播放队列",
-  "@playbackQueue": {
-    "description": "Title and tooltip for the playback queue"
-  },
-  "playbackQueueCount": "{count} 项",
-  "@playbackQueueCount": {
-    "description": "Number of items shown in the playback queue",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "queueItemFallback": "视频 {count}",
-  "@queueItemFallback": {
-    "description": "Fallback title for a queue item without video metadata",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "queueEmpty": "播放队列为空",
-  "@queueEmpty": {
-    "description": "Empty state for the playback queue"
-  },
-  "removeFromQueue": "从队列移除",
-  "@removeFromQueue": {
-    "description": "Tooltip for removing an item from the playback queue"
-  },
-  "currentlyPlaying": "正在播放",
-  "@currentlyPlaying": {
-    "description": "Accessibility label for the current playback queue item"
-  },
   "minimize": "最小化",
   "@minimize": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
@@ -5613,34 +5656,6 @@
         "type": "String"
       }
     }
-  },
-  "playbackErrorNetwork": "网络错误",
-  "@playbackErrorNetwork": {
-    "description": "Playback error category - network failure"
-  },
-  "playbackErrorDecoder": "解码错误",
-  "@playbackErrorDecoder": {
-    "description": "Playback error category - media decoding failure"
-  },
-  "playbackErrorDrm": "DRM 错误",
-  "@playbackErrorDrm": {
-    "description": "Playback error category - DRM failure"
-  },
-  "playbackErrorAuthorization": "授权错误",
-  "@playbackErrorAuthorization": {
-    "description": "Playback error category - authorization failure"
-  },
-  "playbackErrorUnknown": "未知播放错误",
-  "@playbackErrorUnknown": {
-    "description": "Playback error category - unknown failure"
-  },
-  "playbackRetrying": "正在重试...",
-  "@playbackRetrying": {
-    "description": "Playback status shown while retrying a network failure"
-  },
-  "skip": "跳过",
-  "@skip": {
-    "description": "Player error action - skip the current queue item"
   },
   "back": "返回",
   "@back": {
@@ -5849,5 +5864,67 @@
   "switchAction": "切换",
   "@switchAction": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "playbackQueue": "播放队列",
+  "@playbackQueue": {
+    "description": "Title and tooltip for the playback queue"
+  },
+  "playbackQueueCount": "{count} 项",
+  "@playbackQueueCount": {
+    "description": "Number of items shown in the playback queue",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueItemFallback": "视频 {count}",
+  "@queueItemFallback": {
+    "description": "Fallback title for a queue item without video metadata",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueEmpty": "播放队列为空",
+  "@queueEmpty": {
+    "description": "Empty state for the playback queue"
+  },
+  "removeFromQueue": "从队列移除",
+  "@removeFromQueue": {
+    "description": "Tooltip for removing an item from the playback queue"
+  },
+  "currentlyPlaying": "正在播放",
+  "@currentlyPlaying": {
+    "description": "Accessibility label for the current playback queue item"
+  },
+  "playbackErrorNetwork": "网络错误",
+  "@playbackErrorNetwork": {
+    "description": "Playback error category - network failure"
+  },
+  "playbackErrorDecoder": "解码错误",
+  "@playbackErrorDecoder": {
+    "description": "Playback error category - media decoding failure"
+  },
+  "playbackErrorDrm": "DRM 错误",
+  "@playbackErrorDrm": {
+    "description": "Playback error category - DRM failure"
+  },
+  "playbackErrorAuthorization": "授权错误",
+  "@playbackErrorAuthorization": {
+    "description": "Playback error category - authorization failure"
+  },
+  "playbackErrorUnknown": "未知播放错误",
+  "@playbackErrorUnknown": {
+    "description": "Playback error category - unknown failure"
+  },
+  "playbackRetrying": "正在重试...",
+  "@playbackRetrying": {
+    "description": "Playback status shown while retrying a network failure"
+  },
+  "skip": "跳过",
+  "@skip": {
+    "description": "Player error action - skip the current queue item"
   }
 }

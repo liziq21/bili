@@ -4215,55 +4215,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loopQueue => '队列循环';
 
   @override
-  String get playbackQueue => '播放队列';
-
-  @override
-  String playbackQueueCount(int count) {
-    return '$count 项';
-  }
-
-  @override
-  String queueItemFallback(int count) {
-    return '视频 $count';
-  }
-
-  @override
-  String get queueEmpty => '播放队列为空';
-
-  @override
-  String get removeFromQueue => '从队列移除';
-
-  @override
-  String get currentlyPlaying => '正在播放';
-
-  @override
   String get minimize => '最小化';
 
   @override
   String playbackFailed(String p1) {
     return '播放失败：$p1';
   }
-
-  @override
-  String get playbackErrorNetwork => '网络错误';
-
-  @override
-  String get playbackErrorDecoder => '解码错误';
-
-  @override
-  String get playbackErrorDrm => 'DRM 错误';
-
-  @override
-  String get playbackErrorAuthorization => '授权错误';
-
-  @override
-  String get playbackErrorUnknown => '未知播放错误';
-
-  @override
-  String get playbackRetrying => '正在重试...';
-
-  @override
-  String get skip => '跳过';
 
   @override
   String get back => '返回';
@@ -4398,4 +4355,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get switchAction => '切换';
+
+  @override
+  String get playbackQueue => '播放队列';
+
+  @override
+  String playbackQueueCount(int count) {
+    return '$count 项';
+  }
+
+  @override
+  String queueItemFallback(int count) {
+    return '视频 $count';
+  }
+
+  @override
+  String get queueEmpty => '播放队列为空';
+
+  @override
+  String get removeFromQueue => '从队列移除';
+
+  @override
+  String get currentlyPlaying => '正在播放';
+
+  @override
+  String get playbackErrorNetwork => '网络错误';
+
+  @override
+  String get playbackErrorDecoder => '解码错误';
+
+  @override
+  String get playbackErrorDrm => 'DRM 错误';
+
+  @override
+  String get playbackErrorAuthorization => '授权错误';
+
+  @override
+  String get playbackErrorUnknown => '未知播放错误';
+
+  @override
+  String get playbackRetrying => '正在重试...';
+
+  @override
+  String get skip => '跳过';
 }
