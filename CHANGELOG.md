@@ -314,3 +314,4 @@ so hand edits do not survive; change the generator instead.
 - [LIZ-73] 本地播放列表数据层：CRUD、排序与搜索 (#391)
 - Issue Triage: Review LIZ-135, LIZ-134, and LIZ-133 (#481)
 - feat/playback-queue-ui (#486)
+- feat/issue-422-playback-errors (#471)
