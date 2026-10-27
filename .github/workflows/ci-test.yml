@@ -1,0 +1,177 @@
+name: CI - Test
+
+# 由原 ci.yml 拆分（2026-10-28）：pubspec 矩阵生成 + Run Flutter Test。
+# job 名与矩阵策略保持不变，ruleset 的 required check 名不受影响。
+on:
+  push:
+    branches:
+      - main
+  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
+  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ci-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pubspec:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+    - id: pubspec
+      name: Generate matrix from pubspec.yaml
+      uses: flutter-actions/pubspec-matrix-action@a4d3d0f93bf281af6a11f69429b15d90709371dc # v1.3
+      with:
+        pubspec: 'pubspec.yaml'
+    outputs:
+      matrix: ${{ steps.pubspec.outputs.matrix }}
+
+  flutter_test:
+    name: Run Flutter Test
+    needs: pubspec
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
+    permissions:
+      contents: read
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ matrix.release.flutter }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Validate iOS project configuration
+        run: python3 tool/validate_ios_config.py
+
+      - name: Run build_runner
+        run: dart run build_runner build \
+          --delete-conflicting-outputs \
+          --verbose
+
+      - name: Run analyze
+        env:
+          IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
+        run: |
+          if [ "$IS_JULES_RELATED" = "true" ]; then
+            echo "检测到与 google-labs-jules 相关的 PR，提升警告和一般提示为错误级别..."
+            flutter analyze --fatal-infos --fatal-warnings 2>&1 | tee flutter_analyze.txt
+          else
+            flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee flutter_analyze.txt
+          fi
+
+      - name: Dart Analyze to SARIF
+        uses: advanced-security/dart-analyzer-sarif@63edda78ee1ce2b3b5bc5b8c0418ce3128887e23 # main
+        with:
+          input: flutter_analyze.txt
+          output: flutter_analyze.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
+        with:
+          sarif_file: flutter_analyze.sarif
+
+      - name: Run test
+        run: flutter test --coverage
+        working-directory: app
+
+      - name: Upload app coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-app-${{ matrix.release.flutter }}
+          path: app/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Run bilibili package test
+        if: ${{ !cancelled() }}
+        run: flutter test --coverage test/
+        working-directory: packages/bilibili
+
+      - name: Upload bilibili coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-bilibili-${{ matrix.release.flutter }}
+          path: packages/bilibili/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Run bpi test
+        if: ${{ !cancelled() }}
+        run: dart test test/ --coverage-path=coverage/lcov.info
+        working-directory: packages/bilibili/bpi
+
+      - name: Upload bpi coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-bpi-${{ matrix.release.flutter }}
+          path: packages/bilibili/bpi/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Run youtube package test
+        if: ${{ !cancelled() }}
+        run: flutter test --coverage test/
+        working-directory: packages/youtube
+
+      - name: Upload youtube coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-youtube-${{ matrix.release.flutter }}
+          path: packages/youtube/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Run ypi test
+        if: ${{ !cancelled() }}
+        run: dart test test/ --coverage-path=coverage/lcov.info
+        working-directory: packages/youtube/ypi
+
+      - name: Upload ypi coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-ypi-${{ matrix.release.flutter }}
+          path: packages/youtube/ypi/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Run data package test
+        if: ${{ !cancelled() }}
+        run: dart test --coverage-path=coverage/lcov.info
+        working-directory: packages/data
+
+      - name: Upload data coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-data-${{ matrix.release.flutter }}
+          path: packages/data/coverage/lcov.info
+          if-no-files-found: error
+
+      - name: Upload golden failure diffs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: golden-failures-${{ github.run_id }}-${{ matrix.release.flutter }}
+          path: app/test/golden/failures/
+          if-no-files-found: ignore
+
+      - name: Upload current goldens for visual review
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: goldens-review-${{ github.run_id }}-${{ matrix.release.flutter }}
+          path: app/test/golden/goldens/ci/

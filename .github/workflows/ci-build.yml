@@ -1,0 +1,100 @@
+name: CI - Build
+
+# 由原 ci.yml 拆分（2026-10-28）：pubspec 矩阵生成 + Build Flutter App (android)。
+# job 名与矩阵策略保持不变，ruleset 的 required check 名不受影响。
+# 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）；跨 workflow
+# 无法 needs，build 现在独立运行。门禁不受影响：ruleset 同时锁 Run Flutter
+# Test 与 Build Flutter App，任一失败 PR 仍无法合并。
+on:
+  push:
+    branches:
+      - main
+  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
+  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ci-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pubspec:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+    - id: pubspec
+      name: Generate matrix from pubspec.yaml
+      uses: flutter-actions/pubspec-matrix-action@a4d3d0f93bf281af6a11f69429b15d90709371dc # v1.3
+      with:
+        pubspec: 'pubspec.yaml'
+    outputs:
+      matrix: ${{ steps.pubspec.outputs.matrix }}
+
+  build_androidApp:
+    name: Build Flutter App (android)
+    needs: [pubspec]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+          cache-dependency-path: |
+            app/android/*.gradle*
+            app/android/**/gradle-wrapper.properties
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ matrix.release.flutter }}
+          channel: stable
+          cache: true
+
+      - name: Get Packages
+        run: flutter pub get
+
+      - name: Run build_runner
+        run: dart run build_runner build \
+          --delete-conflicting-outputs \
+          --verbose
+
+      # LIZ-50 debugging: build both variants. The debug APK installs cleanly
+      # for reproduction; the release APK (debug-keystore signed, CI-only,
+      # not publishable) carries the real data path for on-device diagnosis
+      # without adb: with the stream-error fix, a startup failure now shows
+      # the actual error text on screen instead of a permanent spinner.
+      - name: Build debug APK
+        run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=${{ github.run_number }}
+        env:
+          # build.gradle.kts throws at configuration time when no release
+          # signing config exists, even for a pure debug build; CI sets this
+          # so configuration passes. The debug variant itself uses the debug
+          # keystore regardless.
+          BILI_ALLOW_UNSIGNED_RELEASE: "1"
+
+      - name: Upload debug APK as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: app-arm64-v8a-debug-${{ matrix.release.flutter }}.apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
+
+      - name: Build release APK (unsigned)
+        run: cd app && flutter build apk --release --split-per-abi --pub --build-number=${{ github.run_number }}
+        env:
+          BILI_ALLOW_UNSIGNED_RELEASE: "1"
+
+      - name: Upload release APK as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: app-arm64-v8a-release-unsigned-${{ matrix.release.flutter }}.apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk

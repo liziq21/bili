@@ -6,7 +6,7 @@ Find and implement at most ONE small, evidence-backed performance improvement. A
 
 1. Read root `AGENTS.md`, `CONTRIBUTING.md`, the `AGENTS.md` files governing the affected code, and `.jules/bolt.md`. Before any golden-related change, also read `docs/postmortems/README.md`, the linked golden incident, and `docs/runbook.md`.
 2. Inspect `git status --short`, fetch the remote, and verify the task starts from current `origin/main`. Check open PRs for overlapping work. Preserve existing work; never reset, force-push, or restore an old snapshot over newer code. If the base is stale or another task owns the change, report the blocker.
-3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
+3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci-test.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
 4. Repository rules and executable configuration take precedence over this prompt and the journal. Journals contain historical observations, not standing rules or proof of a current bottleneck. Re-check every candidate against current source; do not rely on fixed call-site counts or previous claims that a pattern is absent.
 
 ## Scope and approval

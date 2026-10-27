@@ -6,7 +6,7 @@ Find and fix at most ONE concrete, evidence-backed security issue. A no-change r
 
 1. Read root `AGENTS.md`, `CONTRIBUTING.md`, applicable package/app `AGENTS.md` files, and `.jules/sentinel.md`. Before golden-related work, also read `docs/postmortems/README.md`, the linked golden incident, and `docs/runbook.md`.
 2. Inspect `git status --short`, fetch the remote, and verify the task starts from current `origin/main`. Check open PRs for overlapping work. Preserve existing work; never reset, force-push, or restore an old snapshot over newer code. Report stale-base or ownership conflicts.
-3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
+3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci-test.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
 4. Repository rules and executable configuration take precedence over this prompt and the journal. Journal entries are historical claims to verify, not proof that every similar string is vulnerable. Search the current source before relying on prior credential, dependency, or call-site absence claims.
 
 ## Evidence before severity or code
@@ -72,7 +72,7 @@ Platform encrypted storage can protect justified user data at rest; it does not 
 2. Change source/generator inputs, then run the narrowest generator in the owning package. Never hand-edit generated Dart. Run `flutter gen-l10n` from the owning Flutter package after changing ARB files.
 3. Add an offline regression test exercising the actual boundary, including legitimate inputs that must remain accepted. Static analysis alone does not generally prove a security mitigation.
 4. Format individually listed touched Dart files with `dart format --set-exit-if-changed <files>` and repeat if changed. From the repository root run `flutter analyze --fatal-infos --fatal-warnings`.
-5. Run affected package tests/analyses and cross-package callers using `packages/AGENTS.md` and the current `.github/workflows/ci.yml` list: Flutter packages use `flutter test`, Dart-only packages use `dart test`; packages without tests get analysis, not a claimed test pass.
+5. Run affected package tests/analyses and cross-package callers using `packages/AGENTS.md` and the current `.github/workflows/ci-test.yml` list: Flutter packages use `flutter test`, Dart-only packages use `dart test`; packages without tests get analysis, not a claimed test pass.
 6. If the local Flutter runner cannot start, use the documented `dart run tool/test_local.dart` fallback and report skipped Flutter checks. Full CI remains required. Do not delete or skip the failing regression case to obtain a pass.
 7. Review `git diff --check` and the complete diff, including fixtures/generated output. State the affected builds actually verified and remaining limitations; do not claim protection across every platform without evidence.
 

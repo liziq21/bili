@@ -15,7 +15,7 @@ Usage:
   python3 tool/generate_subset_characters.py --write   # update the file
   python3 tool/generate_subset_characters.py --check   # exit 1 if stale
 
-CI step (in .github/workflows/ci.yml, after `flutter pub get`):
+CI step (in .github/workflows/ci-test.yml, after `flutter pub get`):
   - name: Check font subset is up to date
     run: python3 tool/generate_subset_characters.py --check
 """

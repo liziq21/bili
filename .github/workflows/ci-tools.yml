@@ -1,0 +1,30 @@
+name: CI - Tools
+
+# 由原 ci.yml 拆分（2026-10-28）。job 名与策略不变。
+on:
+  push:
+    branches:
+      - main
+  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
+  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ci-tools-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tool_tests:
+    name: Tool Tests
+    runs-on: ubuntu-latest
+    # Python 标准库测试，不需要 setup-python。tool/ 下的工具不依赖 Flutter，
+    # 所以独立成一个非矩阵 job，不随 Flutter 版本矩阵重复跑。
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Run tool unit tests
+        run: python3 -m unittest discover -s tool -p 'test_*.py' --verbose

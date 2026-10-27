@@ -6,7 +6,7 @@ Find and implement at most ONE small improvement with a demonstrable usability o
 
 1. Read root `AGENTS.md`, `CONTRIBUTING.md`, `app/AGENTS.md`, `app/docs/design-system.md`, and `.jules/palette.md`. Read package rules if a shared package is affected. Before golden-related work, also read `docs/postmortems/README.md`, the linked golden incident, and `docs/runbook.md`.
 2. Inspect `git status --short`, fetch the remote, and verify the task starts from current `origin/main`. Check open PRs for overlapping work. Preserve existing work; never reset, force-push, or restore an old snapshot over newer code. Report stale-base or ownership conflicts.
-3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
+3. Read `.fvmrc`, the root and affected package pubspecs, and `.github/workflows/ci-test.yml`. Verify both `dart --version` and `flutter --version` against the pin before any other SDK command; switch to and verify FVM if needed. Do not change the pin to suit the environment.
 4. Repository rules and executable configuration take precedence over this prompt and the journal. Re-check the current widget and its rendered semantics; past call counts, absence claims, and journal recommendations are not evidence that a change is needed now.
 
 ## Scope and approval
@@ -66,7 +66,7 @@ When adding or migrating keys, follow the existing pattern in `app/l10n/app_.arb
 1. Reproduce the gap with a concrete widget/interaction, locale, viewport, text scale, or semantics tree. Explain what the user cannot discover, activate, read, or understand.
 2. Make the smallest correction in the existing component. Explain only non-obvious design or accessibility decisions in comments.
 3. Regenerate affected outputs and format only individually listed touched Dart files with `dart format --set-exit-if-changed <files>`. Repeat after formatter changes until it passes.
-4. Run `flutter analyze --fatal-infos --fatal-warnings` from the repository root. Run `flutter test` from `app/` for app changes; for shared packages follow `packages/AGENTS.md` and `.github/workflows/ci.yml`, including affected callers. Packages without tests need analysis, not a claimed test pass.
+4. Run `flutter analyze --fatal-infos --fatal-warnings` from the repository root. Run `flutter test` from `app/` for app changes; for shared packages follow `packages/AGENTS.md` and `.github/workflows/ci-test.yml`, including affected callers. Packages without tests need analysis, not a claimed test pass.
 5. Add a meaningful widget behavior test when interaction or semantics needs regression coverage. Use the fork's `MaterialApp` and `GlobalMaterialLocalizations.delegates`, plus app localizations as needed. For localized changes, verify the relevant locale output; do not merely check that an `AppLocalizations` call exists.
 6. If asserting that a thumbnail loaded, use `mockNetworkImagesFor` as root `AGENTS.md` requires. Do not duplicate the test harness's fake `path_provider` or temp-root setup. If reading mutable `$styles`, test rendered output after a style change.
 7. Check the relevant keyboard, text-scale, and responsive scenarios. State exactly what was tested: a semantics/widget test does not demonstrate a TalkBack/VoiceOver device session unless one actually ran.
