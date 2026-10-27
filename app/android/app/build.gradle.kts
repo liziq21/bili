@@ -92,6 +92,12 @@ android {
         }
     }
 
+    // LIZ-59: dev (-Pdev) release builds add a dev-only resource source set
+    // for the launcher icon override; release builds without -Pdev never see it.
+    if (project.hasProperty("dev")) {
+        sourceSets["release"].res.srcDir("src/dev/res")
+    }
+
     applicationVariants.all {
         val variant = this
         variant.outputs.forEach { output ->

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LIZ-59: debug variant overrides the launcher icon tints with a
+     high-contrast yellow background and dark foreground so debug builds are
+     distinguishable from release at a glance. The adaptive icon (API 26+)
+     picks this up through the shared @color/*_tint references; pre-26
+     bitmaps are unchanged. -->
+    <color name="ic_launcher_background_tint">#FFFFD600</color>
+    <color name="ic_launcher_foreground_tint">#FF1F1F1F</color>
+</resources>
