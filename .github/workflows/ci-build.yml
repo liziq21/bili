@@ -1,22 +1,10 @@
-name: CI - Build
-
-# 由原 ci.yml 拆分（2026-10-28）：pubspec 矩阵生成 + Build Flutter App (android)。
-# job 名与矩阵策略保持不变，ruleset 的 required check 名不受影响。
-# 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）；跨 workflow
-# 无法 needs，build 现在独立运行。门禁不受影响：ruleset 同时锁 Run Flutter
-# Test 与 Build Flutter App，任一失败 PR 仍无法合并。
+# 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
+# pubspec 矩阵生成 + Build Flutter App (android)。job 名与矩阵策略保持不变，
+# ruleset 的 required check 名不受影响。
+# 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）；调用方
+# ci.yml 的 build job 用 needs: [test] 恢复该依赖。
 on:
-  push:
-    branches:
-      - main
-  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
-  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-
-concurrency:
-  group: ci-build-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
   pubspec:
