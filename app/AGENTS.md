@@ -6,7 +6,7 @@
 
 This directory contains the main Flutter application (`app/`).
 
-## App Structure & Architecture
+## 应用结构与架构
 
 - `lib/`: Application source code
   - `feature/`: Screen-level UI features (`home/`, `search/`, `live/`, `video/`, `space/`, `setting/`, `theme/`, `not_found/`).
@@ -24,19 +24,19 @@ This directory contains the main Flutter application (`app/`).
 - Platform code: `android/`, `ios/`, `linux/`, `web/`.
 - `test/`: Unit and widget tests mirroring `lib/`.
 
-## Core Principles & Design Patterns
+## 核心原则与设计模式
 
-### Extensible Data Sources & Local-Only Personalization
+### 可扩展数据源与本地个性化
 - The application relies on third-party extensible data sources without platform login, online commenting, or platform-specific coin features.
 - Personalization features such as subscriptions, favorites, and watch history are strictly managed in local storage (Drift SQLite / SharedPreferences).
 
-### Global Style Access (`$styles`)
+### 全局样式访问（`$styles`）
 - Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
 - Access the live singleton directly (`$styles.colors`, `$styles.corners`, `$styles.insets`, `$styles.text`, etc.) — do not create local copies.
 - **Strict Rule**: When writing or updating UI components (including Stitch designs), strictly map visual elements to `$styles` design tokens. Never hardcode colors or stitch-specific style constants.
 - See [`docs/design-system.md`](docs/design-system.md) for the color-literal policy, token roles, and contrast requirements. Within `app/lib/`, [`lib/design/brand_palette.dart`](lib/design/brand_palette.dart) is the **only** file where color literals are allowed. Decision rationale and measurements are deliberately kept out of the repository — read them from the git history of the commits that established each rule.
 
-### Dependency Injection & Source Providers (`ServiceSourceProviders`)
+### 依赖注入与源提供者（`ServiceSourceProviders`）
 - The complete source-injection contract is [`docs/source-injection.md`](docs/source-injection.md).
 - `app/lib/data/` depends only on neutral capability interfaces from `packages/data`; it must not import concrete service packages such as `bilibili` or `youtube`.
 - The composition root (`providers/media_sources_provider.dart`) registers source definitions and factories. The root tree injects `MediaSourceCatalog`, never live source instances.
@@ -45,18 +45,18 @@ This directory contains the main Flutter application (`app/`).
 - Repository injection is capability-driven, not a source-ID switch. A missing optional capability omits its provider and the UI must show an explicit unavailable state.
 - Screen-level BlocProviders are assembled at the route/route-data composition point and receive dependencies from the source scope.
 
-### Optional Capability Interfaces & Route Validation
+### 可选能力接口与路由验证
 - Data source features (such as `VideoDetailRemoteDataSource` or `VideoCommentRemoteDataSource`) are optional capability interfaces.
 - Navigation and route build logic must validate explicit source IDs and required context capabilities before showing source-dependent screens.
 - Explicit source IDs attached to media records must not silently fall back to another source.
 
-## Data & Caching Strategy
+## 数据与缓存策略
 
 - **Single Source of Truth (SSOT)**: `app/lib/data` acts as coordinator between remote sources (`packages/bilibili`, `packages/youtube`) and local cache (`app/lib/database`).
 - **Offline-First**: For persistent lists (history, followed creators). Listen to local database streams; background fetches upsert into SQLite.
 - **Network-First (Cache Fallback)**: For time-sensitive data (e.g. Trending). Fetch network first; upsert on success or fallback to cached database rows on error.
 
-## Database Layer Conventions (Drift / SQLite)
+## 数据库层约定（Drift / SQLite）
 
 - **Media Polymorphism**: `Media` is a base table. `Video`, `Article`, `Post` link via `mediaId` (FK with `onDelete: KeyAction.cascade`). Enforce `type` via `customConstraints` CHECK.
 - **Type Constants**: Use `Media.typeVideo`, `Media.typeArticle`, `Media.typePost` string constants — never hardcode raw strings.
@@ -65,7 +65,7 @@ This directory contains the main Flutter application (`app/`).
 - **autoIncrement**: Do NOT override `primaryKey` on tables using `autoIncrement()`.
 - **`customConstraints`**: Must be `const` string literals.
 
-## Tooling & Commands
+## 工具与命令
 
 Use `flutter` commands for `app`:
 
@@ -86,45 +86,3 @@ Generated outputs are committed, but never hand-edit them: change the source, ru
 
 Database unit tests live in `app/test/database/` using `NativeDatabase.memory()`.
 Note: Import `package:drift/drift.dart` with `hide isNotNull` to avoid collision with `package:flutter_test`.
-
-# Storage and Path Restrictions in Termux
-
-Due to Android's security sandbox and non-root execution environment, Termux does not adhere to the standard Filesystem Hierarchy Standard (FHS). Agents must adapt file operations to Termux-specific paths.
-
-## 🛑 Restricted Directories & Alternatives
-
-| Restricted Directory | Reason for Failure | Termux Alternative (`$PREFIX` / `$HOME`) |
-| :--- | :--- | :--- |
-| `/tmp` | No root/write access to system root | `$PREFIX/tmp` (Or use standard `$TMPDIR`) |
-| `/bin`, `/sbin` | Standard Linux binary paths do not exist | `$PREFIX/bin` |
-| `/usr/bin`, `/usr/lib` | Standard shared libraries/binaries missing | `$PREFIX/bin`, `$PREFIX/lib` |
-| `/etc` | System configuration registry is read-only | `$PREFIX/etc` |
-| `/var` | Variable data directory is restricted | `$PREFIX/var` |
-| `/sdcard/Android/data` | Android scoped storage restrictions (Android 11+) | Use Termux private storage or `$HOME/storage/shared` |
-
-## 🛠️ Implementation Guidance for Agents
-
-### 1. Dynamic Path Resolution
-Never hardcode absolute paths like `/tmp` or `/bin/sh`. Always utilize environment variables to resolve paths dynamically:
-* Use **`$TMPDIR`** instead of `/tmp`
-* Use **`$PREFIX`** to reference the base userland environment (equivalent to `/usr`)
-* Use **`$HOME`** for user-space persistent storage
-
-```bash
-# Bad
-echo "data" > /tmp/test.txt
-
-# Good
-echo "data" > "\$TMPDIR/test.txt"
-```
-
-### 2. Handling Shebangs (`#!`)
-Scripts pulled from standard Linux environments containing `#!/bin/bash` or `#!/usr/bin/env` will fail with `No such file or directory`. 
-* **Fix:** Run `termux-fix-shebang <script_file>` before execution to rewrite paths to `$PREFIX/bin/...`.
-
-### 3. FHS Emulation (proot)
-If a dependency rigidly requires standard Linux paths (e.g., pre-compiled binaries looking for `/lib`), wrap the execution inside a `proot` environment:
-```bash
-pkg install proot
-termux-chroot # Simulates a standard FHS layout locally
-```

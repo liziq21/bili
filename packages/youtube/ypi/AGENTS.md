@@ -39,14 +39,12 @@
 
 ## 抓取与测试
 
-- 真实抓取脚本放在 `tool/capture/`，从 `packages/youtube/ypi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
-- 成功 fixture 只保存经过包级规则处理后的 HTTP response body，不保存 headers、Cookie、Token、带凭据 URL 或追踪凭据；HTTP status 和请求元数据记录在 `testing/README.md`。用于覆盖公开失败/受限行为的 negative fixture 必须在文件名、表格和测试中明确标注用途，不能替代成功 fixture。
 - 写盘前脚本递归剔除 `trackingParams`、`clickTrackingParams`、`visitorData` 等追踪字段。
-- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）默认仍属业务失败，不得写入，人工确认也不能例外。若该响应是已登记的公开失败/受限能力边界，才可以保存为明确标记的 negative fixture，并只由失败/能力边界测试引用。
-- 抓取遇到非 2xx、InnerTube 错误或无法识别结构时不得写入或覆盖成功 fixture，并返回非零状态。已存在的 negative fixture 只用于离线失败路径回归，不得用抓取脚本的成功分支覆盖。
-- fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
+- 结构合法但业务无效的响应（如失效频道返回的 200 且 `alerts[].alertRenderer.type` 为 `ERROR`）默认仍属业务失败，不得写入，人工确认也不能例外。若该响应是已登记的公开失败/受限能力边界，才可以保存为明确标记的 negative fixture，并只由失败/能力边界测试引用。
+- fixture 文件名：同端点多变体用 `<endpoint>_<variant>.json`；分页续页单独存 `<endpoint>_continuation.json`。
 - 每个新增 endpoint 必须包含真实成功 fixture；若端点只实现或必须覆盖公开失败/受限形态，可额外保留明确标记的 negative fixture，但不得用它替代成功 fixture。两者都要配套 MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 YouTube 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
+
+通用抓取规则（`tool/capture/` 脚本管理、离线测试、`--force` 覆盖行为等）见 [`packages/AGENTS.md`](../../AGENTS.md) 的「API 子包通用规范」段。
 
 ## 新增 endpoint 流程
 
