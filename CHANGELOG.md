@@ -215,6 +215,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Add tactile haptic feedback to settings toggle switches (#476)
 - 🎨 Palette: Improve playlist picker item screen reader semantics (#483)
 - 🎨 Palette: Improve SpaceScreen creator profile card accessibility semantics (#485)
+- 🎨 Palette: Add accessible semantics and tooltip to video chapter items (#491)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
