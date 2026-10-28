@@ -640,6 +640,24 @@ void main() {
                     },
                   },
                 },
+                'onResponseReceivedEndpoints': [
+                  {
+                    'appendContinuationItemsAction': {
+                      'continuationItems': [
+                        {
+                          'commentThreadRenderer': {
+                            'comment': {
+                              'commentRenderer': {
+                                'commentId': 'C1',
+                                'contentText': {'simpleText': 'hi'},
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
               }),
               200,
             );
