@@ -128,6 +128,11 @@ class LocalLibraryRepository({required final LocalLibraryDao dao}) {
 
   Future<void> removePlaylistItem(int itemId) => dao.removePlaylistItem(itemId);
 
+  Future<void> deletePlaylistItems({
+    required int playlistId,
+    required List<int> itemIds,
+  }) => dao.deletePlaylistItems(playlistId: playlistId, itemIds: itemIds);
+
   Future<void> movePlaylistItem({
     required int playlistId,
     required int fromIndex,

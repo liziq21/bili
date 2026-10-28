@@ -5001,6 +5001,42 @@
   "@removeThisEntry": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "renamePlaylist": "重命名播放列表",
+  "@renamePlaylist": {
+    "description": "Menu item to rename a local playlist"
+  },
+  "renamePlaylistConfirm": "重命名播放列表",
+  "@renamePlaylistConfirm": {
+    "description": "Dialog title for renaming a playlist"
+  },
+  "batchDelete": "批量删除",
+  "@batchDelete": {
+    "description": "Menu item to batch-delete playlist items"
+  },
+  "batchDeleteConfirm": "批量删除条目",
+  "@batchDeleteConfirm": {
+    "description": "Dialog title for batch-deleting selected items"
+  },
+  "batchDeleteNote": "确定删除选中的 {count} 个条目？此操作不可撤销。",
+  "@batchDeleteNote": {
+    "description": "Dialog content for batch delete confirmation"
+  },
+  "deleteSelected": "删除选中",
+  "@deleteSelected": {
+    "description": "Button label to delete selected items in edit mode"
+  },
+  "editMode": "编辑",
+  "@editMode": {
+    "description": "Button to enter edit mode for playlist items"
+  },
+  "done": "完成",
+  "@done": {
+    "description": "Button to exit edit mode"
+  },
+  "itemsSearchHint": "搜索条目...",
+  "@itemsSearchHint": {
+    "description": "Search box placeholder for playlist items"
+  },
   "loadingSubscriptions": "正在加载订阅",
   "@loadingSubscriptions": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"

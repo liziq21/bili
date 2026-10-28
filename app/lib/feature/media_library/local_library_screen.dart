@@ -103,6 +103,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                     onCreate: _createPlaylist,
                     onDelete: (playlist) =>
                         _deletePlaylist(playlist.internalId),
+                    onRename: _renamePlaylist,
                     onAddBookmarks: _addBookmarks,
                     onRemoveItem: (item) => _runOperation(
                       () => _repository.removePlaylistItem(item.internalId),
@@ -226,6 +227,16 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     if (!mounted || request == null) return;
     await _repository.createPlaylist(request.sourceId, request.name);
   });
+
+  Future<void> _renamePlaylist(LocalPlaylistEntity playlist) =>
+      _runOperation(() async {
+        final newName = await _showRenamePlaylistDialog(
+          context,
+          initialName: playlist.name,
+        );
+        if (!mounted || newName == null) return;
+        await _repository.renamePlaylist(playlist.internalId, newName);
+      });
 
   Future<void> _deletePlaylist(int playlistId) => _runOperation(() async {
     final confirmed = await showDialog<bool>(
@@ -466,6 +477,7 @@ class const _PlaylistsTab({
   required final bool busy,
   required final Future<void> Function() onCreate,
   required final Future<void> Function(LocalPlaylistEntity playlist) onDelete,
+  required final Future<void> Function(LocalPlaylistEntity playlist) onRename,
   required final Future<void> Function(LocalPlaylistEntity playlist)
   onAddBookmarks,
   required final Future<void> Function(LocalPlaylistItemEntity item)
@@ -542,6 +554,7 @@ class const _PlaylistsTab({
                 onRetry: onRetry,
                 busy: busy,
                 onDelete: () => onDelete(playlist),
+                onRename: () => onRename(playlist),
                 onAddBookmarks: () => onAddBookmarks(playlist),
                 onRemoveItem: onRemoveItem,
                 onMoveItem: onMoveItem,
@@ -564,6 +577,7 @@ class const _PlaylistCard({
   required final bool busy,
   required final VoidCallback onDelete,
   required final VoidCallback onAddBookmarks,
+  required final VoidCallback onRename,
   required final Future<void> Function(LocalPlaylistItemEntity item)
   onRemoveItem,
   required final Future<void> Function(
@@ -614,6 +628,8 @@ class const _PlaylistCard({
                         if (!busy) onAddBookmarks();
                       case _PlaylistAction.delete:
                         if (!busy) onDelete();
+                      case _PlaylistAction.rename:
+                        if (!busy) onRename();
                     }
                   },
                   itemBuilder: (context) => [
@@ -621,6 +637,11 @@ class const _PlaylistCard({
                       value: _PlaylistAction.addBookmarks,
                       enabled: !busy,
                       child: Text(l10n.addFavorite),
+                    ),
+                    PopupMenuItem(
+                      value: _PlaylistAction.rename,
+                      enabled: !busy,
+                      child: Text(l10n.renamePlaylist),
                     ),
                     PopupMenuItem(
                       value: _PlaylistAction.delete,
@@ -663,6 +684,7 @@ class const _PlaylistCard({
 enum _PlaylistAction() {
   addBookmarks,
   delete,
+  rename,
 }
 
 class const _PlaylistItemsView({
@@ -688,112 +710,230 @@ class const _PlaylistItemsView({
 
 class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
   late final Stream<List<LocalPlaylistItemEntity>> _items;
+  final TextEditingController _searchController = TextEditingController();
+  bool _isEditing = false;
+  final Set<int> _selectedItems = <int>{};
 
   @override
   void initState() {
     super.initState();
     _items = widget.repository.watchPlaylistItems(widget.playlistId);
+    _searchController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _toggleItem(int itemId) {
+    setState(() {
+      if (_selectedItems.contains(itemId)) {
+        _selectedItems.remove(itemId);
+      } else {
+        _selectedItems.add(itemId);
+      }
+    });
+  }
+
+  Future<void> _deleteSelected() async {
+    if (_selectedItems.isEmpty) return;
+    final count = _selectedItems.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        return AlertDialog(
+          title: Text(l10n.batchDeleteConfirm),
+          content: Text(l10n.batchDeleteNote(count)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
+    );
+    if (mounted && confirmed == true) {
+      await widget.repository.deletePlaylistItems(
+        playlistId: widget.playlistId,
+        itemIds: _selectedItems.toList(),
+      );
+      setState(() {
+        _selectedItems.clear();
+        _isEditing = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
-    return StreamBuilder<List<LocalPlaylistItemEntity>>(
-      stream: _items,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (snapshot.hasError) {
-          return Row(
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            $styles.insets.sm,
+            $styles.insets.xs,
+            $styles.insets.sm,
+            $styles.insets.xs,
+          ),
+          child: Row(
             children: [
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all($styles.insets.sm),
-                  child: Text(
-                    l10n.itemsLoadFailed,
-                    style: $styles.text.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: l10n.itemsSearchHint,
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
-              TextButton(onPressed: widget.onRetry, child: Text(l10n.retry)),
-            ],
-          );
-        }
-        final allItems = snapshot.data ?? const <LocalPlaylistItemEntity>[];
-        final items = allItems
-            .where((item) => item.sourceId == widget.sourceId)
-            .toList(growable: false);
-        if (items.isEmpty) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(
-              $styles.insets.sm,
-              0,
-              $styles.insets.sm,
-              $styles.insets.xs,
-            ),
-            child: Text(
-              l10n.listEmpty,
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onSurfaceVariant,
-              ),
-            ),
-          );
-        }
-        return Column(
-          children: [
-            for (var index = 0; index < items.length; index++)
-              _PlaylistItemRow(
-                key: ValueKey(items[index].internalId),
-                item: items[index],
-                isFirst: index == 0,
-                isLast: index == items.length - 1,
-                busy: widget.busy,
-                onTap: () => widget.onVideoTap(
-                  items[index].sourceId,
-                  items[index].originalId,
+              SizedBox(width: $styles.insets.xs),
+              if (_isEditing) ...[
+                TextButton(
+                  onPressed: () => setState(() {
+                    _isEditing = false;
+                    _selectedItems.clear();
+                  }),
+                  child: Text(l10n.done),
                 ),
-                onRemove: widget.busy
-                    ? null
-                    : () => widget.onRemoveItem(items[index]),
-                onMoveUp: index == 0
-                    ? null
-                    : () {
-                        final actualIndex = allItems.indexWhere(
-                          (item) => item.internalId == items[index].internalId,
-                        );
-                        if (!widget.busy) {
-                          widget.onMoveItem(
-                            items[index],
-                            actualIndex,
-                            actualIndex - 1,
-                          );
-                        }
-                      },
-                onMoveDown: index == items.length - 1
-                    ? null
-                    : () {
-                        final actualIndex = allItems.indexWhere(
-                          (item) => item.internalId == items[index].internalId,
-                        );
-                        if (!widget.busy) {
-                          widget.onMoveItem(
-                            items[index],
-                            actualIndex,
-                            actualIndex + 1,
-                          );
-                        }
-                      },
-              ),
-          ],
-        );
-      },
+                if (_selectedItems.isNotEmpty)
+                  FilledButton(
+                    onPressed: _deleteSelected,
+                    child: Text(l10n.deleteSelected),
+                  ),
+              ] else
+                OutlinedButton(
+                  onPressed: () => setState(() => _isEditing = true),
+                  child: Text(l10n.editMode),
+                ),
+            ],
+          ),
+        ),
+        StreamBuilder<List<LocalPlaylistItemEntity>>(
+          stream: _items,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                !snapshot.hasData) {
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all($styles.insets.sm),
+                      child: Text(
+                        l10n.itemsLoadFailed,
+                        style: $styles.text.bodySmall.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: widget.onRetry,
+                    child: Text(l10n.retry),
+                  ),
+                ],
+              );
+            }
+            final allItems = snapshot.data ?? const <LocalPlaylistItemEntity>[];
+            final searchText = _searchController.text.trim().toLowerCase();
+            final items = allItems
+                .where((item) => item.sourceId == widget.sourceId)
+                .where(
+                  (item) =>
+                      searchText.isEmpty ||
+                      item.title.toLowerCase().contains(searchText),
+                )
+                .toList(growable: false);
+            if (items.isEmpty) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  $styles.insets.sm,
+                  0,
+                  $styles.insets.sm,
+                  $styles.insets.xs,
+                ),
+                child: Text(
+                  l10n.listEmpty,
+                  style: $styles.text.bodySmall.copyWith(
+                    color: $styles.colors.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: [
+                for (var index = 0; index < items.length; index++)
+                  _PlaylistItemRow(
+                    key: ValueKey(items[index].internalId),
+                    item: items[index],
+                    isFirst: index == 0,
+                    isLast: index == items.length - 1,
+                    busy: widget.busy,
+                    onTap: () => widget.onVideoTap(
+                      items[index].sourceId,
+                      items[index].originalId,
+                    ),
+                    onRemove: widget.busy
+                        ? null
+                        : () => widget.onRemoveItem(items[index]),
+                    onMoveUp: index == 0
+                        ? null
+                        : () {
+                            final actualIndex = allItems.indexWhere(
+                              (item) =>
+                                  item.internalId == items[index].internalId,
+                            );
+                            if (!widget.busy) {
+                              widget.onMoveItem(
+                                items[index],
+                                actualIndex,
+                                actualIndex - 1,
+                              );
+                            }
+                          },
+                    onMoveDown: index == items.length - 1
+                        ? null
+                        : () {
+                            final actualIndex = allItems.indexWhere(
+                              (item) =>
+                                  item.internalId == items[index].internalId,
+                            );
+                            if (!widget.busy) {
+                              widget.onMoveItem(
+                                items[index],
+                                actualIndex,
+                                actualIndex + 1,
+                              );
+                            }
+                          },
+                    isSelected: _selectedItems.contains(
+                      items[index].internalId,
+                    ),
+                    onToggleSelect: _isEditing
+                        ? () => _toggleItem(items[index].internalId)
+                        : null,
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -808,48 +948,64 @@ class const _PlaylistItemRow({
   required final VoidCallback? onRemove,
   required final VoidCallback? onMoveUp,
   required final VoidCallback? onMoveDown,
+  final bool isSelected = false,
+  final VoidCallback? onToggleSelect,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final isEditing = onToggleSelect != null;
     return ListTile(
       dense: true,
-      leading: const _LibraryLeading(icon: Icons.play_arrow_outlined),
+      leading: isEditing
+          ? Icon(
+              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: isSelected
+                  ? $styles.colors.accentText
+                  : $styles.colors.onSurfaceVariant,
+            )
+          : const _LibraryLeading(icon: Icons.play_arrow_outlined),
       title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       onTap: () {
         HapticFeedback.lightImpact();
-        onTap();
+        if (isEditing) {
+          onToggleSelect!();
+        } else {
+          onTap();
+        }
       },
-      trailing: PopupMenuButton<_PlaylistItemAction>(
-        enabled: !busy,
-        tooltip: l10n.itemActions,
-        onSelected: (action) {
-          switch (action) {
-            case _PlaylistItemAction.up:
-              onMoveUp?.call();
-            case _PlaylistItemAction.down:
-              onMoveDown?.call();
-            case _PlaylistItemAction.remove:
-              onRemove?.call();
-          }
-        },
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: _PlaylistItemAction.up,
-            enabled: !isFirst,
-            child: Text(l10n.moveUp),
-          ),
-          PopupMenuItem(
-            value: _PlaylistItemAction.down,
-            enabled: !isLast,
-            child: Text(l10n.moveDown),
-          ),
-          PopupMenuItem(
-            value: _PlaylistItemAction.remove,
-            child: Text(l10n.removeThisEntry),
-          ),
-        ],
-      ),
+      trailing: isEditing
+          ? null
+          : PopupMenuButton<_PlaylistItemAction>(
+              enabled: !busy,
+              tooltip: l10n.itemActions,
+              onSelected: (action) {
+                switch (action) {
+                  case _PlaylistItemAction.up:
+                    onMoveUp?.call();
+                  case _PlaylistItemAction.down:
+                    onMoveDown?.call();
+                  case _PlaylistItemAction.remove:
+                    onRemove?.call();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _PlaylistItemAction.up,
+                  enabled: !isFirst,
+                  child: Text(l10n.moveUp),
+                ),
+                PopupMenuItem(
+                  value: _PlaylistItemAction.down,
+                  enabled: !isLast,
+                  child: Text(l10n.moveDown),
+                ),
+                PopupMenuItem(
+                  value: _PlaylistItemAction.remove,
+                  child: Text(l10n.removeThisEntry),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -1252,6 +1408,64 @@ Future<_PlaylistRequest?> _showCreatePlaylistDialog(
     ),
   );
 }
+
+class const _RenamePlaylistDialog({required final String initialName})
+    extends StatefulWidget {
+  @override
+  State<_RenamePlaylistDialog> createState() => _RenamePlaylistDialogState();
+}
+
+class _RenamePlaylistDialogState() extends State<_RenamePlaylistDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    return AlertDialog(
+      title: Text(l10n.renamePlaylistConfirm),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: 60,
+        decoration: InputDecoration(labelText: l10n.name),
+        onSubmitted: (_) => _submit(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(onPressed: _submit, child: Text(l10n.save)),
+      ],
+    );
+  }
+
+  void _submit() {
+    final name = _controller.text.trim();
+    if (name.isEmpty) return;
+    Navigator.of(context).pop(name);
+  }
+}
+
+Future<String?> _showRenamePlaylistDialog(
+  BuildContext context, {
+  required String initialName,
+}) => showDialog<String>(
+  context: context,
+  builder: (_) => _RenamePlaylistDialog(initialName: initialName),
+);
 
 class const _GroupDialog({required final String initialValue})
     extends StatefulWidget {

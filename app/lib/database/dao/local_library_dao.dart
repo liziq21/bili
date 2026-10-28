@@ -230,6 +230,26 @@ class LocalLibraryDao(super.db)
     });
   }
 
+  Future<void> deletePlaylistItems({
+    required int playlistId,
+    required List<int> itemIds,
+  }) async {
+    if (itemIds.isEmpty) return;
+    await transaction(() async {
+      await _requirePlaylist(playlistId);
+      await batch((batch) {
+        for (final itemId in itemIds) {
+          batch.deleteWhere(
+            localPlaylistItem,
+            (entry) => entry.internalId.equals(itemId),
+          );
+        }
+      });
+      await _normalizePlaylistPositions(playlistId);
+      await _touchPlaylist(playlistId);
+    });
+  }
+
   Future<void> movePlaylistItem({
     required int playlistId,
     required int fromIndex,

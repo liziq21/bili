@@ -6485,6 +6485,60 @@ abstract class AppLocalizations {
   /// **'移除这一次'**
   String get removeThisEntry;
 
+  /// Menu item to rename a local playlist
+  ///
+  /// In en, this message translates to:
+  /// **'重命名播放列表'**
+  String get renamePlaylist;
+
+  /// Dialog title for renaming a playlist
+  ///
+  /// In en, this message translates to:
+  /// **'重命名播放列表'**
+  String get renamePlaylistConfirm;
+
+  /// Menu item to batch-delete playlist items
+  ///
+  /// In en, this message translates to:
+  /// **'批量删除'**
+  String get batchDelete;
+
+  /// Dialog title for batch-deleting selected items
+  ///
+  /// In en, this message translates to:
+  /// **'批量删除条目'**
+  String get batchDeleteConfirm;
+
+  /// Dialog content for batch delete confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'确定删除选中的 {count} 个条目？此操作不可撤销。'**
+  String batchDeleteNote(Object count);
+
+  /// Button label to delete selected items in edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'删除选中'**
+  String get deleteSelected;
+
+  /// Button to enter edit mode for playlist items
+  ///
+  /// In en, this message translates to:
+  /// **'编辑'**
+  String get editMode;
+
+  /// Button to exit edit mode
+  ///
+  /// In en, this message translates to:
+  /// **'完成'**
+  String get done;
+
+  /// Search box placeholder for playlist items
+  ///
+  /// In en, this message translates to:
+  /// **'搜索条目...'**
+  String get itemsSearchHint;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:

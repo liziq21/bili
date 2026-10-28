@@ -89,6 +89,33 @@ void main() {
     },
   );
 
+  test('deletes multiple playlist items by internal id', () async {
+    final playlistId = await dao.createPlaylist('source-a', 'Queue');
+    await dao.addPlaylistItems(
+      playlistId: playlistId,
+      items: [
+        _playlistItem(playlistId, 'source-a', 'video-1'),
+        _playlistItem(playlistId, 'source-a', 'video-2'),
+        _playlistItem(playlistId, 'source-a', 'video-3'),
+      ],
+    );
+
+    final before = await dao.getPlaylistItems(playlistId);
+    expect(before, hasLength(3));
+
+    await dao.deletePlaylistItems(
+      playlistId: playlistId,
+      itemIds: [before[0].internalId],
+    );
+    expect(await dao.getPlaylistItems(playlistId), hasLength(2));
+
+    await dao.deletePlaylistItems(
+      playlistId: playlistId,
+      itemIds: [before[1].internalId, before[2].internalId],
+    );
+    expect(await dao.getPlaylistItems(playlistId), isEmpty);
+  });
+
   test('rejects cross-source entries and rolls back a failed batch', () async {
     final playlistId = await dao.createPlaylist('source-a', 'Queue');
 
