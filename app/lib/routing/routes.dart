@@ -28,6 +28,8 @@ abstract final class Routes() {
   static const settingsLibrary = '$settings/$settingsLibraryRelative';
   static const settingsAdvancedRelative = 'advanced';
   static const settingsAdvanced = '$settings/$settingsAdvancedRelative';
+  static const settingsDiscoveryRelative = 'discovery';
+  static const settingsDiscovery = '$settings/$settingsDiscoveryRelative';
 
   static const danmakuSettings = '$settings/danmaku';
 

@@ -5990,5 +5990,53 @@
   "skip": "Skip",
   "@skip": {
     "description": "Player error action - skip the current queue item"
+  },
+  "settingsDiscovery": "Discovery",
+  "@settingsDiscovery": {
+    "description": "Settings group and subpage title - home configuration"
+  },
+  "homeConfigTitle": "Home",
+  "@homeConfigTitle": {
+    "description": "Home configuration editor page title"
+  },
+  "homeConfigSource": "Service source",
+  "@homeConfigSource": {
+    "description": "Home configuration section label - service source"
+  },
+  "homeConfigTabs": "Tabs",
+  "@homeConfigTabs": {
+    "description": "Home configuration section label - feed tabs"
+  },
+  "homeConfigMoveUp": "Move up",
+  "@homeConfigMoveUp": {
+    "description": "Home configuration action - move a tab up"
+  },
+  "homeConfigMoveDown": "Move down",
+  "@homeConfigMoveDown": {
+    "description": "Home configuration action - move a tab down"
+  },
+  "homeConfigSetMain": "Set as main",
+  "@homeConfigSetMain": {
+    "description": "Home configuration action - set a tab as the main tab"
+  },
+  "homeConfigGridColumns": "Grid columns",
+  "@homeConfigGridColumns": {
+    "description": "Home configuration setting - grid columns per orientation"
+  },
+  "homeConfigPortrait": "Portrait",
+  "@homeConfigPortrait": {
+    "description": "Home configuration orientation label - portrait"
+  },
+  "homeConfigLandscape": "Landscape",
+  "@homeConfigLandscape": {
+    "description": "Home configuration orientation label - landscape"
+  },
+  "homeConfigVisible": "Visible",
+  "@homeConfigVisible": {
+    "description": "Home configuration tab visibility state - visible"
+  },
+  "homeConfigHidden": "Hidden",
+  "@homeConfigHidden": {
+    "description": "Home configuration tab visibility state - hidden"
   }
 }

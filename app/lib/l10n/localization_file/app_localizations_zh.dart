@@ -4427,4 +4427,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get currentlyPlaying => '正在播放';
+
+  @override
+  String get settingsDiscovery => '发现';
+
+  @override
+  String get homeConfigTitle => '首页';
+
+  @override
+  String get homeConfigSource => '服务源';
+
+  @override
+  String get homeConfigTabs => '标签页';
+
+  @override
+  String get homeConfigMoveUp => '上移';
+
+  @override
+  String get homeConfigMoveDown => '下移';
+
+  @override
+  String get homeConfigSetMain => '设为主标签';
+
+  @override
+  String get homeConfigGridColumns => '网格列数';
+
+  @override
+  String get homeConfigPortrait => '竖屏';
+
+  @override
+  String get homeConfigLandscape => '横屏';
+
+  @override
+  String get homeConfigVisible => '显示';
+
+  @override
+  String get homeConfigHidden => '隐藏';
 }

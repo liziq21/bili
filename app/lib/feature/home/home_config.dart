@@ -269,3 +269,99 @@ class HomeConfig(
     return candidate;
   }
 }
+
+/// Editing operations on [HomeConfig], shared by the editor screen and tests.
+///
+/// Each operation returns a new [HomeConfig]; the editor persists the result
+/// and the widget test / unit tests assert on the returned value directly.
+extension HomeConfigEditorX on HomeConfig {
+  /// Returns a copy with [tabId]'s visibility set to [visible].
+  HomeConfig withTabVisible(String sourceId, String tabId, bool visible) {
+    final source = sources[sourceId];
+    if (source == null) return this;
+    final tabs = [
+      for (final tab in source.tabs)
+        if (tab.id == tabId)
+          HomeTabConfig(
+            id: tab.id,
+            label: tab.label,
+            isVisible: visible,
+            sortOrder: tab.sortOrder,
+          )
+        else
+          tab,
+    ];
+    return withSource(
+      sourceId,
+      HomeSourceConfig(tabs, mainTabId: source.mainTabId),
+    );
+  }
+
+  /// Returns a copy with [tabId] moved one position up ([up] == true) or down.
+  ///
+  /// Moves by swapping sort orders with the neighbour in the current order.
+  /// Returns [this] unchanged when the tab is missing or already at the edge.
+  HomeConfig withTabMoved(String sourceId, String tabId, bool up) {
+    final source = sources[sourceId];
+    if (source == null) return this;
+    final ordered = [...source.tabs]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    final index = ordered.indexWhere((tab) => tab.id == tabId);
+    final targetIndex = up ? index - 1 : index + 1;
+    if (index < 0 || targetIndex < 0 || targetIndex >= ordered.length) {
+      return this;
+    }
+    final other = ordered[targetIndex];
+    final swapped = [
+      for (final tab in source.tabs)
+        if (tab.id == tabId)
+          HomeTabConfig(
+            id: tab.id,
+            label: tab.label,
+            isVisible: tab.isVisible,
+            sortOrder: other.sortOrder,
+          )
+        else if (tab.id == other.id)
+          HomeTabConfig(
+            id: tab.id,
+            label: tab.label,
+            isVisible: tab.isVisible,
+            sortOrder: ordered[index].sortOrder,
+          )
+        else
+          tab,
+    ];
+    return withSource(
+      sourceId,
+      HomeSourceConfig(swapped, mainTabId: source.mainTabId),
+    );
+  }
+
+  /// Returns a copy with [tabId] set as the source's main tab.
+  HomeConfig withMainTab(String sourceId, String tabId) {
+    final source = sources[sourceId];
+    if (source == null || source.mainTabId == tabId) return this;
+    return withSource(
+      sourceId,
+      HomeSourceConfig(source.tabs, mainTabId: tabId),
+    );
+  }
+
+  /// Returns a copy with the per-orientation grid columns replaced.
+  HomeConfig withGridColumns({required int portrait, required int landscape}) {
+    return HomeConfig(
+      sources,
+      gridColumnsPortrait: portrait,
+      gridColumnsLandscape: landscape,
+    );
+  }
+
+  /// Returns a copy with [sourceId] replaced by [source].
+  HomeConfig withSource(String sourceId, HomeSourceConfig source) {
+    return HomeConfig(
+      {...sources, sourceId: source},
+      gridColumnsPortrait: gridColumnsPortrait,
+      gridColumnsLandscape: gridColumnsLandscape,
+    );
+  }
+}
