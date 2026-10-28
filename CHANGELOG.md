@@ -129,6 +129,7 @@ so hand edits do not survive; change the generator instead.
 - fix: resolve flutter analyze issues (#470)
 - 🛡️ Sentinel: Sanitize and mask exception outputs in VideoPlayer _ErrorView (#475)
 - fix(video): complete quality selection (#423) (#478)
+- feat(ci): add coverage threshold gate with branch coverage (LIZ-120) (#494)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
