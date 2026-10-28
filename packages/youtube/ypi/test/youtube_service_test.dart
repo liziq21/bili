@@ -617,10 +617,48 @@ void main() {
               expect(body['videoId'], equals('vid123'));
               expect(body['playlistId'], equals('list123'));
               expect(body['params'], equals('param123'));
-            } else {
-              expect(body['continuation'], equals('token123'));
+              return http.Response(
+                json.encode({
+                  'contents': {
+                    'twoColumnWatchNextResults': {
+                      'results': {
+                        'results': {
+                          'contents': [
+                            {
+                              'videoPrimaryInfoRenderer': {
+                                'title': {'simpleText': 'Test Video'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                }),
+                200,
+              );
             }
-            return http.Response(json.encode({}), 200);
+            expect(body['continuation'], equals('token123'));
+            return http.Response(
+              json.encode({
+                'contents': {
+                  'twoColumnWatchNextResults': {
+                    'results': {
+                      'results': {
+                        'contents': [
+                          {
+                            'videoPrimaryInfoRenderer': {
+                              'title': {'simpleText': 'Test Video'},
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              }),
+              200,
+            );
           } else if (request.url.path.contains('browse')) {
             if (body.containsKey('browseId')) {
               expect(body['params'], equals('param123'));
