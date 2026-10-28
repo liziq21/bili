@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
-class _MockVideoBloc extends Cubit<VideoState> implements VideoBloc {
-  _MockVideoBloc(super.initialState);
-
+class _MockVideoBloc(super.initialState)
+    extends Cubit<VideoState>
+    implements VideoBloc {
   @override
   void add(VideoEvent event) {}
 
@@ -29,7 +29,7 @@ class _MockVideoBloc extends Cubit<VideoState> implements VideoBloc {
   void onTransition(Transition<VideoEvent, VideoState> transition) {}
 }
 
-class _RecordingPlaybackController implements MediaPlaybackController {
+class _RecordingPlaybackController() implements MediaPlaybackController {
   Duration? seekedTo;
   final MediaPlaybackState _state = const MediaPlaybackState(
     duration: Duration(seconds: 300),
