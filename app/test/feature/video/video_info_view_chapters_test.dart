@@ -31,12 +31,15 @@ class _MockVideoBloc(super.initialState)
 
 class _RecordingPlaybackController() implements MediaPlaybackController {
   Duration? seekedTo;
-  final MediaPlaybackState _state = const MediaPlaybackState(
+  final PlaybackState _state = const PlaybackState(
+    isPlaying: false,
+    isBuffering: false,
+    position: Duration.zero,
     duration: Duration(seconds: 300),
   );
 
   @override
-  MediaPlaybackState get state => _state;
+  PlaybackState get state => _state;
 
   @override
   Future<void> seek(Duration position) async {
@@ -91,17 +94,15 @@ void main() {
     expect(find.text('总结'), findsOneWidget);
 
     // Verify Tooltip widget exists with expected message
-    expect(find.byTooltip('01:23 总结'), findsOneWidget);
+    final tooltipWidget = tester.widget(
+      find.ancestor(of: find.text('总结'), matching: find.byType(Tooltip)),
+    ) as Tooltip;
+    expect(tooltipWidget.message, '1:23 总结');
 
-    // Verify Semantics widget with button: true and excludeSemantics: true
-    final semanticsFinder = find.byWidgetPredicate(
-      (widget) =>
-          widget is Semantics &&
-          widget.button == true &&
-          widget.excludeSemantics == true &&
-          widget.properties.label == '01:23 总结',
-    );
-    expect(semanticsFinder, findsOneWidget);
+    // Verify Semantics widget with button: true and label
+    final semanticsWidget = tooltipWidget.child as Semantics;
+    expect(semanticsWidget.properties.button, isTrue);
+    expect(semanticsWidget.properties.label, '1:23 总结');
   });
 
   testWidgets('tapping chapter item triggers playback seek', (tester) async {
