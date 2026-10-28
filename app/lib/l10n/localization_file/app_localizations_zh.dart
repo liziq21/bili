@@ -3779,6 +3779,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeThisEntry => '移除这一次';
 
   @override
+  String get renamePlaylist => '重命名播放列表';
+
+  @override
+  String get renamePlaylistConfirm => '重命名播放列表';
+
+  @override
+  String get batchDelete => '批量删除';
+
+  @override
+  String get batchDeleteConfirm => '批量删除条目';
+
+  @override
+  String batchDeleteNote(Object count) {
+    return '确定删除选中的 $count 个条目？此操作不可撤销。';
+  }
+
+  @override
+  String get deleteSelected => '删除选中';
+
+  @override
+  String get editMode => '编辑';
+
+  @override
+  String get done => '完成';
+
+  @override
+  String get itemsSearchHint => '搜索条目...';
+
+  @override
   String get loadingSubscriptions => '正在加载订阅';
 
   @override

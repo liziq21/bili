@@ -813,45 +813,56 @@ class const _ChapterItem({
   @override
   Widget build(BuildContext context) {
     final target = Duration(seconds: chapter.startSeconds);
-    return InkWell(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
-        final duration = playbackController.state.duration;
-        if (duration <= Duration.zero) return;
-        playbackController.seek(target > duration ? duration : target);
-      },
-      borderRadius: BorderRadius.circular($styles.corners.sm),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: $styles.insets.xxs,
-          horizontal: $styles.insets.xs,
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 44,
-              child: Text(
-                _formatDuration(chapter.startSeconds),
-                style: $styles.text.bodySmallBold.copyWith(
-                  color: $styles.colors.accentText,
-                  fontSize: 12,
-                ),
-              ),
+    final formattedTime = _formatDuration(chapter.startSeconds);
+    final semanticLabel = '$formattedTime ${chapter.title}'.trim();
+
+    return Tooltip(
+      message: semanticLabel,
+      child: Semantics(
+        button: true,
+        label: semanticLabel,
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
+            final duration = playbackController.state.duration;
+            if (duration <= Duration.zero) return;
+            playbackController.seek(target > duration ? duration : target);
+          },
+          borderRadius: BorderRadius.circular($styles.corners.sm),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: $styles.insets.xxs,
+              horizontal: $styles.insets.xs,
             ),
-            const Gap(8),
-            Expanded(
-              child: Text(
-                chapter.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: $styles.text.bodySmall.copyWith(
-                  color: $styles.colors.onSurface,
-                  fontSize: 13,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 44,
+                  child: Text(
+                    formattedTime,
+                    style: $styles.text.bodySmallBold.copyWith(
+                      color: $styles.colors.accentText,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
+                const Gap(8),
+                Expanded(
+                  child: Text(
+                    chapter.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: $styles.text.bodySmall.copyWith(
+                      color: $styles.colors.onSurface,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

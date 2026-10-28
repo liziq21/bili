@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:bpi/bpi.dart';
 import 'package:test/test.dart';
 
-/// One public endpoint method, its backing fixtures, and the documentation
-/// table row that records it.
+/// One public endpoint method, its backing fixtures, the documentation
+/// table row that records it, and the parse closure that reads its
+/// fixtures into the method's DTO.
 ///
 /// [method] must match a method declared in `lib/src/network_*_data_source.dart`,
 /// every name in [fixtures] must match a file in `testing/`, and [docCell] must
@@ -19,10 +22,11 @@ import 'package:test/test.dart';
 /// stand in for `search_suggest.json` and `search_all.json`, which have their
 /// own rows because they are separate endpoints with separate sources.
 final class EndpointSpec {
-  const EndpointSpec({
+  EndpointSpec({
     required this.method,
     required this.fixtures,
     required this.docCell,
+    required this.parse,
   });
 
   final String method;
@@ -36,6 +40,15 @@ final class EndpointSpec {
   /// `testing/popular.json`, `testing/README.md` writes `popular.json` — so the
   /// cell is compared on its file-name part alone.
   final String docCell;
+
+  /// Parses one fixture body into the DTO its method returns and asserts the
+  /// fields that make the fixture usable. A fixture whose structure drifts —
+  /// a renamed field, an emptied list, a lost envelope — fails here.
+  ///
+  /// [decoded] is the decoded JSON object for `.json` fixtures and the raw
+  /// XML text for `.xml` ones. Error-envelope fixtures assert their
+  /// documented error code instead of parsing a success DTO.
+  final Object Function(Object decoded) parse;
 
   /// The documentation cells this row is responsible for. Only meaningful when
   /// [docCell] is a wildcard.
@@ -55,146 +68,358 @@ final class EndpointSpec {
 /// * `getSuggests` calls `/main/suggest`, not the WBI search endpoints, so its
 ///   fixture is named `search_suggest.json` without being a search-type
 ///   fixture, and it has its own row rather than sharing `search_*.json`.
-const endpointSpecs = <EndpointSpec>[
+final endpointSpecs = <EndpointSpec>[
   EndpointSpec(
     method: 'getPopular',
     fixtures: ['popular.json'],
     docCell: 'popular.json',
+    parse: (decoded) {
+      final response = NetworkBiliPopularResponse.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.data.list, isNotEmpty);
+      return response;
+    },
   ),
   EndpointSpec(
     method: 'getRanking',
     fixtures: ['ranking.json'],
     docCell: 'ranking.json',
+    parse: (decoded) {
+      final response = NetworkBiliRankingResponse.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.data.list, isNotEmpty);
+      return response;
+    },
   ),
   EndpointSpec(
     method: 'getLiveRoomDetail',
     fixtures: ['live_room_detail.json'],
     docCell: 'live_room_detail.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final detail = NetworkLiveRoomDetail.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(detail.roomInfo?.roomId, greaterThan(0));
+      return detail;
+    },
   ),
   EndpointSpec(
     method: 'getLiveRoomPlayInfo',
     fixtures: ['live_room_play_info.json'],
     docCell: 'live_room_play_info.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final info = NetworkLiveRoomPlayInfo.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(info.roomId, greaterThan(0));
+      expect(info.playurlInfo, isNotNull);
+      return info;
+    },
   ),
   EndpointSpec(
     method: 'searchAll',
     fixtures: ['search_all.json'],
     docCell: 'search_all.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.video, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchArticle',
     fixtures: ['search_article.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.article, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchBiliUser',
     fixtures: ['search_bili_user.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.biliUser, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchLive',
     fixtures: ['search_live.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.liveUser, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchLiveRoom',
     fixtures: ['search_live_room.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      // Empty-result fixture: the check is that it still parses.
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result, isNotNull);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchLiveUser',
     fixtures: ['search_live_user.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.liveUser, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchMediaBangumi',
     fixtures: ['search_media_bangumi.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.mediaBangumi, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchMediaFt',
     fixtures: ['search_media_ft.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      // Empty-result fixture: the check is that it still parses.
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result, isNotNull);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'searchPhoto',
     fixtures: ['search_photo.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      // Error envelope: the fixture documents the degraded-request failure.
+      expect(json['code'], equals(-1200));
+      return json;
+    },
   ),
   EndpointSpec(
     method: 'searchTopic',
     fixtures: ['search_topic.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      // Error envelope: the fixture documents the degraded-request failure.
+      expect(json['code'], equals(-1200));
+      return json;
+    },
   ),
   EndpointSpec(
     method: 'searchVideo',
     fixtures: ['search_video.json'],
     docCell: 'search_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(result.result.video, isNotEmpty);
+      return result;
+    },
   ),
   EndpointSpec(
     method: 'getSuggests',
     fixtures: ['search_suggest.json'],
     docCell: 'search_suggest.json',
+    parse: (decoded) {
+      final suggest = NetworkSearchSuggest.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(suggest.tag, isNotEmpty);
+      return suggest;
+    },
   ),
   EndpointSpec(
     method: 'getUserCard',
     fixtures: ['user_card.json'],
     docCell: 'user_card.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final userCard = NetworkBiliUserCardData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(userCard.card.mid, isNotEmpty);
+      return userCard;
+    },
   ),
   EndpointSpec(
     method: 'getUserArticles',
     fixtures: ['user_articles.json'],
     docCell: 'user_articles.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final articlesData = NetworkBiliUserArticlesData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(articlesData.articles, isNotEmpty);
+      return articlesData;
+    },
   ),
   EndpointSpec(
     method: 'getBangumiSeason',
     fixtures: ['bangumi_season.json'],
     docCell: 'bangumi_season.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final season = NetworkBangumiSeasonData.fromJson(
+        json['result'] as Map<String, dynamic>,
+      );
+      expect(season.seasonId, greaterThan(0));
+      return season;
+    },
   ),
   EndpointSpec(
     method: 'getBangumiPlayUrl',
     fixtures: ['bangumi_play_url.json'],
     docCell: 'bangumi_play_url.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final playUrl = NetworkPlayUrl.fromJson(
+        json['result'] as Map<String, dynamic>,
+      );
+      expect(playUrl.durl, isNotEmpty);
+      return playUrl;
+    },
   ),
   EndpointSpec(
     method: 'getVideoDetail',
     fixtures: ['video_detail.json'],
     docCell: 'video_detail.json',
+    parse: (decoded) {
+      final response = BaseResponse.fromJson(decoded as Map<String, dynamic>);
+      expect(response.data.bvid, isNotEmpty);
+      return response.data;
+    },
   ),
   EndpointSpec(
     method: 'getVideoRelation',
     fixtures: ['video_relation.json'],
     docCell: 'video_relation.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      // Error envelope: the fixture documents the not-logged-in failure.
+      expect(json['code'], equals(-101));
+      return json;
+    },
   ),
   EndpointSpec(
     method: 'getRelatedVideos',
     fixtures: ['related_videos.json'],
     docCell: 'related_videos.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final list = NetworkRelatedVideosList.fromJson({
+        'items': json['data'] as List,
+      });
+      expect(list.items, isNotEmpty);
+      return list;
+    },
   ),
   EndpointSpec(
     method: 'getReplyList',
     fixtures: ['reply_list.json', 'reply_list_main.json'],
     docCell: 'reply_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final replyData = NetworkReplyData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(replyData.replies, isNotEmpty);
+      return replyData;
+    },
   ),
   EndpointSpec(
     method: 'getReplyReplyList',
     fixtures: ['reply_reply_list.json'],
     docCell: 'reply_*.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final replyData = NetworkReplyReplyData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(replyData.root, isNotNull);
+      return replyData;
+    },
   ),
   EndpointSpec(
     method: 'getPlayUrl',
     fixtures: ['play_url.json'],
     docCell: 'play_url.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final playUrl = NetworkPlayUrl.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(playUrl.dash, isNotNull);
+      return playUrl;
+    },
   ),
   EndpointSpec(
     method: 'getPlayerInfo',
     fixtures: ['player_v2.json'],
     docCell: 'player_v2.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final info = NetworkBiliPlayerInfo.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(info.subtitle, isNotNull);
+      return info;
+    },
   ),
   EndpointSpec(
     method: 'getDanmaku',
     fixtures: ['danmaku.xml'],
     docCell: 'danmaku.xml',
+    parse: (decoded) {
+      final document = NetworkBiliDanmakuDocument.fromXml(decoded as String);
+      expect(document.comments, isNotEmpty);
+      return document;
+    },
   ),
 ];
 
@@ -761,6 +986,36 @@ void main() {
             '${boundKeys.first} but never calls saveResponse with it, so the '
             'fixtures enumerated as map keys are never written to disk.',
       );
+    });
+
+    test('every fixture parses into its DTO with key fields intact', () {
+      for (final spec in endpointSpecs) {
+        for (final fixture in spec.fixtures) {
+          final body = File('testing/$fixture').readAsStringSync();
+          final decoded = fixture.endsWith('.xml') ? body : jsonDecode(body);
+          Object? parsed;
+          String? error;
+          try {
+            parsed = spec.parse(decoded);
+          } catch (e) {
+            error = e.toString();
+          }
+          expect(
+            error,
+            isNull,
+            reason:
+                '${spec.method} declares $fixture, which must parse into '
+                'its DTO with its key fields intact. Parse threw: $error',
+          );
+          expect(
+            parsed,
+            isNotNull,
+            reason:
+                '${spec.method} declares $fixture, whose parse closure '
+                'returned null instead of the parsed DTO',
+          );
+        }
+      }
     });
   });
 }

@@ -45,14 +45,12 @@
 
 ## 抓取与测试
 
-- 真实抓取脚本放在 `tool/capture/`，从 `packages/bilibili/bpi/` 目录手动运行；输出到 `testing/<endpoint>.json`。脚本不进入 CI。
-- fixture 保存 HTTP response body 本身，不保存 headers、Cookie、Token 或追踪凭据。`play_url.json` 的媒体流 URL 带 `e=`、`uparams`、`equery` 等时效签名参数，必须原样保留，解析测试依赖完整查询串。
+- `play_url.json` 的媒体流 URL 带 `e=`、`uparams`、`equery` 等时效签名参数，必须原样保留，解析测试依赖完整查询串。
 - 写盘前脚本按 JSON 键扫描凭据（WBI key、Token、Cookie 等），命中即拒绝写入并非零退出；不做静默改写，因为重编码会改变 fixture 字节。
-- 目标 fixture 已存在时脚本默认跳过并打印清单，`--force` 才覆盖，因此新增 endpoint 时其余 fixture 被跳过而抓取可正常进行。校验只保证结构可识别；结构合法但业务无效的响应仍属业务失败，人工确认也不得写入或覆盖成功 fixture。
-- 抓取遇到非 2xx、Bilibili 业务失败或无法识别结构时不得写入或覆盖成功 fixture，并返回非零状态；本包当前不登记 negative fixture。
-- fixture 文件名：单端点用 `<endpoint>.json`；同端点多变体用 `<endpoint>_<variant>.json`（如 `search_<type>.json`、`reply_<variant>.json`）；分页续页单独存 `<endpoint>_continuation.json`。
-- 每个新增 endpoint 必须包含真实 fixture、MockClient 请求形状测试、fixture 解析测试和失败路径测试。
-- 本包测试必须完全离线：禁止在测试中访问真实 Bilibili 服务。CI 的 `Run Flutter Test` check 覆盖本包。本包无 Flutter 依赖，本地自查用 `dart test` 与 `dart analyze`，覆盖与 CI 相同的用例集。
+- 本包当前不登记 negative fixture。
+- fixture 文件名：同端点多变体用 `<endpoint>_<variant>.json`（如 `search_<type>.json`、`reply_<variant>.json`）；分页续页单独存 `<endpoint>_continuation.json`。
+
+通用抓取规则（`tool/capture/` 脚本管理、离线测试、四项测试要求、`--force` 覆盖行为等）见 [`packages/AGENTS.md`](../../AGENTS.md) 的「API 子包通用规范」段。
 
 ## 新增 endpoint 流程
 
@@ -62,5 +60,5 @@
 4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐非敏感请求参数、HTTP status、来源与抓取日期。
 5. 实现 service 与 DTO，一个 endpoint 对应一个 service 方法；DTO 用 `Network` 前缀加平台或域标识加端点语义命名（`NetworkBili*` / `NetworkLive*` / `NetworkReply*`）。service 按域拆分为 `NetworkSearchDataSource`、`NetworkVideoDataSource`、`NetworkLiveDataSource`、`NetworkFeedDataSource`。
 6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
-7. 在 `test/doc_guardrail_test.dart` 的 `endpointSpecs` 登记新方法：填 `method`、`fixtures`（它的 fixture 文件名）与 `docCell`（它在上面两张表里的 Fixture 单元格文本，去反引号与 `testing/` 前缀，通配行写通配）。该测试强制七条一致性：每个公开方法都在表内、每个 fixture 文件都存在、每个 fixture 只被一个方法声明、`AGENTS.md` 端点表与 `testing/README.md` fixture 表逐行记录 spec 表声明的单元格且不多不少、每张表覆盖 `testing/` 下全部 fixture、每个 fixture 都由 `tool/capture/fetch_fixtures.dart` 真正写出、抓取脚本的 map 键确有循环写盘。漏登记任何一处该测试失败，所以本步必须在第 8 步之前完成。
+7. 在 `test/doc_guardrail_test.dart` 的 `endpointSpecs` 登记新方法：填 `method`、`fixtures`（它的 fixture 文件名）、`docCell`（它在上面两张表里的 Fixture 单元格文本，去反引号与 `testing/` 前缀，通配行写通配）与 `parse`（闭包：把 fixture 解码后用对应 DTO 的 `fromJson` 解析并断言关键字段非空；错误 envelope fixture 断言其 `code`）。该测试强制八条检查：七个一致性（每个公开方法都在表内、每个 fixture 文件都存在、每个 fixture 只被一个方法声明、`AGENTS.md` 端点表与 `testing/README.md` fixture 表逐行记录 spec 表声明的单元格且不多不少、每张表覆盖 `testing/` 下全部 fixture、每个 fixture 都由 `tool/capture/fetch_fixtures.dart` 真正写出、抓取脚本的 map 键确有循环写盘）加一个解析校验（每个 fixture 都能被其 `parse` 闭包解析成该方法的 DTO 且关键字段非空）。漏登记任何一处该测试失败，所以本步必须在第 8 步之前完成。
 8. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。

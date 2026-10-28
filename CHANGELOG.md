@@ -64,6 +64,7 @@ so hand edits do not survive; change the generator instead.
 - feat(LIZ-90): periodic progress persistence + queue-switch progress save (#468)
 - feat(video): add playback queue and fix strict analysis (#480)
 - feat(android): per-variant launcher icons for debug and dev builds (LIZ-59) (#488)
+- feat(library): 本地播放列表管理——重命名、搜索过滤、批量删除 (#493)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -215,6 +216,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Add tactile haptic feedback to settings toggle switches (#476)
 - 🎨 Palette: Improve playlist picker item screen reader semantics (#483)
 - 🎨 Palette: Improve SpaceScreen creator profile card accessibility semantics (#485)
+- 🎨 Palette: Add accessible semantics and tooltip to video chapter items (#491)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -253,6 +255,7 @@ so hand edits do not survive; change the generator instead.
 - docs(AGENTS): add Linear specifications references (#399)
 - docs(github): add issue label, backlog classification, and AI work acceptance specs (#403)
 - docs(agents): fix P0 stale facts in AGENTS.md (#489)
+- docs: AGENTS.md 批次 2+3——结构性补全、精简重复、中英统一 (#490)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
@@ -268,6 +271,7 @@ so hand edits do not survive; change the generator instead.
 - test(ypi): cover channel search playlist lockups (#289)
 - test(LIZ-21): publish per-package coverage reports (#301)
 - test(golden): guardrail against hardcoded user-visible copy (Part of LIZ-51) (#330)
+- test(bpi): fixture parse closures in doc_guardrail_test (LIZ-117) (#492)
 
 ### Maintenance
 - ci: comment out iOS build job in CI workflow (#5)

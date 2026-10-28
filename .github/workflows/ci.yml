@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  # target 分支不限：rerecord-goldens.yml 在功能分支上录出的基线 PR 目标不是 main，
+  # 限定 [main] 会让这类 PR 跳过全部检查，可以无门禁合入。
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# 调用方 workflow 的 permissions 是调用链的权限上限——被调用的可复用 workflow
+# 的 job 权限不能超过这里。四个被调用 workflow 的 job 各自声明了所需权限，
+# 这里取并集作为上限（security-events/actions 仅 SARIF 上传需要）。
+permissions:
+  contents: read
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+
+jobs:
+  # 单次 push/PR 只触发这一个 workflow：一个 concurrency 组、一组 check-run，
+  # 不再是四个独立 workflow 各跑一遍。四个 job 分别调用同目录下的可复用
+  # workflow（on: workflow_call），job 定义在各自文件里。
+  format:
+    uses: ./.github/workflows/ci-format.yml
+
+  test:
+    uses: ./.github/workflows/ci-test.yml
+
+  # 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）。
+  # 同一 workflow 内调用即可恢复该依赖。
+  build:
+    needs: [test]
+    uses: ./.github/workflows/ci-build.yml
+
+  tools:
+    uses: ./.github/workflows/ci-tools.yml
