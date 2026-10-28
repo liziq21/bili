@@ -74,7 +74,7 @@ jobs:
           sarif_file: flutter_analyze.sarif
 
       - name: Run test
-        run: flutter test --coverage
+        run: flutter test --coverage --branch-coverage
         working-directory: app
 
       - name: Upload app coverage
@@ -84,6 +84,13 @@ jobs:
           name: coverage-app-${{ matrix.release.flutter }}
           path: app/coverage/lcov.info
           if-no-files-found: error
+
+      - name: Check coverage threshold
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: python3 tool/check_coverage.py app/coverage/lcov.info
+        env:
+          MIN_LINES: '60'
+          MIN_BRANCHES: '50'
 
       - name: Run bilibili package test
         if: ${{ !cancelled() }}
