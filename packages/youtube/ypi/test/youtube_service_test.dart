@@ -617,30 +617,14 @@ void main() {
               expect(body['videoId'], equals('vid123'));
               expect(body['playlistId'], equals('list123'));
               expect(body['params'], equals('param123'));
-              return http.Response(
-                json.encode({
-                  'contents': {
-                    'twoColumnWatchNextResults': {
-                      'results': {
-                        'results': {
-                          'contents': [
-                            {
-                              'videoPrimaryInfoRenderer': {
-                                'title': {'simpleText': 'Test Video'},
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                }),
-                200,
-              );
+            } else {
+              expect(body['continuation'], equals('token123'));
             }
-            expect(body['continuation'], equals('token123'));
             return http.Response(
               json.encode({
+                'currentVideoEndpoint': {
+                  'watchEndpoint': {'videoId': 'vid123'},
+                },
                 'contents': {
                   'twoColumnWatchNextResults': {
                     'results': {
