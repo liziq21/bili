@@ -64,80 +64,88 @@ void main() {
     );
   });
 
-  testWidgets('renders chapter items with Tooltip and Semantics accessibility button label', (
-    tester,
-  ) async {
-    final mockBloc = _MockVideoBloc(
-      VideoState(isLoading: false, videoDetail: detail),
-    );
-    addTearDown(mockBloc.close);
-    final controller = _RecordingPlaybackController();
+  testWidgets(
+    'renders chapter items with Tooltip and Semantics accessibility button label',
+    (tester) async {
+      final mockBloc = _MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: detail),
+      );
+      addTearDown(mockBloc.close);
+      final controller = _RecordingPlaybackController();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MultiProvider(
-            providers: [
-              BlocProvider<VideoBloc>.value(value: mockBloc),
-              Provider<MediaPlaybackController>.value(value: controller),
-            ],
-            child: const VideoInfoView(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MultiProvider(
+              providers: [
+                BlocProvider<VideoBloc>.value(value: mockBloc),
+                Provider<MediaPlaybackController>.value(value: controller),
+              ],
+              child: const VideoInfoView(),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    expect(find.text('章节'), findsOneWidget);
-    expect(find.text('第一章'), findsOneWidget);
-    expect(find.text('总结'), findsOneWidget);
+      expect(find.text('章节'), findsOneWidget);
+      expect(find.text('第一章'), findsOneWidget);
+      expect(find.text('总结'), findsOneWidget);
 
-    // Verify Tooltip widget exists
-    final tooltipFinder = find.ancestor(
-      of: find.text('总结'),
-      matching: find.byType(Tooltip),
-    ).first;
-    final tooltip = tester.widget<Tooltip>(tooltipFinder);
-    expect(tooltip.message, '01:23 总结');
+      // Verify Tooltip widget exists
+      final tooltipFinder =
+          find
+              .ancestor(
+                of: find.text('总结'),
+                matching: find.byType(Tooltip),
+              )
+              .first;
+      final tooltip = tester.widget<Tooltip>(tooltipFinder);
+      expect(tooltip.message, '01:23 总结');
 
-    // Verify Semantics widget with button: true and excludeSemantics: true
-    final semanticsFinder = find.ancestor(
-      of: find.text('总结'),
-      matching: find.byType(Semantics),
-    ).first;
-    final semantics = tester.widget<Semantics>(semanticsFinder);
-    expect(semantics.button, isTrue);
-    expect(semantics.properties.label, '01:23 总结');
-    expect(semantics.excludeSemantics, isTrue);
-  });
+      // Verify Semantics widget with button: true and excludeSemantics: true
+      final semanticsFinder =
+          find
+              .ancestor(
+                of: find.text('总结'),
+                matching: find.byType(Semantics),
+              )
+              .first;
+      final semantics = tester.widget<Semantics>(semanticsFinder);
+      expect(semantics.button, isTrue);
+      expect(semantics.properties.label, '01:23 总结');
+      expect(semantics.excludeSemantics, isTrue);
+    },
+  );
 
-  testWidgets('tapping chapter item triggers playback seek to target position', (
-    tester,
-  ) async {
-    final mockBloc = _MockVideoBloc(
-      VideoState(isLoading: false, videoDetail: detail),
-    );
-    addTearDown(mockBloc.close);
-    final controller = _RecordingPlaybackController();
+  testWidgets(
+    'tapping chapter item triggers playback seek to target position',
+    (tester) async {
+      final mockBloc = _MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: detail),
+      );
+      addTearDown(mockBloc.close);
+      final controller = _RecordingPlaybackController();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MultiProvider(
-            providers: [
-              BlocProvider<VideoBloc>.value(value: mockBloc),
-              Provider<MediaPlaybackController>.value(value: controller),
-            ],
-            child: const VideoInfoView(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MultiProvider(
+              providers: [
+                BlocProvider<VideoBloc>.value(value: mockBloc),
+                Provider<MediaPlaybackController>.value(value: controller),
+              ],
+              child: const VideoInfoView(),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    await tester.tap(find.text('总结'));
-    await tester.pump();
+      await tester.tap(find.text('总结'));
+      await tester.pump();
 
-    expect(controller.seekedTo, const Duration(seconds: 83));
-  });
+      expect(controller.seekedTo, const Duration(seconds: 83));
+    },
+  );
 }
