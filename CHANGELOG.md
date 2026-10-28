@@ -268,6 +268,7 @@ so hand edits do not survive; change the generator instead.
 - test(ypi): cover channel search playlist lockups (#289)
 - test(LIZ-21): publish per-package coverage reports (#301)
 - test(golden): guardrail against hardcoded user-visible copy (Part of LIZ-51) (#330)
+- test(bpi): fixture parse closures in doc_guardrail_test (LIZ-117) (#492)
 
 ### Maintenance
 - ci: comment out iOS build job in CI workflow (#5)
