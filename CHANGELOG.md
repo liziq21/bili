@@ -253,6 +253,7 @@ so hand edits do not survive; change the generator instead.
 - docs(AGENTS): add Linear specifications references (#399)
 - docs(github): add issue label, backlog classification, and AI work acceptance specs (#403)
 - docs(agents): fix P0 stale facts in AGENTS.md (#489)
+- docs: AGENTS.md 批次 2+3——结构性补全、精简重复、中英统一 (#490)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
