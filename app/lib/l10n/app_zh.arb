@@ -5001,6 +5001,42 @@
   "@removeThisEntry": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "renamePlaylist": "重命名播放列表",
+  "@renamePlaylist": {
+    "description": "菜单项：重命名本地播放列表"
+  },
+  "renamePlaylistConfirm": "重命名播放列表",
+  "@renamePlaylistConfirm": {
+    "description": "重命名播放列表对话框标题"
+  },
+  "batchDelete": "批量删除",
+  "@batchDelete": {
+    "description": "菜单项：批量删除播放列表条目"
+  },
+  "batchDeleteConfirm": "批量删除条目",
+  "@batchDeleteConfirm": {
+    "description": "批量删除条目对话框标题"
+  },
+  "batchDeleteNote": "确定删除选中的 {count} 个条目？此操作不可撤销。",
+  "@batchDeleteNote": {
+    "description": "批量删除确认对话框内容"
+  },
+  "deleteSelected": "删除选中",
+  "@deleteSelected": {
+    "description": "编辑模式下删除选中条目的按钮"
+  },
+  "editMode": "编辑",
+  "@editMode": {
+    "description": "进入播放列表条目编辑模式的按钮"
+  },
+  "done": "完成",
+  "@done": {
+    "description": "退出编辑模式的按钮"
+  },
+  "itemsSearchHint": "搜索条目...",
+  "@itemsSearchHint": {
+    "description": "播放列表条目搜索框占位文字"
+  },
   "loadingSubscriptions": "正在加载订阅",
   "@loadingSubscriptions": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"

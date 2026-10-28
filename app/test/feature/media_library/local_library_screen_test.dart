@@ -353,6 +353,105 @@ void main() {
     await pumpLibrary(tester);
     expect(find.text('还没有收藏'), findsOneWidget);
   });
+
+  testLibraryWidgets('renames a playlist through the menu', (tester) async {
+    final playlistId = await repository.createPlaylist('bilibili', 'Old name');
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '播放列表');
+    expect(find.text('Old name'), findsOneWidget);
+
+    await openPlaylistMenu(tester);
+    await tester.tap(find.text('重命名播放列表'));
+    await pumpRoute(tester);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'New name',
+    );
+    await tester.tap(find.text('保存'));
+    await pumpLibrary(tester);
+
+    expect(find.text('New name'), findsOneWidget);
+    expect(find.text('Old name'), findsNothing);
+    final playlists = await repository.getPlaylists();
+    expect(playlists.single.name, 'New name');
+    expect(playlists.single.internalId, playlistId);
+  });
+
+  testLibraryWidgets('batch-deletes selected items from a playlist', (
+    tester,
+  ) async {
+    final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+    for (final video in const [
+      VideoModel(id: 'a', title: 'Alpha', url: 'https://example.com/a'),
+      VideoModel(id: 'b', title: 'Beta', url: 'https://example.com/b'),
+      VideoModel(id: 'c', title: 'Gamma', url: 'https://example.com/c'),
+    ]) {
+      await repository.addToPlaylist(
+        playlistId: playlistId,
+        sourceId: 'bilibili',
+        video: video,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '播放列表');
+    expect(find.text('Alpha'), findsOneWidget);
+    expect(find.text('Beta'), findsOneWidget);
+    expect(find.text('Gamma'), findsOneWidget);
+
+    await tester.tap(find.text('编辑'));
+    await pumpLibrary(tester);
+
+    await tester.tap(find.text('Alpha'));
+    await tester.tap(find.text('Beta'));
+    await pumpLibrary(tester);
+
+    await tester.tap(find.text('删除选中'));
+    await pumpRoute(tester);
+    await tester.tap(find.text('删除').last);
+    await pumpLibrary(tester);
+
+    expect(find.text('Alpha'), findsNothing);
+    expect(find.text('Beta'), findsNothing);
+    expect(find.text('Gamma'), findsOneWidget);
+    final items = await repository.getPlaylistItems(playlistId);
+    expect(items.map((item) => item.originalId), ['c']);
+  });
+
+  testLibraryWidgets('filters playlist items by search text', (tester) async {
+    final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+    for (final video in const [
+      VideoModel(id: 'a', title: 'Alpha video', url: 'https://example.com/a'),
+      VideoModel(id: 'b', title: 'Beta video', url: 'https://example.com/b'),
+      VideoModel(id: 'c', title: 'Gamma video', url: 'https://example.com/c'),
+    ]) {
+      await repository.addToPlaylist(
+        playlistId: playlistId,
+        sourceId: 'bilibili',
+        video: video,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '播放列表');
+    expect(find.text('Alpha video'), findsOneWidget);
+    expect(find.text('Beta video'), findsOneWidget);
+    expect(find.text('Gamma video'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Alpha');
+    await pumpLibrary(tester);
+
+    expect(find.text('Alpha video'), findsOneWidget);
+    expect(find.text('Beta video'), findsNothing);
+    expect(find.text('Gamma video'), findsNothing);
+  });
 }
 
 MediaSource _bilibili() => const _FakeSource(id: 'bilibili', name: 'Bilibili');
