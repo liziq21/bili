@@ -58,8 +58,14 @@ void main() {
         title: '测试视频',
       ),
       chapters: [
-        VideoChapter(title: '开场介绍', startSeconds: 0),
-        VideoChapter(title: '核心架构拆解', startSeconds: 83),
+        VideoChapter(
+          title: '第一章',
+          startSeconds: 0,
+        ),
+        VideoChapter(
+          title: '总结',
+          startSeconds: 83,
+        ),
       ],
     );
   });
@@ -89,24 +95,31 @@ void main() {
       await tester.pump();
 
       expect(find.text('章节'), findsOneWidget);
-      expect(find.text('开场介绍'), findsOneWidget);
-      expect(find.text('核心架构拆解'), findsOneWidget);
+      expect(find.text('第一章'), findsOneWidget);
+      expect(find.text('总结'), findsOneWidget);
 
       // Verify Tooltip widget exists
       final tooltip = tester.widget<Tooltip>(
         find
-            .ancestor(of: find.text('核心架构拆解'), matching: find.byType(Tooltip))
+            .ancestor(
+              of: find.text('总结'),
+              matching: find.byType(Tooltip),
+            )
             .first,
       );
-      expect(tooltip.message, '01:23 核心架构拆解');
+      expect(tooltip.message, '01:23 总结');
 
       // Verify Semantics widget with button: true and excludeSemantics: true
-      final semanticsFinder = find
-          .ancestor(of: find.text('核心架构拆解'), matching: find.byType(Semantics))
-          .first;
+      final semanticsFinder =
+          find
+              .ancestor(
+                of: find.text('总结'),
+                matching: find.byType(Semantics),
+              )
+              .first;
       final semantics = tester.widget<Semantics>(semanticsFinder);
       expect(semantics.button, isTrue);
-      expect(semantics.properties.label, '01:23 核心架构拆解');
+      expect(semantics.properties.label, '01:23 总结');
       expect(semantics.excludeSemantics, isTrue);
     },
   );
@@ -135,7 +148,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('核心架构拆解'));
+      await tester.tap(find.text('总结'));
       await tester.pump();
 
       expect(controller.seekedTo, const Duration(seconds: 83));
