@@ -365,7 +365,13 @@ void main() {
     await openPlaylistMenu(tester);
     await tester.tap(find.text('重命名播放列表'));
     await pumpRoute(tester);
-    await tester.enterText(find.byType(TextField), 'New name');
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'New name',
+    );
     await tester.tap(find.text('保存'));
     await pumpLibrary(tester);
 
