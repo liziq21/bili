@@ -55,9 +55,10 @@ final class YoutubeService {
     String? continuation,
   }) async {
     final sanitizedQuery = query.replaceAll(_controlChars, '');
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
     final body = <String, dynamic>{};
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       body['query'] = sanitizedQuery;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
@@ -82,9 +83,10 @@ final class YoutubeService {
     String? continuation,
   }) async {
     final sanitizedQuery = query.replaceAll(_controlChars, '');
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
     final body = <String, dynamic>{};
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       body['query'] = sanitizedQuery;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
@@ -109,9 +111,10 @@ final class YoutubeService {
     String? continuation,
   }) async {
     final sanitizedQuery = query.replaceAll(_controlChars, '');
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
     final body = <String, dynamic>{};
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       body['query'] = sanitizedQuery;
       final params = YoutubeProtobufEncoder.encodeSearchParams(
@@ -138,8 +141,11 @@ final class YoutubeService {
   }) async {
     final body = <String, dynamic>{};
     final sanitizedVideoId = videoId?.replaceAll(_controlChars, '');
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    final sanitizedPlaylistId = playlistId?.replaceAll(_controlChars, '');
+    final sanitizedParams = params?.replaceAll(_controlChars, '');
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       if (sanitizedVideoId == null || sanitizedVideoId.isEmpty) {
         throw const YpiJsonException(
@@ -147,11 +153,11 @@ final class YoutubeService {
         );
       }
       body['videoId'] = sanitizedVideoId;
-      if (playlistId != null && playlistId.isNotEmpty) {
-        body['playlistId'] = playlistId;
+      if (sanitizedPlaylistId != null && sanitizedPlaylistId.isNotEmpty) {
+        body['playlistId'] = sanitizedPlaylistId;
       }
-      if (params != null && params.isNotEmpty) {
-        body['params'] = params;
+      if (sanitizedParams != null && sanitizedParams.isNotEmpty) {
+        body['params'] = sanitizedParams;
       }
     }
 
@@ -169,7 +175,9 @@ final class YoutubeService {
   Future<NetworkYouTubeCommentsResponse> getComments(
     String continuation,
   ) async {
-    final sanitizedContinuation = continuation.trim();
+    final sanitizedContinuation = continuation
+        .replaceAll(_controlChars, '')
+        .trim();
     if (sanitizedContinuation.isEmpty) {
       throw const YpiJsonException('getComments requires continuation');
     }
@@ -237,8 +245,10 @@ final class YoutubeService {
     String? params,
   }) async {
     final body = <String, dynamic>{};
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    final sanitizedParams = params?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       final id = browseId?.replaceAll(_controlChars, '');
       if (id == null || id.isEmpty) {
@@ -247,8 +257,8 @@ final class YoutubeService {
         );
       }
       body['browseId'] = id;
-      if (params != null && params.isNotEmpty) {
-        body['params'] = params;
+      if (sanitizedParams != null && sanitizedParams.isNotEmpty) {
+        body['params'] = sanitizedParams;
       }
     }
 
@@ -270,8 +280,10 @@ final class YoutubeService {
     // Sanitise once here so the id echoed back through `requestedPlaylistId`
     // is the same one actually sent to the endpoint.
     final targetId = (playlistId ?? browseId)?.replaceAll(_controlChars, '');
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    final sanitizedParams = params?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       if (targetId == null || targetId.isEmpty) {
         throw const YpiJsonException(
@@ -282,8 +294,8 @@ final class YoutubeService {
           ? targetId
           : 'VL$targetId';
       body['browseId'] = formattedBrowseId;
-      if (params != null && params.isNotEmpty) {
-        body['params'] = params;
+      if (sanitizedParams != null && sanitizedParams.isNotEmpty) {
+        body['params'] = sanitizedParams;
       }
     }
 
@@ -304,8 +316,9 @@ final class YoutubeService {
     String? continuation,
   }) async {
     final body = <String, dynamic>{};
-    if (continuation != null && continuation.isNotEmpty) {
-      body['continuation'] = continuation;
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
     } else {
       body['browseId'] = 'FEwhat_to_watch';
     }
