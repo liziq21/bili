@@ -8,11 +8,11 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
-import 'app_scaffold.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/media_sources_provider.dart';
 import 'providers/repo_providers.dart';
-import 'design/design.dart';
+
+export 'app_scaffold.dart' show $styles;
 
 void main() {
   initDebugOverlayBridge();
@@ -124,5 +124,3 @@ void initDebugOverlayBridge() {
     youtubeClient: HttpLogClient(App.httpBucket, http.IOClient()),
   );
 }
-
-AppStyle get $styles => AppScaffold.style;
