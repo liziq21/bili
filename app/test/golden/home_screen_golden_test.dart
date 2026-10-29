@@ -74,6 +74,8 @@ class _FakeSource({required final int count}) implements MediaSource {
 
   @override
   MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  @override
+  LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
 
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;

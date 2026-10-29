@@ -161,6 +161,8 @@ class FakeMediaSource(@override final String id, @override final String name)
 
   @override
   MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  @override
+  LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
 
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
