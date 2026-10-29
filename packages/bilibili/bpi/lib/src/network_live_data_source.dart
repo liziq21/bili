@@ -1,3 +1,4 @@
+import 'model/live/network_live_danmaku_info.dart';
 import 'model/live/network_live_room_detail.dart';
 import 'model/live/network_live_room_play_info.dart';
 
@@ -13,4 +14,6 @@ abstract interface class NetworkLiveDataSource {
     String platform = 'web',
     int ptype = 8,
   });
+
+  Future<NetworkLiveDanmakuInfo> getDanmuInfo({required int roomId});
 }

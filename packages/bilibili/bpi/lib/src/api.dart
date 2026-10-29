@@ -55,6 +55,13 @@ final class LiveApi {
 
   static const roomDetail = '$base${LiveApiPath.roomDetail}';
   static const roomPlayInfo = '$base${LiveApiPath.roomPlayInfo}';
+  static const danmuInfo = '$base${LiveApiPath.danmuInfo}';
+}
+
+final class LiveApiPath {
+  static const String roomDetail = '/xlive/web-room/v1/index/getH5InfoByRoom';
+  static const String roomPlayInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
+  static const String danmuInfo = '/xlive/web-room/v1/index/getDanmuInfo';
 }
 
 final class LiveDanmakuApi {
@@ -68,9 +75,4 @@ final class LiveDanmakuApi {
     String platform = 'web',
   }) =>
       '$wsBase?room_id=$roomId&token=$token&protocol=$protocol&platform=$platform';
-}
-
-final class LiveApiPath {
-  static const String roomDetail = '/xlive/web-room/v1/index/getH5InfoByRoom';
-  static const String roomPlayInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
 }

@@ -163,7 +163,10 @@ class _SourceScopeState() extends State<_SourceScope> {
         ),
       if (source.danmakuDataSource case final danmakuDataSource?)
         RepositoryProvider<DanmakuRepository>(
-          create: (_) => AppDanmakuRepository(danmakuDataSource),
+          create: (_) => AppDanmakuRepository(
+            danmakuDataSource,
+            source.liveDanmakuDataSource,
+          ),
         ),
       if (source.liveRoomDetailDataSource case final liveRoomDetailDataSource?)
         RepositoryProvider<AppLiveRoomRepository>(

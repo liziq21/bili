@@ -8,6 +8,7 @@ import '../api.dart';
 import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
+import '../model/live/network_live_danmaku_info.dart';
 import '../model/live/network_live_room_detail.dart';
 import '../model/live/network_live_room_play_info.dart';
 import '../model/reply/network_reply_data.dart';
@@ -152,6 +153,11 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ptype') int ptype = 8,
   });
 
+  @GET(path: LiveApi.danmuInfo)
+  Future<NetworkLiveDanmakuInfo> getDanmuInfo({
+    @Query('id') required int roomId,
+  });
+
   @GET(path: ApiPath.userCard)
   Future<NetworkBiliUserCardData> getUserCard({@query required int mid});
 
@@ -204,6 +210,7 @@ class BiliNetworkSearch
         NetworkBiliPlayerInfo: NetworkBiliPlayerInfo.fromJson,
         NetworkLiveRoomDetail: NetworkLiveRoomDetail.fromJson,
         NetworkLiveRoomPlayInfo: NetworkLiveRoomPlayInfo.fromJson,
+        NetworkLiveDanmakuInfo: NetworkLiveDanmakuInfo.fromJson,
         NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
         NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
@@ -595,6 +602,10 @@ class BiliNetworkSearch
     platform: platform,
     ptype: ptype,
   );
+
+  @override
+  Future<NetworkLiveDanmakuInfo> getDanmuInfo({required int roomId}) =>
+      _networkApi.getDanmuInfo(roomId: roomId);
 
   @override
   Future<NetworkBiliUserCardData> getUserCard({required int mid}) async {
