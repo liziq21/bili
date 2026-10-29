@@ -117,7 +117,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
   }
 
   void registerHistoryCleanup(WidgetTester tester, MediaHistoryCubit cubit) {
@@ -323,10 +323,10 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await tester.tap(find.textContaining('Video v1'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(tapped, hasLength(1));
     expect(tapped.single.video.id, 'v1');

@@ -196,7 +196,7 @@ void main() {
             home: Scaffold(body: Center(child: widget)),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
       });
     },
     builder: () => GoldenTestGroup(

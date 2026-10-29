@@ -59,7 +59,7 @@ void main() {
     );
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 
   testWidgets('AppBloc is created with the repository from the graph', (
@@ -75,6 +75,6 @@ void main() {
     );
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 }

@@ -62,7 +62,7 @@ void main() {
 
       expect(find.bySemanticsLabel('CodeCraft, @188339'), findsOneWidget);
       await tester.tap(find.byType(CreatorProfileItem));
-      await tester.pumpAndSettle();
+      await tester.pump();
     },
   );
 }

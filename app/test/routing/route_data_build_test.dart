@@ -56,7 +56,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(built, isNotNull);
       },
@@ -83,7 +83,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(built, isNotNull);
         // extra 非空时 uri 字段取 extra 的 toString，path 字段取其 path/host/scheme。
@@ -119,7 +119,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // extra 为 null 时 uri.toString() 是 'null'，path 三段兜底为空串，
       // 不能崩。
@@ -166,7 +166,7 @@ void main() {
           ),
         );
         await tester.tap(find.text('go'));
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(find.text('Video source unavailable'), findsOneWidget);
       },

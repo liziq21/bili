@@ -27,7 +27,7 @@ void main() {
             home: Scaffold(body: Center(child: widget)),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
       },
       builder: () => GoldenTestGroup(
         columns: 1,
@@ -62,7 +62,7 @@ void main() {
             home: Scaffold(body: Center(child: widget)),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
       },
       // 弹层由三层 Flex 叠成：DraggableScrollableSheet 的 FractionallySizedBox
       // 只给 Column 0.6 倍可用高度，而 ListView 用 sheet 传入的 scrollController

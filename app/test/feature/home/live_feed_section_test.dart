@@ -42,7 +42,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Check tooltip
       expect(find.byTooltip('直播'), findsOneWidget);

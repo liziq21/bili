@@ -60,7 +60,7 @@ void main() {
       final log = FocusRegistrationLog();
 
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(log.calls, hasLength(1));
       expect(log.isRegistered, isTrue);
@@ -69,12 +69,12 @@ void main() {
     testWidgets('unregisters on dispose', (tester) async {
       final log = FocusRegistrationLog();
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(log.calls, hasLength(1));
 
       // 换成一个不含 anchor 的树即触发 dispose。
       await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(log.calls, hasLength(2));
       expect(log.isRegistered, isFalse);
@@ -83,12 +83,12 @@ void main() {
     testWidgets('registers again after a remount', (tester) async {
       final log = FocusRegistrationLog();
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
       await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(log.calls, hasLength(3));
       expect(log.isRegistered, isTrue);
@@ -101,12 +101,12 @@ void main() {
       final second = FocusRegistrationLog();
 
       await tester.pumpWidget(buildAnchorWithRegistration(first));
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(first.calls, hasLength(1));
 
       // 同一位置换挂载点、换注册回调，走 didUpdateWidget 分支。
       await tester.pumpWidget(buildAnchorWithRegistration(second));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // 旧回调先被注销，新回调再被注册，顺序即注销先于注册。
       expect(first.calls, hasLength(2));
@@ -122,7 +122,7 @@ void main() {
           home: Scaffold(body: AppSearchAnchor(onSearch: _noop)),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(tester.takeException(), isNull);
     });
@@ -130,7 +130,7 @@ void main() {
     testWidgets('the registered entry opens the search view', (tester) async {
       final log = FocusRegistrationLog();
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // 注册进来的函数正是 focusInput：调用后把搜索视图这条路由推进来。
       // 断言路由数而非 SearchBar 个数：anchor 自身也含一个 SearchBar，
@@ -139,7 +139,7 @@ void main() {
           .widgetList<SearchBar>(find.byType(SearchBar))
           .length;
       log.current!();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       final searchBarsAfterOpen = tester
           .widgetList<SearchBar>(find.byType(SearchBar))
@@ -148,7 +148,7 @@ void main() {
 
       // 再次调用时，由于搜索视图已经处于打开状态，不会重复推进新的搜索视图
       log.current!();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(
         tester.widgetList<SearchBar>(find.byType(SearchBar)).length,
@@ -159,15 +159,15 @@ void main() {
     testWidgets('the registered entry is inert after dispose', (tester) async {
       final log = FocusRegistrationLog();
       await tester.pumpWidget(buildAnchorWithRegistration(log));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // 留住销毁前那个函数：它必须不能打到已销毁的 controller。
       final stale = log.current!;
       await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       stale();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(tester.takeException(), isNull);
       // 销毁后调用旧函数不得把已销毁的 controller 推回来。

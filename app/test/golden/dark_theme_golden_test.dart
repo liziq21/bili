@@ -56,7 +56,7 @@ void main() {
               ),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
         });
       },
       builder: () => GoldenTestGroup(

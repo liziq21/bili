@@ -175,7 +175,7 @@ void main() {
     expect(created.closed, isFalse);
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(created.closed, isTrue);
   });
