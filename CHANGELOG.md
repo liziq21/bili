@@ -276,6 +276,7 @@ so hand edits do not survive; change the generator instead.
 - test(golden): guardrail against hardcoded user-visible copy (Part of LIZ-51) (#330)
 - test(bpi): fixture parse closures in doc_guardrail_test (LIZ-117) (#492)
 - test: add HomeScreen golden test (LIZ-88) (#498)
+- test(golden): re-record CI baselines from CI (#499)
 
 ### Maintenance
 - ci: comment out iOS build job in CI workflow (#5)
