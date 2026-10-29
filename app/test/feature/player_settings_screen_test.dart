@@ -112,4 +112,33 @@ void main() {
     expect(find.text(l10n.playerDefaultQuality), findsOneWidget);
     expect(find.text('默认画质'), findsNothing);
   });
+
+  testWidgets('exposes semantics selection state for option pickers', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(PlayerSettingsScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    await tester.tap(find.text(l10n.playerDefaultQuality));
+    await tester.pumpAndSettle();
+
+    final autoSemantics = tester.widget<Semantics>(
+      find.ancestor(
+        of: find.text(l10n.playerQualityAuto),
+        matching: find.byType(Semantics),
+      ).first,
+    );
+    expect(autoSemantics.selected, isTrue);
+
+    final p1080Semantics = tester.widget<Semantics>(
+      find.ancestor(
+        of: find.text(l10n.playerQualityHeight('1080')),
+        matching: find.byType(Semantics),
+      ).first,
+    );
+    expect(p1080Semantics.selected, isFalse);
+  });
 }
