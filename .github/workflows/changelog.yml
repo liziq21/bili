@@ -1,16 +1,13 @@
 name: Changelog
 
-# main 每次合入后重跑生成器，把 CHANGELOG.md 的差异直接推回 main。
+# main 每次合入后重跑生成器，把 CHANGELOG.md 的差异提交到 changelog 分支并开 PR。
 #
 # 触发源是合入动作而不是定时器：变更内容只在有人合入 PR 时才变，
 # 定时轮询既慢又会重复空跑（仓库现无任何 cron）。
 #
-# 直推而非开 PR（2026-10-28 改）：changelog 是生成器产出的派生文件，开 PR
-# 会走全套门禁——main 上任何 required check 变红（如 #487 被 Run Flutter
-# Test 腿阻塞）都会让 changelog 永久停更。生成器只读已合入 PR 与 git tag、
-# 无编译依赖，直推不引入新风险；ruleset 23869296 无拦直推的 push 规则，
-# uhibot App token 具备 contents:write。直推会再次触发本 workflow，
-# 生成器发现无差异即跳过，两轮内收敛，无自喂链。
+# 开 PR 而非直推：符合 LIZ-124 验收标准（自动生成、开 PR），且 ruleset
+# 23869296 允许 uhibot App token 推送功能分支。生成器排除 ci/changelog 分支
+# 产出的 PR，合入后不再触发二次生成，无自喂链。
 on:
   push:
     branches:
@@ -18,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: changelog-${{ github.ref }}
@@ -50,18 +48,29 @@ jobs:
           app-id: ${{ vars.GOLDEN_APP_ID }}
           private-key: ${{ secrets.GOLDEN_APP_PRIVATE_KEY }}
 
-      - name: Commit and push to main
+      - name: Commit and push changelog branch + open PR
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          # 生成器只在内容变化时写文件；无变化直接跳过，不产生空提交。
+          # 生成器只在内容变化时写文件；无变化直接跳过。
           if git diff --quiet -- CHANGELOG.md; then
             echo "CHANGELOG.md is up to date, nothing to push"
             exit 0
           fi
           git config user.name "uhibot[bot]"
           git config user.email "uhibot[bot]@users.noreply.github.com"
+
+          BRANCH="ci/changelog"
+          git checkout -b "$BRANCH"
           git add CHANGELOG.md
           git commit -m "docs: regenerate CHANGELOG.md from merged pull requests"
           git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${{ github.repository }}.git"
-          git push origin HEAD:refs/heads/main
+          git push -u origin "$BRANCH"
+
+          # Open PR (idempotent: if PR exists for this branch, gh exits 0)
+          gh pr create \
+            --title "docs: regenerate CHANGELOG.md from merged pull requests" \
+            --body "Automated changelog regeneration from merged PRs since last tag." \
+            --base main \
+            --head "$BRANCH" \
+            --label "c: process" || true
