@@ -65,9 +65,9 @@ void main() {
 
     final result = await source.fetchFeed();
 
-    expect(result.isOk, isTrue);
+    expect(result.isSuccess(), isTrue);
     final page = switch (result) {
-      Ok(:final value) => value,
+      Success(:final success) => success,
       Error() => fail('expected a successful page'),
     };
     expect(page.number, 1);
@@ -95,9 +95,9 @@ void main() {
 
     final result = await source.fetchFeed();
 
-    expect(result.isOk, isTrue);
+    expect(result.isSuccess(), isTrue);
     final page = switch (result) {
-      Ok(:final value) => value,
+      Success(:final success) => success,
       Error() => fail('expected a successful page'),
     };
     expect(page.number, 1);
@@ -140,9 +140,9 @@ void main() {
 
       final result = await source.fetchFeed(pageKey: 3);
 
-      expect(result.isOk, isTrue);
+      expect(result.isSuccess(), isTrue);
       final page = switch (result) {
-        Ok(:final value) => value,
+        Success(:final success) => success,
         Error() => fail('expected a successful page'),
       };
       expect(page.number, 3);
@@ -157,7 +157,7 @@ void main() {
 
     final result = await source.fetchFeed();
 
-    expect(result.isError, isTrue);
+    expect(result.isError(), isTrue);
   });
 
   test('converts ranking network failures to Result.error', () async {
@@ -167,7 +167,7 @@ void main() {
 
     final result = await source.fetchFeed();
 
-    expect(result.isError, isTrue);
+    expect(result.isError(), isTrue);
   });
 
   test('registers popular and ranking video feeds', () async {

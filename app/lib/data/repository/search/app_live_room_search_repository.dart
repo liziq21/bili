@@ -13,7 +13,7 @@ class const AppLiveRoomSearchRepository(
   List<SortOption> get sortOptions => _remoteDataSource.sortOptions;
 
   @override
-  Future<Result<Page<LiveRoomModel>>> search(SearchQuery query) {
+  Future<Result<Page<LiveRoomModel>, Exception>> search(SearchQuery query) {
     return _remoteDataSource.searchLiveRoom(
       query.query,
       pageKey: query.pageKey,

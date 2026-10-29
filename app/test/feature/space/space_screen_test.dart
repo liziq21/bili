@@ -7,12 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class _FakeCreatorProfileRepository(var Result<CreatorProfile> result)
-    implements CreatorProfileRepository {
+class _FakeCreatorProfileRepository(
+  var Result<CreatorProfile, Exception> result,
+) implements CreatorProfileRepository {
   String? requestedId;
 
   @override
-  Future<Result<CreatorProfile>> getProfile(String id) async {
+  Future<Result<CreatorProfile, Exception>> getProfile(String id) async {
     requestedId = id;
     return result;
   }
@@ -29,7 +30,7 @@ void main() {
       subscribers: 12000,
       videos: 42,
     );
-    final repository = _FakeCreatorProfileRepository(Result.ok(profile));
+    final repository = _FakeCreatorProfileRepository(Result.success(profile));
     final l10n = AppLocalizationsZh();
 
     await tester.pumpWidget(
@@ -76,7 +77,7 @@ void main() {
     tester,
   ) async {
     const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
-    final repository = _FakeCreatorProfileRepository(Result.ok(profile));
+    final repository = _FakeCreatorProfileRepository(Result.success(profile));
     var backPressed = false;
 
     await tester.pumpWidget(
@@ -121,7 +122,7 @@ void main() {
     final retryButton = find.text(l10n.retry);
     expect(retryButton, findsOneWidget);
 
-    repository.result = Result.ok(
+    repository.result = Result.success(
       const CreatorProfile(id: 'creator-1', name: 'CodeCraft'),
     );
 

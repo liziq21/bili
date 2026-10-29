@@ -17,7 +17,7 @@ final class const BiliLiveRoomSearchRemoteDataSource({
   @override
   List<SortOption> get sortOptions => const [];
   @override
-  Future<Result<Page<LiveRoomModel>>> searchLiveRoom(
+  Future<Result<Page<LiveRoomModel>, Exception>> searchLiveRoom(
     String query, {
     int? pageKey,
   }) {
@@ -25,7 +25,7 @@ final class const BiliLiveRoomSearchRemoteDataSource({
     if (cleanQuery.isEmpty) {
       final targetPage = pageKey ?? 1;
       return Future.value(
-        Result.ok(
+        Result.success(
           Page<LiveRoomModel>(
             number: targetPage,
             totalPages: targetPage,

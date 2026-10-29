@@ -224,8 +224,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final stored = await preferences.get(PreferencesKey.playbackRate);
-      expect(stored.isOk, isTrue);
-      expect((stored as Ok<double>).value, 1.75);
+      expect(stored.isSuccess(), isTrue);
+      expect((stored as Success<double, Exception>).success, 1.75);
     });
 
     testWidgets('does not persist without an injected data source', (

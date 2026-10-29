@@ -17,7 +17,7 @@ final class BiliMediaStreamRemoteDataSource({
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String videoId, {
     int? preferHeight,
     int? preferStreamId,
@@ -59,7 +59,7 @@ final class BiliMediaStreamRemoteDataSource({
 
       final segments = _segmentsOf(playUrl.durl);
       if (segments.isNotEmpty) {
-        return Result.ok(
+        return Result.success(
           MediaStream(
             videoUrl: segments.first.url,
             headers: _headers,
@@ -82,7 +82,7 @@ final class BiliMediaStreamRemoteDataSource({
 
   /// DASH 分离流。响应里有视频流却无可用音轨时报错而非降级：此时
   /// `audioUrl` 为空会让播放层把纯视频当作自带声音的文件，必然无声。
-  Result<MediaStream> _fromDash(
+  Result<MediaStream, Exception> _fromDash(
     String videoId,
     NetworkPlayUrl playUrl,
     DashData dash,
@@ -116,7 +116,7 @@ final class BiliMediaStreamRemoteDataSource({
       return Result.error(Exception('视频 $videoId 的分离流音频地址无效'));
     }
 
-    return Result.ok(
+    return Result.success(
       MediaStream(
         videoUrl: videoUrl,
         audioUrl: audioUrl,

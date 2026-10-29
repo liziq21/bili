@@ -13,6 +13,6 @@ class const AppVideoSearchRepository(
   List<SortOption> get sortOptions => _remoteDataSource.sortOptions;
 
   @override
-  Future<Result<Page<VideoModel>>> search(SearchQuery query) =>
+  Future<Result<Page<VideoModel>, Exception>> search(SearchQuery query) =>
       _remoteDataSource.searchVideo(query);
 }

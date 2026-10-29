@@ -102,20 +102,25 @@ class _RecordingVideoDetailRepository() implements VideoDetailRepository {
   (String, int?, int?)? lastRequest;
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async => Result.ok(
-    VideoDetail(
-      video: VideoModel(id: id, title: 'Video', url: 'https://example.com/$id'),
-    ),
-  );
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: id,
+            title: 'Video',
+            url: 'https://example.com/$id',
+          ),
+        ),
+      );
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
   }) async {
     lastRequest = (id, preferHeight, preferStreamId);
-    return Result.ok(
+    return Result.success(
       MediaStream(
         videoUrl: 'https://cdn.example/low.m4s',
         height: preferHeight,
@@ -125,15 +130,17 @@ class _RecordingVideoDetailRepository() implements VideoDetailRepository {
   }
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));

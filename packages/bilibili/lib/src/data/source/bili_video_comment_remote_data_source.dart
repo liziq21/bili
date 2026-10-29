@@ -16,7 +16,7 @@ final class BiliVideoCommentRemoteDataSource({
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
@@ -40,7 +40,7 @@ final class BiliVideoCommentRemoteDataSource({
       final totalCount = replyData.cursor?.allCount ?? replies.length;
       final totalPages = totalCount > 0 ? (totalCount / pageSize).ceil() : 1;
 
-      return Result.ok(
+      return Result.success(
         Page<VideoComment>(
           number: page,
           totalPages: totalPages > 0 ? totalPages : 1,
@@ -53,7 +53,7 @@ final class BiliVideoCommentRemoteDataSource({
   }
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
@@ -87,7 +87,7 @@ final class BiliVideoCommentRemoteDataSource({
           ? (totalCount / safePageSize).ceil()
           : 1;
 
-      return Result.ok(
+      return Result.success(
         Page<VideoComment>(
           number: page,
           totalPages: totalPages > 0 ? totalPages : 1,

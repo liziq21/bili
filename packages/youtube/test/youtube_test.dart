@@ -74,7 +74,7 @@ void main() {
           ],
         ),
       );
-      expect(videoRes, isA<Result<Page<VideoModel>>>());
+      expect(videoRes, isA<Result<Page<VideoModel>, Exception>>());
       expect(videoRes, isA<Error>());
       if (videoRes is Error) {
         expect(videoRes.toString(), isNot(contains('\n#0')));
@@ -162,18 +162,21 @@ void main() {
 
       final suggestDS = youtube.searchSuggestDataSource;
 
-      // Blank or control-character-only query fast returns Result.ok([])
+      // Blank or control-character-only query fast returns Result.success([])
       final blankResult = await suggestDS.getSuggests('   \r\n\x00 ');
-      expect(blankResult, isA<Ok<List<String>>>());
-      expect((blankResult as Ok<List<String>>).value, isEmpty);
+      expect(blankResult, isA<Success<List<String>, Exception>>());
+      expect(
+        (blankResult as Success<List<String>, Exception>).success,
+        isEmpty,
+      );
       expect(requestMade, isFalse);
 
       // Query with control characters sanitizes query input and suggestion outputs
       final result = await suggestDS.getSuggests('flut\r\nter\x00');
       expect(requestMade, isTrue);
-      expect(result, isA<Ok<List<String>>>());
+      expect(result, isA<Success<List<String>, Exception>>());
       expect(
-        (result as Ok<List<String>>).value,
+        (result as Success<List<String>, Exception>).success,
         equals(['flutter tutorial', 'flutter course']),
       );
 
@@ -201,13 +204,21 @@ void main() {
       final blankVideoRes = await videoDS.searchVideo(
         const SearchQuery(query: '  \r\n\x00  '),
       );
-      expect(blankVideoRes, isA<Ok<Page<VideoModel>>>());
-      expect((blankVideoRes as Ok<Page<VideoModel>>).value.data, isEmpty);
+      expect(blankVideoRes, isA<Success<Page<VideoModel>, Exception>>());
+      expect(
+        (blankVideoRes as Success<Page<VideoModel>, Exception>).success.data,
+        isEmpty,
+      );
       expect(videoRequestMade, isFalse);
 
       final blankCreatorRes = await creatorDS.searchCreatorProfile('  \x1f  ');
-      expect(blankCreatorRes, isA<Ok<Page<CreatorProfile>>>());
-      expect((blankCreatorRes as Ok<Page<CreatorProfile>>).value.data, isEmpty);
+      expect(blankCreatorRes, isA<Success<Page<CreatorProfile>, Exception>>());
+      expect(
+        (blankCreatorRes as Success<Page<CreatorProfile>, Exception>)
+            .success
+            .data,
+        isEmpty,
+      );
       expect(creatorRequestMade, isFalse);
 
       await youtube.close();
@@ -290,8 +301,9 @@ void main() {
       final videoRes = await videoDS.searchVideo(
         const SearchQuery(query: 'sample'),
       );
-      expect(videoRes, isA<Ok<Page<VideoModel>>>());
-      final videos = (videoRes as Ok<Page<VideoModel>>).value.data;
+      expect(videoRes, isA<Success<Page<VideoModel>, Exception>>());
+      final videos =
+          (videoRes as Success<Page<VideoModel>, Exception>).success.data;
       expect(videos, hasLength(1));
       expect(
         videos.first.thumbnailUrl,
@@ -300,8 +312,9 @@ void main() {
 
       final creatorDS = youtube.creatorProfileSearchDataSource;
       final creatorRes = await creatorDS.searchCreatorProfile('sample');
-      expect(creatorRes, isA<Ok<Page<CreatorProfile>>>());
-      final profiles = (creatorRes as Ok<Page<CreatorProfile>>).value.data;
+      expect(creatorRes, isA<Success<Page<CreatorProfile>, Exception>>());
+      final profiles =
+          (creatorRes as Success<Page<CreatorProfile>, Exception>).success.data;
       expect(profiles, hasLength(1));
       expect(
         profiles.first.thumbnailUrl,

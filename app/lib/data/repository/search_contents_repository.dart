@@ -7,7 +7,7 @@ abstract interface class SearchContentsRepository<T>() {
   List<SortOption> get sortOptions;
   List<FilterGroup> get filters;
 
-  Future<Result<Page<T>>> search(SearchQuery searchQuery);
+  Future<Result<Page<T>, Exception>> search(SearchQuery searchQuery);
 }
 
 typedef VideoSearchRepository = SearchContentsRepository<VideoModel>;

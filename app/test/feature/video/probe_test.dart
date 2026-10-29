@@ -16,21 +16,21 @@ void main() {
 
 class _Repo() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('x'));
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('x'));
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFav) async =>
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFav) async =>
       Result.error(Exception('x'));
   @override
-  Future<Result<bool>> toggleSubscribe(String c, bool s) async =>
+  Future<Result<bool, Exception>> toggleSubscribe(String c, bool s) async =>
       Result.error(Exception('x'));
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
-  }) async => Completer<Result<MediaStream>>().future;
+  }) async => Completer<Result<MediaStream, Exception>>().future;
 }

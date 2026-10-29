@@ -56,7 +56,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     setState(() {
       _settings = settings;
       _comments = switch (result) {
-        Ok(:final value) => value,
+        Success(:final success) => success,
         _ => const [],
       };
     });

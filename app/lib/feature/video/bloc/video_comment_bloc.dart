@@ -49,15 +49,15 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
     }
 
     switch (result) {
-      case Ok(:final value):
+      case Success(:final success):
         emit(
           state.copyWith(
             isLoading: false,
-            comments: value.data,
+            comments: success.data,
             currentPage: 1,
-            totalPages: value.totalPages,
-            hasMore: 1 < value.totalPages,
-            replyStates: _replyStatesFor(value.data),
+            totalPages: success.totalPages,
+            hasMore: 1 < success.totalPages,
+            replyStates: _replyStatesFor(success.data),
           ),
         );
       case Error(:final error):
@@ -85,17 +85,17 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
     if (generation != _loadGeneration || state.videoId != videoId) return;
 
     switch (result) {
-      case Ok(:final value):
+      case Success(:final success):
         emit(
           state.copyWith(
             isLoadingMore: false,
-            comments: [...state.comments, ...value.data],
+            comments: [...state.comments, ...success.data],
             currentPage: nextPage,
-            totalPages: value.totalPages,
-            hasMore: nextPage < value.totalPages,
+            totalPages: success.totalPages,
+            hasMore: nextPage < success.totalPages,
             replyStates: _mergeReplyStates(
               state.replyStates,
-              _replyStatesFor(value.data),
+              _replyStatesFor(success.data),
             ),
           ),
         );
@@ -182,7 +182,7 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
     if (generation != _loadGeneration || state.videoId != videoId) return;
 
     switch (result) {
-      case Ok(:final value):
+      case Success(:final success):
         final loaded = state.replyStates[event.commentId] ?? current;
         emit(
           state.copyWith(
@@ -191,9 +191,9 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
               event.commentId: loaded.copyWith(
                 isLoading: false,
                 hasLoaded: true,
-                currentPage: value.number,
-                totalPages: value.totalPages,
-                replies: _mergeReplies(loaded.replies, value.data),
+                currentPage: success.number,
+                totalPages: success.totalPages,
+                replies: _mergeReplies(loaded.replies, success.data),
                 error: null,
               ),
             },

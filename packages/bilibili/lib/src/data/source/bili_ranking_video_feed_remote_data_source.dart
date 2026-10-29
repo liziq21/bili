@@ -15,7 +15,7 @@ final class const BiliRankingVideoFeedRemoteDataSource({
   String get title => '排行榜';
 
   @override
-  Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) {
+  Future<Result<Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) {
     return Future.sync(_network.getRanking)
         .then(
           (response) => Page<VideoModel>(

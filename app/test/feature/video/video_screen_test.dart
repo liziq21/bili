@@ -45,25 +45,27 @@ class const _TestMediaSource() extends MediaSource {
 
 class const _FailingVideoDetailRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,

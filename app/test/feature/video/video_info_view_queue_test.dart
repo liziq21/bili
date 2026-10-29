@@ -74,7 +74,7 @@ void main() {
   /// 真实的解析→追加链路，而不是另写一份逻辑。
   Future<void> pumpWithQueue(
     WidgetTester tester, {
-    required Result<MediaStream> streamResult,
+    required Result<MediaStream, Exception> streamResult,
     required _RecordingPlaybackController controller,
   }) async {
     final mockBloc = _MockVideoBloc(
@@ -103,8 +103,8 @@ void main() {
               addVideoToQueue: (videoId, repo, playback) async {
                 final result = await repo.getMediaStream(videoId);
                 switch (result) {
-                  case Ok(:final value):
-                    await playback.addToQueue(value);
+                  case Success(:final success):
+                    await playback.addToQueue(success);
                     return true;
                   case Error():
                     return false;
@@ -122,7 +122,7 @@ void main() {
   testWidgets('renders one add button per related video', (tester) async {
     await pumpWithQueue(
       tester,
-      streamResult: Result.ok(queueStream),
+      streamResult: Result.success(queueStream),
       controller: _RecordingPlaybackController(),
     );
 
@@ -137,7 +137,7 @@ void main() {
 
     await pumpWithQueue(
       tester,
-      streamResult: Result.ok(queueStream),
+      streamResult: Result.success(queueStream),
       controller: controller,
     );
 
@@ -234,10 +234,11 @@ void main() {
   });
 }
 
-class _QueueTestRepository({required final Result<MediaStream> streamResult})
-    implements VideoDetailRepository {
+class _QueueTestRepository({
+  required final Result<MediaStream, Exception> streamResult,
+}) implements VideoDetailRepository {
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
@@ -246,19 +247,21 @@ class _QueueTestRepository({required final Result<MediaStream> streamResult})
   }
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       throw UnimplementedError();
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       throw UnimplementedError();
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      throw UnimplementedError();
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => throw UnimplementedError();
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => throw UnimplementedError();

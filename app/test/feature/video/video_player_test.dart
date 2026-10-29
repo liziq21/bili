@@ -507,30 +507,32 @@ void main() {
 
 class _NoStreamRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
   }) async {
-    return Completer<Result<MediaStream>>().future;
+    return Completer<Result<MediaStream, Exception>>().future;
   }
 }
 
@@ -685,54 +687,58 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
 
 class _HangingStreamRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
   }) async {
-    return Completer<Result<MediaStream>>().future;
+    return Completer<Result<MediaStream, Exception>>().future;
   }
 }
 
 class _FailingStreamRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
@@ -742,29 +748,31 @@ class _FailingStreamRepository() implements VideoDetailRepository {
 /// 立即返回可播流：让画面本体（含浮层控制）渲染出来。
 class _ReadyStreamRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('unused'));
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
-  }) async => Result.ok(
+  }) async => Result.success(
     MediaStream(
       videoUrl: 'https://example.com/v.m4s',
       height: 1080,

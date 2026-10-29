@@ -3,14 +3,14 @@ import 'package:model/model.dart';
 
 /// Application boundary for the optional danmaku capability.
 abstract interface class DanmakuRepository() {
-  Future<Result<List<DanmakuComment>>> getDanmaku(String videoId);
+  Future<Result<List<DanmakuComment>, Exception>> getDanmaku(String videoId);
 }
 
 final class AppDanmakuRepository([
   final DanmakuRemoteDataSource? _remoteDataSource,
 ]) implements DanmakuRepository {
   @override
-  Future<Result<List<DanmakuComment>>> getDanmaku(String videoId) {
+  Future<Result<List<DanmakuComment>, Exception>> getDanmaku(String videoId) {
     final remote = _remoteDataSource;
     if (remote == null) {
       return Future.value(

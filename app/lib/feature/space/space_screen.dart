@@ -21,7 +21,7 @@ class const SpaceScreen({
 
 class _SpaceScreenState() extends State<SpaceScreen> {
   CreatorProfileRepository? _repository;
-  Future<Result<CreatorProfile>>? _profileFuture;
+  Future<Result<CreatorProfile, Exception>>? _profileFuture;
 
   @override
   void didChangeDependencies() {
@@ -40,7 +40,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     _profileFuture = _loadProfile();
   }
 
-  Future<Result<CreatorProfile>> _loadProfile() {
+  Future<Result<CreatorProfile, Exception>> _loadProfile() {
     final repository = _repository;
     if (repository == null) {
       return Future.value(
@@ -77,7 +77,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
               ),
         title: Text(l10n.creatorTab),
       ),
-      body: FutureBuilder<Result<CreatorProfile>>(
+      body: FutureBuilder<Result<CreatorProfile, Exception>>(
         future: _profileFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -93,8 +93,8 @@ class _SpaceScreenState() extends State<SpaceScreen> {
           }
 
           return switch (snapshot.data!) {
-            Ok(:final value) => _CreatorProfileHeader(
-              profile: value,
+            Success(:final success) => _CreatorProfileHeader(
+              profile: success,
               colorScheme: colorScheme,
             ),
             Error() => _ProfileLoadError(onRetry: _retry),

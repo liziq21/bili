@@ -19,7 +19,7 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
   static final Map<String, String> _continuationTokens = {};
 
   @override
-  Future<Result<Page<CreatorProfile>>> searchCreatorProfile(
+  Future<Result<Page<CreatorProfile>, Exception>> searchCreatorProfile(
     String query, {
     int? pageKey,
   }) async {
@@ -27,7 +27,7 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
       final targetPage = pageKey ?? 1;
       final sanitizedQuery = query.replaceAll(_controlChars, '').trim();
       if (sanitizedQuery.isEmpty) {
-        return Result.ok(
+        return Result.success(
           Page<CreatorProfile>(
             number: targetPage,
             totalPages: targetPage,
@@ -57,7 +57,7 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
       final totalPages = nextToken == null || nextToken.isEmpty
           ? targetPage
           : targetPage + 1;
-      return Result.ok(
+      return Result.success(
         Page<CreatorProfile>(
           number: targetPage,
           totalPages: totalPages,

@@ -17,12 +17,15 @@ final class const BiliAggregateSearchRemoteDataSource({
   @override
   List<SortOption> get sortOptions => const [];
   @override
-  Future<Result<AggregateSearchPage>> searchAll(String query, {int? pageKey}) {
+  Future<Result<AggregateSearchPage, Exception>> searchAll(
+    String query, {
+    int? pageKey,
+  }) {
     final cleanQuery = query.replaceAll(_controlChars, '').trim();
     if (cleanQuery.isEmpty) {
       final targetPage = pageKey ?? 1;
       return Future.value(
-        Result.ok(
+        Result.success(
           AggregateSearchPage(
             number: targetPage,
             totalPages: targetPage,

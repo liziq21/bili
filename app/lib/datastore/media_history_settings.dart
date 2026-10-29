@@ -27,8 +27,12 @@ class const MediaHistorySettings({
     );
 
     return MediaHistorySettings(
-      recordHistory: recordResult is Ok<bool> ? recordResult.value : true,
-      resumePlayback: resumeResult is Ok<bool> ? resumeResult.value : true,
+      recordHistory: recordResult is Success<bool, Exception>
+          ? recordResult.success
+          : true,
+      resumePlayback: resumeResult is Success<bool, Exception>
+          ? resumeResult.success
+          : true,
     );
   }
 

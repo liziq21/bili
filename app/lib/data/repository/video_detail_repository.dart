@@ -8,22 +8,25 @@ import 'package:model/model.dart';
 /// 包含获取视频详细信息、点赞、收藏及关注创作者等交互逻辑。
 abstract interface class VideoDetailRepository() {
   /// 获取指定 ID 视频的详细信息
-  Future<Result<VideoDetail>> getVideoDetail(String id);
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id);
 
   /// 切换视频的点赞状态
-  Future<Result<bool>> toggleLike(String id, bool isLiked);
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked);
 
   /// 切换视频的收藏状态
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited);
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited);
 
   /// 切换对创作者的关注状态
-  Future<Result<bool>> toggleSubscribe(String creatorId, bool isSubscribed);
+  Future<Result<bool, Exception>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  );
 
   /// 解析指定视频的可播放地址
   ///
   /// [preferHeight] 为期望的画面高度，源按自身可用清晰度就近选取；为
   /// null 时由源取默认档。播放地址带签名时效，调用方取到即播。
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
@@ -40,7 +43,7 @@ class AppVideoDetailRepository([
   final MediaStreamRemoteDataSource? _mediaStreamDataSource,
 ]) implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async {
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
     if (_remoteDataSource != null) {
       return _remoteDataSource.getVideoDetail(id);
     }
@@ -50,7 +53,7 @@ class AppVideoDetailRepository([
   }
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async {
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async {
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleLike(id, isLiked);
     }
@@ -58,7 +61,10 @@ class AppVideoDetailRepository([
   }
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async {
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async {
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleFavorite(id, isFavorited);
     }
@@ -68,7 +74,7 @@ class AppVideoDetailRepository([
   }
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async {
@@ -81,7 +87,7 @@ class AppVideoDetailRepository([
   }
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,

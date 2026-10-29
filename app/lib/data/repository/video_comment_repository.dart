@@ -8,14 +8,14 @@ import 'package:model/model.dart';
 /// 提供视频评论列表的分页获取功能。
 abstract interface class VideoCommentRepository() {
   /// 分页获取指定视频的评论列表
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
   });
 
   /// 分页获取指定评论的二级回复列表。
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
@@ -32,7 +32,7 @@ class AppVideoCommentRepository([
   final VideoCommentRepliesRemoteDataSource? _repliesDataSource,
 ]) implements VideoCommentRepository {
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
@@ -48,7 +48,7 @@ class AppVideoCommentRepository([
   }
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,

@@ -15,7 +15,7 @@ final class const BiliPopularVideoFeedRemoteDataSource({
   String get title => '热门视频';
 
   @override
-  Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) {
+  Future<Result<Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) {
     final page = pageKey ?? 1;
     return Future.sync(() => _network.getPopular(page: page, pageSize: 20))
         .then(

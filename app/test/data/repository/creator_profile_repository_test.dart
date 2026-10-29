@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
 class _FakeCreatorProfileSearchRepository(
-  final Result<Page<CreatorProfile>> result,
+  final Result<Page<CreatorProfile>, Exception> result,
 ) implements CreatorProfileSearchRepository {
   int searchCallCount = 0;
   SearchQuery? lastQuery;
@@ -19,7 +19,9 @@ class _FakeCreatorProfileSearchRepository(
   List<SortOption> get sortOptions => const [];
 
   @override
-  Future<Result<Page<CreatorProfile>>> search(SearchQuery searchQuery) async {
+  Future<Result<Page<CreatorProfile>, Exception>> search(
+    SearchQuery searchQuery,
+  ) async {
     searchCallCount++;
     lastQuery = searchQuery;
     return result;
@@ -57,13 +59,13 @@ void main() {
 
     final result = await repository.getProfile('creator-1');
 
-    expect(result, isA<Ok<CreatorProfile>>());
+    expect(result, isA<Success<CreatorProfile, Exception>>());
     expect(search.searchCallCount, 0);
-    if (result case Ok(:final value)) {
-      expect(value.name, 'Cached creator');
-      expect(value.description, 'Cached description');
-      expect(value.subscribers, 12000);
-      expect(value.videos, 24);
+    if (result case Success(:final success)) {
+      expect(success.name, 'Cached creator');
+      expect(success.description, 'Cached description');
+      expect(success.subscribers, 12000);
+      expect(success.videos, 24);
     }
   });
 
@@ -76,7 +78,7 @@ void main() {
       videos: 12,
     );
     final search = _FakeCreatorProfileSearchRepository(
-      Result.ok(
+      Result.success(
         Page<CreatorProfile>(data: [profile], number: 1, totalPages: 1),
       ),
     );
@@ -88,7 +90,7 @@ void main() {
 
     final result = await repository.getProfile('creator-2');
 
-    expect(result, isA<Ok<CreatorProfile>>());
+    expect(result, isA<Success<CreatorProfile, Exception>>());
     expect(search.searchCallCount, 1);
     expect(search.lastQuery?.query, 'creator-2');
     final cached = await database.creatorProfileDao.getCreatorProfile(

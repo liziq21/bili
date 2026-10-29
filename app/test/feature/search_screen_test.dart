@@ -30,8 +30,8 @@ class RecordingRecentSearchRepository({final bool failOnWrite = false})
 
 class const StubSuggestRepository() implements SearchSuggestRepository {
   @override
-  Future<Result<List<String>>> getSuggests(String query) async =>
-      Result.ok(const []);
+  Future<Result<List<String>, Exception>> getSuggests(String query) async =>
+      Result.success(const []);
 }
 
 Widget buildScreen({

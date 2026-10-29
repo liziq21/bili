@@ -149,11 +149,11 @@ void main() {
     },
   };
 
-  /// Result 没有取值方法，按 Ok 的模式匹配取出成功值。
-  MediaStream expectOk(Result<MediaStream> result) {
-    expect(result.isOk, isTrue, reason: '期望成功，实际 $result');
+  /// Result 没有取值方法，按 Success 的模式匹配取出成功值。
+  MediaStream expectOk(Result<MediaStream, Exception> result) {
+    expect(result.isSuccess(), isTrue, reason: '期望成功，实际 $result');
     return switch (result) {
-      Ok(:final value) => value,
+      Success(:final success) => success,
       _ => throw StateError('unreachable'),
     };
   }
@@ -186,7 +186,7 @@ void main() {
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
 
-      expect(result.isOk, isTrue, reason: '期望成功，实际 $result');
+      expect(result.isSuccess(), isTrue, reason: '期望成功，实际 $result');
       final stream = expectOk(result);
       expect(stream.videoUrl, 'https://cdn.example/video-720.m4s');
       expect(stream.audioUrl, 'https://cdn.example/audio.m4s');
@@ -568,8 +568,12 @@ void main() {
       );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(result.isError, isTrue);
-      expect('$result', contains('音轨'), reason: 'audioUrl 为空会被播放层当作自带声音，必然无声');
+      expect(result.isError(), isTrue);
+      expect(
+        (result as Error<MediaStream, Exception>).error.toString(),
+        contains('音轨'),
+        reason: 'audioUrl 为空会被播放层当作自带声音，必然无声',
+      );
     });
 
     test('durl 中间片段无地址时报错，不返回缺片的序列', () async {
@@ -585,7 +589,7 @@ void main() {
       );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(result.isError, isTrue, reason: '静默跳过会交给播放层一段残缺序列，播放中途断掉且无从察觉');
+      expect(result.isError(), isTrue, reason: '静默跳过会交给播放层一段残缺序列，播放中途断掉且无从察觉');
     });
 
     test('最高档视频缺地址时降级到可用档', () async {
@@ -675,7 +679,7 @@ void main() {
       });
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('视频流缺少地址时报错而非返回空地址', () async {
@@ -688,7 +692,7 @@ void main() {
       );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('网络异常收敛为 Result.error 而非抛出', () async {
@@ -702,7 +706,7 @@ void main() {
       );
 
       final result = await source.getMediaStream('BV1GJ411x7vy');
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('getMediaStream 清理控制字符并针对空 videoId 返回 Result.error', () async {
@@ -711,10 +715,10 @@ void main() {
       final sanitizedResult = await source.getMediaStream(
         'BV1GJ411x7vy\r\n\x00',
       );
-      expect(sanitizedResult.isOk, isTrue);
+      expect(sanitizedResult.isSuccess(), isTrue);
 
       final emptyResult = await source.getMediaStream('  \r\n\x00 ');
-      expect(emptyResult.isError, isTrue);
+      expect(emptyResult.isError(), isTrue);
     });
 
     test('规范化 DASH 与 durl 媒体流 URL 为 HTTPS', () async {

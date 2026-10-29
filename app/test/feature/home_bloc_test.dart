@@ -31,20 +31,24 @@ class MockUserDataRepository() implements UserDataRepository {
   }
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) async {
+  Future<Result<void, Exception>> setSourceId(String sourceId) async {
     _currentData = _currentData.copyWith(sourceId: sourceId);
     _controller.add(_currentData);
-    return const Result.ok(null);
+    return const Result.success(null);
   }
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
-    return const Result.ok(null);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async {
+    return const Result.success(null);
   }
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
-    return const Result.ok(null);
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async {
+    return const Result.success(null);
   }
 
   void dispose() {
@@ -65,11 +69,13 @@ class FakeVideoFeed({
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<VideoModel>>> fetchFeed({int? pageKey}) async {
+  Future<Result<data.Page<VideoModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
     fetchCount++;
     if (failure) return Result.error(Exception('boom'));
     final page = pageKey ?? 1;
-    return Result.ok(
+    return Result.success(
       data.Page<VideoModel>(
         number: page,
         totalPages: pages,
@@ -94,8 +100,10 @@ class FakeLiveFeed({
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<LiveRoomModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(
+  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
+    return Result.success(
       data.Page<LiveRoomModel>(
         number: pageKey ?? 1,
         totalPages: 1,
@@ -117,21 +125,21 @@ class ControlledVideoFeed({
   @override required final String id,
   @override required final String title,
 }) implements VideoFeedRemoteDataSource {
-  final requests = <Completer<Result<data.Page<VideoModel>>>>[];
+  final requests = <Completer<Result<data.Page<VideoModel>, Exception>>>[];
 
   @override
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<VideoModel>>> fetchFeed({int? pageKey}) {
-    final request = Completer<Result<data.Page<VideoModel>>>();
+  Future<Result<data.Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) {
+    final request = Completer<Result<data.Page<VideoModel>, Exception>>();
     requests.add(request);
     return request.future;
   }
 
   void completeRequest(int index, String itemId) {
     requests[index].complete(
-      Result.ok(
+      Result.success(
         data.Page<VideoModel>(
           number: 1,
           totalPages: 1,
@@ -152,21 +160,23 @@ class ControlledLiveFeed({
   @override required final String id,
   @override required final String title,
 }) implements LiveRoomFeedRemoteDataSource {
-  final requests = <Completer<Result<data.Page<LiveRoomModel>>>>[];
+  final requests = <Completer<Result<data.Page<LiveRoomModel>, Exception>>>[];
 
   @override
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<LiveRoomModel>>> fetchFeed({int? pageKey}) {
-    final request = Completer<Result<data.Page<LiveRoomModel>>>();
+  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) {
+    final request = Completer<Result<data.Page<LiveRoomModel>, Exception>>();
     requests.add(request);
     return request.future;
   }
 
   void completeRequest(int index, int roomId) {
     requests[index].complete(
-      Result.ok(
+      Result.success(
         data.Page<LiveRoomModel>(
           number: 1,
           totalPages: 1,
@@ -196,10 +206,10 @@ class const FakeLiveRoomSearch() implements LiveRoomSearchRemoteDataSource {
   List<SortOption> get sortOptions => const [];
 
   @override
-  Future<Result<data.Page<LiveRoomModel>>> searchLiveRoom(
+  Future<Result<data.Page<LiveRoomModel>, Exception>> searchLiveRoom(
     String query, {
     int? pageKey,
-  }) async => Result.ok(
+  }) async => Result.success(
     data.Page<LiveRoomModel>(number: 1, totalPages: 1, data: const []),
   );
 }

@@ -49,16 +49,18 @@ class _FakeUserDataRepository() implements UserDataRepository {
       Stream.value(const UserData(sourceId: 'bilibili'));
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) async =>
-      const Result.ok(null);
+  Future<Result<void, Exception>> setSourceId(String sourceId) async =>
+      const Result.success(null);
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async =>
-      const Result.ok(null);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async => const Result.success(null);
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async =>
-      const Result.ok(null);
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async => const Result.success(null);
 }
 
 /// FakeUserDataRepository is kept for the second test if needed.
@@ -70,19 +72,23 @@ class FakeUserDataRepository() implements UserDataRepository {
   Stream<UserData> get data => Stream.value(_currentData);
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) async {
+  Future<Result<void, Exception>> setSourceId(String sourceId) async {
     _currentData = _currentData.copyWith(sourceId: sourceId);
-    return const Result.ok(null);
+    return const Result.success(null);
   }
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async {
-    return const Result.ok(null);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async {
+    return const Result.success(null);
   }
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async {
-    return const Result.ok(null);
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async {
+    return const Result.success(null);
   }
 }
 
@@ -113,8 +119,8 @@ class _FakeVideoFeed() extends VideoFeedRemoteDataSource {
   String get sourceId => 'bilibili';
 
   @override
-  Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(
+  Future<Result<Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) async {
+    return Result.success(
       Page<VideoModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
     );
   }
@@ -131,8 +137,10 @@ class _FakeLiveFeed() extends LiveRoomFeedRemoteDataSource {
   String get sourceId => 'bilibili';
 
   @override
-  Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(
+  Future<Result<Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
+    return Result.success(
       Page<LiveRoomModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
     );
   }

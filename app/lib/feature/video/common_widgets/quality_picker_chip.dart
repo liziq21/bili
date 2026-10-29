@@ -183,12 +183,12 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
       );
       if (!mounted) return;
       switch (result) {
-        case Ok(:final value):
+        case Success(:final success):
           // 续接：由 _VideoSurface 在收到新状态后统一重开播放器，避免这里
           // 先 open 一次、状态更新触发 didUpdateWidget 又 open 一次。
           widget.controller.restorePositionSeconds =
               widget.controller.state.position.inSeconds;
-          context.read<VideoBloc>().add(MediaStreamChanged(value));
+          context.read<VideoBloc>().add(MediaStreamChanged(success));
           _persistDefaultQuality(option);
         case Error():
           break;

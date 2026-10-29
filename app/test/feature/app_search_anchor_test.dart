@@ -18,9 +18,9 @@ class FakeSuggestRepository(final List<String> suggests)
   final List<String> receivedQueries = [];
 
   @override
-  Future<Result<List<String>>> getSuggests(String query) async {
+  Future<Result<List<String>, Exception>> getSuggests(String query) async {
     receivedQueries.add(query);
-    return Result.ok(suggests);
+    return Result.success(suggests);
   }
 }
 

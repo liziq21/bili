@@ -183,15 +183,17 @@ class HomeBloc({
 
   FeedSectionState<T> _merge<T>(
     FeedSectionState<T> section,
-    Result<Page<T>> result, {
+    Result<Page<T>, Exception> result, {
     required int pageKey,
   }) {
     return switch (result) {
-      Ok(:final value) => section.copyWith(
+      Success(:final success) => section.copyWith(
         status: FeedStatus.success,
-        items: pageKey <= 1 ? value.data : [...section.items, ...value.data],
+        items: pageKey <= 1
+            ? success.data
+            : [...section.items, ...success.data],
         pageKey: pageKey,
-        hasMore: pageKey < value.totalPages,
+        hasMore: pageKey < success.totalPages,
         clearError: true,
       ),
       Error(:final error) => () {

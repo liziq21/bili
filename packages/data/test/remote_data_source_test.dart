@@ -1,5 +1,5 @@
 import 'package:data/data.dart';
-// `isError` / `Ok` / `Error` 来自 package:model，data 包没有 re-export 它。
+// `isError()` / `Success` / `Error` 来自 package:model，data 包没有 re-export 它。
 // app 侧同名测试用同样的 import 形态。
 import 'package:model/model.dart';
 import 'package:test/test.dart';
@@ -15,7 +15,7 @@ class const _DetailSource() extends VideoDetailRemoteDataSource {
   String get sourceId => 'stub';
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       throw UnimplementedError();
 }
 
@@ -32,34 +32,34 @@ void main() {
       // must not hand back a value that reads like a persisted new state.
       final result = await source.toggleLike('BV1', true);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('toggleFavorite reports the capability as missing', () async {
       final result = await source.toggleFavorite('BV1', false);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('toggleSubscribe reports the capability as missing', () async {
       final result = await source.toggleSubscribe('c1', true);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test(
       'the requested value cannot turn a missing capability into a success',
       () async {
         // The old implementation derived its answer from the argument, so both
-        // `true` and `false` produced an `Ok`. Neither may now.
+        // `true` and `false` produced a `Success`. Neither may now.
         for (final requested in [true, false]) {
-          expect((await source.toggleLike('BV1', requested)).isError, isTrue);
+          expect((await source.toggleLike('BV1', requested)).isError(), isTrue);
           expect(
-            (await source.toggleFavorite('BV1', requested)).isError,
+            (await source.toggleFavorite('BV1', requested)).isError(),
             isTrue,
           );
           expect(
-            (await source.toggleSubscribe('c1', requested)).isError,
+            (await source.toggleSubscribe('c1', requested)).isError(),
             isTrue,
           );
         }
@@ -69,9 +69,10 @@ void main() {
     test('the error explains which capability is missing', () async {
       // The message is surfaced to the user through the bloc's actionError
       // path, so it has to say what is unavailable rather than just fail.
-      final message = ((await source.toggleLike('BV1', true)) as Error<bool>)
-          .error
-          .toString();
+      final message = ((await source.toggleLike(
+        'BV1',
+        true,
+      )) as Error<bool, Exception>).error.toString();
 
       expect(message, contains('点赞'));
     });

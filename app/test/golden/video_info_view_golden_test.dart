@@ -17,21 +17,23 @@ import 'golden_font.dart';
 /// [VideoInfoView] 里只是两个 Center，没有布局风险，留给 widget 测试。
 class const _DetailRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
-      Result.ok(_detail);
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(_detail);
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      const Result.ok(true);
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      const Result.success(true);
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      const Result.ok(true);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => const Result.success(true);
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
-  ) async => const Result.ok(true);
+  ) async => const Result.success(true);
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,
@@ -87,28 +89,31 @@ Widget _infoView({required bool withCreator}) => SizedBox(
 
 class const _NoCreatorRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async => Result.ok(
-    VideoDetail(
-      video: VideoModel(
-        id: 'BV1noCreator',
-        title: '没有 UP 主信息的视频',
-        url: 'https://www.bilibili.com/video/BV1noCreator',
-      ),
-    ),
-  );
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: 'BV1noCreator',
+            title: '没有 UP 主信息的视频',
+            url: 'https://www.bilibili.com/video/BV1noCreator',
+          ),
+        ),
+      );
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      const Result.ok(true);
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      const Result.success(true);
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      const Result.ok(true);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => const Result.success(true);
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
-  ) async => const Result.ok(true);
+  ) async => const Result.success(true);
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String id, {
     int? preferHeight,
     int? preferStreamId,

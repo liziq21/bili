@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-class _FakeMediaSource extends MediaSource {
+class _FakeMediaSource() extends MediaSource {
   @override
   String get id => 'test';
 
@@ -74,10 +74,10 @@ void main() {
 
   tearDown(() => preferences.dispose());
 
-  Future<HomeConfig> _persistedConfig() async {
+  Future<HomeConfig> persistedConfig() async {
     final raw = await preferences.get(PreferencesKey.homeConfig);
-    if (raw case Ok(:final value)) {
-      return HomeConfig.fromJsonOrDefault(jsonDecode(value));
+    if (raw case Success(:final success)) {
+      return HomeConfig.fromJsonOrDefault(jsonDecode(success));
     }
     throw StateError('home config persisted as error');
   }
@@ -103,7 +103,7 @@ void main() {
     await tester.tap(switches.at(0));
     await tester.pump();
 
-    final config = await _persistedConfig();
+    final config = await persistedConfig();
     expect(config.sources['test']!.tabs[0].isVisible, isFalse);
     expect(config.sources['test']!.tabs[1].isVisible, isTrue);
   });
@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_upward).at(1));
     await tester.pump();
 
-    final config = await _persistedConfig();
+    final config = await persistedConfig();
     expect(config.sources['test']!.tabs[0].sortOrder, equals(1));
     expect(config.sources['test']!.tabs[1].sortOrder, equals(0));
   });
@@ -131,7 +131,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.star_border));
     await tester.pump();
 
-    final config = await _persistedConfig();
+    final config = await persistedConfig();
     expect(config.sources['test']!.mainTabId, equals('tab_b'));
   });
 
@@ -148,7 +148,7 @@ void main() {
     await tester.tap(find.text('3').last);
     await tester.pump();
 
-    final config = await _persistedConfig();
+    final config = await persistedConfig();
     expect(config.gridColumnsPortrait, equals(3));
     expect(config.gridColumnsLandscape, equals(3));
   });
