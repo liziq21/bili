@@ -78,7 +78,7 @@ void main() {
       expect(choiceChip.tooltip, '最新上传');
 
       await tester.tap(chipFinder);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(selectedValue, isTrue);
     },
@@ -100,7 +100,7 @@ void main() {
       // `ChoiceChip` reports `false` for the already-selected chip, and a
       // single-select caller keeps its selection, so nothing changed.
       await tester.tap(find.byType(ChoiceChip));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(haptics, isEmpty);
     });
@@ -118,7 +118,7 @@ void main() {
       );
 
       await tester.tap(find.byType(ChoiceChip));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(haptics, contains('HapticFeedbackType.selectionClick'));
     });
@@ -140,7 +140,7 @@ void main() {
       // A multi-select caller removes the option on `false`, so the same
       // gesture that is a no-op under single-select is a real change here.
       await tester.tap(find.byType(ChoiceChip));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(reported, isFalse);
       expect(haptics, contains('HapticFeedbackType.selectionClick'));

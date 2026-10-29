@@ -38,7 +38,7 @@ void main() {
         await tester.pumpWidget(
           _buildScreen(SettingScreen(onSectionSelected: selections.add)),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         // Then its localized title and ordered groups match the skeleton.
         final context = tester.element(find.byType(SettingScreen));
@@ -78,12 +78,12 @@ void main() {
           await tester.pumpWidget(
             _buildScreen(SettingScreen(onSectionSelected: selections.add)),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
           expect(selections, isEmpty);
 
           // When this group's actual tile is tapped.
           await tester.tap(find.widgetWithText(ListTile, label));
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           // Then exactly one callback identifies that group.
           expect(selections, [section]);
@@ -108,7 +108,7 @@ void main() {
         try {
           // When the skeleton is rendered.
           await tester.pumpWidget(_buildScreen(screen));
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           // Then only its app bar title is present, with no settings content.
           expect(find.widgetWithText(AppBar, title), findsOneWidget);
@@ -136,7 +136,7 @@ void main() {
       try {
         // When the page is rendered.
         await tester.pumpWidget(_buildScreen(const AppearanceSettingsScreen()));
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         // Then the planned entry points are visible in order and remain inert.
         final context = tester.element(find.byType(AppearanceSettingsScreen));

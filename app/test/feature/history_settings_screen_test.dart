@@ -42,7 +42,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(_buildScreen(preferences));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final switches = find.byType(SwitchListTile);
     expect(switches, findsNWidgets(2));

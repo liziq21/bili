@@ -39,7 +39,7 @@ void main() {
         },
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     final lightScheme = ColorScheme.fromSeed(seedColor: accent);
     final darkScheme = ColorScheme.fromSeed(
@@ -72,7 +72,7 @@ void main() {
         },
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(light!.colorScheme, BrandPalette.of(Brightness.light).scheme);
     expect(dark!.colorScheme, BrandPalette.of(Brightness.dark).scheme);

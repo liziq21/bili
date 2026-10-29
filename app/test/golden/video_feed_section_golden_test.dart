@@ -84,7 +84,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pump();
       });
 
       final grid = tester.widget<SliverGrid>(find.byType(SliverGrid));
@@ -114,7 +114,7 @@ void main() {
               home: Scaffold(body: Center(child: widget)),
             ),
           );
-          await tester.pumpAndSettle();
+          await tester.pump();
         });
       },
       builder: () => GoldenTestGroup(

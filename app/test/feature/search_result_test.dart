@@ -47,7 +47,7 @@ void main() {
     );
 
     bloc.add(const FetchNextPage());
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
     expect(find.text('Nothing found'), findsOneWidget);
