@@ -316,6 +316,7 @@ so hand edits do not survive; change the generator instead.
 - ci: run required checks for changelog PR to enable auto-merge (#409)
 - ci(changelog): fix auto-merge when updating existing PR (#419)
 - ci: add PR author check to dispatch-coderabbit-to-jules workflow (#482)
+- ci: changelog workflow creates PR instead of direct push (LIZ-124) (#503)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
