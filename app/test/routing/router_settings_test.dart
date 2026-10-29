@@ -50,7 +50,7 @@ void main() {
         }
         expect(router.state.uri.path, Routes.settings);
         expect(find.byType(SettingScreen), findsOneWidget);
-        expect(find.byType(ListTile), findsNWidgets(5));
+        expect(find.byType(ListTile), findsNWidgets(6));
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

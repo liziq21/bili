@@ -256,7 +256,7 @@ void main() {
           await tester.tap(find.byType(BackButton));
           await tester.pumpAndSettle();
           expect(find.byType(SettingScreen), findsOneWidget);
-          expect(find.byType(ListTile), findsNWidgets(5));
+          expect(find.byType(ListTile), findsNWidgets(6));
         }
         expect(tester.takeException(), isNull);
       } finally {

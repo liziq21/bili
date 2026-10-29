@@ -49,7 +49,7 @@ void main() {
         expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
 
         final tiles = find.byType(ListTile);
-        expect(tiles, findsNWidgets(5));
+        expect(tiles, findsNWidgets(6));
         for (final (index, (_, label)) in sections.indexed) {
           final tile = tiles.at(index);
           expect(

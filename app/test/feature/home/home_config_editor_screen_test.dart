@@ -114,7 +114,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byIcon(Icons.arrow_upward));
+    await tester.tap(find.byIcon(Icons.arrow_upward).at(1));
     await tester.pump();
 
     final config = await _persistedConfig();
@@ -145,7 +145,7 @@ void main() {
     expect(dropdowns, findsNWidgets(2));
     await tester.tap(dropdowns.at(0));
     await tester.pump();
-    await tester.tap(find.text('3'));
+    await tester.tap(find.text('3').last);
     await tester.pump();
 
     final config = await _persistedConfig();
