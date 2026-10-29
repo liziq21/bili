@@ -15,7 +15,7 @@ final class const BiliRecommendLiveRoomFeedRemoteDataSource({
   String get title => '直播';
 
   @override
-  Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) {
+  Future<Result<Page<LiveRoomModel>, Exception>> fetchFeed({int? pageKey}) {
     return _network
         .searchLiveRoom('直播', page: pageKey)
         .then((it) => it.asPagedLiveRooms())

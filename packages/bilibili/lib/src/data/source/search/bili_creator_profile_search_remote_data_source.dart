@@ -17,7 +17,7 @@ final class const BiliCreatorProfileSearchRemoteDataSource({
   @override
   List<SortOption> get sortOptions => const [];
   @override
-  Future<Result<Page<CreatorProfile>>> searchCreatorProfile(
+  Future<Result<Page<CreatorProfile>, Exception>> searchCreatorProfile(
     String query, {
     int? pageKey,
   }) {
@@ -25,7 +25,7 @@ final class const BiliCreatorProfileSearchRemoteDataSource({
     if (cleanQuery.isEmpty) {
       final targetPage = pageKey ?? 1;
       return Future.value(
-        Result.ok(
+        Result.success(
           Page<CreatorProfile>(
             number: targetPage,
             totalPages: targetPage,

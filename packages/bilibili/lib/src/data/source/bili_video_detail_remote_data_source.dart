@@ -13,7 +13,7 @@ final class BiliVideoDetailRemoteDataSource({
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async {
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
     try {
       final sanitizedId = id.replaceAll(_controlChars, '').trim();
       if (sanitizedId.isEmpty) {
@@ -93,7 +93,7 @@ final class BiliVideoDetailRemoteDataSource({
         chapters: chapters,
       );
 
-      return Result.ok(detail);
+      return Result.success(detail);
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }

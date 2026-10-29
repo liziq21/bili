@@ -12,10 +12,10 @@ final class const BiliSearchSuggestRemoteDataSource({
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
   @override
-  Future<Result<List<String>>> getSuggests(String query) {
+  Future<Result<List<String>, Exception>> getSuggests(String query) {
     final sanitizedQuery = query.replaceAll(_controlChars, '').trim();
     if (sanitizedQuery.isEmpty) {
-      return Future.value(const Result.ok([]));
+      return Future.value(const Result.success([]));
     }
     return network
         .getSuggests(sanitizedQuery)

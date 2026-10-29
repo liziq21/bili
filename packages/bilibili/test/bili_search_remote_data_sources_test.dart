@@ -43,7 +43,7 @@ void main() {
         final result = await dataSource.searchVideo(
           const SearchQuery(query: 'flut\r\nter\x00'),
         );
-        expect(result, isA<Ok<Page<VideoModel>>>());
+        expect(result, isA<Success<Page<VideoModel>, Exception>>());
         expect(mockNetwork.lastCapturedQuery, equals('flutter'));
       });
 
@@ -53,10 +53,10 @@ void main() {
           final result = await dataSource.searchVideo(
             const SearchQuery(query: '   \r\n\x00'),
           );
-          expect(result, isA<Ok<Page<VideoModel>>>());
+          expect(result, isA<Success<Page<VideoModel>, Exception>>());
           expect(mockNetwork.lastCapturedQuery, isNull);
-          if (result case Ok(:final value)) {
-            expect(value.data, isEmpty);
+          if (result case Success(:final success)) {
+            expect(success.data, isEmpty);
           }
         },
       );
@@ -75,7 +75,7 @@ void main() {
         final result = await dataSource.searchCreatorProfile(
           'up\r\nmaster\x1f',
         );
-        expect(result, isA<Ok<Page<CreatorProfile>>>());
+        expect(result, isA<Success<Page<CreatorProfile>, Exception>>());
         expect(mockNetwork.lastCapturedQuery, equals('upmaster'));
       });
 
@@ -83,10 +83,10 @@ void main() {
         'returns empty Page when creator profile query is empty or whitespace',
         () async {
           final result = await dataSource.searchCreatorProfile('\r\n   ');
-          expect(result, isA<Ok<Page<CreatorProfile>>>());
+          expect(result, isA<Success<Page<CreatorProfile>, Exception>>());
           expect(mockNetwork.lastCapturedQuery, isNull);
-          if (result case Ok(:final value)) {
-            expect(value.data, isEmpty);
+          if (result case Success(:final success)) {
+            expect(success.data, isEmpty);
           }
         },
       );
@@ -101,7 +101,7 @@ void main() {
 
       test('strips control characters from live room query', () async {
         final result = await dataSource.searchLiveRoom('live\x00stream\r\n');
-        expect(result, isA<Ok<Page<LiveRoomModel>>>());
+        expect(result, isA<Success<Page<LiveRoomModel>, Exception>>());
         expect(mockNetwork.lastCapturedQuery, equals('livestream'));
       });
 
@@ -109,10 +109,10 @@ void main() {
         'returns empty Page when live room query is empty or whitespace',
         () async {
           final result = await dataSource.searchLiveRoom('\x7f\x00');
-          expect(result, isA<Ok<Page<LiveRoomModel>>>());
+          expect(result, isA<Success<Page<LiveRoomModel>, Exception>>());
           expect(mockNetwork.lastCapturedQuery, isNull);
-          if (result case Ok(:final value)) {
-            expect(value.data, isEmpty);
+          if (result case Success(:final success)) {
+            expect(success.data, isEmpty);
           }
         },
       );
@@ -127,18 +127,18 @@ void main() {
 
       test('strips control characters from aggregate search query', () async {
         final result = await dataSource.searchAll('all\r\nin\x00one');
-        expect(result, isA<Ok<AggregateSearchPage>>());
+        expect(result, isA<Success<AggregateSearchPage, Exception>>());
         expect(mockNetwork.lastCapturedQuery, equals('allinone'));
       });
 
       test('returns empty AggregateSearchPage when aggregate search query is empty or whitespace', () async {
         final result = await dataSource.searchAll(' \r\n ');
-        expect(result, isA<Ok<AggregateSearchPage>>());
+        expect(result, isA<Success<AggregateSearchPage, Exception>>());
         expect(mockNetwork.lastCapturedQuery, isNull);
-        if (result case Ok(:final value)) {
-          expect(value.data, isEmpty);
-          expect(value.creatorProfile, isNull);
-          expect(value.creatorProfileVideos, isNull);
+        if (result case Success(:final success)) {
+          expect(success.data, isEmpty);
+          expect(success.creatorProfile, isNull);
+          expect(success.creatorProfileVideos, isNull);
         }
       });
     });

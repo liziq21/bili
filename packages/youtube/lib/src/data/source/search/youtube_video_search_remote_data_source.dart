@@ -28,12 +28,14 @@ final class const YouTubeVideoSearchRemoteDataSource(
   static final Map<String, String> _continuationTokens = {};
 
   @override
-  Future<Result<Page<VideoModel>>> searchVideo(SearchQuery searchQuery) async {
+  Future<Result<Page<VideoModel>, Exception>> searchVideo(
+    SearchQuery searchQuery,
+  ) async {
     try {
       final targetPage = searchQuery.pageKey;
       final query = searchQuery.query.replaceAll(_controlChars, '').trim();
       if (query.isEmpty) {
-        return Result.ok(
+        return Result.success(
           Page<VideoModel>(
             number: targetPage,
             totalPages: targetPage,
@@ -118,7 +120,7 @@ final class const YouTubeVideoSearchRemoteDataSource(
       final totalPages = nextToken == null || nextToken.isEmpty
           ? targetPage
           : targetPage + 1;
-      return Result.ok(
+      return Result.success(
         Page<VideoModel>(
           number: targetPage,
           totalPages: totalPages,

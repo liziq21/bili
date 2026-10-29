@@ -198,9 +198,9 @@ void main() {
       'getVideoDetail maps detail, owner, relation, and related videos',
       () async {
         final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-        expect(result.isOk, isTrue);
+        expect(result.isSuccess(), isTrue);
 
-        final detail = (result as dynamic).value;
+        final detail = (result as dynamic).success;
         expect(detail.video.id, equals('BV1GJ411x7vy'));
         expect(detail.video.title, isNotEmpty);
         expect(detail.creator, isNotNull);
@@ -226,9 +226,9 @@ void main() {
         };
 
         final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-        expect(result.isOk, isTrue);
+        expect(result.isSuccess(), isTrue);
 
-        final chapters = (result as dynamic).value.chapters as List;
+        final chapters = (result as dynamic).success.chapters as List;
         // 空白标题与缺起点的看点被丢掉，其余按起点升序。
         expect(
           chapters
@@ -252,8 +252,8 @@ void main() {
         mockNetwork.playerInfoError = Exception('player unavailable');
 
         final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-        expect(result.isOk, isTrue);
-        expect((result as dynamic).value.chapters, isEmpty);
+        expect(result.isSuccess(), isTrue);
+        expect((result as dynamic).success.chapters, isEmpty);
       },
     );
 
@@ -262,9 +262,9 @@ void main() {
         'BV1GJ411x7vy',
         page: 1,
       );
-      expect(result.isOk, isTrue);
+      expect(result.isSuccess(), isTrue);
 
-      final page = (result as dynamic).value;
+      final page = (result as dynamic).success;
       expect(page.number, equals(1));
       expect(page.data, isNotEmpty);
       expect(page.data.first.authorName, isNotEmpty);
@@ -273,8 +273,9 @@ void main() {
     test('getDanmaku maps the XML DTO to neutral timed comments', () async {
       final result = await danmakuDataSource.getDanmaku('BV1GJ411x7vy');
 
-      expect(result.isOk, isTrue);
-      final comments = (result as Ok<List<DanmakuComment>>).value;
+      expect(result.isSuccess(), isTrue);
+      final comments =
+          (result as Success<List<DanmakuComment>, Exception>).success;
       expect(comments, hasLength(1));
       expect(comments.single.startTime, const Duration(milliseconds: 1500));
       expect(comments.single.mode, DanmakuMode.top);
@@ -331,8 +332,9 @@ void main() {
       );
 
       final result = await customDanmakuDataSource.getDanmaku('BV1GJ411x7vy');
-      expect(result.isOk, isTrue);
-      final comments = (result as Ok<List<DanmakuComment>>).value;
+      expect(result.isSuccess(), isTrue);
+      final comments =
+          (result as Success<List<DanmakuComment>, Exception>).success;
       expect(comments, hasLength(1));
       expect(comments.single.content, '弹幕内容');
     });
@@ -343,9 +345,9 @@ void main() {
         '2202965009',
         page: 2,
       );
-      expect(result.isOk, isTrue);
+      expect(result.isSuccess(), isTrue);
 
-      final page = (result as dynamic).value;
+      final page = (result as dynamic).success;
       expect(page.number, equals(2));
       expect(page.totalPages, equals(1));
       expect(page.data, isEmpty);
@@ -356,37 +358,37 @@ void main() {
       final sanitizedResult = await detailDataSource.getVideoDetail(
         'BV1GJ411x7vy\r\n\x00',
       );
-      expect(sanitizedResult.isOk, isTrue);
+      expect(sanitizedResult.isSuccess(), isTrue);
 
       final emptyResult = await detailDataSource.getVideoDetail('  \r\n\x00 ');
-      expect(emptyResult.isError, isTrue);
+      expect(emptyResult.isError(), isTrue);
     });
 
     test('getVideoComments sanitizes control characters and returns Result.error for empty ID', () async {
       final sanitizedResult = await commentDataSource.getVideoComments(
         'BV1GJ411x7vy\r\n\x00',
       );
-      expect(sanitizedResult.isOk, isTrue);
+      expect(sanitizedResult.isSuccess(), isTrue);
 
       final emptyResult = await commentDataSource.getVideoComments(
         '  \r\n\x00 ',
       );
-      expect(emptyResult.isError, isTrue);
+      expect(emptyResult.isError(), isTrue);
     });
 
     test(
       'normalizes http:// and // URLs in video detail and comments to https://',
       () async {
         final detailRes = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-        expect(detailRes.isOk, isTrue);
-        final detail = (detailRes as dynamic).value;
+        expect(detailRes.isSuccess(), isTrue);
+        final detail = (detailRes as dynamic).success;
         expect(detail.video.thumbnailUrl, startsWith('https://'));
 
         final commentRes = await commentDataSource.getVideoComments(
           'BV1GJ411x7vy',
         );
-        expect(commentRes.isOk, isTrue);
-        final page = (commentRes as dynamic).value;
+        expect(commentRes.isSuccess(), isTrue);
+        final page = (commentRes as dynamic).success;
         expect(page.data.first.authorAvatar, startsWith('https://'));
       },
     );

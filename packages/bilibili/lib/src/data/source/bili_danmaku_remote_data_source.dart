@@ -11,7 +11,9 @@ final class BiliDanmakuRemoteDataSource({
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
   @override
-  Future<Result<List<DanmakuComment>>> getDanmaku(String videoId) async {
+  Future<Result<List<DanmakuComment>, Exception>> getDanmaku(
+    String videoId,
+  ) async {
     try {
       final sanitizedVideoId = videoId.replaceAll(_controlChars, '').trim();
       if (sanitizedVideoId.isEmpty) {
@@ -25,7 +27,7 @@ final class BiliDanmakuRemoteDataSource({
       }
 
       final document = await network.getDanmaku(cid: cid);
-      return Result.ok(
+      return Result.success(
         document.comments
             .map((comment) {
               final sanitizedContent = comment.content

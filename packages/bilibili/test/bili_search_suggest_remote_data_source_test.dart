@@ -35,10 +35,10 @@ void main() {
         );
 
         final result = await dataSource.getSuggests('flut\r\nter\x00');
-        expect(result, isA<Ok<List<String>>>());
+        expect(result, isA<Success<List<String>, Exception>>());
         expect(mockNetwork.lastCapturedTerm, equals('flutter'));
-        if (result case Ok(:final value)) {
-          expect(value, equals(['flutter']));
+        if (result case Success(:final success)) {
+          expect(success, equals(['flutter']));
         }
       },
     );
@@ -47,10 +47,10 @@ void main() {
       'returns empty list immediately when query only contains control chars',
       () async {
         final result = await dataSource.getSuggests('\r\n\x00\x1f');
-        expect(result, isA<Ok<List<String>>>());
+        expect(result, isA<Success<List<String>, Exception>>());
         expect(mockNetwork.lastCapturedTerm, isNull);
-        if (result case Ok(:final value)) {
-          expect(value, isEmpty);
+        if (result case Success(:final success)) {
+          expect(success, isEmpty);
         }
       },
     );
@@ -67,9 +67,9 @@ void main() {
       );
 
       final result = await dataSource.getSuggests('flutter');
-      expect(result, isA<Ok<List<String>>>());
-      if (result case Ok(:final value)) {
-        expect(value, equals(['a < b > c', '<b>dart</b>']));
+      expect(result, isA<Success<List<String>, Exception>>());
+      if (result case Success(:final success)) {
+        expect(success, equals(['a < b > c', '<b>dart</b>']));
       }
     });
 
@@ -77,10 +77,10 @@ void main() {
       'returns empty list immediately when query only contains spaces',
       () async {
         final result = await dataSource.getSuggests('   ');
-        expect(result, isA<Ok<List<String>>>());
+        expect(result, isA<Success<List<String>, Exception>>());
         expect(mockNetwork.lastCapturedTerm, isNull);
-        if (result case Ok(:final value)) {
-          expect(value, isEmpty);
+        if (result case Success(:final success)) {
+          expect(success, isEmpty);
         }
       },
     );
