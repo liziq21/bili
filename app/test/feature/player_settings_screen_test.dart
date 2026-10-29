@@ -112,4 +112,39 @@ void main() {
     expect(find.text(l10n.playerDefaultQuality), findsOneWidget);
     expect(find.text('默认画质'), findsNothing);
   });
+
+  testWidgets('exposes selection state for option pickers in player settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(PlayerSettingsScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    await tester.tap(find.text(l10n.playerDefaultQuality));
+    await tester.pumpAndSettle();
+
+    final autoTile = tester.widget<ListTile>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.ancestor(
+          of: find.text(l10n.playerQualityAuto),
+          matching: find.byType(ListTile),
+        ),
+      ),
+    );
+    expect(autoTile.selected, isTrue);
+
+    final p1080Tile = tester.widget<ListTile>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.ancestor(
+          of: find.text(l10n.playerQualityHeight('1080')),
+          matching: find.byType(ListTile),
+        ),
+      ),
+    );
+    expect(p1080Tile.selected, isFalse);
+  });
 }

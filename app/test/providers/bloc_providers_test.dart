@@ -5,7 +5,7 @@ import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/providers/bloc_providers.dart';
 import 'package:app/providers/repo_providers.dart';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart'

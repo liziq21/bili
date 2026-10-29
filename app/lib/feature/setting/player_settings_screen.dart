@@ -146,22 +146,28 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     required String subtitle,
     required String value,
     required VoidCallback onTap,
-  }) => ListTile(
-    title: Text(title),
-    subtitle: Text(subtitle),
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: $styles.text.bodySmall.copyWith(
-            color: $styles.colors.onSurfaceVariant,
+  }) => Tooltip(
+    message: '$title: $value',
+    child: ListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: $styles.text.bodySmall.copyWith(
+              color: $styles.colors.onSurfaceVariant,
+            ),
           ),
-        ),
-        Icon(Icons.chevron_right, color: $styles.colors.onSurfaceVariant),
-      ],
+          Icon(Icons.chevron_right, color: $styles.colors.onSurfaceVariant),
+        ],
+      ),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
     ),
-    onTap: onTap,
   );
 
   Widget _sectionHeader(String title) => Padding(
@@ -288,9 +294,13 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     required VoidCallback onTap,
   }) => ListTile(
     title: Text(title),
+    selected: selected,
     trailing: selected
         ? Icon(Icons.check, color: $styles.colors.accentText)
         : null,
-    onTap: onTap,
+    onTap: () {
+      HapticFeedback.selectionClick();
+      onTap();
+    },
   );
 }
