@@ -5990,5 +5990,53 @@
   "skip": "跳过",
   "@skip": {
     "description": "Player error action - skip the current queue item"
+  },
+  "settingsDiscovery": "发现",
+  "@settingsDiscovery": {
+    "description": "Settings group and subpage title - home configuration"
+  },
+  "homeConfigTitle": "首页",
+  "@homeConfigTitle": {
+    "description": "Home configuration editor page title"
+  },
+  "homeConfigSource": "服务源",
+  "@homeConfigSource": {
+    "description": "Home configuration section label - service source"
+  },
+  "homeConfigTabs": "标签页",
+  "@homeConfigTabs": {
+    "description": "Home configuration section label - feed tabs"
+  },
+  "homeConfigMoveUp": "上移",
+  "@homeConfigMoveUp": {
+    "description": "Home configuration action - move a tab up"
+  },
+  "homeConfigMoveDown": "下移",
+  "@homeConfigMoveDown": {
+    "description": "Home configuration action - move a tab down"
+  },
+  "homeConfigSetMain": "设为主标签",
+  "@homeConfigSetMain": {
+    "description": "Home configuration action - set a tab as the main tab"
+  },
+  "homeConfigGridColumns": "网格列数",
+  "@homeConfigGridColumns": {
+    "description": "Home configuration setting - grid columns per orientation"
+  },
+  "homeConfigPortrait": "竖屏",
+  "@homeConfigPortrait": {
+    "description": "Home configuration orientation label - portrait"
+  },
+  "homeConfigLandscape": "横屏",
+  "@homeConfigLandscape": {
+    "description": "Home configuration orientation label - landscape"
+  },
+  "homeConfigVisible": "显示",
+  "@homeConfigVisible": {
+    "description": "Home configuration tab visibility state - visible"
+  },
+  "homeConfigHidden": "隐藏",
+  "@homeConfigHidden": {
+    "description": "Home configuration tab visibility state - hidden"
   }
 }

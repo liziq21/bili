@@ -22,6 +22,7 @@ import '../providers/service_source_providers.dart';
 import '../providers/media_sources_provider.dart';
 import '../ui/common/app_navigation_shell.dart';
 import 'routes.dart';
+import '../feature/home/home_config_editor_screen.dart';
 import '../feature/home/home_screen.dart';
 import '../feature/live/live_screen.dart';
 import '../feature/media_library/media_library_screen.dart';
@@ -187,6 +188,7 @@ final GoRouter router = GoRouter(
                   SettingsSection.history => Routes.settingsHistory,
                   SettingsSection.library => Routes.settingsLibrary,
                   SettingsSection.advanced => Routes.settingsAdvanced,
+                  SettingsSection.discovery => Routes.settingsDiscovery,
                 }),
           ),
           routes: [
@@ -209,6 +211,10 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Routes.settingsAdvancedRelative,
               builder: (_, _) => const AdvancedSettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsDiscoveryRelative,
+              builder: (_, _) => const HomeConfigEditorScreen(),
             ),
           ],
         ),

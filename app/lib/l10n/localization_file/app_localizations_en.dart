@@ -4434,4 +4434,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currentlyPlaying => 'Currently playing';
+
+  @override
+  String get settingsDiscovery => 'Discovery';
+
+  @override
+  String get homeConfigTitle => 'Home';
+
+  @override
+  String get homeConfigSource => 'Service source';
+
+  @override
+  String get homeConfigTabs => 'Tabs';
+
+  @override
+  String get homeConfigMoveUp => 'Move up';
+
+  @override
+  String get homeConfigMoveDown => 'Move down';
+
+  @override
+  String get homeConfigSetMain => 'Set as main';
+
+  @override
+  String get homeConfigGridColumns => 'Grid columns';
+
+  @override
+  String get homeConfigPortrait => 'Portrait';
+
+  @override
+  String get homeConfigLandscape => 'Landscape';
+
+  @override
+  String get homeConfigVisible => 'Visible';
+
+  @override
+  String get homeConfigHidden => 'Hidden';
 }

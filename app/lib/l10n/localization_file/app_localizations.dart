@@ -7618,6 +7618,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Currently playing'**
   String get currentlyPlaying;
+
+  /// Settings group and subpage title - home configuration
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery'**
+  String get settingsDiscovery;
+
+  /// Home configuration editor page title
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeConfigTitle;
+
+  /// Home configuration section label - service source
+  ///
+  /// In en, this message translates to:
+  /// **'Service source'**
+  String get homeConfigSource;
+
+  /// Home configuration section label - feed tabs
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs'**
+  String get homeConfigTabs;
+
+  /// Home configuration action - move a tab up
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get homeConfigMoveUp;
+
+  /// Home configuration action - move a tab down
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get homeConfigMoveDown;
+
+  /// Home configuration action - set a tab as the main tab
+  ///
+  /// In en, this message translates to:
+  /// **'Set as main'**
+  String get homeConfigSetMain;
+
+  /// Home configuration setting - grid columns per orientation
+  ///
+  /// In en, this message translates to:
+  /// **'Grid columns'**
+  String get homeConfigGridColumns;
+
+  /// Home configuration orientation label - portrait
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get homeConfigPortrait;
+
+  /// Home configuration orientation label - landscape
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get homeConfigLandscape;
+
+  /// Home configuration tab visibility state - visible
+  ///
+  /// In en, this message translates to:
+  /// **'Visible'**
+  String get homeConfigVisible;
+
+  /// Home configuration tab visibility state - hidden
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get homeConfigHidden;
 }
 
 class _AppLocalizationsDelegate

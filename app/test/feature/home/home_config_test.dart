@@ -170,4 +170,52 @@ void main() {
 
     expect(restored.sources['bilibili']!.tabs.single.label, '热门视频');
   });
+
+  group('HomeConfigEditorX', () {
+    HomeConfig _baseConfig() {
+      return HomeConfig(
+        {
+          'test': HomeSourceConfig([
+            HomeTabConfig(
+              id: 'tab_a',
+              label: 'Tab A',
+              isVisible: true,
+              sortOrder: 0,
+            ),
+            HomeTabConfig(
+              id: 'tab_b',
+              label: 'Tab B',
+              isVisible: true,
+              sortOrder: 1,
+            ),
+          ], mainTabId: 'tab_a'),
+        },
+        gridColumnsPortrait: 2,
+        gridColumnsLandscape: 3,
+      );
+    }
+
+    test('toggles tab visibility', () {
+      final updated = _baseConfig().withTabVisible('test', 'tab_a', false);
+      expect(updated.sources['test']!.tabs[0].isVisible, isFalse);
+      expect(updated.sources['test']!.tabs[1].isVisible, isTrue);
+    });
+
+    test('moves tab up and swaps sort order', () {
+      final updated = _baseConfig().withTabMoved('test', 'tab_b', true);
+      expect(updated.sources['test']!.tabs[0].sortOrder, equals(1));
+      expect(updated.sources['test']!.tabs[1].sortOrder, equals(0));
+    });
+
+    test('sets main tab', () {
+      final updated = _baseConfig().withMainTab('test', 'tab_b');
+      expect(updated.sources['test']!.mainTabId, equals('tab_b'));
+    });
+
+    test('edits grid columns', () {
+      final updated = _baseConfig().withGridColumns(portrait: 4, landscape: 5);
+      expect(updated.gridColumnsPortrait, equals(4));
+      expect(updated.gridColumnsLandscape, equals(5));
+    });
+  });
 }

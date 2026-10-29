@@ -10,6 +10,7 @@ enum SettingsSection() {
   history,
   library,
   advanced,
+  discovery,
 }
 
 class const SettingScreen({
@@ -42,6 +43,11 @@ class const SettingScreen({
               Icons.video_library_outlined,
             ),
             (SettingsSection.advanced, l10n.settingsAdvanced, Icons.tune),
+            (
+              SettingsSection.discovery,
+              l10n.settingsDiscovery,
+              Icons.home_outlined,
+            ),
           ])
             Tooltip(
               message: label,

@@ -220,6 +220,7 @@ void main() {
             'history',
             'library',
             'advanced',
+            'discovery',
           ]),
         );
         expect(danmaku, hasLength(1));
