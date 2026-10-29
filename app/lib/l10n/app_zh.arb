@@ -5963,34 +5963,6 @@
   "@currentlyPlaying": {
     "description": "Accessibility label for the current playback queue item"
   },
-  "playbackErrorNetwork": "网络错误",
-  "@playbackErrorNetwork": {
-    "description": "Playback error category - network failure"
-  },
-  "playbackErrorDecoder": "解码错误",
-  "@playbackErrorDecoder": {
-    "description": "Playback error category - media decoding failure"
-  },
-  "playbackErrorDrm": "DRM 错误",
-  "@playbackErrorDrm": {
-    "description": "Playback error category - DRM failure"
-  },
-  "playbackErrorAuthorization": "授权错误",
-  "@playbackErrorAuthorization": {
-    "description": "Playback error category - authorization failure"
-  },
-  "playbackErrorUnknown": "未知播放错误",
-  "@playbackErrorUnknown": {
-    "description": "Playback error category - unknown failure"
-  },
-  "playbackRetrying": "正在重试...",
-  "@playbackRetrying": {
-    "description": "Playback status shown while retrying a network failure"
-  },
-  "skip": "跳过",
-  "@skip": {
-    "description": "Player error action - skip the current queue item"
-  },
   "settingsDiscovery": "发现",
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"
@@ -6038,5 +6010,25 @@
   "homeConfigHidden": "隐藏",
   "@homeConfigHidden": {
     "description": "Home configuration tab visibility state - hidden"
+  },
+  "liveRoomLoading": "直播间加载中",
+  "@liveRoomLoading": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveRoomError": "直播间加载失败",
+  "@liveRoomError": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveStreamError": "直播流加载失败",
+  "@liveStreamError": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveOnline": "在线",
+  "@liveOnline": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveViewers": "观看",
+  "@liveViewers": {
+    "description": "LIZ-84 live room detail and stream"
   }
 }

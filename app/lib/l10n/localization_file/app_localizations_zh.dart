@@ -4463,4 +4463,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get homeConfigHidden => '隐藏';
+
+  @override
+  String get liveRoomLoading => '直播间加载中';
+
+  @override
+  String get liveRoomError => '直播间加载失败';
+
+  @override
+  String get liveStreamError => '直播流加载失败';
+
+  @override
+  String get liveOnline => '在线';
+
+  @override
+  String get liveViewers => '观看';
 }

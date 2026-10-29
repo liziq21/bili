@@ -18,6 +18,9 @@ abstract class const MediaSource() {
   DanmakuRemoteDataSource? get danmakuDataSource => null;
   MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
 
+  /// 直播间详情与直播流地址能力（可选）。
+  LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
+
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => const [];
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
 

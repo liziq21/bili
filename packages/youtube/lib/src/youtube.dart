@@ -60,6 +60,8 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   /// 成本与 B站不同量级，故本项显式声明为不支持而非留空。
   @override
   MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  @override
+  LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
 
   @override
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => const [];
