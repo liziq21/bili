@@ -43,6 +43,8 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Check symbol map
+        run: python3 check_symbol_map.py
       - name: Validate iOS project configuration
         run: python3 tool/validate_ios_config.py
 
