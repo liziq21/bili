@@ -19,7 +19,7 @@ class FakeEmptySearchContentsRepository
 
   @override
   Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
-    return Result.ok(Page<VideoModel>(data: [], number: 1, totalPages: 1));
+    return Result.success(Page<VideoModel>(data: [], number: 1, totalPages: 1));
   }
 }
 

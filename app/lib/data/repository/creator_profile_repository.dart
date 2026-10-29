@@ -5,7 +5,7 @@ import '../../database/dao/creator_profile_dao.dart';
 import 'search_contents_repository.dart';
 
 abstract interface class CreatorProfileRepository() {
-  Future<Result<CreatorProfile>> getProfile(String id);
+  Future<Result<CreatorProfile, Exception>> getProfile(String id);
 }
 
 class const AppCreatorProfileRepository(
@@ -14,21 +14,21 @@ class const AppCreatorProfileRepository(
   final CreatorProfileSearchRepository _searchRepository,
 ) implements CreatorProfileRepository {
   @override
-  Future<Result<CreatorProfile>> getProfile(String id) async {
+  Future<Result<CreatorProfile, Exception>> getProfile(String id) async {
     final cachedProfile = await _creatorProfileDao.getCreatorProfile(
       _sourceId,
       id,
     );
-    if (cachedProfile != null) return Result.ok(cachedProfile.asModel());
+    if (cachedProfile != null) return Result.success(cachedProfile.asModel());
 
     final result = await _searchRepository.search(SearchQuery(query: id));
     return switch (result) {
-      Ok(:final value) => await _cacheRemoteProfile(value, id),
+      Success(:final success) => await _cacheRemoteProfile(success, id),
       Error(:final error) => Result.error(error),
     };
   }
 
-  Future<Result<CreatorProfile>> _cacheRemoteProfile(
+  Future<Result<CreatorProfile, Exception>> _cacheRemoteProfile(
     Page<CreatorProfile> page,
     String requestedId,
   ) async {
@@ -44,6 +44,6 @@ class const AppCreatorProfileRepository(
     }
 
     await _creatorProfileDao.cacheCreatorProfile(_sourceId, profile);
-    return Result.ok(profile);
+    return Result.success(profile);
   }
 }

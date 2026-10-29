@@ -36,19 +36,19 @@ class VideoBloc({
 
     final result = await _repository.getVideoDetail(event.id);
     switch (result) {
-      case Ok(:final value):
-        var detail = value;
+      case Success(:final success):
+        var detail = success;
         final local = _localLibraryRepository;
         final sourceId = _sourceId;
         if (local != null && sourceId != null) {
           final isFavorited = await local.isBookmarked(
             sourceId,
-            value.video.id,
+            success.video.id,
           );
-          final isSubscribed = value.creator == null
+          final isSubscribed = success.creator == null
               ? false
-              : await local.isSubscribed(sourceId, value.creator!.id);
-          detail = value.copyWith(
+              : await local.isSubscribed(sourceId, success.creator!.id);
+          detail = success.copyWith(
             isFavorited: isFavorited,
             isSubscribed: isSubscribed,
           );
@@ -69,8 +69,8 @@ class VideoBloc({
 
     final result = await _repository.getMediaStream(event.id);
     switch (result) {
-      case Ok(:final value):
-        emit(state.copyWith(mediaStream: value));
+      case Success(:final success):
+        emit(state.copyWith(mediaStream: success));
       case Error(:final error):
         _log.warning('Failed to load media stream', error);
         emit(state.copyWith(streamError: error.toString()));
@@ -100,7 +100,7 @@ class VideoBloc({
     // 乐观更新已经上屏，写失败必须回滚：否则界面停在一个从未被持久化的状态上，
     // 且没有任何迹象告诉用户它没生效。
     switch (result) {
-      case Ok():
+      case Success():
         break;
       case Error(:final error):
         _log.warning('Failed to toggle like', error);
@@ -136,7 +136,7 @@ class VideoBloc({
           );
     // 回滚理由同 _onToggleVideoLike
     switch (result) {
-      case Ok():
+      case Success():
         break;
       case Error(:final error):
         _log.warning('Failed to toggle favorite', error);
@@ -168,7 +168,7 @@ class VideoBloc({
           );
     // 回滚理由同 _onToggleVideoLike
     switch (result) {
-      case Ok():
+      case Success():
         break;
       case Error(:final error):
         _log.warning('Failed to toggle subscribe', error);
@@ -184,7 +184,7 @@ class VideoBloc({
     emit(state.copyWith(mediaStream: event.stream, streamError: null));
   }
 
-  Future<Result<void>> _setLocalBookmark(
+  Future<Result<void, Exception>> _setLocalBookmark(
     LocalLibraryRepository repository,
     String sourceId,
     VideoDetail updatedDetail,
@@ -195,26 +195,26 @@ class VideoBloc({
         video: updatedDetail.video,
         bookmarked: updatedDetail.isFavorited,
       );
-      return const Result.ok(null);
+      return const Result.success(null);
     } on Exception catch (error) {
       return Result.error(error);
     }
   }
 
-  Future<Result<void>> _setLocalSubscription(
+  Future<Result<void, Exception>> _setLocalSubscription(
     LocalLibraryRepository repository,
     String sourceId,
     VideoDetail updatedDetail,
   ) async {
     try {
       final creator = updatedDetail.creator;
-      if (creator == null) return const Result.ok(null);
+      if (creator == null) return const Result.success(null);
       await repository.setSubscription(
         sourceId: sourceId,
         creator: creator,
         subscribed: updatedDetail.isSubscribed,
       );
-      return const Result.ok(null);
+      return const Result.success(null);
     } on Exception catch (error) {
       return Result.error(error);
     }

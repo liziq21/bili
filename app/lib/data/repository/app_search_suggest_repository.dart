@@ -7,6 +7,6 @@ class const AppSearchSuggestRepository(
   final SearchSuggestRemoteDataSource _remoteDataSource,
 ) implements SearchSuggestRepository {
   @override
-  Future<Result<List<String>>> getSuggests(String query) =>
+  Future<Result<List<String>, Exception>> getSuggests(String query) =>
       _remoteDataSource.getSuggests(query);
 }

@@ -60,9 +60,9 @@ class SearchBloc({
     final result = await _searchSuggestRepository.getSuggests(query);
 
     switch (result) {
-      case Ok(:final value):
-        _log.fine('Suggests (${value.length}) loaded');
-        emit(state.copyWith(suggests: value, currentQuery: query));
+      case Success(:final success):
+        _log.fine('Suggests () loaded');
+        emit(state.copyWith(suggests: success, currentQuery: query));
       case Error():
         _log.warning('Failed to load suggests');
         emit(state.copyWith(suggests: [], currentQuery: query));

@@ -125,19 +125,19 @@ void main() {
 
   group('PreferencesKey values and defaults', () {
     test('returns null when a nullable String key is unset', () async {
-      final Result<String?> result = await ds.get(PreferencesKey.sourceId);
+      final Result<String?, Exception> result = await ds.get(PreferencesKey.sourceId);
 
-      expect(result.isOk, isTrue);
-      expect((result as Ok<String?>).value, isNull);
+      expect(result.isSuccess(), isTrue);
+      expect((result as Success<String?, Exception>).success, isNull);
     });
 
     test('reads back the value written to a nullable String key', () async {
       await ds.set(PreferencesKey.sourceId, 'bilibili');
 
-      final Result<String?> result = await ds.get(PreferencesKey.sourceId);
+      final Result<String?, Exception> result = await ds.get(PreferencesKey.sourceId);
 
-      expect(result.isOk, isTrue);
-      expect((result as Ok<String?>).value, 'bilibili');
+      expect(result.isSuccess(), isTrue);
+      expect((result as Success<String?, Exception>).success, 'bilibili');
     });
 
     test('falls back to the declared true default for bool', () async {
@@ -145,13 +145,13 @@ void main() {
       // 进入动态取色。
       final result = await ds.get(PreferencesKey.useDynamicColor);
 
-      expect((result as Ok<bool>).value, isTrue);
+      expect((result as Success<bool, Exception>).success, isTrue);
     });
 
     test('falls back to the declared default for String', () async {
       final result = await ds.get(PreferencesKey.themeConfig);
 
-      expect((result as Ok<String>).value, 'FOLLOW_SYSTEM');
+      expect((result as Success<String, Exception>).success, 'FOLLOW_SYSTEM');
     });
 
     test('returns an error when the stored value has the wrong type', () async {
@@ -167,8 +167,8 @@ void main() {
 
       final result = await dataSource.get(PreferencesKey.useDynamicColor);
 
-      expect(result, isA<Error<bool>>());
-      expect((result as Error<bool>).error.toString(), contains('String'));
+      expect(result, isA<Error<bool, Exception>>());
+      expect((result as Error<bool, Exception>).error.toString(), contains('String'));
     });
 
     test('returns an error instead of writing a mismatched value', () async {
@@ -177,9 +177,9 @@ void main() {
 
       final result = await ds.set(key, value);
 
-      expect(result, isA<Error<void>>());
+      expect(result, isA<Error<void, Exception>>());
       final readBack = await ds.get(PreferencesKey.useDynamicColor);
-      expect((readBack as Ok<bool>).value, isTrue);
+      expect((readBack as Success<bool, Exception>).success, isTrue);
     });
 
     test('reads back false after writing false to a bool key', () async {
@@ -187,7 +187,7 @@ void main() {
 
       final result = await ds.get(PreferencesKey.useDynamicColor);
 
-      expect((result as Ok<bool>).value, isFalse);
+      expect((result as Success<bool, Exception>).success, isFalse);
     });
 
     test('does not cross values between bool and String keys', () async {
@@ -199,8 +199,8 @@ void main() {
       final theme = await ds.get(PreferencesKey.themeConfig);
       final dynamicColor = await ds.get(PreferencesKey.useDynamicColor);
 
-      expect((theme as Ok<String>).value, 'DARK');
-      expect((dynamicColor as Ok<bool>).value, isFalse);
+      expect((theme as Success<String, Exception>).success, 'DARK');
+      expect((dynamicColor as Success<bool, Exception>).success, isFalse);
     });
 
     test('treats writing null as removal and falls back to default', () async {
@@ -209,7 +209,7 @@ void main() {
 
       final result = await ds.get(PreferencesKey.useDynamicColor);
 
-      expect((result as Ok<bool>).value, isTrue);
+      expect((result as Success<bool, Exception>).success, isTrue);
     });
   });
 

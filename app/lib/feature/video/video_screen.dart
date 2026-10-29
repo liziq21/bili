@@ -247,8 +247,8 @@ class VideoScreenState() extends State<VideoScreen> {
     ) async {
       final result = await repository.getMediaStream(videoId);
       switch (result) {
-        case Ok(:final value):
-          await controller.addToQueue(value, videoId: videoId);
+        case Success(:final success):
+          await controller.addToQueue(success, videoId: videoId);
           return true;
         case Error():
           return false;

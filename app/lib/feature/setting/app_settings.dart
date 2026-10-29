@@ -232,7 +232,7 @@ Future<T> readSetting<T>(
 ) async {
   final result = await preferences.get(key);
   return switch (result) {
-    Ok(:final value) => value,
+    Success(:final success) => success,
     Error() => fallback,
   };
 }

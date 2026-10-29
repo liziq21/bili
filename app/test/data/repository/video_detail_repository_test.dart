@@ -10,22 +10,22 @@ class _FailingVideoDetailRemoteDataSource()
   String get sourceId => 'failing';
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async =>
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('boom'));
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      Result.ok(isLiked);
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      Result.success(isLiked);
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.ok(isFavorited);
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.success(isFavorited);
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
-  ) async => Result.ok(isSubscribed);
+  ) async => Result.success(isSubscribed);
 }
 
 /// A data source whose toggles succeed but can be told to report `false`,
@@ -38,7 +38,7 @@ class _ControllableVideoDetailRemoteDataSource()
   bool likeResult = true;
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async => Result.ok(
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async => Result.success(
     VideoDetail(
       video: VideoModel(id: id, title: 'title', url: 'https://example.com'),
       creator: CreatorProfile(id: 'c1', name: 'Creator'),
@@ -51,18 +51,18 @@ class _ControllableVideoDetailRemoteDataSource()
   );
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
-      Result.ok(likeResult);
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      Result.success(likeResult);
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.ok(isFavorited);
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
+      Result.success(isFavorited);
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
-  ) async => Result.ok(isSubscribed);
+  ) async => Result.success(isSubscribed);
 }
 
 /// `AppVideoDetailRepository` is the fallback used when the surrounding tree
@@ -86,11 +86,11 @@ void main() {
 
       final result = repository.getVideoDetail('BV1');
 
-      expect(result, isA<Future<Result<VideoDetail>>>());
+      expect(result, isA<Future<Result<VideoDetail, Exception>>>());
       return result.then((value) {
-        expect(value.isError, isTrue);
+        expect(value.isError(), isTrue);
         expect(
-          (value as Error<VideoDetail>).error.toString(),
+          (value as Error<VideoDetail, Exception>).error.toString(),
           contains('boom'),
         );
       });
@@ -104,7 +104,7 @@ void main() {
 
       final result = await repository.toggleLike('BV1', true);
 
-      expect((result as Ok<bool>).value, isFalse);
+      expect((result as Success<bool, Exception>).success, isFalse);
     });
   });
 
@@ -120,14 +120,14 @@ void main() {
     test('getVideoDetail reports the capability as missing', () async {
       final result = await repository.getVideoDetail('BV123');
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<VideoDetail>).error.toString(),
+        (result as Error<VideoDetail, Exception>).error.toString(),
         contains('does not support'),
       );
     });
 
-    // The three writes below used to return `Result.ok(!current)`, i.e. success
+    // The three writes below used to return `Result.success(!current)`, i.e. success
     // for an action that never happened, while the read above reported the same
     // missing capability as an error. The bloc now reads the Result and rolls
     // back on failure, so a fictional success would leave the UI showing a like
@@ -135,9 +135,9 @@ void main() {
     test('toggleLike reports the capability as missing', () async {
       final result = await repository.toggleLike('BV1', false);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<bool>).error.toString(),
+        (result as Error<bool, Exception>).error.toString(),
         contains('does not support'),
       );
     });
@@ -145,9 +145,9 @@ void main() {
     test('toggleFavorite reports the capability as missing', () async {
       final result = await repository.toggleFavorite('BV1', false);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<bool>).error.toString(),
+        (result as Error<bool, Exception>).error.toString(),
         contains('does not support'),
       );
     });
@@ -155,20 +155,20 @@ void main() {
     test('toggleSubscribe reports the capability as missing', () async {
       final result = await repository.toggleSubscribe('c1', false);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<bool>).error.toString(),
+        (result as Error<bool, Exception>).error.toString(),
         contains('does not support'),
       );
     });
 
     test('the requested value cannot change a missing capability', () async {
       // The old implementation derived its answer from the argument
-      // (`Result.ok(!isLiked)`), so asking for `true` yielded `false`. There is
+      // (`Result.success(!isLiked)`), so asking for `true` yielded `false`. There is
       // no longer any value for the argument to produce.
-      expect((await repository.toggleLike('BV1', true)).isError, isTrue);
-      expect((await repository.toggleFavorite('BV1', true)).isError, isTrue);
-      expect((await repository.toggleSubscribe('c1', true)).isError, isTrue);
+      expect((await repository.toggleLike('BV1', true)).isError(), isTrue);
+      expect((await repository.toggleFavorite('BV1', true)).isError(), isTrue);
+      expect((await repository.toggleSubscribe('c1', true)).isError(), isTrue);
     });
   });
 }

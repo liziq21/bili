@@ -187,9 +187,9 @@ class HomeConfig(
   }) async {
     final defaults = HomeConfig.defaults(sources: sources);
     final result = await preferences.get(PreferencesKey.homeConfig);
-    if (result case Ok<String>(:final value)) {
+    if (result case Success<String, Exception>(:final success)) {
       try {
-        return fromJsonOrDefault(jsonDecode(value), fallback: defaults);
+        return fromJsonOrDefault(jsonDecode(success), fallback: defaults);
       } on FormatException {
         return defaults;
       } on Object {
@@ -199,7 +199,7 @@ class HomeConfig(
     return defaults;
   }
 
-  Future<Result<void>> save(PreferencesDataSource preferences) {
+  Future<Result<void, Exception>> save(PreferencesDataSource preferences) {
     return preferences.set(PreferencesKey.homeConfig, jsonEncode(toJson()));
   }
 

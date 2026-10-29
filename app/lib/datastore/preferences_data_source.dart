@@ -32,15 +32,15 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
     _controller = null;
   }
 
-  Future<Result<T>> get<T>(PreferencesKey<T> key) async {
+  Future<Result<T, Exception>> get<T>(PreferencesKey<T> key) async {
     try {
-      return .ok(await key._getData(_pref));
+      return .success(await key._getData(_pref));
     } on Object catch (error, stackTrace) {
       return .error(_asException(error, stackTrace));
     }
   }
 
-  Future<Result<void>> set<T>(PreferencesKey<T> prefKey, T? value) async {
+  Future<Result<void, Exception>> set<T>(PreferencesKey<T> prefKey, T? value) async {
     try {
       await prefKey._setData(_pref, value);
       await _readAndEmitData();
@@ -53,7 +53,7 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
           value.add(updatedSetData);
         }
       }
-      return .ok(null);
+      return .success(null);
     } on Object catch (error, stackTrace) {
       return .error(_asException(error, stackTrace));
     }

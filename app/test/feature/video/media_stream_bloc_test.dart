@@ -19,7 +19,7 @@ class FakeMediaStreamRemoteDataSource() extends MediaStreamRemoteDataSource {
   bool failNext = false;
 
   @override
-  Future<Result<MediaStream>> getMediaStream(
+  Future<Result<MediaStream, Exception>> getMediaStream(
     String videoId, {
     int? preferHeight,
     int? preferStreamId,
@@ -28,7 +28,7 @@ class FakeMediaStreamRemoteDataSource() extends MediaStreamRemoteDataSource {
     if (failNext) {
       return Result.error(Exception('签名过期'));
     }
-    return Result.ok(
+    return Result.success(
       MediaStream(
         videoUrl: 'https://cdn.example.com/$videoId.m4s',
         headers: const {'Referer': 'https://www.bilibili.com'},
@@ -140,7 +140,7 @@ void main() {
 
       final result = await repo.getMediaStream('BV123');
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('delegates to the stream data source', () async {
@@ -149,7 +149,7 @@ void main() {
 
       final result = await repo.getMediaStream('BV123', preferHeight: 720);
 
-      expect(result.isOk, isTrue);
+      expect(result.isSuccess(), isTrue);
       expect(source.requests.single, ('BV123', 720));
     });
   });

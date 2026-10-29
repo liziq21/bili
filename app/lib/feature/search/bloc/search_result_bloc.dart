@@ -35,10 +35,10 @@ class SearchResultBloc<T>({
     emit(
       state.updatePagingStete(
         (pagingState) => switch (result) {
-          Ok(:final value) => pagingState.copyWith(
-            pages: [...?pagingState.pages, value.data],
+          Success(:final success) => pagingState.copyWith(
+            pages: [...?pagingState.pages, success.data],
             keys: [...?pagingState.keys, searchQuery.pageKey],
-            hasNextPage: searchQuery.pageKey < value.totalPages,
+            hasNextPage: searchQuery.pageKey < success.totalPages,
             isLoading: false,
           ),
           Error(:final error) => pagingState.copyWith(

@@ -17,7 +17,9 @@ class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
 
   @override
   Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
-    return Result.ok(Page<VideoModel>(data: items, number: 1, totalPages: 1));
+    return Result.success(
+      Page<VideoModel>(data: items, number: 1, totalPages: 1),
+    );
   }
 }
 
@@ -48,7 +50,9 @@ class const FakeCreatorProfileSearchRepository()
 
   @override
   Future<PagedResult<CreatorProfile>> search(SearchQuery searchQuery) async {
-    return Result.ok(Page<CreatorProfile>(data: [], number: 1, totalPages: 1));
+    return Result.success(
+      Page<CreatorProfile>(data: [], number: 1, totalPages: 1),
+    );
   }
 }
 

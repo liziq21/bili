@@ -18,14 +18,14 @@ class const DefaultUserDataRepository(
   Stream<UserData> get data => _prefDataSource.data;
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) =>
+  Future<Result<void, Exception>> setSourceId(String sourceId) =>
       _prefDataSource.set(PreferencesKey.sourceId, sourceId);
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) =>
+  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor) =>
       _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) =>
+  Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) =>
       _prefDataSource.set(PreferencesKey.themeConfig, themeConfig.toJson());
 }

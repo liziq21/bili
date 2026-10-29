@@ -12,6 +12,6 @@ class GetSearchContentsUseCase<T>({
   required final SearchContentsRepository<T> _repository,
 }) {
   /// 执行搜索请求并返回包含分页数据的 [Result]
-  Future<Result<Page<T>>> invoke(SearchQuery query) =>
+  Future<Result<Page<T>, Exception>> invoke(SearchQuery query) =>
       _repository.search(query);
 }

@@ -11,13 +11,13 @@ class _RecordingVideoCommentRemoteDataSource()
   final calls = <(String, int, int)>[];
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
   }) async {
     calls.add((videoId, page, pageSize));
-    return Result.ok(
+    return Result.success(
       Page<VideoComment>(
         number: page,
         totalPages: 5,
@@ -35,14 +35,14 @@ class _RecordingVideoCommentRepliesRemoteDataSource()
   final calls = <(String, String, int, int)>[];
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
     int pageSize = 20,
   }) async {
     calls.add((videoId, rootCommentId, page, pageSize));
-    return Result.ok(
+    return Result.success(
       Page<VideoComment>(
         number: page,
         totalPages: 2,
@@ -83,7 +83,7 @@ void main() {
 
         final result = await repository.getVideoComments('BV1', page: 3);
 
-        final page = (result as Ok<Page<VideoComment>>).value;
+        final page = (result as Success<Page<VideoComment>, Exception>).success;
         expect(page.number, 3);
         expect(page.totalPages, 5);
         expect(page.data, hasLength(1));
@@ -117,9 +117,9 @@ void main() {
       // an error, so the empty-versus-error distinction has to survive.
       final result = await repository.getVideoComments('BV1');
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<Page<VideoComment>>).error.toString(),
+        (result as Error<Page<VideoComment>, Exception>).error.toString(),
         contains('does not support'),
       );
     });
@@ -127,15 +127,15 @@ void main() {
     test('reports the same failure on later pages', () async {
       final result = await repository.getVideoComments('BV1', page: 9);
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
     });
 
     test('reports an unsupported reply capability', () async {
       final result = await repository.getVideoCommentReplies('BV1', '1');
 
-      expect(result.isError, isTrue);
+      expect(result.isError(), isTrue);
       expect(
-        (result as Error<Page<VideoComment>>).error.toString(),
+        (result as Error<Page<VideoComment>, Exception>).error.toString(),
         contains('comment replies'),
       );
     });

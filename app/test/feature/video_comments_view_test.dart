@@ -21,19 +21,19 @@ class _FakeVideoCommentRepository() implements VideoCommentRepository {
   );
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
-  }) async => Result.ok(Page(number: page, totalPages: 1, data: [comment]));
+  }) async => Result.success(Page(number: page, totalPages: 1, data: [comment]));
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
     int pageSize = 20,
-  }) async => Result.ok(
+  }) async => Result.success(
     Page(
       number: page,
       totalPages: 1,

@@ -473,9 +473,9 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       );
       if (!mounted) return;
       switch (result) {
-        case Ok(:final value):
-          if (value != 1.0) {
-            unawaited(widget.controller.setRate(value));
+        case Success(:final success):
+          if (success != 1.0) {
+            unawaited(widget.controller.setRate(success));
           }
         case Error():
           break;
@@ -498,8 +498,8 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       );
       if (!mounted) return;
       switch (heightResult) {
-        case Ok(:final value):
-          preferredHeight = value;
+        case Success(:final success):
+          preferredHeight = success;
         case Error():
           break;
       }
@@ -508,8 +508,8 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       );
       if (!mounted) return;
       switch (streamIdResult) {
-        case Ok(:final value):
-          preferredStreamId = value;
+        case Success(:final success):
+          preferredStreamId = success;
         case Error():
           break;
       }
@@ -536,19 +536,19 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
             .then((result) {
               if (!mounted) return;
               switch (result) {
-                case Ok(:final value):
+                case Success(:final success):
                   widget.controller.restorePositionSeconds =
                       widget.controller.state.position.inSeconds;
                   unawaited(
                     widget.controller.open(
-                      value,
+                      success,
                       videoId: widget.videoId,
                       title: widget.title,
                       creatorName: widget.creatorName,
                       thumbnailUrl: widget.thumbnailUrl,
                     ),
                   );
-                  context.read<VideoBloc>().add(MediaStreamChanged(value));
+                  context.read<VideoBloc>().add(MediaStreamChanged(success));
                 case Error():
                   break;
               }

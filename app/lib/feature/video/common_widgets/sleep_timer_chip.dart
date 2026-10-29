@@ -175,10 +175,10 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
     );
     if (!mounted || _userSelected) return;
     switch (result) {
-      case Ok(:final value)
-          when value > 0 && kSleepTimerMinutes.contains(value):
-        _sleep.start(value);
-      case Ok() || Error():
+      case Success(:final success)
+          when success > 0 && kSleepTimerMinutes.contains(success):
+        _sleep.start(success);
+      case Success() || Error():
         break;
     }
   }

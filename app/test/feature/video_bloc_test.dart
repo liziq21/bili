@@ -17,7 +17,7 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   final List<(String, bool)> subscribeCalls = [];
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async {
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
     final video = VideoModel(
       id: id,
       title: 'Test Video Title $id',
@@ -33,28 +33,28 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
       isFavorited: false,
       isSubscribed: false,
     );
-    return Result.ok(detail);
+    return Result.success(detail);
   }
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async {
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async {
     likeCalls.add((id, isLiked));
-    return Result.ok(isLiked);
+    return Result.success(isLiked);
   }
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async {
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async {
     favoriteCalls.add((id, isFavorited));
-    return Result.ok(isFavorited);
+    return Result.success(isFavorited);
   }
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async {
     subscribeCalls.add((creatorId, isSubscribed));
-    return Result.ok(isSubscribed);
+    return Result.success(isSubscribed);
   }
 }
 
@@ -66,14 +66,14 @@ class _RejectingVideoDetailRemoteDataSource()
   String get sourceId => 'rejecting';
 
   @override
-  Future<Result<VideoDetail>> getVideoDetail(String id) async {
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
     final video = VideoModel(
       id: id,
       title: 'Test Video Title $id',
       url: 'https://example.com/$id',
     );
     final creator = CreatorProfile(id: 'creator_1', name: 'Creator 1');
-    return Result.ok(
+    return Result.success(
       VideoDetail(
         video: video,
         creator: creator,
@@ -87,15 +87,15 @@ class _RejectingVideoDetailRemoteDataSource()
   }
 
   @override
-  Future<Result<bool>> toggleLike(String id, bool isLiked) async =>
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.error(Exception('rejected'));
 
   @override
-  Future<Result<bool>> toggleFavorite(String id, bool isFavorited) async =>
+  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
       Result.error(Exception('rejected'));
 
   @override
-  Future<Result<bool>> toggleSubscribe(
+  Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
     bool isSubscribed,
   ) async => Result.error(Exception('rejected'));
@@ -106,7 +106,7 @@ class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
   String get sourceId => 'fake';
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
@@ -120,7 +120,7 @@ class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
       ],
       replyCount: 3,
     );
-    return Result.ok(
+    return Result.success(
       Page<VideoComment>(number: page, totalPages: 2, data: [comment]),
     );
   }
@@ -134,14 +134,14 @@ class FakeVideoCommentRepliesRemoteDataSource()
   final calls = <(String, String, int, int)>[];
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
     int pageSize = 20,
   }) async {
     calls.add((videoId, rootCommentId, page, pageSize));
-    return Result.ok(
+    return Result.success(
       Page<VideoComment>(
         number: page,
         totalPages: 2,
@@ -163,17 +163,17 @@ class FakeVideoCommentRepliesRemoteDataSource()
 }
 
 class _SwitchingVideoCommentRepository() implements VideoCommentRepository {
-  final staleResult = Completer<Result<Page<VideoComment>>>();
+  final staleResult = Completer<Result<Page<VideoComment>, Exception>>();
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoComments(
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
     String videoId, {
     int page = 1,
     int pageSize = 20,
   }) {
     if (videoId == 'old') return staleResult.future;
     return Future.value(
-      Result.ok(
+      Result.success(
         Page<VideoComment>(
           number: page,
           totalPages: 1,
@@ -186,7 +186,7 @@ class _SwitchingVideoCommentRepository() implements VideoCommentRepository {
   }
 
   @override
-  Future<Result<Page<VideoComment>>> getVideoCommentReplies(
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
     String videoId,
     String rootCommentId, {
     int page = 1,
@@ -367,7 +367,7 @@ void main() {
       () async {
         final repoWithoutSource = AppVideoDetailRepository();
         final result = await repoWithoutSource.getVideoDetail('test_id');
-        expect(result.isError, isTrue);
+        expect(result.isError(), isTrue);
       },
     );
 
@@ -562,7 +562,7 @@ void main() {
       );
 
       repository.staleResult.complete(
-        Result.ok(
+        Result.success(
           Page<VideoComment>(
             number: 1,
             totalPages: 1,
@@ -667,7 +667,7 @@ void main() {
       () async {
         final repoWithoutSource = AppVideoCommentRepository();
         final result = await repoWithoutSource.getVideoComments('test_id');
-        expect(result.isError, isTrue);
+        expect(result.isError(), isTrue);
       },
     );
   });

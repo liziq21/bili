@@ -15,7 +15,7 @@ final class _FakeVideoFeed(
   String get sourceId => 'bilibili';
 
   @override
-  Future<Result<Page<VideoModel>>> fetchFeed({int? pageKey}) =>
+  Future<Result<Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) =>
       throw UnimplementedError();
 }
 
@@ -27,7 +27,7 @@ final class _FakeLiveFeed(
   String get sourceId => 'bilibili';
 
   @override
-  Future<Result<Page<LiveRoomModel>>> fetchFeed({int? pageKey}) =>
+  Future<Result<Page<LiveRoomModel>, Exception>> fetchFeed({int? pageKey}) =>
       throw UnimplementedError();
 }
 
@@ -150,7 +150,7 @@ void main() {
     final result = await original.save(preferences);
     final restored = await HomeConfig.load(preferences);
 
-    expect(result.isOk, isTrue);
+    expect(result.isSuccess(), isTrue);
     expect(restored, original);
   });
 

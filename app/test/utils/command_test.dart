@@ -14,7 +14,7 @@ import 'package:model/model.dart';
 void main() {
   group('Command0', () {
     test('starts idle and reports no result', () {
-      final command = Command0<int>(() async => Result<int>.ok(1));
+      final command = Command0<int>(() async => Result<int, Exception>.success(1));
 
       expect(command.running, isFalse);
       expect(command.completed, isFalse);
@@ -23,20 +23,20 @@ void main() {
     });
 
     test('exposes completed after a successful action', () async {
-      final command = Command0<int>(() async => Result<int>.ok(7));
+      final command = Command0<int>(() async => Result<int, Exception>.success(7));
 
       await command.execute();
 
       expect(command.running, isFalse);
       expect(command.completed, isTrue);
       expect(command.error, isFalse);
-      expect(command.result, isA<Ok<int>>());
-      expect((command.result! as Ok<int>).value, 7);
+      expect(command.result, isA<Success<int, Exception>>());
+      expect((command.result! as Success<int, Exception>).success, 7);
     });
 
     test('exposes error after a failed action', () async {
       final command = Command0<int>(
-        () async => Result<int>.error(Exception('boom')),
+        () async => Result<int, Exception>.error(Exception('boom')),
       );
 
       await command.execute();
@@ -44,14 +44,14 @@ void main() {
       expect(command.running, isFalse);
       expect(command.error, isTrue);
       expect(command.completed, isFalse);
-      expect((command.result! as Error<int>).error, isA<Exception>());
+      expect((command.result! as Error<int, Exception>).error, isA<Exception>());
     });
 
     test('drops a concurrent second invocation while the first is in '
         'flight', () async {
       // The guard is the point of the class: a second execute() arriving
       // before the first completes must not start a second request.
-      final gate = Completer<Result<int>>();
+      final gate = Completer<Result<int, Exception>>();
       var calls = 0;
 
       final command = Command0<int>(() {
@@ -65,26 +65,26 @@ void main() {
       await command.execute();
       expect(calls, 1, reason: 'the second invocation must be dropped');
 
-      gate.complete(Result<int>.ok(1));
+      gate.complete(Result<int, Exception>.success(1));
       await first;
 
       expect(calls, 1);
       expect(command.running, isFalse);
-      expect((command.result! as Ok<int>).value, 1);
+      expect((command.result! as Success<int, Exception>).success, 1);
     });
 
     test('accepts a new invocation once the previous one settled', () async {
       var calls = 0;
       final command = Command0<int>(() async {
         calls++;
-        return Result<int>.ok(calls);
+        return Result<int, Exception>.success(calls);
       });
 
       await command.execute();
       await command.execute();
 
       expect(calls, 2, reason: 'the guard must release after settling');
-      expect((command.result! as Ok<int>).value, 2);
+      expect((command.result! as Success<int, Exception>).success, 2);
     });
 
     test('drops the previous result at the start of the next run', () async {
@@ -92,9 +92,9 @@ void main() {
       final command = Command0<int>(() async {
         if (failNext) {
           failNext = false;
-          return Result<int>.error(Exception('boom'));
+          return Result<int, Exception>.error(Exception('boom'));
         }
-        return Result<int>.ok(1);
+        return Result<int, Exception>.success(1);
       });
 
       await command.execute();
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('notifies listeners when running flips on and off', () async {
-      final command = Command0<int>(() async => Result<int>.ok(1));
+      final command = Command0<int>(() async => Result<int, Exception>.success(1));
       var notifications = 0;
       command.addListener(() => notifications++);
 
@@ -119,7 +119,7 @@ void main() {
     });
 
     test('clearResult drops the result and notifies', () async {
-      final command = Command0<int>(() async => Result<int>.ok(1));
+      final command = Command0<int>(() async => Result<int, Exception>.success(1));
       await command.execute();
       expect(command.result, isNotNull);
 
@@ -139,19 +139,19 @@ void main() {
       String? seen;
       final command = Command1<String, String>((argument) async {
         seen = argument;
-        return Result<String>.ok('done');
+        return Result<String, Exception>.success('done');
       });
 
       await command.execute('hello');
 
       expect(seen, 'hello');
-      expect((command.result! as Ok<String>).value, 'done');
+      expect((command.result! as Success<String, Exception>).success, 'done');
     });
 
     test(
       'applies the same concurrency guard as the no-argument form',
       () async {
-        final gate = Completer<Result<int>>();
+        final gate = Completer<Result<int, Exception>>();
         var calls = 0;
         final command = Command1<int, String>((_) {
           calls++;
@@ -164,7 +164,7 @@ void main() {
         await command.execute('b');
         expect(calls, 1);
 
-        gate.complete(Result<int>.ok(1));
+        gate.complete(Result<int, Exception>.success(1));
         await first;
         expect(calls, 1);
       },

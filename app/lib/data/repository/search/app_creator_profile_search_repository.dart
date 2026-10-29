@@ -13,7 +13,7 @@ class const AppCreatorProfileSearchRepository(
   List<SortOption> get sortOptions => _remoteDataSource.sortOptions;
 
   @override
-  Future<Result<Page<CreatorProfile>>> search(SearchQuery query) {
+  Future<Result<Page<CreatorProfile>, Exception>> search(SearchQuery query) {
     return _remoteDataSource.searchCreatorProfile(
       query.query,
       pageKey: query.pageKey,

@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:model/model.dart';
 
 /// 无参数命令的操作函数类型
-typedef CommandAction0<T> = Future<Result<T>> Function();
+typedef CommandAction0<T> = Future<Result<T, Exception>> Function();
 
 /// 接受一个参数 [A] 的命令操作函数类型
-typedef CommandAction1<T, A> = Future<Result<T>> Function(A argument);
+typedef CommandAction1<T, A> = Future<Result<T, Exception>> Function(A argument);
 
 /// 用于 ViewModel 交互的命令基类 (Command Design Pattern)
 ///
@@ -24,13 +24,13 @@ abstract class Command<T>() extends ChangeNotifier {
   /// 当命令正在异步执行时返回 true
   bool get running => _running;
 
-  Result<T>? _result;
+  Result<T, Exception>? _result;
 
   /// 当命令上一次执行返回 [Error] 时返回 true
   bool get error => _result is Error;
 
-  /// 当命令上一次执行返回 [Ok] 成功时返回 true
-  bool get completed => _result is Ok;
+  /// 当命令上一次执行返回 [Success] 成功时返回 true
+  bool get completed => _result is Success;
 
   /// 获取上一次执行的结果 [Result]
   Result? get result => _result;
