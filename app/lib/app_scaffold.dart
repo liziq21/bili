@@ -1,9 +1,10 @@
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'main.dart';
 import 'design/design.dart';
 import 'ui/common/app_scroll_behavior.dart';
+
+AppStyle get $styles => AppScaffold.style;
 
 class const AppScaffold({super.key, required final Widget child})
     extends StatelessWidget {

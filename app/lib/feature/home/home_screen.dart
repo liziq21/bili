@@ -4,7 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:data/data.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../main.dart';
+import '../../app_scaffold.dart' show $styles;
 import '../../providers/media_sources_provider.dart';
 import 'bloc/home_bloc.dart';
 import 'widgets/feed_status_view.dart';
