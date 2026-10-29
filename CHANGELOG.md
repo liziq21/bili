@@ -220,6 +220,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Improve SpaceScreen creator profile card accessibility semantics (#485)
 - 🎨 Palette: Add accessible semantics and tooltip to video chapter items (#491)
 - refactor: migrate custom Result to multiple_result 5.3.0 (#500)
+- 🎨 Palette: Enhance PlayerSettingsScreen option pickers accessibility and tactile feedback (#497)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
