@@ -17,7 +17,10 @@ abstract interface class VideoDetailRepository() {
   Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited);
 
   /// 切换对创作者的关注状态
-  Future<Result<bool, Exception>> toggleSubscribe(String creatorId, bool isSubscribed);
+  Future<Result<bool, Exception>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  );
 
   /// 解析指定视频的可播放地址
   ///
@@ -58,7 +61,10 @@ class AppVideoDetailRepository([
   }
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async {
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async {
     if (_remoteDataSource != null) {
       return _remoteDataSource.toggleFavorite(id, isFavorited);
     }

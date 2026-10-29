@@ -22,8 +22,9 @@ class const DefaultUserDataRepository(
       _prefDataSource.set(PreferencesKey.sourceId, sourceId);
 
   @override
-  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor) =>
-      _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) => _prefDataSource.set(PreferencesKey.useDynamicColor, useDynamicColor);
 
   @override
   Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) =>

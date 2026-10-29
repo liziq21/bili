@@ -23,8 +23,10 @@ class const _DetailRepository() implements VideoDetailRepository {
   Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       const Result.success(true);
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      const Result.success(true);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => const Result.success(true);
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,
@@ -87,21 +89,24 @@ Widget _infoView({required bool withCreator}) => SizedBox(
 
 class const _NoCreatorRepository() implements VideoDetailRepository {
   @override
-  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async => Result.success(
-    VideoDetail(
-      video: VideoModel(
-        id: 'BV1noCreator',
-        title: '没有 UP 主信息的视频',
-        url: 'https://www.bilibili.com/video/BV1noCreator',
-      ),
-    ),
-  );
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: 'BV1noCreator',
+            title: '没有 UP 主信息的视频',
+            url: 'https://www.bilibili.com/video/BV1noCreator',
+          ),
+        ),
+      );
   @override
   Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       const Result.success(true);
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      const Result.success(true);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => const Result.success(true);
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
     String creatorId,

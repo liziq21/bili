@@ -43,7 +43,10 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   }
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async {
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async {
     favoriteCalls.add((id, isFavorited));
     return Result.success(isFavorited);
   }
@@ -91,8 +94,10 @@ class _RejectingVideoDetailRemoteDataSource()
       Result.error(Exception('rejected'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('rejected'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('rejected'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(

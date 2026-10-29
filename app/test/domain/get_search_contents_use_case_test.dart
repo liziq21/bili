@@ -14,7 +14,9 @@ class _RecordingSearchContentsRepository({
   final receivedQueries = <SearchQuery>[];
 
   @override
-  Future<Result<Page<VideoModel>, Exception>> search(SearchQuery searchQuery) async {
+  Future<Result<Page<VideoModel>, Exception>> search(
+    SearchQuery searchQuery,
+  ) async {
     receivedQueries.add(searchQuery);
     return result;
   }
@@ -50,12 +52,17 @@ void main() {
       final result = await useCase.invoke(query);
 
       expect(result.isSuccess(), isTrue);
-      expect((result as Success<Page<VideoModel>, Exception>).success, same(emptyPage));
+      expect(
+        (result as Success<Page<VideoModel>, Exception>).success,
+        same(emptyPage),
+      );
     });
 
     test('keeps the failure result instead of unwrapping it', () async {
       final repository = _RecordingSearchContentsRepository(
-        result: Result<Page<VideoModel>, Exception>.error(Exception('search failed')),
+        result: Result<Page<VideoModel>, Exception>.error(
+          Exception('search failed'),
+        ),
       );
       final useCase = GetSearchContentsUseCase<VideoModel>(
         repository: repository,
@@ -64,7 +71,10 @@ void main() {
       final result = await useCase.invoke(query);
 
       expect(result.isError(), isTrue);
-      expect((result as Error<Page<VideoModel>, Exception>).error, isA<Exception>());
+      expect(
+        (result as Error<Page<VideoModel>, Exception>).error,
+        isA<Exception>(),
+      );
     });
 
     test('forwards the query object to the repository unchanged', () async {

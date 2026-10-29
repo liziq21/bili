@@ -18,8 +18,10 @@ class _FailingVideoDetailRemoteDataSource()
       Result.success(isLiked);
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.success(isFavorited);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.success(isFavorited);
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
@@ -38,25 +40,28 @@ class _ControllableVideoDetailRemoteDataSource()
   bool likeResult = true;
 
   @override
-  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async => Result.success(
-    VideoDetail(
-      video: VideoModel(id: id, title: 'title', url: 'https://example.com'),
-      creator: CreatorProfile(id: 'c1', name: 'Creator'),
-      likeCount: 0,
-      favoriteCount: 0,
-      isLiked: false,
-      isFavorited: false,
-      isSubscribed: false,
-    ),
-  );
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(id: id, title: 'title', url: 'https://example.com'),
+          creator: CreatorProfile(id: 'c1', name: 'Creator'),
+          likeCount: 0,
+          favoriteCount: 0,
+          isLiked: false,
+          isFavorited: false,
+          isSubscribed: false,
+        ),
+      );
 
   @override
   Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
       Result.success(likeResult);
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.success(isFavorited);
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.success(isFavorited);
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(

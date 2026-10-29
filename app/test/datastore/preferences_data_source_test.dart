@@ -125,7 +125,9 @@ void main() {
 
   group('PreferencesKey values and defaults', () {
     test('returns null when a nullable String key is unset', () async {
-      final Result<String?, Exception> result = await ds.get(PreferencesKey.sourceId);
+      final Result<String?, Exception> result = await ds.get(
+        PreferencesKey.sourceId,
+      );
 
       expect(result.isSuccess(), isTrue);
       expect((result as Success<String?, Exception>).success, isNull);
@@ -134,7 +136,9 @@ void main() {
     test('reads back the value written to a nullable String key', () async {
       await ds.set(PreferencesKey.sourceId, 'bilibili');
 
-      final Result<String?, Exception> result = await ds.get(PreferencesKey.sourceId);
+      final Result<String?, Exception> result = await ds.get(
+        PreferencesKey.sourceId,
+      );
 
       expect(result.isSuccess(), isTrue);
       expect((result as Success<String?, Exception>).success, 'bilibili');
@@ -168,7 +172,10 @@ void main() {
       final result = await dataSource.get(PreferencesKey.useDynamicColor);
 
       expect(result, isA<Error<bool, Exception>>());
-      expect((result as Error<bool, Exception>).error.toString(), contains('String'));
+      expect(
+        (result as Error<bool, Exception>).error.toString(),
+        contains('String'),
+      );
     });
 
     test('returns an error instead of writing a mismatched value', () async {

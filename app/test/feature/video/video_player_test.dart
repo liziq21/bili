@@ -515,8 +515,10 @@ class _NoStreamRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
@@ -693,8 +695,10 @@ class _HangingStreamRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
@@ -722,8 +726,10 @@ class _FailingStreamRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
@@ -750,8 +756,10 @@ class _ReadyStreamRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(

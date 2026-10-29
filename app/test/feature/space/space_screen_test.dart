@@ -7,8 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
-class _FakeCreatorProfileRepository(var Result<CreatorProfile, Exception> result)
-    implements CreatorProfileRepository {
+class _FakeCreatorProfileRepository(
+  var Result<CreatorProfile, Exception> result,
+) implements CreatorProfileRepository {
   String? requestedId;
 
   @override

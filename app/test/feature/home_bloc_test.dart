@@ -38,12 +38,16 @@ class MockUserDataRepository() implements UserDataRepository {
   }
 
   @override
-  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor) async {
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async {
     return const Result.success(null);
   }
 
   @override
-  Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) async {
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async {
     return const Result.success(null);
   }
 
@@ -65,7 +69,9 @@ class FakeVideoFeed({
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<VideoModel>, Exception>> fetchFeed({int? pageKey}) async {
+  Future<Result<data.Page<VideoModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
     fetchCount++;
     if (failure) return Result.error(Exception('boom'));
     final page = pageKey ?? 1;
@@ -94,7 +100,9 @@ class FakeLiveFeed({
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({int? pageKey}) async {
+  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
     return Result.success(
       data.Page<LiveRoomModel>(
         number: pageKey ?? 1,
@@ -158,7 +166,9 @@ class ControlledLiveFeed({
   String get sourceId => 'fake';
 
   @override
-  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({int? pageKey}) {
+  Future<Result<data.Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) {
     final request = Completer<Result<data.Page<LiveRoomModel>, Exception>>();
     requests.add(request);
     return request.future;

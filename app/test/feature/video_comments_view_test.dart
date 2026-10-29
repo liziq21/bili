@@ -25,7 +25,8 @@ class _FakeVideoCommentRepository() implements VideoCommentRepository {
     String videoId, {
     int page = 1,
     int pageSize = 20,
-  }) async => Result.success(Page(number: page, totalPages: 1, data: [comment]));
+  }) async =>
+      Result.success(Page(number: page, totalPages: 1, data: [comment]));
 
   @override
   Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(

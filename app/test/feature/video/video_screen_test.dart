@@ -53,8 +53,10 @@ class const _FailingVideoDetailRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(

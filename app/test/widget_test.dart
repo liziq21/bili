@@ -53,12 +53,14 @@ class _FakeUserDataRepository() implements UserDataRepository {
       const Result.success(null);
 
   @override
-  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor) async =>
-      const Result.success(null);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async => const Result.success(null);
 
   @override
-  Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) async =>
-      const Result.success(null);
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async => const Result.success(null);
 }
 
 /// FakeUserDataRepository is kept for the second test if needed.
@@ -76,12 +78,16 @@ class FakeUserDataRepository() implements UserDataRepository {
   }
 
   @override
-  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor) async {
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async {
     return const Result.success(null);
   }
 
   @override
-  Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) async {
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async {
     return const Result.success(null);
   }
 }
@@ -131,7 +137,9 @@ class _FakeLiveFeed() extends LiveRoomFeedRemoteDataSource {
   String get sourceId => 'bilibili';
 
   @override
-  Future<Result<Page<LiveRoomModel>, Exception>> fetchFeed({int? pageKey}) async {
+  Future<Result<Page<LiveRoomModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
     return Result.success(
       Page<LiveRoomModel>(number: pageKey ?? 1, totalPages: 1, data: const []),
     );

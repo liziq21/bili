@@ -40,7 +40,10 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
     }
   }
 
-  Future<Result<void, Exception>> set<T>(PreferencesKey<T> prefKey, T? value) async {
+  Future<Result<void, Exception>> set<T>(
+    PreferencesKey<T> prefKey,
+    T? value,
+  ) async {
     try {
       await prefKey._setData(_pref, value);
       await _readAndEmitData();

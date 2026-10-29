@@ -7,7 +7,9 @@ import 'package:model/model.dart';
 typedef CommandAction0<T> = Future<Result<T, Exception>> Function();
 
 /// 接受一个参数 [A] 的命令操作函数类型
-typedef CommandAction1<T, A> = Future<Result<T, Exception>> Function(A argument);
+typedef CommandAction1<T, A> = Future<Result<T, Exception>> Function(
+  A argument,
+);
 
 /// 用于 ViewModel 交互的命令基类 (Command Design Pattern)
 ///

@@ -7,5 +7,7 @@ abstract class UserDataRepository() {
 
   Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig);
 
-  Future<Result<void, Exception>> setDynamicColorPreference(bool useDynamicColor);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  );
 }

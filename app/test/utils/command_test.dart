@@ -14,7 +14,9 @@ import 'package:model/model.dart';
 void main() {
   group('Command0', () {
     test('starts idle and reports no result', () {
-      final command = Command0<int>(() async => Result<int, Exception>.success(1));
+      final command = Command0<int>(
+        () async => Result<int, Exception>.success(1),
+      );
 
       expect(command.running, isFalse);
       expect(command.completed, isFalse);
@@ -23,7 +25,9 @@ void main() {
     });
 
     test('exposes completed after a successful action', () async {
-      final command = Command0<int>(() async => Result<int, Exception>.success(7));
+      final command = Command0<int>(
+        () async => Result<int, Exception>.success(7),
+      );
 
       await command.execute();
 
@@ -44,7 +48,10 @@ void main() {
       expect(command.running, isFalse);
       expect(command.error, isTrue);
       expect(command.completed, isFalse);
-      expect((command.result! as Error<int, Exception>).error, isA<Exception>());
+      expect(
+        (command.result! as Error<int, Exception>).error,
+        isA<Exception>(),
+      );
     });
 
     test('drops a concurrent second invocation while the first is in '
@@ -108,7 +115,9 @@ void main() {
     });
 
     test('notifies listeners when running flips on and off', () async {
-      final command = Command0<int>(() async => Result<int, Exception>.success(1));
+      final command = Command0<int>(
+        () async => Result<int, Exception>.success(1),
+      );
       var notifications = 0;
       command.addListener(() => notifications++);
 
@@ -119,7 +128,9 @@ void main() {
     });
 
     test('clearResult drops the result and notifies', () async {
-      final command = Command0<int>(() async => Result<int, Exception>.success(1));
+      final command = Command0<int>(
+        () async => Result<int, Exception>.success(1),
+      );
       await command.execute();
       expect(command.result, isNotNull);
 

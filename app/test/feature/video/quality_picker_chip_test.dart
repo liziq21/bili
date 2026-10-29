@@ -102,11 +102,16 @@ class _RecordingVideoDetailRepository() implements VideoDetailRepository {
   (String, int?, int?)? lastRequest;
 
   @override
-  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async => Result.success(
-    VideoDetail(
-      video: VideoModel(id: id, title: 'Video', url: 'https://example.com/$id'),
-    ),
-  );
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: id,
+            title: 'Video',
+            url: 'https://example.com/$id',
+          ),
+        ),
+      );
 
   @override
   Future<Result<MediaStream, Exception>> getMediaStream(
@@ -129,8 +134,10 @@ class _RecordingVideoDetailRepository() implements VideoDetailRepository {
       Result.error(Exception('unused'));
 
   @override
-  Future<Result<bool, Exception>> toggleFavorite(String id, bool isFavorited) async =>
-      Result.error(Exception('unused'));
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
 
   @override
   Future<Result<bool, Exception>> toggleSubscribe(
