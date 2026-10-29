@@ -228,7 +228,7 @@ class const _LiveBadge() extends StatelessWidget {
             height: 6,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: $styles.colors.accentFill,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -351,7 +351,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
         onTap: widget.fullscreen ? _toggleControls : null,
         child: Stack(
           children: [
-            Container(color: Colors.black, child: surface),
+            Container(color: $styles.colors.scrim, child: surface),
             // 控制条：仅全屏时显示。
             if (widget.fullscreen && _controlsVisible)
               Positioned(
@@ -364,11 +364,14 @@ class _PlayerAreaState extends State<_PlayerArea> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black54,
+                    color: $styles.colors.scrim.withValues(alpha: 0.54),
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
-                      colors: [Colors.black87, Colors.transparent],
+                      colors: [
+                        $styles.colors.scrim.withValues(alpha: 0.87),
+                        Colors.transparent,
+                      ],
                     ),
                   ),
                   child: Row(
