@@ -317,12 +317,15 @@ def print_files(category: str, area: str, rel: Path | None) -> int:
 
 
 def parse_lcov_totals(path: Path):
-    """Parse one lcov file; return (lf, lh, brf, brh)."""
+    """Parse one lcov file; return accumulated (lf, lh, brf, brh)."""
+    total_lf = total_lh = total_brf = total_brh = 0
     lf = lh = brf = brh = 0
     with path.open() as f:
         for raw in f:
             line = raw.strip()
-            if line.startswith('LF:'):
+            if line.startswith('SF:'):
+                lf = lh = brf = brh = 0
+            elif line.startswith('LF:'):
                 lf = int(line[3:])
             elif line.startswith('LH:'):
                 lh = int(line[3:])
@@ -330,7 +333,12 @@ def parse_lcov_totals(path: Path):
                 brf = int(line[4:])
             elif line.startswith('BRH:'):
                 brh = int(line[4:])
-    return lf, lh, brf, brh
+            elif line == 'end_of_record':
+                total_lf += lf
+                total_lh += lh
+                total_brf += brf
+                total_brh += brh
+    return total_lf, total_lh, total_brf, total_brh
 
 
 def parse_reporter_json(path: Path):
@@ -392,9 +400,21 @@ def parse_reporter_json(path: Path):
 
 def summary(matrix_dir: Path) -> int:
     """Aggregate per-category lcov + reporter outputs into a summary."""
+    lcov_files = sorted(matrix_dir.glob('*.lcov'))
+    if not lcov_files:
+        print(f'ERROR: no .lcov files in {matrix_dir}', file=sys.stderr)
+        return 2
+    missing = [
+        c for c in CATEGORIES
+        if TEST_MATRIX[c] and not any(matrix_dir.glob(f'*-{c}.lcov'))
+    ]
+    if missing:
+        print(f'ERROR: categories with files but no lcov output: '
+              f'{", ".join(missing)}', file=sys.stderr)
+        return 2
     # category -> [(area, files, passed, lf, lh, brf, brh), ...]
     per_category: dict[str, list] = {c: [] for c in CATEGORIES}
-    for lcov_path in sorted(matrix_dir.glob('*.lcov')):
+    for lcov_path in lcov_files:
         stem = lcov_path.stem  # e.g. app-widget
         area, _, category = stem.partition('-')
         if category not in per_category:
@@ -426,11 +446,12 @@ def summary(matrix_dir: Path) -> int:
         lh = sum(r[4] for r in rows)
         brf = sum(r[5] for r in rows)
         brh = sum(r[6] for r in rows)
-        if files:
+        if files or lf or brf:
             line_pct = f'{lh / lf * 100:.1f}%' if lf else 'N/A'
             branch_pct = f'{brh / brf * 100:.1f}%' if brf else 'N/A'
+            pass_rate = f'{passed}/{files}' if files else '-'
             lines.append(
-                f'| {category} | {files} | {passed}/{files} '
+                f'| {category} | {files} | {pass_rate} '
                 f'| {line_pct} | {branch_pct} |')
         else:
             lines.append(f'| {category} | 0 | - | - | - |')
