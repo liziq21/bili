@@ -65,6 +65,7 @@ so hand edits do not survive; change the generator instead.
 - feat(video): add playback queue and fix strict analysis (#480)
 - feat(android): per-variant launcher icons for debug and dev builds (LIZ-59) (#488)
 - feat(library): 本地播放列表管理——重命名、搜索过滤、批量删除 (#493)
+- feat(home): home config editor UI (LIZ-65) (#495)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
