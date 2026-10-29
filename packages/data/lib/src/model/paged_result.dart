@@ -1,6 +1,6 @@
 import 'package:model/model.dart';
 
-typedef PagedResult<T> = Result<Page<T>>;
+typedef PagedResult<T> = Result<Page<T>, Exception>;
 
 class Page<T>({
   required final int number,
