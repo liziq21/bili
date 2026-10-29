@@ -291,140 +291,135 @@ void main() {
       service.close();
     });
 
-    test(
-      'searchPlaylists sends the request shape and returns typed playlist envelope',
-      () async {
-        final mockJsonResponse = {
-          'contents': {
-            'twoColumnSearchResultsRenderer': {
-              'primaryContents': {
-                'sectionListRenderer': {
-                  'contents': [
-                    {
-                      'itemSectionRenderer': {
-                        'contents': [
-                          {
-                            'lockupViewModel': {
-                              'contentId': 'PL_PLAYLIST_1',
-                              'contentImage': {
-                                'collectionThumbnailViewModel': {
-                                  'primaryThumbnail': {
-                                    'thumbnailViewModel': {
-                                      'image': {
-                                        'sources': [
-                                          {
-                                            'url':
-                                                'https://img.youtube.com/playlist.jpg',
-                                            'width': 360,
-                                            'height': 202,
-                                          },
-                                        ],
-                                      },
-                                      'overlays': [
+    test('searchPlaylists sends the request shape and returns typed playlist envelope', () async {
+      final mockJsonResponse = {
+        'contents': {
+          'twoColumnSearchResultsRenderer': {
+            'primaryContents': {
+              'sectionListRenderer': {
+                'contents': [
+                  {
+                    'itemSectionRenderer': {
+                      'contents': [
+                        {
+                          'lockupViewModel': {
+                            'contentId': 'PL_PLAYLIST_1',
+                            'contentImage': {
+                              'collectionThumbnailViewModel': {
+                                'primaryThumbnail': {
+                                  'thumbnailViewModel': {
+                                    'image': {
+                                      'sources': [
                                         {
-                                          'thumbnailOverlayBadgeViewModel': {
-                                            'thumbnailBadges': [
-                                              {
-                                                'thumbnailBadgeViewModel': {
-                                                  'text': '25 lessons',
-                                                },
-                                              },
-                                            ],
-                                          },
+                                          'url': 'https://img.youtube.com/playlist.jpg',
+                                          'width': 360,
+                                          'height': 202,
                                         },
                                       ],
                                     },
-                                  },
-                                },
-                              },
-                              'metadata': {
-                                'lockupMetadataViewModel': {
-                                  'title': {'content': 'Playlist Title'},
-                                  'metadata': {
-                                    'contentMetadataViewModel': {
-                                      'metadataRows': [
-                                        {
-                                          'metadataParts': [
+                                    'overlays': [
+                                      {
+                                        'thumbnailOverlayBadgeViewModel': {
+                                          'thumbnailBadges': [
                                             {
-                                              'text': {
-                                                'content': 'Playlist Owner',
-                                                'commandRuns': [
-                                                  {
-                                                    'onTap': {
-                                                      'innertubeCommand': {
-                                                        'browseEndpoint': {
-                                                          'browseId':
-                                                              'UC_OWNER_1',
-                                                        },
-                                                      },
-                                                    },
-                                                  },
-                                                ],
+                                              'thumbnailBadgeViewModel': {
+                                                'text': '25 lessons',
                                               },
                                             },
                                           ],
-                                          'lockupContentMetadataRowExtension': {
-                                            'contentType':
-                                                'METADATA_ROW_CONTENT_TYPE_BYLINE',
-                                          },
                                         },
-                                      ],
-                                    },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            'metadata': {
+                              'lockupMetadataViewModel': {
+                                'title': {'content': 'Playlist Title'},
+                                'metadata': {
+                                  'contentMetadataViewModel': {
+                                    'metadataRows': [
+                                      {
+                                        'metadataParts': [
+                                          {
+                                            'text': {
+                                              'content': 'Playlist Owner',
+                                              'commandRuns': [
+                                                {
+                                                  'onTap': {
+                                                    'innertubeCommand': {
+                                                      'browseEndpoint': {
+                                                        'browseId':
+                                                            'UC_OWNER_1',
+                                                      },
+                                                    },
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                        'lockupContentMetadataRowExtension': {
+                                          'contentType': 'METADATA_ROW_CONTENT_TYPE_BYLINE',
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
                               },
                             },
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
-        };
+        },
+      };
 
-        final mockClient = MockClient((request) async {
-          expect(request.method, 'POST');
-          expect(request.url.path, '/youtubei/v1/search');
-          final body = json.decode(request.body) as Map<String, dynamic>;
-          expect(body['query'], 'flutter playlist');
-          expect(body['context'], isA<Map<String, dynamic>>());
-          expect(body['params'], 'QgIQAw==');
-          return http.Response(
-            json.encode(mockJsonResponse),
-            200,
-            headers: {'content-type': 'application/json'},
-          );
-        });
-
-        final service = YoutubeService(httpClient: mockClient);
-        final response = await service.searchPlaylists('flutter playlist');
-        final section =
-            response
-                    .contents!
-                    .twoColumnSearchResultsRenderer!
-                    .primaryContents!
-                    .sectionListRenderer!
-                    .contents
-                    .single
-                as NetworkYouTubeItemSectionRenderer;
-        final playlist =
-            (section.contents.single as NetworkYouTubePlaylistSearchItem)
-                .renderer;
-        expect(playlist.playlistId, 'PL_PLAYLIST_1');
-        expect(playlist.title, 'Playlist Title');
-        expect(playlist.videoCountText, '25 lessons');
-        expect(playlist.owner?.text.value, 'Playlist Owner');
-        expect(playlist.owner?.browseId, 'UC_OWNER_1');
-        expect(
-          playlist.thumbnail?.thumbnails.single.url,
-          contains('playlist.jpg'),
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/youtubei/v1/search');
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['query'], 'flutter playlist');
+        expect(body['context'], isA<Map<String, dynamic>>());
+        expect(body['params'], 'QgIQAw==');
+        return http.Response(
+          json.encode(mockJsonResponse),
+          200,
+          headers: {'content-type': 'application/json'},
         );
-        service.close();
-      },
-    );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      final response = await service.searchPlaylists('flutter playlist');
+      final section =
+          response
+                  .contents!
+                  .twoColumnSearchResultsRenderer!
+                  .primaryContents!
+                  .sectionListRenderer!
+                  .contents
+                  .single
+              as NetworkYouTubeItemSectionRenderer;
+      final playlist =
+          (section.contents.single as NetworkYouTubePlaylistSearchItem)
+              .renderer;
+      expect(playlist.playlistId, 'PL_PLAYLIST_1');
+      expect(playlist.title, 'Playlist Title');
+      expect(playlist.videoCountText, '25 lessons');
+      expect(playlist.owner?.text.value, 'Playlist Owner');
+      expect(playlist.owner?.browseId, 'UC_OWNER_1');
+      expect(
+        playlist.thumbnail?.thumbnails.single.url,
+        contains('playlist.jpg'),
+      );
+      service.close();
+    });
 
     test('browseChannel posts to browse and returns lockup items', () async {
       final mockClient = MockClient((request) async {
@@ -607,98 +602,92 @@ void main() {
       service.close();
     });
 
-    test(
-      'sanitizes control characters in continuation, playlistId, and params across methods',
-      () async {
-        final client = MockClient((request) async {
-          final body = json.decode(request.body) as Map<String, dynamic>;
-          if (request.url.path.contains('next')) {
-            if (body.containsKey('videoId')) {
-              expect(body['videoId'], equals('vid123'));
-              expect(body['playlistId'], equals('list123'));
-              expect(body['params'], equals('param123'));
-            } else {
-              expect(body['continuation'], equals('token123'));
-            }
-            return http.Response(
-              json.encode({
-                'currentVideoEndpoint': {
-                  'watchEndpoint': {'videoId': 'vid123'},
-                },
-                'contents': {
-                  'twoColumnWatchNextResults': {
+    test('sanitizes control characters in continuation, playlistId, and params across methods', () async {
+      final client = MockClient((request) async {
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        if (request.url.path.contains('next')) {
+          if (body.containsKey('videoId')) {
+            expect(body['videoId'], equals('vid123'));
+            expect(body['playlistId'], equals('list123'));
+            expect(body['params'], equals('param123'));
+          } else {
+            expect(body['continuation'], equals('token123'));
+          }
+          return http.Response(
+            json.encode({
+              'currentVideoEndpoint': {
+                'watchEndpoint': {'videoId': 'vid123'},
+              },
+              'contents': {
+                'twoColumnWatchNextResults': {
+                  'results': {
                     'results': {
-                      'results': {
-                        'contents': [
-                          {
-                            'videoPrimaryInfoRenderer': {
-                              'title': {'simpleText': 'Test Video'},
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-                'onResponseReceivedEndpoints': [
-                  {
-                    'appendContinuationItemsAction': {
-                      'continuationItems': [
+                      'contents': [
                         {
-                          'commentThreadRenderer': {
-                            'comment': {
-                              'commentRenderer': {
-                                'commentId': 'C1',
-                                'contentText': {'simpleText': 'hi'},
-                              },
-                            },
+                          'videoPrimaryInfoRenderer': {
+                            'title': {'simpleText': 'Test Video'},
                           },
                         },
                       ],
                     },
                   },
-                ],
-              }),
-              200,
-            );
-          } else if (request.url.path.contains('browse')) {
-            if (body.containsKey('browseId')) {
-              expect(body['params'], equals('param123'));
-            } else {
-              expect(body['continuation'], equals('token123'));
-            }
-            return http.Response(json.encode({}), 200);
-          } else if (request.url.path.contains('search')) {
+                },
+              },
+              'onResponseReceivedEndpoints': [
+                {
+                  'appendContinuationItemsAction': {
+                    'continuationItems': [
+                      {
+                        'commentThreadRenderer': {
+                          'comment': {
+                            'commentRenderer': {
+                              'commentId': 'C1',
+                              'contentText': {'simpleText': 'hi'},
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+          );
+        } else if (request.url.path.contains('browse')) {
+          if (body.containsKey('browseId')) {
+            expect(body['params'], equals('param123'));
+          } else {
             expect(body['continuation'], equals('token123'));
-            return http.Response(json.encode({'contents': {}}), 200);
           }
-          return http.Response('', 404);
-        });
+          return http.Response(json.encode({}), 200);
+        } else if (request.url.path.contains('search')) {
+          expect(body['continuation'], equals('token123'));
+          return http.Response(json.encode({'contents': {}}), 200);
+        }
+        return http.Response('', 404);
+      });
 
-        final service = YoutubeService(httpClient: client);
+      final service = YoutubeService(httpClient: client);
 
-        await service.getWatchNext(
-          videoId: 'vid\r\n123',
-          playlistId: 'list\x00123',
-          params: 'param\x1f123',
-        );
-        await service.getWatchNext(continuation: 'token\r\n\x7f123');
-        await service.getComments('token\r\n\x00123');
-        await service.browseChannel(browseId: 'UC123', params: 'param\r\n123');
-        await service.browseChannel(continuation: 'token\r\n123');
-        await service.browsePlaylist(
-          playlistId: 'VL123',
-          params: 'param\r\n123',
-        );
-        await service.browsePlaylist(continuation: 'token\r\n123');
-        await service.browseHomeFeed(continuation: 'token\r\n123');
-        await service.searchVideos('query', continuation: 'token\r\n123');
-        await service.searchChannels('query', continuation: 'token\r\n123');
-        await service.searchPlaylists('query', continuation: 'token\r\n123');
+      await service.getWatchNext(
+        videoId: 'vid\r\n123',
+        playlistId: 'list\x00123',
+        params: 'param\x1f123',
+      );
+      await service.getWatchNext(continuation: 'token\r\n\x7f123');
+      await service.getComments('token\r\n\x00123');
+      await service.browseChannel(browseId: 'UC123', params: 'param\r\n123');
+      await service.browseChannel(continuation: 'token\r\n123');
+      await service.browsePlaylist(playlistId: 'VL123', params: 'param\r\n123');
+      await service.browsePlaylist(continuation: 'token\r\n123');
+      await service.browseHomeFeed(continuation: 'token\r\n123');
+      await service.searchVideos('query', continuation: 'token\r\n123');
+      await service.searchChannels('query', continuation: 'token\r\n123');
+      await service.searchPlaylists('query', continuation: 'token\r\n123');
 
-        service.close();
-      },
-    );
+      service.close();
+    });
 
     test('throws typed HTTP and InnerTube exceptions', () async {
       final httpService = YoutubeService(
@@ -1057,140 +1046,135 @@ void main() {
       service.close();
     });
 
-    test(
-      'searchPlaylists sends the request shape and returns typed playlist envelope',
-      () async {
-        final mockJsonResponse = {
-          'contents': {
-            'twoColumnSearchResultsRenderer': {
-              'primaryContents': {
-                'sectionListRenderer': {
-                  'contents': [
-                    {
-                      'itemSectionRenderer': {
-                        'contents': [
-                          {
-                            'lockupViewModel': {
-                              'contentId': 'PL_PLAYLIST_1',
-                              'contentImage': {
-                                'collectionThumbnailViewModel': {
-                                  'primaryThumbnail': {
-                                    'thumbnailViewModel': {
-                                      'image': {
-                                        'sources': [
-                                          {
-                                            'url':
-                                                'https://img.youtube.com/playlist.jpg',
-                                            'width': 360,
-                                            'height': 202,
-                                          },
-                                        ],
-                                      },
-                                      'overlays': [
+    test('searchPlaylists sends the request shape and returns typed playlist envelope', () async {
+      final mockJsonResponse = {
+        'contents': {
+          'twoColumnSearchResultsRenderer': {
+            'primaryContents': {
+              'sectionListRenderer': {
+                'contents': [
+                  {
+                    'itemSectionRenderer': {
+                      'contents': [
+                        {
+                          'lockupViewModel': {
+                            'contentId': 'PL_PLAYLIST_1',
+                            'contentImage': {
+                              'collectionThumbnailViewModel': {
+                                'primaryThumbnail': {
+                                  'thumbnailViewModel': {
+                                    'image': {
+                                      'sources': [
                                         {
-                                          'thumbnailOverlayBadgeViewModel': {
-                                            'thumbnailBadges': [
-                                              {
-                                                'thumbnailBadgeViewModel': {
-                                                  'text': '25 lessons',
-                                                },
-                                              },
-                                            ],
-                                          },
+                                          'url': 'https://img.youtube.com/playlist.jpg',
+                                          'width': 360,
+                                          'height': 202,
                                         },
                                       ],
                                     },
-                                  },
-                                },
-                              },
-                              'metadata': {
-                                'lockupMetadataViewModel': {
-                                  'title': {'content': 'Playlist Title'},
-                                  'metadata': {
-                                    'contentMetadataViewModel': {
-                                      'metadataRows': [
-                                        {
-                                          'metadataParts': [
+                                    'overlays': [
+                                      {
+                                        'thumbnailOverlayBadgeViewModel': {
+                                          'thumbnailBadges': [
                                             {
-                                              'text': {
-                                                'content': 'Playlist Owner',
-                                                'commandRuns': [
-                                                  {
-                                                    'onTap': {
-                                                      'innertubeCommand': {
-                                                        'browseEndpoint': {
-                                                          'browseId':
-                                                              'UC_OWNER_1',
-                                                        },
-                                                      },
-                                                    },
-                                                  },
-                                                ],
+                                              'thumbnailBadgeViewModel': {
+                                                'text': '25 lessons',
                                               },
                                             },
                                           ],
-                                          'lockupContentMetadataRowExtension': {
-                                            'contentType':
-                                                'METADATA_ROW_CONTENT_TYPE_BYLINE',
-                                          },
                                         },
-                                      ],
-                                    },
+                                      },
+                                    ],
+                                  },
+                                },
+                              },
+                            },
+                            'metadata': {
+                              'lockupMetadataViewModel': {
+                                'title': {'content': 'Playlist Title'},
+                                'metadata': {
+                                  'contentMetadataViewModel': {
+                                    'metadataRows': [
+                                      {
+                                        'metadataParts': [
+                                          {
+                                            'text': {
+                                              'content': 'Playlist Owner',
+                                              'commandRuns': [
+                                                {
+                                                  'onTap': {
+                                                    'innertubeCommand': {
+                                                      'browseEndpoint': {
+                                                        'browseId':
+                                                            'UC_OWNER_1',
+                                                      },
+                                                    },
+                                                  },
+                                                },
+                                              ],
+                                            },
+                                          },
+                                        ],
+                                        'lockupContentMetadataRowExtension': {
+                                          'contentType': 'METADATA_ROW_CONTENT_TYPE_BYLINE',
+                                        },
+                                      },
+                                    ],
                                   },
                                 },
                               },
                             },
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
-        };
+        },
+      };
 
-        final mockClient = MockClient((request) async {
-          expect(request.method, 'POST');
-          expect(request.url.path, '/youtubei/v1/search');
-          final body = json.decode(request.body) as Map<String, dynamic>;
-          expect(body['query'], 'flutter playlist');
-          expect(body['context'], isA<Map<String, dynamic>>());
-          expect(body['params'], 'QgIQAw==');
-          return http.Response(
-            json.encode(mockJsonResponse),
-            200,
-            headers: {'content-type': 'application/json'},
-          );
-        });
-
-        final service = YoutubeService(httpClient: mockClient);
-        final response = await service.searchPlaylists('flutter playlist');
-        final section =
-            response
-                    .contents!
-                    .twoColumnSearchResultsRenderer!
-                    .primaryContents!
-                    .sectionListRenderer!
-                    .contents
-                    .single
-                as NetworkYouTubeItemSectionRenderer;
-        final playlist =
-            (section.contents.single as NetworkYouTubePlaylistSearchItem)
-                .renderer;
-        expect(playlist.playlistId, 'PL_PLAYLIST_1');
-        expect(playlist.title, 'Playlist Title');
-        expect(playlist.videoCountText, '25 lessons');
-        expect(playlist.owner?.text.value, 'Playlist Owner');
-        expect(playlist.owner?.browseId, 'UC_OWNER_1');
-        expect(
-          playlist.thumbnail?.thumbnails.single.url,
-          contains('playlist.jpg'),
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'POST');
+        expect(request.url.path, '/youtubei/v1/search');
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        expect(body['query'], 'flutter playlist');
+        expect(body['context'], isA<Map<String, dynamic>>());
+        expect(body['params'], 'QgIQAw==');
+        return http.Response(
+          json.encode(mockJsonResponse),
+          200,
+          headers: {'content-type': 'application/json'},
         );
-        service.close();
-      },
-    );
+      });
+
+      final service = YoutubeService(httpClient: mockClient);
+      final response = await service.searchPlaylists('flutter playlist');
+      final section =
+          response
+                  .contents!
+                  .twoColumnSearchResultsRenderer!
+                  .primaryContents!
+                  .sectionListRenderer!
+                  .contents
+                  .single
+              as NetworkYouTubeItemSectionRenderer;
+      final playlist =
+          (section.contents.single as NetworkYouTubePlaylistSearchItem)
+              .renderer;
+      expect(playlist.playlistId, 'PL_PLAYLIST_1');
+      expect(playlist.title, 'Playlist Title');
+      expect(playlist.videoCountText, '25 lessons');
+      expect(playlist.owner?.text.value, 'Playlist Owner');
+      expect(playlist.owner?.browseId, 'UC_OWNER_1');
+      expect(
+        playlist.thumbnail?.thumbnails.single.url,
+        contains('playlist.jpg'),
+      );
+      service.close();
+    });
 
     test('browseChannel posts to browse and returns lockup items', () async {
       final mockClient = MockClient((request) async {
