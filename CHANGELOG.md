@@ -67,6 +67,7 @@ so hand edits do not survive; change the generator instead.
 - feat(library): 本地播放列表管理——重命名、搜索过滤、批量删除 (#493)
 - feat(home): home config editor UI (LIZ-65) (#495)
 - feat(live): 直播页播放接入（房间信息头 + media_kit 直播流） (#501)
+- feat: symbol-level repo map for recall (LIZ-125) (#502)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
