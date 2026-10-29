@@ -219,6 +219,7 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Improve playlist picker item screen reader semantics (#483)
 - 🎨 Palette: Improve SpaceScreen creator profile card accessibility semantics (#485)
 - 🎨 Palette: Add accessible semantics and tooltip to video chapter items (#491)
+- refactor: migrate custom Result to multiple_result 5.3.0 (#500)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
