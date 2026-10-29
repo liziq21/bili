@@ -4470,4 +4470,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeConfigHidden => 'Hidden';
+
+  @override
+  String get liveRoomLoading => 'Loading live room';
+
+  @override
+  String get liveRoomError => 'Failed to load live room';
+
+  @override
+  String get liveStreamError => 'Failed to load live stream';
+
+  @override
+  String get liveOnline => 'online';
+
+  @override
+  String get liveViewers => 'watching';
 }

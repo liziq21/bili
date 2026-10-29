@@ -7690,6 +7690,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hidden'**
   String get homeConfigHidden;
+
+  /// LIZ-84 live room detail and stream
+  ///
+  /// In en, this message translates to:
+  /// **'Loading live room'**
+  String get liveRoomLoading;
+
+  /// LIZ-84 live room detail and stream
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load live room'**
+  String get liveRoomError;
+
+  /// LIZ-84 live room detail and stream
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load live stream'**
+  String get liveStreamError;
+
+  /// LIZ-84 live room detail and stream
+  ///
+  /// In en, this message translates to:
+  /// **'online'**
+  String get liveOnline;
+
+  /// LIZ-84 live room detail and stream
+  ///
+  /// In en, this message translates to:
+  /// **'watching'**
+  String get liveViewers;
 }
 
 class _AppLocalizationsDelegate

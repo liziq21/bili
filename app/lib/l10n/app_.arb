@@ -5963,34 +5963,6 @@
   "@currentlyPlaying": {
     "description": "Accessibility label for the current playback queue item"
   },
-  "playbackErrorNetwork": "Network error",
-  "@playbackErrorNetwork": {
-    "description": "Playback error category - network failure"
-  },
-  "playbackErrorDecoder": "Decoder error",
-  "@playbackErrorDecoder": {
-    "description": "Playback error category - media decoding failure"
-  },
-  "playbackErrorDrm": "DRM error",
-  "@playbackErrorDrm": {
-    "description": "Playback error category - DRM failure"
-  },
-  "playbackErrorAuthorization": "Authorization error",
-  "@playbackErrorAuthorization": {
-    "description": "Playback error category - authorization failure"
-  },
-  "playbackErrorUnknown": "Unknown playback error",
-  "@playbackErrorUnknown": {
-    "description": "Playback error category - unknown failure"
-  },
-  "playbackRetrying": "Retrying...",
-  "@playbackRetrying": {
-    "description": "Playback status shown while retrying a network failure"
-  },
-  "skip": "Skip",
-  "@skip": {
-    "description": "Player error action - skip the current queue item"
-  },
   "settingsDiscovery": "Discovery",
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"
@@ -6038,5 +6010,25 @@
   "homeConfigHidden": "Hidden",
   "@homeConfigHidden": {
     "description": "Home configuration tab visibility state - hidden"
+  },
+  "liveRoomLoading": "Loading live room",
+  "@liveRoomLoading": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveRoomError": "Failed to load live room",
+  "@liveRoomError": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveStreamError": "Failed to load live stream",
+  "@liveStreamError": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveOnline": "online",
+  "@liveOnline": {
+    "description": "LIZ-84 live room detail and stream"
+  },
+  "liveViewers": "watching",
+  "@liveViewers": {
+    "description": "LIZ-84 live room detail and stream"
   }
 }

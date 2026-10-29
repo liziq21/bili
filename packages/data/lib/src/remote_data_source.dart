@@ -4,6 +4,7 @@ import 'search_query.dart';
 
 import 'model/creator_profile_model.dart';
 import 'model/danmaku.dart';
+import 'model/live_room_detail.dart';
 import 'model/filter_group.dart';
 import 'model/live_room_model.dart';
 import 'model/media_stream.dart';
@@ -123,6 +124,19 @@ abstract class const MediaStreamRemoteDataSource() extends RemoteDataSource {
     int? preferHeight,
     int? preferStreamId,
   });
+}
+
+/// 直播间详情与直播流地址可选能力接口
+///
+/// 提供直播间详情（标题/主播/在线数）与直播流地址两项能力。
+/// 两者是两次不同的网络请求，失败语义不同：详情失败整页换错误态，
+/// 流地址失败只影响播放器区域。
+abstract class const LiveRoomDetailRemoteDataSource() extends RemoteDataSource {
+  /// 获取直播间详情。
+  Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(int roomId);
+
+  /// 获取直播间播放流地址（HLS/FLV）。
+  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId);
 }
 
 /// 视频评论可选能力接口
