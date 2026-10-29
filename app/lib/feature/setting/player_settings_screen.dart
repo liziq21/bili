@@ -148,29 +148,25 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     required VoidCallback onTap,
   }) => Tooltip(
     message: '$title: $value',
-    child: Semantics(
-      button: true,
-      value: value,
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onSurfaceVariant,
-              ),
+    child: ListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: $styles.text.bodySmall.copyWith(
+              color: $styles.colors.onSurfaceVariant,
             ),
-            Icon(Icons.chevron_right, color: $styles.colors.onSurfaceVariant),
-          ],
-        ),
-        onTap: () {
-          HapticFeedback.lightImpact();
-          onTap();
-        },
+          ),
+          Icon(Icons.chevron_right, color: $styles.colors.onSurfaceVariant),
+        ],
       ),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
     ),
   );
 
@@ -296,19 +292,15 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     required String title,
     required bool selected,
     required VoidCallback onTap,
-  }) => Semantics(
-    button: true,
+  }) => ListTile(
+    title: Text(title),
     selected: selected,
-    label: title,
-    child: ListTile(
-      title: Text(title),
-      trailing: selected
-          ? Icon(Icons.check, color: $styles.colors.accentText)
-          : null,
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-    ),
+    trailing: selected
+        ? Icon(Icons.check, color: $styles.colors.accentText)
+        : null,
+    onTap: () {
+      HapticFeedback.selectionClick();
+      onTap();
+    },
   );
 }

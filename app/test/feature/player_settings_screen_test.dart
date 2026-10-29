@@ -113,7 +113,7 @@ void main() {
     expect(find.text('默认画质'), findsNothing);
   });
 
-  testWidgets('exposes semantics selection state for option pickers', (
+  testWidgets('exposes selection state for option pickers in player settings', (
     tester,
   ) async {
     await tester.pumpWidget(_buildScreen(preferences));
@@ -125,20 +125,20 @@ void main() {
     await tester.tap(find.text(l10n.playerDefaultQuality));
     await tester.pumpAndSettle();
 
-    final autoSemantics = tester.widget<Semantics>(
+    final autoTile = tester.widget<ListTile>(
       find.ancestor(
         of: find.text(l10n.playerQualityAuto),
-        matching: find.byType(Semantics),
-      ).first,
+        matching: find.byType(ListTile),
+      ),
     );
-    expect(autoSemantics.selected, isTrue);
+    expect(autoTile.selected, isTrue);
 
-    final p1080Semantics = tester.widget<Semantics>(
+    final p1080Tile = tester.widget<ListTile>(
       find.ancestor(
         of: find.text(l10n.playerQualityHeight('1080')),
-        matching: find.byType(Semantics),
-      ).first,
+        matching: find.byType(ListTile),
+      ),
     );
-    expect(p1080Semantics.selected, isFalse);
+    expect(p1080Tile.selected, isFalse);
   });
 }
