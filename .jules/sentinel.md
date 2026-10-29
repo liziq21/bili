@@ -143,3 +143,9 @@ Prevention: Construct route URIs using standard `Uri(...)` constructor without c
 Vulnerability: `_ErrorView` in `app/lib/feature/video/common_widgets/video_player.dart` directly interpolated raw `message` exception strings (`l10n?.playbackFailed(message) ?? 'Playback failed: $message'`), exposing raw system file paths, network URLs, or exception stack traces to end users during stream loading failures.
 Learning: Displaying raw exception strings in UI widgets leaks sensitive internal application details, system paths, or network parameters in production builds.
 Prevention: Replace raw exception string interpolations in UI error widgets with generic, localized error messages (`l10n?.videoLoadFailed ?? 'Playback failed'`) and confine detailed exception logging to background loggers.
+
+## 2026-10-26 - Sanitize Control Characters in YouTube Service API Parameters
+
+Vulnerability: `YoutubeService` passed raw `continuation`, `playlistId`, and `params` string arguments directly into YouTube InnerTube API JSON POST bodies across search, browse, watchNext, and comment endpoints without stripping ASCII control characters (`\r\n`, `\x00`, `\x1f`, `\x7f`).
+Learning: Continuation tokens, playlist IDs, and parameter tokens sourced from untrusted external responses or URL parameters can contain non-printable control characters that pollute HTTP POST bodies, corrupt JSON payloads, or trigger backend API request errors.
+Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) from all input parameters (`continuation`, `playlistId`, `params`) across all API service methods before building REST payloads.

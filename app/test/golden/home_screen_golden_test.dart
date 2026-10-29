@@ -19,21 +19,22 @@ class _FakeUserDataRepository() implements UserDataRepository {
   Stream<UserData> get data => Stream.empty();
 
   @override
-  Future<Result<void>> setSourceId(String sourceId) async => Result.ok(null);
+  Future<Result<void, Exception>> setSourceId(String sourceId) async =>
+      Result.success(null);
 
   @override
-  Future<Result<void>> setThemeConfig(ThemeConfig themeConfig) async =>
-      Result.ok(null);
+  Future<Result<void, Exception>> setThemeConfig(
+    ThemeConfig themeConfig,
+  ) async => Result.success(null);
 
   @override
-  Future<Result<void>> setDynamicColorPreference(bool useDynamicColor) async =>
-      Result.ok(null);
+  Future<Result<void, Exception>> setDynamicColorPreference(
+    bool useDynamicColor,
+  ) async => Result.success(null);
 }
 
-class _FakeVideoFeed({required this.count})
+class _FakeVideoFeed({required final int count})
     implements VideoFeedRemoteDataSource {
-  final int count;
-
   @override
   String get sourceId => 'bilibili';
 
@@ -44,14 +45,16 @@ class _FakeVideoFeed({required this.count})
   String get title => '热门';
 
   @override
-  Future<Result<data.Page<VideoModel>>> fetchFeed({int? pageKey}) async {
-    return Result.ok(data.Page(number: 1, totalPages: 1, data: _videos(count)));
+  Future<Result<data.Page<VideoModel>, Exception>> fetchFeed({
+    int? pageKey,
+  }) async {
+    return Result.success(
+      data.Page(number: 1, totalPages: 1, data: _videos(count)),
+    );
   }
 }
 
-class _FakeSource({required this.count}) implements MediaSource {
-  final int count;
-
+class _FakeSource({required final int count}) implements MediaSource {
   @override
   String get id => 'bilibili';
 

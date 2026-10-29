@@ -602,6 +602,93 @@ void main() {
       service.close();
     });
 
+    test('sanitizes control characters in continuation, playlistId, and params across methods', () async {
+      final client = MockClient((request) async {
+        final body = json.decode(request.body) as Map<String, dynamic>;
+        if (request.url.path.contains('next')) {
+          if (body.containsKey('videoId')) {
+            expect(body['videoId'], equals('vid123'));
+            expect(body['playlistId'], equals('list123'));
+            expect(body['params'], equals('param123'));
+          } else {
+            expect(body['continuation'], equals('token123'));
+          }
+          return http.Response(
+            json.encode({
+              'currentVideoEndpoint': {
+                'watchEndpoint': {'videoId': 'vid123'},
+              },
+              'contents': {
+                'twoColumnWatchNextResults': {
+                  'results': {
+                    'results': {
+                      'contents': [
+                        {
+                          'videoPrimaryInfoRenderer': {
+                            'title': {'simpleText': 'Test Video'},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              'onResponseReceivedEndpoints': [
+                {
+                  'appendContinuationItemsAction': {
+                    'continuationItems': [
+                      {
+                        'commentThreadRenderer': {
+                          'comment': {
+                            'commentRenderer': {
+                              'commentId': 'C1',
+                              'contentText': {'simpleText': 'hi'},
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+          );
+        } else if (request.url.path.contains('browse')) {
+          if (body.containsKey('browseId')) {
+            expect(body['params'], equals('param123'));
+          } else {
+            expect(body['continuation'], equals('token123'));
+          }
+          return http.Response(json.encode({}), 200);
+        } else if (request.url.path.contains('search')) {
+          expect(body['continuation'], equals('token123'));
+          return http.Response(json.encode({'contents': {}}), 200);
+        }
+        return http.Response('', 404);
+      });
+
+      final service = YoutubeService(httpClient: client);
+
+      await service.getWatchNext(
+        videoId: 'vid\r\n123',
+        playlistId: 'list\x00123',
+        params: 'param\x1f123',
+      );
+      await service.getWatchNext(continuation: 'token\r\n\x7f123');
+      await service.getComments('token\r\n\x00123');
+      await service.browseChannel(browseId: 'UC123', params: 'param\r\n123');
+      await service.browseChannel(continuation: 'token\r\n123');
+      await service.browsePlaylist(playlistId: 'VL123', params: 'param\r\n123');
+      await service.browsePlaylist(continuation: 'token\r\n123');
+      await service.browseHomeFeed(continuation: 'token\r\n123');
+      await service.searchVideos('query', continuation: 'token\r\n123');
+      await service.searchChannels('query', continuation: 'token\r\n123');
+      await service.searchPlaylists('query', continuation: 'token\r\n123');
+
+      service.close();
+    });
+
     test('throws typed HTTP and InnerTube exceptions', () async {
       final httpService = YoutubeService(
         httpClient: MockClient((_) async => http.Response('unavailable', 503)),
