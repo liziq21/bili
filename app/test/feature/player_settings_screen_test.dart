@@ -126,17 +126,23 @@ void main() {
     await tester.pumpAndSettle();
 
     final autoTile = tester.widget<ListTile>(
-      find.ancestor(
-        of: find.text(l10n.playerQualityAuto),
-        matching: find.byType(ListTile),
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.ancestor(
+          of: find.text(l10n.playerQualityAuto),
+          matching: find.byType(ListTile),
+        ),
       ),
     );
     expect(autoTile.selected, isTrue);
 
     final p1080Tile = tester.widget<ListTile>(
-      find.ancestor(
-        of: find.text(l10n.playerQualityHeight('1080')),
-        matching: find.byType(ListTile),
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.ancestor(
+          of: find.text(l10n.playerQualityHeight('1080')),
+          matching: find.byType(ListTile),
+        ),
       ),
     );
     expect(p1080Tile.selected, isFalse);
