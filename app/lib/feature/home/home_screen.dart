@@ -6,6 +6,7 @@ import 'package:data/data.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../app_scaffold.dart' show $styles;
 import '../../providers/media_sources_provider.dart';
+import '../../routing/navigation_callbacks.dart';
 import 'bloc/home_bloc.dart';
 import 'widgets/feed_status_view.dart';
 import 'widgets/home_filter_bar.dart';
@@ -15,13 +16,10 @@ import 'widgets/video_feed_section.dart';
 
 class const HomeScreen({
   super.key,
-  required final Function(String roomId) _onLive,
-  required final Function(String id) _onVideo,
-  required final VoidCallback onSettings,
+  final LiveNavCallback? onLive,
+  final VideoNavCallback? onVideo,
+  final VoidCallback? onSettings,
 }) extends StatelessWidget {
-  Function(String roomId) get onLive => _onLive;
-  Function(String id) get onVideo => _onVideo;
-
   void _onFilterSelected(BuildContext context, HomeFilter filter) {
     context.read<HomeBloc>().add(FilterSelected(filter.id));
   }
@@ -69,7 +67,7 @@ class const HomeScreen({
                       AppLocalizations.of(context)?.navSettings ?? 'Settings',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    onSettings();
+                    onSettings?.call();
                   },
                 ),
                 SizedBox(width: $styles.insets.xs),
@@ -158,7 +156,7 @@ class const HomeScreen({
       for (final section in liveSections)
         LiveFeedSection(
           section: section,
-          onLiveTap: (liveRoom) => onLive('${liveRoom.id}'),
+          onLiveTap: (liveRoom) => onLive?.call('${liveRoom.id}'),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
         ),
       for (final section in videoSections)
@@ -166,7 +164,7 @@ class const HomeScreen({
           section: section,
           homeConfig: state.homeConfig,
           sourceName: sourceName,
-          onVideoTap: (video) => onVideo(video.id),
+          onVideoTap: (video) => onVideo?.call(video.id),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           onLoadMore: () =>
               context.read<HomeBloc>().add(FeedNextPageRequested(section.id)),

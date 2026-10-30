@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' hide Icons;
 import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +39,7 @@ import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
 import '../feature/video/danmaku/danmaku_settings_screen.dart';
+import 'navigation_callbacks.dart';
 
 part 'route_data/live_route_data.dart';
 part 'route_data/not_found_route_data.dart';
@@ -45,6 +47,42 @@ part 'route_data/search_result_route_data.dart';
 part 'route_data/space_route_data.dart';
 part 'route_data/video_route_data.dart';
 part 'router.g.dart';
+
+extension NavigationCallbacks on BuildContext {
+  /// 默认视频导航：读取当前作用域的 MediaSource
+  void defaultNavigateToVideo(String videoId) {
+    final source = read<MediaSource>();
+    navigateToVideo(videoId, source: source.id);
+  }
+
+  /// 默认直播导航
+  void defaultNavigateToLive(String roomId) {
+    final source = read<MediaSource>();
+    navigateToLive(roomId, source: source.id);
+  }
+
+  /// 默认空间导航
+  void defaultNavigateToSpace(String mid) {
+    final source = read<MediaSource>();
+    navigateToSpace(mid, source: source.id);
+  }
+
+  /// 默认搜索导航
+  void defaultNavigateToSearchResult(String query) {
+    final source = read<MediaSource>();
+    navigateToSearchResult(query, source: source.id);
+  }
+
+  /// 默认创作者导航（媒体库）
+  void defaultNavigateToCreator(String sourceId, String creatorId) {
+    navigateToSpace(creatorId, source: sourceId);
+  }
+
+  /// 默认视频导航（媒体库）
+  void defaultNavigateToMediaLibraryVideo(String sourceId, String videoId) {
+    navigateToVideo(videoId, source: sourceId);
+  }
+}
 
 /// 搜索分支输入框的聚焦入口，由 [SearchScreen] 在挂载时写入、销毁时清空
 ///
@@ -260,14 +298,8 @@ Widget _buildHome(BuildContext context) {
                 context,
                 HomeScreen(
                   onSettings: () => context.push<void>(Routes.settings),
-                  onLive: (roomId) => context.navigateToLive(
-                    roomId,
-                    source: context.read<MediaSource>().id,
-                  ),
-                  onVideo: (id) => context.navigateToVideo(
-                    id,
-                    source: context.read<MediaSource>().id,
-                  ),
+                  onLive: context.defaultNavigateToLive,
+                  onVideo: context.defaultNavigateToVideo,
                 ),
               ),
             ),
@@ -323,8 +355,7 @@ Widget _buildSearchEntry(BuildContext context) {
         if (context.read<SearchSuggestRepository?>() == null) {
           return SearchScreen(
             onFocusInputReady: _registerSearchFocus,
-            onSearch: (query) =>
-                context.navigateToSearchResult(query, source: definition.id),
+            onSearch: context.defaultNavigateToSearchResult,
           );
         }
         return BlocProvider<SearchBloc>(
@@ -338,8 +369,7 @@ Widget _buildSearchEntry(BuildContext context) {
                 ..add(MonitorRecentSearches()),
           child: SearchScreen(
             onFocusInputReady: _registerSearchFocus,
-            onSearch: (query) =>
-                context.navigateToSearchResult(query, source: definition.id),
+            onSearch: context.defaultNavigateToSearchResult,
           ),
         );
       },
@@ -356,17 +386,11 @@ Widget _buildLibrary(BuildContext context) {
       // 之上的 context 去 read 会抛 ProviderNotFoundException。
       child: Builder(
         builder: (context) => MediaLibraryScreen(
-          onVideoTap: (item) => context.navigateToVideo(
-            item.video.id,
-            // 历史跨源存放，不带 source 会落到当前默认源，用错源的接口取详情会失败。
-            source: item.sourceId,
-          ),
+          onVideoTap: context.defaultNavigateToMediaLibraryVideo,
         ),
       ),
     ),
-    onVideoTap: (sourceId, videoId) =>
-        context.navigateToVideo(videoId, source: sourceId),
-    onCreatorTap: (sourceId, creatorId) =>
-        context.navigateToSpace(creatorId, source: sourceId),
+    onVideoTap: context.defaultNavigateToMediaLibraryVideo,
+    onCreatorTap: context.defaultNavigateToCreator,
   );
 }

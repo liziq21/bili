@@ -9,6 +9,7 @@ import '../../data/repository/recent_search_query/recent_search_query_repository
 import '../../data/repository/search_suggest_repository.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import '../../routing/navigation_callbacks.dart';
 import 'app_search_anchor.dart';
 import 'bloc/search_bloc.dart';
 
@@ -19,7 +20,7 @@ import 'bloc/search_bloc.dart';
 /// 底栏每个目的地都能被直接唤起（导航语义：点按当前项回到该分支根）。
 class const SearchScreen({
   super.key,
-  required final void Function(String query) onSearch,
+  final SearchNavCallback? onSearch,
 
   /// 登记聚焦入口的回调，由页面内的搜索框在挂载时以聚焦函数调用、销毁时以 null 调用
   ///
@@ -81,7 +82,7 @@ class const SearchScreen({
         // 两个都调一遍，两者指同一个函数就会跳两次结果页。
         onSearch: (query) {
           record(query);
-          onSearch(query);
+          onSearch?.call(query);
         },
       );
     }
@@ -93,7 +94,7 @@ class const SearchScreen({
       onSearch: (_) {},
       navigateToSearchResult: (query) {
         record(query);
-        onSearch(query);
+        onSearch?.call(query);
       },
     );
   }
@@ -105,7 +106,7 @@ class const SearchScreen({
 /// 快照。bloc 缺失时（数据源不支持建议）整块不渲染。
 class const _RecentSearches({
   required final int limit,
-  required final void Function(String query) onSearch,
+  final SearchNavCallback? onSearch,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -166,7 +167,7 @@ class const _RecentSearches({
                     title: Text(q.query),
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      onSearch(q.query);
+                      onSearch?.call(q.query);
                     },
                   ),
                 ),

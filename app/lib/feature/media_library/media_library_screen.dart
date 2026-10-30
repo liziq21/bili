@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../../routing/navigation_callbacks.dart';
 import '../../ui/video_card.dart';
 import 'media_history_cubit.dart';
 
@@ -24,7 +25,7 @@ class const MediaLibraryScreen({
   super.key,
 
   /// 点按历史条目时的回调
-  required final void Function(MediaHistoryItem item) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -172,9 +173,8 @@ String tooltipMessage(
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
 ///
 /// 历史为空是正常状态（新装用户）而不是故障，所以与错误态分开表达。
-class const _HistoryList({
-  required final void Function(MediaHistoryItem item) onVideoTap,
-}) extends StatelessWidget {
+class const _HistoryList({final MediaLibraryVideoNavCallback? onVideoTap})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -229,7 +229,7 @@ class const _HistoryList({
 
 /// Content wrapper that selects list data to isolate list row rebuilding.
 class const _HistoryRowsContent({
-  required final void Function(MediaHistoryItem item) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -262,7 +262,7 @@ class const _HistoryRows({
   required final List<MediaHistoryItem> items,
   required final Map<MediaHistoryProgressKey, MediaHistoryProgress>
   progressByMedia,
-  required final void Function(MediaHistoryItem item) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -303,7 +303,7 @@ class const _HistoryRows({
                   )],
               thumbWidth: thumbWidth,
               sourceLabel: sourceNames[item.sourceId],
-              onTap: () => onVideoTap(item),
+              onTap: () => onVideoTap?.call(item.sourceId, item.video.id),
             );
           },
         );
@@ -317,7 +317,7 @@ class const _HistoryRow({
   required final MediaHistoryItem item,
   final MediaHistoryProgress? progress,
   required final double thumbWidth,
-  required final VoidCallback onTap,
+  required final VoidCallback? onTap,
   final String? sourceLabel,
 }) extends StatelessWidget {
   @override
@@ -348,7 +348,7 @@ class const _HistoryRow({
         child: InkWell(
           onTap: () {
             HapticFeedback.lightImpact();
-            onTap();
+            onTap?.call();
           },
           child: Padding(
             padding: EdgeInsets.symmetric(

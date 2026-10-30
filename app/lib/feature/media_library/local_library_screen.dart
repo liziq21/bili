@@ -9,6 +9,7 @@ import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../../routing/navigation_callbacks.dart';
 
 /// The local-only library shell.
 ///
@@ -18,8 +19,8 @@ import '../../providers/media_sources_provider.dart';
 class const LocalLibraryScreen({
   super.key,
   required final Widget history,
-  required final void Function(String sourceId, String videoId) onVideoTap,
-  required final void Function(String sourceId, String creatorId) onCreatorTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
+  final CreatorNavCallback? onCreatorTap,
 }) extends StatefulWidget {
   @override
   State<LocalLibraryScreen> createState() => _LocalLibraryScreenState();
@@ -361,8 +362,8 @@ class const _BookmarksTab({
   required final Stream<List<LocalBookmarkEntity>> stream,
   required final String? sourceId,
   required final String? Function(String?) sourceName,
-  required final void Function(String sourceId, String videoId) onVideoTap,
-  required final void Function(String sourceId, String creatorId) onCreatorTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
+  final CreatorNavCallback? onCreatorTap,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function(LocalBookmarkEntity bookmark) onRemove,
@@ -426,7 +427,7 @@ class const _BookmarksTab({
               ),
               onTap: () {
                 HapticFeedback.lightImpact();
-                onVideoTap(bookmark.sourceId, bookmark.originalId);
+                onVideoTap?.call(bookmark.sourceId, bookmark.originalId);
               },
               trailing: PopupMenuButton<_BookmarkAction>(
                 enabled: !busy,
@@ -437,7 +438,7 @@ class const _BookmarksTab({
                       onRemove(bookmark);
                     case _BookmarkAction.creator:
                       if (creatorId != null && creatorId.isNotEmpty) {
-                        onCreatorTap(bookmark.sourceId, creatorId);
+                        onCreatorTap?.call(bookmark.sourceId, creatorId);
                       }
                   }
                 },
@@ -472,7 +473,7 @@ class const _PlaylistsTab({
   required final Stream<List<LocalPlaylistEntity>> stream,
   required final String? sourceId,
   required final String? Function(String?) sourceName,
-  required final void Function(String sourceId, String videoId) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function() onCreate,
@@ -572,7 +573,7 @@ class const _PlaylistCard({
   required final LocalPlaylistEntity playlist,
   required final String? sourceName,
   required final String sourceId,
-  required final void Function(String sourceId, String videoId) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
   required final VoidCallback onRetry,
   required final bool busy,
   required final VoidCallback onDelete,
@@ -692,7 +693,7 @@ class const _PlaylistItemsView({
   required final LocalLibraryRepository repository,
   required final int playlistId,
   required final String sourceId,
-  required final void Function(String sourceId, String videoId) onVideoTap,
+  final MediaLibraryVideoNavCallback? onVideoTap,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function(LocalPlaylistItemEntity item)
@@ -885,7 +886,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
                     isFirst: index == 0,
                     isLast: index == items.length - 1,
                     busy: widget.busy,
-                    onTap: () => widget.onVideoTap(
+                    onTap: () => widget.onVideoTap?.call(
                       items[index].sourceId,
                       items[index].originalId,
                     ),
@@ -1021,7 +1022,7 @@ class const _SubscriptionsTab({
   required final Stream<List<LocalSubscriptionEntity>> stream,
   required final String? sourceId,
   required final String? Function(String?) sourceName,
-  required final void Function(String sourceId, String creatorId) onCreatorTap,
+  final CreatorNavCallback? onCreatorTap,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function(LocalSubscriptionEntity subscription)
@@ -1114,7 +1115,7 @@ class const _SubscriptionGroup({
   required final String groupName,
   required final String? sourceName,
   required final List<LocalSubscriptionEntity> subscriptions,
-  required final void Function(String sourceId, String creatorId) onCreatorTap,
+  final CreatorNavCallback? onCreatorTap,
   required final Future<void> Function(LocalSubscriptionEntity subscription)
   onUnsubscribe,
   required final Future<void> Function(LocalSubscriptionEntity subscription)
@@ -1153,7 +1154,10 @@ class const _SubscriptionGroup({
               title: Text(subscription.name),
               onTap: () {
                 HapticFeedback.lightImpact();
-                onCreatorTap(subscription.sourceId, subscription.originalId);
+                onCreatorTap?.call(
+                  subscription.sourceId,
+                  subscription.originalId,
+                );
               },
               trailing: PopupMenuButton<_SubscriptionAction>(
                 enabled: !busy,
