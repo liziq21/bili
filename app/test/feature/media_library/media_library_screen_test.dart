@@ -115,17 +115,15 @@ void main() {
           value: cubit,
           child: MaterialApp(
             home: MediaLibraryScreen(
-              onVideoTap: (sourceId, videoId) => tapped.add(
-                MediaHistoryItem(
-                  video: VideoModel(
-                    id: videoId,
-                    title: 'Video $videoId',
-                    url: 'https://example.com/$videoId',
-                  ),
-                  sourceId: sourceId,
-                  viewedAt: DateTime.now(),
+              onVideoTap: (sourceId, videoId) => tapped.add((
+                video: VideoModel(
+                  id: videoId,
+                  title: 'Video $videoId',
+                  url: 'https://example.com/$videoId',
                 ),
-              ),
+                sourceId: sourceId,
+                viewedAt: DateTime.now(),
+              )),
             ),
           ),
         ),
@@ -335,17 +333,15 @@ void main() {
           value: cubit,
           child: MaterialApp(
             home: MediaLibraryScreen(
-              onVideoTap: (sourceId, videoId) => tapped.add(
-                MediaHistoryItem(
-                  video: VideoModel(
-                    id: videoId,
-                    title: 'Video $videoId',
-                    url: 'https://example.com/$videoId',
-                  ),
-                  sourceId: sourceId,
-                  viewedAt: DateTime.now(),
+              onVideoTap: (sourceId, videoId) => tapped.add((
+                video: VideoModel(
+                  id: videoId,
+                  title: 'Video $videoId',
+                  url: 'https://example.com/$videoId',
                 ),
-              ),
+                sourceId: sourceId,
+                viewedAt: DateTime.now(),
+              )),
             ),
           ),
         ),
