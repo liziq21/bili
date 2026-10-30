@@ -6,9 +6,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-class _FakeLiveBloc(LiveState initialState)
-    extends Bloc<LiveEvent, LiveState>(initialState)
-    implements LiveBloc;
+class _FakeLiveBloc(super.initialState)
+    extends Cubit<LiveState>
+    implements LiveBloc {
+  @override
+  void add(LiveEvent event) {}
+
+  @override
+  void on<E extends LiveEvent>(
+    EventHandler<E, LiveState> handler, {
+    EventTransformer<E>? transformer,
+  }) {}
+
+  @override
+  void onDone(LiveEvent event, [Object? error, StackTrace? stackTrace]) {}
+
+  @override
+  void onEvent(LiveEvent event) {}
+
+  @override
+  void onTransition(Transition<LiveEvent, LiveState> transition) {}
+}
 
 void main() {
   group('LiveScreen player overlay accessibility and tooltips', () {
