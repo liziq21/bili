@@ -55,6 +55,8 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
 
   @override
   DanmakuRemoteDataSource? get danmakuDataSource => null;
+  @override
+  LiveDanmakuRemoteDataSource? get liveDanmakuDataSource => null;
 
   /// YouTube 播放能力尚未接入：分离流地址的签名解密需要执行 player JS，
   /// 成本与 B站不同量级，故本项显式声明为不支持而非留空。

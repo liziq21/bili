@@ -170,6 +170,17 @@ abstract class const DanmakuRemoteDataSource() extends RemoteDataSource {
   Future<Result<List<DanmakuComment>, Exception>> getDanmaku(String videoId);
 }
 
+/// 直播弹幕流式能力接口。
+///
+/// 直播弹幕与视频弹幕不同：视频弹幕一次性加载全部，直播弹幕通过
+/// WebSocket 实时推送。此接口返回流式弹幕，app 层订阅即可。
+abstract class const LiveDanmakuRemoteDataSource() extends RemoteDataSource {
+  /// 订阅指定直播间的实时弹幕流。
+  ///
+  /// 返回的流在取消订阅时停止；实现方应在取消时断开 WebSocket 连接。
+  Stream<DanmakuComment> liveDanmaku(int roomId);
+}
+
 /// 推荐Feed/流数据源泛型能力接口
 abstract class const FeedRemoteDataSource<T>() extends RemoteDataSource {
   /// Feed 流标识

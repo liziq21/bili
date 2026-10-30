@@ -1,10 +1,17 @@
 library;
 
 export 'src/error/bpi_exception.dart';
+export 'src/danmaku_ws/danmaku_message.dart';
+export 'src/danmaku_ws/live_danmaku_ws_client.dart';
+export 'src/danmaku_ws/packet.dart';
 export 'src/model/feed/network_bili_popular_response.dart';
 export 'src/model/feed/network_bili_ranking_response.dart';
+export 'src/model/live/live_danmaku.dart';
+export 'src/model/live/network_live_danmaku_info.dart';
 export 'src/model/live/network_live_room_detail.dart';
 export 'src/model/live/network_live_room_play_info.dart';
+export 'src/network_live_danmaku_data_source.dart';
+export 'src/live_danmaku_client.dart';
 export 'src/model/reply/network_reply_data.dart';
 export 'src/model/reply/network_reply_reply_data.dart';
 export 'src/model/search/common/html_title.dart';

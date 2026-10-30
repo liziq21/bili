@@ -386,6 +386,23 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
+  Future<NetworkLiveDanmakuInfo> getDanmuInfo({required int roomId}) async {
+    final Uri $url = Uri.parse(
+      'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'id': roomId};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+    );
+    final Response<NetworkLiveDanmakuInfo> $response = await client
+        .send<NetworkLiveDanmakuInfo, NetworkLiveDanmakuInfo>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
   Future<NetworkBiliUserCardData> getUserCard({required int mid}) async {
     final Uri $url = Uri.parse('https://api.bilibili.com/x/web-interface/card');
     final Map<String, dynamic> $params = <String, dynamic>{'mid': mid};

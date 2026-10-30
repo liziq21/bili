@@ -421,6 +421,20 @@ final endpointSpecs = <EndpointSpec>[
       return document;
     },
   ),
+  EndpointSpec(
+    method: 'getDanmuInfo',
+    fixtures: ['danmaku_info.json'],
+    docCell: 'danmaku_info.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final info = NetworkLiveDanmakuInfo.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(info.host, isNotEmpty);
+      expect(info.wssPort, greaterThan(0));
+      return info;
+    },
+  ),
 ];
 
 /// Matches an abstract method declaration such as
@@ -820,7 +834,13 @@ void main() {
       for (final name in names) {
         final source = File('lib/src/$name').readAsStringSync();
         declared.addAll(
-          _methodDeclaration.allMatches(source).map((m) => m.group(2)!),
+          _methodDeclaration
+              .allMatches(source)
+              // WebSocket control methods (connect/disconnect/sendHeartbeat)
+              // return `Future<void>` and have no HTTP endpoint, fixture or
+              // documentation row; this guardrail covers HTTP endpoints only.
+              .where((m) => m.group(1) != 'void')
+              .map((m) => m.group(2)!),
         );
       }
       expect(

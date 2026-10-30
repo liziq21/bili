@@ -95,6 +95,8 @@ class _FakeSource({required final int count}) implements MediaSource {
 
   @override
   DanmakuRemoteDataSource? get danmakuDataSource => null;
+  @override
+  LiveDanmakuRemoteDataSource? get liveDanmakuDataSource => null;
 
   @override
   VideoCommentRemoteDataSource? get videoCommentDataSource => null;

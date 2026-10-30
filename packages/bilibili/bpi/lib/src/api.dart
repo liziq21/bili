@@ -55,9 +55,24 @@ final class LiveApi {
 
   static const roomDetail = '$base${LiveApiPath.roomDetail}';
   static const roomPlayInfo = '$base${LiveApiPath.roomPlayInfo}';
+  static const danmuInfo = '$base${LiveApiPath.danmuInfo}';
 }
 
 final class LiveApiPath {
   static const String roomDetail = '/xlive/web-room/v1/index/getH5InfoByRoom';
   static const String roomPlayInfo = '/xlive/web-room/v2/index/getRoomPlayInfo';
+  static const String danmuInfo = '/xlive/web-room/v1/index/getDanmuInfo';
+}
+
+final class LiveDanmakuApi {
+  static const host = 'broadcastlv.chat.bilibili.com';
+  static const wsBase = 'wss://$host/sub';
+
+  static String wsUrl({
+    required int roomId,
+    required String token,
+    int protocol = 1,
+    String platform = 'web',
+  }) =>
+      '$wsBase?room_id=$roomId&token=$token&protocol=$protocol&platform=$platform';
 }

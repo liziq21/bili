@@ -11,8 +11,10 @@ import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../video/player/media_playback_controller.dart';
+import '../video/danmaku/danmaku_settings_screen.dart';
 import 'bloc/live_bloc.dart';
 import 'bloc/providers.dart';
+import 'live_danmaku_overlay.dart';
 
 /// 直播页：房间信息头 + media_kit 播放器。
 ///
@@ -145,6 +147,7 @@ class _LiveScreenState() extends State<LiveScreen> {
                     controller: _playback!,
                     stream: stream,
                     streamError: streamError,
+                    roomId: roomIdNum,
                     fullscreen: _fullscreen,
                     onToggleFullscreen: _toggleFullscreen,
                     onRetry: () =>
@@ -248,6 +251,7 @@ class const _PlayerArea({
   required final MediaPlaybackController controller,
   required final MediaStream? stream,
   required final String? streamError,
+  required final int roomId,
   required final bool fullscreen,
   required final VoidCallback onToggleFullscreen,
   required final VoidCallback onRetry,
@@ -352,6 +356,9 @@ class _PlayerAreaState extends State<_PlayerArea> {
         child: Stack(
           children: [
             Container(color: $styles.colors.scrim, child: surface),
+            // 直播弹幕浮层。
+            if (widget.roomId > 0)
+              LiveDanmakuOverlay(controller: controller, roomId: widget.roomId),
             // 控制条：仅全屏时显示。
             if (widget.fullscreen && _controlsVisible)
               Positioned(
@@ -393,6 +400,16 @@ class _PlayerAreaState extends State<_PlayerArea> {
                       IconButton(
                         onPressed: widget.onToggleFullscreen,
                         icon: const Icon(Icons.fullscreen_rounded),
+                      ),
+                      // 弹幕设置。
+                      IconButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DanmakuSettingsScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.forum_outlined),
                       ),
                     ],
                   ),
