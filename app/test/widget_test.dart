@@ -33,8 +33,11 @@ import 'package:provider/provider.dart';
 /// This fake uses a repository with Stream.value that emits once and completes
 /// synchronously, so emit.forEach completes immediately and no subscription
 /// remains active during test teardown.
-class FakeAppBloc() extends AppBloc {
-  this : super(userDataRepository: _FakeUserDataRepository());
+class FakeAppBloc extends AppBloc {
+  FakeAppBloc([final UserDataRepository? userDataRepository])
+      : super(
+          userDataRepository: userDataRepository ?? _FakeUserDataRepository(),
+        );
 
   @override
   Future<void> close() {
@@ -220,7 +223,7 @@ void main() {
                   recentSearchQueryRepository: recentSearchQueryRepository,
                 ),
                 child: BlocProvider<AppBloc>(
-                  create: (_) => FakeAppBloc(),
+                  create: (_) => FakeAppBloc(userDataRepository),
                   child: Provider<MediaSourceCatalog>.value(
                     value: mediaSourceCatalog,
                     child: const App(),
