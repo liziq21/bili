@@ -5,6 +5,7 @@ import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../l10n/localization_file/app_localizations.dart';
+import '../../routing/navigation_callbacks.dart';
 import '../../routing/router.dart';
 import '../../ui/search/creator_profile_item.dart';
 import '../../ui/video_card.dart';
@@ -15,8 +16,10 @@ import 'bloc/search_result_bloc.dart';
 class const SearchResultScreen({
   super.key,
   required final String query,
-  required final VoidCallback? onBackClick,
+  final VoidCallback? onBackClick,
   final String? source,
+  final VideoNavCallback? onVideo,
+  final SpaceNavCallback? onSpace,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -37,7 +40,7 @@ class const SearchResultScreen({
             child: AppSearchAnchor(
               onSearch: (newQuery) {
                 if (newQuery.isNotEmpty && newQuery != query) {
-                  context.navigateToSearchResult(newQuery, source: source);
+                  context.defaultNavigateToSearchResult(newQuery);
                 }
               },
             ),
@@ -48,6 +51,12 @@ class const SearchResultScreen({
             tabs: tabAndView.keys.toList(),
             onTap: (_) => HapticFeedback.selectionClick(),
           ),
+          leading: onBackClick != null
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  onPressed: onBackClick,
+                )
+              : null,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -63,7 +72,7 @@ class const SearchResultScreen({
     int index,
   ) => VideoCard(
     videoInfoBase: videoInfoBase,
-    onTap: () => context.navigateToVideo(videoInfoBase.id, source: source),
+    onTap: () => onVideo?.call(videoInfoBase.id),
   );
 
   Widget _buildCreatorProfileItem(
@@ -72,7 +81,7 @@ class const SearchResultScreen({
     int index,
   ) => CreatorProfileItem(
     creatorProfile: creatorProfile,
-    onTap: () => context.navigateToSpace(creatorProfile.id, source: source),
+    onTap: () => onSpace?.call(creatorProfile.id),
   );
 
   Widget? _videoResultView(BuildContext context) {
