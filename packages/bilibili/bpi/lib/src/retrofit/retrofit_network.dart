@@ -8,6 +8,7 @@ import '../api.dart';
 import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
+import '../model/live/network_live_danmaku.dart';
 import '../model/live/network_live_room_detail.dart';
 import '../model/live/network_live_room_play_info.dart';
 import '../model/reply/network_reply_data.dart';
@@ -25,6 +26,7 @@ import '../model/video/network_video_relation.dart';
 import '../model/video/video_detail_data.dart';
 import '../network_feed_data_source.dart';
 import '../network_live_data_source.dart';
+import '../network_live_danmaku_client.dart';
 import '../network_search_data_source.dart';
 import '../network_user_data_source.dart';
 import '../network_video_data_source.dart';
@@ -595,6 +597,22 @@ class BiliNetworkSearch
     platform: platform,
     ptype: ptype,
   );
+
+  @override
+  LiveDanmakuConnection connectLiveDanmaku({
+    required int roomId,
+    required String token,
+    int uid = 0,
+    LiveDanmakuProtocolVersion protocolVersion = LiveDanmakuProtocolVersion.v2,
+  }) {
+    final client = LiveDanmakuClient();
+    return client.connect(
+      roomId: roomId,
+      token: token,
+      uid: uid,
+      protocolVersion: protocolVersion,
+    );
+  }
 
   @override
   Future<NetworkBiliUserCardData> getUserCard({required int mid}) async {

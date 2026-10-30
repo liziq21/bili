@@ -1,0 +1,88 @@
+{
+  "handshake_response": {
+    "description": "Successful handshake response from server",
+    "protocol_version": 2,
+    "op_code": 8,
+    "sequence_id": 1,
+    "body": {
+      "code": 0,
+      "msg": "success"
+    }
+  },
+  "heartbeat_response": {
+    "description": "Heartbeat acknowledgment",
+    "protocol_version": 2,
+    "op_code": 3,
+    "sequence_id": 2,
+    "body": []
+  },
+  "danmaku_notification": {
+    "description": "A typical danmaku message (scrolling)",
+    "protocol_version": 2,
+    "op_code": 5,
+    "sequence_id": 0,
+    "body": {
+      "cmd": "DANMU_MSG",
+      "info": [
+        [0, 1, 25, 16777215, 123456789, 0, "", 0],
+        "Hello World",
+        ["user123", 456789, false, false, "", 0, 0, 0, 0, 0, ""],
+        [1700000000, 0, 0, 0, 0, 0, 0],
+        [],
+        0,
+        0,
+        0
+      ],
+      "roomid": 21144080
+    }
+  },
+  "gift_notification": {
+    "description": "A gift message",
+    "protocol_version": 2,
+    "op_code": 5,
+    "sequence_id": 0,
+    "body": {
+      "cmd": "SEND_GIFT",
+      "data": {
+        "giftId": 123,
+        "giftName": "小电视",
+        "num": 1,
+        "uname": "gift_user",
+        "uid": 999999,
+        "price": 1000,
+        "coinType": "silver",
+        "totalCoin": 1000
+      }
+    }
+  },
+  "entry_notification": {
+    "description": "User entry notification",
+    "protocol_version": 2,
+    "op_code": 5,
+    "sequence_id": 0,
+    "body": {
+      "cmd": "INTERACT_WORD",
+      "data": {
+        "uid": 111111,
+        "uname": "new_viewer",
+        "isadmin": false,
+        "is_vip": true,
+        "vip_type": 2,
+        "msg_type": 1,
+        "roomid": 21144080
+      }
+    }
+  },
+  "like_notification": {
+    "description": "Popularity/like update",
+    "protocol_version": 2,
+    "op_code": 5,
+    "sequence_id": 0,
+    "body": {
+      "cmd": "WATCHED_CHANGE",
+      "data": {
+        "num": 12345
+      }
+    }
+  }
+}
