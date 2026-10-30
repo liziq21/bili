@@ -1,6 +1,6 @@
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Icons;
+import 'package:flutter/material.dart' hide Icons, ScaffoldMessenger, SnackBar;
 import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

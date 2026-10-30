@@ -113,7 +113,21 @@ void main() {
         ]),
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
-          child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),
+          child: MaterialApp(
+            home: MediaLibraryScreen(
+              onVideoTap: (sourceId, videoId) => tapped.add(
+                MediaHistoryItem(
+                  video: VideoModel(
+                    id: videoId,
+                    title: 'Video $videoId',
+                    url: 'https://example.com/$videoId',
+                  ),
+                  sourceId: sourceId,
+                  viewedAt: DateTime.now(),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -319,7 +333,21 @@ void main() {
         ]),
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
-          child: MaterialApp(home: MediaLibraryScreen(onVideoTap: tapped.add)),
+          child: MaterialApp(
+            home: MediaLibraryScreen(
+              onVideoTap: (sourceId, videoId) => tapped.add(
+                MediaHistoryItem(
+                  video: VideoModel(
+                    id: videoId,
+                    title: 'Video $videoId',
+                    url: 'https://example.com/$videoId',
+                  ),
+                  sourceId: sourceId,
+                  viewedAt: DateTime.now(),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
