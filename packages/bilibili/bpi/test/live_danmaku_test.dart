@@ -6,11 +6,11 @@ import 'package:test/test.dart';
 
 void main() {
   Map<String, dynamic> loadFixture(String name) {
-    final file = File('packages/bilibili/bpi/testing/$name');
+    final file = File('testing/$name');
     expect(
       file.existsSync(),
       isTrue,
-      reason: 'Fixture file packages/bilibili/bpi/testing/$name should exist',
+      reason: 'Fixture file testing/$name should exist',
     );
     final content = file.readAsStringSync();
     return jsonDecode(content) as Map<String, dynamic>;
