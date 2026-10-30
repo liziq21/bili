@@ -34,7 +34,7 @@ import 'package:provider/provider.dart';
 /// synchronously, so emit.forEach completes immediately and no subscription
 /// remains active during test teardown.
 class FakeAppBloc extends AppBloc {
-  FakeAppBloc([final UserDataRepository? userDataRepository])
+  FakeAppBloc([UserDataRepository? userDataRepository])
       : super(
           userDataRepository: userDataRepository ?? _FakeUserDataRepository(),
         );
