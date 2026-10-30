@@ -265,12 +265,12 @@ final class LiveDanmakuComment {
           ? userInfo[9] as String
           : '',
       medalName:
-          medalInfo != null && medalInfo.length > 1 && medalInfo[1] is String
-          ? medalInfo[1] as String
+          medalInfo != null && medalInfo.isNotEmpty && medalInfo[0] is String
+          ? medalInfo[0] as String
           : null,
       medalLevel:
-          medalInfo != null && medalInfo.isNotEmpty && medalInfo[0] is int
-          ? medalInfo[0] as int
+          medalInfo != null && medalInfo.length > 1 && medalInfo[1] is int
+          ? medalInfo[1] as int
           : null,
       guardLevel: userInfo.length > 7 && userInfo[7] is int
           ? userInfo[7] as int
