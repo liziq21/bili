@@ -245,6 +245,7 @@ Flutter 自身对该层的指导见 `flutter/flutter` 仓库的 `docs/rules/rule
 - **Widget 测试外壳**：用 `material_ui` fork 的 `MaterialApp` 构建树并注册 `GlobalMaterialLocalizations.delegates`。Flutter 自身的 `MaterialApp` 不提供 fork 的 `MaterialLocalizations`，在非英文 locale 下会抛出异常。
 - **断言 widget 树**：当被测代码读取可变全局状态（如 `$styles`）时，测试必须改变该状态并断言渲染输出。从测试中读回同一静态值无论 widget 树是否重建都会通过。
 - **泄漏追踪**：从 `app/` 运行 `LEAK_TRACKING=true flutter test` 报告未释放的 disposable。测试在清理前抛出导致的泄漏是可接受的例外；将其标记为例外而非删除测试。
+- **测试分类矩阵**：`app/test/TEST_MATRIX.md` 由 `tool/test_matrix.py --report` 生成，映射 125 个测试文件到六类（unit/widget/golden/contract/integration/performance）。新增/移动测试文件须登记分类，`python3 tool/test_matrix.py --check` 是 CI 门禁（Tool Tests job），映射与测试树不一致即红。分类维度定义见该文件。
 
 ### Flutter 测试运行器主机故障
 

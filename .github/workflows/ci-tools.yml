@@ -17,3 +17,11 @@ jobs:
           persist-credentials: false
       - name: Run tool unit tests
         run: python3 -m unittest discover -s tool -p 'test_*.py' --verbose
+
+      - name: Check test matrix mapping
+        run: python3 tool/test_matrix.py --check
+
+      - name: Refresh test matrix document
+        run: |
+          python3 tool/test_matrix.py --report
+          git diff --exit-code -- app/test/TEST_MATRIX.md

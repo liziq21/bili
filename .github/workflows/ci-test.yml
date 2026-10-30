@@ -173,3 +173,64 @@ jobs:
         with:
           name: goldens-review-${{ github.run_id }}-${{ matrix.release.flutter }}
           path: app/test/golden/goldens/ci/
+
+  test_matrix_report:
+    name: Test Matrix Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - id: fvmrc
+        name: Read Flutter version from .fvmrc
+        run: echo "version=$(cat .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ steps.fvmrc.outputs.version }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Run build_runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Run app tests per category
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/test-matrix"
+          for cat in unit widget golden contract integration; do
+            files=$(python3 "$GITHUB_WORKSPACE/tool/test_matrix.py" --files "$cat" --area app --rel app)
+            if [ -z "$files" ]; then echo "FATAL: no files for app/$cat"; exit 1; fi
+            flutter test $files --coverage --coverage-path="$GITHUB_WORKSPACE/test-matrix/app-$cat.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/app-$cat.json"
+          done
+        working-directory: app
+
+      - name: Run package tests per category
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/test-matrix"
+          for spec in bpi:packages/bilibili/bpi bilibili:packages/bilibili data:packages/data youtube:packages/youtube ypi:packages/youtube/ypi; do
+            area=${spec%%:*}; dir=${spec##*:}
+            for cat in unit widget contract; do
+              files=$(python3 "$GITHUB_WORKSPACE/tool/test_matrix.py" --files "$cat" --area "$area" --rel "$dir")
+              if [ -z "$files" ]; then continue; fi
+              (cd "$GITHUB_WORKSPACE/$dir" && dart test $files --coverage-path="$GITHUB_WORKSPACE/test-matrix/$area-$cat.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/$area-$cat.json")
+            done
+          done
+
+      - name: Generate category summary
+        run: python3 tool/test_matrix.py --summary test-matrix
+
+      - name: Upload summary report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: test-matrix-summary-${{ github.run_id }}
+          path: test-matrix/summary.md
+          if-no-files-found: error

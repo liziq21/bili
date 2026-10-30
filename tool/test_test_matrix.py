@@ -83,15 +83,17 @@ class LcovParseTest(unittest.TestCase):
             self.assertEqual((lf, lh, brf, brh), (30, 28, 4, 2))
 
 
+def _events(suites, tests, dones):
+    return _json_events([
+        {'type': 'start', 'time': 0, 'protocolVersion': '0.1.0'},
+        *suites,
+        *tests,
+        *dones,
+        {'type': 'done', 'time': 1, 'success': True},
+    ])
+
+
 class ReporterJsonTest(unittest.TestCase):
-    def _events(self, suites, tests, dones):
-        return _json_events([
-            {'type': 'start', 'time': 0, 'protocolVersion': '0.1.0'},
-            *suites,
-            *tests,
-            *dones,
-            {'type': 'done', 'time': 1, 'success': True},
-        ])
 
     def test_current_protocol_pass(self):
         suites = [{'type': 'suite', 'time': 0,
@@ -104,7 +106,7 @@ class ReporterJsonTest(unittest.TestCase):
                   'result': 'success', 'hidden': False, 'skipped': False}]
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'out.json'
-            _write(path, self._events(suites, tests, dones))
+            _write(path, _events(suites, tests, dones))
             files, passed = test_matrix.parse_reporter_json(path)
         self.assertEqual((files, passed), (1, 1))
 
@@ -129,7 +131,7 @@ class ReporterJsonTest(unittest.TestCase):
         ]
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'out.json'
-            _write(path, self._events(suites, tests, dones))
+            _write(path, _events(suites, tests, dones))
             files, passed = test_matrix.parse_reporter_json(path)
         self.assertEqual((files, passed), (2, 1))
 
@@ -149,7 +151,7 @@ class ReporterJsonTest(unittest.TestCase):
                   'result': 'success', 'hidden': False, 'skipped': False}]
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'out.json'
-            _write(path, self._events(suites, tests, dones))
+            _write(path, _events(suites, tests, dones))
             files, passed = test_matrix.parse_reporter_json(path)
         # Non-root legacy suites are loading virtuals: not counted.
         self.assertEqual((files, passed), (1, 1))
@@ -169,7 +171,7 @@ class ReporterJsonTest(unittest.TestCase):
         ]
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'out.json'
-            _write(path, self._events(suites, tests, dones))
+            _write(path, _events(suites, tests, dones))
             files, passed = test_matrix.parse_reporter_json(path)
         self.assertEqual((files, passed), (1, 0))
 
@@ -187,9 +189,12 @@ class SummaryTest(unittest.TestCase):
     def test_summary_aggregates_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             matrix_dir = Path(tmp)
-            _write(matrix_dir / 'app-unit.lcov',
-                   'SF:app/lib/a.dart\nLF:10\nLH:9\nend_of_record\n')
-            _write(matrix_dir / 'app-unit.json', self._events(
+            for cat in ('unit', 'widget', 'golden', 'contract',
+                        'integration'):
+                lh = {'unit': 9, 'widget': 5}.get(cat, 10)
+                _write(matrix_dir / f'app-{cat}.lcov',
+                       f'SF:app/lib/{cat}.dart\nLF:10\nLH:{lh}\nend_of_record\n')
+            _write(matrix_dir / 'app-unit.json', _events(
                 [{'type': 'suite', 'time': 0,
                   'suite': {'id': 1, 'platform': 'vm',
                             'path': 'test/a.dart'}}],
@@ -199,9 +204,16 @@ class SummaryTest(unittest.TestCase):
                 [{'type': 'testDone', 'time': 2, 'testID': 10,
                   'result': 'success', 'hidden': False, 'skipped': False}],
             ))
-            _write(matrix_dir / 'app-widget.lcov',
-                   'SF:app/lib/b.dart\nLF:10\nLH:5\nend_of_record\n')
-            _write(matrix_dir / 'app-widget.json', '')
+            _write(matrix_dir / 'app-widget.json', _events(
+                [{'type': 'suite', 'time': 0,
+                  'suite': {'id': 2, 'platform': 'vm',
+                            'path': 'test/b.dart'}}],
+                [{'type': 'testStart', 'time': 1,
+                  'test': {'id': 11, 'name': 't2', 'suiteID': 2,
+                           'groupIDs': []}}],
+                [{'type': 'testDone', 'time': 2, 'testID': 11,
+                  'result': 'failure', 'hidden': False, 'skipped': False}],
+            ))
             out = io.StringIO()
             with redirect_stdout(out):
                 code = test_matrix.summary(matrix_dir)
