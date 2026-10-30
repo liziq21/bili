@@ -17,17 +17,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
-class MockUserDataRepository() implements UserDataRepository {
-  final StreamController<UserData> _controller =
-      StreamController<UserData>.broadcast();
+class MockUserDataRepository implements UserDataRepository {
+  final StreamController<UserData> _controller = StreamController<UserData>();
   UserData _currentData = const UserData();
+
+  MockUserDataRepository() {
+    _controller.add(_currentData);
+  }
 
   @override
   Stream<UserData> get data => _controller.stream;
 
   void emitData(UserData userData) {
     _currentData = userData;
-    _controller.add(userData);
+    _controller.add(_currentData);
   }
 
   @override
