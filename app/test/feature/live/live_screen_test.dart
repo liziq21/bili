@@ -6,14 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-class _FakeLiveBloc extends Bloc<LiveEvent, LiveState> implements LiveBloc {
-  _FakeLiveBloc(LiveState initialState) : super(initialState);
-}
+class _FakeLiveBloc(LiveState initialState)
+    extends Bloc<LiveEvent, LiveState>(initialState)
+    implements LiveBloc;
 
 void main() {
   group('LiveScreen player overlay accessibility and tooltips', () {
     testWidgets('LiveScreen displays stream error and retry button with tooltip and semantics', (
-      WidgetTester tester,
+      tester,
     ) async {
       final fakeBloc = _FakeLiveBloc(
         const LiveState(

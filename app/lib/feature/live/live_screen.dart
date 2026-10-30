@@ -388,9 +388,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
                     children: [
                       // 播放 / 暂停。
                       IconButton(
-                        tooltip: playerState.isPlaying
-                            ? l10n.pause
-                            : l10n.play,
+                        tooltip: playerState.isPlaying ? l10n.pause : l10n.play,
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           unawaited(
