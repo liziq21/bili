@@ -30,37 +30,38 @@ class _FakeLiveBloc(super.initialState)
 
 void main() {
   group('LiveScreen player overlay accessibility and tooltips', () {
-    testWidgets('LiveScreen displays stream error and retry button with tooltip and semantics', (
-      tester,
-    ) async {
-      final fakeBloc = _FakeLiveBloc(
-        const LiveState(
-          streamError: 'Failed to load stream',
-          roomDetail: LiveRoomDetailModel(
-            roomId: 12345,
-            title: 'Test Live Room',
-            anchorName: 'Streamer',
-            online: 100,
-            isLive: true,
+    testWidgets(
+      'LiveScreen displays stream error and retry button',
+      (tester) async {
+        final fakeBloc = _FakeLiveBloc(
+          const LiveState(
+            streamError: 'Failed to load stream',
+            roomDetail: LiveRoomDetailModel(
+              roomId: 12345,
+              title: 'Test Live Room',
+              anchorName: 'Streamer',
+              online: 100,
+              isLive: true,
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.delegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: BlocProvider<LiveBloc>.value(
-            value: fakeBloc,
-            child: const LiveScreen(roomId: '12345'),
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.delegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: BlocProvider<LiveBloc>.value(
+              value: fakeBloc,
+              child: const LiveScreen(roomId: '12345'),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Failed to load live stream'), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
-      expect(find.byType(FilledButton), findsOneWidget);
-    });
+        expect(find.text('Failed to load live stream'), findsOneWidget);
+        expect(find.text('Retry'), findsOneWidget);
+        expect(find.byType(FilledButton), findsOneWidget);
+      },
+    );
   });
 }
