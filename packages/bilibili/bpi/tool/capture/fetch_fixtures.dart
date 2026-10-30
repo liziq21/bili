@@ -118,8 +118,38 @@ Future<void> main(List<String> args) async {
           throw FormatException('danmaku response is not usable: $error');
         }
         saveXmlResponse('testing/danmaku.xml', response);
-        print('Danmaku fixture fetched successfully.');
       }
+
+      if (!shouldFetch('testing/danmaku_info.json')) {
+        skipNote('testing/danmaku_info.json');
+        return;
+      }
+      final danmuInfo = await getJson(
+        Uri.https(
+          'api.live.bilibili.com',
+          '/xlive/web-room/v1/index/getDanmuInfo',
+          {'id': '21144080'},
+        ),
+        'danmu_info',
+      );
+      // 弹幕服务器鉴权 token 是临时凭据，按 fixture 规则不写入。
+      final sanitized = Map<String, dynamic>.from(danmuInfo.json);
+      final data = Map<String, dynamic>.from(sanitized['data'] as Map);
+      data.remove('token');
+      sanitized['data'] = data;
+      final sanitizedBody = jsonEncode(sanitized);
+      saveResponse(
+        'testing/danmaku_info.json',
+        _CapturedResponse(
+          response: http.Response(
+            sanitizedBody,
+            200,
+            headers: danmuInfo.response.headers,
+          ),
+          json: sanitized,
+        ),
+      );
+      print('Danmaku fixture fetched successfully.');
       return;
     }
 

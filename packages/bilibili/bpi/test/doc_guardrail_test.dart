@@ -421,6 +421,20 @@ final endpointSpecs = <EndpointSpec>[
       return document;
     },
   ),
+  EndpointSpec(
+    method: 'getDanmuInfo',
+    fixtures: ['danmaku_info.json'],
+    docCell: 'danmaku_info.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final info = NetworkLiveDanmakuInfo.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(info.host, isNotEmpty);
+      expect(info.wssPort, greaterThan(0));
+      return info;
+    },
+  ),
 ];
 
 /// Matches an abstract method declaration such as
