@@ -322,8 +322,11 @@ class _PlayerAreaState extends State<_PlayerArea> {
                 Text(l10n.liveStreamError, style: $styles.text.body),
                 const Gap(12),
                 FilledButton(
-                  onPressed: widget.onRetry,
-                  child: const Text('Retry'),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.onRetry();
+                  },
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
@@ -385,11 +388,17 @@ class _PlayerAreaState extends State<_PlayerArea> {
                     children: [
                       // 播放 / 暂停。
                       IconButton(
-                        onPressed: () => unawaited(
-                          playerState.isPlaying
-                              ? controller.pause()
-                              : controller.play(),
-                        ),
+                        tooltip: playerState.isPlaying
+                            ? l10n.pause
+                            : l10n.play,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          unawaited(
+                            playerState.isPlaying
+                                ? controller.pause()
+                                : controller.play(),
+                          );
+                        },
                         icon: Icon(
                           playerState.isPlaying
                               ? Icons.pause_rounded
@@ -398,7 +407,11 @@ class _PlayerAreaState extends State<_PlayerArea> {
                       ),
                       // 全屏切换。
                       IconButton(
-                        onPressed: widget.onToggleFullscreen,
+                        tooltip: l10n.fullscreenToggle,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          widget.onToggleFullscreen();
+                        },
                         icon: const Icon(Icons.fullscreen_rounded),
                       ),
                       // 弹幕设置。
@@ -444,7 +457,13 @@ class const _ErrorView({
           const Gap(8),
           Text(message, style: $styles.text.bodySmall),
           const Gap(16),
-          FilledButton(onPressed: onRetry, child: Text(l10n.retry)),
+          FilledButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              onRetry();
+            },
+            child: Text(l10n.retry),
+          ),
         ],
       ),
     );
