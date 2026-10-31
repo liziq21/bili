@@ -435,6 +435,21 @@ final endpointSpecs = <EndpointSpec>[
       return info;
     },
   ),
+  EndpointSpec(
+    method: 'getPlaylistContent',
+    fixtures: ['playlist_content.json'],
+    docCell: 'playlist_content.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final data = NetworkBiliPlaylistContentData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(data.itemsLists, isNotNull);
+      expect(data.itemsLists?.page, isNotNull);
+      expect(data.itemsLists?.seriesList, isNotEmpty);
+      return data;
+    },
+  ),
 ];
 
 /// Matches an abstract method declaration such as

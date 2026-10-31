@@ -17,6 +17,7 @@ import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
+import '../model/user/network_bili_playlist_content.dart';
 import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_bili_danmaku.dart';
 import '../model/video/network_play_url.dart';
@@ -183,6 +184,16 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('fourk') int fourk = 1,
   });
 
+  @GET(path: WbiApiPath.playlistContent)
+  Future<NetworkBiliPlaylistContentData> getPlaylistContent({
+    @query required int mid,
+    @Query('page_num') int pageNum = 1,
+    @Query('page_size') int pageSize = 30,
+    @Query('sort_reverse') bool sortReverse = false,
+    @Query('season_id') int? seasonId,
+    @tag String tag = 'WBI',
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -214,6 +225,7 @@ class BiliNetworkSearch
         NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
         NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
+        NetworkBiliPlaylistContentData: NetworkBiliPlaylistContentData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -651,6 +663,37 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili user articles network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliPlaylistContentData> getPlaylistContent({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+    bool sortReverse = false,
+    int? seasonId,
+  }) async {
+    try {
+      return await _networkApi.getPlaylistContent(
+        mid: mid,
+        pageNum: pageNum,
+        pageSize: pageSize,
+        sortReverse: sortReverse,
+        seasonId: seasonId,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili playlist content response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili playlist content network request failed.',
         cause: error,
       );
     }

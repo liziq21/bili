@@ -47,6 +47,8 @@ final class WbiApiPath {
   static const String searchByType = '/x/web-interface/wbi/search/type';
   static const String searchAll = '/x/web-interface/wbi/search/all/v2';
   static const String playUrl = '/x/player/wbi/playurl';
+  static const String playlistContent =
+      '/x/polymer/space/seasons_archives_list';
 }
 
 final class LiveApi {
