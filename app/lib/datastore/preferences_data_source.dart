@@ -204,6 +204,13 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     null,
   );
 
+  /// 每房间上次直播清晰度（B 站 qn）。JSON 编码的 roomId→qn 映射；
+  /// 键机制不支持 Map，故按 homeConfig 同款以字符串承载。
+  static const liveQualityByRoom = PreferencesKey<String>._(
+    'LIVE_QUALITY_BY_ROOM',
+    '{}',
+  );
+
   /// 睡眠定时器默认档位（分钟）。0 表示进入播放器不自动开始计时。
   static const sleepTimerDefaultMinutes = PreferencesKey<int>._(
     'SLEEP_TIMER_DEFAULT_MINUTES',

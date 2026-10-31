@@ -73,7 +73,10 @@ class MediaStream({
 /// 重新解析所需的两项（可读标签、画面高度）。
 class MediaQualityOption({
   /// 画面高度（像素），用于重新解析时让源就近选档。
-  required final int height,
+  ///
+  /// 点播档恒有高度；直播档位没有可靠高度（源只给清晰度编号），此时为
+  /// null，UI 与重新解析均不依赖它。
+  final int? height,
 
   /// 可读标签，如 `1080P`。
   required final String label,
