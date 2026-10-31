@@ -414,12 +414,16 @@ class _PlayerAreaState extends State<_PlayerArea> {
                       ),
                       // 弹幕设置。
                       IconButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DanmakuSettingsScreen(),
-                          ),
-                        ),
+                        tooltip: l10n.danmakuSettingsTitle,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const DanmakuSettingsScreen(),
+                            ),
+                          );
+                        },
                         icon: const Icon(Icons.forum_outlined),
                       ),
                     ],
