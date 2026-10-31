@@ -24,6 +24,7 @@ import 'live_danmaku_overlay.dart';
 class const LiveScreen({
   super.key,
   final VoidCallback? onBackClick,
+  final MediaPlaybackController? playbackController,
   required final String roomId,
 }) extends StatefulWidget {
   @override
@@ -38,14 +39,16 @@ class _LiveScreenState() extends State<LiveScreen> {
   @override
   void initState() {
     super.initState();
-    _playback = MediaPlaybackController();
+    _playback = widget.playbackController ?? MediaPlaybackController();
   }
 
   @override
   void dispose() {
     // 带着横屏设置离开会把整个应用留在横屏，离开时必须还原。
     if (_fullscreen) unawaited(_restorePortrait());
-    unawaited(_playback?.dispose());
+    if (widget.playbackController == null) {
+      unawaited(_playback?.dispose());
+    }
     super.dispose();
   }
 
