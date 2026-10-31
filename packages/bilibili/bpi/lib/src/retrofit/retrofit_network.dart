@@ -18,6 +18,7 @@ import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/user/network_bili_playlist_content.dart';
+import '../model/user/network_bili_user_videos.dart';
 import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_bili_danmaku.dart';
 import '../model/video/network_play_url.dart';
@@ -169,6 +170,15 @@ abstract class BiliNetworkApi extends ChopperService {
     @Query('ps') int pageSize = 30,
   });
 
+  @GET(path: WbiApiPath.userVideos)
+  Future<NetworkBiliUserVideosData> getUserVideos({
+    @query required int mid,
+    @Query('pn') int page = 1,
+    @Query('ps') int pageSize = 30,
+    @Query('order') String? order,
+    @tag String tag = 'WBI',
+  });
+
   @GET(path: ApiPath.bangumiSeason)
   Future<NetworkBangumiSeasonData> getBangumiSeason({
     @Query('season_id') int? seasonId,
@@ -224,6 +234,7 @@ class BiliNetworkSearch
         NetworkLiveDanmakuInfo: NetworkLiveDanmakuInfo.fromJson,
         NetworkBiliUserCardData: NetworkBiliUserCardData.fromJson,
         NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
+        NetworkBiliUserVideosData: NetworkBiliUserVideosData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
         NetworkBiliPlaylistContentData: NetworkBiliPlaylistContentData.fromJson,
       },
@@ -694,6 +705,35 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili playlist content network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliUserVideosData> getUserVideos({
+    required int mid,
+    int page = 1,
+    int pageSize = 30,
+    String? order,
+  }) async {
+    try {
+      return await _networkApi.getUserVideos(
+        mid: mid,
+        page: page,
+        pageSize: pageSize,
+        order: order,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili user videos response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili user videos network request failed.',
         cause: error,
       );
     }
