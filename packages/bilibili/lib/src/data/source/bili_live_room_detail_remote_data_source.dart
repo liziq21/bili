@@ -2,6 +2,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
 
+import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
 
 /// B站直播间详情与直播流地址数据源。
@@ -24,6 +25,9 @@ final class BiliLiveRoomDetailRemoteDataSource({
     int roomId,
   ) async {
     try {
+      if (roomId <= 0) {
+        return Result.error(Exception('Live room ID must be positive'));
+      }
       final detail = await network.getLiveRoomDetail(roomId: roomId);
       final roomInfo = detail.roomInfo;
       if (roomInfo == null) {
@@ -38,7 +42,7 @@ final class BiliLiveRoomDetailRemoteDataSource({
           title: roomInfo.title ?? '未知标题',
           anchorName: anchorName,
           online: online,
-          coverUrl: roomInfo.cover,
+          coverUrl: normalizeBiliUrl(roomInfo.cover),
           isLive: isLive,
           areaName: roomInfo.parentAreaName ?? roomInfo.areaName,
         ),
@@ -51,6 +55,9 @@ final class BiliLiveRoomDetailRemoteDataSource({
   @override
   Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) async {
     try {
+      if (roomId <= 0) {
+        return Result.error(Exception('Live room ID must be positive'));
+      }
       final playInfo = await network.getLiveRoomPlayInfo(roomId: roomId);
       final playurl = playInfo.playurlInfo?.playurl;
       if (playurl == null || playurl.stream.isEmpty) {
@@ -68,7 +75,8 @@ final class BiliLiveRoomDetailRemoteDataSource({
         return Result.error(Exception('直播间 $roomId 未返回流地址'));
       }
       final urlInfo = codec.urlInfo.first;
-      final videoUrl = '${urlInfo.host}${codec.baseUrl}${urlInfo.extra}';
+      final rawVideoUrl = '${urlInfo.host}${codec.baseUrl}${urlInfo.extra}';
+      final videoUrl = normalizeBiliUrl(rawVideoUrl) ?? rawVideoUrl;
 
       return Result.success(MediaStream(videoUrl: videoUrl, headers: _headers));
     } catch (e) {
