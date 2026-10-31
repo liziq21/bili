@@ -581,6 +581,25 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/bangumi_play_url.json', bangumiPlayUrl);
     }
 
+    // 17. Playlist Content (WBI)
+    if (!shouldFetch('testing/playlist_content.json')) {
+      skipNote('testing/playlist_content.json');
+    } else {
+      final playlistContent = await getWbiJson(
+        'https://api.bilibili.com/x/polymer/space/seasons_archives_list',
+        {
+          'mid': '2',
+          'page_num': '1',
+          'page_size': '30',
+          'sort_reverse': 'false',
+        },
+        'playlist content',
+      );
+      _requirePlaylistContent(playlistContent.json, 'playlist content');
+      saveResponse('testing/playlist_content.json', playlistContent);
+      print('Playlist content fixture fetched successfully.');
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -879,5 +898,57 @@ void _requireBangumiPlayUrl(Map<String, dynamic> json, String label) {
     }
   } on Object catch (error) {
     throw FormatException('$label is not a parsable bangumi play URL: $error');
+  }
+}
+
+void _requirePlaylistContent(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final itemsLists = data['items_lists'];
+  if (itemsLists is! Map) {
+    throw FormatException('$label data.items_lists is not an object');
+  }
+  final page = itemsLists['page'];
+  if (page is! Map) {
+    throw FormatException('$label data.items_lists.page is not an object');
+  }
+  final pageNum = page['page_num'];
+  final pageSize = page['page_size'];
+  final total = page['total'];
+  if (pageNum is! int || pageSize is! int || total is! int) {
+    throw FormatException(
+      '$label data.items_lists.page missing required fields',
+    );
+  }
+  final seriesList = itemsLists['series_list'];
+  if (seriesList is! List || seriesList.isEmpty) {
+    throw FormatException(
+      '$label data.items_lists.series_list is not a non-empty list',
+    );
+  }
+  final hasValidSeries = seriesList.any((item) {
+    if (item is! Map) return false;
+    final seriesId = item['series_id'];
+    return seriesId is int && seriesId > 0;
+  });
+  if (!hasValidSeries) {
+    throw FormatException('$label has no valid series with series_id');
+  }
+  // 校验第一个 series 的视频列表
+  final firstSeries = seriesList.first;
+  if (firstSeries is! Map) return;
+  final archives = firstSeries['archives'];
+  if (archives is! List || archives.isEmpty) {
+    throw FormatException('$label first series has no archives');
+  }
+  final hasValidVideo = archives.any((item) {
+    if (item is! Map) return false;
+    final aid = item['aid'];
+    final bvid = item['bvid'];
+    return (aid is int && aid > 0) || (bvid is String && bvid.isNotEmpty);
+  });
+  if (!hasValidVideo) {
+    throw FormatException(
+      '$label first series has no valid video with aid or bvid',
+    );
   }
 }
