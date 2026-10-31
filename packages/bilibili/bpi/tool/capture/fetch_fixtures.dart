@@ -581,6 +581,45 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/bangumi_play_url.json', bangumiPlayUrl);
     }
 
+    // 17. User space videos (WBI)
+    if (!shouldFetch('testing/space_videos.json')) {
+      skipNote('testing/space_videos.json');
+    } else {
+      // B 站对该端点做 IP 级间歇限流（探针实测 412/-352 交替出现），
+      // 同一参数组合有时 200 有时被拦。重试 3 次、间隔 3 秒。
+      late final _CapturedResponse spaceVideos;
+      for (var attempt = 1; attempt <= 3; attempt++) {
+        try {
+          spaceVideos = await getWbiJson(
+            'https://api.bilibili.com/x/space/wbi/arc/search',
+            {
+              'mid': '2',
+              'ps': '30',
+              'pn': '1',
+              'order': 'pubdate',
+              'platform': 'web',
+            },
+            'space videos',
+            headers: const {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Referer': 'https://space.bilibili.com/',
+              'Origin': 'https://space.bilibili.com',
+            },
+          );
+          break;
+        } on FormatException catch (error) {
+          if (attempt == 3) rethrow;
+          stderr.writeln(
+            'space videos attempt $attempt failed: $error; retrying in 3s',
+          );
+          await Future.delayed(const Duration(seconds: 3));
+        }
+      }
+      _requireSpaceVideos(spaceVideos.json, 'space videos');
+      saveResponse('testing/space_videos.json', spaceVideos);
+      print('Space videos fixture fetched successfully.');
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -831,6 +870,27 @@ void _requireUserArticles(Map<String, dynamic> json, String label) {
     }
   } on Object catch (error) {
     throw FormatException('$label is not a parsable user articles: $error');
+  }
+}
+
+void _requireSpaceVideos(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final list = data['list'];
+  if (list is! Map) {
+    throw FormatException('$label data.list is not an object');
+  }
+  final vlist = list['vlist'];
+  if (vlist is! List || vlist.isEmpty) {
+    throw FormatException('$label data.list.vlist is not a non-empty list');
+  }
+  final hasVideo = vlist.any((item) {
+    if (item is! Map) return false;
+    final bvid = item['bvid'];
+    final aid = item['aid'];
+    return (bvid is String && bvid.isNotEmpty) || (aid is int);
+  });
+  if (!hasVideo) {
+    throw FormatException('$label has no video item with bvid or aid');
   }
 }
 

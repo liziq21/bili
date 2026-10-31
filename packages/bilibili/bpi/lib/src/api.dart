@@ -47,6 +47,7 @@ final class WbiApiPath {
   static const String searchByType = '/x/web-interface/wbi/search/type';
   static const String searchAll = '/x/web-interface/wbi/search/all/v2';
   static const String playUrl = '/x/player/wbi/playurl';
+  static const String userVideos = '/x/space/wbi/arc/search';
 }
 
 final class LiveApi {
