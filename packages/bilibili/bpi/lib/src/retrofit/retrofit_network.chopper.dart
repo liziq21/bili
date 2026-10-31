@@ -491,4 +491,37 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
         .send<NetworkPlayUrl, NetworkPlayUrl>($request);
     return $response.bodyOrThrow;
   }
+
+  @override
+  Future<NetworkBiliPlaylistContentData> getPlaylistContent({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+    bool sortReverse = false,
+    int? seasonId,
+    String tag = 'WBI',
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/polymer/space/seasons_archives_list',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'mid': mid,
+      'page_num': pageNum,
+      'page_size': pageSize,
+      'sort_reverse': sortReverse,
+      'season_id': seasonId,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: tag,
+    );
+    final Response<NetworkBiliPlaylistContentData> $response = await client
+        .send<NetworkBiliPlaylistContentData, NetworkBiliPlaylistContentData>(
+          $request,
+        );
+    return $response.bodyOrThrow;
+  }
 }

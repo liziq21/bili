@@ -32,6 +32,7 @@
 | 番剧/剧集播放地址 | `GET /pgc/player/web/playurl` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/bangumi_play_url.json` | 2026-10-08 |
 | 视频弹幕 | `GET /{cid}.xml` | 公共请求 | [Bilibili 公开弹幕 XML endpoint](https://comment.bilibili.com/42164617674.xml) / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/danmaku.xml` | 2026-10-15 |
 | 直播弹幕服务器信息 | `GET /xlive/web-room/v1/index/getDanmuInfo` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/danmaku_info.json` | 2026-10-30 |
+| 播放列表内容 | `GET /x/polymer/space/seasons_archives_list` | WBI | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/playlist_content.json` | 2026-10-31 |
 
 `getH5InfoByRoom` 和 `getRoomPlayInfo` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以对应的 fixture 为准。
 
