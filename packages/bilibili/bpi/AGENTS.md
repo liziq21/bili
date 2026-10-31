@@ -28,6 +28,7 @@
 | 直播间播放流信息 | `GET /xlive/web-room/v2/index/getRoomPlayInfo` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/live_room_play_info.json` | 2026-10-02 |
 | 用户名片/信息 | `GET /x/web-interface/card` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/user_card.json` | 2026-10-03 |
 | 用户专栏文章列表 | `GET /x/space/article` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/user_articles.json` | 2026-10-04 |
+| 用户投稿视频列表 | `GET /x/space/arc/search` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/space_videos.json` | 2026-10-30 |
 | 番剧/剧集详情 | `GET /pgc/view/web/season` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/bangumi_season.json` | 2026-10-05 |
 | 番剧/剧集播放地址 | `GET /pgc/player/web/playurl` | 公共请求 | PipePipe / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/bangumi_play_url.json` | 2026-10-08 |
 | 视频弹幕 | `GET /{cid}.xml` | 公共请求 | [Bilibili 公开弹幕 XML endpoint](https://comment.bilibili.com/42164617674.xml) / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/danmaku.xml` | 2026-10-15 |

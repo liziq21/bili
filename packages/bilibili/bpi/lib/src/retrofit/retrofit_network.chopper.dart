@@ -443,6 +443,35 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
+  Future<NetworkBiliUserVideosData> getUserVideos({
+    required int mid,
+    int page = 1,
+    int pageSize = 30,
+    String? order,
+    String tag = 'WBI',
+  }) async {
+    final Uri $url = Uri.parse(
+      'https://api.bilibili.com/x/space/wbi/arc/search',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'mid': mid,
+      'pn': page,
+      'ps': pageSize,
+      'order': order,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: tag,
+    );
+    final Response<NetworkBiliUserVideosData> $response = await client
+        .send<NetworkBiliUserVideosData, NetworkBiliUserVideosData>($request);
+    return $response.bodyOrThrow;
+  }
+
+  @override
   Future<NetworkBangumiSeasonData> getBangumiSeason({
     int? seasonId,
     int? epId,
