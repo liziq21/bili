@@ -38,11 +38,8 @@ void main() {
         final route = VideoRouteData(id: '123');
         Widget? built;
         // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-        // 先 pump 一次空 widget 初始化视图，再设置 physicalSize，
-        // 然后 pump 实际内容。MaterialApp 会创建自己的 MediaQuery，
-        // 所以 tester.view.physicalSize 必须在 pumpWidget 之前生效。
-        // 额外用 SizedBox 约束返回的 widget，防止 MaterialApp 的 MediaQuery 被忽略。
-        await tester.pumpWidget(const SizedBox.shrink());
+        // 必须在首次 pumpWidget 之前设置 tester.view.physicalSize，
+        // 否则 MaterialApp 会捕获默认的 320x30 视口尺寸。
         tester.view.physicalSize = const Size(800, 600);
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.resetPhysicalSize);
