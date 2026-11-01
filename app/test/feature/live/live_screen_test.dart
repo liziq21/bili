@@ -19,6 +19,9 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   bool isVideoControllerAttached = false;
 
   @override
+  Future<int> get handle async => 0;
+
+  @override
   PlayerStream get stream => PlayerStream(
     _playlist.stream,
     _playing.stream,
