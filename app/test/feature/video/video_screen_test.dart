@@ -11,13 +11,20 @@ void main() {
   testWidgets('video detail page exposes a page back button', (tester) async {
     var backPressed = false;
 
+    // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(
       Provider<MediaSource>.value(
         value: const _TestMediaSource(),
         child: RepositoryProvider<VideoDetailRepository>.value(
           value: const _FailingVideoDetailRepository(),
           child: MaterialApp(
-            home: VideoScreen(onBackClick: () => backPressed = true),
+            home: Scaffold(
+              body: VideoScreen(onBackClick: () => backPressed = true),
+            ),
           ),
         ),
       ),

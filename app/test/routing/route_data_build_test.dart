@@ -40,21 +40,24 @@ void main() {
         // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
         tester.view.physicalSize = const Size(800, 600);
         tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
         await tester.pumpWidget(
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
             child: MaterialApp(
-              home: Builder(
-                builder: (context) {
-                  built = route.build(
-                    context,
-                    fakeState(
-                      location: '/video/123',
-                      pathParameters: const {'id': '123'},
-                    ),
-                  );
-                  return built ?? const SizedBox.shrink();
-                },
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    built = route.build(
+                      context,
+                      fakeState(
+                        location: '/video/123',
+                        pathParameters: const {'id': '123'},
+                      ),
+                    );
+                    return built ?? const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
           ),
