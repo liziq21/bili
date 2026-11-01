@@ -45,19 +45,17 @@ void main() {
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
             child: MaterialApp(
-              home: Scaffold(
-                body: Builder(
-                  builder: (context) {
-                    built = route.build(
-                      context,
-                      fakeState(
-                        location: '/video/123',
-                        pathParameters: const {'id': '123'},
-                      ),
-                    );
-                    return built ?? const SizedBox.shrink();
-                  },
-                ),
+              home: Builder(
+                builder: (context) {
+                  built = route.build(
+                    context,
+                    fakeState(
+                      location: '/video/123',
+                      pathParameters: const {'id': '123'},
+                    ),
+                  );
+                  return built ?? const SizedBox.shrink();
+                },
               ),
             ),
           ),

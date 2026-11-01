@@ -22,9 +22,7 @@ void main() {
         child: RepositoryProvider<VideoDetailRepository>.value(
           value: const _FailingVideoDetailRepository(),
           child: MaterialApp(
-            home: Scaffold(
-              body: VideoScreen(onBackClick: () => backPressed = true),
-            ),
+            home: VideoScreen(onBackClick: () => backPressed = true),
           ),
         ),
       ),
