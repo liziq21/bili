@@ -11,6 +11,8 @@ class const AppLiveRoomRepository(
   Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(int roomId) =>
       _remoteDataSource.getLiveRoomDetail(roomId);
 
-  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) =>
-      _remoteDataSource.getLiveRoomStream(roomId);
+  Future<Result<MediaStream, Exception>> getLiveRoomStream(
+    int roomId, {
+    int? preferQn,
+  }) => _remoteDataSource.getLiveRoomStream(roomId, preferQn: preferQn);
 }

@@ -27,7 +27,10 @@ class _FakeLiveDataSource extends LiveRoomDetailRemoteDataSource {
   }
 
   @override
-  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) async {
+  Future<Result<MediaStream, Exception>> getLiveRoomStream(
+    int roomId, {
+    int? preferQn,
+  }) async {
     return Result.error(Exception('Stream unavailable'));
   }
 }

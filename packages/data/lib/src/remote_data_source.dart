@@ -136,7 +136,13 @@ abstract class const LiveRoomDetailRemoteDataSource() extends RemoteDataSource {
   Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(int roomId);
 
   /// 获取直播间播放流地址（HLS/FLV）。
-  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId);
+  ///
+  /// [preferQn] 为记住的清晰度编号（B 站直播的 qn），源按它请求对应档的
+  /// 流地址；为 null 时由源取默认档。
+  Future<Result<MediaStream, Exception>> getLiveRoomStream(
+    int roomId, {
+    int? preferQn,
+  });
 }
 
 /// 视频评论可选能力接口
