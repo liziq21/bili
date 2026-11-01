@@ -12,7 +12,11 @@ void main() {
     var backPressed = false;
 
     // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-    // 显式包裹 MediaQuery，确保 material_ui MaterialApp 继承正确的视口尺寸。
+    // 同时设置 tester.view 并显式包裹 MediaQuery，确保 material_ui MaterialApp 继承正确的视口尺寸。
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(size: Size(800, 600), devicePixelRatio: 1.0),

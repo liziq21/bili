@@ -35,40 +35,42 @@ void main() {
     testWidgets(
       'VideoRouteData.build resolves to the default source when source is null',
       (tester) async {
-        final route = VideoRouteData(id: '123');
-        Widget? built;
-        // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-        // 显式包裹 MediaQuery，确保 material_ui MaterialApp 继承正确的视口尺寸。
-        await tester.pumpWidget(
-          MediaQuery(
-            data: const MediaQueryData(
-              size: Size(800, 600),
-              devicePixelRatio: 1.0,
-            ),
-            child: Provider<MediaSourceCatalog>.value(
-              value: defaultMediaSourceCatalog,
-              child: MaterialApp(
-                home: Builder(
-                  builder: (context) {
-                    built = route.build(
-                      context,
-                      fakeState(
-                        location: '/video/123',
-                        pathParameters: const {'id': '123'},
-                      ),
-                    );
-                    return built ?? const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pump();
+        testWidgets(
+              'VideoRouteData.build resolves to the default source when source is null',
+              (tester) async {
+                final route = VideoRouteData(id: '123');
+                Widget? built;
+                // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+                // 使用 tester.view.physicalSize（而非 MediaQuery 包裹），
+                // 因为 MaterialApp 会创建自己的 MediaQuery 覆盖外层包裹。
+                tester.view.physicalSize = const Size(800, 600);
+                tester.view.devicePixelRatio = 1.0;
+                addTearDown(tester.view.resetPhysicalSize);
 
-        expect(built, isNotNull);
-      },
-    );
+                await tester.pumpWidget(
+                  Provider<MediaSourceCatalog>.value(
+                    value: defaultMediaSourceCatalog,
+                    child: MaterialApp(
+                      home: Builder(
+                        builder: (context) {
+                          built = route.build(
+                            context,
+                            fakeState(
+                              location: '/video/123',
+                              pathParameters: const {'id': '123'},
+                            ),
+                          );
+                          return built ?? const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                  ),
+                );
+                await tester.pump();
+
+                expect(built, isNotNull);
+              },
+            );
 
     testWidgets(
       'NotFoundRouteData.build renders state.extra as URI text without crashing',
