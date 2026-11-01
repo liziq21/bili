@@ -146,8 +146,21 @@ void main() {
           findsOneWidget,
         );
         expect(find.byType(ListTile), findsNWidgets(3));
-        expect(find.text(l10n.appearanceTheme), findsOneWidget);
-        expect(find.text(l10n.appearanceFontSize), findsOneWidget);
+        // Use descendant of ListTile to avoid matching section headers.
+        expect(
+          find.descendant(
+            of: find.byType(ListTile).at(0),
+            matching: find.text(l10n.appearanceTheme),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(ListTile).at(1),
+            matching: find.text(l10n.appearanceFontSize),
+          ),
+          findsOneWidget,
+        );
         expect(find.text(l10n.appearanceEyeComfort), findsOneWidget);
         expect(tester.takeException(), isNull);
       } finally {

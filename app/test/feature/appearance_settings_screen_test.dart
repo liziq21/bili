@@ -4,6 +4,7 @@ import 'package:app/feature/setting/appearance_settings_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -64,8 +65,8 @@ void main() {
       final context = tester.element(find.byType(AppearanceSettingsScreen));
       final l10n = AppLocalizations.of(context)!;
 
-      // Tap theme tile to open picker.
-      await tester.tap(find.text(l10n.appearanceTheme));
+      // Tap theme tile to open picker (target the ListTile, not the section header).
+      await tester.tap(find.byType(ListTile).at(0));
       await tester.pumpAndSettle();
 
       // Select Dark.
@@ -75,9 +76,9 @@ void main() {
       // Value updates immediately.
       expect(find.text(l10n.appearanceThemeDark), findsOneWidget);
 
-      // Persisted to preferences.
-      final prefs = SharedPreferencesAsync();
-      expect(await prefs.getString('THEME_CONFIG'), 'DARK');
+      // Persisted to preferences via the same PreferencesDataSource instance.
+      final result = await preferences.get(PreferencesKey.themeConfig);
+      expect((result as Success<String, Exception>).success, 'DARK');
     });
 
     testWidgets('changes font scale and persists to preferences', (
@@ -89,8 +90,8 @@ void main() {
       final context = tester.element(find.byType(AppearanceSettingsScreen));
       final l10n = AppLocalizations.of(context)!;
 
-      // Tap font size tile to open picker.
-      await tester.tap(find.text(l10n.appearanceFontSize));
+      // Tap font size tile to open picker (target the ListTile, not the section header).
+      await tester.tap(find.byType(ListTile).at(1));
       await tester.pumpAndSettle();
 
       // Select Large (1.15).
@@ -100,9 +101,9 @@ void main() {
       // Value updates immediately.
       expect(find.text(l10n.appearanceFontSizeLarge), findsOneWidget);
 
-      // Persisted to preferences.
-      final prefs = SharedPreferencesAsync();
-      expect(await prefs.getDouble('FONT_SCALE'), 1.15);
+      // Persisted to preferences via the same PreferencesDataSource instance.
+      final result = await preferences.get(PreferencesKey.fontScale);
+      expect((result as Success<double, Exception>).success, 1.15);
     });
 
     testWidgets('uses English translations when English is selected', (
