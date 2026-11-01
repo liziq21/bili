@@ -15,6 +15,7 @@ void main() {
     // 先 pump 一次空 widget 初始化视图，再设置 physicalSize，
     // 然后 pump 实际内容。MaterialApp 会创建自己的 MediaQuery，
     // 所以 tester.view.physicalSize 必须在 pumpWidget 之前生效。
+    // 额外用 SizedBox 约束返回的 widget，防止 MaterialApp 的 MediaQuery 被忽略。
     await tester.pumpWidget(const SizedBox.shrink());
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1.0;
@@ -26,7 +27,11 @@ void main() {
         child: RepositoryProvider<VideoDetailRepository>.value(
           value: const _FailingVideoDetailRepository(),
           child: MaterialApp(
-            home: VideoScreen(onBackClick: () => backPressed = true),
+            home: SizedBox(
+              width: 800,
+              height: 600,
+              child: VideoScreen(onBackClick: () => backPressed = true),
+            ),
           ),
         ),
       ),
