@@ -111,7 +111,13 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
           );
     final options = <MediaQualityOption>[...widget.stream.alternatives];
     if (current != null) options.add(current);
-    options.sort((a, b) => b.height.compareTo(a.height));
+    options.sort((a, b) {
+      final bh = b.height;
+      final ah = a.height;
+      if (bh == null) return ah == null ? 0 : 1;
+      if (ah == null) return -1;
+      return bh.compareTo(ah);
+    });
     return options;
   }
 
