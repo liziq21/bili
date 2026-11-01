@@ -12,22 +12,24 @@ void main() {
     var backPressed = false;
 
     // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-    // 必须在首次 pumpWidget 之前设置 tester.view.physicalSize，
-    // 否则 MaterialApp 会捕获默认的 320x30 视口尺寸。
-    tester.view.physicalSize = const Size(800, 600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
+    // material_ui 的 MaterialApp 不读取 tester.view，改用 binding.window 物理尺寸。
+    tester.binding.window.physicalSizeTestValue = const Size(800, 600);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    addTearDown(() {
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
+    });
 
+    // 额外显式包裹 MediaQuery，双重保险。
     await tester.pumpWidget(
-      Provider<MediaSource>.value(
-        value: const _TestMediaSource(),
-        child: RepositoryProvider<VideoDetailRepository>.value(
-          value: const _FailingVideoDetailRepository(),
-          child: MaterialApp(
-            home: SizedBox(
-              width: 800,
-              height: 600,
-              child: VideoScreen(onBackClick: () => backPressed = true),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(800, 600), devicePixelRatio: 1.0),
+        child: Provider<MediaSource>.value(
+          value: const _TestMediaSource(),
+          child: RepositoryProvider<VideoDetailRepository>.value(
+            value: const _FailingVideoDetailRepository(),
+            child: MaterialApp(
+              home: VideoScreen(onBackClick: () => backPressed = true),
             ),
           ),
         ),

@@ -38,31 +38,36 @@ void main() {
         final route = VideoRouteData(id: '123');
         Widget? built;
         // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-        // 必须在首次 pumpWidget 之前设置 tester.view.physicalSize，
-        // 否则 MaterialApp 会捕获默认的 320x30 视口尺寸。
-        tester.view.physicalSize = const Size(800, 600);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.resetPhysicalSize);
+        // material_ui 的 MaterialApp 不读取 tester.view，改用 binding.window 物理尺寸。
+        tester.binding.window.physicalSizeTestValue = const Size(800, 1200);
+        tester.binding.window.devicePixelRatioTestValue = 1.0;
+        addTearDown(() {
+          tester.binding.window.clearPhysicalSizeTestValue();
+          tester.binding.window.clearDevicePixelRatioTestValue();
+        });
 
+        // 额外显式包裹 MediaQuery，双重保险。
         await tester.pumpWidget(
-          Provider<MediaSourceCatalog>.value(
-            value: defaultMediaSourceCatalog,
-            child: MaterialApp(
-              home: Builder(
-                builder: (context) {
-                  built = route.build(
-                    context,
-                    fakeState(
-                      location: '/video/123',
-                      pathParameters: const {'id': '123'},
-                    ),
-                  );
-                  return SizedBox(
-                    width: 800,
-                    height: 600,
-                    child: built ?? const SizedBox.shrink(),
-                  );
-                },
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(800, 1200),
+              devicePixelRatio: 1.0,
+            ),
+            child: Provider<MediaSourceCatalog>.value(
+              value: defaultMediaSourceCatalog,
+              child: MaterialApp(
+                home: Builder(
+                  builder: (context) {
+                    built = route.build(
+                      context,
+                      fakeState(
+                        location: '/video/123',
+                        pathParameters: const {'id': '123'},
+                      ),
+                    );
+                    return built ?? const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
           ),
