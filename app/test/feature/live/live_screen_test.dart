@@ -65,7 +65,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   }
 }
 
-class _FakeLiveDataSource extends LiveRoomDetailRemoteDataSource {
+class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -157,10 +157,7 @@ void main() {
     addTearDown(controller.dispose);
     addTearDown(fakePlatform.disposeStreams);
 
-    final mediaStream = MediaStream(
-      url: 'https://example.com/live.m3u8',
-      format: StreamFormat.hls,
-    );
+    final mediaStream = MediaStream(videoUrl: 'https://example.com/live.m3u8');
     final repo = AppLiveRoomRepository(
       _FakeLiveDataSourceWithStream(mediaStream),
     );
