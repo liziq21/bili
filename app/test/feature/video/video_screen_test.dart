@@ -11,6 +11,14 @@ void main() {
   testWidgets('video detail page exposes a page back button', (tester) async {
     var backPressed = false;
 
+    // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+    // 必须在 pumpWidget 之前设置 tester.view.physicalSize，
+    // 否则 MaterialApp 会捕获默认的 320x30 视口尺寸。
+    // 使用更高的视口 (800x1200) 确保队列有足够空间滚动。
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(
       Provider<MediaSource>.value(
         value: const _TestMediaSource(),

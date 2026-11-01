@@ -88,7 +88,7 @@ class _PlaybackQueueSheetState() extends State<PlaybackQueueSheet> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxHeight),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             children: [
               _QueueHeader(
                 title: l10n.playbackQueue,
@@ -104,7 +104,7 @@ class _PlaybackQueueSheetState() extends State<PlaybackQueueSheet> {
               if (_items.isEmpty)
                 _EmptyQueue(message: l10n.queueEmpty)
               else
-                Flexible(
+                Expanded(
                   child: ReorderableListView.builder(
                     buildDefaultDragHandles: false,
                     padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),

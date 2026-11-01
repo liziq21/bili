@@ -34,3 +34,37 @@ final class const MediaStreamChanged(final MediaStream stream)
   @override
   List<Object?> get props => [stream];
 }
+
+/// 请求把视频加入播放队列。
+///
+/// 由相关视频卡片等入口触发，解析地址后交给 [MediaPlaybackController.addToQueue]。
+final class const QueueAddVideo(final String videoId) extends VideoEvent {
+  @override
+  List<Object?> get props => [videoId];
+}
+
+/// 请求从队列移除指定序号的条目。
+final class const QueueRemoveItem(final int index) extends VideoEvent {
+  @override
+  List<Object?> get props => [index];
+}
+
+/// 请求重排队列条目。
+final class const QueueReorderItems(final int from, final int to)
+    extends VideoEvent {
+  @override
+  List<Object?> get props => [from, to];
+}
+
+/// 请求跳转到队列指定序号。
+final class const QueueJumpTo(final int index) extends VideoEvent {
+  @override
+  List<Object?> get props => [index];
+}
+
+/// 请求切换队列播放模式。
+final class const QueueSetMode(final PlaybackQueueMode mode)
+    extends VideoEvent {
+  @override
+  List<Object?> get props => [mode];
+}
