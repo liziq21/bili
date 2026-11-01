@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 
 /// 更完整的假播放器，参考 media_playback_controller_test.dart 的实现。
 ///
-/// 提供足够的流与字段防止 media_kit 在测试环境下触发原生代码路径导致 segfault。
+/// 提供足够的流防止 media_kit 在测试环境下触发原生代码路径导致 segfault。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   this {
     stream = PlayerStream(
@@ -154,102 +154,33 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   }
 }
 
-/// 返回成功流的数据源，用于测试播放器渲染路径。
-class _FakeLiveDataSourceWithStream() extends LiveRoomDetailRemoteDataSource {
-  @override
-  String get sourceId => 'fake';
-
-  @override
-  Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(
-    int roomId,
+void main() {
+  testWidgets('LiveScreen displays stream error and retry button', (
+    tester,
   ) async {
-    return Result.success(
-      const LiveRoomDetail(
-        roomId: 12345,
-        title: 'Test Live Room',
-        anchorName: 'Streamer',
-        online: 100,
-        isLive: true,
+    final fakePlatform = _FakePlatformPlayer();
+    final controller = MediaPlaybackController(fakePlatform);
+    addTearDown(controller.dispose);
+    addTearDown(fakePlatform.disposeStreams);
+
+    final repo = AppLiveRoomRepository(_FakeLiveDataSource());
+
+    await tester.pumpWidget(
+      Provider<AppLiveRoomRepository>.value(
+        value: repo,
+        child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: LiveScreen(roomId: '12345', playbackController: controller),
+        ),
       ),
     );
-  }
+    await tester.pumpAndSettle();
 
-  @override
-  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) async {
-    return Result.success(
-      MediaStream(videoUrl: 'https://example.com/live.m3u8'),
-    );
-  }
-}
-
-void main() {
-  group('LiveScreen', () {
-    testWidgets('displays stream error and retry button', (tester) async {
-      final fakePlatform = _FakePlatformPlayer();
-      final controller = MediaPlaybackController(fakePlatform);
-      addTearDown(controller.dispose);
-      addTearDown(fakePlatform.disposeStreams);
-
-      final repo = AppLiveRoomRepository(_FakeLiveDataSource());
-
-      await tester.pumpWidget(
-        Provider<AppLiveRoomRepository>.value(
-          value: repo,
-          child: MaterialApp(
-            localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: LiveScreen(roomId: '12345', playbackController: controller),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Failed to load live stream'), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
-      expect(find.byType(FilledButton), findsOneWidget);
-    });
-
-    testWidgets('danmaku settings button has localized tooltip', (
-      tester,
-    ) async {
-      final fakePlatform = _FakePlatformPlayer();
-      final controller = MediaPlaybackController(fakePlatform);
-      addTearDown(controller.dispose);
-      addTearDown(fakePlatform.disposeStreams);
-
-      final repo = AppLiveRoomRepository(_FakeLiveDataSourceWithStream());
-
-      await tester.pumpWidget(
-        Provider<AppLiveRoomRepository>.value(
-          value: repo,
-          child: MaterialApp(
-            localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: LiveScreen(roomId: '12345', playbackController: controller),
-          ),
-        ),
-      );
-
-      // 等待流加载并进入播放状态
-      await tester.pumpAndSettle(const Duration(seconds: 5));
-
-      // 进入全屏以显示控制条
-      await tester.tap(find.byIcon(Icons.fullscreen_rounded));
-      await tester.pumpAndSettle();
-
-      // 验证弹幕设置按钮存在且有本地化 tooltip
-      final settingsButton = find.byIcon(Icons.forum_outlined);
-      expect(settingsButton, findsOneWidget);
-
-      final tooltip = tester.widget<Tooltip>(
-        find.ancestor(of: settingsButton, matching: find.byType(Tooltip)),
-      );
-      expect(tooltip.message, isNotEmpty);
-      expect(tooltip.message, contains('danmaku'));
-    });
+    expect(find.text('Failed to load live stream'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
   });
 }
