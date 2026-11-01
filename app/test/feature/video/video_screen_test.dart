@@ -11,22 +11,20 @@ void main() {
   testWidgets('video detail page exposes a page back button', (tester) async {
     var backPressed = false;
 
-    // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-    // 同时设置 tester.view 并显式包裹 MediaQuery，确保 material_ui MaterialApp 继承正确的视口尺寸。
+    // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+    // 使用 tester.view.physicalSize（而非 MediaQuery 包裹），
+    // 因为 MaterialApp 会创建自己的 MediaQuery 覆盖外层包裹。
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(size: Size(800, 600), devicePixelRatio: 1.0),
-        child: Provider<MediaSource>.value(
-          value: const _TestMediaSource(),
-          child: RepositoryProvider<VideoDetailRepository>.value(
-            value: const _FailingVideoDetailRepository(),
-            child: MaterialApp(
-              home: VideoScreen(onBackClick: () => backPressed = true),
-            ),
+      Provider<MediaSource>.value(
+        value: const _TestMediaSource(),
+        child: RepositoryProvider<VideoDetailRepository>.value(
+          value: const _FailingVideoDetailRepository(),
+          child: MaterialApp(
+            home: VideoScreen(onBackClick: () => backPressed = true),
           ),
         ),
       ),

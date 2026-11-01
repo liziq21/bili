@@ -35,42 +35,39 @@ void main() {
     testWidgets(
       'VideoRouteData.build resolves to the default source when source is null',
       (tester) async {
-        testWidgets(
-              'VideoRouteData.build resolves to the default source when source is null',
-              (tester) async {
-                final route = VideoRouteData(id: '123');
-                Widget? built;
-                // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-                // 使用 tester.view.physicalSize（而非 MediaQuery 包裹），
-                // 因为 MaterialApp 会创建自己的 MediaQuery 覆盖外层包裹。
-                tester.view.physicalSize = const Size(800, 600);
-                tester.view.devicePixelRatio = 1.0;
-                addTearDown(tester.view.resetPhysicalSize);
+        final route = VideoRouteData(id: '123');
+        Widget? built;
+        // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+        // 使用 tester.view.physicalSize（而非 MediaQuery 包裹），
+        // 因为 MaterialApp 会创建自己的 MediaQuery 覆盖外层包裹。
+        tester.view.physicalSize = const Size(800, 600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
 
-                await tester.pumpWidget(
-                  Provider<MediaSourceCatalog>.value(
-                    value: defaultMediaSourceCatalog,
-                    child: MaterialApp(
-                      home: Builder(
-                        builder: (context) {
-                          built = route.build(
-                            context,
-                            fakeState(
-                              location: '/video/123',
-                              pathParameters: const {'id': '123'},
-                            ),
-                          );
-                          return built ?? const SizedBox.shrink();
-                        },
-                      ),
+        await tester.pumpWidget(
+          Provider<MediaSourceCatalog>.value(
+            value: defaultMediaSourceCatalog,
+            child: MaterialApp(
+              home: Builder(
+                builder: (context) {
+                  built = route.build(
+                    context,
+                    fakeState(
+                      location: '/video/123',
+                      pathParameters: const {'id': '123'},
                     ),
-                  ),
-                );
-                await tester.pump();
+                  );
+                  return built ?? const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
 
-                expect(built, isNotNull);
-              },
-            );
+        expect(built, isNotNull);
+      },
+    );
 
     testWidgets(
       'NotFoundRouteData.build renders state.extra as URI text without crashing',
