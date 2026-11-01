@@ -300,6 +300,20 @@ final endpointSpecs = <EndpointSpec>[
     },
   ),
   EndpointSpec(
+    method: 'getUserVideos',
+    fixtures: ['space_videos.json'],
+    docCell: 'space_videos.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final data = NetworkBiliUserVideosData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(data.list, isNotNull);
+      expect(data.page, isNotNull);
+      return data;
+    },
+  ),
+  EndpointSpec(
     method: 'getBangumiSeason',
     fixtures: ['bangumi_season.json'],
     docCell: 'bangumi_season.json',
