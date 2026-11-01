@@ -12,17 +12,17 @@ void main() {
     var backPressed = false;
 
     // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-    tester.view.physicalSize = const Size(800, 600);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.resetPhysicalSize);
-
+    // 显式包裹 MediaQuery，确保 material_ui MaterialApp 继承正确的视口尺寸。
     await tester.pumpWidget(
-      Provider<MediaSource>.value(
-        value: const _TestMediaSource(),
-        child: RepositoryProvider<VideoDetailRepository>.value(
-          value: const _FailingVideoDetailRepository(),
-          child: MaterialApp(
-            home: VideoScreen(onBackClick: () => backPressed = true),
+      MediaQuery(
+        data: const MediaQueryData(size: Size(800, 600), devicePixelRatio: 1.0),
+        child: Provider<MediaSource>.value(
+          value: const _TestMediaSource(),
+          child: RepositoryProvider<VideoDetailRepository>.value(
+            value: const _FailingVideoDetailRepository(),
+            child: MaterialApp(
+              home: VideoScreen(onBackClick: () => backPressed = true),
+            ),
           ),
         ),
       ),
