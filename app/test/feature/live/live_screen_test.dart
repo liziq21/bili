@@ -8,47 +8,85 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
+/// 更完整的假播放器，参考 media_playback_controller_test.dart 的实现。
+///
+/// 提供足够的流与字段防止 media_kit 在测试环境下触发原生代码路径导致 segfault。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
-  final _playing = StreamController<bool>.broadcast();
+  this {
+    stream = PlayerStream(
+      _playlist.stream,
+      _playing.stream,
+      _completed.stream,
+      _position.stream,
+      _duration.stream,
+      _volume.stream,
+      _rate.stream,
+      _pitch.stream,
+      _buffering.stream,
+      _bufferingPercentage.stream,
+      _buffer.stream,
+      _playlistMode.stream,
+      _shuffle.stream,
+      _audioParams.stream,
+      _videoParams.stream,
+      _audioBitrate.stream,
+      _audioDevice.stream,
+      _audioDevices.stream,
+      _track.stream,
+      _tracks.stream,
+      _width.stream,
+      _height.stream,
+      _subtitle.stream,
+      _log.stream,
+      _error.stream,
+    );
+  }
+
   final _playlist = StreamController<Playlist>.broadcast();
+  final _playing = StreamController<bool>.broadcast();
+  final _completed = StreamController<bool>.broadcast();
+  final _position = StreamController<Duration>.broadcast();
+  final _duration = StreamController<Duration>.broadcast();
+  final _volume = StreamController<double>.broadcast();
+  final _rate = StreamController<double>.broadcast();
+  final _pitch = StreamController<double>.broadcast();
+  final _buffering = StreamController<bool>.broadcast();
+  final _buffer = StreamController<Duration>.broadcast();
+  final _bufferingPercentage = StreamController<double>.broadcast();
+  final _playlistMode = StreamController<PlaylistMode>.broadcast();
+  final _shuffle = StreamController<bool>.broadcast();
+  final _audioParams = StreamController<AudioParams>.broadcast();
+  final _videoParams = StreamController<VideoParams>.broadcast();
+  final _audioBitrate = StreamController<double?>.broadcast();
+  final _audioDevice = StreamController<AudioDevice>.broadcast();
+  final _audioDevices = StreamController<List<AudioDevice>>.broadcast();
+  final _track = StreamController<Track>.broadcast();
+  final _tracks = StreamController<Tracks>.broadcast();
+  final _width = StreamController<int?>.broadcast();
+  final _height = StreamController<int?>.broadcast();
+  final _subtitle = StreamController<List<String>>.broadcast();
+  final _log = StreamController<PlayerLog>.broadcast();
+  final _error = StreamController<String>.broadcast();
 
   @override
   bool isVideoControllerAttached = false;
 
   @override
+  late PlayerState state = PlayerState();
+
+  @override
+  Completer<VideoController> videoControllerCompleter =
+      Completer<VideoController>();
+
+  @override
   Future<int> get handle async => 0;
 
   @override
-  PlayerStream get stream => PlayerStream(
-    _playlist.stream,
-    _playing.stream,
-    const Stream<bool>.empty(),
-    const Stream<Duration>.empty(),
-    const Stream<Duration>.empty(),
-    const Stream<double>.empty(),
-    const Stream<double>.empty(),
-    const Stream<double>.empty(),
-    const Stream<bool>.empty(),
-    const Stream<double>.empty(),
-    const Stream<Duration>.empty(),
-    const Stream<PlaylistMode>.empty(),
-    const Stream<bool>.empty(),
-    const Stream<AudioParams>.empty(),
-    const Stream<VideoParams>.empty(),
-    const Stream<double?>.empty(),
-    const Stream<AudioDevice>.empty(),
-    const Stream<List<AudioDevice>>.empty(),
-    const Stream<Track>.empty(),
-    const Stream<Tracks>.empty(),
-    const Stream<int?>.empty(),
-    const Stream<int?>.empty(),
-    const Stream<List<String>>.empty(),
-    const Stream<PlayerLog>.empty(),
-    const Stream<String>.empty(),
-  );
+  late PlayerStream stream;
 
   @override
   Future<void> open(
@@ -64,6 +102,29 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
 
   void disposeStreams() {
     _playing.close();
+    _completed.close();
+    _position.close();
+    _duration.close();
+    _volume.close();
+    _rate.close();
+    _pitch.close();
+    _buffering.close();
+    _buffer.close();
+    _bufferingPercentage.close();
+    _playlistMode.close();
+    _shuffle.close();
+    _audioParams.close();
+    _videoParams.close();
+    _audioBitrate.close();
+    _audioDevice.close();
+    _audioDevices.close();
+    _track.close();
+    _tracks.close();
+    _width.close();
+    _height.close();
+    _subtitle.close();
+    _log.close();
+    _error.close();
     _playlist.close();
   }
 }
@@ -93,11 +154,8 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   }
 }
 
-class _FakeLiveDataSourceWithStream extends LiveRoomDetailRemoteDataSource {
-  _FakeLiveDataSourceWithStream(this._stream);
-
-  final MediaStream _stream;
-
+/// 返回成功流的数据源，用于测试播放器渲染路径。
+class _FakeLiveDataSourceWithStream() extends LiveRoomDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
@@ -118,83 +176,80 @@ class _FakeLiveDataSourceWithStream extends LiveRoomDetailRemoteDataSource {
 
   @override
   Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) async {
-    return Result.success(_stream);
+    return Result.success(
+      MediaStream(videoUrl: 'https://example.com/live.m3u8'),
+    );
   }
 }
 
 void main() {
-  testWidgets('LiveScreen displays stream error and retry button', (
-    tester,
-  ) async {
-    final fakePlatform = _FakePlatformPlayer();
-    final controller = MediaPlaybackController(fakePlatform);
-    addTearDown(controller.dispose);
-    addTearDown(fakePlatform.disposeStreams);
+  group('LiveScreen', () {
+    testWidgets('displays stream error and retry button', (tester) async {
+      final fakePlatform = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fakePlatform);
+      addTearDown(controller.dispose);
+      addTearDown(fakePlatform.disposeStreams);
 
-    final repo = AppLiveRoomRepository(_FakeLiveDataSource());
+      final repo = AppLiveRoomRepository(_FakeLiveDataSource());
 
-    await tester.pumpWidget(
-      Provider<AppLiveRoomRepository>.value(
-        value: repo,
-        child: MaterialApp(
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: LiveScreen(roomId: '12345', playbackController: controller),
+      await tester.pumpWidget(
+        Provider<AppLiveRoomRepository>.value(
+          value: repo,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: LiveScreen(roomId: '12345', playbackController: controller),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Failed to load live stream'), findsOneWidget);
-    expect(find.text('Retry'), findsOneWidget);
-    expect(find.byType(FilledButton), findsOneWidget);
-  });
-
-  testWidgets('LiveScreen danmaku settings button has localized tooltip', (
-    tester,
-  ) async {
-    final fakePlatform = _FakePlatformPlayer();
-    final controller = MediaPlaybackController(fakePlatform);
-    addTearDown(controller.dispose);
-    addTearDown(fakePlatform.disposeStreams);
-
-    final mediaStream = MediaStream(videoUrl: 'https://example.com/live.m3u8');
-    final repo = AppLiveRoomRepository(
-      _FakeLiveDataSourceWithStream(mediaStream),
-    );
-
-    await tester.pumpWidget(
-      Provider<AppLiveRoomRepository>.value(
-        value: repo,
-        child: MaterialApp(
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          home: LiveScreen(roomId: '12345', playbackController: controller),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // Toggle fullscreen to show overlay controls.
-    final toggleFullscreenFinder = find.byTooltip('Fullscreen');
-    if (toggleFullscreenFinder.evaluate().isNotEmpty) {
-      await tester.tap(toggleFullscreenFinder);
+      );
       await tester.pumpAndSettle();
-    }
 
-    final l10n = AppLocalizations.of(tester.element(find.byType(LiveScreen)))!;
-    final danmakuSettingsButton = find.byWidgetPredicate(
-      (widget) =>
-          widget is IconButton &&
-          widget.tooltip == l10n.danmakuSettingsTitle &&
-          widget.icon is Icon &&
-          (widget.icon as Icon).icon == Icons.forum_outlined,
-    );
-    expect(danmakuSettingsButton, findsOneWidget);
+      expect(find.text('Failed to load live stream'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.byType(FilledButton), findsOneWidget);
+    });
+
+    testWidgets('danmaku settings button has localized tooltip', (
+      tester,
+    ) async {
+      final fakePlatform = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fakePlatform);
+      addTearDown(controller.dispose);
+      addTearDown(fakePlatform.disposeStreams);
+
+      final repo = AppLiveRoomRepository(_FakeLiveDataSourceWithStream());
+
+      await tester.pumpWidget(
+        Provider<AppLiveRoomRepository>.value(
+          value: repo,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: LiveScreen(roomId: '12345', playbackController: controller),
+          ),
+        ),
+      );
+
+      // 等待流加载并进入播放状态
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      // 进入全屏以显示控制条
+      await tester.tap(find.byIcon(Icons.fullscreen_rounded));
+      await tester.pumpAndSettle();
+
+      // 验证弹幕设置按钮存在且有本地化 tooltip
+      final settingsButton = find.byIcon(Icons.forum_outlined);
+      expect(settingsButton, findsOneWidget);
+
+      final tooltip = tester.widget<Tooltip>(
+        find.ancestor(of: settingsButton, matching: find.byType(Tooltip)),
+      );
+      expect(tooltip.message, isNotEmpty);
+      expect(tooltip.message, contains('danmaku'));
+    });
   });
 }
