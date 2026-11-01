@@ -142,15 +142,24 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
       child: Row(
         children: [
           Expanded(child: Text(label)),
-          DropdownButton<int>(
-            value: value,
-            items: [
-              for (var columns = 1; columns <= 8; columns++)
-                DropdownMenuItem(value: columns, child: Text('$columns')),
-            ],
-            onChanged: (updated) {
-              if (updated != null) onChanged(updated);
-            },
+          Semantics(
+            label: label,
+            value: '$value',
+            button: true,
+            excludeSemantics: true,
+            child: DropdownButton<int>(
+              value: value,
+              items: [
+                for (var columns = 1; columns <= 8; columns++)
+                  DropdownMenuItem(value: columns, child: Text('$columns')),
+              ],
+              onChanged: (updated) {
+                if (updated != null) {
+                  HapticFeedback.selectionClick();
+                  onChanged(updated);
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -203,9 +212,16 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Switch(
-          value: tab.isVisible,
-          onChanged: (value) => _setTabVisible(sourceId, tab.id, value),
+        Semantics(
+          label:
+              '${tab.label} ${tab.isVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
+          child: Switch(
+            value: tab.isVisible,
+            onChanged: (value) {
+              HapticFeedback.selectionClick();
+              _setTabVisible(sourceId, tab.id, value);
+            },
+          ),
         ),
         Expanded(
           child: Column(
@@ -217,20 +233,53 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
             ],
           ),
         ),
-        IconButton(
-          icon: Icon(isMain ? Icons.star : Icons.star_border, size: 18.0),
-          tooltip: l10n.homeConfigSetMain,
-          onPressed: isMain ? null : () => _setMainTab(sourceId, tab.id),
+        Semantics(
+          label: '${l10n.homeConfigSetMain}: ${tab.label}',
+          button: true,
+          enabled: !isMain,
+          excludeSemantics: true,
+          child: IconButton(
+            icon: Icon(isMain ? Icons.star : Icons.star_border, size: 18.0),
+            tooltip: l10n.homeConfigSetMain,
+            onPressed: isMain
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    _setMainTab(sourceId, tab.id);
+                  },
+          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.arrow_upward, size: 18),
-          tooltip: l10n.homeConfigMoveUp,
-          onPressed: isFirst ? null : () => _moveTab(sourceId, tab.id, true),
+        Semantics(
+          label: '${l10n.homeConfigMoveUp}: ${tab.label}',
+          button: true,
+          enabled: !isFirst,
+          excludeSemantics: true,
+          child: IconButton(
+            icon: const Icon(Icons.arrow_upward, size: 18),
+            tooltip: l10n.homeConfigMoveUp,
+            onPressed: isFirst
+                ? null
+                : () {
+                    HapticFeedback.selectionClick();
+                    _moveTab(sourceId, tab.id, true);
+                  },
+          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.arrow_downward, size: 18),
-          tooltip: l10n.homeConfigMoveDown,
-          onPressed: isLast ? null : () => _moveTab(sourceId, tab.id, false),
+        Semantics(
+          label: '${l10n.homeConfigMoveDown}: ${tab.label}',
+          button: true,
+          enabled: !isLast,
+          excludeSemantics: true,
+          child: IconButton(
+            icon: const Icon(Icons.arrow_downward, size: 18),
+            tooltip: l10n.homeConfigMoveDown,
+            onPressed: isLast
+                ? null
+                : () {
+                    HapticFeedback.selectionClick();
+                    _moveTab(sourceId, tab.id, false);
+                  },
+          ),
         ),
       ],
     );

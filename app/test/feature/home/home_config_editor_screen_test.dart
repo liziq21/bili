@@ -152,4 +152,111 @@ void main() {
     expect(config.gridColumnsPortrait, equals(3));
     expect(config.gridColumnsLandscape, equals(3));
   });
+
+  testWidgets('exposes accessible semantics for screen readers', (
+    tester,
+  ) async {
+    await preferences.set(PreferencesKey.homeConfig, _persistedJson);
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Dropdown semantics with excludeSemantics and orientation label
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '竖屏' &&
+            w.properties.value == '2' &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '横屏' &&
+            w.properties.value == '3' &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+
+    // Tab visibility switches with state semantics
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'Tab A 显示',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'Tab B 显示',
+      ),
+      findsOneWidget,
+    );
+
+    // Tab action buttons with contextual tab labels
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '设为主标签: Tab A' &&
+            w.properties.enabled == false &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '设为主标签: Tab B' &&
+            w.properties.enabled == true &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '上移: Tab A' &&
+            w.properties.enabled == false &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '上移: Tab B' &&
+            w.properties.enabled == true &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '下移: Tab A' &&
+            w.properties.enabled == true &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.label == '下移: Tab B' &&
+            w.properties.enabled == false &&
+            w.excludeSemantics == true,
+      ),
+      findsOneWidget,
+    );
+  });
 }
