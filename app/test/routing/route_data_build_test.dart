@@ -37,6 +37,9 @@ void main() {
       (tester) async {
         final route = VideoRouteData(id: '123');
         Widget? built;
+        // 提供足够的窗口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+        tester.view.physicalSize = const Size(800, 600);
+        tester.view.devicePixelRatio = 1.0;
         await tester.pumpWidget(
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
