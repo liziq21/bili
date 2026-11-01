@@ -12,8 +12,10 @@ void main() {
     var backPressed = false;
 
     // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-    // 使用 tester.view.physicalSize（而非 MediaQuery 包裹），
-    // 因为 MaterialApp 会创建自己的 MediaQuery 覆盖外层包裹。
+    // 先 pump 一次空 widget 初始化视图，再设置 physicalSize，
+    // 然后 pump 实际内容。MaterialApp 会创建自己的 MediaQuery，
+    // 所以 tester.view.physicalSize 必须在 pumpWidget 之前生效。
+    await tester.pumpWidget(const SizedBox.shrink());
     tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
