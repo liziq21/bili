@@ -49,10 +49,15 @@ class const App({super.key}) extends StatelessWidget {
           themeConfig: userData.themeConfig,
           builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
             return MaterialApp.router(
-              builder: (_, child) => DebugOverlay(
-                logBucket: App.logBucket,
-                httpBucket: App.httpBucket,
-                child: child ?? const SizedBox.shrink(),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(userData.fontScale)),
+                child: DebugOverlay(
+                  logBucket: App.logBucket,
+                  httpBucket: App.httpBucket,
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
               debugShowCheckedModeBanner: false,
               showPerformanceOverlay: false,

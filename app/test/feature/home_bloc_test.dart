@@ -54,6 +54,11 @@ class MockUserDataRepository implements UserDataRepository {
     return const Result.success(null);
   }
 
+  @override
+  Future<Result<void, Exception>> setFontScale(double fontScale) async {
+    return const Result.success(null);
+  }
+
   void dispose() {
     _controller.close();
   }

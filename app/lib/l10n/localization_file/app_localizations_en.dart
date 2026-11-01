@@ -209,6 +209,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appearanceEyeComfort => 'Eye Comfort';
 
   @override
+  String get appearanceThemeSubtitle => 'Theme mode for the app';
+
+  @override
+  String get appearanceFontSize => 'Font Size';
+
+  @override
+  String get appearanceFontSizeSubtitle => 'Adjust text size across the app';
+
+  @override
+  String get appearanceEyeComfortSubtitle =>
+      'Reduce eye strain in dark environments';
+
+  @override
+  String get appearanceFontSizeSmall => 'Small';
+
+  @override
+  String get appearanceFontSizeStandard => 'Standard';
+
+  @override
+  String get appearanceFontSizeLarge => 'Large';
+
+  @override
+  String get appearanceFontSizeXLarge => 'X-Large';
+
+  @override
   String get appearanceHistoryView => 'History View';
 
   @override

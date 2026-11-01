@@ -29,4 +29,8 @@ class const DefaultUserDataRepository(
   @override
   Future<Result<void, Exception>> setThemeConfig(ThemeConfig themeConfig) =>
       _prefDataSource.set(PreferencesKey.themeConfig, themeConfig.toJson());
+
+  @override
+  Future<Result<void, Exception>> setFontScale(double fontScale) =>
+      _prefDataSource.set(PreferencesKey.fontScale, fontScale);
 }

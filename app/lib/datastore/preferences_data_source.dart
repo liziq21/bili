@@ -145,6 +145,11 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
+  /// 字体缩放系数：作用于全应用 Text（MediaQuery.textScaler）。
+  ///
+  /// 可选档位 0.85 / 1.0 / 1.15 / 1.3，1.0 为标准。
+  static const fontScale = PreferencesKey<double>._('FONT_SCALE', 1.0);
+
   /// 播放器默认倍速：用户在倍速弹窗里选过就记住，下次进入播放器自动套用。
   static const playbackRate = PreferencesKey<double>._('PLAYBACK_RATE', 1.0);
 

@@ -470,6 +470,54 @@ abstract class AppLocalizations {
   /// **'Eye Comfort'**
   String get appearanceEyeComfort;
 
+  /// Subtitle for theme setting
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode for the app'**
+  String get appearanceThemeSubtitle;
+
+  /// Font size setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get appearanceFontSize;
+
+  /// Subtitle for font size setting
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust text size across the app'**
+  String get appearanceFontSizeSubtitle;
+
+  /// Subtitle for eye comfort setting
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce eye strain in dark environments'**
+  String get appearanceEyeComfortSubtitle;
+
+  /// Font size option: Small
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get appearanceFontSizeSmall;
+
+  /// Font size option: Standard
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get appearanceFontSizeStandard;
+
+  /// Font size option: Large
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get appearanceFontSizeLarge;
+
+  /// Font size option: X-Large
+  ///
+  /// In en, this message translates to:
+  /// **'X-Large'**
+  String get appearanceFontSizeXLarge;
+
   /// Layout style for history
   ///
   /// In en, this message translates to:

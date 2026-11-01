@@ -14,6 +14,9 @@ class const UserData({
   final String? sourceId,
   final ThemeConfig themeConfig = ThemeConfig.followSystem,
   final bool useDynamicColor = true,
+
+  /// 字体缩放系数：1.0 为标准，作用于全应用 Text（MediaQuery.textScaler）。
+  final double fontScale = 1.0,
 }) extends Equatable {
   factory fromJson(Map<String, dynamic> json) => _$UserDataFromJson(json);
 
@@ -23,14 +26,21 @@ class const UserData({
     String? sourceId,
     ThemeConfig? themeConfig,
     bool? useDynamicColor,
+    double? fontScale,
   }) {
     return UserData(
       sourceId: sourceId ?? this.sourceId,
       themeConfig: themeConfig ?? this.themeConfig,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
+      fontScale: fontScale ?? this.fontScale,
     );
   }
 
   @override
-  List<Object?> get props => [sourceId, themeConfig, useDynamicColor];
+  List<Object?> get props => [
+    sourceId,
+    themeConfig,
+    useDynamicColor,
+    fontScale,
+  ];
 }
