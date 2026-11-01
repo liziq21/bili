@@ -72,6 +72,9 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
 
   @override
+  UserVideosRemoteDataSource? get userVideosDataSource => null;
+
+  @override
   Future<void> close() async {
     _youtubeService.close();
   }

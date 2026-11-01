@@ -89,3 +89,37 @@ class LocalSubscription() extends Table {
     {sourceId, originalId},
   ];
 }
+
+/// A feed entry from a subscribed channel (video/article/post).
+///
+/// Stores the minimal metadata needed to display in the subscription feed,
+/// plus a read marker. The entry is scoped by [sourceId] and [channelId]
+/// to match the subscription, and deduplicated by [entryId].
+@TableIndex(
+  name: 'feed_entry_channel_time',
+  columns: {#channelId, #publishedAt},
+)
+@DataClassName('FeedEntryEntity')
+class FeedEntry() extends Table {
+  IntColumn get internalId => integer().autoIncrement()();
+  TextColumn get sourceId => text()();
+  TextColumn get channelId => text()();
+  TextColumn get entryId => text()();
+  TextColumn get entryType => text()(); // 'video' | 'article' | 'post'
+  TextColumn get title => text()();
+  TextColumn get url => text()();
+  TextColumn get thumbnailUrl => text().nullable()();
+  TextColumn get creatorProfileId => text().nullable()();
+  TextColumn get creatorProfileName => text().nullable()();
+  DateTimeColumn get publishedAt => dateTime().nullable()();
+  BoolColumn get isRead => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get insertedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  String get tableName => 'feed_entry';
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {sourceId, channelId, entryId},
+  ];
+}

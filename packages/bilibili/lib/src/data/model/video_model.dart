@@ -45,3 +45,20 @@ extension NetworkBiliPopularVideoX on NetworkBiliPopularVideo {
     creatorProfileId: owner?.mid?.toString(),
   );
 }
+
+extension NetworkBiliUserVideoItemX on NetworkBiliUserVideoItem {
+  VideoModel asModel() => VideoModel(
+    id: bvid,
+    title: title ?? bvid,
+    url: buildBiliWatchUrl(bvid),
+    thumbnailUrl: normalizeBiliUrl(pic),
+    viewCount: play,
+    uploadDate: created == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(created! * 1000),
+    duration: int.tryParse(length ?? ''),
+    desc: description,
+    creatorProfileName: author,
+    creatorProfileId: mid?.toString(),
+  );
+}

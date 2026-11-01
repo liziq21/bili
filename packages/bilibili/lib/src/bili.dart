@@ -9,6 +9,7 @@ import 'data/source/bili_live_danmaku_remote_data_source.dart';
 import 'data/source/bili_media_stream_remote_data_source.dart';
 import 'data/source/bili_popular_video_feed_remote_data_source.dart';
 import 'data/source/bili_ranking_video_feed_remote_data_source.dart';
+import 'data/source/bili_user_videos_remote_data_source.dart';
 import 'data/source/bili_video_comment_remote_data_source.dart';
 import 'data/source/bili_video_detail_remote_data_source.dart';
 import 'data/source/search/bili_aggregate_search_remote_data_source.dart';
@@ -117,4 +118,8 @@ class Bili() implements MediaSource {
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => [
     BiliRecommendLiveRoomFeedRemoteDataSource(network: _searchApi),
   ];
+
+  @override
+  UserVideosRemoteDataSource? get userVideosDataSource =>
+      BiliUserVideosRemoteDataSource(network: _networkSearch!);
 }
