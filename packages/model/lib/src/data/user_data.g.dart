@@ -22,6 +22,7 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'USE_DYNAMIC_COLOR',
         (v) => v as bool? ?? true,
       ),
+      fontScale: $checkedConvert('FONT_SCALE', (v) => v as double? ?? 1.0),
     );
     return val;
   },
@@ -29,6 +30,7 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'sourceId': 'SOURCE_ID',
     'themeConfig': 'THEME_CONFIG',
     'useDynamicColor': 'USE_DYNAMIC_COLOR',
+    'fontScale': 'FONT_SCALE',
   },
 );
 
@@ -36,6 +38,7 @@ Map<String, dynamic> _$UserDataToJson(UserData instance) => <String, dynamic>{
   'SOURCE_ID': instance.sourceId,
   'THEME_CONFIG': instance.themeConfig,
   'USE_DYNAMIC_COLOR': instance.useDynamicColor,
+  'FONT_SCALE': instance.fontScale,
 };
 
 const _$ThemeConfigEnumMap = {

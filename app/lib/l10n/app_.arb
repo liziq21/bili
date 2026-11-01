@@ -248,6 +248,46 @@
   "@appearanceEyeComfort": {
     "description": "Appearance settings placeholder entry for eye comfort"
   },
+  "appearanceThemeSubtitle": "Theme mode for the app",
+  "@appearanceThemeSubtitle": {
+    "description": "Subtitle for theme setting",
+    "type": "String"
+  },
+  "appearanceFontSize": "Font Size",
+  "@appearanceFontSize": {
+    "description": "Font size setting label",
+    "type": "String"
+  },
+  "appearanceFontSizeSubtitle": "Adjust text size across the app",
+  "@appearanceFontSizeSubtitle": {
+    "description": "Subtitle for font size setting",
+    "type": "String"
+  },
+  "appearanceEyeComfortSubtitle": "Reduce eye strain in dark environments",
+  "@appearanceEyeComfortSubtitle": {
+    "description": "Subtitle for eye comfort setting",
+    "type": "String"
+  },
+  "appearanceFontSizeSmall": "Small",
+  "@appearanceFontSizeSmall": {
+    "description": "Font size option: Small",
+    "type": "String"
+  },
+  "appearanceFontSizeStandard": "Standard",
+  "@appearanceFontSizeStandard": {
+    "description": "Font size option: Standard",
+    "type": "String"
+  },
+  "appearanceFontSizeLarge": "Large",
+  "@appearanceFontSizeLarge": {
+    "description": "Font size option: Large",
+    "type": "String"
+  },
+  "appearanceFontSizeXLarge": "X-Large",
+  "@appearanceFontSizeXLarge": {
+    "description": "Font size option: X-Large",
+    "type": "String"
+  },
   "appearanceHistoryView": "History View",
   "@appearanceHistoryView": {
     "description": "Layout style for history"
