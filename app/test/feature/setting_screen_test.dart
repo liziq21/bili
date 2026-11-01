@@ -161,7 +161,14 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.text(l10n.appearanceEyeComfort), findsOneWidget);
+        // Use descendant of SwitchListTile to avoid matching section header.
+        expect(
+          find.descendant(
+            of: find.byType(SwitchListTile),
+            matching: find.text(l10n.appearanceEyeComfort),
+          ),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
