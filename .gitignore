@@ -113,3 +113,9 @@ coverage/
 # Local agent state and OpenCode configuration
 /__agent__/
 /opencode.json
+
+# 容器层缓存软链（10-31 liz79：.dart_tool/ 带斜杠只匹配目录，软链需无斜杠条目）
+.dart_tool
+packages/*/.dart_tool
+build
+app/build
