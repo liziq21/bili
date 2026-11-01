@@ -5,7 +5,7 @@ import 'package:app/feature/live/live_quality_picker.dart';
 
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show BlocProvider;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
@@ -45,6 +45,13 @@ class _FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
       ),
     );
   }
+}
+
+/// 在 testWidgets 的 fake-async zone 里显式推进事件队列，
+/// 避免 `pumpEventQueue()` 在某些 Flutter 版本上挂死（见 flutter-bloc-widget-test-zones skill）。
+Future<void> _pumpEventQueue(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -91,7 +98,7 @@ void main() {
 
       // 选「HD+」→ 以该 qn 请求。
       await tester.tap(find.text('HD+'));
-      await pumpEventQueue();
+      await _pumpEventQueue(tester);
 
       expect(dataSource.lastPreferQn, 250);
     },

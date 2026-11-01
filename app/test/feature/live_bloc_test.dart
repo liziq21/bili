@@ -54,6 +54,13 @@ class FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
   }
 }
 
+/// 在 testWidgets 的 fake-async zone 里显式推进事件队列，
+/// 避免 `pumpEventQueue()` 在某些 Flutter 版本上挂死（见 flutter-bloc-widget-test-zones skill）。
+Future<void> _pumpEventQueue(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('SwitchLiveQuality requests the target qn and swaps the stream', (
     tester,
@@ -69,7 +76,7 @@ void main() {
     addTearDown(bloc.close);
 
     bloc.add(SwitchLiveQuality(21144080, 250));
-    await pumpEventQueue();
+    await _pumpEventQueue(tester);
 
     expect(dataSource.lastPreferQn, 250);
     expect(bloc.state.mediaStream, newStream);
@@ -95,7 +102,7 @@ void main() {
     addTearDown(bloc.close);
 
     bloc.add(LoadLiveStream(21144080));
-    await pumpEventQueue();
+    await _pumpEventQueue(tester);
 
     expect(dataSource.lastPreferQn, 250);
   });
@@ -115,7 +122,7 @@ void main() {
     addTearDown(bloc.close);
 
     bloc.add(SwitchLiveQuality(21144080, 400));
-    await pumpEventQueue();
+    await _pumpEventQueue(tester);
 
     final result = await preferences.get<String>(
       PreferencesKey.liveQualityByRoom,
@@ -142,12 +149,12 @@ void main() {
     addTearDown(bloc.close);
 
     bloc.add(LoadLiveStream(21144080));
-    await pumpEventQueue();
+    await _pumpEventQueue(tester);
     expect(bloc.state.mediaStream, oldStream);
 
     dataSource.streamResult = Result.error(Exception('boom'));
     bloc.add(SwitchLiveQuality(21144080, 250));
-    await pumpEventQueue();
+    await _pumpEventQueue(tester);
 
     expect(bloc.state.mediaStream, oldStream);
     expect(bloc.state.streamError, isNull);
