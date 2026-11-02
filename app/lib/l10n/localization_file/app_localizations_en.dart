@@ -4080,6 +4080,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelTimer => '取消定时';
 
   @override
+  String get sleepTimerCustom => 'Custom';
+
+  @override
+  String get sleepTimerCustomTitle => 'Custom sleep timer';
+
+  @override
+  String sleepTimerCustomValue(String p1) {
+    return '$p1 min';
+  }
+
+  @override
+  String get sleepTimerMinutesHint => 'Minutes';
+
+  @override
+  String get sleepTimerInvalidDuration =>
+      'Enter a duration from 1 to 1440 minutes.';
+
+  @override
   String countCompactWan(String p1) {
     return '$p1万';
   }

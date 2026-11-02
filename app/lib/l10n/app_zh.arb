@@ -5439,6 +5439,31 @@
   "@cancelTimer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "sleepTimerCustom": "自定义",
+  "@sleepTimerCustom": {
+    "description": "Sleep timer option for entering a custom duration"
+  },
+  "sleepTimerCustomTitle": "自定义睡眠定时",
+  "@sleepTimerCustomTitle": {
+    "description": "Dialog title for entering a custom sleep timer duration"
+  },
+  "sleepTimerCustomValue": "{p1} 分钟",
+  "@sleepTimerCustomValue": {
+    "description": "Selected custom sleep timer duration",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepTimerMinutesHint": "分钟",
+  "@sleepTimerMinutesHint": {
+    "description": "Input hint for a custom sleep timer duration"
+  },
+  "sleepTimerInvalidDuration": "请输入 1 到 1440 分钟之间的时长。",
+  "@sleepTimerInvalidDuration": {
+    "description": "Validation error for a custom sleep timer duration"
+  },
   "countCompactWan": "{p1}万",
   "@countCompactWan": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
