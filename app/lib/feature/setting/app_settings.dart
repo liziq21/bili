@@ -3,11 +3,21 @@ import 'package:model/model.dart';
 
 import '../../datastore/preferences_data_source.dart';
 
-/// 睡眠定时器可选的档位（分钟）。
+/// 睡眠定时器常用档位（分钟）。
 ///
-/// 单一来源：设置页写下的默认值与播放器弹窗列出的档位必须同源，否则会出现
-/// 「默认 90 分钟」而播放器里没有任何一项能对上的状态。
-const List<int> kSleepTimerMinutes = [15, 30, 45, 60];
+/// 自定义时长也可以写入同一个设置键；这个列表只负责播放器和设置页的
+/// 快速选项，不能用它限制已经保存的自定义值。
+const List<int> kSleepTimerMinutes = [10, 20, 30, 60, 90, 120];
+
+/// 睡眠定时器允许输入的最短时长。
+const int kMinSleepTimerMinutes = 1;
+
+/// 睡眠定时器允许输入的最长时长（24 小时）。
+const int kMaxSleepTimerMinutes = 24 * 60;
+
+/// Whether [minutes] is a valid sleep-timer duration.
+bool isValidSleepTimerMinutes(int minutes) =>
+    minutes >= kMinSleepTimerMinutes && minutes <= kMaxSleepTimerMinutes;
 
 /// 播放器可记忆的倍速档位。
 const List<double> kPlaybackRates = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];

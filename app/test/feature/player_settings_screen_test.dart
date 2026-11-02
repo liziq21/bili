@@ -96,6 +96,32 @@ void main() {
     expect(settings.sleepTimerDefaultMinutes, 30);
   });
 
+  testWidgets('saves a custom sleep timer duration', (tester) async {
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(PlayerSettingsScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    await tester.tap(find.text(l10n.playerSleepTimerDefault));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(l10n.sleepTimerCustom),
+      100,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text(l10n.sleepTimerCustom));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '37');
+    await tester.tap(find.text(l10n.confirm));
+    await tester.pumpAndSettle();
+
+    final settings = await PlayerSettings.load(preferences);
+    expect(settings.sleepTimerDefaultMinutes, 37);
+    expect(find.text(l10n.sleepTimerCustomValue('37')), findsOneWidget);
+  });
+
   testWidgets('uses English translations when English is selected', (
     tester,
   ) async {

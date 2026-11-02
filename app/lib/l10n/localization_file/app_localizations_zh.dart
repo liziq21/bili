@@ -4073,6 +4073,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cancelTimer => '取消定时';
 
   @override
+  String get sleepTimerCustom => '自定义';
+
+  @override
+  String get sleepTimerCustomTitle => '自定义睡眠定时';
+
+  @override
+  String sleepTimerCustomValue(String p1) {
+    return '$p1 分钟';
+  }
+
+  @override
+  String get sleepTimerMinutesHint => '分钟';
+
+  @override
+  String get sleepTimerInvalidDuration => '请输入 1 到 1440 分钟之间的时长。';
+
+  @override
   String countCompactWan(String p1) {
     return '$p1万';
   }

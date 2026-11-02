@@ -214,14 +214,23 @@ void main() {
     testWidgets('tapping the chip opens the picker with all durations', (
       tester,
     ) async {
+      useTallViewport(tester);
       await pumpChip(tester);
 
       await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
 
-      for (final minutes in ['15 min', '30 min', '45 min', '60 min']) {
+      for (final minutes in [
+        '10 min',
+        '20 min',
+        '30 min',
+        '60 min',
+        '90 min',
+        '120 min',
+      ]) {
         expect(find.text(minutes), findsOneWidget);
       }
+      expect(find.text('Custom'), findsNWidgets(2));
     });
 
     testWidgets('selecting a duration shows the remaining time', (
@@ -231,10 +240,47 @@ void main() {
 
       await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('15 min'));
+      await tester.tap(find.text('10 min'));
       await tester.pump();
 
-      expect(find.text('15:00'), findsOneWidget);
+      expect(find.text('10:00'), findsOneWidget);
+    });
+
+    testWidgets('accepts a custom duration in minutes', (tester) async {
+      useTallViewport(tester);
+      await pumpChip(tester);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Custom').first);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '37');
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('37:00'), findsOneWidget);
+    });
+
+    testWidgets('rejects a custom duration outside the supported range', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      await pumpChip(tester);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Custom').first);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), '1441');
+      await tester.tap(find.text('OK'));
+      await tester.pump();
+
+      expect(
+        find.text('Enter a duration from 1 to 1440 minutes.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a running timer offers a cancel entry', (tester) async {
@@ -348,11 +394,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('When time up'), findsOneWidget);
-      expect(find.text('15 min (after current)'), findsOneWidget);
-      // 两组各 4 个档位，同文案项取最后一个即 after-current 组。
-      // 两组档位文案不再相同，第一组是裸的「15 分钟」。
-      expect(find.text('15 min'), findsOneWidget);
-      expect(find.text('15 min (after current)'), findsOneWidget);
+      expect(find.text('10 min (after current)'), findsOneWidget);
+      // 两组档位文案不再相同，第一组是裸的「10 分钟」。
+      expect(find.text('10 min'), findsOneWidget);
+      expect(find.text('10 min (after current)'), findsOneWidget);
     });
 
     testWidgets('after-current selection shows the pending label', (
@@ -367,12 +412,12 @@ void main() {
 
       await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('15 min (after current)'));
+      await tester.tap(find.text('10 min (after current)'));
       await tester.pumpAndSettle();
-      expect(find.text('15:00'), findsOneWidget);
+      expect(find.text('10:00'), findsOneWidget);
 
-      // 15 分钟档 = 900s，推进 901s 让最后一次 tick 落地。
-      await tester.pump(const Duration(seconds: 901));
+      // 10 分钟档 = 600s，推进 601s 让最后一次 tick 落地。
+      await tester.pump(const Duration(seconds: 601));
       await tester.pump();
 
       expect(find.text('After current'), findsOneWidget);
