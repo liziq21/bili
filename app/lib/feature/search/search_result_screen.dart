@@ -58,7 +58,7 @@ class const SearchResultScreen({
                   tooltip: backTooltip,
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    onBackClick();
+                    onBackClick?.call();
                   },
                 )
               : null,
