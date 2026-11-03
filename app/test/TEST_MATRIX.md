@@ -75,6 +75,7 @@
 - `packages/bilibili/bpi/test/wbi_utils_test.dart`
 - `packages/bilibili/test/bili_live_danmaku_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_room_detail_remote_data_source_test.dart`
+- `packages/bilibili/test/bili_live_room_stream_test.dart`
 - `packages/bilibili/test/bili_media_stream_test.dart`
 - `packages/bilibili/test/bili_popular_feed_test.dart`
 - `packages/bilibili/test/bili_user_videos_remote_data_source_test.dart`
@@ -93,8 +94,9 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/yt_protobuf_encoder_test.dart`
 
-## widget（45）
+## widget（48）
 
+- `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/app_search_anchor_test.dart`
 - `app/test/feature/filter_bar_test.dart`
 - `app/test/feature/history_settings_screen_test.dart`
@@ -104,7 +106,9 @@
 - `app/test/feature/home_bloc_test.dart`
 - `app/test/feature/home_filter_bar_test.dart`
 - `app/test/feature/home_source_selector_test.dart`
+- `app/test/feature/live/live_quality_chip_test.dart`
 - `app/test/feature/live/live_screen_test.dart`
+- `app/test/feature/live_bloc_test.dart`
 - `app/test/feature/media_library/local_library_screen_test.dart`
 - `app/test/feature/media_library/media_library_screen_test.dart`
 - `app/test/feature/media_library/playlist_picker_test.dart`

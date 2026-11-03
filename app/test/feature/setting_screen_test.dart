@@ -129,7 +129,7 @@ void main() {
       });
     }
 
-    testWidgets('appearance page shows the three placeholder entries', (
+    testWidgets('appearance page shows theme, font size and eye comfort', (
       tester,
     ) async {
       // Given the localized appearance settings page.
@@ -138,7 +138,7 @@ void main() {
         await tester.pumpWidget(_buildScreen(const AppearanceSettingsScreen()));
         await tester.pump();
 
-        // Then the planned entry points are visible in order and remain inert.
+        // Then the three entries are visible.
         final context = tester.element(find.byType(AppearanceSettingsScreen));
         final l10n = AppLocalizations.of(context)!;
         expect(
@@ -146,9 +146,29 @@ void main() {
           findsOneWidget,
         );
         expect(find.byType(ListTile), findsNWidgets(3));
-        expect(find.text(l10n.appearanceTheme), findsOneWidget);
-        expect(find.text(l10n.appearanceNightMode), findsOneWidget);
-        expect(find.text(l10n.appearanceEyeComfort), findsOneWidget);
+        // Use descendant of ListTile to avoid matching section headers.
+        expect(
+          find.descendant(
+            of: find.byType(ListTile).at(0),
+            matching: find.text(l10n.appearanceTheme),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(ListTile).at(1),
+            matching: find.text(l10n.appearanceFontSize),
+          ),
+          findsOneWidget,
+        );
+        // Use descendant of SwitchListTile to avoid matching section header.
+        expect(
+          find.descendant(
+            of: find.byType(SwitchListTile),
+            matching: find.text(l10n.appearanceEyeComfort),
+          ),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

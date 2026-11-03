@@ -15,6 +15,7 @@ import '../video/danmaku/danmaku_settings_screen.dart';
 import 'bloc/live_bloc.dart';
 import 'bloc/providers.dart';
 import 'live_danmaku_overlay.dart';
+import 'live_quality_picker.dart';
 
 /// 直播页：房间信息头 + media_kit 播放器。
 ///
@@ -34,7 +35,7 @@ class const LiveScreen({
 class _LiveScreenState() extends State<LiveScreen> {
   MediaPlaybackController? _playback;
   bool _fullscreen = false;
-  bool _streamReady = false;
+  MediaStream? _openedStream;
 
   @override
   void initState() {
@@ -71,8 +72,10 @@ class _LiveScreenState() extends State<LiveScreen> {
   }
 
   void _openStream(MediaStream stream, {String? title, String? creatorName}) {
-    if (_streamReady) return;
-    _streamReady = true;
+    // 流地址对象变化才重新 open：初始加载与切清晰度都走这里；同一对象
+    // 重复发射（如详情加载）不重复 open，避免打断当前播放。
+    if (_openedStream == stream) return;
+    _openedStream = stream;
     unawaited(
       _playback!.open(
         stream,
@@ -103,8 +106,7 @@ class _LiveScreenState() extends State<LiveScreen> {
         ),
         body: BlocConsumer<LiveBloc, LiveState>(
           listener: (context, state) {
-            // 流地址就绪时开播放器。只触发一次：直播流不可 seek，
-            // 重复 open 会打断当前播放。
+            // 流地址就绪或变化时开播放器（初始加载与切清晰度）。
             if (state.mediaStream != null) {
               _openStream(
                 state.mediaStream!,
@@ -247,9 +249,9 @@ class const _LiveBadge() extends StatelessWidget {
   }
 }
 
-/// 播放器区域：Video widget + 简单控制条（播放/暂停 + 全屏）。
+/// 播放器区域：Video widget + 简单控制条（播放/暂停 + 画质 + 全屏）。
 ///
-/// 直播不渲染进度条、弹幕、画质选择、倍速——直播无续播语义。
+/// 直播不渲染进度条、弹幕、倍速——直播无续播语义。
 class const _PlayerArea({
   required final MediaPlaybackController controller,
   required final MediaStream? stream,
@@ -263,7 +265,7 @@ class const _PlayerArea({
   State<_PlayerArea> createState() => _PlayerAreaState();
 }
 
-class _PlayerAreaState extends State<_PlayerArea> {
+class _PlayerAreaState() extends State<_PlayerArea> {
   bool _controlsVisible = true;
   Timer? _autoHideControls;
 
@@ -305,6 +307,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final stream = widget.stream;
 
     // 流地址错误 → 播放器区域显示错误态 + 重试。
     if (widget.streamError != null) {
@@ -339,7 +342,7 @@ class _PlayerAreaState extends State<_PlayerArea> {
     }
 
     // 流地址尚未就绪 → 加载态。
-    if (widget.stream == null) {
+    if (stream == null) {
       return AspectRatio(
         aspectRatio: 16 / 9,
         child: Container(
@@ -406,6 +409,8 @@ class _PlayerAreaState extends State<_PlayerArea> {
                               : Icons.play_arrow_rounded,
                         ),
                       ),
+                      // 画质切换。
+                      LiveQualityChip(stream: stream, roomId: widget.roomId),
                       // 全屏切换。
                       IconButton(
                         tooltip: l10n.fullscreenToggle,

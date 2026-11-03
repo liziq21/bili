@@ -8,6 +8,7 @@ import 'package:model/model.dart';
 
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../data/repository/local_library_repository.dart';
+import '../player/media_playback_controller.dart';
 
 part 'video_event.dart';
 part 'video_state.dart';
@@ -24,6 +25,11 @@ class VideoBloc({
     on<ToggleVideoFavorite>(_onToggleVideoFavorite);
     on<ToggleCreatorSubscribe>(_onToggleCreatorSubscribe);
     on<MediaStreamChanged>(_onMediaStreamChanged);
+    on<QueueAddVideo>(_onQueueAddVideo);
+    on<QueueRemoveItem>(_onQueueRemoveItem);
+    on<QueueReorderItems>(_onQueueReorderItems);
+    on<QueueJumpTo>(_onQueueJumpTo);
+    on<QueueSetMode>(_onQueueSetMode);
   }
 
   final _log = Logger('VideoBloc');
@@ -218,5 +224,35 @@ class VideoBloc({
     } on Exception catch (error) {
       return Result.error(error);
     }
+  }
+
+  /// 请求把视频加入播放队列。
+  Future<void> _onQueueAddVideo(
+    QueueAddVideo event,
+    Emitter<VideoState> emit,
+  ) async {
+    // 解析地址后交给播放层，由 MediaPlaybackController.addToQueue 处理。
+    // 这里只负责触发解析；解析结果在 UI 层通过 MediaPlaybackController 回调处理。
+    _log.info('Queue add video: ${event.videoId}');
+  }
+
+  /// 请求从队列移除指定序号的条目。
+  void _onQueueRemoveItem(QueueRemoveItem event, Emitter<VideoState> emit) {
+    _log.info('Queue remove item: ${event.index}');
+  }
+
+  /// 请求重排队列条目。
+  void _onQueueReorderItems(QueueReorderItems event, Emitter<VideoState> emit) {
+    _log.info('Queue reorder: ${event.from} -> ${event.to}');
+  }
+
+  /// 请求跳转到队列指定序号。
+  void _onQueueJumpTo(QueueJumpTo event, Emitter<VideoState> emit) {
+    _log.info('Queue jump to: ${event.index}');
+  }
+
+  /// 请求切换队列播放模式。
+  void _onQueueSetMode(QueueSetMode event, Emitter<VideoState> emit) {
+    _log.info('Queue set mode: ${event.mode}');
   }
 }

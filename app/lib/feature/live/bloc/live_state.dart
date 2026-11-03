@@ -3,6 +3,10 @@ part of 'live_bloc.dart';
 class const LiveState({
   final bool isLoading = false,
 
+  /// 切换清晰度请求进行中。与 [isLoading] 分开：切换失败不换错误态、
+  /// 旧流继续播放，仅画质按钮显示进行态。
+  final bool isSwitchingQuality = false,
+
   /// 加载直播间详情失败的原因。渲染侧据此把整页换成「加载失败，请重试」。
   final String? roomError,
 
@@ -18,6 +22,7 @@ class const LiveState({
 }) extends Equatable {
   LiveState copyWith({
     bool? isLoading,
+    bool? isSwitchingQuality,
     String? roomError,
     String? streamError,
     LiveRoomDetail? roomDetail,
@@ -25,6 +30,7 @@ class const LiveState({
   }) {
     return LiveState(
       isLoading: isLoading ?? this.isLoading,
+      isSwitchingQuality: isSwitchingQuality ?? this.isSwitchingQuality,
       roomError: roomError,
       streamError: streamError,
       roomDetail: roomDetail ?? this.roomDetail,
@@ -35,6 +41,7 @@ class const LiveState({
   @override
   List<Object?> get props => [
     isLoading,
+    isSwitchingQuality,
     roomError,
     streamError,
     roomDetail,

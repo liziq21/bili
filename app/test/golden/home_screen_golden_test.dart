@@ -31,6 +31,10 @@ class _FakeUserDataRepository() implements UserDataRepository {
   Future<Result<void, Exception>> setDynamicColorPreference(
     bool useDynamicColor,
   ) async => Result.success(null);
+
+  @override
+  Future<Result<void, Exception>> setFontScale(double fontScale) async =>
+      Result.success(null);
 }
 
 class _FakeVideoFeed({required final int count})

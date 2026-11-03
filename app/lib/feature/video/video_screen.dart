@@ -21,6 +21,7 @@ import 'bloc/providers.dart';
 import 'common_widgets/video_comments_view.dart';
 import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
+import 'common_widgets/playback_queue_sheet.dart';
 import 'player/media_playback_controller.dart';
 
 class const VideoScreen({
@@ -406,15 +407,23 @@ class _VideoContentState() extends State<_VideoContent> {
           color: $styles.colors.outline.withValues(alpha: 0.2),
         ),
         const Expanded(child: VideoCommentsView()),
+        VerticalDivider(
+          width: 1,
+          color: $styles.colors.outline.withValues(alpha: 0.2),
+        ),
+        SizedBox(
+          width: 320,
+          child: PlaybackQueueSheet(controller: widget.playbackController),
+        ),
       ],
     );
   }
 
   Widget _buildNarrowTabContainer(AppLocalizations l10n) {
-    // ⚡ Bolt Optimization: Match DefaultTabController length to the 2 actual tabs
-    // ('简介与相关' and '评论区') to eliminate out-of-bounds tab index state tracking and invalid animation math.
+    // ⚡ Bolt Optimization: Match DefaultTabController length to the 3 actual tabs
+    // ('简介与相关', '评论区', '播放队列') to eliminate out-of-bounds tab index state tracking and invalid animation math.
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Column(
         children: [
           Container(
@@ -431,11 +440,18 @@ class _VideoContentState() extends State<_VideoContent> {
               tabs: [
                 Tab(text: l10n.infoAndRelated),
                 Tab(text: l10n.commentsCountTab),
+                Tab(text: l10n.playbackQueue),
               ],
             ),
           ),
-          const Expanded(
-            child: TabBarView(children: [VideoInfoView(), VideoCommentsView()]),
+          Expanded(
+            child: TabBarView(
+              children: [
+                VideoInfoView(),
+                VideoCommentsView(),
+                PlaybackQueueSheet(controller: widget.playbackController),
+              ],
+            ),
           ),
         ],
       ),

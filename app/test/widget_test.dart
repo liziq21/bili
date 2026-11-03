@@ -61,6 +61,10 @@ class _FakeUserDataRepository() implements UserDataRepository {
   Future<Result<void, Exception>> setThemeConfig(
     ThemeConfig themeConfig,
   ) async => const Result.success(null);
+
+  @override
+  Future<Result<void, Exception>> setFontScale(double fontScale) async =>
+      const Result.success(null);
 }
 
 /// FakeUserDataRepository is kept for the second test if needed.
@@ -88,6 +92,11 @@ class FakeUserDataRepository() implements UserDataRepository {
   Future<Result<void, Exception>> setThemeConfig(
     ThemeConfig themeConfig,
   ) async {
+    return const Result.success(null);
+  }
+
+  @override
+  Future<Result<void, Exception>> setFontScale(double fontScale) async {
     return const Result.success(null);
   }
 }

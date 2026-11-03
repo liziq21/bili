@@ -53,12 +53,20 @@ final class BiliLiveRoomDetailRemoteDataSource({
   }
 
   @override
-  Future<Result<MediaStream, Exception>> getLiveRoomStream(int roomId) async {
+  Future<Result<MediaStream, Exception>> getLiveRoomStream(
+    int roomId, {
+    int? preferQn,
+  }) async {
     try {
       if (roomId <= 0) {
         return Result.error(Exception('Live room ID must be positive'));
       }
-      final playInfo = await network.getLiveRoomPlayInfo(roomId: roomId);
+      // 切清晰度 = 带 qn 重新请求：响应里对应档的 codec 条目带着该档的
+      // 流地址（其 currentQn 即目标档）。preferQn 为 null 时沿用默认档。
+      final playInfo = await network.getLiveRoomPlayInfo(
+        roomId: roomId,
+        qn: preferQn ?? 10000,
+      );
       final playurl = playInfo.playurlInfo?.playurl;
       if (playurl == null || playurl.stream.isEmpty) {
         return Result.error(Exception('直播间 $roomId 未返回可用流'));
@@ -78,9 +86,57 @@ final class BiliLiveRoomDetailRemoteDataSource({
       final rawVideoUrl = '${urlInfo.host}${codec.baseUrl}${urlInfo.extra}';
       final videoUrl = normalizeBiliUrl(rawVideoUrl) ?? rawVideoUrl;
 
-      return Result.success(MediaStream(videoUrl: videoUrl, headers: _headers));
+      final currentQn = codec.currentQn;
+      return Result.success(
+        MediaStream(
+          videoUrl: videoUrl,
+          headers: _headers,
+          // qn 是直播档的源侧身份：记忆「上次选了哪一档」与界面标记当前
+          // 档都用它，与点播的 dash video id 同位。
+          streamId: currentQn,
+          qualityLabel: _qualityLabel(playurl.gQnDesc, currentQn),
+          alternatives: _qualityOptions(
+            gQnDesc: playurl.gQnDesc,
+            acceptQn: codec.acceptQn,
+            currentQn: currentQn,
+          ),
+        ),
+      );
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }
+  }
+
+  /// gQnDesc 里 qn → 可读描述。找不到时退回 `{qn}`，保证标签非空。
+  String _qualityLabel(List<NetworkLiveQualityDescription> gQnDesc, int? qn) {
+    if (qn == null) return '';
+    final description = gQnDesc.firstWhere(
+      (item) => item.qn == qn,
+      orElse: () => NetworkLiveQualityDescription(qn: qn, desc: null),
+    );
+    return description.desc ?? '$qn';
+  }
+
+  /// 可切换档位列表：acceptQn 与 gQnDesc 的交集，排除当前档，保持
+  /// gQnDesc 顺序（源侧即清晰度降序）。
+  List<MediaQualityOption> _qualityOptions({
+    required List<NetworkLiveQualityDescription> gQnDesc,
+    required List<int> acceptQn,
+    required int? currentQn,
+  }) {
+    return gQnDesc
+        .where(
+          (item) =>
+              item.qn != null &&
+              item.qn != currentQn &&
+              acceptQn.contains(item.qn),
+        )
+        .map(
+          (item) => MediaQualityOption(
+            streamId: item.qn,
+            label: item.desc ?? '${item.qn}',
+          ),
+        )
+        .toList();
   }
 }

@@ -10,4 +10,6 @@ abstract class UserDataRepository() {
   Future<Result<void, Exception>> setDynamicColorPreference(
     bool useDynamicColor,
   );
+
+  Future<Result<void, Exception>> setFontScale(double fontScale);
 }

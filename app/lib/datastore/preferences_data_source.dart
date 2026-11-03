@@ -145,6 +145,11 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
+  /// 字体缩放系数：作用于全应用 Text（MediaQuery.textScaler）。
+  ///
+  /// 可选档位 0.85 / 1.0 / 1.15 / 1.3，1.0 为标准。
+  static const fontScale = PreferencesKey<double>._('FONT_SCALE', 1.0);
+
   /// 播放器默认倍速：用户在倍速弹窗里选过就记住，下次进入播放器自动套用。
   static const playbackRate = PreferencesKey<double>._('PLAYBACK_RATE', 1.0);
 
@@ -202,6 +207,13 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   static const preferredQualityStreamId = PreferencesKey<int?>._(
     'PREFERRED_QUALITY_STREAM_ID',
     null,
+  );
+
+  /// 每房间上次直播清晰度（B 站 qn）。JSON 编码的 roomId→qn 映射；
+  /// 键机制不支持 Map，故按 homeConfig 同款以字符串承载。
+  static const liveQualityByRoom = PreferencesKey<String>._(
+    'LIVE_QUALITY_BY_ROOM',
+    '{}',
   );
 
   /// 睡眠定时器默认档位（分钟）。0 表示进入播放器不自动开始计时。

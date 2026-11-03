@@ -179,7 +179,7 @@ final class BiliMediaStreamRemoteDataSource({
         ),
       );
     }
-    options.sort((a, b) => b.height.compareTo(a.height));
+    options.sort((a, b) => (b.height ?? 0).compareTo(a.height ?? 0));
     return options;
   }
 
