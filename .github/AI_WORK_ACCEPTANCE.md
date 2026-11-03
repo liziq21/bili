@@ -151,7 +151,7 @@ When the agent believes the work is complete:
 - Do not run formatter on the whole tree.
 
 ### SDK Version
-- All `dart`/`flutter` commands must use the version in `.fvmrc` (currently Flutter 3.47.7 / Dart 3.13.5).
+- All `dart`/`flutter` commands must use the version in `.fvmrc` (currently Flutter 3.47.9 / Dart 3.13.7).
 - Agent must verify `dart --version` and `flutter --version` match before running commands.
 
 ---
