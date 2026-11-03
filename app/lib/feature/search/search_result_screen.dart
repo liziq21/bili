@@ -26,6 +26,7 @@ class const SearchResultScreen({
     final l10n = AppLocalizations.of(context);
     final creatorLabel = l10n?.creatorTab ?? 'Creators';
     final videoLabel = l10n?.videoTab ?? 'Videos';
+    final backTooltip = l10n?.back ?? 'Back';
 
     final Map<Widget, Widget> tabAndView = {
       Tab(text: creatorLabel): ?_creatorProfileResultView(context),
@@ -54,7 +55,11 @@ class const SearchResultScreen({
           leading: onBackClick != null
               ? IconButton(
                   icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: onBackClick,
+                  tooltip: backTooltip,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    onBackClick();
+                  },
                 )
               : null,
         ),
