@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import 'media.dart';
+
 // Keep local-library snapshots independent of the evictable media/creator
 // cache: clearing history or cached metadata must not remove saved items.
 
@@ -97,10 +99,14 @@ class LocalSubscription() extends Table {
 /// to match the subscription, and deduplicated by [entryId].
 @TableIndex(
   name: 'feed_entry_channel_time',
-  columns: {#channelId, #publishedAt},
+  columns: {#sourceId, #channelId, #publishedAt},
 )
 @DataClassName('FeedEntryEntity')
 class FeedEntry() extends Table {
+  static const String typeVideo = Media.typeVideo;
+  static const String typeArticle = Media.typeArticle;
+  static const String typePost = Media.typePost;
+
   IntColumn get internalId => integer().autoIncrement()();
   TextColumn get sourceId => text()();
   TextColumn get channelId => text()();
@@ -121,5 +127,10 @@ class FeedEntry() extends Table {
   @override
   List<Set<Column>> get uniqueKeys => [
     {sourceId, channelId, entryId},
+  ];
+
+  @override
+  List<String> get customConstraints => const [
+    "CHECK (entry_type IN ('video', 'article', 'post'))",
   ];
 }

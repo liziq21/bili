@@ -11,10 +11,11 @@ void main() {
       final db = AppDatabase(NativeDatabase.memory());
       addTearDown(db.close);
 
-      expect(db.schemaVersion, 5);
-      expect(await _pragmaInt(db, 'user_version'), 5);
+      expect(db.schemaVersion, 6);
+      expect(await _pragmaInt(db, 'user_version'), 6);
       expect(await _pragmaInt(db, 'foreign_keys'), 1);
       await _expectPlaylistItemOrderIndex(db);
+      await _expectFeedEntryIndex(db);
     },
   );
 
@@ -26,9 +27,10 @@ void main() {
     );
     addTearDown(db.close);
 
-    expect(await _pragmaInt(db, 'user_version'), 5);
+    expect(await _pragmaInt(db, 'user_version'), 6);
     expect(await _pragmaInt(db, 'foreign_keys'), 1);
     await _expectPlaylistItemOrderIndex(db);
+    await _expectFeedEntryIndex(db);
 
     final playlist = (await db.localLibraryDao.getPlaylists()).single;
     expect(playlist.internalId, 10);
@@ -197,8 +199,9 @@ void main() {
 
       final first = _open(raw);
       try {
-        expect(await _pragmaInt(first, 'user_version'), 5);
+        expect(await _pragmaInt(first, 'user_version'), 6);
         await _expectPlaylistItemOrderIndex(first);
+        await _expectFeedEntryIndex(first);
         expect(await first.localLibraryDao.getBookmarks(), hasLength(1));
       } finally {
         await first.close();
@@ -206,8 +209,9 @@ void main() {
 
       final reopened = _open(raw);
       try {
-        expect(await _pragmaInt(reopened, 'user_version'), 5);
+        expect(await _pragmaInt(reopened, 'user_version'), 6);
         await _expectPlaylistItemOrderIndex(reopened);
+        await _expectFeedEntryIndex(reopened);
         expect(await reopened.localLibraryDao.getPlaylists(), hasLength(1));
         expect(
           await reopened.localLibraryDao.getPlaylistItems(10),
@@ -221,7 +225,7 @@ void main() {
     },
   );
 
-  test('migrates the authentic v3 schema through v4 and v5', () async {
+  test('migrates the authentic v3 schema through v4, v5, and v6', () async {
     final db = _openLegacyMemory(
       schema: _v3Schema,
       version: 3,
@@ -251,8 +255,9 @@ void main() {
     );
     addTearDown(db.close);
 
-    expect(await _pragmaInt(db, 'user_version'), 5);
+    expect(await _pragmaInt(db, 'user_version'), 6);
     await _expectPlaylistItemOrderIndex(db);
+    await _expectFeedEntryIndex(db);
     expect((await db.localLibraryDao.getPlaylists()).single.name, 'v3 queue');
     final item = (await db.localLibraryDao.getPlaylistItems(20)).single;
     expect(item.originalId, 'v3-video');
@@ -318,6 +323,31 @@ Future<void> _expectPlaylistItemOrderIndex(AppDatabase db) async {
     'playlist_id',
     'position',
     'internal_id',
+  ]);
+}
+
+Future<void> _expectFeedEntryIndex(AppDatabase db) async {
+  final table = await db.customSelect('''
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'table' AND name = 'feed_entry'
+  ''').get();
+  expect(table, hasLength(1));
+
+  final index = await db.customSelect('''
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'index' AND name = 'feed_entry_channel_time'
+  ''').get();
+  expect(index, hasLength(1));
+
+  final columns = await db
+      .customSelect("PRAGMA index_info('feed_entry_channel_time')")
+      .get();
+  expect(columns.map((row) => row.read<String>('name')), [
+    'source_id',
+    'channel_id',
+    'published_at',
   ]);
 }
 

@@ -5421,7 +5421,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final Index feedEntryChannelTime = Index(
     'feed_entry_channel_time',
-    'CREATE INDEX feed_entry_channel_time ON feed_entry (channel_id, published_at)',
+    'CREATE INDEX feed_entry_channel_time ON feed_entry (source_id, channel_id, published_at)',
   );
   late final RecentSearchQueryDao recentSearchQueryDao = RecentSearchQueryDao(
     this as AppDatabase,

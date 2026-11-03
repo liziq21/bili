@@ -6,14 +6,37 @@ import '../table/local_library.dart';
 part 'feed_dao.g.dart';
 
 @DriftAccessor(tables: [FeedEntry])
-class FeedDao extends DatabaseAccessor<AppDatabase> with _$FeedDaoMixin {
-  FeedDao(super.db);
-
+class FeedDao(super.db)
+    extends DatabaseAccessor<AppDatabase>
+    with _$FeedDaoMixin {
   Future<void> upsertEntries(List<FeedEntryCompanion> entries) async {
     if (entries.isEmpty) return;
-    await batch((batch) {
+    for (final entry in entries) {
+      _validateEntry(entry);
+    }
+
+    await transaction(() async {
       for (final entry in entries) {
-        batch.insert(feedEntry, entry, mode: InsertMode.insertOrReplace);
+        final normalized = entry.copyWith(internalId: const Value.absent());
+        await into(feedEntry).insert(
+          normalized,
+          onConflict: DoUpdate(
+            (_) => FeedEntryCompanion(
+              entryType: normalized.entryType,
+              title: normalized.title,
+              url: normalized.url,
+              thumbnailUrl: normalized.thumbnailUrl,
+              creatorProfileId: normalized.creatorProfileId,
+              creatorProfileName: normalized.creatorProfileName,
+              publishedAt: normalized.publishedAt,
+            ),
+            target: [
+              feedEntry.sourceId,
+              feedEntry.channelId,
+              feedEntry.entryId,
+            ],
+          ),
+        );
       }
     });
   }
@@ -32,7 +55,11 @@ class FeedDao extends DatabaseAccessor<AppDatabase> with _$FeedDaoMixin {
     if (unreadOnly == true) {
       query = query..where((e) => e.isRead.equals(false));
     }
-    query = query..orderBy([(e) => OrderingTerm.desc(e.publishedAt)]);
+    query = query
+      ..orderBy([
+        (e) => OrderingTerm.desc(e.publishedAt),
+        (e) => OrderingTerm.desc(e.internalId),
+      ]);
     if (limit != null) query = query..limit(limit, offset: offset);
     return query.get();
   }
@@ -50,7 +77,11 @@ class FeedDao extends DatabaseAccessor<AppDatabase> with _$FeedDaoMixin {
     if (unreadOnly == true) {
       query = query..where((e) => e.isRead.equals(false));
     }
-    query = query..orderBy([(e) => OrderingTerm.desc(e.publishedAt)]);
+    query = query
+      ..orderBy([
+        (e) => OrderingTerm.desc(e.publishedAt),
+        (e) => OrderingTerm.desc(e.internalId),
+      ]);
     if (limit != null) query = query..limit(limit);
     return query.watch();
   }
@@ -92,6 +123,9 @@ class FeedDao extends DatabaseAccessor<AppDatabase> with _$FeedDaoMixin {
     String channelId, {
     int keepDays = 30,
   }) async {
+    if (keepDays < 0) {
+      throw ArgumentError.value(keepDays, 'keepDays', 'must not be negative');
+    }
     final cutoff = DateTime.now().subtract(Duration(days: keepDays));
     await (delete(feedEntry)..where(
           (e) =>
@@ -100,5 +134,34 @@ class FeedDao extends DatabaseAccessor<AppDatabase> with _$FeedDaoMixin {
               e.publishedAt.isSmallerThanValue(cutoff),
         ))
         .go();
+  }
+
+  void _validateEntry(FeedEntryCompanion entry) {
+    _requireNonBlank(_requiredValue(entry.sourceId, 'sourceId'), 'sourceId');
+    _requireNonBlank(_requiredValue(entry.channelId, 'channelId'), 'channelId');
+    _requireNonBlank(_requiredValue(entry.entryId, 'entryId'), 'entryId');
+    final entryType = _requiredValue(entry.entryType, 'entryType');
+    if (!const {
+      FeedEntry.typeVideo,
+      FeedEntry.typeArticle,
+      FeedEntry.typePost,
+    }.contains(entryType)) {
+      throw ArgumentError.value(
+        entryType,
+        'entryType',
+        'must be video, article, or post',
+      );
+    }
+  }
+
+  String _requiredValue(Value<String> value, String name) {
+    if (!value.present) throw ArgumentError('Missing required $name');
+    return value.value;
+  }
+
+  void _requireNonBlank(String value, String name) {
+    if (value.trim().isEmpty) {
+      throw ArgumentError.value(value, name, 'must not be blank');
+    }
   }
 }

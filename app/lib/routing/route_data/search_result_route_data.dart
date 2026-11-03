@@ -11,8 +11,6 @@ extension BuildContextSearch on BuildContext {
 class const SearchRouteData({
   required final String keyword,
   final String? source,
-  final VideoNavCallback? onVideo,
-  final SpaceNavCallback? onSpace,
 }) extends GoRouteData with $SearchRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -53,8 +51,8 @@ class const SearchRouteData({
             query: keyword,
             onBackClick: () => context.pop(),
             source: effectiveSource.id,
-            onVideo: onVideo ?? context.defaultNavigateToVideo,
-            onSpace: onSpace ?? context.defaultNavigateToSpace,
+            onVideo: context.defaultNavigateToVideo,
+            onSpace: context.defaultNavigateToSpace,
           ),
         ),
       ),

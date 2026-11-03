@@ -250,6 +250,8 @@ class FakeMediaSource({
   @override
   VideoCommentRepliesRemoteDataSource? get videoCommentRepliesDataSource =>
       null;
+  @override
+  UserVideosRemoteDataSource? get userVideosDataSource => null;
 
   @override
   Future<void> close() async {}

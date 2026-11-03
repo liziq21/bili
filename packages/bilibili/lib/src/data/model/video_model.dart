@@ -56,9 +56,23 @@ extension NetworkBiliUserVideoItemX on NetworkBiliUserVideoItem {
     uploadDate: created == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(created! * 1000),
-    duration: int.tryParse(length ?? ''),
+    duration: _parseDuration(length),
     desc: description,
     creatorProfileName: author,
     creatorProfileId: mid?.toString(),
   );
+}
+
+int? _parseDuration(String? value) {
+  if (value == null || value.isEmpty) return null;
+  final parts = value.split(':');
+  if (parts.length == 1) return int.tryParse(value);
+
+  var seconds = 0;
+  for (final part in parts) {
+    final component = int.tryParse(part);
+    if (component == null) return null;
+    seconds = seconds * 60 + component;
+  }
+  return seconds;
 }

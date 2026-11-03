@@ -37,6 +37,11 @@ class Bili() implements MediaSource {
     return _networkSearch!;
   }
 
+  NetworkUserDataSource get _userApi {
+    _networkSearch ??= BiliNetworkSearch(client: client);
+    return _networkSearch!;
+  }
+
   NetworkVideoDataSource get _videoApi {
     _networkSearch ??= BiliNetworkSearch(client: client);
     return _networkSearch!;
@@ -121,5 +126,5 @@ class Bili() implements MediaSource {
 
   @override
   UserVideosRemoteDataSource? get userVideosDataSource =>
-      BiliUserVideosRemoteDataSource(network: _networkSearch!);
+      BiliUserVideosRemoteDataSource(network: _userApi);
 }

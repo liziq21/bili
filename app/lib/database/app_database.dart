@@ -95,6 +95,7 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
       }
       if (from < 6) {
         await m.createTable(feedEntry);
+        await m.createIndex(feedEntryChannelTime);
       }
     },
   );
