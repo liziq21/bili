@@ -232,4 +232,59 @@ void main() {
       expect(find.text('Nothing found'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'SearchResultScreen renders back button with tooltip and handles tap',
+    (tester) async {
+      var backClicked = false;
+      final videoRepo = const FakeVideoSearchRepository();
+      final creatorRepo = const FakeCreatorProfileSearchRepository();
+
+      final videoBloc = SearchResultBloc<VideoModel>(
+        searchContentsRepository: videoRepo,
+      );
+      final creatorBloc = SearchResultBloc<CreatorProfile>(
+        searchContentsRepository: creatorRepo,
+      );
+
+      addTearDown(videoBloc.close);
+      addTearDown(creatorBloc.close);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<SearchResultBloc<VideoModel>>.value(
+                value: videoBloc,
+              ),
+              BlocProvider<SearchResultBloc<CreatorProfile>>.value(
+                value: creatorBloc,
+              ),
+            ],
+            child: SearchResultScreen(
+              query: 'Flutter',
+              onBackClick: () {
+                backClicked = true;
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final backButton = find.widgetWithIcon(
+        IconButton,
+        Icons.arrow_back_rounded,
+      );
+      expect(backButton, findsOneWidget);
+
+      final iconBtn = tester.widget<IconButton>(backButton);
+      expect(iconBtn.tooltip, 'Back');
+
+      await tester.tap(backButton);
+      await tester.pump();
+
+      expect(backClicked, isTrue);
+    },
+  );
 }
