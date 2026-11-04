@@ -250,6 +250,41 @@ class LiveDanmakuClient implements NetworkLiveDanmakuDataSource {
     _stopHeartbeat();
     _reconnectTimer?.cancel();
   }
+
+  @override
+  List<LiveDanmakuMessage> parseFrames(List<int> bytes) {
+    final messages = <LiveDanmakuMessage>[];
+    final uint8Bytes = Uint8List.fromList(bytes);
+    int offset = 0;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
+
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
+      final packetLen = header.getUint32(0, Endian.big);
+
+      if (offset + packetLen > uint8Bytes.length) break;
+
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
+      offset += packetLen;
+
+      try {
+        final packet = LiveDanmakuPacket.fromBytes(packetBytes);
+        if (packet.opCode == LiveDanmakuOpCode.notify) {
+          try {
+            final jsonStr = utf8.decode(packet.payload);
+            final jsonMap = jsonDecode(jsonStr) as Map<String, dynamic>;
+            final message = LiveDanmakuMessage.fromJson(jsonMap);
+            messages.add(message);
+          } on FormatException {
+            // Skip non-JSON payloads
+          }
+        }
+      } on FormatException {
+        // Skip malformed packets
+      }
+    }
+    return messages;
+  }
 }
 
 /// Fixture-based test client for offline testing.
@@ -303,19 +338,31 @@ class LiveDanmakuFixtureClient implements NetworkLiveDanmakuDataSource {
       return;
     }
 
-    final bytes = await file.readAsBytes();
+    // Support both binary and JSON array fixture formats
+    List<int> bytes;
+    final content = await file.readAsString();
+    if (content.trim().startsWith('[')) {
+      // JSON array format: [16, 0, 0, 0, ...]
+      final jsonList = jsonDecode(content) as List;
+      bytes = jsonList.cast<int>();
+    } else {
+      // Binary format
+      bytes = content.codeUnits;
+    }
+
     // Parse fixture as sequence of packets
     // Fixture format: concatenated binary packets
+    final uint8Bytes = Uint8List.fromList(bytes);
     int offset = 0;
-    while (offset < bytes.length) {
-      if (offset + 16 > bytes.length) break;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
 
-      final header = ByteData.view(bytes.buffer, offset, 16);
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
       final packetLen = header.getUint32(0, Endian.big);
 
-      if (offset + packetLen > bytes.length) break;
+      if (offset + packetLen > uint8Bytes.length) break;
 
-      final packetBytes = bytes.sublist(offset, offset + packetLen);
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
       offset += packetLen;
 
       try {
@@ -382,5 +429,40 @@ class LiveDanmakuFixtureClient implements NetworkLiveDanmakuDataSource {
     _stateController.close();
     _messageController.close();
     _commentController.close();
+  }
+
+  @override
+  List<LiveDanmakuMessage> parseFrames(List<int> bytes) {
+    final messages = <LiveDanmakuMessage>[];
+    final uint8Bytes = Uint8List.fromList(bytes);
+    int offset = 0;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
+
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
+      final packetLen = header.getUint32(0, Endian.big);
+
+      if (offset + packetLen > uint8Bytes.length) break;
+
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
+      offset += packetLen;
+
+      try {
+        final packet = LiveDanmakuPacket.fromBytes(packetBytes);
+        if (packet.opCode == LiveDanmakuOpCode.notify) {
+          try {
+            final jsonStr = utf8.decode(packet.payload);
+            final jsonMap = jsonDecode(jsonStr) as Map<String, dynamic>;
+            final message = LiveDanmakuMessage.fromJson(jsonMap);
+            messages.add(message);
+          } on FormatException {
+            // Skip non-JSON payloads
+          }
+        }
+      } on FormatException {
+        // Skip malformed packets
+      }
+    }
+    return messages;
   }
 }

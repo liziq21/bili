@@ -26,6 +26,7 @@
 | `bangumi_play_url.json` | `/pgc/player/web/playurl` | GET | `ep_id=326233&qn=80&fnval=4048&fourk=1` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-10-08 |
 | `danmaku.xml` | `/{cid}.xml` | GET | `cid=42164617674` | 200 | [Bilibili 公开弹幕 XML endpoint](https://comment.bilibili.com/42164617674.xml) / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-10-15 |
 | `danmaku_info.json` | `/xlive/web-room/v1/index/getDanmuInfo` | GET | `id=21144080` | 200 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-10-30 |
+| `live_danmaku_frames.json` | `wss://broadcastlv.chat.bilibili.com/sub` | WSS | `room_id=21144080&token=xxx` | 101 | Bilibili 实际 WebSocket 协议 / PipePipe | 公共请求 | 2026-11-04 |
 | `playlist_content.json` | `/x/polymer/space/seasons_archives_list` | GET | `mid=2&page_num=1&page_size=30&sort_reverse=false` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | WBI | 2026-10-31 |
 
 ## 抓取规则
