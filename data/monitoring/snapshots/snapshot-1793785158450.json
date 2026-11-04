@@ -1,0 +1,467 @@
+{
+  "ts": 1793785158450,
+  "kind": "high-mem",
+  "sample": {
+    "ts": 1793785158450,
+    "memory": {
+      "currentBytes": 2498125824,
+      "limitBytes": 3221225472,
+      "peakBytes": 3221499904,
+      "ratio": 0.7755203247070312
+    },
+    "memoryStat": {
+      "anonBytes": 1879359488,
+      "fileBytes": 543510528,
+      "inactiveFileBytes": 537124864,
+      "kernelBytes": 74797056,
+      "slabReclaimableBytes": 59917480,
+      "slabUnreclaimableBytes": 7973760,
+      "unevictableBytes": 1887333248,
+      "reclaimableBytes": 603428008
+    },
+    "reclaim": {
+      "pgscanDirect": 546603445,
+      "pgstealDirect": 186894084,
+      "workingsetRefaultFile": 179223090
+    },
+    "cpu": {
+      "usageUsec": 84482198247,
+      "userUsec": 75622243178,
+      "systemUsec": 8859955069,
+      "nrPeriods": 3164079,
+      "nrThrottled": 36945,
+      "throttledUsec": 1596821450
+    },
+    "events": {
+      "low": 0,
+      "high": 0,
+      "max": 4756536,
+      "oom": 51,
+      "oomKill": 33
+    },
+    "deltas": {
+      "events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oomKill": 0
+      },
+      "reclaim": {
+        "pgscanDirect": 0,
+        "pgstealDirect": 0,
+        "workingsetRefaultFile": 0
+      },
+      "cpu": {
+        "usageUsec": 7002,
+        "userUsec": 6268,
+        "systemUsec": 734,
+        "nrPeriods": 2,
+        "nrThrottled": 0,
+        "throttledUsec": 0
+      }
+    },
+    "disk": {
+      "path": "/workspace",
+      "usedMb": 4405.05,
+      "totalMb": 5959.59,
+      "freeMb": 1554.54
+    },
+    "activeConversations": [
+      {
+        "conversationId": "85eba6b0-ed72-4999-a968-1b5ddbd5540d",
+        "title": "bili项目新建工作区工单",
+        "originChannel": "vellum",
+        "originInterface": "web",
+        "processingStartedAt": 1793784938468
+      }
+    ],
+    "processes": [
+      {
+        "pid": 844,
+        "name": "memory-worker",
+        "cpuPct": 33,
+        "rssMb": 814
+      },
+      {
+        "pid": 1,
+        "name": "daemon",
+        "cpuPct": 2,
+        "rssMb": 686
+      },
+      {
+        "pid": 224,
+        "name": "monitoring-worker",
+        "cpuPct": 2,
+        "rssMb": 143
+      },
+      {
+        "pid": 96,
+        "name": "schedule-worker",
+        "cpuPct": 0,
+        "rssMb": 207
+      },
+      {
+        "pid": 76,
+        "name": "vellum-qdrant",
+        "cpuPct": 0,
+        "rssMb": 93
+      },
+      {
+        "pid": 362833,
+        "name": "gh",
+        "cpuPct": 0,
+        "rssMb": 0
+      }
+    ]
+  },
+  "fileResidency": [
+    {
+      "path": "/workspace/data/db/assistant.db",
+      "sizeBytes": 657313792,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/db/assistant.db-wal",
+      "sizeBytes": 4173592,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/db/assistant.db-shm",
+      "sizeBytes": 32768,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/bin/qdrant",
+      "sizeBytes": 76128640,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/bin/vellum-qdrant",
+      "sizeBytes": 76128640,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/memory_v3_sections/0/wal/open-2",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/memory_v3_sections/0/wal/open-1",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/memory_v2_concept_pages/0/wal/closed-0",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/memory_v2_concept_pages/0/wal/open-3",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/memory_v2_concept_pages/0/wal/open-2",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/messages_lexical/0/wal/closed-0",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/messages_lexical/0/wal/open-3",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    },
+    {
+      "path": "/workspace/data/qdrant/collections/messages_lexical/0/wal/open-2",
+      "sizeBytes": 33554432,
+      "residentBytes": 0,
+      "residentRatio": 0
+    }
+  ],
+  "topProcesses": [
+    {
+      "pid": 844,
+      "command": "memory-worker",
+      "rssBytes": 853032960,
+      "pssBytes": 827797504,
+      "pssAnonBytes": 816492544,
+      "pssFileBytes": 11304960,
+      "pssShmemBytes": 0
+    },
+    {
+      "pid": 1,
+      "command": "daemon-main",
+      "rssBytes": 718315520,
+      "pssBytes": 693008384,
+      "pssAnonBytes": 678834176,
+      "pssFileBytes": 14174208,
+      "pssShmemBytes": 0
+    },
+    {
+      "pid": 96,
+      "command": "schedule-worker",
+      "rssBytes": 216555520,
+      "pssBytes": 200492032,
+      "pssAnonBytes": 194637824,
+      "pssFileBytes": 5854208,
+      "pssShmemBytes": 0
+    },
+    {
+      "pid": 224,
+      "command": "monitoring-worker",
+      "rssBytes": 149336064,
+      "pssBytes": 126929920,
+      "pssAnonBytes": 117567488,
+      "pssFileBytes": 9362432,
+      "pssShmemBytes": 0
+    },
+    {
+      "pid": 76,
+      "command": "vellum-qdrant",
+      "rssBytes": 79814656,
+      "pssBytes": 79810560,
+      "pssAnonBytes": 72105984,
+      "pssFileBytes": 7704576,
+      "pssShmemBytes": 0
+    },
+    {
+      "pid": 362833,
+      "command": "(unknown)",
+      "rssBytes": 0,
+      "pssBytes": null,
+      "pssAnonBytes": null,
+      "pssFileBytes": null,
+      "pssShmemBytes": null
+    },
+    {
+      "pid": 362874,
+      "command": "(unknown)",
+      "rssBytes": 0,
+      "pssBytes": null,
+      "pssAnonBytes": null,
+      "pssFileBytes": null,
+      "pssShmemBytes": null
+    },
+    {
+      "pid": 362973,
+      "command": "(unknown)",
+      "rssBytes": 0,
+      "pssBytes": null,
+      "pssAnonBytes": null,
+      "pssFileBytes": null,
+      "pssShmemBytes": null
+    }
+  ],
+  "topSlabCaches": [
+    {
+      "name": "fuse_inode",
+      "activeObjs": 45195,
+      "numObjs": 45324,
+      "objSizeBytes": 896,
+      "totalBytes": 40610304
+    },
+    {
+      "name": "dentry",
+      "activeObjs": 49208,
+      "numObjs": 49812,
+      "objSizeBytes": 192,
+      "totalBytes": 9563904
+    },
+    {
+      "name": "radix_tree_node",
+      "activeObjs": 11999,
+      "numObjs": 12852,
+      "objSizeBytes": 584,
+      "totalBytes": 7505568
+    },
+    {
+      "name": "vm_area_struct",
+      "activeObjs": 22189,
+      "numObjs": 27321,
+      "objSizeBytes": 192,
+      "totalBytes": 5245632
+    },
+    {
+      "name": "lsm_inode_cache",
+      "activeObjs": 49002,
+      "numObjs": 49202,
+      "objSizeBytes": 56,
+      "totalBytes": 2755312
+    },
+    {
+      "name": "kernfs_node_cache",
+      "activeObjs": 17155,
+      "numObjs": 17220,
+      "objSizeBytes": 136,
+      "totalBytes": 2341920
+    },
+    {
+      "name": "maple_node",
+      "activeObjs": 2704,
+      "numObjs": 8608,
+      "objSizeBytes": 256,
+      "totalBytes": 2203648
+    },
+    {
+      "name": "kmalloc-512",
+      "activeObjs": 2897,
+      "numObjs": 3616,
+      "objSizeBytes": 512,
+      "totalBytes": 1851392
+    },
+    {
+      "name": "anon_vma_chain",
+      "activeObjs": 21346,
+      "numObjs": 26688,
+      "objSizeBytes": 64,
+      "totalBytes": 1708032
+    },
+    {
+      "name": "kmalloc-rcl-96",
+      "activeObjs": 16682,
+      "numObjs": 17136,
+      "objSizeBytes": 96,
+      "totalBytes": 1645056
+    }
+  ],
+  "topProcessesByFd": [
+    {
+      "pid": 76,
+      "command": "vellum-qdrant",
+      "openCount": 185,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0.005285714285714286
+    },
+    {
+      "pid": 1,
+      "command": "daemon-main",
+      "openCount": 75,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0.002142857142857143
+    },
+    {
+      "pid": 844,
+      "command": "memory-worker",
+      "openCount": 37,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0.0010571428571428572
+    },
+    {
+      "pid": 224,
+      "command": "monitoring-worker",
+      "openCount": 31,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0.0008857142857142857
+    },
+    {
+      "pid": 96,
+      "command": "schedule-worker",
+      "openCount": 27,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0.0007714285714285715
+    },
+    {
+      "pid": 362833,
+      "command": "(unknown)",
+      "openCount": 0,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0
+    },
+    {
+      "pid": 362874,
+      "command": "(unknown)",
+      "openCount": 0,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0
+    },
+    {
+      "pid": 362973,
+      "command": "(unknown)",
+      "openCount": 0,
+      "softLimit": 35000,
+      "hardLimit": 35000,
+      "ratio": 0
+    }
+  ],
+  "processTree": {
+    "pid": 1,
+    "name": "daemon-main",
+    "command": "daemon-main",
+    "origin": "workspace",
+    "children": [
+      {
+        "pid": 76,
+        "name": "vellum-qdrant",
+        "command": "vellum-qdrant",
+        "origin": "workspace",
+        "children": []
+      },
+      {
+        "pid": 96,
+        "name": "schedule-worker",
+        "command": "schedule-worker",
+        "origin": "workspace",
+        "children": []
+      },
+      {
+        "pid": 224,
+        "name": "monitoring-worker",
+        "command": "monitoring-worker",
+        "origin": "workspace",
+        "children": []
+      },
+      {
+        "pid": 844,
+        "name": "memory-worker",
+        "command": "memory-worker",
+        "origin": "plugin:default-memory",
+        "children": []
+      },
+      {
+        "pid": 362833,
+        "name": "gh",
+        "command": "gh",
+        "origin": "workspace",
+        "children": []
+      },
+      {
+        "pid": 362874,
+        "name": "git",
+        "command": "git",
+        "origin": "workspace",
+        "children": []
+      },
+      {
+        "pid": 362973,
+        "name": "git",
+        "command": "git",
+        "origin": "workspace",
+        "children": []
+      }
+    ]
+  }
+}
