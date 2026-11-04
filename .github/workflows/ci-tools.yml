@@ -3,6 +3,10 @@
 on:
   workflow_call:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tool_tests:
     name: Tool Tests
@@ -25,3 +29,43 @@ jobs:
         run: |
           python3 tool/test_matrix.py --report
           git diff --exit-code -- app/test/TEST_MATRIX.md
+
+  dcm:
+    name: Dart Code Metrics
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: "3.47.9"
+          channel: stable
+          cache: true
+
+      - name: Install DCM
+        run: |
+          sudo apt-get update
+          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+          sudo apt-get update
+          sudo apt-get install -y dcm=1.39.1-1
+          echo "$(dcm --version)"
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@7654d458321ee25acccccfdb86cd48bd95768ff1
+
+      - name: Run dcm analyze
+        run: |
+          dcm analyze packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app
+
+      - name: Run dcm check-unused-code
+        run: |
+          dcm check-unused-code packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app --exclude-public-api
+
+      - name: Run dcm check-dependencies
+        run: |
+          dcm check-dependencies packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app

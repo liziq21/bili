@@ -54,6 +54,18 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
 
+      - name: Cache build_runner generated files
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/bilibili/bpi/lib/src/**/*.g.dart
+            packages/bilibili/bpi/lib/src/**/*.chopper.dart
+            packages/youtube/ypi/lib/src/**/*.g.dart
+            packages/youtube/ypi/lib/src/**/*.chopper.dart
+          key: build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-
+
       - name: Run analyze
         env:
           IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
@@ -126,6 +138,11 @@ jobs:
           name: golden-failures-${{ github.run_id }}-${{ matrix.release.flutter }}
           path: app/test/golden/failures/
           if-no-files-found: ignore
+
+      - name: Notify golden fix hint
+        if: failure()
+        run: |
+          echo "::notice title=金丝雀测试失败快速修复:: 本地运行 \`flutter test --update-goldens\` 重录基线图片"
 
       - name: Upload current goldens for visual review
         if: always()
