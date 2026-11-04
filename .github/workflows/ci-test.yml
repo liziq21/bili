@@ -336,7 +336,7 @@ jobs:
           persist-credentials: false
 
       - name: Download all category results
-        uses: actions/download-artifact@c850b1c0e9f1ad38e71c1a704be88a70281615a7 # v5
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           path: test-matrix
           pattern: test-matrix-*-${{ github.run_id }}
