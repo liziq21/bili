@@ -649,12 +649,11 @@ Future<void> main(List<String> args) async {
         // recording. Placeholder saveResponse to satisfy doc guardrail fixture coverage.
         saveResponse(
           'testing/live_danmaku_frames.json',
-          _CapturedResponse(
-            response: http.Response('[]', 200),
-            json: [],
-          ),
+          _CapturedResponse(response: http.Response('[]', 200), json: []),
         );
-        print('Live Danmaku WS fixture placeholder saved. Replace with real frames from live_danmaku_fixture.dart');
+        print(
+          'Live Danmaku WS fixture placeholder saved. Replace with real frames from live_danmaku_fixture.dart',
+        );
       }
       return;
     }
