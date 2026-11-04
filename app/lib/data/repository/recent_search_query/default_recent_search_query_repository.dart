@@ -22,4 +22,10 @@ class DefaultRecentSearchQueryRepository({
   @override
   Future<void> clearRecentSearchQueries() async =>
       _recentSearchQueryDao.clearRecentSearchQueries();
+
+  @override
+  Future<void> deleteOldSearchQueries(int retentionDays) async {
+    if (retentionDays <= 0) return; // -1 means forever, 0 means no retention
+    await _recentSearchQueryDao.deleteOldSearchQueries(retentionDays);
+  }
 }

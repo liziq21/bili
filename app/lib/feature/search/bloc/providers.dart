@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../datastore/preferences_data_source.dart';
 import '../../../data/repository/search_contents_repository.dart';
 import 'search_bloc.dart';
 import 'search_result_bloc.dart';
@@ -12,6 +13,7 @@ List<BlocProvider> getSearchBlocProviders(BuildContext context) => [
       searchSuggestRepository: context.read(),
       recentSearchQueryRepository: context.read(),
       getRentSearchQueriesUseCase: context.read(),
+      preferences: context.read<PreferencesDataSource>(),
     ),
   ),
   if (context.read<VideoSearchRepository?>()

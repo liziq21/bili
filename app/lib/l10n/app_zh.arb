@@ -164,6 +164,38 @@
   "@settingsLibrary": {
     "description": "Settings group and subpage title - local library"
   },
+  "libraryBookmarkSync": "同步收藏",
+  "@libraryBookmarkSync": {
+    "description": "Toggle for syncing remote bookmarks to local library"
+  },
+  "libraryBookmarkSyncSubtitle": "将本地收藏与远端保持同步",
+  "@libraryBookmarkSyncSubtitle": {
+    "description": "Subtitle for bookmark sync toggle"
+  },
+  "librarySearchHistoryRetention": "搜索历史保留",
+  "@librarySearchHistoryRetention": {
+    "description": "Setting for how long to keep search history"
+  },
+  "librarySearchHistoryRetentionSubtitle": "删除早于选定周期的搜索记录",
+  "@librarySearchHistoryRetentionSubtitle": {
+    "description": "Subtitle for search history retention setting"
+  },
+  "librarySearchHistoryRetention7Days": "7 天",
+  "@librarySearchHistoryRetention7Days": {
+    "description": "Retention option - 7 days"
+  },
+  "librarySearchHistoryRetention30Days": "30 天",
+  "@librarySearchHistoryRetention30Days": {
+    "description": "Retention option - 30 days"
+  },
+  "librarySearchHistoryRetention90Days": "90 天",
+  "@librarySearchHistoryRetention90Days": {
+    "description": "Retention option - 90 days"
+  },
+  "librarySearchHistoryRetentionForever": "永久",
+  "@librarySearchHistoryRetentionForever": {
+    "description": "Retention option - keep forever"
+  },
   "settingsAdvanced": "Advanced",
   "@settingsAdvanced": {
     "description": "Settings group and subpage title - advanced options"
