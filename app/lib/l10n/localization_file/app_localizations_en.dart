@@ -144,6 +144,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLibrary => 'Library';
 
   @override
+  String get libraryBookmarkSync => 'Sync bookmarks';
+
+  @override
+  String get libraryBookmarkSyncSubtitle =>
+      'Keep local bookmarks in sync with remote';
+
+  @override
+  String get librarySearchHistoryRetention => 'Search history retention';
+
+  @override
+  String get librarySearchHistoryRetentionSubtitle =>
+      'Delete searches older than the selected period';
+
+  @override
+  String get librarySearchHistoryRetention7Days => '7 days';
+
+  @override
+  String get librarySearchHistoryRetention30Days => '30 days';
+
+  @override
+  String get librarySearchHistoryRetention90Days => '90 days';
+
+  @override
+  String get librarySearchHistoryRetentionForever => 'Forever';
+
+  @override
   String get settingsAdvanced => 'Advanced';
 
   @override

@@ -322,6 +322,7 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
       searchSuggestRepository: context.read(),
       recentSearchQueryRepository: context.read(),
       getRentSearchQueriesUseCase: context.read(),
+      preferences: context.read<PreferencesDataSource>(),
     ),
     child: child,
   );
@@ -363,6 +364,7 @@ Widget _buildSearchEntry(BuildContext context) {
                   searchSuggestRepository: context.read(),
                   recentSearchQueryRepository: context.read(),
                   getRentSearchQueriesUseCase: context.read(),
+                  preferences: context.read<PreferencesDataSource>(),
                 )
                 // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
                 ..add(MonitorRecentSearches()),

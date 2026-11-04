@@ -29,6 +29,7 @@ class const SearchRouteData({
                   searchSuggestRepository: context.read(),
                   recentSearchQueryRepository: context.read(),
                   getRentSearchQueriesUseCase: context.read(),
+                  preferences: context.read<PreferencesDataSource>(),
                   initQuery: keyword,
                 ),
               ),
