@@ -3,6 +3,10 @@
 on:
   workflow_call:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tool_tests:
     name: Tool Tests
@@ -29,8 +33,6 @@ jobs:
   dcm:
     name: Dart Code Metrics
     runs-on: ubuntu-latest
-    # DCM requires a license key for CI (DCM_CI_KEY + DCM_EMAIL).
-    # Runs but handles missing secrets gracefully in steps.
     permissions:
       contents: read
     steps:
@@ -57,29 +59,13 @@ jobs:
         uses: dart-lang/setup-dart@7654d458321ee25acccccfdb86cd48bd95768ff1
 
       - name: Run dcm analyze
-        if: ${{ secrets.DCM_CI_KEY != '' && secrets.DCM_EMAIL != '' }}
-        env:
-          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
-          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm analyze packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app
 
       - name: Run dcm check-unused-code
-        if: ${{ secrets.DCM_CI_KEY != '' && secrets.DCM_EMAIL != '' }}
-        env:
-          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
-          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm check-unused-code packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app --exclude-public-api
 
       - name: Run dcm check-dependencies
-        if: ${{ secrets.DCM_CI_KEY != '' && secrets.DCM_EMAIL != '' }}
-        env:
-          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
-          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm check-dependencies packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app
-
-      - name: DCM skipped notice
-        if: ${{ secrets.DCM_CI_KEY == '' || secrets.DCM_EMAIL == '' }}
-        run: echo "::notice title=DCM Skipped::DCM_CI_KEY and DCM_EMAIL secrets not configured. Configure them to enable Dart Code Metrics analysis."
