@@ -26,6 +26,9 @@ class RecordingRecentSearchRepository({final bool failOnWrite = false})
   @override
   Stream<List<RecentSearchQuery>> getRecentSearchQueries(int limit) =>
       const Stream.empty();
+
+  @override
+  Future<void> deleteOldSearchQueries(int retentionDays) async {}
 }
 
 class const StubSuggestRepository() implements SearchSuggestRepository {
