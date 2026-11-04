@@ -155,3 +155,9 @@ Prevention: Strip non-printable ASCII control characters (`[\x00-\x1F\x7F]`) fro
 Vulnerability: `BiliLiveRoomDetailRemoteDataSource` directly assigned raw `roomInfo.cover` to `LiveRoomDetail.coverUrl` and assembled un-normalized live stream playback URLs (`'${urlInfo.host}${codec.baseUrl}${urlInfo.extra}'`) without `normalizeBiliUrl`, allowing unencrypted `http://` or scheme-relative `//` URLs to pass to domain models and media player components. Additionally, non-positive room IDs (`roomId <= 0`) were not validated, triggering redundant requests to remote Bilibili endpoints on invalid parameters.
 Learning: Live room metadata and streaming endpoints return scheme-relative (`//`) or cleartext (`http://`) URLs for covers and stream segments. Data source implementations must consistently normalize all external asset and media stream URLs using `normalizeBiliUrl` to enforce HTTPS transport, and validate numeric room IDs to reject non-positive inputs early.
 Prevention: Always normalize `coverUrl` and `videoUrl` with `normalizeBiliUrl` and validate `roomId > 0` before making network requests in live room data sources.
+
+## 2026-11-03 - Validate Room IDs in Bilibili Live Danmaku Remote Data Source
+
+Vulnerability: `BiliLiveDanmakuRemoteDataSource.liveDanmaku` passed raw `roomId` parameters directly into `network.getDanmuInfo(roomId: roomId)` without validating positive room IDs, triggering redundant network requests and WebSocket connection setups on invalid or non-positive room IDs (`roomId <= 0`).
+Learning: Live danmaku streaming data sources must validate numeric room IDs to reject non-positive inputs early and terminate streams before querying remote danmaku server info endpoints.
+Prevention: Validate `roomId > 0` and return immediately from `liveDanmaku` stream generators on non-positive room IDs.
