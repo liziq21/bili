@@ -9,6 +9,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
+# 并发只在调用方（本文件）声明——被调用的可复用 workflow 绝不能自带 concurrency：
+# 在 workflow_call 上下文里 github.workflow 解析成调用方名（CI），四个子 workflow
+# 会落到同一个 group 字符串上互相 cancel，并连带把调用方 run 一起取消（实测三轮
+# 推送全部 cancelled，annotation「Canceling since a higher priority waiting request
+# for CI-refs/pull/N/merge exists」即此）。取消语义由这里的 cancel-in-progress 承担。
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
