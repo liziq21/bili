@@ -22,6 +22,9 @@ abstract class const MediaSource() {
   /// 直播间详情与直播流地址能力（可选）。
   LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
 
+  /// 频道投稿视频分页能力（订阅 Feed 消费用，可选）。
+  UserVideosRemoteDataSource? get userVideosDataSource => null;
+
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => const [];
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
 

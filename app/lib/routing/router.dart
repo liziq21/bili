@@ -39,7 +39,6 @@ import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
 import '../feature/video/danmaku/danmaku_settings_screen.dart';
-import 'navigation_callbacks.dart';
 
 part 'route_data/live_route_data.dart';
 part 'route_data/not_found_route_data.dart';

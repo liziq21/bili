@@ -4618,6 +4618,785 @@ class LocalSubscriptionCompanion
   }
 }
 
+class $FeedEntryTable extends FeedEntry
+    with TableInfo<$FeedEntryTable, FeedEntryEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FeedEntryTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _channelIdMeta = const VerificationMeta(
+    'channelId',
+  );
+  @override
+  late final GeneratedColumn<String> channelId = GeneratedColumn<String>(
+    'channel_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entryIdMeta = const VerificationMeta(
+    'entryId',
+  );
+  @override
+  late final GeneratedColumn<String> entryId = GeneratedColumn<String>(
+    'entry_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entryTypeMeta = const VerificationMeta(
+    'entryType',
+  );
+  @override
+  late final GeneratedColumn<String> entryType = GeneratedColumn<String>(
+    'entry_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileIdMeta = const VerificationMeta(
+    'creatorProfileId',
+  );
+  @override
+  late final GeneratedColumn<String> creatorProfileId = GeneratedColumn<String>(
+    'creator_profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileNameMeta =
+      const VerificationMeta('creatorProfileName');
+  @override
+  late final GeneratedColumn<String> creatorProfileName =
+      GeneratedColumn<String>(
+        'creator_profile_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _publishedAtMeta = const VerificationMeta(
+    'publishedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> publishedAt = GeneratedColumn<DateTime>(
+    'published_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isReadMeta = const VerificationMeta('isRead');
+  @override
+  late final GeneratedColumn<bool> isRead = GeneratedColumn<bool>(
+    'is_read',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_read" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _insertedAtMeta = const VerificationMeta(
+    'insertedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> insertedAt = GeneratedColumn<DateTime>(
+    'inserted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    sourceId,
+    channelId,
+    entryId,
+    entryType,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    publishedAt,
+    isRead,
+    insertedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'feed_entry';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FeedEntryEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('channel_id')) {
+      context.handle(
+        _channelIdMeta,
+        channelId.isAcceptableOrUnknown(data['channel_id']!, _channelIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_channelIdMeta);
+    }
+    if (data.containsKey('entry_id')) {
+      context.handle(
+        _entryIdMeta,
+        entryId.isAcceptableOrUnknown(data['entry_id']!, _entryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entryIdMeta);
+    }
+    if (data.containsKey('entry_type')) {
+      context.handle(
+        _entryTypeMeta,
+        entryType.isAcceptableOrUnknown(data['entry_type']!, _entryTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entryTypeMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_id')) {
+      context.handle(
+        _creatorProfileIdMeta,
+        creatorProfileId.isAcceptableOrUnknown(
+          data['creator_profile_id']!,
+          _creatorProfileIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_name')) {
+      context.handle(
+        _creatorProfileNameMeta,
+        creatorProfileName.isAcceptableOrUnknown(
+          data['creator_profile_name']!,
+          _creatorProfileNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('published_at')) {
+      context.handle(
+        _publishedAtMeta,
+        publishedAt.isAcceptableOrUnknown(
+          data['published_at']!,
+          _publishedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_read')) {
+      context.handle(
+        _isReadMeta,
+        isRead.isAcceptableOrUnknown(data['is_read']!, _isReadMeta),
+      );
+    }
+    if (data.containsKey('inserted_at')) {
+      context.handle(
+        _insertedAtMeta,
+        insertedAt.isAcceptableOrUnknown(data['inserted_at']!, _insertedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceId, channelId, entryId},
+  ];
+  @override
+  FeedEntryEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FeedEntryEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      channelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}channel_id'],
+      )!,
+      entryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_id'],
+      )!,
+      entryType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entry_type'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      creatorProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_id'],
+      ),
+      creatorProfileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_name'],
+      ),
+      publishedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}published_at'],
+      ),
+      isRead: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_read'],
+      )!,
+      insertedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}inserted_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FeedEntryTable createAlias(String alias) {
+    return $FeedEntryTable(attachedDatabase, alias);
+  }
+}
+
+class FeedEntryEntity extends DataClass implements Insertable<FeedEntryEntity> {
+  final int internalId;
+  final String sourceId;
+  final String channelId;
+  final String entryId;
+  final String entryType;
+  final String title;
+  final String url;
+  final String? thumbnailUrl;
+  final String? creatorProfileId;
+  final String? creatorProfileName;
+  final DateTime? publishedAt;
+  final bool isRead;
+  final DateTime insertedAt;
+  const FeedEntryEntity({
+    required this.internalId,
+    required this.sourceId,
+    required this.channelId,
+    required this.entryId,
+    required this.entryType,
+    required this.title,
+    required this.url,
+    this.thumbnailUrl,
+    this.creatorProfileId,
+    this.creatorProfileName,
+    this.publishedAt,
+    required this.isRead,
+    required this.insertedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['channel_id'] = Variable<String>(channelId);
+    map['entry_id'] = Variable<String>(entryId);
+    map['entry_type'] = Variable<String>(entryType);
+    map['title'] = Variable<String>(title);
+    map['url'] = Variable<String>(url);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    if (!nullToAbsent || creatorProfileId != null) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId);
+    }
+    if (!nullToAbsent || creatorProfileName != null) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName);
+    }
+    if (!nullToAbsent || publishedAt != null) {
+      map['published_at'] = Variable<DateTime>(publishedAt);
+    }
+    map['is_read'] = Variable<bool>(isRead);
+    map['inserted_at'] = Variable<DateTime>(insertedAt);
+    return map;
+  }
+
+  FeedEntryCompanion toCompanion(bool nullToAbsent) {
+    return FeedEntryCompanion(
+      internalId: Value(internalId),
+      sourceId: Value(sourceId),
+      channelId: Value(channelId),
+      entryId: Value(entryId),
+      entryType: Value(entryType),
+      title: Value(title),
+      url: Value(url),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      creatorProfileId: creatorProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileId),
+      creatorProfileName: creatorProfileName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileName),
+      publishedAt: publishedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publishedAt),
+      isRead: Value(isRead),
+      insertedAt: Value(insertedAt),
+    );
+  }
+
+  factory FeedEntryEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FeedEntryEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      channelId: serializer.fromJson<String>(json['channelId']),
+      entryId: serializer.fromJson<String>(json['entryId']),
+      entryType: serializer.fromJson<String>(json['entryType']),
+      title: serializer.fromJson<String>(json['title']),
+      url: serializer.fromJson<String>(json['url']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      creatorProfileId: serializer.fromJson<String?>(json['creatorProfileId']),
+      creatorProfileName: serializer.fromJson<String?>(
+        json['creatorProfileName'],
+      ),
+      publishedAt: serializer.fromJson<DateTime?>(json['publishedAt']),
+      isRead: serializer.fromJson<bool>(json['isRead']),
+      insertedAt: serializer.fromJson<DateTime>(json['insertedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'channelId': serializer.toJson<String>(channelId),
+      'entryId': serializer.toJson<String>(entryId),
+      'entryType': serializer.toJson<String>(entryType),
+      'title': serializer.toJson<String>(title),
+      'url': serializer.toJson<String>(url),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'creatorProfileId': serializer.toJson<String?>(creatorProfileId),
+      'creatorProfileName': serializer.toJson<String?>(creatorProfileName),
+      'publishedAt': serializer.toJson<DateTime?>(publishedAt),
+      'isRead': serializer.toJson<bool>(isRead),
+      'insertedAt': serializer.toJson<DateTime>(insertedAt),
+    };
+  }
+
+  FeedEntryEntity copyWith({
+    int? internalId,
+    String? sourceId,
+    String? channelId,
+    String? entryId,
+    String? entryType,
+    String? title,
+    String? url,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    Value<String?> creatorProfileId = const Value.absent(),
+    Value<String?> creatorProfileName = const Value.absent(),
+    Value<DateTime?> publishedAt = const Value.absent(),
+    bool? isRead,
+    DateTime? insertedAt,
+  }) => FeedEntryEntity(
+    internalId: internalId ?? this.internalId,
+    sourceId: sourceId ?? this.sourceId,
+    channelId: channelId ?? this.channelId,
+    entryId: entryId ?? this.entryId,
+    entryType: entryType ?? this.entryType,
+    title: title ?? this.title,
+    url: url ?? this.url,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    creatorProfileId: creatorProfileId.present
+        ? creatorProfileId.value
+        : this.creatorProfileId,
+    creatorProfileName: creatorProfileName.present
+        ? creatorProfileName.value
+        : this.creatorProfileName,
+    publishedAt: publishedAt.present ? publishedAt.value : this.publishedAt,
+    isRead: isRead ?? this.isRead,
+    insertedAt: insertedAt ?? this.insertedAt,
+  );
+  FeedEntryEntity copyWithCompanion(FeedEntryCompanion data) {
+    return FeedEntryEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      channelId: data.channelId.present ? data.channelId.value : this.channelId,
+      entryId: data.entryId.present ? data.entryId.value : this.entryId,
+      entryType: data.entryType.present ? data.entryType.value : this.entryType,
+      title: data.title.present ? data.title.value : this.title,
+      url: data.url.present ? data.url.value : this.url,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      creatorProfileId: data.creatorProfileId.present
+          ? data.creatorProfileId.value
+          : this.creatorProfileId,
+      creatorProfileName: data.creatorProfileName.present
+          ? data.creatorProfileName.value
+          : this.creatorProfileName,
+      publishedAt: data.publishedAt.present
+          ? data.publishedAt.value
+          : this.publishedAt,
+      isRead: data.isRead.present ? data.isRead.value : this.isRead,
+      insertedAt: data.insertedAt.present
+          ? data.insertedAt.value
+          : this.insertedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FeedEntryEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('channelId: $channelId, ')
+          ..write('entryId: $entryId, ')
+          ..write('entryType: $entryType, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('isRead: $isRead, ')
+          ..write('insertedAt: $insertedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    internalId,
+    sourceId,
+    channelId,
+    entryId,
+    entryType,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    publishedAt,
+    isRead,
+    insertedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FeedEntryEntity &&
+          other.internalId == this.internalId &&
+          other.sourceId == this.sourceId &&
+          other.channelId == this.channelId &&
+          other.entryId == this.entryId &&
+          other.entryType == this.entryType &&
+          other.title == this.title &&
+          other.url == this.url &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.creatorProfileId == this.creatorProfileId &&
+          other.creatorProfileName == this.creatorProfileName &&
+          other.publishedAt == this.publishedAt &&
+          other.isRead == this.isRead &&
+          other.insertedAt == this.insertedAt);
+}
+
+class FeedEntryCompanion extends UpdateCompanion<FeedEntryEntity> {
+  final Value<int> internalId;
+  final Value<String> sourceId;
+  final Value<String> channelId;
+  final Value<String> entryId;
+  final Value<String> entryType;
+  final Value<String> title;
+  final Value<String> url;
+  final Value<String?> thumbnailUrl;
+  final Value<String?> creatorProfileId;
+  final Value<String?> creatorProfileName;
+  final Value<DateTime?> publishedAt;
+  final Value<bool> isRead;
+  final Value<DateTime> insertedAt;
+  const FeedEntryCompanion({
+    this.internalId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.channelId = const Value.absent(),
+    this.entryId = const Value.absent(),
+    this.entryType = const Value.absent(),
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.publishedAt = const Value.absent(),
+    this.isRead = const Value.absent(),
+    this.insertedAt = const Value.absent(),
+  });
+  FeedEntryCompanion.insert({
+    this.internalId = const Value.absent(),
+    required String sourceId,
+    required String channelId,
+    required String entryId,
+    required String entryType,
+    required String title,
+    required String url,
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.publishedAt = const Value.absent(),
+    this.isRead = const Value.absent(),
+    this.insertedAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       channelId = Value(channelId),
+       entryId = Value(entryId),
+       entryType = Value(entryType),
+       title = Value(title),
+       url = Value(url);
+  static Insertable<FeedEntryEntity> custom({
+    Expression<int>? internalId,
+    Expression<String>? sourceId,
+    Expression<String>? channelId,
+    Expression<String>? entryId,
+    Expression<String>? entryType,
+    Expression<String>? title,
+    Expression<String>? url,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? creatorProfileId,
+    Expression<String>? creatorProfileName,
+    Expression<DateTime>? publishedAt,
+    Expression<bool>? isRead,
+    Expression<DateTime>? insertedAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (channelId != null) 'channel_id': channelId,
+      if (entryId != null) 'entry_id': entryId,
+      if (entryType != null) 'entry_type': entryType,
+      if (title != null) 'title': title,
+      if (url != null) 'url': url,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (creatorProfileId != null) 'creator_profile_id': creatorProfileId,
+      if (creatorProfileName != null)
+        'creator_profile_name': creatorProfileName,
+      if (publishedAt != null) 'published_at': publishedAt,
+      if (isRead != null) 'is_read': isRead,
+      if (insertedAt != null) 'inserted_at': insertedAt,
+    });
+  }
+
+  FeedEntryCompanion copyWith({
+    Value<int>? internalId,
+    Value<String>? sourceId,
+    Value<String>? channelId,
+    Value<String>? entryId,
+    Value<String>? entryType,
+    Value<String>? title,
+    Value<String>? url,
+    Value<String?>? thumbnailUrl,
+    Value<String?>? creatorProfileId,
+    Value<String?>? creatorProfileName,
+    Value<DateTime?>? publishedAt,
+    Value<bool>? isRead,
+    Value<DateTime>? insertedAt,
+  }) {
+    return FeedEntryCompanion(
+      internalId: internalId ?? this.internalId,
+      sourceId: sourceId ?? this.sourceId,
+      channelId: channelId ?? this.channelId,
+      entryId: entryId ?? this.entryId,
+      entryType: entryType ?? this.entryType,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      creatorProfileId: creatorProfileId ?? this.creatorProfileId,
+      creatorProfileName: creatorProfileName ?? this.creatorProfileName,
+      publishedAt: publishedAt ?? this.publishedAt,
+      isRead: isRead ?? this.isRead,
+      insertedAt: insertedAt ?? this.insertedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (channelId.present) {
+      map['channel_id'] = Variable<String>(channelId.value);
+    }
+    if (entryId.present) {
+      map['entry_id'] = Variable<String>(entryId.value);
+    }
+    if (entryType.present) {
+      map['entry_type'] = Variable<String>(entryType.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (creatorProfileId.present) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId.value);
+    }
+    if (creatorProfileName.present) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName.value);
+    }
+    if (publishedAt.present) {
+      map['published_at'] = Variable<DateTime>(publishedAt.value);
+    }
+    if (isRead.present) {
+      map['is_read'] = Variable<bool>(isRead.value);
+    }
+    if (insertedAt.present) {
+      map['inserted_at'] = Variable<DateTime>(insertedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FeedEntryCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('channelId: $channelId, ')
+          ..write('entryId: $entryId, ')
+          ..write('entryType: $entryType, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('publishedAt: $publishedAt, ')
+          ..write('isRead: $isRead, ')
+          ..write('insertedAt: $insertedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4635,9 +5414,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalPlaylistItemTable(this);
   late final $LocalSubscriptionTable localSubscription =
       $LocalSubscriptionTable(this);
+  late final $FeedEntryTable feedEntry = $FeedEntryTable(this);
   late final Index localPlaylistItemOrder = Index(
     'local_playlist_item_order',
     'CREATE INDEX local_playlist_item_order ON local_playlist_item (playlist_id, position, internal_id)',
+  );
+  late final Index feedEntryChannelTime = Index(
+    'feed_entry_channel_time',
+    'CREATE INDEX feed_entry_channel_time ON feed_entry (source_id, channel_id, published_at)',
   );
   late final RecentSearchQueryDao recentSearchQueryDao = RecentSearchQueryDao(
     this as AppDatabase,
@@ -4654,6 +5438,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final LocalLibraryDao localLibraryDao = LocalLibraryDao(
     this as AppDatabase,
   );
+  late final FeedDao feedDao = FeedDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4670,7 +5455,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localPlaylist,
     localPlaylistItem,
     localSubscription,
+    feedEntry,
     localPlaylistItemOrder,
+    feedEntryChannelTime,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5463,10 +6250,11 @@ class $$MediaTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (mediaHistoryRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          MediaHistoryEntity
+                          MediaHistoryEntity,
+                          $MediaHistoryTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
@@ -5477,61 +6265,56 @@ class $$MediaTableTableManager
                                 table,
                                 p0,
                               ).mediaHistoryRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (videoRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          VideoEntity
+                          VideoEntity,
+                          $VideoTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._videoRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).videoRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (articleRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          ArticleEntity
+                          ArticleEntity,
+                          $ArticleTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._articleRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).articleRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (postRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          PostEntity
+                          PostEntity,
+                          $PostTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._postRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).postRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                     ];
@@ -7578,10 +8361,11 @@ class $$LocalPlaylistTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (localPlaylistItemRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       LocalPlaylistEntity,
                       $LocalPlaylistTable,
-                      LocalPlaylistItemEntity
+                      LocalPlaylistItemEntity,
+                      $LocalPlaylistItemTable
                     >(
                       currentTable: table,
                       referencedTable: $$LocalPlaylistTableReferences
@@ -7592,10 +8376,8 @@ class $$LocalPlaylistTableTableManager
                             table,
                             p0,
                           ).localPlaylistItemRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.playlistId == item.internalId,
-                          ),
+                      currentColumn: 'internal_id',
+                      referencedColumn: 'playlist_id',
                       typedResults: items,
                     ),
                 ];
@@ -8293,6 +9075,371 @@ typedef $$LocalSubscriptionTableProcessedTableManager =
       LocalSubscriptionEntity,
       PrefetchHooks Function()
     >;
+typedef $$FeedEntryTableCreateCompanionBuilder = FeedEntryCompanion Function({
+  Value<int> internalId,
+  required String sourceId,
+  required String channelId,
+  required String entryId,
+  required String entryType,
+  required String title,
+  required String url,
+  Value<String?> thumbnailUrl,
+  Value<String?> creatorProfileId,
+  Value<String?> creatorProfileName,
+  Value<DateTime?> publishedAt,
+  Value<bool> isRead,
+  Value<DateTime> insertedAt,
+});
+typedef $$FeedEntryTableUpdateCompanionBuilder = FeedEntryCompanion Function({
+  Value<int> internalId,
+  Value<String> sourceId,
+  Value<String> channelId,
+  Value<String> entryId,
+  Value<String> entryType,
+  Value<String> title,
+  Value<String> url,
+  Value<String?> thumbnailUrl,
+  Value<String?> creatorProfileId,
+  Value<String?> creatorProfileName,
+  Value<DateTime?> publishedAt,
+  Value<bool> isRead,
+  Value<DateTime> insertedAt,
+});
+
+class $$FeedEntryTableFilterComposer
+    extends Composer<_$AppDatabase, $FeedEntryTable> {
+  $$FeedEntryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entryId => $composableBuilder(
+    column: $table.entryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entryType => $composableBuilder(
+    column: $table.entryType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRead => $composableBuilder(
+    column: $table.isRead,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FeedEntryTableOrderingComposer
+    extends Composer<_$AppDatabase, $FeedEntryTable> {
+  $$FeedEntryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get channelId => $composableBuilder(
+    column: $table.channelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entryId => $composableBuilder(
+    column: $table.entryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entryType => $composableBuilder(
+    column: $table.entryType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRead => $composableBuilder(
+    column: $table.isRead,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FeedEntryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FeedEntryTable> {
+  $$FeedEntryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get channelId =>
+      $composableBuilder(column: $table.channelId, builder: (column) => column);
+
+  GeneratedColumn<String> get entryId =>
+      $composableBuilder(column: $table.entryId, builder: (column) => column);
+
+  GeneratedColumn<String> get entryType =>
+      $composableBuilder(column: $table.entryType, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get publishedAt => $composableBuilder(
+    column: $table.publishedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isRead =>
+      $composableBuilder(column: $table.isRead, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$FeedEntryTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FeedEntryTable,
+          FeedEntryEntity,
+          $$FeedEntryTableFilterComposer,
+          $$FeedEntryTableOrderingComposer,
+          $$FeedEntryTableAnnotationComposer,
+          $$FeedEntryTableCreateCompanionBuilder,
+          $$FeedEntryTableUpdateCompanionBuilder,
+          (
+            FeedEntryEntity,
+            BaseReferences<_$AppDatabase, $FeedEntryTable, FeedEntryEntity>,
+          ),
+          FeedEntryEntity,
+          PrefetchHooks Function()
+        > {
+  $$FeedEntryTableTableManager(_$AppDatabase db, $FeedEntryTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FeedEntryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FeedEntryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FeedEntryTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> channelId = const Value.absent(),
+                Value<String> entryId = const Value.absent(),
+                Value<String> entryType = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime?> publishedAt = const Value.absent(),
+                Value<bool> isRead = const Value.absent(),
+                Value<DateTime> insertedAt = const Value.absent(),
+              }) => FeedEntryCompanion(
+                internalId: internalId,
+                sourceId: sourceId,
+                channelId: channelId,
+                entryId: entryId,
+                entryType: entryType,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                publishedAt: publishedAt,
+                isRead: isRead,
+                insertedAt: insertedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required String sourceId,
+                required String channelId,
+                required String entryId,
+                required String entryType,
+                required String title,
+                required String url,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime?> publishedAt = const Value.absent(),
+                Value<bool> isRead = const Value.absent(),
+                Value<DateTime> insertedAt = const Value.absent(),
+              }) => FeedEntryCompanion.insert(
+                internalId: internalId,
+                sourceId: sourceId,
+                channelId: channelId,
+                entryId: entryId,
+                entryType: entryType,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                publishedAt: publishedAt,
+                isRead: isRead,
+                insertedAt: insertedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FeedEntryTable, FeedEntryEntity>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $FeedEntryTable,
+                    FeedEntryEntity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FeedEntryTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FeedEntryTable,
+      FeedEntryEntity,
+      $$FeedEntryTableFilterComposer,
+      $$FeedEntryTableOrderingComposer,
+      $$FeedEntryTableAnnotationComposer,
+      $$FeedEntryTableCreateCompanionBuilder,
+      $$FeedEntryTableUpdateCompanionBuilder,
+      (
+        FeedEntryEntity,
+        BaseReferences<_$AppDatabase, $FeedEntryTable, FeedEntryEntity>,
+      ),
+      FeedEntryEntity,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8318,4 +9465,6 @@ class $AppDatabaseManager {
       $$LocalPlaylistItemTableTableManager(_db, _db.localPlaylistItem);
   $$LocalSubscriptionTableTableManager get localSubscription =>
       $$LocalSubscriptionTableTableManager(_db, _db.localSubscription);
+  $$FeedEntryTableTableManager get feedEntry =>
+      $$FeedEntryTableTableManager(_db, _db.feedEntry);
 }
