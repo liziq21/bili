@@ -33,8 +33,12 @@ jobs:
   dcm:
     name: Dart Code Metrics
     runs-on: ubuntu-latest
+    # DCM requires a license key for CI (DCM_CI_KEY + DCM_EMAIL).
+    # Only runs if both secrets are configured; otherwise skipped with notice.
+    if: env.DCM_CI_KEY != '' && env.DCM_EMAIL != ''
     permissions:
       contents: read
+    continue-on-error: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -59,13 +63,26 @@ jobs:
         uses: dart-lang/setup-dart@7654d458321ee25acccccfdb86cd48bd95768ff1
 
       - name: Run dcm analyze
+        env:
+          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
+          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm analyze packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app
 
       - name: Run dcm check-unused-code
+        env:
+          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
+          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm check-unused-code packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app --exclude-public-api
 
       - name: Run dcm check-dependencies
+        env:
+          DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
+          DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
         run: |
           dcm check-dependencies packages/bilibili packages/bilibili/bpi packages/youtube packages/youtube/ypi packages/data app
+
+      - name: DCM skipped notice
+        if: env.DCM_CI_KEY == '' || env.DCM_EMAIL == ''
+        run: echo "::notice title=DCM Skipped::DCM_CI_KEY and DCM_EMAIL secrets not configured. Configure them to enable Dart Code Metrics analysis."

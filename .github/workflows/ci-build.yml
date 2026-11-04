@@ -42,9 +42,6 @@ jobs:
             app/android/*.gradle*
             app/android/**/gradle-wrapper.properties
 
-      - name: Enable Gradle configuration cache
-        run: echo "org.gradle.configuration-cache=true" >> app/android/gradle.properties
-
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
           version: ${{ matrix.release.flutter }}
@@ -94,7 +91,8 @@ jobs:
         if: always()
         run: |
           cd app
-          flutter build apk --release --analyze-size --target-platform android-arm64 --output build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json 2>&1 | tee apk_size_analysis.txt
+          flutter build apk --release --analyze-size --target-platform android-arm64 2>&1 | tee apk_size_analysis.txt
+          # --analyze-size outputs to build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json
           if [ -f build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json ]; then
             echo "APK size analysis completed"
             python3 -c "import json, sys; f=open('build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json'); data=json.load(f); total=data.get('size', 0); print(f'::notice title=APK Size (release-arm64)::{total/1024/1024:.2f} MB')"
