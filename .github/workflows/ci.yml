@@ -42,13 +42,12 @@ jobs:
   # 的 job，PR 上它们 skipped，而 needs 到 skipped job 的 job 自身也会 skipped，
   # 于是 test 整体判为 skipped，build 若不 always() 会被连带 skip ——
   # 而 build 是 ruleset 的 required check，skip 会让 PR 永久 BLOCKED。
-  # needs 的结果：success / failure / cancelled / skipped。PR 上 test 因两个
-  # main-only job 被判 skipped —— 若用 `needs.test.result == 'success'` 会连
-  # PR 上的 build 一起 skip，而 build 是 required check，skip = PR 永久 BLOCKED。
-  # 故条件取「test 未失败即可」：成功或跳过都跑 build，只有 test 真失败才跳。
+  # 不写 needs: [test]：ci-test 里 test_matrix_report/test_matrix_summary 是
+  # 「仅 push+main」的 job，PR 上它们 skipped，而 needs 到 skipped job 的 job
+  # 自身也会被 skip —— build 因此被连带 skip。build 是 ruleset 的 required
+  # check，一旦 skip，PR 拿不到该 check 就永久 BLOCKED（实测 if: always() 也
+  # 救不回来：needs-gating 先于 if 求值）。build 独立跑，不再依赖 test。
   build:
-    needs: [test]
-    if: ${{ always() && needs.test.result != 'failure' }}
     uses: ./.github/workflows/ci-build.yml
 
   tools:
