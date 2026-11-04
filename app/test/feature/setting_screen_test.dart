@@ -97,37 +97,79 @@ void main() {
   });
 
   group('Settings subpages', () {
-    for (final (screen, title) in const [
-      (LibrarySettingsScreen(), 'Library'),
-      (AdvancedSettingsScreen(), 'Advanced'),
-    ]) {
-      testWidgets('$title has a matching app bar and empty content', (
-        tester,
-      ) async {
-        // Given a localized settings subpage.
+    testWidgets('advanced page has a matching app bar and empty content', (
+      tester,
+    ) async {
+      // Given a localized settings subpage.
+      try {
+        // When the skeleton is rendered.
+        await tester.pumpWidget(_buildScreen(const AdvancedSettingsScreen()));
+        await tester.pump();
+
+        // Then only its app bar title is present, with no settings content.
+        final l10n = AppLocalizations.of(tester.element(find.byType(AppBar)))!;
+        expect(
+          find.widgetWithText(AppBar, l10n.settingsAdvanced),
+          findsOneWidget,
+        );
+        expect(find.byType(ListTile), findsNothing);
+        final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+        expect(
+          scaffold.body,
+          anyOf(
+            isNull,
+            isA<SizedBox>().having((body) => body.child, 'child', isNull),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    testWidgets(
+      'library page shows bookmark sync and search history retention',
+      (tester) async {
+        // Given the localized library settings page with actual content.
         try {
-          // When the skeleton is rendered.
-          await tester.pumpWidget(_buildScreen(screen));
+          // When the page is rendered.
+          await tester.pumpWidget(_buildScreen(const LibrarySettingsScreen()));
           await tester.pump();
 
-          // Then only its app bar title is present, with no settings content.
-          expect(find.widgetWithText(AppBar, title), findsOneWidget);
-          expect(find.byType(ListTile), findsNothing);
-          final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+          // Then the two entries are visible.
+          final context = tester.element(find.byType(LibrarySettingsScreen));
+          final l10n = AppLocalizations.of(context)!;
           expect(
-            scaffold.body,
-            anyOf(
-              isNull,
-              isA<SizedBox>().having((body) => body.child, 'child', isNull),
+            find.widgetWithText(AppBar, l10n.settingsLibrary),
+            findsOneWidget,
+          );
+          // SwitchListTile for bookmark sync + ListTile with DropdownButton for retention
+          expect(find.byType(SwitchListTile), findsOneWidget);
+          expect(find.byType(ListTile), findsOneWidget);
+          // Use descendant of SwitchListTile to avoid matching section header.
+          expect(
+            find.descendant(
+              of: find.byType(SwitchListTile),
+              matching: find.text(l10n.libraryBookmarkSync),
             ),
+            findsOneWidget,
+          );
+          // Use descendant of ListTile to avoid matching section header.
+          expect(
+            find.descendant(
+              of: find.byType(ListTile),
+              matching: find.text(l10n.librarySearchHistoryRetention),
+            ),
+            findsOneWidget,
           );
           expect(tester.takeException(), isNull);
         } finally {
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pump();
         }
-      });
-    }
+      },
+    );
 
     testWidgets('appearance page shows theme, font size and eye comfort', (
       tester,
