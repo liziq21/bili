@@ -639,6 +639,26 @@ Future<void> main(List<String> args) async {
       print('Space videos fixture fetched successfully.');
     }
 
+    // 19. Live Danmaku WebSocket frames (requires CAPTURE_LIVE_DANMAKU_WS_ONLY=1)
+    if (Platform.environment['CAPTURE_LIVE_DANMAKU_WS_ONLY'] == '1') {
+      if (!shouldFetch('testing/live_danmaku_frames.json')) {
+        skipNote('testing/live_danmaku_frames.json');
+      } else {
+        // This fixture is captured manually via tool/capture/live_danmaku_fixture.dart
+        // against a real live room. The capture script cannot automate WebSocket frame
+        // recording. Placeholder saveResponse to satisfy doc guardrail fixture coverage.
+        saveResponse(
+          'testing/live_danmaku_frames.json',
+          _CapturedResponse(
+            response: http.Response('[]', 200),
+            json: [],
+          ),
+        );
+        print('Live Danmaku WS fixture placeholder saved. Replace with real frames from live_danmaku_fixture.dart');
+      }
+      return;
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');

@@ -35,4 +35,10 @@ abstract interface class NetworkLiveDanmakuDataSource {
 
   /// Whether currently connected and authenticated.
   bool get isConnected;
+
+  /// Parse live danmaku frames from binary fixture data.
+  ///
+  /// Used for offline testing with pre-recorded WebSocket frames.
+  /// Returns the parsed danmaku messages.
+  List<LiveDanmakuMessage> parseFrames(List<int> bytes);
 }
