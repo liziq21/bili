@@ -78,6 +78,7 @@ TEST_MATRIX = {
     ],
     'widget': [
         'app/test/feature/appearance_settings_screen_test.dart',
+        'app/test/feature/danmaku_settings_screen_test.dart',
         'app/test/feature/app_search_anchor_test.dart',
         'app/test/feature/filter_bar_test.dart',
         'app/test/feature/history_settings_screen_test.dart',
