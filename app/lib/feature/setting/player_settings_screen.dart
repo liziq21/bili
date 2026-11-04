@@ -6,6 +6,7 @@ import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
+import 'sleep_timer_duration_dialog.dart';
 
 class const PlayerSettingsScreen({super.key}) extends StatefulWidget {
   @override
@@ -277,8 +278,50 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                   );
                 },
               ),
+            _pickerOption(
+              title: _customSleepTimerLabel(l10n),
+              selected: _isCustomSleepTimer,
+              onTap: () async {
+                final minutes = await _showCustomSleepTimerDialog(sheetContext);
+                if (!mounted || !sheetContext.mounted || minutes == null) {
+                  return;
+                }
+                Navigator.of(sheetContext).pop();
+                await _updatePlayer(
+                  _playerSettings.copyWith(sleepTimerDefaultMinutes: minutes),
+                );
+              },
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  bool get _isCustomSleepTimer {
+    final minutes = _playerSettings.sleepTimerDefaultMinutes;
+    return minutes > 0 && !kSleepTimerMinutes.contains(minutes);
+  }
+
+  String _customSleepTimerLabel(AppLocalizations l10n) {
+    final minutes = _playerSettings.sleepTimerDefaultMinutes;
+    return _isCustomSleepTimer
+        ? l10n.sleepTimerCustomValue('$minutes')
+        : l10n.sleepTimerCustom;
+  }
+
+  Future<int?> _showCustomSleepTimerDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    return showDialog<int>(
+      context: context,
+      builder: (_) => SleepTimerDurationDialog(
+        title: l10n.sleepTimerCustomTitle,
+        minutesLabel: l10n.sleepTimerMinutesHint,
+        invalidDurationMessage: l10n.sleepTimerInvalidDuration,
+        cancelLabel: l10n.dialogCancel,
+        confirmLabel: l10n.confirm,
+        minMinutes: kMinSleepTimerMinutes,
+        maxMinutes: kMaxSleepTimerMinutes,
       ),
     );
   }

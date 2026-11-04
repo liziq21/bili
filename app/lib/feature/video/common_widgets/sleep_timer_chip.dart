@@ -9,6 +9,7 @@ import '../../../datastore/preferences_data_source.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../setting/app_settings.dart' as settings;
+import '../../setting/sleep_timer_duration_dialog.dart';
 import '../player/media_playback_controller.dart';
 
 /// Backwards-compatible export for the player chip's duration list.
@@ -176,7 +177,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
     if (!mounted || _userSelected) return;
     switch (result) {
       case Success(:final success)
-          when success > 0 && kSleepTimerMinutes.contains(success):
+          when settings.isValidSleepTimerMinutes(success):
         _sleep.start(success);
       case Success() || Error():
         break;
@@ -275,6 +276,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                   onTap: () =>
                       _pick(sheetContext, minutes, SleepTimerAction.pauseNow),
                 ),
+              _customOption(sheetContext, SleepTimerAction.pauseNow),
               _groupLabel(l10n?.stopAfterCurrentItem ?? 'Stop after current'),
               for (final minutes in kSleepTimerMinutes)
                 _option(
@@ -290,6 +292,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                     SleepTimerAction.afterCurrent,
                   ),
                 ),
+              _customOption(sheetContext, SleepTimerAction.afterCurrent),
               if (_sleep.isActive)
                 ListTile(
                   title: Text(
@@ -334,6 +337,48 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
       onTap();
     },
   );
+
+  Widget _customOption(BuildContext sheetContext, SleepTimerAction action) {
+    final l10n = AppLocalizations.of(sheetContext);
+    final selectedMinutes = _sleep.selectedMinutes;
+    final selected =
+        selectedMinutes != null &&
+        !kSleepTimerMinutes.contains(selectedMinutes) &&
+        _sleep.action == action &&
+        (_sleep.pendingAfterCurrent ==
+            (action == SleepTimerAction.afterCurrent));
+    return _option(
+      selected
+          ? (l10n?.sleepTimerCustomValue('$selectedMinutes') ??
+                '$selectedMinutes min')
+          : (l10n?.sleepTimerCustom ?? 'Custom'),
+      selected: selected,
+      onTap: () => unawaited(_showCustomDuration(sheetContext, action)),
+    );
+  }
+
+  Future<void> _showCustomDuration(
+    BuildContext sheetContext,
+    SleepTimerAction action,
+  ) async {
+    final l10n = AppLocalizations.of(sheetContext);
+    final minutes = await showDialog<int>(
+      context: sheetContext,
+      builder: (_) => SleepTimerDurationDialog(
+        title: l10n?.sleepTimerCustomTitle ?? 'Custom duration',
+        minutesLabel: l10n?.sleepTimerMinutesHint ?? 'Minutes',
+        invalidDurationMessage:
+            l10n?.sleepTimerInvalidDuration ??
+            'Enter a duration from 1 to 1440 minutes.',
+        cancelLabel: l10n?.dialogCancel ?? 'Cancel',
+        confirmLabel: l10n?.confirm ?? 'OK',
+        minMinutes: settings.kMinSleepTimerMinutes,
+        maxMinutes: settings.kMaxSleepTimerMinutes,
+      ),
+    );
+    if (!mounted || !sheetContext.mounted || minutes == null) return;
+    _pick(sheetContext, minutes, action);
+  }
 
   void _pick(BuildContext sheetContext, int minutes, SleepTimerAction action) {
     _userSelected = true;

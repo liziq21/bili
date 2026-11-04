@@ -5439,6 +5439,31 @@
   "@cancelTimer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "sleepTimerCustom": "Custom",
+  "@sleepTimerCustom": {
+    "description": "Sleep timer option for entering a custom duration"
+  },
+  "sleepTimerCustomTitle": "Custom sleep timer",
+  "@sleepTimerCustomTitle": {
+    "description": "Dialog title for entering a custom sleep timer duration"
+  },
+  "sleepTimerCustomValue": "{p1} min",
+  "@sleepTimerCustomValue": {
+    "description": "Selected custom sleep timer duration",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepTimerMinutesHint": "Minutes",
+  "@sleepTimerMinutesHint": {
+    "description": "Input hint for a custom sleep timer duration"
+  },
+  "sleepTimerInvalidDuration": "Enter a duration from 1 to 1440 minutes.",
+  "@sleepTimerInvalidDuration": {
+    "description": "Validation error for a custom sleep timer duration"
+  },
   "countCompactWan": "{p1}万",
   "@countCompactWan": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",

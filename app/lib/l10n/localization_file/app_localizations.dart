@@ -6995,6 +6995,36 @@ abstract class AppLocalizations {
   /// **'取消定时'**
   String get cancelTimer;
 
+  /// Sleep timer option for entering a custom duration
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get sleepTimerCustom;
+
+  /// Dialog title for entering a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Custom sleep timer'**
+  String get sleepTimerCustomTitle;
+
+  /// Selected custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'{p1} min'**
+  String sleepTimerCustomValue(String p1);
+
+  /// Input hint for a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get sleepTimerMinutesHint;
+
+  /// Validation error for a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a duration from 1 to 1440 minutes.'**
+  String get sleepTimerInvalidDuration;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
