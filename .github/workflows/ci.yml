@@ -9,6 +9,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
+# 并发只在调用方（本文件）声明——被调用的可复用 workflow 绝不能自带 concurrency：
+# 在 workflow_call 上下文里 github.workflow 解析成调用方名（CI），四个子 workflow
+# 会落到同一个 group 字符串上互相 cancel，并连带把调用方 run 一起取消（实测三轮
+# 推送全部 cancelled，annotation「Canceling since a higher priority waiting request
+# for CI-refs/pull/N/merge exists」即此）。取消语义由这里的 cancel-in-progress 承担。
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -32,9 +37,17 @@ jobs:
     uses: ./.github/workflows/ci-test.yml
 
   # 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）。
-  # 同一 workflow 内调用即可恢复该依赖。
+  # 同一 workflow 内调用即可恢复该依赖。if: always() 是必需的：test 可复用
+  # workflow 内含 test_matrix_report/test_matrix_summary 两个「仅 push+main」
+  # 的 job，PR 上它们 skipped，而 needs 到 skipped job 的 job 自身也会 skipped，
+  # 于是 test 整体判为 skipped，build 若不 always() 会被连带 skip ——
+  # 而 build 是 ruleset 的 required check，skip 会让 PR 永久 BLOCKED。
+  # 不写 needs: [test]：ci-test 里 test_matrix_report/test_matrix_summary 是
+  # 「仅 push+main」的 job，PR 上它们 skipped，而 needs 到 skipped job 的 job
+  # 自身也会被 skip —— build 因此被连带 skip。build 是 ruleset 的 required
+  # check，一旦 skip，PR 拿不到该 check 就永久 BLOCKED（实测 if: always() 也
+  # 救不回来：needs-gating 先于 if 求值）。build 独立跑，不再依赖 test。
   build:
-    needs: [test]
     uses: ./.github/workflows/ci-build.yml
 
   tools:
