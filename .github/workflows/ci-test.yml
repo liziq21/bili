@@ -280,7 +280,11 @@ jobs:
 
       - id: fvmrc
         name: Read Flutter version from .fvmrc
-        run: echo "version=$(cat .fvmrc)" >> "$GITHUB_OUTPUT"
+        # .fvmrc is multi-line JSON; `cat`ing it into $GITHUB_OUTPUT writes
+        # "Invalid format" lines and fails the job. Parse out the value first.
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.fvmrc'))['flutter'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
