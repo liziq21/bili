@@ -254,16 +254,17 @@ class LiveDanmakuClient implements NetworkLiveDanmakuDataSource {
   @override
   List<LiveDanmakuMessage> parseFrames(List<int> bytes) {
     final messages = <LiveDanmakuMessage>[];
+    final uint8Bytes = Uint8List.fromList(bytes);
     int offset = 0;
-    while (offset < bytes.length) {
-      if (offset + 16 > bytes.length) break;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
 
-      final header = ByteData.view(bytes.buffer, offset, 16);
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
       final packetLen = header.getUint32(0, Endian.big);
 
-      if (offset + packetLen > bytes.length) break;
+      if (offset + packetLen > uint8Bytes.length) break;
 
-      final packetBytes = bytes.sublist(offset, offset + packetLen);
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
       offset += packetLen;
 
       try {
@@ -351,16 +352,17 @@ class LiveDanmakuFixtureClient implements NetworkLiveDanmakuDataSource {
 
     // Parse fixture as sequence of packets
     // Fixture format: concatenated binary packets
+    final uint8Bytes = Uint8List.fromList(bytes);
     int offset = 0;
-    while (offset < bytes.length) {
-      if (offset + 16 > bytes.length) break;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
 
-      final header = ByteData.view(bytes.buffer, offset, 16);
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
       final packetLen = header.getUint32(0, Endian.big);
 
-      if (offset + packetLen > bytes.length) break;
+      if (offset + packetLen > uint8Bytes.length) break;
 
-      final packetBytes = bytes.sublist(offset, offset + packetLen);
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
       offset += packetLen;
 
       try {
@@ -432,16 +434,17 @@ class LiveDanmakuFixtureClient implements NetworkLiveDanmakuDataSource {
   @override
   List<LiveDanmakuMessage> parseFrames(List<int> bytes) {
     final messages = <LiveDanmakuMessage>[];
+    final uint8Bytes = Uint8List.fromList(bytes);
     int offset = 0;
-    while (offset < bytes.length) {
-      if (offset + 16 > bytes.length) break;
+    while (offset < uint8Bytes.length) {
+      if (offset + 16 > uint8Bytes.length) break;
 
-      final header = ByteData.view(bytes.buffer, offset, 16);
+      final header = ByteData.view(uint8Bytes.buffer, offset, 16);
       final packetLen = header.getUint32(0, Endian.big);
 
-      if (offset + packetLen > bytes.length) break;
+      if (offset + packetLen > uint8Bytes.length) break;
 
-      final packetBytes = bytes.sublist(offset, offset + packetLen);
+      final packetBytes = uint8Bytes.sublist(offset, offset + packetLen);
       offset += packetLen;
 
       try {
