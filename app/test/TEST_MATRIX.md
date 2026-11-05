@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 65 |
+| unit | 67 |
 | widget | 49 |
 | golden | 8 |
 | contract | 12 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **136** |
+| **合计** | **138** |
 
 ## 分类定义
 
@@ -24,13 +24,14 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（65）
+## unit（67）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
 - `app/test/data/repository/video_comment_repository_test.dart`
 - `app/test/data/repository/video_detail_repository_test.dart`
 - `app/test/database/app_database_test.dart`
+- `app/test/database/feed_dao_test.dart`
 - `app/test/database/local_library_dao_test.dart`
 - `app/test/database/local_media_key_test.dart`
 - `app/test/database/local_playlist_dao_test.dart`
@@ -77,6 +78,7 @@
 - `packages/bilibili/test/bili_live_room_stream_test.dart`
 - `packages/bilibili/test/bili_media_stream_test.dart`
 - `packages/bilibili/test/bili_popular_feed_test.dart`
+- `packages/bilibili/test/bili_user_videos_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_search_remote_data_sources_test.dart`
 - `packages/bilibili/test/bili_search_suggest_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_url_normalization_test.dart`
@@ -107,6 +109,7 @@
 - `app/test/feature/home_source_selector_test.dart`
 - `app/test/feature/live/live_quality_chip_test.dart`
 - `app/test/feature/live/live_screen_test.dart`
+- `app/test/feature/library_settings_screen_test.dart`
 - `app/test/feature/live_bloc_test.dart`
 - `app/test/feature/media_library/local_library_screen_test.dart`
 - `app/test/feature/media_library/media_library_screen_test.dart`

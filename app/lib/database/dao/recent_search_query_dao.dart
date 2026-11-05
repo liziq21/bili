@@ -44,4 +44,11 @@ class RecentSearchQueryDao(super.attachedDatabase)
   }
 
   Future<void> clearRecentSearchQueries() => delete(recentSearchQuery).go();
+
+  Future<void> deleteOldSearchQueries(int retentionDays) {
+    final cutoff = DateTime.now().subtract(Duration(days: retentionDays));
+    return (delete(
+      recentSearchQuery,
+    )..where((tbl) => tbl.queriedDate.isSmallerThanValue(cutoff))).go();
+  }
 }

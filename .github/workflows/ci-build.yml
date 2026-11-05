@@ -1,6 +1,6 @@
 # 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
-# pubspec 矩阵生成 + Build Flutter App (android)。job 名与矩阵策略保持不变，
-# ruleset 的 required check 名不受影响。
+# pubspec 矩阵生成 + Build Flutter App (android)。job 名与矩阵策略保持不变；矩阵版本变更
+# 会改变带版本后缀的 check 名，升级 SDK 时必须同步更新 ruleset 的 required check。
 # 拆分前 build 的 needs 含 flutter_test（test 失败时 build 跳过）；调用方
 # ci.yml 的 build job 用 needs: [test] 恢复该依赖。
 on:
@@ -86,3 +86,22 @@ jobs:
         with:
           name: app-arm64-v8a-release-unsigned-${{ matrix.release.flutter }}.apk
           path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+      - name: Analyze APK size
+        if: always()
+        run: |
+          cd app
+          flutter build apk --release --analyze-size --target-platform android-arm64 2>&1 | tee apk_size_analysis.txt
+          # --analyze-size outputs to build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json
+          if [ -f build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json ]; then
+            echo "APK size analysis completed"
+            python3 -c "import json, sys; f=open('build/app/outputs/flutter-apk/app-arm64-v8a-release-size.json'); data=json.load(f); total=data.get('size', 0); print(f'::notice title=APK Size (release-arm64)::{total/1024/1024:.2f} MB')"
+          fi
+
+      - name: Upload APK size analysis
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: apk-size-analysis-${{ matrix.release.flutter }}
+          path: app/apk_size_analysis.txt
+          if-no-files-found: ignore

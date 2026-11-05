@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../../../datastore/preferences_data_source.dart';
 import '../../../data/model/recent_search_query.dart';
-import '../../../data/repository/recent_search_query/recent_search_query_repository.dart';
+import '../../../data/repository/recent_search_query/recent_search_query_repository.dart'
+    show RecentSearchQueryRepository;
 import '../../../data/repository/search_suggest_repository.dart';
 import '../../../domain/get_recent_search_queries_use_case.dart';
 part 'search_state.dart';
@@ -16,6 +18,7 @@ class SearchBloc({
   required final GetRecentSearchQueriesUseCase _getRentSearchQueriesUseCase,
   required final RecentSearchQueryRepository _recentSearchQueryRepository,
   required final SearchSuggestRepository _searchSuggestRepository,
+  required final PreferencesDataSource _preferences,
   String initQuery = '',
 }) extends Bloc<SearchEvent, SearchState> {
   this : super(SearchState(currentQuery: initQuery)) {
@@ -27,9 +30,14 @@ class SearchBloc({
     );
     on<ClearRecentSearchesPressed>(_onClearRecentSearchesPressed);
     on<RecentSearchUpdated>(_onRecentSearchUpdated);
+    on<CleanupOldSearchQueries>(_onCleanupOldSearchQueries);
+
+    // 触发一次性清理（fire-and-forget，不阻塞启动）
+    add(CleanupOldSearchQueries());
   }
 
   final _log = Logger('AppSearchBarBloc');
+
   // 处理最近搜索流：emit.forEach 自动接管生命周期，销毁时自动注销
   Future<void> _onMonitorRecentSearches(
     MonitorRecentSearches event,
@@ -85,5 +93,28 @@ class SearchBloc({
     if (event.query.isEmpty) return;
     await _recentSearchQueryRepository.insertOrReplaceRecentSearch(event.query);
     _log.info('add recent search: ${event.query}');
+  }
+
+  // 清理过期搜索历史
+  Future<void> _onCleanupOldSearchQueries(
+    CleanupOldSearchQueries event,
+    Emitter<SearchState> emit,
+  ) async {
+    final retentionResult = await _preferences.get(
+      PreferencesKey.searchHistoryRetentionDays,
+    );
+    final retentionDays = retentionResult is Success<int, Exception>
+        ? retentionResult.success
+        : 30;
+
+    if (retentionDays <= 0) {
+      _log.fine(
+        'Search history retention is forever (days=$retentionDays), skipping cleanup',
+      );
+      return;
+    }
+
+    await _recentSearchQueryRepository.deleteOldSearchQueries(retentionDays);
+    _log.info('Cleaned up search queries older than $retentionDays days');
   }
 }

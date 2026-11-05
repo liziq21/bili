@@ -344,6 +344,54 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get settingsLibrary;
 
+  /// Toggle for syncing remote bookmarks to local library
+  ///
+  /// In en, this message translates to:
+  /// **'Sync bookmarks'**
+  String get libraryBookmarkSync;
+
+  /// Subtitle for bookmark sync toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Keep local bookmarks in sync with remote'**
+  String get libraryBookmarkSyncSubtitle;
+
+  /// Setting for how long to keep search history
+  ///
+  /// In en, this message translates to:
+  /// **'Search history retention'**
+  String get librarySearchHistoryRetention;
+
+  /// Subtitle for search history retention setting
+  ///
+  /// In en, this message translates to:
+  /// **'Delete searches older than the selected period'**
+  String get librarySearchHistoryRetentionSubtitle;
+
+  /// Retention option - 7 days
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get librarySearchHistoryRetention7Days;
+
+  /// Retention option - 30 days
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get librarySearchHistoryRetention30Days;
+
+  /// Retention option - 90 days
+  ///
+  /// In en, this message translates to:
+  /// **'90 days'**
+  String get librarySearchHistoryRetention90Days;
+
+  /// Retention option - keep forever
+  ///
+  /// In en, this message translates to:
+  /// **'Forever'**
+  String get librarySearchHistoryRetentionForever;
+
   /// Settings group and subpage title - advanced options
   ///
   /// In en, this message translates to:
@@ -6994,6 +7042,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'取消定时'**
   String get cancelTimer;
+
+  /// Sleep timer option for entering a custom duration
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get sleepTimerCustom;
+
+  /// Dialog title for entering a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Custom sleep timer'**
+  String get sleepTimerCustomTitle;
+
+  /// Selected custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'{p1} min'**
+  String sleepTimerCustomValue(String p1);
+
+  /// Input hint for a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get sleepTimerMinutesHint;
+
+  /// Validation error for a custom sleep timer duration
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a duration from 1 to 1440 minutes.'**
+  String get sleepTimerInvalidDuration;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///

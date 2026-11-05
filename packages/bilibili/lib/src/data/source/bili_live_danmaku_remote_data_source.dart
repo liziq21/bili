@@ -18,6 +18,7 @@ final class BiliLiveDanmakuRemoteDataSource({
 
   @override
   Stream<DanmakuComment> liveDanmaku(int roomId) async* {
+    if (roomId <= 0) return;
     try {
       final info = await network.getDanmuInfo(roomId: roomId);
       final client = LiveDanmakuWsClient(

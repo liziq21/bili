@@ -115,6 +115,9 @@ class FakeRecentSearchQueryRepository() implements RecentSearchQueryRepository {
 
   @override
   Future<void> clearRecentSearchQueries() async {}
+
+  @override
+  Future<void> deleteOldSearchQueries(int retentionDays) async {}
 }
 
 class _FakeVideoFeed() extends VideoFeedRemoteDataSource {
@@ -200,6 +203,8 @@ class FakeMediaSource(@override final String id, @override final String name)
   @override
   VideoCommentRepliesRemoteDataSource? get videoCommentRepliesDataSource =>
       null;
+  @override
+  UserVideosRemoteDataSource? get userVideosDataSource => null;
 
   @override
   Future<void> close() async {}

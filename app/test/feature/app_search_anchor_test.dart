@@ -1,6 +1,8 @@
 import 'package:app/data/model/recent_search_query.dart';
 import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
 import 'package:app/data/repository/search_suggest_repository.dart';
+import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/datastore/preferences_key_set.dart';
 import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/search/app_search_anchor.dart';
 import 'package:app/feature/search/bloc/search_bloc.dart';
@@ -12,6 +14,30 @@ import 'package:flutter_test/flutter_test.dart';
 // 是另一个 fork 的类型，查找会失败。
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+
+class FakePreferencesDataSource() implements PreferencesDataSource {
+  @override
+  Future<Result<T, Exception>> get<T>(PreferencesKey<T> key) async =>
+      Result.success(key.defaultValue);
+
+  @override
+  Future<Result<void, Exception>> set<T>(
+    PreferencesKey<T> prefKey,
+    T? value,
+  ) async => Result.success(null);
+
+  @override
+  Stream<UserData> get data => const Stream.empty();
+
+  @override
+  void dispose() {}
+
+  @override
+  Stream<T> streamOf<T>(PreferencesKey<T> key) => const Stream.empty();
+
+  @override
+  Stream<T> streamOfSet<T>(PreferencesKeySet<T> keySet) => const Stream.empty();
+}
 
 class FakeSuggestRepository(final List<String> suggests)
     implements SearchSuggestRepository {
@@ -35,6 +61,9 @@ class const FakeRecentSearchQueryRepository()
 
   @override
   Future<void> clearRecentSearchQueries() async {}
+
+  @override
+  Future<void> deleteOldSearchQueries(int retentionDays) async {}
 }
 
 /// [SearchBloc] 必须在 `testWidgets` 函数体内构造，不能放在 `setUp` 里。
@@ -49,6 +78,7 @@ SearchBloc buildBloc(SearchSuggestRepository suggest) {
     getRentSearchQueriesUseCase: GetRecentSearchQueriesUseCase(
       recentSearchQueryRepository: recent,
     ),
+    preferences: FakePreferencesDataSource(),
   );
 }
 

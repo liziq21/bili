@@ -42,7 +42,7 @@ WBI key 会从 Bilibili 导航接口获取，并在内存中缓存。WBI 请求�
 
 ## 开发
 
-该包要求 Dart `^3.13.4`。测试不应依赖真实 Bilibili 网络服务，应使用固定
+该包要求 Dart `^3.13.7`。测试不应依赖真实 Bilibili 网络服务，应使用固定
 JSON fixtures 和 mock HTTP client；端点文档与 fixture 表由 `doc_guardrail_test.dart`
 保持同步。
 

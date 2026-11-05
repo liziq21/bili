@@ -1,6 +1,6 @@
 # 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
-# pubspec 矩阵生成 + Run Flutter Test。job 名与矩阵策略保持不变，
-# ruleset 的 required check 名不受影响。
+# pubspec 矩阵生成 + Run Flutter Test。job 名与矩阵策略保持不变；矩阵版本变更
+# 会改变带版本后缀的 check 名，升级 SDK 时必须同步更新 ruleset 的 required check。
 on:
   workflow_call:
 
@@ -18,18 +18,19 @@ jobs:
     outputs:
       matrix: ${{ steps.pubspec.outputs.matrix }}
 
-  flutter_test:
-    name: Run Flutter Test
+  # 共享准备步骤：symbol map、iOS 校验、build_runner、analyze、SARIF
+  # 每个 Flutter 版本跑一次，后续测试 job 依赖它
+  flutter_test_setup:
+    name: Flutter Test Setup
     needs: pubspec
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
     permissions:
       contents: read
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    timeout-minutes: 60
-
+      security-events: write
+      actions: read
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -53,6 +54,18 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
 
+      - name: Cache build_runner generated files
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/bilibili/bpi/lib/src/**/*.g.dart
+            packages/bilibili/bpi/lib/src/**/*.chopper.dart
+            packages/youtube/ypi/lib/src/**/*.g.dart
+            packages/youtube/ypi/lib/src/**/*.chopper.dart
+          key: build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-
+
       - name: Run analyze
         env:
           IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
@@ -75,6 +88,30 @@ jobs:
         with:
           sarif_file: flutter_analyze.sarif
 
+  # 主测试 job：仅跑 app 测试，保留 "Run Flutter Test" 名称供 ruleset 识别
+  flutter_test:
+    name: Run Flutter Test
+    needs: [pubspec, flutter_test_setup]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.pubspec.outputs.matrix)}}
+    permissions:
+      contents: read
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ matrix.release.flutter }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
       - name: Run test
         run: flutter test --coverage --branch-coverage
         working-directory: app
@@ -94,71 +131,6 @@ jobs:
           MIN_LINES: '60'
           MIN_BRANCHES: '50'
 
-      - name: Run bilibili package test
-        if: ${{ !cancelled() }}
-        run: flutter test --coverage test/
-        working-directory: packages/bilibili
-
-      - name: Upload bilibili coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-bilibili-${{ matrix.release.flutter }}
-          path: packages/bilibili/coverage/lcov.info
-          if-no-files-found: error
-
-      - name: Run bpi test
-        if: ${{ !cancelled() }}
-        run: dart test test/ --coverage-path=coverage/lcov.info
-        working-directory: packages/bilibili/bpi
-
-      - name: Upload bpi coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-bpi-${{ matrix.release.flutter }}
-          path: packages/bilibili/bpi/coverage/lcov.info
-          if-no-files-found: error
-
-      - name: Run youtube package test
-        if: ${{ !cancelled() }}
-        run: flutter test --coverage test/
-        working-directory: packages/youtube
-
-      - name: Upload youtube coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-youtube-${{ matrix.release.flutter }}
-          path: packages/youtube/coverage/lcov.info
-          if-no-files-found: error
-
-      - name: Run ypi test
-        if: ${{ !cancelled() }}
-        run: dart test test/ --coverage-path=coverage/lcov.info
-        working-directory: packages/youtube/ypi
-
-      - name: Upload ypi coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-ypi-${{ matrix.release.flutter }}
-          path: packages/youtube/ypi/coverage/lcov.info
-          if-no-files-found: error
-
-      - name: Run data package test
-        if: ${{ !cancelled() }}
-        run: dart test --coverage-path=coverage/lcov.info
-        working-directory: packages/data
-
-      - name: Upload data coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-data-${{ matrix.release.flutter }}
-          path: packages/data/coverage/lcov.info
-          if-no-files-found: error
-
       - name: Upload golden failure diffs
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -167,6 +139,11 @@ jobs:
           path: app/test/golden/failures/
           if-no-files-found: ignore
 
+      - name: Notify golden fix hint
+        if: failure()
+        run: |
+          echo "::notice title=金丝雀测试失败快速修复:: 本地运行 \`flutter test --update-goldens\` 重录基线图片"
+
       - name: Upload current goldens for visual review
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -174,13 +151,145 @@ jobs:
           name: goldens-review-${{ github.run_id }}-${{ matrix.release.flutter }}
           path: app/test/golden/goldens/ci/
 
+  # 包测试并行：matrix 过 (Flutter版本 × 包)，不阻断合并
+  flutter_test_packages:
+    name: Run Package Tests
+    needs: [pubspec, flutter_test_setup]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        flutter: ${{fromJson(needs.pubspec.outputs.matrix)}}
+        package:
+          - { name: bilibili, dir: packages/bilibili, runner: flutter }
+          - { name: bpi, dir: packages/bilibili/bpi, runner: dart }
+          - { name: youtube, dir: packages/youtube, runner: flutter }
+          - { name: ypi, dir: packages/youtube/ypi, runner: dart }
+          - { name: data, dir: packages/data, runner: dart }
+    permissions:
+      contents: read
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
+        with:
+          version: ${{ matrix.flutter.release.flutter }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Run ${{ matrix.package.name }} tests
+        run: |
+          if [ "${{ matrix.package.runner }}" = "flutter" ]; then
+            cd ${{ matrix.package.dir }} && flutter test --coverage test/
+          else
+            cd ${{ matrix.package.dir }} && dart test test/ --coverage-path=coverage/lcov.info
+          fi
+
+      - name: Upload ${{ matrix.package.name }} coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-${{ matrix.package.name }}-${{ matrix.flutter.release.flutter }}
+          path: ${{ matrix.package.dir }}/coverage/lcov.info
+          if-no-files-found: error
+
   test_matrix_report:
     name: Test Matrix Report
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    timeout-minutes: 90
+    timeout-minutes: 30
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - area: app
+            cat: unit
+            dir: app
+            runner: flutter
+          - area: app
+            cat: widget
+            dir: app
+            runner: flutter
+          - area: app
+            cat: golden
+            dir: app
+            runner: flutter
+          - area: app
+            cat: contract
+            dir: app
+            runner: flutter
+          - area: app
+            cat: integration
+            dir: app
+            runner: flutter
+          - area: bilibili
+            cat: unit
+            dir: packages/bilibili
+            runner: flutter
+          - area: bilibili
+            cat: widget
+            dir: packages/bilibili
+            runner: flutter
+          - area: bilibili
+            cat: contract
+            dir: packages/bilibili
+            runner: flutter
+          - area: bpi
+            cat: unit
+            dir: packages/bilibili/bpi
+            runner: dart
+          - area: bpi
+            cat: widget
+            dir: packages/bilibili/bpi
+            runner: dart
+          - area: bpi
+            cat: contract
+            dir: packages/bilibili/bpi
+            runner: dart
+          - area: data
+            cat: unit
+            dir: packages/data
+            runner: dart
+          - area: data
+            cat: widget
+            dir: packages/data
+            runner: dart
+          - area: data
+            cat: contract
+            dir: packages/data
+            runner: dart
+          - area: youtube
+            cat: unit
+            dir: packages/youtube
+            runner: flutter
+          - area: youtube
+            cat: widget
+            dir: packages/youtube
+            runner: flutter
+          - area: youtube
+            cat: contract
+            dir: packages/youtube
+            runner: flutter
+          - area: ypi
+            cat: unit
+            dir: packages/youtube/ypi
+            runner: dart
+          - area: ypi
+            cat: widget
+            dir: packages/youtube/ypi
+            runner: dart
+          - area: ypi
+            cat: contract
+            dir: packages/youtube/ypi
+            runner: dart
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -188,7 +297,11 @@ jobs:
 
       - id: fvmrc
         name: Read Flutter version from .fvmrc
-        run: echo "version=$(cat .fvmrc)" >> "$GITHUB_OUTPUT"
+        # .fvmrc is multi-line JSON; `cat`ing it into $GITHUB_OUTPUT writes
+        # "Invalid format" lines and fails the job. Parse out the value first.
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.fvmrc'))['flutter'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
         with:
@@ -201,29 +314,50 @@ jobs:
       - name: Run build_runner
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Run app tests per category
+      - name: Run ${{ matrix.area }}/${{ matrix.cat }} tests
         run: |
           set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/test-matrix"
-          for cat in unit widget golden contract integration; do
-            files=$(python3 "$GITHUB_WORKSPACE/tool/test_matrix.py" --files "$cat" --area app --rel app)
-            if [ -z "$files" ]; then echo "FATAL: no files for app/$cat"; exit 1; fi
-            flutter test $files --coverage --coverage-path="$GITHUB_WORKSPACE/test-matrix/app-$cat.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/app-$cat.json"
-          done
-        working-directory: app
+          files=$(python3 "$GITHUB_WORKSPACE/tool/test_matrix.py" --files "${{ matrix.cat }}" --area "${{ matrix.area }}" --rel "${{ matrix.dir }}")
+          if [ -z "$files" ]; then
+            echo "No files for ${{ matrix.area }}/${{ matrix.cat }}, skipping"
+            exit 0
+          fi
+          if [ "${{ matrix.runner }}" = "flutter" ]; then
+            cd "$GITHUB_WORKSPACE/${{ matrix.dir }}" && flutter test $files --coverage --coverage-path="$GITHUB_WORKSPACE/test-matrix/${{ matrix.area }}-${{ matrix.cat }}.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/${{ matrix.area }}-${{ matrix.cat }}.json"
+          else
+            cd "$GITHUB_WORKSPACE/${{ matrix.dir }}" && dart test $files --coverage-path="$GITHUB_WORKSPACE/test-matrix/${{ matrix.area }}-${{ matrix.cat }}.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/${{ matrix.area }}-${{ matrix.cat }}.json"
+          fi
 
-      - name: Run package tests per category
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE/test-matrix"
-          for spec in bpi:packages/bilibili/bpi bilibili:packages/bilibili data:packages/data youtube:packages/youtube ypi:packages/youtube/ypi; do
-            area=${spec%%:*}; dir=${spec##*:}
-            for cat in unit widget contract; do
-              files=$(python3 "$GITHUB_WORKSPACE/tool/test_matrix.py" --files "$cat" --area "$area" --rel "$dir")
-              if [ -z "$files" ]; then continue; fi
-              (cd "$GITHUB_WORKSPACE/$dir" && dart test $files --coverage-path="$GITHUB_WORKSPACE/test-matrix/$area-$cat.lcov" --reporter=json > "$GITHUB_WORKSPACE/test-matrix/$area-$cat.json")
-            done
-          done
+      - name: Upload category result
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: test-matrix-${{ matrix.area }}-${{ matrix.cat }}-${{ github.run_id }}
+          path: |
+            test-matrix/${{ matrix.area }}-${{ matrix.cat }}.json
+            test-matrix/${{ matrix.area }}-${{ matrix.cat }}.lcov
+          if-no-files-found: ignore
+
+  test_matrix_summary:
+    name: Test Matrix Summary
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test_matrix_report
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Download all category results
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          path: test-matrix
+          pattern: test-matrix-*-${{ github.run_id }}
+          merge-multiple: true
 
       - name: Generate category summary
         run: python3 tool/test_matrix.py --summary test-matrix

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'dao/article_dao.dart';
 import 'dao/creator_profile_dao.dart';
+import 'dao/feed_dao.dart';
 import 'dao/media_history_dao.dart';
 import 'dao/local_library_dao.dart';
 import 'dao/post_dao.dart';
@@ -34,6 +35,7 @@ part 'app_database.g.dart';
     LocalPlaylist,
     LocalPlaylistItem,
     LocalSubscription,
+    FeedEntry,
   ],
   daos: [
     RecentSearchQueryDao,
@@ -43,13 +45,14 @@ part 'app_database.g.dart';
     ArticleDao,
     PostDao,
     LocalLibraryDao,
+    FeedDao,
   ],
 )
 class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +92,10 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
       }
       if (from < 5) {
         await m.createIndex(localPlaylistItemOrder);
+      }
+      if (from < 6) {
+        await m.createTable(feedEntry);
+        await m.createIndex(feedEntryChannelTime);
       }
     },
   );

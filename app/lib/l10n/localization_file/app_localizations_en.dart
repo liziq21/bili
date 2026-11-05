@@ -144,6 +144,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLibrary => 'Library';
 
   @override
+  String get libraryBookmarkSync => 'Sync bookmarks';
+
+  @override
+  String get libraryBookmarkSyncSubtitle =>
+      'Keep local bookmarks in sync with remote';
+
+  @override
+  String get librarySearchHistoryRetention => 'Search history retention';
+
+  @override
+  String get librarySearchHistoryRetentionSubtitle =>
+      'Delete searches older than the selected period';
+
+  @override
+  String get librarySearchHistoryRetention7Days => '7 days';
+
+  @override
+  String get librarySearchHistoryRetention30Days => '30 days';
+
+  @override
+  String get librarySearchHistoryRetention90Days => '90 days';
+
+  @override
+  String get librarySearchHistoryRetentionForever => 'Forever';
+
+  @override
   String get settingsAdvanced => 'Advanced';
 
   @override
@@ -4078,6 +4104,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelTimer => '取消定时';
+
+  @override
+  String get sleepTimerCustom => 'Custom';
+
+  @override
+  String get sleepTimerCustomTitle => 'Custom sleep timer';
+
+  @override
+  String sleepTimerCustomValue(String p1) {
+    return '$p1 min';
+  }
+
+  @override
+  String get sleepTimerMinutesHint => 'Minutes';
+
+  @override
+  String get sleepTimerInvalidDuration =>
+      'Enter a duration from 1 to 1440 minutes.';
 
   @override
   String countCompactWan(String p1) {

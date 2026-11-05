@@ -39,7 +39,6 @@ import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
 import '../feature/video/danmaku/danmaku_settings_screen.dart';
-import 'navigation_callbacks.dart';
 
 part 'route_data/live_route_data.dart';
 part 'route_data/not_found_route_data.dart';
@@ -323,6 +322,7 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
       searchSuggestRepository: context.read(),
       recentSearchQueryRepository: context.read(),
       getRentSearchQueriesUseCase: context.read(),
+      preferences: context.read<PreferencesDataSource>(),
     ),
     child: child,
   );
@@ -364,6 +364,7 @@ Widget _buildSearchEntry(BuildContext context) {
                   searchSuggestRepository: context.read(),
                   recentSearchQueryRepository: context.read(),
                   getRentSearchQueriesUseCase: context.read(),
+                  preferences: context.read<PreferencesDataSource>(),
                 )
                 // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
                 ..add(MonitorRecentSearches()),

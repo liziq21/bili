@@ -65,7 +65,7 @@ jobs:
           git add CHANGELOG.md
           git commit -m "docs: regenerate CHANGELOG.md from merged pull requests"
           git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${{ github.repository }}.git"
-          git push -u origin "$BRANCH"
+          git push --force-with-lease -u origin "$BRANCH"
 
           # Open PR (idempotent: if PR exists for this branch, gh exits 0)
           gh pr create \

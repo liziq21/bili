@@ -137,6 +137,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLibrary => 'Library';
 
   @override
+  String get libraryBookmarkSync => '同步收藏';
+
+  @override
+  String get libraryBookmarkSyncSubtitle => '将本地收藏与远端保持同步';
+
+  @override
+  String get librarySearchHistoryRetention => '搜索历史保留';
+
+  @override
+  String get librarySearchHistoryRetentionSubtitle => '删除早于选定周期的搜索记录';
+
+  @override
+  String get librarySearchHistoryRetention7Days => '7 天';
+
+  @override
+  String get librarySearchHistoryRetention30Days => '30 天';
+
+  @override
+  String get librarySearchHistoryRetention90Days => '90 天';
+
+  @override
+  String get librarySearchHistoryRetentionForever => '永久';
+
+  @override
   String get settingsAdvanced => 'Advanced';
 
   @override
@@ -4071,6 +4095,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cancelTimer => '取消定时';
+
+  @override
+  String get sleepTimerCustom => '自定义';
+
+  @override
+  String get sleepTimerCustomTitle => '自定义睡眠定时';
+
+  @override
+  String sleepTimerCustomValue(String p1) {
+    return '$p1 分钟';
+  }
+
+  @override
+  String get sleepTimerMinutesHint => '分钟';
+
+  @override
+  String get sleepTimerInvalidDuration => '请输入 1 到 1440 分钟之间的时长。';
 
   @override
   String countCompactWan(String p1) {

@@ -164,6 +164,38 @@
   "@settingsLibrary": {
     "description": "Settings group and subpage title - local library"
   },
+  "libraryBookmarkSync": "Sync bookmarks",
+  "@libraryBookmarkSync": {
+    "description": "Toggle for syncing remote bookmarks to local library"
+  },
+  "libraryBookmarkSyncSubtitle": "Keep local bookmarks in sync with remote",
+  "@libraryBookmarkSyncSubtitle": {
+    "description": "Subtitle for bookmark sync toggle"
+  },
+  "librarySearchHistoryRetention": "Search history retention",
+  "@librarySearchHistoryRetention": {
+    "description": "Setting for how long to keep search history"
+  },
+  "librarySearchHistoryRetentionSubtitle": "Delete searches older than the selected period",
+  "@librarySearchHistoryRetentionSubtitle": {
+    "description": "Subtitle for search history retention setting"
+  },
+  "librarySearchHistoryRetention7Days": "7 days",
+  "@librarySearchHistoryRetention7Days": {
+    "description": "Retention option - 7 days"
+  },
+  "librarySearchHistoryRetention30Days": "30 days",
+  "@librarySearchHistoryRetention30Days": {
+    "description": "Retention option - 30 days"
+  },
+  "librarySearchHistoryRetention90Days": "90 days",
+  "@librarySearchHistoryRetention90Days": {
+    "description": "Retention option - 90 days"
+  },
+  "librarySearchHistoryRetentionForever": "Forever",
+  "@librarySearchHistoryRetentionForever": {
+    "description": "Retention option - keep forever"
+  },
   "settingsAdvanced": "Advanced",
   "@settingsAdvanced": {
     "description": "Settings group and subpage title - advanced options"
@@ -5438,6 +5470,31 @@
   "cancelTimer": "取消定时",
   "@cancelTimer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+  },
+  "sleepTimerCustom": "Custom",
+  "@sleepTimerCustom": {
+    "description": "Sleep timer option for entering a custom duration"
+  },
+  "sleepTimerCustomTitle": "Custom sleep timer",
+  "@sleepTimerCustomTitle": {
+    "description": "Dialog title for entering a custom sleep timer duration"
+  },
+  "sleepTimerCustomValue": "{p1} min",
+  "@sleepTimerCustomValue": {
+    "description": "Selected custom sleep timer duration",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepTimerMinutesHint": "Minutes",
+  "@sleepTimerMinutesHint": {
+    "description": "Input hint for a custom sleep timer duration"
+  },
+  "sleepTimerInvalidDuration": "Enter a duration from 1 to 1440 minutes.",
+  "@sleepTimerInvalidDuration": {
+    "description": "Validation error for a custom sleep timer duration"
   },
   "countCompactWan": "{p1}万",
   "@countCompactWan": {

@@ -464,6 +464,19 @@ final endpointSpecs = <EndpointSpec>[
       return data;
     },
   ),
+  EndpointSpec(
+    method: 'parseFrames',
+    fixtures: ['live_danmaku_frames.json'],
+    docCell: 'live_danmaku_frames.json',
+    parse: (decoded) {
+      final bytes = decoded as List<int>;
+      final client = LiveDanmakuFixtureClient(fixturePath: '');
+      final messages = client.parseFrames(bytes);
+      expect(messages, isNotEmpty);
+      expect(messages.any((m) => m.cmd == 'DANMU_MSG'), isTrue);
+      return messages;
+    },
+  ),
 ];
 
 /// Matches an abstract method declaration such as

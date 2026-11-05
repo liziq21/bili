@@ -206,3 +206,13 @@ abstract class const VideoFeedRemoteDataSource()
 /// 直播推荐 Feed 数据源接口
 abstract class const LiveRoomFeedRemoteDataSource()
     extends FeedRemoteDataSource<LiveRoomModel>;
+
+/// 频道投稿视频分页数据源（订阅 Feed 消费封装用）。
+abstract class const UserVideosRemoteDataSource() extends RemoteDataSource {
+  /// 按频道拉取投稿视频分页（新到旧）。
+  Future<Result<Page<VideoModel>, Exception>> fetchUserVideos({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  });
+}
