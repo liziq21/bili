@@ -89,6 +89,7 @@ TEST_MATRIX = {
         'app/test/feature/home_source_selector_test.dart',
         'app/test/feature/live/live_quality_chip_test.dart',
         'app/test/feature/live/live_screen_test.dart',
+        'app/test/feature/library_settings_screen_test.dart',
         'app/test/feature/live_bloc_test.dart',
         'app/test/feature/media_library/local_library_screen_test.dart',
         'app/test/feature/media_library/media_library_screen_test.dart',
