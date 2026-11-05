@@ -1,8 +1,59 @@
 import 'package:bilibili/bilibili.dart';
+import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:test/test.dart';
 
+// ignore_for_file: use_primary_constructors
+
+final class _TrackingLiveDataSource implements NetworkLiveDataSource {
+  int getDanmuInfoCallCount = 0;
+
+  @override
+  Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkLiveRoomPlayInfo> getLiveRoomPlayInfo({
+    required int roomId,
+    int qn = 10000,
+    String protocol = '0,1',
+    String format = '0,1,2',
+    String codec = '0,1',
+    String platform = 'web',
+    int ptype = 8,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<NetworkLiveDanmakuInfo> getDanmuInfo({required int roomId}) async {
+    getDanmuInfoCallCount++;
+    throw UnimplementedError();
+  }
+}
+
 void main() {
+  group('BiliLiveDanmakuRemoteDataSource security validation', () {
+    test(
+      'terminates stream without network calls when roomId is non-positive',
+      () async {
+        final fakeNetwork = _TrackingLiveDataSource();
+        final dataSource = BiliLiveDanmakuRemoteDataSource(
+          network: fakeNetwork,
+        );
+
+        final zeroComments = await dataSource.liveDanmaku(0).toList();
+        expect(zeroComments, isEmpty);
+        expect(fakeNetwork.getDanmuInfoCallCount, equals(0));
+
+        final negativeComments = await dataSource.liveDanmaku(-100).toList();
+        expect(negativeComments, isEmpty);
+        expect(fakeNetwork.getDanmuInfoCallCount, equals(0));
+      },
+    );
+  });
+
   group('BiliLiveDanmakuRemoteDataSource.modeOf', () {
     test('mode 1 maps to scrolling', () {
       expect(BiliLiveDanmakuRemoteDataSource.modeOf(1), DanmakuMode.scrolling);
