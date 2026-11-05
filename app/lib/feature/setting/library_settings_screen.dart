@@ -68,8 +68,7 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
     setState(() => _bookmarkSyncEnabled = enabled);
     final preferences = _preferences;
     if (preferences != null) {
-      // ignore: unawaited_futures
-      unawaited(preferences.set(PreferencesKey.bookmarkSyncEnabled, enabled));
+      await preferences.set(PreferencesKey.bookmarkSyncEnabled, enabled);
     }
   }
 
@@ -78,10 +77,7 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
     setState(() => _searchHistoryRetentionDays = days);
     final preferences = _preferences;
     if (preferences != null) {
-      // ignore: unawaited_futures
-      unawaited(
-        preferences.set(PreferencesKey.searchHistoryRetentionDays, days),
-      );
+      await preferences.set(PreferencesKey.searchHistoryRetentionDays, days);
     }
   }
 
@@ -103,6 +99,7 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final retentionText = _retentionLabel(_searchHistoryRetentionDays, l10n);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsLibrary)),
       body: _loading
@@ -111,29 +108,44 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
                 _sectionHeader(l10n.libraryBookmarkSync),
-                SwitchListTile(
-                  title: Text(l10n.libraryBookmarkSync),
-                  subtitle: Text(l10n.libraryBookmarkSyncSubtitle),
-                  value: _bookmarkSyncEnabled,
-                  onChanged: _updateBookmarkSync,
+                Tooltip(
+                  message:
+                      '${l10n.libraryBookmarkSync}: ${_bookmarkSyncEnabled ? l10n.confirm : l10n.dialogCancel}',
+                  child: SwitchListTile(
+                    title: Text(l10n.libraryBookmarkSync),
+                    subtitle: Text(l10n.libraryBookmarkSyncSubtitle),
+                    value: _bookmarkSyncEnabled,
+                    onChanged: (enabled) {
+                      unawaited(_updateBookmarkSync(enabled));
+                    },
+                  ),
                 ),
                 _sectionHeader(l10n.librarySearchHistoryRetention),
-                ListTile(
-                  title: Text(l10n.librarySearchHistoryRetention),
-                  subtitle: Text(l10n.librarySearchHistoryRetentionSubtitle),
-                  trailing: DropdownButton<int>(
-                    value: _searchHistoryRetentionDays,
-                    onChanged: (value) {
-                      if (value != null) {
-                        _updateSearchHistoryRetention(value);
-                      }
-                    },
-                    items: _retentionOptions.map((days) {
-                      return DropdownMenuItem<int>(
-                        value: days,
-                        child: Text(_retentionLabel(days, l10n)),
-                      );
-                    }).toList(),
+                Tooltip(
+                  message:
+                      '${l10n.librarySearchHistoryRetention}: $retentionText',
+                  child: ListTile(
+                    title: Text(l10n.librarySearchHistoryRetention),
+                    subtitle: Text(l10n.librarySearchHistoryRetentionSubtitle),
+                    trailing: Semantics(
+                      label: l10n.librarySearchHistoryRetention,
+                      value: retentionText,
+                      excludeSemantics: true,
+                      child: DropdownButton<int>(
+                        value: _searchHistoryRetentionDays,
+                        onChanged: (value) {
+                          if (value != null) {
+                            unawaited(_updateSearchHistoryRetention(value));
+                          }
+                        },
+                        items: _retentionOptions.map((days) {
+                          return DropdownMenuItem<int>(
+                            value: days,
+                            child: Text(_retentionLabel(days, l10n)),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ],
