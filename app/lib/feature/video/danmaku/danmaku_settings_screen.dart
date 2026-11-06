@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -15,6 +16,7 @@ class const DanmakuSettingsScreen({super.key}) extends StatefulWidget {
 
 class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
   DanmakuSettings _settings = const DanmakuSettings();
+  PreferencesDataSource? _preferences;
   bool _loading = true;
 
   @override
@@ -24,11 +26,22 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
   }
 
   Future<void> _load() async {
-    final settings = await DanmakuSettings.load(
-      context.read<PreferencesDataSource>(),
-    );
+    PreferencesDataSource? preferences;
+    try {
+      preferences = context.read<PreferencesDataSource>();
+    } on Object catch (_) {
+      // Keep the page usable in isolated widget tests without app providers.
+    }
+
+    if (preferences == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    final settings = await DanmakuSettings.load(preferences);
     if (!mounted) return;
     setState(() {
+      _preferences = preferences;
       _settings = settings;
       _loading = false;
     });
@@ -36,7 +49,8 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
 
   Future<void> _update(DanmakuSettings settings) async {
     setState(() => _settings = settings);
-    await settings.save(context.read<PreferencesDataSource>());
+    final preferences = _preferences;
+    if (preferences != null) await settings.save(preferences);
   }
 
   @override
@@ -58,8 +72,10 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                         'Show timeline danmaku on video',
                   ),
                   value: _settings.enabled,
-                  onChanged: (enabled) =>
-                      _update(_settings.copyWith(enabled: enabled)),
+                  onChanged: (enabled) {
+                    HapticFeedback.selectionClick();
+                    _update(_settings.copyWith(enabled: enabled));
+                  },
                 ),
                 _SliderSetting(
                   title:
@@ -162,20 +178,27 @@ class const _SliderSetting({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Slider(
-        value: value.clamp(min, max).toDouble(),
-        min: min,
-        max: max,
-        divisions: divisions,
-        label: valueLabel,
-        onChanged: onChanged,
-      ),
-      trailing: Text(
-        valueLabel,
-        style: $styles.text.bodySmall.copyWith(
-          color: $styles.colors.onSurfaceVariant,
+    return Tooltip(
+      message: '$title: $valueLabel',
+      child: ListTile(
+        title: Text(title),
+        subtitle: Semantics(
+          label: title,
+          child: Slider(
+            value: value.clamp(min, max).toDouble(),
+            min: min,
+            max: max,
+            divisions: divisions,
+            label: valueLabel,
+            semanticFormatterCallback: (double _) => valueLabel,
+            onChanged: onChanged,
+          ),
+        ),
+        trailing: Text(
+          valueLabel,
+          style: $styles.text.bodySmall.copyWith(
+            color: $styles.colors.onSurfaceVariant,
+          ),
         ),
       ),
     );
