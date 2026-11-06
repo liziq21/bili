@@ -310,7 +310,8 @@ def render_report() -> str:
 
 def write_report(root: Path, path: Path) -> int:
     content = render_report()
-    if path.read_text() if path.exists() else '' != content:
+    existing = path.read_text() if path.exists() else ''
+    if existing != content:
         path.write_text(content)
     print(f'Wrote {path}')
     return 0
