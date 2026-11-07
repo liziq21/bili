@@ -2,7 +2,7 @@ import 'package:data/data.dart';
 import 'package:model/model.dart';
 
 /// Application boundary for the optional danmaku capability.
-abstract interface class DanmakuRepository {
+abstract interface class DanmakuRepository() {
   Future<Result<List<DanmakuComment>, Exception>> getDanmaku(String videoId);
 
   /// 订阅指定直播间的实时弹幕流。
@@ -11,10 +11,10 @@ abstract interface class DanmakuRepository {
   Stream<DanmakuComment> liveDanmaku(int roomId);
 }
 
-final class AppDanmakuRepository([
+final class AppDanmakuRepository(
   final DanmakuRemoteDataSource? _remoteDataSource,
   final LiveDanmakuRemoteDataSource? _liveDanmakuDataSource,
-]) implements DanmakuRepository {
+) implements DanmakuRepository {
   @override
   Future<Result<List<DanmakuComment>, Exception>> getDanmaku(String videoId) {
     final remote = _remoteDataSource;

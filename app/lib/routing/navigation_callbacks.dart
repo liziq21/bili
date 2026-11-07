@@ -8,6 +8,7 @@
 /// - 页面只声明「发生了什么」，不决定「怎么跳转」
 /// - 回调可为 null 表示无实现（no-op）
 /// - 路由层提供默认实现，source 隐式从 ServiceSourceProviders 读取
+library;
 
 /// 视频导航回调
 typedef VideoNavCallback = void Function(String videoId);

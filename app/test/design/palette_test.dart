@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:app/app_scaffold.dart';
-import 'package:app/main.dart';
 import 'package:app/design/design.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

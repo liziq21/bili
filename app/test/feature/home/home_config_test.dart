@@ -172,7 +172,7 @@ void main() {
   });
 
   group('HomeConfigEditorX', () {
-    HomeConfig _baseConfig() {
+    HomeConfig baseConfig() {
       return HomeConfig(
         {
           'test': HomeSourceConfig([
@@ -196,24 +196,24 @@ void main() {
     }
 
     test('toggles tab visibility', () {
-      final updated = _baseConfig().withTabVisible('test', 'tab_a', false);
+      final updated = baseConfig().withTabVisible('test', 'tab_a', false);
       expect(updated.sources['test']!.tabs[0].isVisible, isFalse);
       expect(updated.sources['test']!.tabs[1].isVisible, isTrue);
     });
 
     test('moves tab up and swaps sort order', () {
-      final updated = _baseConfig().withTabMoved('test', 'tab_b', true);
+      final updated = baseConfig().withTabMoved('test', 'tab_b', true);
       expect(updated.sources['test']!.tabs[0].sortOrder, equals(1));
       expect(updated.sources['test']!.tabs[1].sortOrder, equals(0));
     });
 
     test('sets main tab', () {
-      final updated = _baseConfig().withMainTab('test', 'tab_b');
+      final updated = baseConfig().withMainTab('test', 'tab_b');
       expect(updated.sources['test']!.mainTabId, equals('tab_b'));
     });
 
     test('edits grid columns', () {
-      final updated = _baseConfig().withGridColumns(portrait: 4, landscape: 5);
+      final updated = baseConfig().withGridColumns(portrait: 4, landscape: 5);
       expect(updated.gridColumnsPortrait, equals(4));
       expect(updated.gridColumnsLandscape, equals(5));
     });

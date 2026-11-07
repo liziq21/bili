@@ -38,12 +38,12 @@ void main() {
         final route = VideoRouteData(id: '123');
         Widget? built;
         // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
-        // material_ui 的 MaterialApp 不读取 tester.view，改用 binding.window 物理尺寸。
-        tester.binding.window.physicalSizeTestValue = const Size(800, 1200);
-        tester.binding.window.devicePixelRatioTestValue = 1.0;
+        // material_ui 的 MaterialApp 不读取 tester.view，改用 tester.view 物理尺寸。
+        tester.view.physicalSize = const Size(800, 1200);
+        tester.view.devicePixelRatio = 1.0;
         addTearDown(() {
-          tester.binding.window.clearPhysicalSizeTestValue();
-          tester.binding.window.clearDevicePixelRatioTestValue();
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
         });
 
         // 额外显式包裹 MediaQuery，双重保险。

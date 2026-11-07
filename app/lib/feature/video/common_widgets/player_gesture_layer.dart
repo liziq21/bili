@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -102,7 +101,6 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   double _brightness = 0.5;
 
   /// 最近一次按下的指针设备类型，用于区分触摸双击与鼠标双击。
-  PointerDeviceKind? _lastPointerKind;
   int _pointerCount = 0;
 
   @override
@@ -244,7 +242,6 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
             Positioned.fill(
               child: Listener(
                 onPointerDown: (event) {
-                  _lastPointerKind = event.kind;
                   _pointerCount++;
                   if (_pointerCount == 2) {
                     widget.onDoubleTapScreen?.call();
@@ -404,34 +401,6 @@ class const _VerticalIndicator({required final _VerticalDrag vertical})
     if (value <= 0) return Icons.volume_off;
     if (value < 0.5) return Icons.volume_down;
     return Icons.volume_up;
-  }
-}
-
-/// 双击快进 / 快退的瞬时提示。
-class const _SkipHint({required final Duration delta}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final forward = delta.inMilliseconds > 0;
-    return Align(
-      alignment: Alignment.center,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: $styles.colors.scrim.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              forward ? Icons.forward_10 : Icons.replay_10,
-              color: $styles.colors.onScrim,
-              size: 28,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

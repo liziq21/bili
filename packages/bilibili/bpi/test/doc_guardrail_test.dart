@@ -469,7 +469,7 @@ final endpointSpecs = <EndpointSpec>[
     fixtures: ['live_danmaku_frames.json'],
     docCell: 'live_danmaku_frames.json',
     parse: (decoded) {
-      final bytes = decoded as List<int>;
+      final bytes = (decoded as List).cast<int>();
       final client = LiveDanmakuFixtureClient(fixturePath: '');
       final messages = client.parseFrames(bytes);
       expect(messages, isNotEmpty);
@@ -487,8 +487,14 @@ final endpointSpecs = <EndpointSpec>[
 /// group copes with nested generics such as `Future<List<NetworkReplyData>>`,
 /// where stopping at the first `>` would leave a stray `>` before the method
 /// name and the match would fail.
+///
+/// HTTP endpoints return `Future<…>`, but a data source can also expose a
+/// synchronous parsing method (`List<LiveDanmakuMessage> parseFrames(…)`) that
+/// still has its own fixture and documentation row. Matching any return type
+/// (rather than `Future<…>` alone) keeps those registered methods from being
+/// reported as undeclared.
 final RegExp _methodDeclaration = RegExp(
-  r'^[ \t]*Future<(.+?)>[ \t]+([A-Za-z]\w*)[ \t]*\(',
+  r'^[ \t]*(?:Future|List)<(.+?)>[ \t]+(?!get\s)([A-Za-z]\w*)[ \t]*\(',
   multiLine: true,
 );
 
