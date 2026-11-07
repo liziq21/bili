@@ -6317,10 +6317,10 @@ abstract class AppLocalizations {
   /// **'Video'**
   String get videoTab;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Header for recent search history list
   ///
   /// In en, this message translates to:
-  /// **'最近搜索'**
+  /// **'Recent searches'**
   String get recentSearches;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7846,6 +7846,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'watching'**
   String get liveViewers;
+
+  /// Header for search history section in suggestions
+  ///
+  /// In en, this message translates to:
+  /// **'Search history'**
+  String get searchHistory;
+
+  /// Header for search suggestions section
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get searchSuggestions;
+
+  /// Tooltip for deleting a single search history item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete from history'**
+  String get deleteSearchHistoryItem;
+
+  /// Button to clear all search history
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all search history'**
+  String get clearAllSearchHistory;
+
+  /// Dialog title for confirming clear all search history
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all search history?'**
+  String get clearSearchHistoryConfirm;
+
+  /// Dialog message for confirming clear all search history
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all your recent searches. This action cannot be undone.'**
+  String get clearSearchHistoryMessage;
+
+  /// Empty state when there is no search history
+  ///
+  /// In en, this message translates to:
+  /// **'No search history yet'**
+  String get noSearchHistory;
+
+  /// Dialog title for confirming deletion of a single history item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{p1}\" from history?'**
+  String deleteHistoryItemConfirm(String p1);
 }
 
 class _AppLocalizationsDelegate

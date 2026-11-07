@@ -74,9 +74,37 @@ class const SearchScreen({
       );
     }
 
+    // 删除 / 清空都通过 repository 落库，再由仓库的 watch 流回推到
+    // SearchBloc，浮层与页面上的历史列表一起刷新。
+    final repository = context.read<RecentSearchQueryRepository?>();
+    void deleteHistory(String query) {
+      if (repository == null) return;
+      unawaited(
+        repository.deleteRecentSearchQuery(query).onError((error, _) {
+          // 删除失败不该打断输入，下一次读库会自愈。
+        }),
+      );
+    }
+
+    void clearHistory() {
+      if (repository == null) return;
+      unawaited(
+        repository.clearRecentSearchQueries().onError((error, _) {
+          // 同上：历史只是辅助信息。
+        }),
+      );
+    }
+
+    final history = context.select<SearchBloc?, List<RecentSearchQuery>>(
+      (bloc) => bloc?.state.recentSearchQueries ?? const [],
+    );
+
     if (suggest == null) {
       return AppSearchAnchor(
         onFocusInputReady: onFocusInputReady,
+        recentSearchQuery: history,
+        onDeleteRecentSearch: repository == null ? null : deleteHistory,
+        onClearRecentSearch: repository == null ? null : clearHistory,
         // 数据源无建议能力时 navigateToSearchResult 必须留空：
         // AppSearchAnchor._handleSearch 会把 onSearch 与 navigateToSearchResult
         // 两个都调一遍，两者指同一个函数就会跳两次结果页。
@@ -88,6 +116,9 @@ class const SearchScreen({
     }
     return AppSearchAnchor(
       onFocusInputReady: onFocusInputReady,
+      recentSearchQuery: history,
+      onDeleteRecentSearch: repository == null ? null : deleteHistory,
+      onClearRecentSearch: repository == null ? null : clearHistory,
       // 有建议时走 navigateToSearchResult（它负责关闭浮层）。onSearch 留空：
       // 它与 navigateToSearchResult 在 _handleSearch 里都会被调一遍，
       // 给它一个真实现等于把同一次提交执行两次。

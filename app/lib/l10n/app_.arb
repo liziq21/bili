@@ -6127,5 +6127,46 @@
   "liveViewers": "watching",
   "@liveViewers": {
     "description": "LIZ-84 live room detail and stream"
+  },
+  "recentSearches": "Recent searches",
+  "@recentSearches": {
+    "description": "Header for recent search history list"
+  },
+  "searchHistory": "Search history",
+  "@searchHistory": {
+    "description": "Header for search history section in suggestions"
+  },
+  "searchSuggestions": "Suggestions",
+  "@searchSuggestions": {
+    "description": "Header for search suggestions section"
+  },
+  "deleteSearchHistoryItem": "Delete from history",
+  "@deleteSearchHistoryItem": {
+    "description": "Tooltip for deleting a single search history item"
+  },
+  "clearAllSearchHistory": "Clear all search history",
+  "@clearAllSearchHistory": {
+    "description": "Button to clear all search history"
+  },
+  "clearSearchHistoryConfirm": "Clear all search history?",
+  "@clearSearchHistoryConfirm": {
+    "description": "Dialog title for confirming clear all search history"
+  },
+  "clearSearchHistoryMessage": "This will remove all your recent searches. This action cannot be undone.",
+  "@clearSearchHistoryMessage": {
+    "description": "Dialog message for confirming clear all search history"
+  },
+  "noSearchHistory": "No search history yet",
+  "@noSearchHistory": {
+    "description": "Empty state when there is no search history"
+  },
+  "deleteHistoryItemConfirm": "Delete \"{p1}\" from history?",
+  "@deleteHistoryItemConfirm": {
+    "description": "Dialog title for confirming deletion of a single history item",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
   }
 }

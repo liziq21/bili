@@ -51,4 +51,10 @@ class RecentSearchQueryDao(super.attachedDatabase)
       recentSearchQuery,
     )..where((tbl) => tbl.queriedDate.isSmallerThanValue(cutoff))).go();
   }
+
+  Future<void> deleteRecentSearchQuery(String query) {
+    return (delete(
+      recentSearchQuery,
+    )..where((tbl) => tbl.query.equals(query))).go();
+  }
 }

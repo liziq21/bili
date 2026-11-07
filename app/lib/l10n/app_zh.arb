@@ -6127,5 +6127,46 @@
   "liveViewers": "观看",
   "@liveViewers": {
     "description": "LIZ-84 live room detail and stream"
+  },
+  "recentSearches": "最近搜索",
+  "@recentSearches": {
+    "description": "Header for recent search history list"
+  },
+  "searchHistory": "搜索历史",
+  "@searchHistory": {
+    "description": "Header for search history section in suggestions"
+  },
+  "searchSuggestions": "建议词",
+  "@searchSuggestions": {
+    "description": "Header for search suggestions section"
+  },
+  "deleteSearchHistoryItem": "从历史中删除",
+  "@deleteSearchHistoryItem": {
+    "description": "Tooltip for deleting a single search history item"
+  },
+  "clearAllSearchHistory": "清空搜索历史",
+  "@clearAllSearchHistory": {
+    "description": "Button to clear all search history"
+  },
+  "clearSearchHistoryConfirm": "清空搜索历史？",
+  "@clearSearchHistoryConfirm": {
+    "description": "Dialog title for confirming clear all search history"
+  },
+  "clearSearchHistoryMessage": "这将移除所有最近搜索记录。此操作不可撤销。",
+  "@clearSearchHistoryMessage": {
+    "description": "Dialog message for confirming clear all search history"
+  },
+  "noSearchHistory": "暂无搜索历史",
+  "@noSearchHistory": {
+    "description": "Empty state when there is no search history"
+  },
+  "deleteHistoryItemConfirm": "从历史中删除 \"{p1}\"？",
+  "@deleteHistoryItemConfirm": {
+    "description": "Dialog title for confirming deletion of a single history item",
+    "placeholders": {
+      "p1": {
+        "type": "String"
+      }
+    }
   }
 }

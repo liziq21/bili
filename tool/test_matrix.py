@@ -97,6 +97,7 @@ TEST_MATRIX = {
         'app/test/feature/media_library/playlist_picker_test.dart',
         'app/test/feature/not_found_screen_test.dart',
         'app/test/feature/player_settings_screen_test.dart',
+        'app/test/feature/search/app_search_anchor_history_test.dart',
         'app/test/feature/search/search_result_screen_test.dart',
         'app/test/feature/search_result_test.dart',
         'app/test/feature/search_screen_test.dart',
