@@ -179,10 +179,14 @@ void main() {
         query: 'flutter',
         suggests: ['FlUtTeR tutorial'],
         history: [
-          RecentSearchQuery(query: 'FLUTTER TEST', queriedDate: DateTime.now()),
+          RecentSearchQuery(
+            query: 'FLUTTER TUTORIAL',
+            queriedDate: DateTime.now(),
+          ),
         ],
       );
 
+      // 输入给的是同一个词的大小写变体，去重后只保留建议词那一份原文。
       expect(result, ['FlUtTeR tutorial']);
     });
 
