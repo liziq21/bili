@@ -1,7 +1,6 @@
 import 'package:app/feature/search/common_widgets/filter_bar.dart';
 import 'package:app/app_scaffold.dart';
 import 'package:app/design/design.dart';
-import 'package:app/main.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';

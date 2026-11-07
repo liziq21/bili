@@ -64,7 +64,7 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
   }
 
   Future<void> _updateBookmarkSync(bool enabled) async {
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
     setState(() => _bookmarkSyncEnabled = enabled);
     final preferences = _preferences;
     if (preferences != null) {
@@ -73,7 +73,7 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
   }
 
   Future<void> _updateSearchHistoryRetention(int days) async {
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
     setState(() => _searchHistoryRetentionDays = days);
     final preferences = _preferences;
     if (preferences != null) {

@@ -7,7 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
-class _FakeLiveDataSource extends LiveRoomDetailRemoteDataSource {
+class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 

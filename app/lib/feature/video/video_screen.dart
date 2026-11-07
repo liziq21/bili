@@ -126,8 +126,9 @@ class VideoScreenState() extends State<VideoScreen> {
     final controller = _playbackController;
     if (controller == null) return;
     // 避免重复启动。
-    if (_progressSaveTimer != null || _playbackStateSubscription != null)
+    if (_progressSaveTimer != null || _playbackStateSubscription != null) {
       return;
+    }
 
     _progressSaveTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _saveProgressPeriodic();

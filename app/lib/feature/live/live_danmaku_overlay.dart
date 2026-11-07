@@ -26,7 +26,7 @@ class const LiveDanmakuOverlay({
   State<LiveDanmakuOverlay> createState() => _LiveDanmakuOverlayState();
 }
 
-class _LiveDanmakuOverlayState extends State<LiveDanmakuOverlay> {
+class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
   /// 滚动窗口：超过 10 秒的弹幕不再保留，防止内存增长。
   static const _maxWindow = Duration(seconds: 10);
 

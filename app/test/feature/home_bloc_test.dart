@@ -17,13 +17,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
+// ignore: use_primary_constructors
 class MockUserDataRepository implements UserDataRepository {
-  final StreamController<UserData> _controller = StreamController<UserData>();
-  UserData _currentData = const UserData();
-
-  MockUserDataRepository() {
+  // ignore: use_primary_constructors
+  new()
+    : _currentData = const UserData(),
+      _controller = StreamController<UserData>() {
     _controller.add(_currentData);
   }
+
+  final StreamController<UserData> _controller;
+  UserData _currentData;
 
   @override
   Stream<UserData> get data => _controller.stream;
