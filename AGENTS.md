@@ -250,7 +250,7 @@ Flutter 自身对该层的指导见 `flutter/flutter` 仓库的 `docs/rules/rule
 ### Flutter 测试运行器主机故障
 
 - `flutter test` 是 Flutter 测试命令，但测试进程实际由平台特定的 `flutter_tester` 二进制启动。测试加载前的失败不证明测试或应用代码有问题。
-- 在 Linux/Termux 主机上，已知失败为 `CANNOT LINK EXECUTABLE ... flutter_tester: library "libvk_swiftshader.so" not found`。先确认锁定的 SDK 版本，再尝试 `flutter precache --linux`。若库仍缺失，本地 Flutter SDK 不含该主机兼容的 Linux 测试引擎。
+- 在 Linux/Termux 主机上，最常见的失败是 `CANNOT LINK EXECUTABLE ... flutter_tester: library "libvk_swiftshader.so" not found`。**修复是 `pkg install swiftshader`**（提供 `$PREFIX/lib/libvk_swiftshader.so`），而不是 `flutter precache --linux`。安装前先确认 `flutter --version` 与 `.fvmrc` 一致。
 - **不得**通过将任意 `libvulkan*.so` 符号链接为 `libvk_swiftshader.so` 来解决此问题：ABI 和渲染器不同，这会将清晰的启动错误变成 `flutter_tester` 崩溃或无效测试结果。不得向仓库添加主机特定库或测试跳过。
-- 使用 `dart run tool/test_local.dart` 运行纯 Dart 回退。它先探测运行器，再运行主机上可用的全部离线检查。在 Termux 上，缺失 `libvk_swiftshader.so` 是已知的 Flutter SDK 主机限制，不是仓库测试失败：完成可本地运行的检查，不要仅因此原因将不可用的 Flutter 套件报告为失败。CI 仍须运行 `.github/workflows/ci-test.yml` 的完整 Flutter 矩阵。仅在明确要求本地 Flutter 运行器且不可用运行器必须立即失败时，使用 `dart run tool/test_local.dart --require-flutter`。
-- 对于 PR，核实 CI 的 `Run Flutter Test (…)` 检查覆盖 Flutter/widget/golden。纯 Dart 回退对其实际运行的本地检查是充分证据；已知 Termux 限制无需特殊运行器故障报告（除非有要求）。
+- 使用 `dart run tool/test_local.dart` 运行纯 Dart 回退。它先探测运行器，再运行主机上可用的全部离线检查。**Termux 上安装 `pkg install swiftshader` 后 `flutter test`（widget/golden）已可正常运行**（`/data/data/com.termux/files/usr/lib/libvk_swiftshader.so` 提供 `flutter_tester` 所需的 Vulkan CPU 实现）；纯 Dart 回退仅作为不依赖 `flutter_tester` 的快速检查保留。CI 仍须运行 `.github/workflows/ci-test.yml` 的完整 Flutter 矩阵并作为最终准则。仅在明确要求本地 Flutter 运行器且不可用运行器必须立即失败时，使用 `dart run tool/test_local.dart --require-flutter`。
+- 对于 PR，核实 CI 的 `Run Flutter Test (…)` 检查覆盖 Flutter/widget/golden。**新增或修改 widget 测试时必须在提交前本地跑一遍**（`flutter test <路径>`，swiftshader 已装时可用）；本地 Termux 通过不等价于 CI 通过（栅格化路径不同，golden 仍以 CI 为准），但纯逻辑断言（如去重、路由、状态）在本地即可暴露。只跑静态检查就提交，曾经漏掉一个把「不同词」写成「同词大小写变体」的断言。
