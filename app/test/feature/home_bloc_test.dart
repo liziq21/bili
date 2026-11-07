@@ -19,6 +19,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 
 // ignore: use_primary_constructors
 class MockUserDataRepository implements UserDataRepository {
+  // ignore: use_primary_constructors
   new()
     : _currentData = const UserData(),
       _controller = StreamController<UserData>() {
