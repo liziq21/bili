@@ -190,6 +190,8 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           value: '${(_progress * 100).round()}%',
                           child: Slider(
                             value: _progress,
+                            semanticFormatterCallback: (double val) =>
+                                '${(val * 100).round()}%',
                             onChanged: (val) {
                               HapticFeedback.selectionClick();
                               setState(() {

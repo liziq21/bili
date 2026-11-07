@@ -42,6 +42,11 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      final slider = tester.widget<Slider>(find.byType(Slider));
+      expect(slider.semanticFormatterCallback, isNotNull);
+      expect(slider.semanticFormatterCallback!(slider.value), '25%');
+      expect(slider.semanticFormatterCallback!(0.75), '75%');
     },
   );
 }
