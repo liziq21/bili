@@ -27,6 +27,9 @@ class _RecordingRecentSearchQueryRepository()
 
   @override
   Future<void> deleteOldSearchQueries(int retentionDays) async {}
+
+  @override
+  Future<void> deleteRecentSearchQuery(String query) async {}
 }
 
 /// The use case is a one-line delegation, so the only behaviour worth pinning

@@ -64,6 +64,9 @@ class const FakeRecentSearchQueryRepository()
 
   @override
   Future<void> deleteOldSearchQueries(int retentionDays) async {}
+
+  @override
+  Future<void> deleteRecentSearchQuery(String query) async {}
 }
 
 /// [SearchBloc] 必须在 `testWidgets` 函数体内构造，不能放在 `setUp` 里。

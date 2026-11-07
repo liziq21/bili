@@ -28,4 +28,8 @@ class DefaultRecentSearchQueryRepository({
     if (retentionDays <= 0) return; // -1 means forever, 0 means no retention
     await _recentSearchQueryDao.deleteOldSearchQueries(retentionDays);
   }
+
+  @override
+  Future<void> deleteRecentSearchQuery(String query) async =>
+      _recentSearchQueryDao.deleteRecentSearchQuery(query);
 }

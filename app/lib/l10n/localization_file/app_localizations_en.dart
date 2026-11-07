@@ -3699,7 +3699,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoTab => 'Video';
 
   @override
-  String get recentSearches => '最近搜索';
+  String get recentSearches => 'Recent searches';
 
   @override
   String get clearRecentSearchHistory => '清空最近搜索历史';
@@ -4554,4 +4554,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveViewers => 'watching';
+
+  @override
+  String get searchHistory => 'Search history';
+
+  @override
+  String get searchSuggestions => 'Suggestions';
+
+  @override
+  String get deleteSearchHistoryItem => 'Delete from history';
+
+  @override
+  String get clearAllSearchHistory => 'Clear all search history';
+
+  @override
+  String get clearSearchHistoryConfirm => 'Clear all search history?';
+
+  @override
+  String get clearSearchHistoryMessage =>
+      'This will remove all your recent searches. This action cannot be undone.';
+
+  @override
+  String get noSearchHistory => 'No search history yet';
+
+  @override
+  String deleteHistoryItemConfirm(String p1) {
+    return 'Delete \"$p1\" from history?';
+  }
 }

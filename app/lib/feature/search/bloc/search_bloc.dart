@@ -29,6 +29,7 @@ class SearchBloc({
           events.debounce(const Duration(milliseconds: 300)).switchMap(mapper),
     );
     on<ClearRecentSearchesPressed>(_onClearRecentSearchesPressed);
+    on<DeleteRecentSearchPressed>(_onDeleteRecentSearchPressed);
     on<RecentSearchUpdated>(_onRecentSearchUpdated);
     on<CleanupOldSearchQueries>(_onCleanupOldSearchQueries);
 
@@ -83,6 +84,16 @@ class SearchBloc({
     Emitter<SearchState> emit,
   ) async {
     await _recentSearchQueryRepository.clearRecentSearchQueries();
+  }
+
+  // 删除单条历史记录
+  Future<void> _onDeleteRecentSearchPressed(
+    DeleteRecentSearchPressed event,
+    Emitter<SearchState> emit,
+  ) async {
+    if (event.query.isEmpty) return;
+    await _recentSearchQueryRepository.deleteRecentSearchQuery(event.query);
+    _log.info('deleted recent search: ${event.query}');
   }
 
   // 更新/增加历史记录

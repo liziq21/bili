@@ -4544,4 +4544,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get liveViewers => '观看';
+
+  @override
+  String get searchHistory => '搜索历史';
+
+  @override
+  String get searchSuggestions => '建议词';
+
+  @override
+  String get deleteSearchHistoryItem => '从历史中删除';
+
+  @override
+  String get clearAllSearchHistory => '清空搜索历史';
+
+  @override
+  String get clearSearchHistoryConfirm => '清空搜索历史？';
+
+  @override
+  String get clearSearchHistoryMessage => '这将移除所有最近搜索记录。此操作不可撤销。';
+
+  @override
+  String get noSearchHistory => '暂无搜索历史';
+
+  @override
+  String deleteHistoryItemConfirm(String p1) {
+    return '从历史中删除 \"$p1\"？';
+  }
 }

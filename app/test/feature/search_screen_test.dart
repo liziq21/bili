@@ -29,6 +29,9 @@ class RecordingRecentSearchRepository({final bool failOnWrite = false})
 
   @override
   Future<void> deleteOldSearchQueries(int retentionDays) async {}
+
+  @override
+  Future<void> deleteRecentSearchQuery(String query) async {}
 }
 
 class const StubSuggestRepository() implements SearchSuggestRepository {
