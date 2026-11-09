@@ -75,6 +75,9 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   UserVideosRemoteDataSource? get userVideosDataSource => null;
 
   @override
+  PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
+
+  @override
   Future<void> close() async {
     _youtubeService.close();
   }

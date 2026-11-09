@@ -4570,4 +4570,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String deleteHistoryItemConfirm(String p1) {
     return '从历史中删除 \"$p1\"？';
   }
+
+  @override
+  String get playlistTitle => '播放列表';
+
+  @override
+  String get playlistSourceUnavailable => '该播放列表所属的数据源不可用';
+
+  @override
+  String get playlistEmpty => '这个播放列表还没有视频';
+
+  @override
+  String get playlistDescriptionUnavailable => '暂无简介';
+
+  @override
+  String playlistItemCount(String count) {
+    return '$count 个视频';
+  }
+
+  @override
+  String get playlistFetchAll => '下载全部';
+
+  @override
+  String playlistFetchAllProgress(String count) {
+    return '已下载 $count';
+  }
+
+  @override
+  String playlistFetchAllDone(String count) {
+    return '已下载全部 $count 个视频';
+  }
+
+  @override
+  String playlistFetchAllPartial(String count) {
+    return '下载中断，已下载 $count 个视频';
+  }
 }

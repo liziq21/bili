@@ -9,6 +9,7 @@ export 'src/data/source/bili_danmaku_remote_data_source.dart';
 export 'src/data/source/bili_live_danmaku_remote_data_source.dart';
 export 'src/data/source/bili_remote_data_source.dart';
 export 'src/data/source/bili_popular_video_feed_remote_data_source.dart';
+export 'src/data/source/bili_playlist_content_remote_data_source.dart';
 export 'src/data/source/bili_ranking_video_feed_remote_data_source.dart';
 export 'src/data/source/bili_user_videos_remote_data_source.dart';
 export 'src/data/source/bili_video_comment_remote_data_source.dart';

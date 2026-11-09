@@ -6168,5 +6168,61 @@
         "type": "String"
       }
     }
+  },
+  "playlistTitle": "Playlist",
+  "@playlistTitle": {
+    "description": "LIZ-77 remote playlist detail page title"
+  },
+  "playlistSourceUnavailable": "The source of this playlist is unavailable",
+  "@playlistSourceUnavailable": {
+    "description": "LIZ-77 shown when no media source can resolve the playlist route"
+  },
+  "playlistEmpty": "This playlist has no videos yet",
+  "@playlistEmpty": {
+    "description": "LIZ-77 empty state for a playlist without videos"
+  },
+  "playlistDescriptionUnavailable": "No description",
+  "@playlistDescriptionUnavailable": {
+    "description": "LIZ-77 placeholder when the playlist has no description"
+  },
+  "playlistItemCount": "{count} videos",
+  "@playlistItemCount": {
+    "description": "LIZ-77 number of videos advertised by the playlist",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "playlistFetchAll": "Fetch all",
+  "@playlistFetchAll": {
+    "description": "LIZ-77 button that fetches every page of the playlist"
+  },
+  "playlistFetchAllProgress": "Fetched {count}",
+  "@playlistFetchAllProgress": {
+    "description": "LIZ-77 progress shown while fetching all playlist pages",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "playlistFetchAllDone": "Fetched all {count} videos",
+  "@playlistFetchAllDone": {
+    "description": "LIZ-77 progress shown after every playlist page was fetched",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "playlistFetchAllPartial": "Fetched {count} videos before the fetch stopped",
+  "@playlistFetchAllPartial": {
+    "description": "LIZ-77 progress shown when fetching all pages was interrupted",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

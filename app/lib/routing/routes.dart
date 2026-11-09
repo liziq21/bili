@@ -38,5 +38,8 @@ abstract final class Routes() {
   static const video = '/$videoRelative';
   static const videoRelative = 'video';
 
+  static const playlist = '/$playlistRelative';
+  static const playlistRelative = 'playlist';
+
   static String videoWithId(String id) => '$video/$id';
 }

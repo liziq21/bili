@@ -63,6 +63,24 @@ extension NetworkBiliUserVideoItemX on NetworkBiliUserVideoItem {
   );
 }
 
+extension NetworkBiliPlaylistVideoItemX on NetworkBiliPlaylistVideoItem {
+  VideoModel asModel() => VideoModel(
+    id: bvid,
+    title: title ?? bvid,
+    url: buildBiliWatchUrl(bvid),
+    thumbnailUrl: normalizeBiliUrl(pic),
+    viewCount: play,
+    uploadDate: switch (pubdate ?? created) {
+      final timestamp? => DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+      null => null,
+    },
+    duration: _parseDuration(length),
+    desc: description,
+    creatorProfileName: author,
+    creatorProfileId: mid?.toString(),
+  );
+}
+
 int? _parseDuration(String? value) {
   if (value == null || value.isEmpty) return null;
   final parts = value.split(':');

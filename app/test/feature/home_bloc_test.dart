@@ -261,6 +261,8 @@ class FakeMediaSource({
       null;
   @override
   UserVideosRemoteDataSource? get userVideosDataSource => null;
+  @override
+  PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
 
   @override
   Future<void> close() async {}

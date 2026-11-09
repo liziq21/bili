@@ -10,6 +10,7 @@ import '../data/repository/app_search_suggest_repository.dart';
 import '../data/repository/creator_profile_repository.dart';
 import '../data/repository/danmaku_repository.dart';
 import '../data/repository/app_live_room_repository.dart';
+import '../data/repository/playlist_content_repository.dart';
 import '../data/repository/search/app_creator_profile_search_repository.dart';
 import '../data/repository/search/app_live_room_search_repository.dart';
 import '../data/repository/search/app_video_search_repository.dart';
@@ -171,6 +172,12 @@ class _SourceScopeState() extends State<_SourceScope> {
       if (source.liveRoomDetailDataSource case final liveRoomDetailDataSource?)
         RepositoryProvider<AppLiveRoomRepository>(
           create: (_) => AppLiveRoomRepository(liveRoomDetailDataSource),
+        ),
+      if (source.playlistContentDataSource
+          case final playlistContentDataSource?)
+        RepositoryProvider<PlaylistContentRepository>(
+          create: (_) =>
+              AppPlaylistContentRepository(playlistContentDataSource),
         ),
     ];
   }

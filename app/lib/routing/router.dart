@@ -27,6 +27,7 @@ import '../feature/home/home_screen.dart';
 import '../feature/live/live_screen.dart';
 import '../feature/media_library/media_library_screen.dart';
 import '../feature/not_found/not_found_screen.dart';
+import '../feature/playlist/playlist_screen.dart';
 import '../feature/search/search_result_screen.dart';
 import '../feature/search/search_screen.dart';
 import '../feature/setting/advanced_settings_screen.dart';
@@ -41,6 +42,7 @@ import '../feature/video/danmaku/danmaku_settings_screen.dart';
 
 part 'route_data/live_route_data.dart';
 part 'route_data/not_found_route_data.dart';
+part 'route_data/playlist_route_data.dart';
 part 'route_data/search_result_route_data.dart';
 part 'route_data/space_route_data.dart';
 part 'route_data/video_route_data.dart';
