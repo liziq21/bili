@@ -96,6 +96,7 @@ TEST_MATRIX = {
         'app/test/feature/media_library/media_library_screen_test.dart',
         'app/test/feature/media_library/playlist_picker_test.dart',
         'app/test/feature/not_found_screen_test.dart',
+        'app/test/feature/playlist/playlist_screen_test.dart',
         'app/test/feature/player_settings_screen_test.dart',
         'app/test/feature/search/app_search_anchor_history_test.dart',
         'app/test/feature/search/search_result_screen_test.dart',
@@ -132,6 +133,7 @@ TEST_MATRIX = {
     'unit': [
         'app/test/data/local_library_repository_test.dart',
         'app/test/data/repository/creator_profile_repository_test.dart',
+        'app/test/data/repository/playlist_content_repository_test.dart',
         'app/test/data/repository/video_comment_repository_test.dart',
         'app/test/data/repository/video_detail_repository_test.dart',
         'app/test/database/app_database_test.dart',
@@ -181,6 +183,7 @@ TEST_MATRIX = {
         'packages/bilibili/test/bili_live_room_detail_remote_data_source_test.dart',
         'packages/bilibili/test/bili_live_room_stream_test.dart',
         'packages/bilibili/test/bili_media_stream_test.dart',
+        'packages/bilibili/test/bili_playlist_content_remote_data_source_test.dart',
         'packages/bilibili/test/bili_popular_feed_test.dart',
         'packages/bilibili/test/bili_user_videos_remote_data_source_test.dart',
         'packages/bilibili/test/bili_search_remote_data_sources_test.dart',

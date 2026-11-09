@@ -9,6 +9,7 @@ import 'model/filter_group.dart';
 import 'model/live_room_model.dart';
 import 'model/media_stream.dart';
 import 'model/paged_result.dart';
+import 'model/playlist_detail.dart';
 import 'model/search_results.dart';
 import 'model/sort_option.dart';
 import 'model/video_comment_model.dart';
@@ -212,6 +213,22 @@ abstract class const UserVideosRemoteDataSource() extends RemoteDataSource {
   /// 按频道拉取投稿视频分页（新到旧）。
   Future<Result<Page<VideoModel>, Exception>> fetchUserVideos({
     required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  });
+}
+
+/// 远端播放列表（合集 / 收藏夹类的平台列表）内容数据源。
+///
+/// 与本地播放列表无关：这里只读远端。整列表抓取由
+/// `fetchFullPlaylist` 基于本接口的分页逐页完成。
+abstract class const PlaylistContentRemoteDataSource()
+    extends RemoteDataSource {
+  /// 拉取播放列表一页内容（含列表信息头）。
+  ///
+  /// [playlistId] 为平台列表标识；[page] 从 1 开始。
+  Future<Result<Page<PlaylistDetail>, Exception>> fetchPlaylistContent({
+    required String playlistId,
     int page = 1,
     int pageSize = 30,
   });

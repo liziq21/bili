@@ -7894,6 +7894,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete \"{p1}\" from history?'**
   String deleteHistoryItemConfirm(String p1);
+
+  /// LIZ-77 remote playlist detail page title
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist'**
+  String get playlistTitle;
+
+  /// LIZ-77 shown when no media source can resolve the playlist route
+  ///
+  /// In en, this message translates to:
+  /// **'The source of this playlist is unavailable'**
+  String get playlistSourceUnavailable;
+
+  /// LIZ-77 empty state for a playlist without videos
+  ///
+  /// In en, this message translates to:
+  /// **'This playlist has no videos yet'**
+  String get playlistEmpty;
+
+  /// LIZ-77 placeholder when the playlist has no description
+  ///
+  /// In en, this message translates to:
+  /// **'No description'**
+  String get playlistDescriptionUnavailable;
+
+  /// LIZ-77 number of videos advertised by the playlist
+  ///
+  /// In en, this message translates to:
+  /// **'{count} videos'**
+  String playlistItemCount(String count);
+
+  /// LIZ-77 button that fetches every page of the playlist
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch all'**
+  String get playlistFetchAll;
+
+  /// LIZ-77 progress shown while fetching all playlist pages
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched {count}'**
+  String playlistFetchAllProgress(String count);
+
+  /// LIZ-77 progress shown after every playlist page was fetched
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched all {count} videos'**
+  String playlistFetchAllDone(String count);
+
+  /// LIZ-77 progress shown when fetching all pages was interrupted
+  ///
+  /// In en, this message translates to:
+  /// **'Fetched {count} videos before the fetch stopped'**
+  String playlistFetchAllPartial(String count);
 }
 
 class _AppLocalizationsDelegate

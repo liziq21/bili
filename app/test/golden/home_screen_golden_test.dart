@@ -110,6 +110,8 @@ class _FakeSource({required final int count}) implements MediaSource {
       null;
   @override
   UserVideosRemoteDataSource? get userVideosDataSource => null;
+  @override
+  PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
 
   @override
   Future<void> close() async {}

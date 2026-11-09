@@ -4581,4 +4581,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String deleteHistoryItemConfirm(String p1) {
     return 'Delete \"$p1\" from history?';
   }
+
+  @override
+  String get playlistTitle => 'Playlist';
+
+  @override
+  String get playlistSourceUnavailable =>
+      'The source of this playlist is unavailable';
+
+  @override
+  String get playlistEmpty => 'This playlist has no videos yet';
+
+  @override
+  String get playlistDescriptionUnavailable => 'No description';
+
+  @override
+  String playlistItemCount(String count) {
+    return '$count videos';
+  }
+
+  @override
+  String get playlistFetchAll => 'Fetch all';
+
+  @override
+  String playlistFetchAllProgress(String count) {
+    return 'Fetched $count';
+  }
+
+  @override
+  String playlistFetchAllDone(String count) {
+    return 'Fetched all $count videos';
+  }
+
+  @override
+  String playlistFetchAllPartial(String count) {
+    return 'Fetched $count videos before the fetch stopped';
+  }
 }

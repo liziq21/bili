@@ -9,6 +9,7 @@ part of 'router.dart';
 List<RouteBase> get $appRoutes => [
   $liveRouteData,
   $notFoundRouteData,
+  $playlistRouteData,
   $searchRouteData,
   $spaceRouteData,
   $videoRouteData,
@@ -60,6 +61,40 @@ mixin $NotFoundRouteData on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/404');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $playlistRouteData => GoRouteData.$route(
+  path: '/playlist/:playlistId',
+  hasOverriddenOnExit: false,
+  factory: $PlaylistRouteData._fromState,
+);
+
+mixin $PlaylistRouteData on GoRouteData {
+  static PlaylistRouteData _fromState(GoRouterState state) => PlaylistRouteData(
+    playlistId: state.pathParameters['playlistId']!,
+    source: state.uri.queryParameters['source'],
+  );
+
+  PlaylistRouteData get _self => this as PlaylistRouteData;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/playlist/${Uri.encodeComponent(_self.playlistId)}',
+    queryParams: {if (_self.source != null) 'source': _self.source},
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
