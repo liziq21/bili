@@ -29,6 +29,7 @@ This directory contains the main Flutter application (`app/`).
 ### 可扩展数据源与本地个性化
 - The application relies on third-party extensible data sources without platform login, online commenting, or platform-specific coin features.
 - Personalization features such as subscriptions, favorites, and watch history are strictly managed in local storage (Drift SQLite / SharedPreferences).
+- **产品边界（只读客户端）的完整规则见 [`docs/product-boundary.md`](../docs/product-boundary.md)**：不登录，因此不向平台写任何东西（发评论、回复、发弹幕、投币、点赞、平台侧收藏/订阅/播放列表编辑全部不做，不是「暂缓」）；只读能力（评论列表、弹幕渲染、Feed、远端播放列表内容、直播信息）不受影响。新增功能、评审工单、triage 判档前先读它。
 
 ### 全局样式访问（`$styles`）
 - Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.

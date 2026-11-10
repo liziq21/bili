@@ -1,5 +1,6 @@
 # Issue Triage — Linear 同步入口审核
 
+> prompt_version: 3（2026-11-10：新增 §3.5 产品边界门禁——入口审核先判「是否越出只读边界」，越界项不得进 `confirmed-actionable`；并明确工单标题/描述是模板产物、不是授权扩大）
 > prompt_version: 2（2026-10-16：①复用 [AI HANDOFF] 标记并加 result 字段，废除独立 [AI TRIAGE HANDOFF] 词汇；②授权 ready-for-jules 小单移 Todo 与添加 jules 标签；③补 MCP 不可用行为约定与配额核算；④统一预算口径；⑤§1/§6 的状态与标记禁令改为指向 §5 的 ready-for-jules 例外，消除初版「不移动状态」与该档授权的互相矛盾）
 > prompt_version: 1（2026-10-14 首版，实跑 session 7253746796850183061，LIZ-49）
 
@@ -13,7 +14,7 @@
 - 每轮最多审核 **3 条**，每条主动调查预算 **10 分钟**，总预算 **30 分钟**；这是工作上限，不是产出配额。到限时保存有用结论和下一步，剩余项留到下一轮。
 - 默认自主选单；若本次运行指定候选，则只处理指定范围。排程每 6 小时一次（4 次/天），同仓库串行运行。配额核算：triage 4 次/天占 Jules 免费档 15 次/滚动 24h 的 27%，与既有 Bolt/Palette/Sentinel 定时线并列消耗同一配额。提示词文件本身不会启用调度。
 - **Linear MCP 不可用时的行为约定**：MCP 连接失败、读取超时或写入权限缺失时，静默零写入并在收尾报告阻塞类型，本轮不算失败、不重试超过一次。首次上线前须由人工触发一次手动 session 验证 MCP 连通性与 commentCreate 写入权限，不把首次实跑暴露给定时任务。
-- 开始前读根 `AGENTS.md`、`CONTRIBUTING.md`，并通过项目 resources 读取最新版《AI 工单接取规范》《Backlog HITL/AFK 分类》《项目标签规范》。技术调查按需读对应层的规则。
+- 开始前读根 `AGENTS.md`、`CONTRIBUTING.md`、[`docs/product-boundary.md`](../docs/product-boundary.md)，并通过项目 resources 读取最新版《AI 工单接取规范》《Backlog HITL/AFK 分类》《项目标签规范》。技术调查按需读对应层的规则。
 - 实际权限/字段以当前 MCP schema 为准。历史分类与代码、当前工单或规则冲突时记录差异，不据旧表批量处理。当前标签分组可能限制单选，不能照旧文档给同组叠加标签。
 - 当前《AI 工单接取规范》由用户/负责人将 Backlog 移到 Todo，且实现接取使用 Draft PR 和 `[AI CLAIM]`。**本任务只做入口审核，不开 Draft PR、不自行接取实现。** 默认不使用实现 `[AI CLAIM]` 标记，不改状态、不改标签；唯一例外是 §5 的 `ready-for-jules` 档，写入口径见 §6。收尾统一用 §6 规定的 `[AI HANDOFF]` + `role: triage`，那是审核交接标记而非实现 claim。Todo 也不表示所有方案已获批准。
 
@@ -37,6 +38,14 @@
 - MCP 操作也可能显示为管理员账号写入。自己的评论、带 AI 标记的历史记录、机器人代写和 `onBehalfOf` 必须结合正文核对，不能当作新增人工批准。身份不明时保留意图并注明不确定，不将其推断成普通低质量报告。
 - 管理员的明确需求、参考链接、研究问题都必须得到实质回应。先读代码、已有工单和资料，能自己查到的不要反问；不因一句话、当前缺少能力、成本高或暂未实现就判“伪需求”或弃置。
 - **必须考虑不等于必须照搬方案。** 技术事实仍需验证。管理员要求实现但范围未定时，输出可选边界和具体决策；不得擅自将其降为“仅供参考”。只有原意确为参考/咨询且已回答时，才用 `reference-only`，并保留维护者后续取舍权。
+
+## 3.5 产品边界门禁
+
+**入口审核的第一步先判「是否越出只读边界」**。引用 [`docs/product-boundary.md`](../docs/product-boundary.md)：
+
+- 凡有一项交付物属于第 1 节的「向平台写」操作（发评论/回复、发弹幕、投币、点赞、平台侧收藏/订阅/播放列表编辑、任何需登录态的写端点），该工单**不得**进入 `confirmed-actionable`。结论直接给 `not-actionable`（已落地的只读部分单独列出可保留）或 `needs-refinement`（把越界项剥离，只保留只读/本地个性化范围）。
+- 工单标题与描述可能由模板或父单机械复述而来，**不构成对产品边界的扩大授权**。描述与边界文档冲突时以边界文档为准；判档理由里要显式引用本条与边界文档，而非只写一句「暂不支持登录态」。
+- 只读能力（评论列表、二级回复分页、弹幕渲染、动态 Feed、远端播放列表内容、直播信息与流地址）不受影响；它们是入口审核可直接确认的 `confirmed-actionable` 候选。
 
 ## 4. 有预算的审核
 
@@ -86,7 +95,7 @@
 role: triage
 agent: <真实执行者，如 Jules 或 OpenCode；不能冒充人类>
 session: <本轮唯一 ID>
-prompt_version: 2
+prompt_version: 3
 result: <主要结果；ready-for-jules 时写 confirmed-actionable + ready-for-jules>
 origin: <verified-admin / known-admin-account / unknown / other；依据>
 reviewed_input: <标题/描述版本摘要、最近实际用户评论 ID 或 none>

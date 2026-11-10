@@ -37,6 +37,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow: branch naming, pre-commit checks, and CI status checks.
 - [`.fvmrc`](.fvmrc), [`pubspec.yaml`](pubspec.yaml), [`analysis_options.yaml`](analysis_options.yaml), and [`.github/workflows/`](.github/workflows/) — executable SDK, dependency, analysis, and CI behavior; consult these when a rule mentions a command, version, or gate.
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
+- [`docs/product-boundary.md`](docs/product-boundary.md) — 产品边界：只读客户端，不登录、不向平台写。**新增功能、评审工单、triage 判档前必读**；工单标题/描述与它冲突时以它为准。
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
 
 ### Linear 规范
@@ -44,7 +45,7 @@ Before writing or modifying code in this repository, read the specification file
 Linear is the authoritative project tracking, scheduling, and progress synchronization system. Its specifications live in:
 
 - [`docs/issue-triage-validation.md`](docs/issue-triage-validation.md) — real trial record of Linear MCP reviewing GitHub Issue sync entries; documents the sync boundary, comment threading, and evidence standards.
-- [`.jules/issue-triage-prompt.md`](.jules/issue-triage-prompt.md) — the Jules agent prompt for Linear issue triage (entry review). Defines configuration, scope, identity verification, review budget, result taxonomy, write protocol, and handoff format. Versioned (current v2).
+- [`.jules/issue-triage-prompt.md`](.jules/issue-triage-prompt.md) — the Jules agent prompt for Linear issue triage (entry review). Defines configuration, scope, identity verification, review budget, result taxonomy, write protocol, and handoff format. Versioned (current v3 — §3.5 gates triage on [`docs/product-boundary.md`](docs/product-boundary.md)).
 - [`CHANGELOG.md`](CHANGELOG.md) — generated changelog; bucketing uses `c:` label attached by Linear sync (see Release section).
 - Linear team: `LIZ`; project: `bili` / `P-LIZ-2`. Sync entry issues may not yet be added to the project — **do not only query project-scoped issues**.
 - GitHub mirror issues are an intentional sync mechanism; do not propose disabling it. Close the mirror issue in the same turn after verifying the work is landed (PATCH `state=closed` + closing rationale comment).
