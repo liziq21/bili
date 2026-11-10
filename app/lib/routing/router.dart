@@ -396,7 +396,7 @@ Widget _buildLibrary(BuildContext context) {
     onVideoTap: context.defaultNavigateToMediaLibraryVideo,
     onCreatorTap: context.defaultNavigateToCreator,
     onPlayPlaylist: (sourceId, videoIds, {required startIndex}) =>
-        context.navigateToPlaylist(
+        context.navigateToPlaylistQueue(
           source: sourceId,
           videoIds: videoIds,
           startIndex: startIndex,

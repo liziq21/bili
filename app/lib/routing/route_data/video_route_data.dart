@@ -26,7 +26,7 @@ extension BuildContextVideo on BuildContext {
   ///
   /// 播放列表条目的 `originalId` 可能不是任何一条视频的有效标识（历史数据、
   /// 源侧已删除），解析失败由视频页逐条跳过并汇报，这里不做预检。
-  void navigateToPlaylist({
+  void navigateToPlaylistQueue({
     required String source,
     required List<String> videoIds,
     int startIndex = 0,
