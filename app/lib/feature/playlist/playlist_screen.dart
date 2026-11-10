@@ -284,19 +284,31 @@ class const _PlaylistHeader({
               runSpacing: $styles.insets.xxs,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                FilledButton.icon(
-                  onPressed: isFetchingAll ? null : onFetchAll,
-                  icon: isFetchingAll
-                      ? SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: $styles.colors.onAccentFill,
-                          ),
-                        )
-                      : const Icon(Icons.download_rounded),
-                  label: Text(l10n.playlistFetchAll),
+                Tooltip(
+                  message: l10n.playlistFetchAll,
+                  child: Semantics(
+                    button: true,
+                    label: l10n.playlistFetchAll,
+                    child: FilledButton.icon(
+                      onPressed: isFetchingAll
+                          ? null
+                          : () {
+                              HapticFeedback.lightImpact();
+                              onFetchAll();
+                            },
+                      icon: isFetchingAll
+                          ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: $styles.colors.onAccentFill,
+                              ),
+                            )
+                          : const Icon(Icons.download_rounded),
+                      label: Text(l10n.playlistFetchAll),
+                    ),
+                  ),
                 ),
                 if (progressText != null)
                   Text(

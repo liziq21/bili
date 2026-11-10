@@ -127,6 +127,19 @@ void main() {
     expect(find.text('第一个视频'), findsOneWidget);
     expect(find.text('列表样本视频'), findsOneWidget);
     expect(find.text(l10n.playlistFetchAll), findsOneWidget);
+
+    final tooltipFinder = find.byWidgetPredicate(
+      (w) => w is Tooltip && w.message == l10n.playlistFetchAll,
+    );
+    expect(tooltipFinder, findsOneWidget);
+
+    final semanticsFinder = find.byWidgetPredicate(
+      (w) =>
+          w is Semantics &&
+          w.properties.button == true &&
+          w.properties.label == l10n.playlistFetchAll,
+    );
+    expect(semanticsFinder, findsOneWidget);
   });
 
   testWidgets('shows the description placeholder when the playlist has none', (
