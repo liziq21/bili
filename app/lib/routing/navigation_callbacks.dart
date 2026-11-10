@@ -30,3 +30,13 @@ typedef MediaLibraryVideoNavCallback = void Function(
   String sourceId,
   String videoId,
 );
+
+/// 播放本地播放列表的回调（媒体库专用）。
+///
+/// [videoIds] 是已按播放列表顺序排好的条目，[startIndex] 是用户要求起播的
+/// 下标。解析播放地址与打开队列属于视频路由的职责，页面只声明「播这个列表」。
+typedef PlayPlaylistCallback = void Function(
+  String sourceId,
+  List<String> videoIds, {
+  required int startIndex,
+});

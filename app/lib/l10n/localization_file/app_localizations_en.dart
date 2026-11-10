@@ -4505,6 +4505,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentlyPlaying => 'Currently playing';
 
   @override
+  String get playPlaylist => 'Play all';
+
+  @override
+  String get playlistPlaybackFailed => 'Could not start this playlist';
+
+  @override
+  String playlistPlaybackPartial(int played, int total) {
+    return 'Playing $played of $total items';
+  }
+
+  @override
   String get settingsDiscovery => 'Discovery';
 
   @override
