@@ -23,6 +23,7 @@ import '../danmaku/danmaku_overlay.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
+import '../video_queue_request.dart';
 import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
 import '../player/playback_error.dart';
@@ -71,6 +72,11 @@ class const VideoPlayer({
   /// 真 [Video] 依赖平台 Texture Registry 与 libmpv OpenGL，widget 测试里
   /// 渲染会挂住 pump，故测试经此参数注入纯 Flutter 画面，只测外围交互。
   final Widget Function(MediaPlaybackController controller)? surfaceBuilder,
+
+  /// 已解析的播放队列。非空时以队列方式起播，而不是只播当前这一条。
+  ///
+  /// 解析在页面层完成（需要 repository 与失败跳过），播放层只接收结果。
+  final VideoQueueResult? queue,
 }) extends StatefulWidget {
   @override
   State<VideoPlayer> createState() => _VideoPlayerState();
@@ -209,6 +215,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             onMinimize: widget.onMinimize,
             onTapSurface: _toggleControls,
             surfaceBuilder: widget.surfaceBuilder,
+            queue: widget.queue,
           );
 
           if (widget.fullscreen) return surface;
@@ -419,6 +426,7 @@ class const _VideoSurface({
   required final VoidCallback onTapSurface,
   required final Widget Function(MediaPlaybackController controller)?
   surfaceBuilder,
+  final VideoQueueResult? queue,
 }) extends StatefulWidget {
   @override
   State<_VideoSurface> createState() => _VideoSurfaceState();
@@ -440,16 +448,36 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
-    widget.controller.open(
-      widget.stream,
-      videoId: widget.videoId,
-      title: widget.title,
-      creatorName: widget.creatorName,
-      thumbnailUrl: widget.thumbnailUrl,
-    );
+    // 有队列时只开队列：先按单条 open 再被队列覆盖会让画面白闪一次，也会
+    // 让首条进历史/进队列两次。
+    if (!_openQueueIfNeeded()) {
+      widget.controller.open(
+        widget.stream,
+        videoId: widget.videoId,
+        title: widget.title,
+        creatorName: widget.creatorName,
+        thumbnailUrl: widget.thumbnailUrl,
+      );
+    }
     _restoreSavedRate();
     _applyPreferredQuality();
     _loadGestureSettings();
+  }
+
+  /// 把已解析的播放队列交给播放层，返回是否真的打开了队列。
+  ///
+  /// 队列只开一次：后续 [didUpdateWidget] 里标题/封面等元数据变化走
+  /// `updateCurrentQueueItemMetadata`，不重新打开，否则每帧都会重建播放列表。
+  bool _openQueueIfNeeded() {
+    final queue = widget.queue;
+    if (queue == null || queue.items.isEmpty) return false;
+    final items = [
+      for (final item in queue.items)
+        PlaybackQueueItem(stream: item.stream, videoId: item.videoId),
+    ];
+    final start = queue.startIndex.clamp(0, items.length - 1).toInt();
+    unawaited(widget.controller.openQueueItems(items, index: start));
+    return true;
   }
 
   Future<void> _loadGestureSettings() async {
@@ -560,7 +588,12 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
   @override
   void didUpdateWidget(covariant _VideoSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.stream != oldWidget.stream) {
+    // 队列后带到（页面异步解析完成后才传下来）：补开一次并结束，不先按单条
+    // open。已是同一队列则不重开：openQueueItems 会清空进度与当前索引。
+    if (widget.queue != null && !identical(widget.queue, oldWidget.queue)) {
+      if (_openQueueIfNeeded()) return;
+    }
+    if (widget.stream != oldWidget.stream && widget.queue == null) {
       widget.controller.open(
         widget.stream,
         videoId: widget.videoId,

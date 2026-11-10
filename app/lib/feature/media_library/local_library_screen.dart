@@ -21,6 +21,7 @@ class const LocalLibraryScreen({
   required final Widget history,
   final MediaLibraryVideoNavCallback? onVideoTap,
   final CreatorNavCallback? onCreatorTap,
+  final PlayPlaylistCallback? onPlayPlaylist,
 }) extends StatefulWidget {
   @override
   State<LocalLibraryScreen> createState() => _LocalLibraryScreenState();
@@ -99,6 +100,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                     sourceId: _sourceId,
                     sourceName: _sourceName,
                     onVideoTap: widget.onVideoTap,
+                    onPlayPlaylist: widget.onPlayPlaylist,
                     onRetry: _retryStreams,
                     busy: _busy,
                     onCreate: _createPlaylist,
@@ -474,6 +476,7 @@ class const _PlaylistsTab({
   required final String? sourceId,
   required final String? Function(String?) sourceName,
   final MediaLibraryVideoNavCallback? onVideoTap,
+  final PlayPlaylistCallback? onPlayPlaylist,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function() onCreate,
@@ -552,6 +555,7 @@ class const _PlaylistsTab({
                 sourceName: sourceName(playlist.sourceId),
                 sourceId: playlist.sourceId,
                 onVideoTap: onVideoTap,
+                onPlayPlaylist: onPlayPlaylist,
                 onRetry: onRetry,
                 busy: busy,
                 onDelete: () => onDelete(playlist),
@@ -574,6 +578,7 @@ class const _PlaylistCard({
   required final String? sourceName,
   required final String sourceId,
   final MediaLibraryVideoNavCallback? onVideoTap,
+  final PlayPlaylistCallback? onPlayPlaylist,
   required final VoidCallback onRetry,
   required final bool busy,
   required final VoidCallback onDelete,
@@ -671,6 +676,7 @@ class const _PlaylistCard({
             playlistId: playlist.internalId,
             sourceId: sourceId,
             onVideoTap: onVideoTap,
+            onPlayPlaylist: onPlayPlaylist,
             onRetry: onRetry,
             busy: busy,
             onRemoveItem: onRemoveItem,
@@ -694,6 +700,7 @@ class const _PlaylistItemsView({
   required final int playlistId,
   required final String sourceId,
   final MediaLibraryVideoNavCallback? onVideoTap,
+  final PlayPlaylistCallback? onPlayPlaylist,
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function(LocalPlaylistItemEntity item)
@@ -738,6 +745,19 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
         _selectedItems.add(itemId);
       }
     });
+  }
+
+  /// 从第一条开始播放整个播放列表。
+  ///
+  /// 排序依据是数据库的 `position`，即用户在列表里看到的顺序；解析与打开
+  /// 队列交给路由回调，页面只交出 id 序列。
+  void _playAll(List<LocalPlaylistItemEntity> items) {
+    final callback = widget.onPlayPlaylist;
+    if (callback == null || items.isEmpty) return;
+    HapticFeedback.lightImpact();
+    callback(widget.sourceId, [
+      for (final item in items) item.originalId,
+    ], startIndex: 0);
   }
 
   Future<void> _deleteSelected() async {
@@ -879,6 +899,29 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
             }
             return Column(
               children: [
+                // 「播放全部」按播放列表的存储顺序起播，不受搜索框过滤影响：
+                // 过滤是找条目用的，截断后的列表不是用户的播放列表。
+                if (widget.onPlayPlaylist != null && !_isEditing)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        $styles.insets.sm,
+                        0,
+                        $styles.insets.sm,
+                        $styles.insets.xs,
+                      ),
+                      child: TextButton.icon(
+                        onPressed: () => _playAll(
+                          allItems
+                              .where((item) => item.sourceId == widget.sourceId)
+                              .toList(growable: false),
+                        ),
+                        icon: const Icon(Icons.play_circle_outline),
+                        label: Text(l10n.playPlaylist),
+                      ),
+                    ),
+                  ),
                 for (var index = 0; index < items.length; index++)
                   _PlaylistItemRow(
                     key: ValueKey(items[index].internalId),

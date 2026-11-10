@@ -6060,6 +6060,26 @@
   "@currentlyPlaying": {
     "description": "Accessibility label for the current playback queue item"
   },
+  "playPlaylist": "播放全部",
+  "@playPlaylist": {
+    "description": "Button that starts a local playlist from its first item"
+  },
+  "playlistPlaybackFailed": "无法开始播放此播放列表",
+  "@playlistPlaybackFailed": {
+    "description": "Error shown when no playlist entry could be resolved to a playable stream"
+  },
+  "playlistPlaybackPartial": "播放 {played}/{total} 项",
+  "@playlistPlaybackPartial": {
+    "description": "Notice shown when some playlist entries could not be resolved and were skipped",
+    "placeholders": {
+      "played": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "settingsDiscovery": "发现",
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"

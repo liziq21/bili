@@ -4,6 +4,7 @@ import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/local_library_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
+import 'package:app/routing/navigation_callbacks.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -91,10 +92,12 @@ void main() {
   LocalLibraryScreen screen({
     void Function(String sourceId, String videoId)? onVideoTap,
     void Function(String sourceId, String creatorId)? onCreatorTap,
+    PlayPlaylistCallback? onPlayPlaylist,
   }) => LocalLibraryScreen(
     history: const SizedBox.shrink(),
     onVideoTap: onVideoTap ?? (_, _) {},
     onCreatorTap: onCreatorTap ?? (_, _) {},
+    onPlayPlaylist: onPlayPlaylist,
   );
 
   Future<void> pumpLibrary(WidgetTester tester) async {
@@ -452,6 +455,88 @@ void main() {
     expect(find.text('Beta video'), findsNothing);
     expect(find.text('Gamma video'), findsNothing);
   });
+
+  testLibraryWidgets(
+    'plays the whole playlist in stored order when Play all is tapped',
+    (tester) async {
+      final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+      for (final video in const [
+        VideoModel(id: 'a', title: 'Alpha video', url: 'https://example.com/a'),
+        VideoModel(id: 'b', title: 'Beta video', url: 'https://example.com/b'),
+        VideoModel(id: 'c', title: 'Gamma video', url: 'https://example.com/c'),
+      ]) {
+        await repository.addToPlaylist(
+          playlistId: playlistId,
+          sourceId: 'bilibili',
+          video: video,
+        );
+      }
+
+      final calls = <({String sourceId, List<String> videoIds, int start})>[];
+      await tester.pumpWidget(
+        app(
+          screen(
+            onPlayPlaylist: (sourceId, videoIds, {required startIndex}) =>
+                calls.add((
+                  sourceId: sourceId,
+                  videoIds: videoIds,
+                  start: startIndex,
+                )),
+          ),
+        ),
+      );
+      await pumpLibrary(tester);
+      await openTab(tester, '播放列表');
+      expect(find.text('播放全部'), findsOneWidget);
+
+      await tester.tap(find.text('播放全部'));
+      await pumpLibrary(tester);
+
+      // 起播的是整张播放列表，而不是搜索过滤后的可见条目。
+      expect(calls, hasLength(1));
+      expect(calls.single.sourceId, 'bilibili');
+      expect(calls.single.videoIds, ['a', 'b', 'c']);
+      expect(calls.single.start, 0);
+    },
+  );
+
+  testLibraryWidgets(
+    'Play all keeps the full list while a search narrows the rows',
+    (tester) async {
+      final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+      for (final video in const [
+        VideoModel(id: 'a', title: 'Alpha video', url: 'https://example.com/a'),
+        VideoModel(id: 'b', title: 'Beta video', url: 'https://example.com/b'),
+      ]) {
+        await repository.addToPlaylist(
+          playlistId: playlistId,
+          sourceId: 'bilibili',
+          video: video,
+        );
+      }
+
+      final played = <List<String>>[];
+      await tester.pumpWidget(
+        app(
+          screen(
+            onPlayPlaylist: (_, videoIds, {required startIndex}) =>
+                played.add(videoIds),
+          ),
+        ),
+      );
+      await pumpLibrary(tester);
+      await openTab(tester, '播放列表');
+
+      await tester.enterText(find.byType(TextField), 'Alpha');
+      await pumpLibrary(tester);
+      expect(find.text('Beta video'), findsNothing);
+
+      await tester.tap(find.text('播放全部'));
+      await pumpLibrary(tester);
+
+      expect(played.single, ['a', 'b']);
+    },
+  );
 }
 
 MediaSource _bilibili() => const _FakeSource(id: 'bilibili', name: 'Bilibili');

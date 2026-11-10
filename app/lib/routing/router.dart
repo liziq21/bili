@@ -38,6 +38,7 @@ import '../feature/setting/player_settings_screen.dart';
 import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
 import '../feature/video/video_screen.dart';
+import '../feature/video/video_queue_request.dart';
 import '../feature/video/danmaku/danmaku_settings_screen.dart';
 
 part 'route_data/live_route_data.dart';
@@ -394,5 +395,11 @@ Widget _buildLibrary(BuildContext context) {
     ),
     onVideoTap: context.defaultNavigateToMediaLibraryVideo,
     onCreatorTap: context.defaultNavigateToCreator,
+    onPlayPlaylist: (sourceId, videoIds, {required startIndex}) =>
+        context.navigateToPlaylistQueue(
+          source: sourceId,
+          videoIds: videoIds,
+          startIndex: startIndex,
+        ),
   );
 }

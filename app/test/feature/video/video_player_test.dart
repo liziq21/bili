@@ -5,6 +5,7 @@ import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_player.dart';
 import 'package:app/feature/video/common_widgets/player_gesture_layer.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/feature/video/video_queue_request.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,13 +18,19 @@ void main() {
     WidgetTester tester, {
     required VideoBloc bloc,
     MediaPlaybackController? controller,
+    VideoQueueResult? queue,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: BlocProvider<VideoBloc>.value(
             value: bloc,
-            child: VideoPlayer(controller: controller),
+            child: VideoPlayer(
+              controller: controller,
+              queue: queue,
+              // 真 Video 依赖原生 Texture，widget 测试里渲染会挂住 pump。
+              surfaceBuilder: (_) => const SizedBox.expand(),
+            ),
           ),
         ),
       ),
@@ -160,6 +167,81 @@ void main() {
       // The current item stays in the queue; only the following item has a
       // remove action.
       expect(find.byIcon(Icons.remove_circle_outline), findsOneWidget);
+
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+    });
+
+    testWidgets('opens the queue from a playlist request', (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _StaticStreamRepository());
+      final queue = VideoQueueResult(
+        items: [
+          VideoQueueItem(
+            videoId: 'one',
+            stream: MediaStream(videoUrl: 'https://example.com/1.m4s'),
+          ),
+          VideoQueueItem(
+            videoId: 'two',
+            stream: MediaStream(videoUrl: 'https://example.com/2.m4s'),
+          ),
+        ],
+        requestedCount: 2,
+      );
+
+      bloc.add(const LoadMediaStream('one'));
+      await tester.pump();
+      await pumpPlayer(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        queue: queue,
+      );
+      await tester.pump();
+
+      // 队列以一次 openQueueItems 打开，而不是单条 open。
+      expect(fake.openCalls, hasLength(1));
+      expect(fake.openCalls.single, isA<Playlist>());
+      expect(controller.queueItems, hasLength(2));
+      expect(controller.queueItems.first.videoId, 'one');
+
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+    });
+
+    testWidgets('starts the queue at the requested index', (tester) async {
+      final fake = _FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _StaticStreamRepository());
+      final queue = VideoQueueResult(
+        items: [
+          VideoQueueItem(
+            videoId: 'one',
+            stream: MediaStream(videoUrl: 'https://example.com/1.m4s'),
+          ),
+          VideoQueueItem(
+            videoId: 'two',
+            stream: MediaStream(videoUrl: 'https://example.com/2.m4s'),
+          ),
+        ],
+        startIndex: 1,
+        requestedCount: 2,
+      );
+
+      bloc.add(const LoadMediaStream('two'));
+      await tester.pump();
+      await pumpPlayer(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        queue: queue,
+      );
+      await tester.pump();
+
+      final opened = fake.openCalls.single;
+      expect(opened, isA<Playlist>());
+      expect((opened as Playlist).index, 1);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
@@ -503,6 +585,18 @@ void main() {
       expect(minimized, isTrue);
     });
   });
+}
+
+/// 返回固定可播地址的仓库：让 bloc 在首次 pump 后就有 stream，便于断言
+/// 播放器按队列还是按单条打开。
+class _StaticStreamRepository() extends _NoStreamRepository {
+  @override
+  Future<Result<MediaStream, Exception>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  }) async =>
+      Result.success(MediaStream(videoUrl: 'https://example.com/$id.m4s'));
 }
 
 class _NoStreamRepository() implements VideoDetailRepository {

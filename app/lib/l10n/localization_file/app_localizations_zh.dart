@@ -4495,6 +4495,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get currentlyPlaying => '正在播放';
 
   @override
+  String get playPlaylist => '播放全部';
+
+  @override
+  String get playlistPlaybackFailed => '无法开始播放此播放列表';
+
+  @override
+  String playlistPlaybackPartial(int played, int total) {
+    return '播放 $played/$total 项';
+  }
+
+  @override
   String get settingsDiscovery => '发现';
 
   @override

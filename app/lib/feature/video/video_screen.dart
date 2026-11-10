@@ -23,10 +23,12 @@ import 'common_widgets/video_info_view.dart';
 import 'common_widgets/video_player.dart';
 import 'common_widgets/playback_queue_sheet.dart';
 import 'player/media_playback_controller.dart';
+import 'video_queue_request.dart';
 
 class const VideoScreen({
   super.key,
   final String videoId = 'demo_video',
+  final VideoQueueRequest? queue,
   final VoidCallback? onBackClick,
 }) extends StatefulWidget {
   @override
@@ -42,6 +44,9 @@ class VideoScreenState() extends State<VideoScreen> {
   Future<void>? _progressLoadFuture;
   int _restorePositionSeconds = 0;
   int _progressGeneration = 0;
+
+  /// 播放队列解析结果。仅在进入页面时带 [VideoScreen.queue] 时有值。
+  VideoQueueResult? _queueResult;
 
   /// 进度周期性保存定时器（每 10 秒）。
   Timer? _progressSaveTimer;
@@ -79,12 +84,67 @@ class VideoScreenState() extends State<VideoScreen> {
     }
   }
 
+  /// 进度初始化：有播放队列时先解析整队，否则只等这一条的进度。
+  ///
+  /// 队列解析结果是 [VideoPlayer] 实际起播的数据来源。它必须早于播放器拿到
+  /// 单条 stream，否则播放器会先按单条打开、再被队列覆盖，白闪一次。
   Future<void> _initializeProgressAsync() async {
     final preferences = _preferences;
     if (preferences != null) {
       _historySettings = await MediaHistorySettings.load(preferences);
     }
     if (_historySettings.shouldReadProgress) await _loadProgressAsync();
+    final queue = widget.queue;
+    if (queue == null) return;
+    await _resolveQueueAsync(queue);
+  }
+
+  /// 把播放队列里的每个 id 解析为可播地址。
+  ///
+  /// 逐条解析、逐条跳过：某个条目失效（源侧删除、历史脏数据）不该让整队
+  /// 打不开。全部失败时把 [VideoQueueResult] 的错误交给页面提示。
+  Future<void> _resolveQueueAsync(VideoQueueRequest queue) async {
+    final sourceId = _sourceId;
+    if (sourceId == null) return;
+    final VideoDetailRepository repository;
+    try {
+      repository = context.read<VideoDetailRepository>();
+    } on Object {
+      return;
+    }
+    final items = <VideoQueueItem>[];
+    var startIndex = 0;
+    var resolved = 0;
+    for (var index = 0; index < queue.videoIds.length; index++) {
+      final id = queue.videoIds[index];
+      final result = await repository.getMediaStream(id);
+      switch (result) {
+        case Success(:final success):
+          if (index == queue.startIndex) startIndex = resolved;
+          items.add(VideoQueueItem(videoId: id, stream: success));
+          resolved++;
+        case Error():
+          // 跳过失效条目；起播位置按「实际进入队列的条目数」折算。
+          break;
+      }
+    }
+    if (!mounted) return;
+    final error = items.isEmpty
+        ? (AppLocalizations.of(context) ?? AppLocalizationsZh())
+              .playlistPlaybackFailed
+        : null;
+    _setQueueResult(
+      VideoQueueResult(
+        items: items,
+        startIndex: startIndex,
+        requestedCount: queue.videoIds.length,
+        error: error,
+      ),
+    );
+  }
+
+  void _setQueueResult(VideoQueueResult result) {
+    setState(() => _queueResult = result);
   }
 
   /// 查 [media_history] 里这条视频的播放进度，
@@ -269,6 +329,7 @@ class VideoScreenState() extends State<VideoScreen> {
           body: _VideoContent(
             videoId: widget.videoId,
             playbackController: controller,
+            queue: _queueResult,
             onBackClick: widget.onBackClick,
           ),
         ),
@@ -300,6 +361,7 @@ class VideoScreenState() extends State<VideoScreen> {
 class const _VideoContent({
   required final String videoId,
   required final MediaPlaybackController playbackController,
+  final VideoQueueResult? queue,
   final VoidCallback? onBackClick,
 }) extends StatefulWidget {
   @override
@@ -371,6 +433,7 @@ class _VideoContentState() extends State<_VideoContent> {
       onRetry: () =>
           context.read<VideoBloc>().add(LoadMediaStream(widget.videoId)),
       onMinimize: _minimize,
+      queue: widget.queue,
     );
     final content = Column(
       children: [

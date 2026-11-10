@@ -7745,6 +7745,24 @@ abstract class AppLocalizations {
   /// **'Currently playing'**
   String get currentlyPlaying;
 
+  /// Button that starts a local playlist from its first item
+  ///
+  /// In en, this message translates to:
+  /// **'Play all'**
+  String get playPlaylist;
+
+  /// Error shown when no playlist entry could be resolved to a playable stream
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start this playlist'**
+  String get playlistPlaybackFailed;
+
+  /// Notice shown when some playlist entries could not be resolved and were skipped
+  ///
+  /// In en, this message translates to:
+  /// **'Playing {played} of {total} items'**
+  String playlistPlaybackPartial(int played, int total);
+
   /// Settings group and subpage title - home configuration
   ///
   /// In en, this message translates to:

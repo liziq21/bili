@@ -6060,6 +6060,26 @@
   "@currentlyPlaying": {
     "description": "Accessibility label for the current playback queue item"
   },
+  "playPlaylist": "Play all",
+  "@playPlaylist": {
+    "description": "Button that starts a local playlist from its first item"
+  },
+  "playlistPlaybackFailed": "Could not start this playlist",
+  "@playlistPlaybackFailed": {
+    "description": "Error shown when no playlist entry could be resolved to a playable stream"
+  },
+  "playlistPlaybackPartial": "Playing {played} of {total} items",
+  "@playlistPlaybackPartial": {
+    "description": "Notice shown when some playlist entries could not be resolved and were skipped",
+    "placeholders": {
+      "played": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "settingsDiscovery": "Discovery",
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"
