@@ -76,11 +76,41 @@ void main() {
     final expandButton = find.byKey(const ValueKey('comment-replies-c1'));
     expect(find.text('2'), findsOneWidget);
 
+    // Initial state: not expanded, has tooltip and expanded: false semantics
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.expanded == false &&
+            w.properties.button == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate((w) => w is Tooltip && w.message == '2'),
+      findsOneWidget,
+    );
+
     await tester.tap(expandButton);
     await tester.pump();
     await tester.pump();
 
     expect(find.text('Collapse replies'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.expanded == true &&
+            w.properties.button == true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Tooltip && w.message == 'Collapse replies',
+      ),
+      findsOneWidget,
+    );
     expect(
       find.textContaining('Preview reply', findRichText: true),
       findsOneWidget,
@@ -95,5 +125,14 @@ void main() {
 
     expect(find.text('2'), findsOneWidget);
     expect(find.text('Collapse replies'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Semantics &&
+            w.properties.expanded == false &&
+            w.properties.button == true,
+      ),
+      findsOneWidget,
+    );
   });
 }

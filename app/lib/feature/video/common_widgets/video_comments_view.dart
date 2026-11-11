@@ -269,34 +269,33 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
               ),
               if (hasReplies) ...[
                 const Gap(2),
-                Semantics(
-                  button: true,
-                  enabled: true,
-                  label: effectiveReplyState.isExpanded
+                () {
+                  final toggleLabel = effectiveReplyState.isExpanded
                       ? (l10n?.collapseReplies ?? 'Collapse replies')
-                      : l10n?.viewReplyCount(
-                          VideoCommentsView._formatCount(replyCount, l10n),
-                        ),
-                  child: TextButton(
-                    key: ValueKey('comment-replies-${comment.id}'),
-                    onPressed: () {
-                      context.read<VideoCommentBloc>().add(
-                        ToggleCommentReplies(comment.id),
-                      );
-                    },
-                    child: Text(
-                      effectiveReplyState.isExpanded
-                          ? (l10n?.collapseReplies ?? 'Collapse replies')
-                          : l10n?.viewReplyCount(
-                                  VideoCommentsView._formatCount(
-                                    replyCount,
-                                    l10n,
-                                  ),
-                                ) ??
-                                '$replyCount',
+                      : (l10n?.viewReplyCount(
+                              VideoCommentsView._formatCount(replyCount, l10n),
+                            ) ??
+                            '$replyCount');
+                  return Tooltip(
+                    message: toggleLabel,
+                    child: Semantics(
+                      button: true,
+                      enabled: true,
+                      expanded: effectiveReplyState.isExpanded,
+                      label: toggleLabel,
+                      child: TextButton(
+                        key: ValueKey('comment-replies-${comment.id}'),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          context.read<VideoCommentBloc>().add(
+                            ToggleCommentReplies(comment.id),
+                          );
+                        },
+                        child: Text(toggleLabel),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }(),
               ],
               if (effectiveReplyState.isExpanded)
                 _CommentReplies(
@@ -367,13 +366,17 @@ class const _CommentReplies({
                             color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            context.read<VideoCommentBloc>().add(
-                              FetchNextCommentRepliesPage(commentId),
-                            );
-                          },
-                          child: Text(l10n?.retry ?? 'Retry'),
+                        Tooltip(
+                          message: l10n?.retry ?? 'Retry',
+                          child: TextButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              context.read<VideoCommentBloc>().add(
+                                FetchNextCommentRepliesPage(commentId),
+                              );
+                            },
+                            child: Text(l10n?.retry ?? 'Retry'),
+                          ),
                         ),
                       ],
                     );
