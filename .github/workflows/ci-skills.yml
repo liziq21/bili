@@ -1,9 +1,10 @@
 # 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
 #
 # 从 code-scanning.yml 并入：该文件原本独立监听 push/PR，在同一个 commit 上
-# 产生第二个 check suite。ci.yml 那个 suite 收尾时只统计自己的 28 个 check，
-# 看不到另一 suite 的 check，汇总层于是判 failure —— 即便 30 个 check 全部
-# success。并入后所有 check 落在同一个 run 里，Actions 页不再出现红叉。
+# 另起一个 check suite。并入后 `scan-skills` 与 ci.yml 的其余 job 同属一个 run。
+#
+# 这不会消除 main run 上的红叉：实测 suite 内 check run 全为 success 时，
+# run 仍判 failure（见 ci.yml 顶部注释）。并入的价值是排查/查看时只有一行。
 #
 # job 名 `scan-skills` 保持不变，外部按名引用的地方（如 docs/postmortems）
 # 不受影响。

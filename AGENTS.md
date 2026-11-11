@@ -81,7 +81,9 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 | `automerge-for-google-labs-jules-bot.yml` | PR from Jules bot | 自动合并 |
 | `release.yml` | workflow_dispatch / tag | 发布构建 |
 
-**只有 `ci.yml` 是触发入口，其余 `ci-*.yml` 都是 `on: workflow_call` 的可复用 workflow。** 独立监听 push/PR 的 workflow 会在同一个 commit 上另起一个 check suite，而 `ci.yml` 的 suite 收尾时只统计自己的 check，汇总层看不到另一个 suite 的 check 就判 `failure`——即使所有实际 check 都是 `success`（实测 run 42955726241：28 个 job 全绿，另有 2 个 check 落在别的 suite，最终仍显示红叉）。新增门禁请加进 `ci.yml`，不要新建监听 push/PR 的顶层 workflow。
+**只有 `ci.yml` 是触发入口，其余 `ci-*.yml` 都是 `on: workflow_call` 的可复用 workflow。** 新增门禁请加进 `ci.yml`，不要新建监听 push/PR 的顶层 workflow：独立监听的 workflow 会在同一个 commit 上另起一个 check suite，Actions 页面按 suite 分行显示，排查时要跨多个 run 对照。
+
+**关于 main 上 `CI` run 显示红叉（已知未解，勿重复排查）：** 该 run 的 conclusion 自 2026-10-30 引入 `test_matrix_report` 的 20 个矩阵 job 起一直是 `failure`，而 suite 内全部 check run 都是 `completed/success`（实测 `166a458`：28/28；`2b878e7`：30/30，重跑后 60/60 亦全绿）。最后一个成功的 CI run 是 10-28 的 `40629252954`，当时仅 8 个 job。这不是 job 或 step 失败，也不是跨 suite 汇总（早期归因已被数据推翻），GitHub 侧对这类 run 的结论计算如此。`statusCheckRollup` 始终是 `SUCCESS`，ruleset 的 required check 也始终通过，**合并不受影响**。不要为此把判断改成 job 级 `if`：job 级 `if` 为假产生的 skipped job 反而会把 run 判成 failure（PR #548 实测 9 success / 2 skipped / 0 failure → run failure）。
 
 ## 发布
 
