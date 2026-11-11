@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -100,8 +101,17 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
   /// 上次读到的窗口亮度，拖动起点。
   double _brightness = 0.5;
 
+  /// 双击后的快进 / 快退提示增量，非 null 时渲染浮层。
+  Duration? _skipHint;
+
+  /// 收起提示浮层的定时器。
+  Timer? _skipHintTimer;
+
   /// 最近一次按下的指针设备类型，用于区分触摸双击与鼠标双击。
-  int _pointerCount = 0;
+  PointerDeviceKind? _lastPointerKind;
+
+  /// 当前按下的触点，用于识别双指同时按下（双指全屏）。
+  final Set<int> _activePointers = {};
 
   @override
   void initState() {
@@ -208,17 +218,58 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
     setState(() => _vertical = null);
   }
 
-  /// 双击：右半屏快进、左半屏快退。
+  /// 双击：触摸右半屏快进、左半屏快退；鼠标双击交给 [PlayerGestureLayer.onDoubleTapScreen]。
   ///
   /// 分界取画面中线，与垂直拖动的左右分区同一条线，避免同一手势里出现两套
   /// 空间约定。时长未知（尚未打开媒体）时只给提示不 seek。
   void _onDoubleTapDown(TapDownDetails details) {
-    widget.onDoubleTapScreen?.call();
+    if (_lastPointerKind == PointerDeviceKind.mouse) {
+      widget.onDoubleTapScreen?.call();
+      return;
+    }
+    if (!widget.seekEnabled) return;
+
+    final width = context.size?.width ?? 1;
+    final forward = details.localPosition.dx >= width / 2;
+    final delta = forward ? kDoubleTapSeekDelta : -kDoubleTapSeekDelta;
+    final state = widget.controller.state;
+    final duration = state.duration;
+    if (duration > Duration.zero) {
+      final targetMs = (state.position.inMilliseconds + delta.inMilliseconds)
+          .clamp(0, duration.inMilliseconds)
+          .toInt();
+      widget.controller.seek(Duration(milliseconds: targetMs));
+    }
+    HapticFeedback.mediumImpact();
+    _showSkipHint(delta);
   }
 
   /// 浮层只闪一下，不阻塞后续手势。
+  void _showSkipHint(Duration delta) {
+    _skipHintTimer?.cancel();
+    setState(() => _skipHint = delta);
+    _skipHintTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      setState(() => _skipHint = null);
+    });
+  }
+
+  /// 双指全屏：第二根手指按下即触发，不等待抬起。
+  void _onPointerDown(PointerDownEvent event) {
+    _lastPointerKind = event.kind;
+    _activePointers.add(event.pointer);
+    if (_activePointers.length != 2) return;
+    // 抬起后再按已经是新手势，清空避免第三根手指误触。
+    _activePointers.clear();
+    widget.onDoubleTapScreen?.call();
+  }
+
+  void _onPointerUp(PointerEvent event) =>
+      _activePointers.remove(event.pointer);
+
   @override
   void dispose() {
+    _skipHintTimer?.cancel();
     super.dispose();
   }
 
@@ -232,7 +283,6 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
     onVerticalDragEnd: _onVerticalDragEnd,
     onDoubleTapDown: _onDoubleTapDown,
   );
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -241,13 +291,9 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
           children: [
             Positioned.fill(
               child: Listener(
-                onPointerDown: (event) {
-                  _pointerCount++;
-                  if (_pointerCount == 2) {
-                    widget.onDoubleTapScreen?.call();
-                    _pointerCount = 0;
-                  }
-                },
+                onPointerDown: _onPointerDown,
+                onPointerUp: _onPointerUp,
+                onPointerCancel: _onPointerUp,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragStart: widget.seekEnabled
@@ -269,6 +315,7 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
                   onLongPressEnd: widget.boostEnabled
                       ? (_) => widget.boost.onLongPressEnd()
                       : null,
+                  onDoubleTapDown: _onDoubleTapDown,
                   child: widget.child,
                 ),
               ),
@@ -283,6 +330,8 @@ class _PlayerGestureLayerState() extends State<PlayerGestureLayer> {
               ),
             if (_vertical != null)
               Positioned.fill(child: _VerticalIndicator(vertical: _vertical!)),
+            if (_skipHint != null)
+              Positioned.fill(child: _SkipHint(delta: _skipHint!)),
           ],
         );
       },
@@ -401,6 +450,46 @@ class const _VerticalIndicator({required final _VerticalDrag vertical})
     if (value <= 0) return Icons.volume_off;
     if (value < 0.5) return Icons.volume_down;
     return Icons.volume_up;
+  }
+}
+
+/// 双击快进/快退浮层：显示图标与时间增量。
+class const _SkipHint({required final Duration delta}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isForward = !delta.isNegative;
+    final absDelta = delta.abs();
+    final sign = isForward ? '+' : '-';
+
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: $styles.colors.scrim.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isForward
+                  ? Icons.fast_forward_rounded
+                  : Icons.fast_rewind_rounded,
+              color: $styles.colors.onScrim,
+              size: 28,
+            ),
+            const Gap(4),
+            Text(
+              '$sign${formatPlayerTimestamp(absDelta)}',
+              style: $styles.text.bodySmallBold.copyWith(
+                color: $styles.colors.onScrim,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
