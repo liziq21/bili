@@ -1,34 +1,39 @@
-name: Changelog
-
-# main 每次合入后重跑生成器，把 CHANGELOG.md 的差异提交到 changelog 分支并开 PR。
+# 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
 #
-# 触发源是合入动作而不是定时器：变更内容只在有人合入 PR 时才变，
-# 定时轮询既慢又会重复空跑（仓库现无任何 cron）。
+# 从 changelog.yml 并入：该文件原本独立监听 push/main，在合入 commit 上另起
+# 一个 check suite，Actions 汇总层因此判 failure（详见 ci.yml 顶部注释）。
 #
-# 开 PR 而非直推：符合 LIZ-124 验收标准（自动生成、开 PR），且 ruleset
-# 23869296 允许 uhibot App token 推送功能分支。生成器排除 ci/changelog 分支
-# 产出的 PR，合入后不再触发二次生成，无自喂链。
+# `environment: Actions` 是必需的：GOLDEN_APP_PRIVATE_KEY 是 environment 级
+# secret，只有声明了该 environment 的 job 才能读到（同 rerecord-goldens.yml）。
+# 官方要求 environment 写在被调用 workflow 的 job 上，调用方不能声明。
 on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: write
-  pull-requests: write
-
-concurrency:
-  group: changelog-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
-  update:
-    # GOLDEN_APP_PRIVATE_KEY 存放在名为 Actions 的 environment 中，environment
-    # 级 secret 仅注入声明了该 environment 的 job（同 rerecord-goldens.yml）。
+  update_changelog:
+    name: update-changelog
     environment: Actions
     runs-on: ubuntu-latest
+    # 用 uhibot App token 写分支并开 PR，不依赖 GITHUB_TOKEN 的写权限。
+    # ci.yml 顶层是 contents: read，这里按需就地提权。
+    permissions:
+      contents: write
+      pull-requests: write
+    # 触发面是「仅 push 到 main」，但**不能**用 job 级 `if` 表达：
+    # job 级 `if` 为假时该 job 是 `skipped`，而 skipped 的 job 会把整个 run
+    # 的 conclusion 拉成 `failure` —— PR 上每次 run 都会变红（实测 PR #548：
+    # 11 个 job 中 8 success / 3 skipped / 0 failure，run 仍判 failure）。
+    # 因此 job 恒运行，用 step 级 `if` 在 PR 上走空步骤快速通过。
     steps:
+      - name: Skip outside main pushes
+        if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+        run: echo "Not a push to main (event=$EVENT_NAME, ref=$REF); skipping changelog."
+
       - name: Check out full history
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # 生成器要读 tag 列表和每个 tag 的提交日期，浅克隆拿不到。
@@ -37,11 +42,13 @@ jobs:
           persist-credentials: false
 
       - name: Rebuild CHANGELOG.md
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 tool/generate_changelog.py
 
       - name: Create uhibot App token
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         id: app-token
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
         with:
@@ -49,6 +56,7 @@ jobs:
           private-key: ${{ secrets.GOLDEN_APP_PRIVATE_KEY }}
 
       - name: Commit and push changelog branch + open PR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
