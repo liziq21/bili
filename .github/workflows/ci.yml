@@ -68,16 +68,19 @@ jobs:
   skills:
     uses: ./.github/workflows/ci-skills.yml
 
-  # 原本是独立的 changelog.yml（同样另起 check suite）。并入后用 job 级 `if`
-  # 收窄回原来的触发面：只有 push 到 main 才重建 CHANGELOG，PR 上跳过。
+  # 原本是独立的 changelog.yml（同样另起 check suite）。
+  #
+  # 不要加 job 级 `if`：job 级 `if` 为假时该 job 是 `skipped`，而 skipped
+  # 的 job 会把整个 run 的 conclusion 拉成 `failure`（实测 PR #548：11 个
+  # job 中 8 success / 3 skipped / 0 failure，run 仍判 failure）。「仅 push
+  # 到 main」的判定放在 ci-changelog.yml 内部用 step 级 `if` 完成。
   #
   # job 级 permissions 覆盖顶层 `contents: read`：调用链的权限只能维持或降低、
-  # 不能提升，若只在本 job 内不声明，被调用 workflow 的 `contents: write`
+  # 不能提升，若不在本 job 内声明，被调用 workflow 的 `contents: write`
   # 会被顶层 read 截断，推送 `ci/changelog` 分支必然失败。写权限只给这一个
   # job，其余 job 仍受顶层只读约束。
   changelog:
     uses: ./.github/workflows/ci-changelog.yml
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       pull-requests: write
