@@ -34,10 +34,18 @@ jobs:
   # workflow（on: workflow_call），job 定义在各自文件里。
   #
   # 并入这里的每个 workflow 都必须删掉自己的 `on: push/pull_request`：
-  # 独立触发会在同一 commit 上另起 check suite，而本 suite 收尾时只统计
-  # 自己的 check，汇总层看不到另一 suite 的 check 就会判 failure（实测
-  # run 42955726241：28 个本 suite job 全 success，另有 2 个 check 落在
-  # 其它 suite，最终 conclusion 仍是 failure）。
+  # 独立触发会在同一 commit 上另起 check suite，Actions 页面按 suite 分行显示，
+  # 排查时要跨多个 run 对照。并入后所有 job 同属一个 run。
+  #
+  # 注意：这不会消除 main run 上的红叉。实测 run 42955726241（166a458）与
+  # 43021874496（2b878e7）都是本 suite 内全部 check run `completed/success`
+  # （28/28、30/30，重跑后 60/60 亦全绿），suite 与 run 的 conclusion 仍是
+  # `failure`。该现象自 2026-10-30 引入 test_matrix_report 的 20 个矩阵 job
+  # 后开始，最后一个成功的 CI run 是 10-28 的 40629252954（当时仅 8 个 job）。
+  # 不要在 job / step 层找原因，也别为此再加 `if`：job 级 `if` 为假产生的
+  # skipped job 反而会把 run 判成 failure（PR #548 实测）。commit 级
+  # statusCheckRollup 始终是 SUCCESS，ruleset 的 required check 也始终通过，
+  # 合并不受影响。
   format:
     uses: ./.github/workflows/ci-format.yml
 
@@ -61,14 +69,13 @@ jobs:
   tools:
     uses: ./.github/workflows/ci-tools.yml
 
-  # 原本是独立的 code-scanning.yml，在同一个 commit 上另起一个 check suite。
-  # 并入后 `scan-skills` 落在本 run 内，不再让 Actions 汇总层因「看不到另一
-  # suite 的 check」而判 failure。SARIF 上传所需的 security-events: write
-  # 已在本文件顶层 permissions 中声明（调用链权限上限）。
+  # 原本是独立的 code-scanning.yml。并入后 `scan-skills` 与本 suite 的其余
+  # job 同属一个 run，Actions 页面不再追加一行独立的 suite。SARIF 上传所需的
+  # security-events: write 已在本文件顶层 permissions 中声明（调用链权限上限）。
   skills:
     uses: ./.github/workflows/ci-skills.yml
 
-  # 原本是独立的 changelog.yml（同样另起 check suite）。
+  # 原本是独立的 changelog.yml（同样在 commit 上另起一个 suite）。
   #
   # 不要加 job 级 `if`：job 级 `if` 为假时该 job 是 `skipped`，而 skipped
   # 的 job 会把整个 run 的 conclusion 拉成 `failure`（实测 PR #548：11 个

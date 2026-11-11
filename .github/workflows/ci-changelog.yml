@@ -1,11 +1,16 @@
 # 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
 #
 # 从 changelog.yml 并入：该文件原本独立监听 push/main，在合入 commit 上另起
-# 一个 check suite，Actions 汇总层因此判 failure（详见 ci.yml 顶部注释）。
+# 一个 check suite。并入后 `update-changelog` 与 ci.yml 的其余 job 同属一个 run。
 #
 # `environment: Actions` 是必需的：GOLDEN_APP_PRIVATE_KEY 是 environment 级
 # secret，只有声明了该 environment 的 job 才能读到（同 rerecord-goldens.yml）。
 # 官方要求 environment 写在被调用 workflow 的 job 上，调用方不能声明。
+#
+# 调用方还必须写 `secrets: inherit`：environment secret 不会自动穿透到可复用
+# workflow，缺失时它在被调用方静默变成空字符串且不报错（官方文档明示），
+# 直到 create-github-app-token 才抛 `privateKey option is required`
+# （实测 main run 43015095349）。
 on:
   workflow_call:
 
