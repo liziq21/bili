@@ -10,7 +10,7 @@ on:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 # 并发只在调用方（本文件）声明——被调用的可复用 workflow 绝不能自带 concurrency：
-# 在 workflow_call 上下文里 github.workflow 解析成调用方名（CI），四个子 workflow
+# 在 workflow_call 上下文里 github.workflow 解析成调用方名（CI），各子 workflow
 # 会落到同一个 group 字符串上互相 cancel，并连带把调用方 run 一起取消（实测三轮
 # 推送全部 cancelled，annotation「Canceling since a higher priority waiting request
 # for CI-refs/pull/N/merge exists」即此）。取消语义由这里的 cancel-in-progress 承担。
@@ -19,17 +19,25 @@ concurrency:
   cancel-in-progress: true
 
 # 调用方 workflow 的 permissions 是调用链的权限上限——被调用的可复用 workflow
-# 的 job 权限不能超过这里。四个被调用 workflow 的 job 各自声明了所需权限，
-# 这里取并集作为上限（security-events/actions 仅 SARIF 上传需要）。
+# 的 job 权限不能超过这里。各被调用 workflow 的 job 各自声明了所需权限，
+# 这里取并集作为上限（security-events/actions 仅 SARIF 上传需要；
+# contents/pull-requests 的 write 仅供 changelog job 用 uhibot token 推送与开 PR）。
 permissions:
   contents: read
   security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
   actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  pull-requests: read
 
 jobs:
   # 单次 push/PR 只触发这一个 workflow：一个 concurrency 组、一组 check-run，
-  # 不再是四个独立 workflow 各跑一遍。四个 job 分别调用同目录下的可复用
+  # 不再是多个独立 workflow 各跑一遍。各 job 分别调用同目录下的可复用
   # workflow（on: workflow_call），job 定义在各自文件里。
+  #
+  # 并入这里的每个 workflow 都必须删掉自己的 `on: push/pull_request`：
+  # 独立触发会在同一 commit 上另起 check suite，而本 suite 收尾时只统计
+  # 自己的 check，汇总层看不到另一 suite 的 check 就会判 failure（实测
+  # run 42955726241：28 个本 suite job 全 success，另有 2 个 check 落在
+  # 其它 suite，最终 conclusion 仍是 failure）。
   format:
     uses: ./.github/workflows/ci-format.yml
 
@@ -52,3 +60,24 @@ jobs:
 
   tools:
     uses: ./.github/workflows/ci-tools.yml
+
+  # 原本是独立的 code-scanning.yml，在同一个 commit 上另起一个 check suite。
+  # 并入后 `scan-skills` 落在本 run 内，不再让 Actions 汇总层因「看不到另一
+  # suite 的 check」而判 failure。SARIF 上传所需的 security-events: write
+  # 已在本文件顶层 permissions 中声明（调用链权限上限）。
+  skills:
+    uses: ./.github/workflows/ci-skills.yml
+
+  # 原本是独立的 changelog.yml（同样另起 check suite）。并入后用 job 级 `if`
+  # 收窄回原来的触发面：只有 push 到 main 才重建 CHANGELOG，PR 上跳过。
+  #
+  # job 级 permissions 覆盖顶层 `contents: read`：调用链的权限只能维持或降低、
+  # 不能提升，若只在本 job 内不声明，被调用 workflow 的 `contents: write`
+  # 会被顶层 read 截断，推送 `ci/changelog` 分支必然失败。写权限只给这一个
+  # job，其余 job 仍受顶层只读约束。
+  changelog:
+    uses: ./.github/workflows/ci-changelog.yml
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      pull-requests: write

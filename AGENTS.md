@@ -69,18 +69,19 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 
 | Workflow | 触发条件 | 产出 check |
 |---|---|---|
-| `ci-format.yml` | push / PR | Check Formatting |
-| `ci-test.yml` | push / PR | Run Flutter Test (矩阵) |
-| `ci-build.yml` | push / PR | Build Flutter App (android) (矩阵) |
-| `ci-tools.yml` | push / PR | Tool Tests |
+| `ci.yml` | push / PR | 唯一入口：调用下面各 `ci-*.yml` 可复用 workflow |
+| `ci-format.yml` | 由 `ci.yml` 调用 | Check Formatting |
+| `ci-test.yml` | 由 `ci.yml` 调用 | Run Flutter Test (矩阵) |
+| `ci-build.yml` | 由 `ci.yml` 调用 | Build Flutter App (android) (矩阵) |
+| `ci-tools.yml` | 由 `ci.yml` 调用 | Tool Tests |
+| `ci-skills.yml` | 由 `ci.yml` 调用 | scan-skills（SARIF 上传到 Code Scanning） |
+| `ci-changelog.yml` | 由 `ci.yml` 调用，仅 push to main | update-changelog（推送 `ci/changelog` 分支并开 PR） |
 | `rerecord-goldens.yml` | workflow_dispatch | 生成 golden 基线 PR |
-| `changelog.yml` | push to main | 直接推送 CHANGELOG.md 到 main |
-| `code-scanning.yml` | push / PR | Code Scanning |
-| `skills_lint.yml` | push / PR | Skills Lint |
-| `scan-skills.yml` | push / PR | Skills Code Scanning |
 | `dispatch-coderabbit-to-jules.yml` | PR opened / synchronize | 派单到 Jules |
 | `automerge-for-google-labs-jules-bot.yml` | PR from Jules bot | 自动合并 |
 | `release.yml` | workflow_dispatch / tag | 发布构建 |
+
+**只有 `ci.yml` 是触发入口，其余 `ci-*.yml` 都是 `on: workflow_call` 的可复用 workflow。** 独立监听 push/PR 的 workflow 会在同一个 commit 上另起一个 check suite，而 `ci.yml` 的 suite 收尾时只统计自己的 check，汇总层看不到另一个 suite 的 check 就判 `failure`——即使所有实际 check 都是 `success`（实测 run 42955726241：28 个 job 全绿，另有 2 个 check 落在别的 suite，最终仍显示红叉）。新增门禁请加进 `ci.yml`，不要新建监听 push/PR 的顶层 workflow。
 
 ## 发布
 
@@ -89,7 +90,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 - **Release signing is mandatory.** `app/android/app/build.gradle.kts` throws `GradleException` when a release build has no `key.properties`, so a release build can never silently fall back to the debug keystore. `BILI_ALLOW_UNSIGNED_RELEASE=1` is the single opt-out; CI sets it to verify that the release variant compiles, and artifacts built that way are not publishable.
 - **Status check names carry a version suffix for matrix jobs.** `ci-test.yml` and `ci-build.yml` emit `Run Flutter Test (3.47.9, 3.13.7)` and `Build Flutter App (android) (3.47.9, 3.13.7)` from the root `pubspec.yaml` `environment` matrix; `Check Formatting` is an independent, single-version job. The GitHub ruleset decides which emitted checks are required. **Upgrading Flutter or Dart requires updating the ruleset's required names in the same change**, or every PR can block on a missing check.
 
-- **`CHANGELOG.md` is generated, never hand-edited.** `tool/generate_changelog.py` rebuilds it from git tags plus the GitHub pulls API on every run, so the file is derived state and manual edits do not survive. `.github/workflows/changelog.yml` runs the generator after every push to `main` and pushes the changelog update directly to `main`（2026-10-28 从「开 PR 到 `ci/changelog` 分支」改为直推；changelog 是生成器产出的派生文件，开 PR 会走全套门禁，main 上任何 required check 变红会让 changelog 永久停更）。 Each tag becomes one `## vX.Y.Z - <tag date>` section holding the pull requests merged after the previous tag and no later than this one; the range newer than the newest tag lands under `## [Unreleased]`; the oldest tag absorbs everything merged before it so nothing is dropped. Section headings come from the tag, which means cutting a release needs no manual edit. Bucketing is by `c:` label when the Linear sync attached one, otherwise by the conventional-commit or agent-emoji prefix in the pull request title, with `Other` as the fallback rather than dropping the entry. When the bucketing looks wrong, change the generator, not the file. `generate_changelog.py` 排除来自 `ci/changelog` 分支的 PR（`GENERATED_BRANCH`）——历史 `ci/changelog` PR 仍在仓库中，不排除会让每个已合 changelog PR 产生下一个。该排除按分支名匹配，不按 `ci-generated` label 匹配——golden 基线 workflow 也用同一 label，重录基线是真实历史。 Its unit tests run in the `Tool Tests` job: `python3 -m unittest discover -s tool -p 'test_*.py'`.
+- **`CHANGELOG.md` is generated, never hand-edited.** `tool/generate_changelog.py` rebuilds it from git tags plus the GitHub pulls API on every run, so the file is derived state and manual edits do not survive. `.github/workflows/ci-changelog.yml`（由 `ci.yml` 在 push 到 `main` 时调用）运行生成器，把差异提交到 `ci/changelog` 分支并开 PR，用 uhibot App token 推送。**这是当前实际行为**：`4758c4c` 曾改为直推 main，`4281fe2` 又改回开 PR 并沿用至今——旧版本文档曾写成「已改为直推」，与配置不符，以本段为准。 Each tag becomes one `## vX.Y.Z - <tag date>` section holding the pull requests merged after the previous tag and no later than this one; the range newer than the newest tag lands under `## [Unreleased]`; the oldest tag absorbs everything merged before it so nothing is dropped. Section headings come from the tag, which means cutting a release needs no manual edit. Bucketing is by `c:` label when the Linear sync attached one, otherwise by the conventional-commit or agent-emoji prefix in the pull request title, with `Other` as the fallback rather than dropping the entry. When the bucketing looks wrong, change the generator, not the file. `generate_changelog.py` 排除来自 `ci/changelog` 分支的 PR（`GENERATED_BRANCH`）——历史 `ci/changelog` PR 仍在仓库中，不排除会让每个已合 changelog PR 产生下一个。该排除按分支名匹配，不按 `ci-generated` label 匹配——golden 基线 workflow 也用同一 label，重录基线是真实历史。 Its unit tests run in the `Tool Tests` job: `python3 -m unittest discover -s tool -p 'test_*.py'`.
 
 For architectural walkthroughs — not prescriptive rules, but context on why boundaries fall where they do:
 - [`docs/architecture-learning-journey.md`](docs/architecture-learning-journey.md).

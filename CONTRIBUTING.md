@@ -66,7 +66,9 @@ dart run tool/test_local.dart --require-flutter
    | `Check Formatting` | `ci-format.yml`，使用 `.fvmrc` 的单一 SDK |
    | `Run Flutter Test (…)` | `ci-test.yml`，后缀来自 pubspec 矩阵 |
    | `Build Flutter App (android) (…)` | `ci-build.yml`，后缀来自 pubspec 矩阵 |
-   | Skills Code Scanning 的 `scan-skills` job | [`code-scanning.yml`](.github/workflows/code-scanning.yml) |
+   | `scan-skills` | [`ci-skills.yml`](.github/workflows/ci-skills.yml)，结果上传 Code Scanning |
+
+   以上都由 [`ci.yml`](.github/workflows/ci.yml) 作为唯一入口调用，落在同一个 check suite 内。
 
    哪些检查必需、适用哪些分支、谁能 bypass，必须查看 GitHub 当前 ruleset 和 PR Checks；仅看 workflow 或本文不能证明权限。升级 SDK 的同步要求见根 [Release](AGENTS.md#release) 与 [SDK 版本](AGENTS.md#sdk-版本)。
 
