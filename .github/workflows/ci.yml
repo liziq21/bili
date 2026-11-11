@@ -79,8 +79,15 @@ jobs:
   # 不能提升，若不在本 job 内声明，被调用 workflow 的 `contents: write`
   # 会被顶层 read 截断，推送 `ci/changelog` 分支必然失败。写权限只给这一个
   # job，其余 job 仍受顶层只读约束。
+  #
+  # `secrets: inherit` 是必需的：改成可复用 workflow 后，调用方不显式传递时
+  # environment secret 会在被调用方静默解析成空字符串且不报错（官方文档明示）。
+  # 缺了它有实测后果——main run 43015095349 在 create-github-app-token 处报
+  # `privateKey option is required`。原 changelog.yml 作为独立 workflow 时
+  # 不需要这一步。
   changelog:
     uses: ./.github/workflows/ci-changelog.yml
     permissions:
       contents: write
       pull-requests: write
+    secrets: inherit
