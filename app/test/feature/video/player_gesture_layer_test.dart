@@ -305,33 +305,51 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('touch double tap toggles fullscreen', (tester) async {
-      var fullscreenToggles = 0;
-      await pumpLayer(tester, onDoubleTapScreen: () => fullscreenToggles++);
+    testWidgets('touch double tap right half seeks forward', (tester) async {
+      await pumpLayer(tester, onDoubleTapScreen: () => {});
 
+      // 右半屏 x=150（中线 x=100），触摸双击应快进 10s。
       await tester.tapAt(const Offset(150, 50));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(const Offset(150, 50));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(fullscreenToggles, 1);
-      expect(fake.seekCalls, isEmpty);
+      // 起点 30s + 10s = 40s
+      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
+      // 浮层显示 +10s
+      expect(find.text('+00:10'), findsOneWidget);
     });
-    testWidgets('two-finger tap toggles fullscreen', (tester) async {
-      var fullscreenToggles = 0;
-      await pumpLayer(tester, onDoubleTapScreen: () => fullscreenToggles++);
 
-      final first = TestPointer(1, PointerDeviceKind.touch);
-      final second = TestPointer(2, PointerDeviceKind.touch);
-      tester.binding.handlePointerEvent(first.down(const Offset(60, 50)));
-      tester.binding.handlePointerEvent(second.down(const Offset(140, 50)));
-      tester.binding.handlePointerEvent(first.up());
-      tester.binding.handlePointerEvent(second.up());
-      await tester.pump();
+    testWidgets('touch double tap left half seeks backward', (tester) async {
+      await pumpLayer(tester, onDoubleTapScreen: () => {});
 
-      expect(fullscreenToggles, 1);
-      expect(fake.seekCalls, isEmpty);
+      // 左半屏 x=50（中线 x=100），触摸双击应快退 10s。
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // 起点 30s - 10s = 20s
+      expect(fake.seekCalls, contains(const Duration(seconds: 20)));
+      // 浮层显示 -10s
+      expect(find.text('-00:10'), findsOneWidget);
     });
+
+    testWidgets('touch double tap on the midline goes to right half', (
+      tester,
+    ) async {
+      await pumpLayer(tester, onDoubleTapScreen: () => {});
+
+      // 中线 x=100 归属右半屏（>= width/2），应快进 10s。
+      await tester.tapAt(const Offset(100, 50));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(const Offset(100, 50));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(fake.seekCalls, contains(const Duration(seconds: 40)));
+      expect(find.text('+00:10'), findsOneWidget);
+    });
+
     testWidgets(
       'mouse double tap goes to the screen callback instead of seeking',
       (tester) async {
@@ -350,6 +368,24 @@ void main() {
         expect(fake.seekCalls, isEmpty);
       },
     );
+
+    testWidgets('two-finger tap toggles fullscreen', (tester) async {
+      var fullscreenToggles = 0;
+      await pumpLayer(tester, onDoubleTapScreen: () => fullscreenToggles++);
+
+      final first = TestPointer(1, PointerDeviceKind.touch);
+      final second = TestPointer(2, PointerDeviceKind.touch);
+      tester.binding.handlePointerEvent(first.down(const Offset(60, 50)));
+      tester.binding.handlePointerEvent(second.down(const Offset(140, 50)));
+      tester.binding.handlePointerEvent(first.up());
+      tester.binding.handlePointerEvent(second.up());
+      await tester.pump();
+      // 双击识别器留有 50ms countdown timer，需推进过去避免 pending timer 泄漏。
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(fullscreenToggles, 1);
+      expect(fake.seekCalls, isEmpty);
+    });
     testWidgets('long press boosts the rate and releasing restores', (
       tester,
     ) async {
