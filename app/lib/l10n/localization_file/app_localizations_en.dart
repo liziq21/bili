@@ -4567,6 +4567,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveViewers => 'watching';
 
   @override
+  String get liveRoomEnded => 'Stream ended';
+
+  @override
   String get searchHistory => 'Search history';
 
   @override

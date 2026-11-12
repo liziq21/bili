@@ -7865,6 +7865,12 @@ abstract class AppLocalizations {
   /// **'watching'**
   String get liveViewers;
 
+  /// LIZ-113 live room badge when the anchor is no longer live
+  ///
+  /// In en, this message translates to:
+  /// **'Stream ended'**
+  String get liveRoomEnded;
+
   /// Header for search history section in suggestions
   ///
   /// In en, this message translates to:

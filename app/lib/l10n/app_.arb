@@ -6148,6 +6148,10 @@
   "@liveViewers": {
     "description": "LIZ-84 live room detail and stream"
   },
+  "liveRoomEnded": "Stream ended",
+  "@liveRoomEnded": {
+    "description": "LIZ-113 live room badge when the anchor is no longer live"
+  },
   "recentSearches": "Recent searches",
   "@recentSearches": {
     "description": "Header for recent search history list"

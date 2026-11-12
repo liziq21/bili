@@ -4557,6 +4557,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get liveViewers => '观看';
 
   @override
+  String get liveRoomEnded => '直播已结束';
+
+  @override
   String get searchHistory => '搜索历史';
 
   @override

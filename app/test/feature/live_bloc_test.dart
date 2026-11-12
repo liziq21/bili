@@ -7,6 +7,7 @@ import 'package:app/feature/live/bloc/live_bloc.dart';
 
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:model/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -19,6 +20,12 @@ class FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
 
   /// 最近一次 getLiveRoomStream 收到的 preferQn。
   int? lastPreferQn;
+
+  /// getLiveRoomDetail 被调用的次数，用于验证后台刷新是否真的发生。
+  int detailCalls = 0;
+
+  /// getLiveRoomDetail 的返回值，测试可改（用于模拟刷新失败）。
+  Result<LiveRoomDetail, Exception> Function(int roomId)? detailHandler;
 
   /// getLiveRoomStream 的返回值，测试可改。
   Result<MediaStream, Exception> streamResult = Result.success(
@@ -33,6 +40,9 @@ class FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
   Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(
     int roomId,
   ) async {
+    detailCalls++;
+    final handler = detailHandler;
+    if (handler != null) return handler(roomId);
     return Result.success(
       LiveRoomDetail(
         roomId: roomId,
@@ -159,5 +169,103 @@ void main() {
     expect(bloc.state.mediaStream, oldStream);
     expect(bloc.state.streamError, isNull);
     expect(bloc.state.isSwitchingQuality, isFalse);
+  });
+
+  group('LiveBloc room detail refresh', () {
+    // 刷新用 Timer 驱动，而 testWidgets 的 fake-async zone 在测试结束时
+    // 会校验「没有待处理的 Timer」——周期 Timer 只要没被 close 取消就无法
+    // 通过。这里用纯 fake_async zone，可以随意推进时钟，且不要求取消。
+    LiveBloc createBloc(
+      FakeLiveRoomDataSource dataSource, {
+      Duration? interval = const Duration(seconds: 5),
+    }) {
+      final bloc = LiveBloc(
+        repository: AppLiveRoomRepository(dataSource),
+        roomDetailRefreshInterval: interval,
+      );
+      addTearDown(bloc.close);
+      return bloc;
+    }
+
+    void addAndFlush(FakeAsync async, LiveBloc bloc, LiveEvent event) {
+      bloc.add(event);
+      async.flushMicrotasks();
+    }
+
+    test('refreshes the room detail periodically after the first load', () {
+      fakeAsync((async) {
+        final dataSource = FakeLiveRoomDataSource();
+        dataSource.detailHandler = (roomId) => Result.success(
+          LiveRoomDetail(
+            roomId: roomId,
+            title: 'Title',
+            anchorName: 'Anchor',
+            online: dataSource.detailCalls * 100,
+            isLive: true,
+          ),
+        );
+        final bloc = createBloc(dataSource);
+
+        addAndFlush(async, bloc, const LoadLiveRoomDetail(21144080));
+        expect(bloc.state.roomDetail?.online, 100);
+
+        async.elapse(const Duration(seconds: 5));
+
+        expect(dataSource.detailCalls, 2);
+        expect(bloc.state.roomDetail?.online, 200);
+        expect(bloc.state.roomError, isNull);
+
+        async.elapse(const Duration(seconds: 5));
+        expect(dataSource.detailCalls, 3);
+        expect(bloc.state.roomDetail?.online, 300);
+      });
+    });
+
+    test('a failed refresh keeps the last detail and no error state', () {
+      fakeAsync((async) {
+        final dataSource = FakeLiveRoomDataSource();
+        final bloc = createBloc(dataSource);
+
+        addAndFlush(async, bloc, const LoadLiveRoomDetail(21144080));
+        final loaded = bloc.state.roomDetail;
+        expect(loaded?.online, 100);
+
+        dataSource.detailHandler = (_) =>
+            Result.error(Exception('rate limited'));
+        async.elapse(const Duration(seconds: 5));
+
+        expect(dataSource.detailCalls, 2, reason: 'the refresh must have run');
+        expect(bloc.state.roomDetail, same(loaded));
+        expect(bloc.state.roomError, isNull);
+        expect(bloc.state.isLoading, isFalse);
+      });
+    });
+
+    test('a failed first load does not start the refresh timer', () {
+      fakeAsync((async) {
+        final dataSource = FakeLiveRoomDataSource();
+        dataSource.detailHandler = (_) => Result.error(Exception('offline'));
+        final bloc = createBloc(dataSource);
+
+        addAndFlush(async, bloc, const LoadLiveRoomDetail(21144080));
+        expect(bloc.state.roomError, isNotNull);
+
+        async.elapse(const Duration(minutes: 5));
+
+        expect(dataSource.detailCalls, 1);
+      });
+    });
+
+    test('interval null disables the refresh', () {
+      fakeAsync((async) {
+        final dataSource = FakeLiveRoomDataSource();
+        final bloc = createBloc(dataSource, interval: null);
+
+        addAndFlush(async, bloc, const LoadLiveRoomDetail(21144080));
+        async.elapse(const Duration(minutes: 5));
+
+        expect(dataSource.detailCalls, 1);
+      });
+    });
   });
 }

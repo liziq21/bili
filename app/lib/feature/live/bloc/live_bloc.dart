@@ -16,14 +16,37 @@ part 'live_state.dart';
 class LiveBloc({
   required final AppLiveRoomRepository _repository,
   final PreferencesDataSource? _preferences,
+
+  /// 直播间详情（在线人数、标题）的后台刷新间隔。
+  ///
+  /// null 关闭刷新；测试可注入短间隔，默认 [defaultRoomDetailRefreshInterval]。
+  final Duration? roomDetailRefreshInterval = defaultRoomDetailRefreshInterval,
 }) extends Bloc<LiveEvent, LiveState> {
   this : super(const LiveState()) {
     on<LoadLiveRoomDetail>(_onLoadLiveRoomDetail);
+    on<RefreshLiveRoomDetail>(_onRefreshLiveRoomDetail);
     on<LoadLiveStream>(_onLoadLiveStream);
     on<SwitchLiveQuality>(_onSwitchLiveQuality);
   }
 
+  /// 在线人数是分钟级的展示信息，30 秒足够跟上变化，又不会把
+  /// roomInfo 端点刷成负担。
+  static const defaultRoomDetailRefreshInterval = Duration(seconds: 30);
+
   final _log = Logger('LiveBloc');
+  Timer? _roomDetailRefreshTimer;
+
+  /// 首次加载之后启动定时刷新；关闭刷新或首次加载失败时不起定时器
+  /// （失败态由用户点重试，不自动重试）。
+  void _startRoomDetailRefresh(int roomId) {
+    _roomDetailRefreshTimer?.cancel();
+    final interval = roomDetailRefreshInterval;
+    if (interval == null) return;
+    _roomDetailRefreshTimer = Timer.periodic(
+      interval,
+      (_) => add(RefreshLiveRoomDetail(roomId)),
+    );
+  }
 
   Future<void> _onLoadLiveRoomDetail(
     LoadLiveRoomDetail event,
@@ -36,10 +59,33 @@ class LiveBloc({
     switch (result) {
       case Success(:final success):
         emit(state.copyWith(isLoading: false, roomDetail: success));
+        _startRoomDetailRefresh(event.roomId);
       case Error(:final error):
         _log.warning('Failed to load live room detail', error);
+        _roomDetailRefreshTimer?.cancel();
         emit(state.copyWith(isLoading: false, roomError: error.toString()));
     }
+  }
+
+  /// 后台刷新：成功才替换详情；失败保留旧值，不进入错误态、不改加载态。
+  Future<void> _onRefreshLiveRoomDetail(
+    RefreshLiveRoomDetail event,
+    Emitter<LiveState> emit,
+  ) async {
+    final result = await _repository.getLiveRoomDetail(event.roomId);
+    switch (result) {
+      case Success(:final success):
+        emit(state.copyWith(roomDetail: success));
+      case Error(:final error):
+        _log.fine('Failed to refresh live room detail', error);
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _roomDetailRefreshTimer?.cancel();
+    _roomDetailRefreshTimer = null;
+    return super.close();
   }
 
   Future<void> _onLoadLiveStream(
