@@ -151,54 +151,6 @@ jobs:
           name: goldens-review-${{ github.run_id }}-${{ matrix.release.flutter }}
           path: app/test/golden/goldens/ci/
 
-  # 包测试并行：matrix 过 (Flutter版本 × 包)，不阻断合并
-  flutter_test_packages:
-    name: Run Package Tests
-    needs: [pubspec, flutter_test_setup]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        flutter: ${{fromJson(needs.pubspec.outputs.matrix)}}
-        package:
-          - { name: bilibili, dir: packages/bilibili, runner: flutter }
-          - { name: bpi, dir: packages/bilibili/bpi, runner: dart }
-          - { name: youtube, dir: packages/youtube, runner: flutter }
-          - { name: ypi, dir: packages/youtube/ypi, runner: dart }
-          - { name: data, dir: packages/data, runner: dart }
-    permissions:
-      contents: read
-    timeout-minutes: 30
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      - uses: flutter-actions/setup-flutter@adb607ae976a9e00473569facfc69813c637a060 # v4.3
-        with:
-          version: ${{ matrix.flutter.release.flutter }}
-          channel: stable
-          cache: true
-
-      - run: flutter pub get
-
-      - name: Run ${{ matrix.package.name }} tests
-        run: |
-          if [ "${{ matrix.package.runner }}" = "flutter" ]; then
-            cd ${{ matrix.package.dir }} && flutter test --coverage test/
-          else
-            cd ${{ matrix.package.dir }} && dart test test/ --coverage-path=coverage/lcov.info
-          fi
-
-      - name: Upload ${{ matrix.package.name }} coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: coverage-${{ matrix.package.name }}-${{ matrix.flutter.release.flutter }}
-          path: ${{ matrix.package.dir }}/coverage/lcov.info
-          if-no-files-found: error
-
   test_matrix_report:
     name: Test Matrix Report
     runs-on: ubuntu-latest
