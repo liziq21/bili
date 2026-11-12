@@ -68,6 +68,14 @@ so hand edits do not survive; change the generator instead.
 - feat(home): home config editor UI (LIZ-65) (#495)
 - feat(live): 直播页播放接入（房间信息头 + media_kit 直播流） (#501)
 - feat: symbol-level repo map for recall (LIZ-125) (#502)
+- feat(live): 直播弹幕浮层与弹幕参数配置 (LIZ-116) (#507)
+- feat: LIZ-100 外观设置（主题切换 + 字体缩放 + 护眼占位） (#523)
+- feat: support custom sleep timer duration (#527)
+- feat: support custom sleep timer duration (#526)
+- feat: add search history page and merge suggestion words (LIZ-107) (#538)
+- feat: Remote playlist detail page + full fetch entry (LIZ-77) (#541)
+- feat: add Play All queue playback for local playlists (#544)
+- feat(live): refresh live room info while watching (LIZ-113) (#552)
 
 ### Fixed
 - Fix MainActivity Kotlin compilation errors in CI build (#9)
@@ -134,6 +142,12 @@ so hand edits do not survive; change the generator instead.
 - fix(video): complete quality selection (#423) (#478)
 - feat(ci): add coverage threshold gate with branch coverage (LIZ-120) (#494)
 - 🛡️ Sentinel: Sanitize Control Characters in YouTube Service Parameters (#496)
+- fix: LIZ-118 home_bloc_test flake root cause (#515)
+- 🛡️ Sentinel: Enforce HTTPS URL normalization and validate room IDs in Bilibili live room data source (#517)
+- 🛡️ Sentinel: Enforce release mode guard for DebugOverlay and HttpLogClient (#524)
+- 🛡️ Sentinel: Validate room ID in live danmaku stream (#534)
+- fix(player): restore touch double-tap seek and two-finger fullscreen (LIZ-92) (#547)
+- fix(ci): pass secrets to the reusable changelog workflow (#549)
 
 ### Changed
 - refactor: update environment and apply Dart 3.13 syntax (#8)
@@ -224,6 +238,15 @@ so hand edits do not survive; change the generator instead.
 - 🎨 Palette: Add accessible semantics and tooltip to video chapter items (#491)
 - refactor: migrate custom Result to multiple_result 5.3.0 (#500)
 - 🎨 Palette: Enhance PlayerSettingsScreen option pickers accessibility and tactile feedback (#497)
+- 🎨 Palette: Improve live player overlay controls accessibility and tactile feedback (#514)
+- 🎨 Palette: improve home config editor accessibility (#520)
+- 🎨 Palette: improve live danmaku settings accessibility and tactile feedback (#518)
+- 🎨 Palette: Add tooltip and haptic feedback to SearchResultScreen back button (#525)
+- 🎨 Palette: Improve LibrarySettingsScreen accessibility semantics, tooltips, and tests (#535)
+- 🎨 Palette: Improve DanmakuSettingsScreen slider accessibility semantics and haptic feedback (#532)
+- 🎨 Palette: Add semanticFormatterCallback to VideoPlayerPlaceholder slider (#536)
+- 🎨 Palette: add tooltip, semantics, and haptic feedback to playlist fetch-all button (#542)
+- 🎨 Palette: Improve video comment reply toggle accessibility and tactile feedback (#546)
 
 ### Documentation
 - docs: Enrich Primary Constructors documentation in AGENTS.md (#13)
@@ -263,6 +286,11 @@ so hand edits do not survive; change the generator instead.
 - docs(github): add issue label, backlog classification, and AI work acceptance specs (#403)
 - docs(agents): fix P0 stale facts in AGENTS.md (#489)
 - docs: AGENTS.md 批次 2+3——结构性补全、精简重复、中英统一 (#490)
+- LIZ-52: 页面间导航规范调研 (#505)
+- docs(bpi): LIZ-85 文档护栏同步 - 直播弹幕 WS 端点 (#533)
+- docs: correct the Termux flutter_tester workaround in AGENTS.md (#539)
+- docs: codify read-only client boundary in AGENTS and triage prompt (#543)
+- docs(ci): record the real cause of the red CI badge on main (#550)
 
 ### Tests
 - test(bilibili): update bpi real API fixtures and tests (#19)
@@ -281,6 +309,9 @@ so hand edits do not survive; change the generator instead.
 - test(bpi): fixture parse closures in doc_guardrail_test (LIZ-117) (#492)
 - test: add HomeScreen golden test (LIZ-88) (#498)
 - test(golden): re-record CI baselines from CI (#499)
+- test: pumpAndSettle -> pump 清理（LIZ-121，保守策略） (#504)
+- test: LIZ-123 测试覆盖结构分类矩阵 (#510)
+- test: classify live_screen_test in test matrix (#516)
 
 ### Maintenance
 - ci: comment out iOS build job in CI workflow (#5)
@@ -316,6 +347,12 @@ so hand edits do not survive; change the generator instead.
 - ci: run required checks for changelog PR to enable auto-merge (#409)
 - ci(changelog): fix auto-merge when updating existing PR (#419)
 - ci: add PR author check to dispatch-coderabbit-to-jules workflow (#482)
+- ci: changelog workflow creates PR instead of direct push (LIZ-124) (#503)
+- ci: optimize CI with concurrency, parallel test matrix & package tests (#529)
+- ci: phase 2 optimizations - golden hint, build_runner cache, Gradle config cache, APK size, DCM (#531)
+- chore: clear all static analysis issues across app and packages (#537)
+- ci: route skills scan and changelog through ci.yml (single check suite) (#548)
+- ci: remove dead flutter_test_packages job (never ran) (#551)
 
 ### Other
 - Split AGENTS.md into nested AGENTS.md files (#3)
@@ -330,3 +367,9 @@ so hand edits do not survive; change the generator instead.
 - Issue Triage: Review LIZ-135, LIZ-134, and LIZ-133 (#481)
 - feat/playback-queue-ui (#486)
 - feat/issue-422-playback-errors (#471)
+- LIZ-75: bpi 播放列表内容端点 + fixture (#519)
+- LIZ-70: bpi 频道内容端点：用户投稿列表 + 分页 + fixture (#509)
+- LIZ-28: 播放队列 UI + bloc 集成 (#522)
+- LIZ-83: 直播清晰度切换 (#508)
+- LIZ-79: 动态 Feed 数据层（端点 + 条目表 + 增量落库） (#521)
+- LIZ-102: 本地库设置项（历史/续播/收藏/搜索历史） (#528)
