@@ -78,6 +78,10 @@ dev_dependencies:
   # app/test/flutter_test_config.dart imports it directly to enable leak
   # tracking. Version constraint matches the one flutter_test pins.
   leak_tracker_flutter_testing: ^3.0.10
+  # Transitive dependency of flutter_test, declared here because
+  # app/test/feature/live_bloc_test.dart drives periodic timers in a
+  # fake-async zone. Keep the constraint in step with flutter_test's pin.
+  fake_async: ^1.3.3
   network_image_mock: ^2.1.1
   path_provider_platform_interface: ^2.1.3
   # G1 门禁（app/test/design/hardcoded_color_test.dart）用 AST 扫描 app/lib，

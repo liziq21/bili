@@ -180,7 +180,8 @@ class _LiveScreenState() extends State<LiveScreen> {
                             children: [
                               Text(detail.anchorName, style: $styles.text.body),
                               const Gap(8),
-                              if (detail.isLive) _LiveBadge(),
+                              // 后台刷新后主播可能已下播，徽标随详情切换。
+                              _LiveBadge(isLive: detail.isLive),
                             ],
                           ),
                           const Gap(8),
@@ -217,8 +218,8 @@ class _LiveScreenState() extends State<LiveScreen> {
   }
 }
 
-/// 直播状态徽章：红色圆点 + 「直播中」。
-class const _LiveBadge() extends StatelessWidget {
+/// 直播状态徽标：在播显示「直播中」，刷新到已下播后显示「直播已结束」。
+class const _LiveBadge({required final bool isLive}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
@@ -236,13 +237,18 @@ class const _LiveBadge() extends StatelessWidget {
             height: 6,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: $styles.colors.accentFill,
+                color: isLive
+                    ? $styles.colors.accentFill
+                    : $styles.colors.onSurfaceVariant,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
           ),
           const Gap(4),
-          Text(l10n.liveNow, style: $styles.text.bodySmall),
+          Text(
+            isLive ? l10n.liveNow : l10n.liveRoomEnded,
+            style: $styles.text.bodySmall,
+          ),
         ],
       ),
     );
