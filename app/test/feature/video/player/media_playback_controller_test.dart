@@ -264,6 +264,29 @@ void main() {
       },
     );
 
+    test(
+      'a single-file stream opens the raw address with its headers',
+      () async {
+        await controller.open(
+          MediaStream(
+            videoUrl: 'https://live.example.com/room/index.m3u8',
+            headers: {'Referer': 'https://live.bilibili.com'},
+          ),
+        );
+
+        expect(fake.openedUris, hasLength(1));
+        // 直播 HLS 是单条 m3u8：不经 EDL，地址原样交给播放器。
+        expect(
+          fake.openedUris.single,
+          'https://live.example.com/room/index.m3u8',
+        );
+        expect(
+          fake.openedHeaders.single['Referer'],
+          'https://live.bilibili.com',
+        );
+      },
+    );
+
     test('the state after opening is reset, not carried over from the previous media', () async {
       await controller.open(
         MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
@@ -529,15 +552,17 @@ void main() {
             audioUrl: 'https://cdn.example.com/1a.m4s',
             headers: {'Referer': 'https://www.bilibili.com'},
           ),
+          // 单文件项不经 EDL，直接使用原始地址。
           MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
         ]);
 
         expect(fake.openedPlaylists, hasLength(1));
         expect(fake.openedPlaylists.single.medias, hasLength(2));
         expect(fake.openedPlaylists.single.index, 0);
-        // 每条队列项各自拼成 EDL，互不串扰。
+        // 音视频分离项拼成 EDL；单文件项保持原始地址。
+        expect(fake.openedUris[0], startsWith('edl://'));
+        expect(fake.openedUris[1], 'https://cdn.example.com/2.m4s');
         for (final uri in fake.openedUris) {
-          expect(uri, startsWith('edl://'));
           expect(uri, isNot(contains('\n')));
         }
         // 队列项的请求头随各自媒体下发，不共用。
@@ -589,7 +614,7 @@ void main() {
   });
 
   group('MediaPlaybackController queue edits', () {
-    test('addToQueue forwards an EDL media with its own headers', () async {
+    test('addToQueue forwards the media with its own headers', () async {
       await controller.addToQueue(
         MediaStream(
           videoUrl: 'https://cdn.example.com/v.m4s',
@@ -598,7 +623,8 @@ void main() {
       );
 
       expect(fake.addedMedias, hasLength(1));
-      expect(fake.addedMedias.single.uri, startsWith('edl://'));
+      // 单文件流直接使用原始地址，不再套 EDL。
+      expect(fake.addedMedias.single.uri, 'https://cdn.example.com/v.m4s');
       expect(
         fake.addedMedias.single.httpHeaders?['Referer'],
         'https://www.bilibili.com',

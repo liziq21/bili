@@ -35,11 +35,21 @@ final class MediaEdl() {
   ///   `!new_stream` 与声音轨，mpv 两条轨同时播放。
   /// - 分段（[MediaStream.isSegmented]）：各片段按 [MediaStream.segments]
   ///   的顺序排列，播完一段接下一段。
-  /// - 单文件：直接播放 [MediaStream.videoUrl]。
+  /// - 单文件：直接返回 [MediaStream.videoUrl]，不经 EDL。
   ///
   /// 输出是单行的：EDL 首行 `# mpv EDL v0` 必须独占一行，而换行无法
   /// 穿过播放列表，故整体省略该行——规范中它是可选的注释行。
+  ///
+  /// 单文件不套 EDL 外观：直播 HLS 就是单条 m3u8，套上 `edl://` 后 mpv
+  /// 按 EDL 打开它，而 EDL 内 `%N%` 之外的裸参数是「开始-结束」时间轴，
+  /// 直播没有时间轴语义；同时 `http-header-fields` 的查找以 mpv 报告的
+  /// 原始 `path` 为键，EDL 外层地址与内层地址不同，头也不保证随之外层
+  /// 传下去。直接返回原始地址把这两种不确定性都去掉，且行为与点播的
+  /// 单文件形态一致。
   static String uriOf(MediaStream stream) {
+    if (!stream.hasSeparateAudio && !stream.isSegmented) {
+      return stream.videoUrl;
+    }
     return 'edl://${_bodyOf(stream)}';
   }
 

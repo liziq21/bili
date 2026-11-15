@@ -10,12 +10,12 @@ const _urlWithCommas =
 
 void main() {
   group('MediaEdl.uriOf', () {
-    test('a single-file stream yields the prefix and the address', () {
+    test('a single-file stream returns the raw address without EDL', () {
       final uri = MediaEdl.uriOf(
         MediaStream(videoUrl: 'https://cdn.example.com/v.mp4'),
       );
 
-      expect(uri, 'edl://https://cdn.example.com/v.mp4');
+      expect(uri, 'https://cdn.example.com/v.mp4');
     });
 
     test(
@@ -89,7 +89,8 @@ void main() {
         MediaStream(videoUrl: 'https://cdn.example.com/v.mp4', audioUrl: ''),
       );
 
-      expect(uri, isNot(contains('!new_stream')));
+      // 单文件流不经 EDL，直接返回原地址
+      expect(uri, 'https://cdn.example.com/v.mp4');
     });
   });
 
@@ -119,21 +120,24 @@ void main() {
       }
     });
 
-    test(
-      'an address with a raw line break is stripped of control characters',
-      () {
-        // 长度前缀转义挡不住这个：切分发生在 mpv 读到 EDL 之前。
-        final uri = MediaEdl.uriOf(
-          MediaStream(videoUrl: 'https://cdn.example.com/v\n.m4s'),
-        );
+    test('an address with a raw line break is stripped of control characters in EDL', () {
+      // 长度前缀转义挡不住这个：切分发生在 mpv 读到 EDL 之前。
+      // 只有走 EDL 路径的流（分离音频/分段）才会剔除控制字符；
+      // 单文件流直接返回原地址，不做任何处理。
+      final uri = MediaEdl.uriOf(
+        MediaStream(
+          videoUrl: 'https://cdn.example.com/v\n.m4s',
+          audioUrl: 'https://cdn.example.com/a.m4s',
+        ),
+      );
 
-        expect(uri, isNot(contains('\n')));
-        expect(uri, 'edl://https://cdn.example.com/v.m4s');
-      },
-    );
+      expect(uri, isNot(contains('\n')));
+      expect(uri, contains('edl://'));
+    });
 
     test('control characters in an address never reach the playlist line', () {
       // 播放列表按行解析，任何控制字符都可能改变行的边界或内容。
+      // 仅对走 EDL 的流生效（使用 separate-audio 触发）。
       for (final url in [
         'https://cdn.example.com/a\rb.m4s',
         'https://cdn.example.com/a\tb.m4s',
@@ -141,7 +145,12 @@ void main() {
         'https://cdn.example.com/a\u007fb.m4s',
       ]) {
         expect(
-          MediaEdl.uriOf(MediaStream(videoUrl: url)),
+          MediaEdl.uriOf(
+            MediaStream(
+              videoUrl: url,
+              audioUrl: 'https://cdn.example.com/a.m4s',
+            ),
+          ),
           isNot(matches(RegExp(r'[\x00-\x1F\x7F]'))),
           reason: '$url should have been stripped',
         );
@@ -151,9 +160,12 @@ void main() {
     test('the length prefix counts the stripped address, not the raw one', () {
       // 先剔除再转义：长度前缀必须按剔除后的内容算，否则 mpv 会截断。
       const url = 'https://cdn.example.com/中文,\na.m4s';
-      final uri = MediaEdl.uriOf(MediaStream(videoUrl: url));
+      final uri = MediaEdl.uriOf(
+        MediaStream(videoUrl: url, audioUrl: 'https://cdn.example.com/a.m4s'),
+      );
 
-      final escaped = uri.substring('edl://'.length);
+      // 视频轨在首个 `;` 之前，取首段即可
+      final escaped = uri.substring('edl://'.length).split(';').first;
       final declared = int.parse(escaped.split('%').elementAt(1));
       expect(escaped, '%$declared%https://cdn.example.com/中文,a.m4s');
       expect(declared, 'https://cdn.example.com/中文,a.m4s'.length + 4);
@@ -163,7 +175,12 @@ void main() {
       // 首行 # mpv EDL v0 必须独占一行，而换行无法穿过播放列表，
       // 故整体省略——该行在规范中是可选注释。
       expect(
-        MediaEdl.uriOf(MediaStream(videoUrl: 'https://cdn.example.com/v.mp4')),
+        MediaEdl.uriOf(
+          MediaStream(
+            videoUrl: 'https://cdn.example.com/v.mp4',
+            audioUrl: 'https://cdn.example.com/a.m4s',
+          ),
+        ),
         isNot(contains('mpv EDL v0')),
       );
     });
@@ -171,9 +188,14 @@ void main() {
 
   group('MediaEdl escaping', () {
     test('a comma-bearing address is escaped by byte length', () {
-      final uri = MediaEdl.uriOf(MediaStream(videoUrl: _urlWithCommas));
+      final uri = MediaEdl.uriOf(
+        MediaStream(
+          videoUrl: _urlWithCommas,
+          audioUrl: 'https://cdn.example.com/a.m4s',
+        ),
+      );
 
-      expect(uri, 'edl://%${_urlWithCommas.length}%$_urlWithCommas');
+      expect(uri, contains('%${_urlWithCommas.length}%$_urlWithCommas'));
     });
 
     test('the length prefix counts bytes, not characters', () {
@@ -181,7 +203,9 @@ void main() {
       // 还是按字节计数）。非 ASCII 字符在 UTF-8 下多占字节，长度前缀
       // 按字符算会让 mpv 截断超出的部分。
       const url = 'https://cdn.example.com/中文,a.m4s';
-      final uri = MediaEdl.uriOf(MediaStream(videoUrl: url));
+      final uri = MediaEdl.uriOf(
+        MediaStream(videoUrl: url, audioUrl: 'https://cdn.example.com/a.m4s'),
+      );
 
       final escaped = uri.substring('edl://'.length);
       final declared = int.parse(escaped.split('%').elementAt(1));
@@ -195,8 +219,9 @@ void main() {
         'https://cdn.example.com/a!b.m4s',
         'https://cdn.example.com/a%b.m4s',
       ]) {
-        final escaped = MediaEdl.uriOf(MediaStream(videoUrl: url))
-            .substring('edl://'.length);
+        final escaped = MediaEdl.uriOf(
+          MediaStream(videoUrl: url, audioUrl: 'https://cdn.example.com/a.m4s'),
+        ).substring('edl://'.length);
 
         expect(
           escaped.startsWith('%${url.length}%$url'),
@@ -206,13 +231,13 @@ void main() {
       }
     });
 
-    test('an address without structural characters is left as is', () {
+    test('an address without structural characters is left as is in EDL', () {
       const url = 'https://cdn.example.com/plain.m4s?a=1&b=2';
+      const audio = 'https://cdn.example.com/a.m4s';
+      final uri = MediaEdl.uriOf(MediaStream(videoUrl: url, audioUrl: audio));
 
-      expect(
-        MediaEdl.uriOf(MediaStream(videoUrl: url)).substring('edl://'.length),
-        url,
-      );
+      // 视频轨原样保留（EDL 前缀与音频轨之外）
+      expect(uri.split(';').first, 'edl://$url');
     });
 
     test('an escaped separator does not split the EDL', () {
