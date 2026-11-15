@@ -40,11 +40,9 @@ void main() {
 
   Widget graph(Widget child) => MultiRepositoryProvider(
     providers: repoProviders,
-    child: Builder(
-      builder: (context) => MultiBlocProvider(
-        providers: getBlocProviders(context),
-        child: MaterialApp(home: child),
-      ),
+    child: MultiBlocProvider(
+      providers: blocProviders,
+      child: MaterialApp(home: child),
     ),
   );
 

@@ -32,13 +32,11 @@ void main() {
   runApp(
     MultiRepositoryProvider(
       providers: repoProviders,
-      child: Builder(
-        builder: (context) => MultiBlocProvider(
-          providers: getBlocProviders(context),
-          child: Provider<MediaSourceCatalog>.value(
-            value: defaultMediaSourceCatalog,
-            child: const App(),
-          ),
+      child: MultiBlocProvider(
+        providers: blocProviders,
+        child: Provider<MediaSourceCatalog>.value(
+          value: defaultMediaSourceCatalog,
+          child: const App(),
         ),
       ),
     ),

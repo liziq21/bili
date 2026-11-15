@@ -4,10 +4,9 @@ import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/router.dart';
 import 'package:app/routing/routes.dart';
 
-import 'package:flutter/material.dart' hide MaterialApp, Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 /// 钉住各 typed route data 在「source 缺省」场景下的行为：每个 route 的 build

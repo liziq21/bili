@@ -126,8 +126,7 @@ class _SourceScopeState() extends State<_SourceScope> {
         RepositoryProvider<VideoSearchRepository>(
           create: (_) => AppVideoSearchRepository(videoSearchDataSource),
         ),
-      if (creatorProfileSearchDataSource
-          case final creatorProfileSearchDataSource?)
+      if (creatorProfileSearchDataSource != null)
         RepositoryProvider<CreatorProfileSearchRepository>(
           create: (_) =>
               AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),

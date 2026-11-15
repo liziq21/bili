@@ -9,8 +9,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # repository: https://github.com/my_org/my_repo
 
 environment:
-  sdk: "^3.13.7"
-  flutter: ">=3.47.9"
+  sdk: "^3.14.0"
+  flutter: ">=3.50.0"
 resolution: workspace
 
 # Add regular dependencies here.
@@ -59,7 +59,6 @@ dependencies:
   sized_context: ^1.0.0+4
   flutter_animate: ^4.5.2
   gap: ^3.0.1
-  
 dev_dependencies:
   flutter_test:
     sdk: flutter

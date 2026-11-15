@@ -21,13 +21,13 @@ Before writing or modifying code in this repository, read the specification file
 
 ### 文档维护义务
 
-- 修改 workflow、SDK 版本、命令或版本号时，同一次改动必须检查并更新所有 AGENTS.md 中的引用。
+- 可执行配置（`.fvmrc`、`pubspec.yaml`、`analysis_options.yaml`、workflow 文件等）是 SDK 与工具行为的唯一事实源。文档中不得自行硬编码具体 SDK 版本号作为事实源。
 - 文档与可执行配置不一致时，以可执行配置为准，文档须在同一次改动中修复。
 - 改 CI workflow 或 golden 基线时，同步更新 `docs/postmortems/README.md` 中的引用。
 
 **开工前必读：**
 
-- [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, Dart 3.13 syntax, immutability, testing.
+- [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, primary constructor syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
 - [`packages/AGENTS.md`](packages/AGENTS.md) — package classification, data layer rules, API sub-package conventions (`bilibili`/`youtube`), CI test scope.
 - [`app/docs/design-system.md`](app/docs/design-system.md) — design token policy: color literal allow-list, contrast requirements, token roles. **Must read before touching any UI colors, tokens, or theme code.**
@@ -90,7 +90,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 - **Version source of truth** is `app/pubspec.yaml` `version: X.Y.Z+N`, not the git tag. Local `flutter build` reads the pubspec, so making the tag authoritative would silently produce a wrong `versionCode` on developer machines. The tag is a release marker; `.github/workflows/release.yml` fails the build when `vX.Y.Z` disagrees with the pubspec's `X.Y.Z`.
 - **Build number** is injected by CI and never committed. The verification build in `ci-build.yml` uses `--build-number=${{ github.run_number }}`; the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
 - **Release signing is mandatory.** `app/android/app/build.gradle.kts` throws `GradleException` when a release build has no `key.properties`, so a release build can never silently fall back to the debug keystore. `BILI_ALLOW_UNSIGNED_RELEASE=1` is the single opt-out; CI sets it to verify that the release variant compiles, and artifacts built that way are not publishable.
-- **Status check names carry a version suffix for matrix jobs.** `ci-test.yml` and `ci-build.yml` emit `Run Flutter Test (3.47.9, 3.13.7)` and `Build Flutter App (android) (3.47.9, 3.13.7)` from the root `pubspec.yaml` `environment` matrix; `Check Formatting` is an independent, single-version job. The GitHub ruleset decides which emitted checks are required. **Upgrading Flutter or Dart requires updating the ruleset's required names in the same change**, or every PR can block on a missing check.
+- **Status check names carry a version suffix for matrix jobs.** `ci-test.yml` and `ci-build.yml` emit check names like `Run Flutter Test (<flutter>, <dart>)` and `Build Flutter App (android) (<flutter>, <dart>)`, where the versions are dynamically expanded from the `environment` block in the root `pubspec.yaml` by `pubspec-matrix-action`; `Check Formatting` is an independent, single-version job. The GitHub ruleset decides which emitted checks are required. **Upgrading Flutter or Dart requires updating the ruleset's required names in the same change**, or every PR can block on a missing check.
 
 - **`CHANGELOG.md` is generated, never hand-edited.** `tool/generate_changelog.py` rebuilds it from git tags plus the GitHub pulls API on every run, so the file is derived state and manual edits do not survive. `.github/workflows/ci-changelog.yml`（由 `ci.yml` 在 push 到 `main` 时调用）运行生成器，把差异提交到 `ci/changelog` 分支并开 PR，用 uhibot App token 推送。**这是当前实际行为**：`4758c4c` 曾改为直推 main，`4281fe2` 又改回开 PR 并沿用至今——旧版本文档曾写成「已改为直推」，与配置不符，以本段为准。 Each tag becomes one `## vX.Y.Z - <tag date>` section holding the pull requests merged after the previous tag and no later than this one; the range newer than the newest tag lands under `## [Unreleased]`; the oldest tag absorbs everything merged before it so nothing is dropped. Section headings come from the tag, which means cutting a release needs no manual edit. Bucketing is by `c:` label when the Linear sync attached one, otherwise by the conventional-commit or agent-emoji prefix in the pull request title, with `Other` as the fallback rather than dropping the entry. When the bucketing looks wrong, change the generator, not the file. `generate_changelog.py` 排除来自 `ci/changelog` 分支的 PR（`GENERATED_BRANCH`）——历史 `ci/changelog` PR 仍在仓库中，不排除会让每个已合 changelog PR 产生下一个。该排除按分支名匹配，不按 `ci-generated` label 匹配——golden 基线 workflow 也用同一 label，重录基线是真实历史。 Its unit tests run in the `Tool Tests` job: `python3 -m unittest discover -s tool -p 'test_*.py'`.
 
@@ -132,13 +132,13 @@ Linear sync 附带的 `c:` 标签优先于标题前缀分桶。agent 派单时�
 
 ### SDK 版本
 
-`.fvmrc` 是本地开发与单版本格式门禁的精确 SDK 来源，当前钉在 Flutter 3.47.9（Dart 3.13.7）；根 `pubspec.yaml` 的 `environment` 是包的最低约束，也是 CI 矩阵的输入。两者必须保持下限与本地 pin 一致。
+`.fvmrc` 是本地开发与单版本格式门禁的精确 SDK 来源（以 `.fvmrc` 中声明的 `flutter` 值为准，自带的 Dart 版本由该 Flutter 版本决定）；根 `pubspec.yaml` 的 `environment` 是包的最低约束，也是 CI 矩阵的输入。两者必须保持下限与本地 pin 一致。
 
-**执行任何 `dart` / `flutter` 命令前，先分别确认两个 SDK 与 `.fvmrc` 一致**（`dart --version` 与 `flutter --version`）。不一致时不要继续，改用 `fvm dart` / `fvm flutter`，或先切到 3.47.9。两个都要看：PATH 里的 Dart 与 Flutter 可能来自不同 SDK，且 Flutter 自带的 Dart 可能与独立安装的 Dart 冲突——只核对 `dart --version` 匹配，仍可能让后续 `flutter` 命令跑在另一个版本上。
+**执行任何 `dart` / `flutter` 命令前，先分别确认两个 SDK 与 `.fvmrc` 一致**（`dart --version` 与 `flutter --version`）。不一致时不要继续，改用 `fvm dart` / `fvm flutter`，或先切换到 `.fvmrc` 中声明的版本。两个都要看：PATH 里的 Dart 与 Flutter 可能来自不同 SDK，且 Flutter 自带的 Dart 可能与独立安装的 Dart 冲突——只核对 `dart --version` 匹配，仍可能让后续 `flutter` 命令跑在另一个版本上。
 
 原因：`dart format` 的输出随 SDK 版本变化，同一份源码在不同 formatter 上会得到不同排版。agent 在与仓库不一致的 SDK 上跑一次格式化，它碰过的每个文件都会被整体重排；如果这些文件此后又与 main 前进过的版本撞车，PR 就会变成 dirty，而这类 dirty 的净差异里混着「把 main 已合内容改回旧写法」的回退，只能关单重开。2026-10-04 的六条 PR 全部是这个成因。
 
-CI 的 Flutter 版本由根 `pubspec.yaml` 的 `environment` 约束经 `pubspec-matrix-action` 展开，当前产出 `3.47.9, 3.13.7`（下限）与最新 stable 两项；`.fvmrc` 与下限项一致，也是 `rerecord-goldens.yml` 录制 golden 基线所用的版本。**升级 SDK 时 `.fvmrc`、`pubspec.yaml`、ruleset 的 required check 名三者必须同一次改动里一起改。**
+CI 的 Flutter 版本由根 `pubspec.yaml` 的 `environment` 约束经 `pubspec-matrix-action` 展开，产出下限版本（来自 `pubspec.yaml`）与最新 stable 两项；`.fvmrc` 与下限项一致，也是 `rerecord-goldens.yml` 录制 golden 基线所用的版本。**升级 SDK 时 `.fvmrc`、`pubspec.yaml`、ruleset 的 required check 名三者必须同一次改动里一起改。**
 
 ### 格式
 提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。
@@ -192,7 +192,7 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 ### Dart 版本与语法
 - Do not arbitrarily downgrade the Dart SDK version.
-- Prioritize using the repository's **Dart 3.13.x** primary constructors and concise syntax features; do not write syntax that requires a newer SDK than the root constraint.
+- Prioritize using primary constructors and concise syntax features available in the Dart SDK declared in root `pubspec.yaml`; do not write syntax that requires a newer SDK than the root constraint.
 
 #### 主构造函数与简洁语法（Dart 3.13+）
 权威规范见 Dart constructors — Concise constructor syntax: https://dart.dev/language/constructors#concise-constructor-syntax；本仓库特例见下文的无参类规则。
