@@ -1,22 +1,22 @@
 import 'package:app/feature/search/app_search_anchor.dart';
-import 'package:app/routing/router.dart';
+import 'package:app/routing/search_focus_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 // 必须用 material_ui 而不是 flutter/material：SearchAnchor 内部查找的是
 // material_ui 自己的 MaterialLocalizations 类型。与 app_search_anchor_test.dart
 // 同一原因，这里不重复解释。
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 /// 本文件测的是「底栏重复点搜索把焦点交回输入框」这条链路的注册端。
 ///
-/// 注册槽位 `_focusSearchInput` 在 router.dart 里是私有的，测试无法直接写入，
-/// 所以覆盖拆成两层：
+/// 聚焦入口已从顶层可变闭包改为 [SearchFocusController]（由
+/// [ChangeNotifierProvider] 注入）。覆盖仍拆成两层：
 ///   1. [AppSearchAnchor] 在 initState 注册、dispose 注销、didUpdateWidget 换绑，
-///      这是实际往槽位里写值的唯一生产端；
-///   2. [requestSearchFocus] 在无人注册时静默返回——私有槽位初始为 null，
-///      这是可从公开 API 观测到的真实行为（重复点搜索发生在搜索页挂载前）。
+///      这是实际往控制器里写值的唯一生产端；
+///   2. [SearchFocusController.requestFocus] 在无人注册时静默返回——重复点搜索
+///      发生在搜索页挂载前时必须不抛。
 ///
-/// 真正的端到端链路（router 把 [AppSearchAnchor.onFocusInputReady] 接到私有
-/// 槽位）需要拉起整棵 provider 树，收益不抵成本，此处不覆盖。
+/// 控制器自身的语义单测见 `search_focus_controller_test.dart`。
 
 /// 记录注册端收到的所有回调调用序列。
 class FocusRegistrationLog() {
@@ -175,10 +175,46 @@ void main() {
     });
   });
 
-  group('requestSearchFocus', () {
+  group('SearchFocusController requestFocus', () {
     test('does not throw when no search screen has registered', () {
-      // 私有槽位初值为 null，重复点搜索发生在搜索页挂载前，此时必须静默。
-      expect(requestSearchFocus, returnsNormally);
+      // 控制器尚未登记回调，重复点搜索发生在搜索页挂载前，此时必须静默。
+      expect(SearchFocusController().requestFocus, returnsNormally);
+    });
+
+    testWidgets('router injects one controller shared by nav bar and branch', (
+      tester,
+    ) async {
+      // 底栏目的地的 onReselect 与搜索分支必须读到同一个 SearchFocusController，
+      // 否则点按触发的聚焦永远不会到达输入框。
+      late BuildContext navContext;
+      late BuildContext branchContext;
+      final controller = SearchFocusController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SearchFocusController>.value(
+          value: controller,
+          child: Builder(
+            builder: (outer) {
+              navContext = outer;
+              return Builder(
+                builder: (inner) {
+                  branchContext = inner;
+                  return const SizedBox.shrink();
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(
+        identical(
+          navContext.read<SearchFocusController>(),
+          branchContext.read<SearchFocusController>(),
+        ),
+        isTrue,
+      );
     });
   });
 }
