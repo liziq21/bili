@@ -34,6 +34,7 @@ import '../feature/setting/advanced_settings_screen.dart';
 import '../feature/setting/appearance_settings_screen.dart';
 import '../feature/setting/history_settings_screen.dart';
 import '../feature/setting/library_settings_screen.dart';
+import '../feature/setting/notification_settings_screen.dart';
 import '../feature/setting/player_settings_screen.dart';
 import '../feature/setting/setting_screen.dart';
 import '../feature/space/space_screen.dart';
@@ -226,6 +227,7 @@ final GoRouter router = GoRouter(
                   SettingsSection.appearance => Routes.settingsAppearance,
                   SettingsSection.history => Routes.settingsHistory,
                   SettingsSection.library => Routes.settingsLibrary,
+                  SettingsSection.notifications => Routes.settingsNotifications,
                   SettingsSection.advanced => Routes.settingsAdvanced,
                   SettingsSection.discovery => Routes.settingsDiscovery,
                 }),
@@ -246,6 +248,10 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Routes.settingsLibraryRelative,
               builder: (_, _) => const LibrarySettingsScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsNotificationsRelative,
+              builder: (_, _) => const NotificationSettingsScreen(),
             ),
             GoRoute(
               path: Routes.settingsAdvancedRelative,

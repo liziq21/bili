@@ -9,6 +9,7 @@ enum SettingsSection() {
   appearance,
   history,
   library,
+  notifications,
   advanced,
   discovery,
 }
@@ -41,6 +42,11 @@ class const SettingScreen({
               SettingsSection.library,
               l10n.settingsLibrary,
               Icons.video_library_outlined,
+            ),
+            (
+              SettingsSection.notifications,
+              l10n.settingsNotifications,
+              Icons.notifications_outlined,
             ),
             (SettingsSection.advanced, l10n.settingsAdvanced, Icons.tune),
             (
