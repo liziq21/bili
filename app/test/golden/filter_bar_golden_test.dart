@@ -4,6 +4,7 @@ import 'package:app/feature/search/common_widgets/filter_group_section.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:youtube/youtube.dart';
 
 import 'golden_font.dart';
 
@@ -24,6 +25,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: goldenTestTheme(),
+            localizationsDelegates: YoutubeLocalizations.localizationsDelegates,
+            supportedLocales: YoutubeLocalizations.supportedLocales,
             home: Scaffold(body: Center(child: widget)),
           ),
         );
@@ -59,6 +62,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: goldenTestTheme(),
+            localizationsDelegates: YoutubeLocalizations.localizationsDelegates,
+            supportedLocales: YoutubeLocalizations.supportedLocales,
             home: Scaffold(body: Center(child: widget)),
           ),
         );
