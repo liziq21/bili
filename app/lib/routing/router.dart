@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../l10n/localization_file/app_localizations.dart';
 import '../app_bloc.dart';
@@ -22,6 +23,7 @@ import '../providers/service_source_providers.dart';
 import '../providers/media_sources_provider.dart';
 import '../ui/common/app_navigation_shell.dart';
 import 'routes.dart';
+import 'search_focus_controller.dart';
 import '../feature/home/home_config_editor_screen.dart';
 import '../feature/home/home_screen.dart';
 import '../feature/live/live_screen.dart';
@@ -86,19 +88,18 @@ extension NavigationCallbacks on BuildContext {
   }
 }
 
-/// 搜索分支输入框的聚焦入口，由 [SearchScreen] 在挂载时写入、销毁时清空
+/// 搜索分支输入框的聚焦入口改为 [SearchFocusController]
 ///
 /// 底栏重复点「搜索」时用它：已经在搜索页就把焦点交回输入框，让用户直接继续
-/// 打字。放在这里而不是搜索页内部，是因为导航目的地（[_navDestinations]）
-/// 与搜索页由不同的构建路径产出，两者之间没有共同的祖先状态可挂。
-void Function()? _focusSearchInput;
+/// 打字。控制器由 [StatefulShellRoute.indexedStack] 的 builder 以
+/// [ChangeNotifierProvider] 注入，导航目的地（[_navDestinations]）与搜索页因此
+/// 共享同一实例——不再依赖顶层可变闭包，多实例与测试之间不会互相污染。
 
-/// 底栏搜索目的地的重复点按动作
-void requestSearchFocus() => _focusSearchInput?.call();
-
-/// [SearchScreen] 挂载/销毁时回调它，登记或注销聚焦入口
-void _registerSearchFocus(void Function()? focus) => _focusSearchInput = focus;
-
+/// 解析当前路由作用域内生效的数据源定义
+///
+/// 显式 source 优先；其次读 [ServiceSourceProviders] 注入的
+/// [MediaSourceDefinition]；最后回退到 [AppBloc] 里持久化的选择。供根级推入页面
+/// （视频 / 直播 / 空间 / 搜索结果 / 播放列表）在组装自己的源作用域前调用。
 MediaSourceDefinition? _resolveSource(
   BuildContext context, {
   String? explicitSource,
@@ -137,7 +138,7 @@ List<AppNavDestination> _navDestinations(BuildContext context) {
       icon: Icons.search_rounded,
       railIcon: Icons.search_rounded,
       // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
-      onReselect: requestSearchFocus,
+      onReselect: () => context.read<SearchFocusController>().requestFocus(),
     ),
     AppNavDestination(
       label: l10n?.mine ?? 'Mine',
@@ -149,13 +150,18 @@ List<AppNavDestination> _navDestinations(BuildContext context) {
 
 final _log = Logger('Router');
 
+/// 安全脱敏的纯函数：只保留 URI 的 path（剥离 query / fragment / user-info），
+/// 并去掉控制字符。抽出为纯函数是为了让脱敏规则可被单测直接验证——
+/// [logRoutingException] 的 logger 是模块级单例，测试无法只观测单次调用。
+String sanitizedRoutingPath(GoRouterState state) =>
+    NotFoundScreen.sanitizeUriString(state.uri.path);
+
 /// Logs routing exceptions with path-only diagnostics.
 ///
 /// The URI path is retained for debugging, while query parameters, fragments,
 /// authority/user-info, and the exception payload are intentionally omitted.
 void logRoutingException(GoRouterState state) {
-  final safePath = NotFoundScreen.sanitizeUriString(state.uri.path);
-  _log.severe('Routing exception for path: $safePath');
+  _log.severe('Routing exception for path: ${sanitizedRoutingPath(state)}');
 }
 
 final GoRouter router = GoRouter(
@@ -169,10 +175,15 @@ final GoRouter router = GoRouter(
     // 底部导航的三个主分支。用 indexedStack 而非普通 ShellRoute：切分支时
     // 保留各分支的导航栈，从详情页返回时回到离开前的那一屏而不是分支根。
     StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) => AppScaffold(
-        child: AppNavigationShell(
-          navigationShell: navigationShell,
-          destinations: _navDestinations(context),
+      builder: (context, state, navigationShell) => ChangeNotifierProvider(
+        create: (_) => SearchFocusController(),
+        child: Builder(
+          builder: (context) => AppScaffold(
+            child: AppNavigationShell(
+              navigationShell: navigationShell,
+              destinations: _navDestinations(context),
+            ),
+          ),
         ),
       ),
       branches: [
@@ -213,11 +224,6 @@ final GoRouter router = GoRouter(
       },
       routes: [
         ...$appRoutes,
-        /* $liveRouteData,
-        $spaceRouteData,
-        $videoRouteData,
-        $searchRouteData,
-        $notFoundRouteData, */
         GoRoute(
           path: Routes.settings,
           builder: (context, _) => SettingScreen(
@@ -279,41 +285,25 @@ final GoRouter router = GoRouter(
 /// `ServiceSourceProviders` 注入与搜索 bloc 注入串在一起，属于「组装」而不是
 /// 「路由声明」，放在路由数据类里会让人误以为换个路由就得复制这段。
 Widget _buildHome(BuildContext context) {
-  return BlocSelector<AppBloc, AppState, String?>(
-    selector: (state) => switch (state) {
-      LoadSuccess(:final userData) => userData.sourceId,
-      _ => null,
-    },
-    builder: (context, persistedSourceId) {
-      final definition = context.read<MediaSourceCatalog>().resolvePersisted(
-        persistedSourceId,
-      );
-      if (definition == null) return const NoMediaSourceScreen();
-
-      return ServiceSourceProviders(
-        key: ValueKey('home:${definition.id}'),
-        source: definition.id,
-        child: Builder(
-          builder: (context) => BlocProvider<HomeBloc>(
-            create: (context) => HomeBloc(
-              userDataRepository: context.read(),
-              preferences: context.read<PreferencesDataSource?>(),
-              source: context.read<MediaSource>(),
-            ),
-            child: Builder(
-              builder: (context) => _withSearchBloc(
-                context,
-                HomeScreen(
-                  onSettings: () => context.push<void>(Routes.settings),
-                  onLive: context.defaultNavigateToLive,
-                  onVideo: context.defaultNavigateToVideo,
-                ),
-              ),
-            ),
+  return _ScopedSourceBuilder(
+    keyPrefix: 'home',
+    builder: (context) => BlocProvider<HomeBloc>(
+      create: (context) => HomeBloc(
+        userDataRepository: context.read(),
+        preferences: context.read<PreferencesDataSource?>(),
+        source: context.read<MediaSource>(),
+      ),
+      child: Builder(
+        builder: (context) => _withSearchBloc(
+          context,
+          HomeScreen(
+            onSettings: () => context.push<void>(Routes.settings),
+            onLive: context.defaultNavigateToLive,
+            onVideo: context.defaultNavigateToVideo,
           ),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
 
@@ -326,12 +316,15 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
   if (context.read<SearchSuggestRepository?>() == null) return child;
 
   return BlocProvider<SearchBloc>(
-    create: (context) => SearchBloc(
-      searchSuggestRepository: context.read(),
-      recentSearchQueryRepository: context.read(),
-      getRentSearchQueriesUseCase: context.read(),
-      preferences: context.read<PreferencesDataSource>(),
-    ),
+    create: (context) =>
+        SearchBloc(
+            searchSuggestRepository: context.read(),
+            recentSearchQueryRepository: context.read(),
+            getRentSearchQueriesUseCase: context.read(),
+            preferences: context.read<PreferencesDataSource>(),
+          )
+          // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
+          ..add(MonitorRecentSearches()),
     child: child,
   );
 }
@@ -341,49 +334,53 @@ Widget _withSearchBloc(BuildContext context, Widget child) {
 /// 数据源跟随 app 全局选择：用户的选择持久化在 [UserData]，搜索分支从同一份
 /// 状态解析源目录。源实例仍由本分支的 [ServiceSourceProviders] 创建并拥有。
 Widget _buildSearchEntry(BuildContext context) {
-  final persistedSourceId = context.select<AppBloc, String?>(
-    (bloc) => switch (bloc.state) {
-      LoadSuccess(:final userData) => userData.sourceId,
-      _ => null,
+  return _ScopedSourceBuilder(
+    keyPrefix: 'search',
+    builder: (context) {
+      // 建议能力依赖 SearchSuggestRepository。数据源不支持时（provider 未
+      // 注入）不建 SearchBloc：它的构造器要三个必填依赖，硬建会拿到 null
+      // 并在首次搜索时崩。
+      return _withSearchBloc(
+        context,
+        SearchScreen(
+          onFocusInputReady: context.read<SearchFocusController?>()?.register,
+          onSearch: context.defaultNavigateToSearchResult,
+        ),
+      );
     },
   );
-  final definition = context.read<MediaSourceCatalog>().resolvePersisted(
-    persistedSourceId,
-  );
-  if (definition == null) return const NoMediaSourceScreen();
+}
 
-  return ServiceSourceProviders(
-    key: ValueKey('search:${definition.id}'),
-    source: definition.id,
-    child: Builder(
-      builder: (context) {
-        // 建议能力依赖 SearchSuggestRepository。数据源不支持时（provider 未
-        // 注入）不建 SearchBloc：它的构造器要三个必填依赖，硬建会拿到 null
-        // 并在首次搜索时崩。
-        if (context.read<SearchSuggestRepository?>() == null) {
-          return SearchScreen(
-            onFocusInputReady: _registerSearchFocus,
-            onSearch: context.defaultNavigateToSearchResult,
-          );
-        }
-        return BlocProvider<SearchBloc>(
-          create: (context) =>
-              SearchBloc(
-                  searchSuggestRepository: context.read(),
-                  recentSearchQueryRepository: context.read(),
-                  getRentSearchQueriesUseCase: context.read(),
-                  preferences: context.read<PreferencesDataSource>(),
-                )
-                // 建 bloc 后立刻订阅最近搜索，否则历史列表不会自己更新。
-                ..add(MonitorRecentSearches()),
-          child: SearchScreen(
-            onFocusInputReady: _registerSearchFocus,
-            onSearch: context.defaultNavigateToSearchResult,
-          ),
+/// 解析当前持久化的数据源并把 [ServiceSourceProviders] 注入子树。
+///
+/// 首页与搜索分支共用：两者都从 [AppBloc] 的 `userData.sourceId` 解析源目录，
+/// 无可用源时渲染 [NoMediaSourceScreen]。`keyPrefix` 让两个分支各自的
+/// [ServiceSourceProviders] 拿到不同的 [ValueKey]，切换数据源时子树按分支重建。
+class const _ScopedSourceBuilder({
+  required final String keyPrefix,
+  required final WidgetBuilder builder,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<AppBloc, AppState, String?>(
+      selector: (state) => switch (state) {
+        LoadSuccess(:final userData) => userData.sourceId,
+        _ => null,
+      },
+      builder: (context, persistedSourceId) {
+        final definition = context.read<MediaSourceCatalog>().resolvePersisted(
+          persistedSourceId,
+        );
+        if (definition == null) return const NoMediaSourceScreen();
+
+        return ServiceSourceProviders(
+          key: ValueKey('$keyPrefix:${definition.id}'),
+          source: definition.id,
+          child: Builder(builder: builder),
         );
       },
-    ),
-  );
+    );
+  }
 }
 
 /// 媒体资产分支

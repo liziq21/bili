@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 70 |
-| widget | 52 |
+| unit | 71 |
+| widget | 53 |
 | golden | 8 |
 | contract | 12 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **144** |
+| **合计** | **146** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（70）
+## unit（71）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -53,6 +53,7 @@
 - `app/test/feature/video_bloc_test.dart`
 - `app/test/layout_breakpoints_test.dart`
 - `app/test/providers/media_sources_provider_test.dart`
+- `app/test/routing/search_focus_controller_test.dart`
 - `app/test/utils/command_test.dart`
 - `app/test/utils/platform_info_test.dart`
 - `packages/bilibili/bpi/test/api_interceptor_test.dart`
@@ -97,7 +98,7 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 
-## widget（52）
+## widget（53）
 
 - `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/danmaku_settings_screen_test.dart`
@@ -146,6 +147,7 @@
 - `app/test/routing/router_resolve_source_test.dart`
 - `app/test/routing/router_search_focus_test.dart`
 - `app/test/routing/router_settings_test.dart`
+- `app/test/routing/router_test.dart`
 - `app/test/ui/app_navigation_shell_test.dart`
 - `app/test/ui/app_scroll_behavior_test.dart`
 - `app/test/ui/creator_profile_item_test.dart`
