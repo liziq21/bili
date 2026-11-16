@@ -33,25 +33,31 @@ void main() {
       expect(bytes[1], equals(2)); // View count value = 2
     });
 
-    test('upload date today writes a length-delimited submessage at field 8', () {
-      final params = YoutubeSearchParams.encode(
-        uploadDate: 2, // today = 2
-      );
-      expect(params, isNotEmpty);
+    test(
+      'upload date today writes a length-delimited submessage at field 8',
+      () {
+        final params = YoutubeSearchParams.encode(
+          uploadDate: 2, // today = 2
+        );
+        expect(params, isNotEmpty);
 
-      final bytes = base64.decode(params);
-      // Field 8 (Filters), WireType 2: (8 << 3) | 2 = 66 (0x42)
-      expect(bytes[0], equals(66));
-      expect(bytes[1], equals(2)); // Submessage length = 2 bytes
-      // Subfield 1 (UploadDate), WireType 0: (1 << 3) | 0 = 8
-      expect(bytes[2], equals(8));
-      expect(bytes[3], equals(2)); // Today value = 2
-    });
+        final bytes = base64.decode(params);
+        // Field 8 (Filters), WireType 2: (8 << 3) | 2 = 66 (0x42)
+        expect(bytes[0], equals(66));
+        expect(bytes[1], equals(2)); // Submessage length = 2 bytes
+        // Subfield 1 (UploadDate), WireType 0: (1 << 3) | 0 = 8
+        expect(bytes[2], equals(8));
+        expect(bytes[3], equals(2)); // Today value = 2
+      },
+    );
 
-    test('content type playlist alone encodes to the measured playlist params', () {
-      // Pinned against a real request: searchPlaylists sent `QgIQAw==`.
-      expect(YoutubeSearchParams.encode(contentType: 3), equals('QgIQAw=='));
-    });
+    test(
+      'content type playlist alone encodes to the measured playlist params',
+      () {
+        // Pinned against a real request: searchPlaylists sent `QgIQAw==`.
+        expect(YoutubeSearchParams.encode(contentType: 3), equals('QgIQAw=='));
+      },
+    );
 
     test('sort, duration and features combine into one submessage', () {
       final params = YoutubeSearchParams.encode(
@@ -61,11 +67,10 @@ void main() {
       );
 
       expect(base64.decode(params), isNotEmpty);
-      expect(params, equals(YoutubeSearchParams.encode(
-        sort: 3,
-        duration: 1,
-        features: {5},
-      )));
+      expect(
+        params,
+        equals(YoutubeSearchParams.encode(sort: 3, duration: 1, features: {5})),
+      );
     });
   });
 }

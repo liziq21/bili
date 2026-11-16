@@ -60,9 +60,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeSearchParams.encode(
-                contentType: 1,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 1),
             }),
           )
           .timeout(requestTimeout);
@@ -88,9 +86,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeSearchParams.encode(
-                contentType: 2,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 2),
             }),
           )
           .timeout(requestTimeout);
@@ -116,9 +112,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeSearchParams.encode(
-                contentType: 3,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 3),
             }),
           )
           .timeout(requestTimeout);
@@ -667,9 +661,7 @@ Future<void> _probeChannelSearchForLockup(
           body: jsonEncode({
             'context': _clientContext,
             'query': 'Flutter',
-            'params': YoutubeSearchParams.encode(
-              contentType: entry.value,
-            ),
+            'params': YoutubeSearchParams.encode(contentType: entry.value),
           }),
         )
         .timeout(timeout);
