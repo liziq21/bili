@@ -11,6 +11,7 @@ import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../video/player/media_playback_controller.dart';
+import '../video/player/playback_error.dart';
 import '../video/danmaku/danmaku_settings_screen.dart';
 import 'bloc/live_bloc.dart';
 import 'bloc/providers.dart';
@@ -275,15 +276,33 @@ class _PlayerAreaState() extends State<_PlayerArea> {
   bool _controlsVisible = true;
   Timer? _autoHideControls;
 
+  /// 播放器实时状态快照。控制条的图标与点击行为都读它：只读一次
+  /// `controller.state` 会让按钮停留在初始值（所有状态都由播放器错误
+  /// 或用户交互异步驱动，不在 widget 重建时更新）。
+  late PlaybackState _state = widget.controller.state;
+  StreamSubscription<PlaybackState>? _stateSubscription;
+
   @override
   void initState() {
     super.initState();
     _controlsVisible = !widget.fullscreen;
+    _stateSubscription = widget.controller.states.listen((state) {
+      if (!mounted) return;
+      setState(() => _state = state);
+    });
   }
 
   @override
   void didUpdateWidget(covariant _PlayerArea oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _stateSubscription?.cancel();
+      _state = widget.controller.state;
+      _stateSubscription = widget.controller.states.listen((state) {
+        if (!mounted) return;
+        setState(() => _state = state);
+      });
+    }
     if (oldWidget.fullscreen == widget.fullscreen) return;
     _controlsVisible = !widget.fullscreen;
     _scheduleAutoHide();
@@ -292,6 +311,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
   @override
   void dispose() {
     _autoHideControls?.cancel();
+    _stateSubscription?.cancel();
     super.dispose();
   }
 
@@ -360,9 +380,53 @@ class _PlayerAreaState() extends State<_PlayerArea> {
 
     // 流地址就绪 → Video widget + 控制条。
     final controller = widget.controller;
-    final playerState = controller.state;
+    final playbackError = _state.error;
 
     final Widget surface = Video(controller: controller.videoController);
+
+    // 播放器报错（地址失效、解码失败等）也必须可见：直播没有进度条，
+    // 静默的黑屏等于「点了没反应」。
+    final Widget? playbackErrorOverlay = playbackError == null
+        ? null
+        : Positioned.fill(
+            child: ColoredBox(
+              color: $styles.colors.scrim.withValues(alpha: 0.72),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_rounded,
+                      size: 32,
+                      color: $styles.colors.onSurfaceVariant,
+                    ),
+                    const Gap(8),
+                    Text(
+                      _categoryLabel(l10n, playbackError.category),
+                      style: $styles.text.body,
+                      textAlign: TextAlign.center,
+                    ),
+                    const Gap(4),
+                    Text(
+                      playbackError.message,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const Gap(12),
+                    FilledButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        widget.onRetry();
+                      },
+                      child: Text(l10n.retry),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
 
     return AspectRatio(
       aspectRatio: 16 / 9,
@@ -371,6 +435,8 @@ class _PlayerAreaState() extends State<_PlayerArea> {
         child: Stack(
           children: [
             Container(color: $styles.colors.scrim, child: surface),
+            // 播放器错误覆盖层：优先于弹幕与控制条显示。
+            ?playbackErrorOverlay,
             // 直播弹幕浮层。
             if (widget.roomId > 0)
               LiveDanmakuOverlay(controller: controller, roomId: widget.roomId),
@@ -400,17 +466,17 @@ class _PlayerAreaState() extends State<_PlayerArea> {
                     children: [
                       // 播放 / 暂停。
                       IconButton(
-                        tooltip: playerState.isPlaying ? l10n.pause : l10n.play,
+                        tooltip: _state.isPlaying ? l10n.pause : l10n.play,
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           unawaited(
-                            playerState.isPlaying
+                            _state.isPlaying
                                 ? controller.pause()
                                 : controller.play(),
                           );
                         },
                         icon: Icon(
-                          playerState.isPlaying
+                          _state.isPlaying
                               ? Icons.pause_rounded
                               : Icons.play_arrow_rounded,
                         ),
@@ -450,6 +516,20 @@ class _PlayerAreaState() extends State<_PlayerArea> {
     );
   }
 }
+
+/// 播放器错误类别 → 本地化标签。
+String _categoryLabel(AppLocalizations? l10n, PlaybackErrorCategory category) =>
+    switch (category) {
+      PlaybackErrorCategory.network =>
+        l10n?.playbackErrorNetwork ?? 'Network error',
+      PlaybackErrorCategory.decoder =>
+        l10n?.playbackErrorDecoder ?? 'Decoder error',
+      PlaybackErrorCategory.drm => l10n?.playbackErrorDrm ?? 'DRM error',
+      PlaybackErrorCategory.authorization =>
+        l10n?.playbackErrorAuthorization ?? 'Authorization error',
+      PlaybackErrorCategory.unknown =>
+        l10n?.playbackErrorUnknown ?? 'Unknown error',
+    };
 
 /// 整页错误态：详情加载失败时显示。
 class const _ErrorView({

@@ -1,12 +1,9 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../app_bloc.dart';
 
-List<BlocProvider> getBlocProviders(BuildContext context) => [
+List<BlocProvider> get blocProviders => [
   BlocProvider<AppBloc>(
-    create: ((context) {
-      return .new(userDataRepository: context.read());
-    }),
+    create: ((context) => .new(userDataRepository: context.read())),
   ),
 ];

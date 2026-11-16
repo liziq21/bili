@@ -29,6 +29,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - "**/localization_file/**"
 
 linter:
   rules:
