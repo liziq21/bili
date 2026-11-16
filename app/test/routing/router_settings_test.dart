@@ -9,12 +9,15 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   tearDownAll(router.dispose);
 
+  // Titles are the zh values from `app_zh.arb`: most settings labels are still
+  // English there, but the notifications page was translated.
   for (final (path, title) in [
     (Routes.settings, 'Settings'),
     (Routes.settingsPlayer, 'Player'),
     (Routes.settingsAppearance, 'Appearance'),
     (Routes.settingsHistory, 'History'),
     (Routes.settingsLibrary, 'Library'),
+    (Routes.settingsNotifications, '通知'),
     (Routes.settingsAdvanced, 'Advanced'),
   ]) {
     testWidgets('$path opens without any source or preferences providers', (
@@ -50,7 +53,7 @@ void main() {
         }
         expect(router.state.uri.path, Routes.settings);
         expect(find.byType(SettingScreen), findsOneWidget);
-        expect(find.byType(ListTile), findsNWidgets(6));
+        expect(find.byType(ListTile), findsNWidgets(7));
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

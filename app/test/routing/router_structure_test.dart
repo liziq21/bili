@@ -211,7 +211,7 @@ void main() {
           (route) => route.path == Routes.danmakuSettings,
         );
 
-        // Then all five children are relative and danmaku stays a sibling.
+        // Then all six children are relative and danmaku stays a sibling.
         expect(
           settings.routes.whereType<GoRoute>().map((route) => route.path),
           unorderedEquals([
@@ -219,6 +219,7 @@ void main() {
             'appearance',
             'history',
             'library',
+            'notifications',
             'advanced',
             'discovery',
           ]),
