@@ -13,7 +13,6 @@ import '../models/network_youtube_player.dart';
 import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_search.dart';
 import '../models/network_youtube_watch_next.dart';
-import '../protobuf/yt_protobuf_encoder.dart';
 
 final class YoutubeService {
   YoutubeService({
@@ -46,58 +45,28 @@ final class YoutubeService {
 
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
+  /// Searches videos.
+  ///
+  /// The `params` filter string is an opaque, already-encoded InnerTube search
+  /// filter: callers build it from their own filter model and this package
+  /// never interprets it. Content-type filtering is left to the caller so that
+  /// the same request shape serves every search tab.
   Future<NetworkYouTubeVideoSearchResponse> searchVideos(
     String query, {
-    int? sort,
-    int? uploadDate,
-    int? duration,
-    Set<int> features = const {},
+    String? params,
     String? continuation,
   }) async {
-    final sanitizedQuery = query.replaceAll(_controlChars, '');
-    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
-    final body = <String, dynamic>{};
-    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
-      body['continuation'] = sanitizedContinuation;
-    } else {
-      body['query'] = sanitizedQuery;
-      final params = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: sort,
-        uploadDate: uploadDate,
-        contentType: 1,
-        duration: duration,
-        features: features,
-      );
-      if (params.isNotEmpty) {
-        body['params'] = params;
-      }
-    }
-
+    final body = _searchBody(query, params: params, continuation: continuation);
     final response = await _sendSearch(body);
     return _parseResponse(response, NetworkYouTubeVideoSearchResponse.fromJson);
   }
 
   Future<NetworkYouTubeChannelSearchResponse> searchChannels(
     String query, {
-    int? sort,
+    String? params,
     String? continuation,
   }) async {
-    final sanitizedQuery = query.replaceAll(_controlChars, '');
-    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
-    final body = <String, dynamic>{};
-    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
-      body['continuation'] = sanitizedContinuation;
-    } else {
-      body['query'] = sanitizedQuery;
-      final params = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: sort,
-        contentType: 2,
-      );
-      if (params.isNotEmpty) {
-        body['params'] = params;
-      }
-    }
-
+    final body = _searchBody(query, params: params, continuation: continuation);
     final response = await _sendSearch(body);
     return _parseResponse(
       response,
@@ -107,30 +76,36 @@ final class YoutubeService {
 
   Future<NetworkYouTubePlaylistSearchResponse> searchPlaylists(
     String query, {
-    int? sort,
+    String? params,
     String? continuation,
   }) async {
-    final sanitizedQuery = query.replaceAll(_controlChars, '');
-    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
-    final body = <String, dynamic>{};
-    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
-      body['continuation'] = sanitizedContinuation;
-    } else {
-      body['query'] = sanitizedQuery;
-      final params = YoutubeProtobufEncoder.encodeSearchParams(
-        sort: sort,
-        contentType: 3,
-      );
-      if (params.isNotEmpty) {
-        body['params'] = params;
-      }
-    }
-
+    final body = _searchBody(query, params: params, continuation: continuation);
     final response = await _sendSearch(body);
     return _parseResponse(
       response,
       NetworkYouTubePlaylistSearchResponse.fromJson,
     );
+  }
+
+  /// Builds a search body: a continuation request on later pages, otherwise a
+  /// fresh query with the opaque [params] filter string when one is given.
+  Map<String, dynamic> _searchBody(
+    String query, {
+    String? params,
+    String? continuation,
+  }) {
+    final body = <String, dynamic>{};
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
+      return body;
+    }
+    body['query'] = query.replaceAll(_controlChars, '');
+    final sanitizedParams = params?.replaceAll(_controlChars, '');
+    if (sanitizedParams != null && sanitizedParams.isNotEmpty) {
+      body['params'] = sanitizedParams;
+    }
+    return body;
   }
 
   Future<NetworkYouTubeWatchNextResponse> getWatchNext({

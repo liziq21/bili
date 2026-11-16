@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:youtube/youtube.dart';
 
 import '../../../l10n/localization_file/app_localizations.dart';
 import 'filter_chip_item.dart';
@@ -17,7 +18,7 @@ class const FilterGroupSection({
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Text(
-            group.label,
+            group.localizedLabel(context),
             style: Theme.of(context).textTheme.titleSmall
                 ?.copyWith(fontWeight: .bold),
           ),
@@ -56,7 +57,7 @@ class const _SingleFilterView({
           final isSelected = group.selection == option;
           return FilterChipItem(
             key: ValueKey(option.value),
-            label: option.label,
+            label: option.localizedLabel(context),
             isSelected: isSelected,
             selectionMode: FilterChipSelectionMode.single,
             onSelected: (selected) {
@@ -85,7 +86,7 @@ class const _MultiFilterView({
           final isSelected = filter.isSelected(option);
           return FilterChipItem(
             key: ValueKey(option.value),
-            label: option.label,
+            label: option.localizedLabel(context),
             isSelected: isSelected,
             selectionMode: FilterChipSelectionMode.multiple,
             onSelected: (selected) {

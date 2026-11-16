@@ -6,4 +6,5 @@ export 'src/models/network_youtube_player.dart';
 export 'src/models/network_youtube_playlist_browse.dart';
 export 'src/models/network_youtube_search.dart';
 export 'src/models/network_youtube_watch_next.dart';
+export 'src/params/search_params.dart';
 export 'src/service/youtube_service.dart';

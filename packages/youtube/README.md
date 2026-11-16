@@ -4,7 +4,7 @@ YouTube 相关 API 客户端与远程数据源实现 package。
 
 ## 作用范围
 
-- **负责**：封装 YouTube API 客户端（`ypi`）、实现 Chopper REST 客户端与 Protobuf 编码器（`YoutubeProtobufEncoder` / `YoutubeParamsBuilder`）、实现 `packages/data` 中定义的 `RemoteDataSource` 接口，以及管理 YouTube 平台本地化资源（l10n）。
+- **负责**：封装 YouTube API 客户端（`ypi`）、实现 Chopper REST 客户端与 InnerTube 搜索参数编码（`YoutubeSearchParams`）、实现 `packages/data` 中定义的 `RemoteDataSource` 接口，以及管理 YouTube 平台本地化资源（l10n）。
 - **不负责**：不直接提供 Flutter 页面 UI，不处理本地缓存或 SQLite 持久化。
 
 ## 依赖关系
@@ -14,7 +14,7 @@ YouTube 相关 API 客户端与远程数据源实现 package。
 
 ## 主要目录
 
-- `lib/src/`：YouTube 远程数据源实现、Chopper 客户端与 Protobuf 编码模块
+- `lib/src/`：YouTube 远程数据源实现、Chopper 客户端与 InnerTube 搜索参数编码模块
 - `lib/l10n/`：本地化 ARB 文件及生成的本地化类 (`YoutubeLocalizations`)
 - `ypi/`：YouTube API 子包与底层客户端
 

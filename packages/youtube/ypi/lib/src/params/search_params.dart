@@ -1,7 +1,16 @@
 import 'dart:convert';
 
-abstract final class YoutubeProtobufEncoder {
-  static String encodeSearchParams({
+/// Encodes the opaque InnerTube `params` filter string for `/v1/search`.
+///
+/// The value is a base64-encoded protobuf message: varint field 2 carries the
+/// sort order and length-delimited field 8 carries a filter submessage whose
+/// varint fields are the upload date (1), content type (2), duration (3) and
+/// one field per enabled feature (using YouTube's own field tags). Callers
+/// translate their own filter model into these raw values; this package never
+/// depends on the caller's model.
+abstract final class YoutubeSearchParams {
+  /// Content type values: video (1), channel (2), playlist (3).
+  static String encode({
     int? sort,
     int? uploadDate,
     int? contentType,
@@ -10,12 +19,10 @@ abstract final class YoutubeProtobufEncoder {
   }) {
     final rootBuffer = <int>[];
 
-    // Field 2: Sort (Varint)
     if (sort != null && sort != 0) {
       _writeVarintField(rootBuffer, 2, sort);
     }
 
-    // Field 8: Filter options submessage
     final filterBuffer = <int>[];
     if (uploadDate != null) {
       _writeVarintField(filterBuffer, 1, uploadDate);

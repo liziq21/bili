@@ -9,7 +9,7 @@ This directory contains shared packages and modules (`packages/*`). A directory 
 ## Packages Overview
 
 - `bilibili/`: Bilibili API wrapper (`bpi`), remote data sources (`BiliVideoSearchRemoteDataSource`, etc.), models, and `BilibiliLocalizations` (l10n).
-- `youtube/`: YouTube API wrapper (`ypi`), remote data sources (`YouTubeVideoSearchRemoteDataSource`, etc.), Chopper REST client, and custom pure Dart Protobuf encoders (`YoutubeProtobufEncoder` / `YoutubeParamsBuilder`) for InnerTube endpoints, plus `YoutubeLocalizations` (l10n).
+- `youtube/`: YouTube API wrapper (`ypi`), remote data sources (`YouTubeVideoSearchRemoteDataSource`, etc.), Chopper REST client, and the InnerTube search params encoder (`YoutubeSearchParams`) for filter/sort requests, plus `YoutubeLocalizations` (l10n).
 - `data/`: Core canonical models (`VideoModel`, `LiveRoomModel`, `CreatorProfile`, etc.), abstract `RemoteDataSource`, `SearchQuery`, filter/pagination primitives, and optional capability interfaces.
 - `model/`: Shared domain models (`UserData` with `ServiceSource` & `ThemeConfig`, `Result<T>`).
 

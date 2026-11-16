@@ -45,8 +45,8 @@ final class const YouTubeVideoSearchRemoteDataSource(
       }
 
       int? sort;
-      if (searchQuery.sortOption is YoutubeSearchSort) {
-        sort = (searchQuery.sortOption as YoutubeSearchSort).valueInt;
+      if (searchQuery.sortOption case final YoutubeSearchSort s) {
+        sort = s.sortValue;
       }
 
       int? uploadDate;
@@ -54,46 +54,38 @@ final class const YouTubeVideoSearchRemoteDataSource(
       final features = <int>{};
 
       for (final filter in searchQuery.filters) {
-        if (filter is SingleFilterGroup) {
-          final selection = filter.selection;
-          if (selection == null) {
-            continue;
-          }
-          if (filter.key == 'upload_date') {
-            if (selection is YoutubeUploadDateFilterOption) {
-              uploadDate = selection.valueInt;
-            } else {
-              final found = YoutubeUploadDateFilterOption.values.firstWhere(
-                (option) => option.value == selection.value,
-                orElse: () => YoutubeUploadDateFilterOption.today,
+        switch (filter) {
+          case SingleFilterGroup(key: 'upload_date', :final selection):
+            uploadDate = youtubeFilterOptionFrom(
+              selection,
+              YoutubeUploadDateFilterOption.values,
+            )?.paramValue;
+          case SingleFilterGroup(key: 'duration', :final selection):
+            duration = youtubeFilterOptionFrom(
+              selection,
+              YoutubeDurationFilterOption.values,
+            )?.paramValue;
+          case MultiFilterGroup(key: 'feature', :final selections):
+            for (final selection in selections) {
+              final feature = youtubeFilterOptionFrom(
+                selection,
+                YoutubeFeatureFilterOption.values,
               );
-              uploadDate = found.valueInt;
+              if (feature != null) {
+                features.add(feature.paramValue);
+              }
             }
-          } else if (filter.key == 'duration') {
-            if (selection is YoutubeDurationFilterOption) {
-              duration = selection.valueInt;
-            } else {
-              final found = YoutubeDurationFilterOption.values.firstWhere(
-                (option) => option.value == selection.value,
-                orElse: () => YoutubeDurationFilterOption.fourTo20Minutes,
-              );
-              duration = found.valueInt;
-            }
-          }
-        } else if (filter is MultiFilterGroup && filter.key == 'feature') {
-          for (final selection in filter.selections) {
-            if (selection is YoutubeFeatureFilterOption) {
-              features.add(selection.fieldTag);
-            } else {
-              final found = YoutubeFeatureFilterOption.values.firstWhere(
-                (option) => option.value == selection.value,
-                orElse: () => YoutubeFeatureFilterOption.hd,
-              );
-              features.add(found.fieldTag);
-            }
-          }
+          default:
+            break;
         }
       }
+
+      final searchParams = (
+        sort: sort,
+        uploadDate: uploadDate,
+        duration: duration,
+        features: features,
+      );
 
       final continuationKey = '$query:$targetPage';
       final previousContinuationKey = '$query:${targetPage - 1}';
@@ -103,10 +95,7 @@ final class const YouTubeVideoSearchRemoteDataSource(
 
       final response = await _youtubeService.searchVideos(
         query,
-        sort: sort,
-        uploadDate: uploadDate,
-        duration: duration,
-        features: features,
+        params: searchParams.encode(),
         continuation: continuation,
       );
       final nextToken = videoContinuationToken(response);
