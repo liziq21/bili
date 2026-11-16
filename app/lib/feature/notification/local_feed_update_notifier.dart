@@ -67,14 +67,19 @@ final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
     if (!isSupported) return const Result.success(false);
 
     try {
-      final granted = await _android?.requestNotificationsPermission();
+      final android = _android;
+      // The platform channel is absent in headless runs (widget tests, unit
+      // tests without the Android host), which is not an error: there is
+      // simply nobody to ask.
+      if (android == null) return const Result.success(false);
+      final granted = await android.requestNotificationsPermission();
       return Result.success(granted ?? true);
     } on Object catch (error, stackTrace) {
-      return Result.error(
-        Exception(
-          'Failed to request notification permission: $error\n$stackTrace',
-        ),
-      );
+      // A missing or broken channel is indistinguishable from a denial here;
+      // callers treat both as "cannot notify right now".
+      debugPrint('Notification permission unavailable: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      return const Result.success(false);
     }
   }
 

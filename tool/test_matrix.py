@@ -148,6 +148,7 @@ TEST_MATRIX = {
         'app/test/domain/get_search_contents_use_case_test.dart',
         'app/test/feature/home/home_config_test.dart',
         'app/test/feature/media_library/media_history_cubit_test.dart',
+        'app/test/feature/notification/feed_update_notifier_test.dart',
         'app/test/feature/search_state_test.dart',
         'app/test/feature/video/media_stream_bloc_test.dart',
         'app/test/feature/video/player/media_edl_test.dart',
