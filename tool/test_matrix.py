@@ -200,7 +200,7 @@ TEST_MATRIX = {
         'packages/youtube/test/youtube_test.dart',
         'packages/youtube/ypi/test/from_json_test.dart',
         'packages/youtube/ypi/test/youtube_service_test.dart',
-        'packages/youtube/ypi/test/yt_protobuf_encoder_test.dart',
+        'packages/youtube/ypi/test/youtube_search_params_test.dart',
     ],
     'performance': [],
 }

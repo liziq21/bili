@@ -396,7 +396,10 @@ void main() {
       });
 
       final service = YoutubeService(httpClient: mockClient);
-      final response = await service.searchPlaylists('flutter playlist');
+      final response = await service.searchPlaylists(
+        'flutter playlist',
+        params: YoutubeSearchParams.encode(contentType: 3),
+      );
       final section =
           response
                   .contents!
@@ -1151,7 +1154,10 @@ void main() {
       });
 
       final service = YoutubeService(httpClient: mockClient);
-      final response = await service.searchPlaylists('flutter playlist');
+      final response = await service.searchPlaylists(
+        'flutter playlist',
+        params: YoutubeSearchParams.encode(contentType: 3),
+      );
       final section =
           response
                   .contents!

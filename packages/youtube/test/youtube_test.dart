@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:data/data.dart';
 import 'package:flutter/widgets.dart' hide Page;
@@ -145,6 +146,82 @@ void main() {
       expect(featureGroup.labelWithL10n(zh), equals('功能特性'));
       expect(featureGroup.labelWithL10n(en), equals('Features'));
     });
+
+    test('neutral filter options and groups resolve through YouTube l10n in app code', () {
+      final zh = lookupYoutubeLocalizations(const Locale('zh'));
+      final en = lookupYoutubeLocalizations(const Locale('en'));
+
+      // The filter sheet replaces entries in a List<FilterGroup>, so after a
+      // pick the entry is a neutral SingleFilterGroup. It still names the same
+      // YouTube group by key and its selected option by value.
+      final picked = const YoutubeUploadDateFilterGroup().copyWith(
+        selection: YoutubeUploadDateFilterOption.today,
+      );
+      final FilterGroup neutral = SingleFilterGroup(
+        key: picked.key,
+        label: picked.label,
+        options: picked.options,
+        selection: picked.selection,
+      );
+      expect(localizedGroupLabel(neutral, zh), equals('上传时间'));
+      expect(localizedGroupLabel(neutral, en), equals('Upload date'));
+      expect(
+        localizedOptionLabel((neutral as SingleFilterGroup).selection!, zh),
+        equals('今天'),
+      );
+      expect(localizedOptionLabel(neutral.selection!, en), equals('Today'));
+
+      // Groups from sources without their own l10n keep their label.
+      const otherGroup = SingleFilterGroup(
+        key: 'pubdate',
+        label: '发布时间',
+        options: [],
+      );
+      expect(localizedGroupLabel(otherGroup, en), equals('发布时间'));
+      expect(
+        localizedSortLabel(YoutubeSearchSort.rating, en),
+        equals('Rating'),
+      );
+    });
+
+    test(
+      'video search sends the encoded InnerTube params for sort and filters',
+      () async {
+        Map<String, dynamic>? requestBody;
+        final youtube = YouTube(
+          httpClient: MockClient((request) async {
+            requestBody = jsonDecode(request.body) as Map<String, dynamic>;
+            return http.Response(jsonEncode({'contents': {}}), 200);
+          }),
+        );
+
+        final result = await youtube.videoSearchDataSource.searchVideo(
+          const SearchQuery(
+            query: 'flutter',
+            sortOption: YoutubeSearchSort.viewCount,
+            filters: [
+              YoutubeUploadDateFilterGroup(
+                selection: YoutubeUploadDateFilterOption.today,
+              ),
+              YoutubeFeatureFilterGroup(
+                selections: {YoutubeFeatureFilterOption.fourK},
+              ),
+            ],
+          ),
+        );
+
+        expect(result, isA<Success<Page<VideoModel>, Exception>>());
+        final expected = YoutubeSearchParams.encode(
+          sort: YoutubeSearchSort.viewCount.sortValue,
+          contentType: YoutubeContentTypeFilterOption.video.contentType,
+          uploadDate: YoutubeUploadDateFilterOption.today.paramValue,
+          features: {YoutubeFeatureFilterOption.fourK.paramValue},
+        );
+        expect(requestBody?['params'], equals(expected));
+
+        await youtube.close();
+      },
+    );
 
     test('searchSuggestDataSource sanitizes control characters and returns empty list on blank queries', () async {
       var requestMade = false;

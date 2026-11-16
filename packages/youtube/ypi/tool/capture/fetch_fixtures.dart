@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:ypi/ypi.dart';
 
-import 'package:ypi/src/protobuf/yt_protobuf_encoder.dart';
-
 final class _CapturedResponse {
   const _CapturedResponse(this.response, this.bodyBytes);
 
@@ -62,9 +60,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 1,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 1),
             }),
           )
           .timeout(requestTimeout);
@@ -90,9 +86,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 2,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 2),
             }),
           )
           .timeout(requestTimeout);
@@ -118,9 +112,7 @@ Future<void> main(List<String> args) async {
             body: jsonEncode({
               'context': _clientContext,
               'query': 'Flutter',
-              'params': YoutubeProtobufEncoder.encodeSearchParams(
-                contentType: 3,
-              ),
+              'params': YoutubeSearchParams.encode(contentType: 3),
             }),
           )
           .timeout(requestTimeout);
@@ -669,9 +661,7 @@ Future<void> _probeChannelSearchForLockup(
           body: jsonEncode({
             'context': _clientContext,
             'query': 'Flutter',
-            'params': YoutubeProtobufEncoder.encodeSearchParams(
-              contentType: entry.value,
-            ),
+            'params': YoutubeSearchParams.encode(contentType: entry.value),
           }),
         )
         .timeout(timeout);
@@ -708,7 +698,7 @@ Future<void> _captureSearchChannelFixture(
         body: jsonEncode({
           'context': _clientContext,
           'query': 'Flutter',
-          'params': YoutubeProtobufEncoder.encodeSearchParams(contentType: 2),
+          'params': YoutubeSearchParams.encode(contentType: 2),
         }),
       )
       .timeout(timeout);

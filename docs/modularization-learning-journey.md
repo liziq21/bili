@@ -56,7 +56,7 @@ graph TD
 | `packages/model` | 跨服务共享的数据模型与 `Result<T>`；不依赖任何内部包 | `UserData`、`Result<T>`、`Ok<T>`、`Error<T>` |
 | `packages/data` | 业务模型与远端数据源的能力接口；只依赖 `model` | `RemoteDataSource`、`SearchRemoteDataSource`、`VideoDetailRemoteDataSource` |
 | `packages/bilibili/bpi` | B 站 API 客户端：Chopper 抽象接口 + 代码生成 + 业务信封打解 + fixture 抓取脚本 | `@ChopperApi` 标注的服务类、`envelopeFactories`、`tool/capture/` |
-| `packages/youtube/ypi` | YouTube API 客户端；额外有 Protobuf 编码 | InnerTube 端点、`YoutubeProtobufEncoder` |
+| `packages/youtube/ypi` | YouTube API 客户端；额外有 InnerTube 搜索参数编码 | InnerTube 端点、`YoutubeSearchParams` |
 | `packages/bilibili` | B 站客户端的上层封装：l10n、`RemoteDataSource` 实现 | `BiliPopularVideoFeedRemoteDataSource`、`BiliVideoDetailRemoteDataSource` |
 | `packages/youtube` | YouTube 客户端的上层封装 | `YouTubeRemoteDataSource`、`YouTubeVideoSearchRemoteDataSource` |
 | `app` | 主应用：UI、路由、领域用例、本地数据库、依赖注入 | `HomeBloc`、`AppDatabase`、`GoRouter` |

@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:youtube/youtube.dart';
 
 class const SortBar({
   super.key,
@@ -14,7 +15,7 @@ class const SortBar({
       items: sortOptions.map((option) {
         return DropdownMenuItem<SortOption>(
           value: option,
-          child: Text(option.label),
+          child: Text(option.localizedLabel(context)),
         );
       }).toList(),
     );
