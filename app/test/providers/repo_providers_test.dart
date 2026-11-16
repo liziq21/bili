@@ -191,8 +191,12 @@ void main() {
   testWidgets('the two sub-lists together equal the full provider list', (
     tester,
   ) async {
+    // The trailing constant counts the providers defined directly in
+    // `repoProviders`: UserDataRepository, RecentSearchQueryRepository,
+    // LocalLibraryRepository, GetRecentSearchQueriesUseCase and
+    // FeedUpdateNotifier.
     expect(
-      databaseProviders.length + preferencesProviders.length + 4,
+      databaseProviders.length + preferencesProviders.length + 5,
       repoProviders.length,
     );
   });
