@@ -4619,4 +4619,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String playlistFetchAllPartial(String count) {
     return '下载中断，已下载 $count 个视频';
   }
+
+  @override
+  String get settingsNotifications => '通知';
+
+  @override
+  String get feedUpdateNotifications => 'Feed 更新通知';
+
+  @override
+  String get feedUpdateNotificationsSubtitle => '检测到新 Feed 条目时发送通知';
+
+  @override
+  String get feedUpdateThreshold => '通知阈值';
+
+  @override
+  String get feedUpdateThresholdSubtitle => '仅当新条目数达到此值时才通知';
+
+  @override
+  String feedUpdateThresholdOption(int count) {
+    return '$count 条';
+  }
+
+  @override
+  String get feedUpdateThresholdOff => '关闭';
 }

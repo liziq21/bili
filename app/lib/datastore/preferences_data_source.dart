@@ -266,6 +266,22 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     30,
   );
 
+  /// Feed 更新通知阈值：当检测到的新条目数 ≥ 该值时触发通知。
+  ///
+  /// 设为 0 表示完全关闭该通知。默认 3。
+  static const feedUpdateNotificationThreshold = PreferencesKey<int>._(
+    'FEED_UPDATE_NOTIFICATION_THRESHOLD',
+    3,
+  );
+
+  /// 上次成功推送通知时的 Feed 条目总数（用于去重抑制）。
+  ///
+  /// 内部计数器，不直接面向用户。
+  static const feedUpdateNotificationLastCount = PreferencesKey<int>._(
+    'FEED_UPDATE_NOTIFICATION_LAST_COUNT',
+    0,
+  );
+
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // Dart 3.13 type patterns (`switch (T)`) only match non-nullable types:
   // `const (String?)` is a compile error, and `T.toString()` for nullable

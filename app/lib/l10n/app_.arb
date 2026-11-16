@@ -6248,5 +6248,38 @@
         "type": "String"
       }
     }
+  },
+  "settingsNotifications": "Notifications",
+  "@settingsNotifications": {
+    "description": "Settings group and subpage title - notifications"
+  },
+  "feedUpdateNotifications": "Feed update notifications",
+  "@feedUpdateNotifications": {
+    "description": "Toggle for feed update notifications"
+  },
+  "feedUpdateNotificationsSubtitle": "Notify when new feed items are detected",
+  "@feedUpdateNotificationsSubtitle": {
+    "description": "Subtitle for feed update notifications toggle"
+  },
+  "feedUpdateThreshold": "Notification threshold",
+  "@feedUpdateThreshold": {
+    "description": "Setting for minimum new items to trigger notification"
+  },
+  "feedUpdateThresholdSubtitle": "Only notify when new items reach this count",
+  "@feedUpdateThresholdSubtitle": {
+    "description": "Subtitle for notification threshold setting"
+  },
+  "feedUpdateThresholdOption": "{count} items",
+  "@feedUpdateThresholdOption": {
+    "description": "Threshold option with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedUpdateThresholdOff": "Off",
+  "@feedUpdateThresholdOff": {
+    "description": "Threshold option to disable notifications"
   }
 }

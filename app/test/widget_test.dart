@@ -8,12 +8,16 @@ import 'package:app/data/repository/recent_search_query/recent_search_query_repo
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/feature/notification/feed_update_notifier.dart';
 import 'package:app/feature/setting/advanced_settings_screen.dart';
 import 'package:app/feature/setting/appearance_settings_screen.dart';
 import 'package:app/feature/setting/history_settings_screen.dart';
 import 'package:app/feature/setting/library_settings_screen.dart';
+import 'package:app/feature/setting/notification_settings_screen.dart';
 import 'package:app/feature/setting/player_settings_screen.dart';
 import 'package:app/feature/setting/setting_screen.dart';
+import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/router.dart';
 import 'package:app/routing/routes.dart';
@@ -25,6 +29,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 /// A fake AppBloc that doesn't use emit.forEach on a stream.
 /// The real AppBloc uses emit.forEach in _onStarted which creates a subscription
@@ -121,6 +128,31 @@ class FakeRecentSearchQueryRepository() implements RecentSearchQueryRepository {
 
   @override
   Future<void> deleteRecentSearchQuery(String query) async {}
+}
+
+/// 通知设置页的真实实现走 `flutter_local_notifications` 平台通道，测试里没有
+/// Android host，所以用一个只报告能力的 fake 替换。
+final class _FakeFeedUpdateNotifier() implements FeedUpdateNotifier {
+  @override
+  bool get isSupported => true;
+
+  @override
+  Future<Result<void, Exception>> initialize() async =>
+      const Result.success(null);
+
+  @override
+  Future<Result<bool, Exception>> requestPermission() async =>
+      const Result.success(true);
+
+  @override
+  Future<Result<int, Exception>> notifyIfThresholdReached({
+    required int currentCount,
+    required int threshold,
+    required int lastNotifiedCount,
+  }) async => Result.success(lastNotifiedCount);
+
+  @override
+  Future<void> dispose() async {}
 }
 
 class _FakeVideoFeed() extends VideoFeedRemoteDataSource {
@@ -230,6 +262,13 @@ void main() {
       // 顺序对齐 `main.dart`：仓库在 bloc 和 MediaSource 之外层。
       final recentSearchQueryRepository = FakeRecentSearchQueryRepository();
       final userDataRepository = FakeUserDataRepository();
+      // 通知设置子页读取 `preferences` 和 `FeedUpdateNotifier`；后者在测试里
+      // 用 fake 而不是真实的平台通道实现。
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      final preferences = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
       try {
         await tester.pumpWidget(
           RepositoryProvider<UserDataRepository>.value(
@@ -240,11 +279,17 @@ void main() {
                 value: GetRecentSearchQueriesUseCase(
                   recentSearchQueryRepository: recentSearchQueryRepository,
                 ),
-                child: BlocProvider<AppBloc>(
-                  create: (_) => FakeAppBloc(),
-                  child: Provider<MediaSourceCatalog>.value(
-                    value: mediaSourceCatalog,
-                    child: const App(),
+                child: RepositoryProvider<PreferencesDataSource>.value(
+                  value: preferences,
+                  child: RepositoryProvider<FeedUpdateNotifier>.value(
+                    value: _FakeFeedUpdateNotifier(),
+                    child: BlocProvider<AppBloc>(
+                      create: (_) => FakeAppBloc(),
+                      child: Provider<MediaSourceCatalog>.value(
+                        value: mediaSourceCatalog,
+                        child: const App(),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -287,12 +332,32 @@ void main() {
           await tester.tap(find.byType(BackButton));
           await tester.pumpAndSettle();
           expect(find.byType(SettingScreen), findsOneWidget);
-          expect(find.byType(ListTile), findsNWidgets(6));
+          expect(find.byType(ListTile), findsNWidgets(7));
         }
+        // 通知子页的标题已本地化，zh locale 下用中文标签匹配。
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(SettingScreen)),
+        )!;
+        await tester.tap(
+          find.widgetWithText(ListTile, l10n.settingsNotifications),
+        );
+        await tester.pumpAndSettle();
+        expect(router.state.uri.path, Routes.settingsNotifications);
+        expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+        expect(
+          find.widgetWithText(AppBar, l10n.settingsNotifications),
+          findsOneWidget,
+        );
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.byType(BackButton));
+        await tester.pumpAndSettle();
+        expect(find.byType(SettingScreen), findsOneWidget);
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();
+        preferences.dispose();
       }
     },
   );

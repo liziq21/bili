@@ -13,6 +13,8 @@ import '../database/dao/creator_profile_dao.dart';
 import '../database/dao/recent_search_query_dao.dart';
 import '../datastore/preferences_data_source.dart';
 import '../domain/get_recent_search_queries_use_case.dart';
+import '../feature/notification/feed_update_notifier.dart';
+import '../feature/notification/local_feed_update_notifier.dart';
 
 final _log = Logger('DatabaseProviders');
 
@@ -69,5 +71,9 @@ List<RepositoryProvider> get repoProviders => [
   ),
   RepositoryProvider<GetRecentSearchQueriesUseCase>(
     create: (context) => .new(recentSearchQueryRepository: context.read()),
+  ),
+  RepositoryProvider<FeedUpdateNotifier>(
+    create: (context) => LocalFeedUpdateNotifier(context.read()),
+    dispose: (notifier) => notifier.dispose(),
   ),
 ];

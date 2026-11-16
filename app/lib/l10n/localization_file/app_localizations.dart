@@ -7972,6 +7972,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fetched {count} videos before the fetch stopped'**
   String playlistFetchAllPartial(String count);
+
+  /// Settings group and subpage title - notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// Toggle for feed update notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Feed update notifications'**
+  String get feedUpdateNotifications;
+
+  /// Subtitle for feed update notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Notify when new feed items are detected'**
+  String get feedUpdateNotificationsSubtitle;
+
+  /// Setting for minimum new items to trigger notification
+  ///
+  /// In en, this message translates to:
+  /// **'Notification threshold'**
+  String get feedUpdateThreshold;
+
+  /// Subtitle for notification threshold setting
+  ///
+  /// In en, this message translates to:
+  /// **'Only notify when new items reach this count'**
+  String get feedUpdateThresholdSubtitle;
+
+  /// Threshold option with count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String feedUpdateThresholdOption(int count);
+
+  /// Threshold option to disable notifications
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get feedUpdateThresholdOff;
 }
 
 class _AppLocalizationsDelegate

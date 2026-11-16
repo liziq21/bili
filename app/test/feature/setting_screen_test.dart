@@ -27,7 +27,7 @@ void main() {
   ];
 
   group('SettingScreen', () {
-    testWidgets('shows the settings title and exactly five groups in order', (
+    testWidgets('shows the settings title and exactly seven groups in order', (
       tester,
     ) async {
       // Given the app's zh locale and both material localization delegates.
@@ -49,8 +49,17 @@ void main() {
         expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
 
         final tiles = find.byType(ListTile);
-        expect(tiles, findsNWidgets(6));
-        for (final (index, (_, label)) in sections.indexed) {
+        expect(tiles, findsNWidgets(7));
+        final orderedLabels = [
+          l10n.settingsPlayer,
+          l10n.settingsAppearance,
+          l10n.settingsHistory,
+          l10n.settingsLibrary,
+          l10n.settingsNotifications,
+          l10n.settingsAdvanced,
+          l10n.settingsDiscovery,
+        ];
+        for (final (index, label) in orderedLabels.indexed) {
           final tile = tiles.at(index);
           expect(
             find.descendant(of: tile, matching: find.text(label)),
@@ -94,6 +103,37 @@ void main() {
         }
       });
     }
+
+    testWidgets('selecting Notifications reports only its section', (
+      tester,
+    ) async {
+      // Given an index with a recording selection callback.
+      final selections = <SettingsSection>[];
+
+      try {
+        await tester.pumpWidget(
+          _buildScreen(SettingScreen(onSectionSelected: selections.add)),
+        );
+        await tester.pump();
+        expect(selections, isEmpty);
+
+        // When the notifications tile is tapped (label is localized).
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(SettingScreen)),
+        )!;
+        await tester.tap(
+          find.widgetWithText(ListTile, l10n.settingsNotifications),
+        );
+        await tester.pump();
+
+        // Then exactly one callback identifies that group.
+        expect(selections, [SettingsSection.notifications]);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
   });
 
   group('Settings subpages', () {

@@ -10,12 +10,16 @@ plugins {
 
 android {
     namespace = "com.example.bili"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23.x requires compileSdk 37, which is newer than
+    // the Flutter default (36). Pin it explicitly so the plugin's resources compile.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Required by flutter_local_notifications (java.time APIs on older APIs).
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlin {
@@ -30,6 +34,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     packagingOptions.jniLibs.useLegacyPackaging = true
@@ -108,4 +113,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }

@@ -4631,4 +4631,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String playlistFetchAllPartial(String count) {
     return 'Fetched $count videos before the fetch stopped';
   }
+
+  @override
+  String get settingsNotifications => 'Notifications';
+
+  @override
+  String get feedUpdateNotifications => 'Feed update notifications';
+
+  @override
+  String get feedUpdateNotificationsSubtitle =>
+      'Notify when new feed items are detected';
+
+  @override
+  String get feedUpdateThreshold => 'Notification threshold';
+
+  @override
+  String get feedUpdateThresholdSubtitle =>
+      'Only notify when new items reach this count';
+
+  @override
+  String feedUpdateThresholdOption(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get feedUpdateThresholdOff => 'Off';
 }

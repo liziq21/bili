@@ -6248,5 +6248,38 @@
         "type": "String"
       }
     }
+  },
+  "settingsNotifications": "通知",
+  "@settingsNotifications": {
+    "description": "Settings group and subpage title - notifications"
+  },
+  "feedUpdateNotifications": "Feed 更新通知",
+  "@feedUpdateNotifications": {
+    "description": "Toggle for feed update notifications"
+  },
+  "feedUpdateNotificationsSubtitle": "检测到新 Feed 条目时发送通知",
+  "@feedUpdateNotificationsSubtitle": {
+    "description": "Subtitle for feed update notifications toggle"
+  },
+  "feedUpdateThreshold": "通知阈值",
+  "@feedUpdateThreshold": {
+    "description": "Setting for minimum new items to trigger notification"
+  },
+  "feedUpdateThresholdSubtitle": "仅当新条目数达到此值时才通知",
+  "@feedUpdateThresholdSubtitle": {
+    "description": "Subtitle for notification threshold setting"
+  },
+  "feedUpdateThresholdOption": "{count} 条",
+  "@feedUpdateThresholdOption": {
+    "description": "Threshold option with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedUpdateThresholdOff": "关闭",
+  "@feedUpdateThresholdOff": {
+    "description": "Threshold option to disable notifications"
   }
 }
