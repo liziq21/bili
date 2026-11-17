@@ -18,18 +18,28 @@ class const LiveFeedSection({
   required final VoidCallback onRetry,
 }) extends StatelessWidget {
   /// 直播卡片高度：封面 16:9 + 两行文字，随字体缩放而变化
+  ///
+  /// 文字高度必须取字体令牌的真实行高（`fontSize * height`）。早先按
+  /// `fontSize * 1.5` 估算，而 `bodySmall` / `bodySmallBold` 的实际行高是
+  /// 23/14 ≈ 1.643，每行少算 2px；两行文字靠 `Flexible` 挤进不足的高度里，
+  /// 放大字号时下半截字形被裁掉。末尾 `ceilToDouble` 与
+  /// [VideoFeedSection.cardExtent] 一致，避免亚像素误差再次挤掉文字。
   static double cardExtent(BuildContext context, double cardWidth) {
     final textScaler = MediaQuery.textScalerOf(context);
-    final titleHeight =
-        textScaler.scale($styles.text.bodySmallBold.fontSize ?? 14) * 1.5;
-    final streamerHeight =
-        textScaler.scale($styles.text.bodySmall.fontSize ?? 14) * 1.5;
+    // 两行文字都是单行（maxLines: 1），行高由令牌的 height 比例决定。
+    final titleLineHeight =
+        ($styles.text.bodySmallBold.fontSize ?? 14) *
+        ($styles.text.bodySmallBold.height ?? 1.643);
+    final streamerLineHeight =
+        ($styles.text.bodySmall.fontSize ?? 14) *
+        ($styles.text.bodySmall.height ?? 1.643);
 
-    return cardWidth * 9 / 16 +
-        titleHeight +
-        streamerHeight +
-        $styles.insets.xs * 2 +
-        $styles.insets.xxs;
+    return (cardWidth * 9 / 16 +
+            textScaler.scale(titleLineHeight) +
+            textScaler.scale(streamerLineHeight) +
+            $styles.insets.xs * 2 +
+            $styles.insets.xxs)
+        .ceilToDouble();
   }
 
   @override
