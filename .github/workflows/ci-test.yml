@@ -142,7 +142,7 @@ jobs:
       - name: Notify golden fix hint
         if: failure()
         run: |
-          echo "::notice title=金丝雀测试失败快速修复:: 本地运行 \`flutter test --update-goldens\` 重录基线图片"
+          echo "::notice title=金丝雀测试失败修复指引:: 基线需由 CI 统一录制，请触发 rerecord-goldens.yml workflow 并指定 target_ref 为当前分支，详见 docs/runbook.md"
 
       - name: Upload current goldens for visual review
         if: always()

@@ -113,4 +113,94 @@ void main() {
     expect(moreTapped, isTrue);
     await clearImageCacheDuringTest(tester);
   });
+
+  testWidgets(
+    'VideoCard enforces ellipsis and maxLines on title and subtitle layout',
+    (WidgetTester tester) async {
+      final video = VideoModel(
+        id: 'BV1layoutTest',
+        title:
+            'Extremely long video title designed to verify that layout ellipsis '
+            'and two-line constraint are strictly preserved without overflow',
+        url: 'https://example.com/video/layout',
+        thumbnailUrl: 'https://example.com/thumb.jpg',
+        viewCount: 123456,
+        creatorProfileName: 'Creator With Very Long Name Testing Overflow',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 280,
+              height: 240,
+              child: VideoCard(videoInfoBase: video),
+            ),
+          ),
+        ),
+      );
+
+      final titleWidget = tester.widget<Text>(
+        find.text(
+          'Extremely long video title designed to verify that layout ellipsis '
+          'and two-line constraint are strictly preserved without overflow',
+        ),
+      );
+      expect(titleWidget.maxLines, 2);
+      expect(titleWidget.overflow, TextOverflow.ellipsis);
+
+      final subtitleWidget = tester.widget<Text>(
+        find.textContaining('Creator With Very Long Name Testing Overflow'),
+      );
+      expect(subtitleWidget.maxLines, 1);
+      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+
+      await clearImageCacheDuringTest(tester);
+    },
+  );
+
+  testWidgets(
+    'VideoCard feed variant enforces ellipsis and maxLines on title and creator info',
+    (WidgetTester tester) async {
+      final video = VideoModel(
+        id: 'BV1feedLayout',
+        title: 'Feed variant extremely long title to assert layout ellipsis and constraints',
+        url: 'https://example.com/video/feedLayout',
+        thumbnailUrl: 'https://example.com/thumb.jpg',
+        viewCount: 999999,
+        creatorProfileName: 'Feed Creator With Long Name',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 320,
+              height: 300,
+              child: VideoCard(
+                variant: VideoCardVariant.feed,
+                videoInfoBase: video,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final titleWidget = tester.widget<Text>(
+        find.text(
+          'Feed variant extremely long title to assert layout ellipsis and constraints',
+        ),
+      );
+      expect(titleWidget.maxLines, 2);
+      expect(titleWidget.overflow, TextOverflow.ellipsis);
+
+      final subtitleWidget = tester.widget<Text>(
+        find.textContaining('Feed Creator With Long Name'),
+      );
+      expect(subtitleWidget.maxLines, 1);
+      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+
+      await clearImageCacheDuringTest(tester);
+    },
+  );
 }

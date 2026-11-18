@@ -65,4 +65,38 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets(
+    'CreatorProfileItem enforces ellipsis and single-line layout for name and subtitle',
+    (WidgetTester tester) async {
+      const creator = CreatorProfile(
+        id: '12345678901234567890',
+        name: 'Very Long Creator Profile Name Designed To Assert Ellipsis',
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 280,
+              height: 80,
+              child: CreatorProfileItem(creatorProfile: creator),
+            ),
+          ),
+        ),
+      );
+
+      final nameWidget = tester.widget<Text>(
+        find.text('Very Long Creator Profile Name Designed To Assert Ellipsis'),
+      );
+      expect(nameWidget.maxLines, 1);
+      expect(nameWidget.overflow, TextOverflow.ellipsis);
+
+      final subtitleWidget = tester.widget<Text>(
+        find.text('@12345678901234567890'),
+      );
+      expect(subtitleWidget.maxLines, 1);
+      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+    },
+  );
 }
