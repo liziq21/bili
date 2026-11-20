@@ -135,7 +135,5 @@ sealed class _FeedRow();
 
 final class _ChannelRow(final FeedChannelGroup group) extends _FeedRow;
 
-final class _EntryRow(
-  final FeedChannelGroup group,
-  final FeedEntryEntity entry,
-) extends _FeedRow;
+final class _EntryRow(final FeedChannelGroup group, final FeedEntryEntity entry)
+    extends _FeedRow;
