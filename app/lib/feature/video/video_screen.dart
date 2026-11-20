@@ -30,6 +30,18 @@ class const VideoScreen({
   final String videoId = 'demo_video',
   final VideoQueueRequest? queue,
   final VoidCallback? onBackClick,
+
+  /// 播放器会话，为 null 时页面自建并在销毁时释放。
+  ///
+  /// 测试用它注入假播放器：真实的 [MediaPlaybackController] 会初始化原生库，
+  /// 在 widget 测试环境里起不来。与 [LiveScreen] 的注入方式一致。
+  final MediaPlaybackController? playbackController,
+
+  /// 画面构建器，透传给 [VideoPlayer]。
+  ///
+  /// 真 `Video` 依赖平台 Texture Registry 与 libmpv，widget 测试里渲染会挂住
+  /// pump；需要断言「页面起播后 seek 到续播位置」的测试经此注入纯 Flutter 画面。
+  final Widget Function(MediaPlaybackController controller)? surfaceBuilder,
 }) extends StatefulWidget {
   @override
   State<VideoScreen> createState() => VideoScreenState();
@@ -62,8 +74,11 @@ class VideoScreenState() extends State<VideoScreen> {
 
   /// 惰性初始化：原生库（libmpv）须先 [MediaKit.ensureInitialized]，
   /// 在 widget 测试环境起不来；仅在 build 被调用时才创建。
+  ///
+  /// 外部注入的会话不在此处创建，也不由页面释放。
   MediaPlaybackController _ensurePlaybackController() {
-    _playbackController ??= MediaPlaybackController();
+    _playbackController ??=
+        widget.playbackController ?? MediaPlaybackController();
     return _playbackController!;
   }
 
@@ -279,7 +294,8 @@ class VideoScreenState() extends State<VideoScreen> {
   void dispose() {
     _stopProgressTracking();
     unawaited(_saveProgress());
-    _playbackController?.dispose();
+    // 注入的会话归调用方所有：与 LiveScreen 一致，页面只释放自建的那个。
+    if (widget.playbackController == null) _playbackController?.dispose();
     super.dispose();
   }
 
@@ -331,6 +347,7 @@ class VideoScreenState() extends State<VideoScreen> {
             playbackController: controller,
             queue: _queueResult,
             onBackClick: widget.onBackClick,
+            surfaceBuilder: widget.surfaceBuilder,
           ),
         ),
       ),
@@ -363,6 +380,7 @@ class const _VideoContent({
   required final MediaPlaybackController playbackController,
   final VideoQueueResult? queue,
   final VoidCallback? onBackClick,
+  final Widget Function(MediaPlaybackController controller)? surfaceBuilder,
 }) extends StatefulWidget {
   @override
   State<_VideoContent> createState() => _VideoContentState();
@@ -434,6 +452,7 @@ class _VideoContentState() extends State<_VideoContent> {
           context.read<VideoBloc>().add(LoadMediaStream(widget.videoId)),
       onMinimize: _minimize,
       queue: widget.queue,
+      surfaceBuilder: widget.surfaceBuilder,
     );
     final content = Column(
       children: [

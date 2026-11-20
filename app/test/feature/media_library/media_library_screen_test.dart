@@ -1,11 +1,13 @@
 // ignore_for_file: use_declaring_parameters
 
 import 'package:app/database/app_database.dart';
+import 'package:app/database/dao/media_history_dao.dart';
+import 'package:app/database/table/media.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:app/feature/media_library/media_library_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -307,6 +309,138 @@ void main() {
     expect(find.text('Bilibili - Just now'), findsOneWidget);
   });
 
+  testWidgets('long-press deletes the row after confirmation', (tester) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+    await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    await tester.longPress(find.textContaining('Video v1'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete "Video v1" from history?'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // 删除先写库再发提示，库操作是真实异步 I/O：假时钟推不动它，必须让出
+    // 真实时间；随后只 pump 一帧断言提示，pumpAndSettle 会把 SnackBar 的
+    // 自动消失计时一起走完。
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(find.text('Removed from history'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Video v1'), findsNothing);
+    expect(find.textContaining('Video v2'), findsOneWidget);
+    // 确认框只是界面动作，库里的行必须真的没了，否则重进页面又出现。
+    final rows = await db.mediaHistoryDao.getHistoryWithMedia();
+    expect(rows.map((row) => row.media.originalId), ['v2']);
+  });
+
+  testWidgets('cancelling the delete dialog keeps the row', (tester) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    await tester.longPress(find.textContaining('Video v1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Video v1'), findsOneWidget);
+    expect(await db.mediaHistoryDao.getHistoryWithMedia(), hasLength(1));
+  });
+
+  testWidgets('the header clear action empties the list after confirmation', (
+    tester,
+  ) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+    await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    await tester.tap(find.byTooltip('Clear all watch history'));
+    await tester.pumpAndSettle();
+    expect(find.text('Clear all watch history?'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // 同上：清空同样先写库，真实 I/O 需要让出真实时间。
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(find.text('Watch history cleared'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    expect(cubit.state.items, isEmpty);
+    expect(find.text('No watch history yet'), findsOneWidget);
+    expect(await db.mediaHistoryDao.getHistoryWithMedia(), isEmpty);
+  });
+
+  testWidgets('a failed delete shows no success snack bar', (tester) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: _FailingDeleteHistoryDao(db),
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    await tester.longPress(find.textContaining('Video v1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // 先等对话框退场，否则它的标题里也含「Video v1」，与列表行的断言撞在一起。
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    // 写库失败时行还在树上，提示不能说「已移除」——那与用户看到的画面矛盾。
+    expect(find.text('Removed from history'), findsNothing);
+    expect(find.textContaining('Video v1'), findsOneWidget);
+    expect(cubit.state.error, isNotNull);
+  });
+
+  testWidgets('the clear action is disabled while the list is empty', (
+    tester,
+  ) async {
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    // 空列表上清空没有意义；常驻但禁用，比忽隐忽现更容易预期。
+    final button = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.delete_sweep_outlined),
+    );
+    expect(button.onPressed, isNull);
+  });
+
   testWidgets('tapping a row hands over the source that row was loaded from', (
     tester,
   ) async {
@@ -356,4 +490,14 @@ void main() {
     expect(tapped.single.video.id, 'v1');
     expect(tapped.single.sourceId, 'bilibili');
   });
+}
+
+/// 删除必然失败的 DAO 包装：只覆盖删除路径，查询仍走真实数据库。
+final class _FailingDeleteHistoryDao(super.db) extends MediaHistoryDao {
+  @override
+  Future<int> deleteHistoryForMediaKey({
+    required String sourceId,
+    required String originalId,
+    String type = Media.typeVideo,
+  }) async => throw StateError('delete failed');
 }

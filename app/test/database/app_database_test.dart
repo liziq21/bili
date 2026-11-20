@@ -296,5 +296,93 @@ void main() {
       expect(rows.single.media.title, 'A title');
       expect(rows.single.media.url, 'https://example.com/video');
     });
+
+    test(
+      'deleteHistoryForMediaKey removes only the matching history row',
+      () async {
+        final historyDao = db.mediaHistoryDao;
+        await historyDao.getOrCreateMediaId(
+          'bilibili',
+          'BV_KEEP',
+          Media.typeVideo,
+          title: 'Keep',
+          url: 'https://example.com/keep',
+        );
+        await historyDao.getOrCreateMediaId(
+          'bilibili',
+          'BV_DROP',
+          Media.typeVideo,
+          title: 'Drop',
+          url: 'https://example.com/drop',
+        );
+        // 同一 originalId 挂在另一个数据源下是另一行（media 唯一键含 sourceId），
+        // 按 {sourceId, originalId} 删除时不能连带删掉它。
+        await historyDao.getOrCreateMediaId(
+          'youtube',
+          'BV_DROP',
+          Media.typeVideo,
+          title: 'Other source',
+          url: 'https://example.com/other',
+        );
+
+        final deleted = await historyDao.deleteHistoryForMediaKey(
+          sourceId: 'bilibili',
+          originalId: 'BV_DROP',
+        );
+
+        expect(deleted, 1);
+        final remaining = await historyDao.getHistoryWithMedia();
+        expect(
+          remaining.map(
+            (row) => '${row.media.sourceId}/${row.media.originalId}',
+          ),
+          unorderedEquals(['bilibili/BV_KEEP', 'youtube/BV_DROP']),
+        );
+      },
+    );
+
+    test('deleting history keeps the media row it pointed at', () async {
+      final historyDao = db.mediaHistoryDao;
+      await historyDao.getOrCreateMediaId(
+        'bilibili',
+        'BV_MEDIA_KEPT',
+        Media.typeVideo,
+        title: 'Kept media',
+        url: 'https://example.com/kept',
+      );
+
+      await historyDao.deleteHistoryForMediaKey(
+        sourceId: 'bilibili',
+        originalId: 'BV_MEDIA_KEPT',
+      );
+
+      expect(await historyDao.getHistoryWithMedia(), isEmpty);
+      // media 是元数据缓存（时长、播放量、封面），详情页直接读它；清历史不该连它一起删。
+      final media = await db.select(db.media).get();
+      expect(media.map((row) => row.originalId), ['BV_MEDIA_KEPT']);
+    });
+
+    test(
+      'clearHistory empties the table without touching media rows',
+      () async {
+        final historyDao = db.mediaHistoryDao;
+        for (final id in ['BV_C1', 'BV_C2', 'BV_C3']) {
+          await historyDao.getOrCreateMediaId(
+            'bilibili',
+            id,
+            Media.typeVideo,
+            title: id,
+            url: 'https://example.com/$id',
+          );
+        }
+        expect(await historyDao.getHistoryWithMedia(), hasLength(3));
+
+        final deleted = await historyDao.clearHistory();
+
+        expect(deleted, 3);
+        expect(await historyDao.getHistoryWithMedia(), isEmpty);
+        expect(await db.select(db.media).get(), hasLength(3));
+      },
+    );
   });
 }

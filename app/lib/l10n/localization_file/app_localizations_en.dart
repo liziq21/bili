@@ -4582,6 +4582,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearAllSearchHistory => 'Clear all search history';
 
   @override
+  String get clearAllWatchHistory => 'Clear all watch history';
+
+  @override
+  String get clearWatchHistoryConfirm => 'Clear all watch history?';
+
+  @override
+  String get clearWatchHistoryMessage =>
+      'This removes every entry from your watch history. The action cannot be undone.';
+
+  @override
+  String get historyItemRemoved => 'Removed from history';
+
+  @override
+  String get watchHistoryCleared => 'Watch history cleared';
+
+  @override
   String get clearSearchHistoryConfirm => 'Clear all search history?';
 
   @override

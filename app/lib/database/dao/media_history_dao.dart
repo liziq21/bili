@@ -92,6 +92,37 @@ class MediaHistoryDao(super.db)
     return rows.first.progressSeconds?.toInt();
   }
 
+  /// 按 `{sourceId, type, originalId}` 删除一条历史，返回删除的行数。
+  ///
+  /// 只删 `media_history` 行。`media` 是按 `{sourceId, type, originalId}` 共享的
+  /// 元数据缓存，`video`/`article`/`post` 子行（时长、播放量、正文）挂在它下面
+  /// 并随之级联。用户清的是「看过什么」，不是这些元数据；顺手删 media 会连同
+  /// 子行一起带走，下次进入还得重新抓。孤儿 media 行的回收是独立议题，不在本单。
+  ///
+  /// 列表项只带这三个字段，不带 `media.internalId`；用子查询定位 media 行，
+  /// 避免调用方为了一次删除再查一次 id。
+  Future<int> deleteHistoryForMediaKey({
+    required String sourceId,
+    required String originalId,
+    String type = Media.typeVideo,
+  }) {
+    final mediaIds = selectOnly(media)
+      ..addColumns([media.internalId])
+      ..where(
+        media.sourceId.equals(sourceId) &
+            media.type.equals(type) &
+            media.originalId.equals(originalId),
+      );
+    return (delete(
+      mediaHistory,
+    )..where((h) => h.mediaId.isInQuery(mediaIds))).go();
+  }
+
+  /// 清空全部观看历史，返回删除的行数。
+  ///
+  /// 与 [deleteHistoryForMediaKey] 一样只删历史行，不动 `media` 元数据缓存。
+  Future<int> clearHistory() => delete(mediaHistory).go();
+
   /// Gets the history rows joined with their media rows.
   Future<List<MediaHistoryWithMedia>> getHistoryWithMedia({
     int limit = 20,

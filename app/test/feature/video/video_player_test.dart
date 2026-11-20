@@ -5,6 +5,9 @@ import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_player.dart';
 import 'package:app/feature/video/common_widgets/player_gesture_layer.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+
+import 'fake_platform_player.dart';
+
 import 'package:app/feature/video/video_queue_request.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,7 +74,7 @@ void main() {
     testWidgets(
       'next button drives controller.next and previous button drives controller.previous',
       (tester) async {
-        final fake = _FakePlatformPlayer();
+        final fake = FakePlatformPlayer();
         final controller = MediaPlaybackController(fake);
 
         final bloc = VideoBloc(repository: _NoStreamRepository());
@@ -104,7 +107,7 @@ void main() {
     testWidgets('cycling loop mode updates the loop mode tooltip dynamically', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
 
       final bloc = VideoBloc(repository: _NoStreamRepository());
@@ -136,7 +139,7 @@ void main() {
     testWidgets('opens a sheet with queue metadata and edit controls', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _NoStreamRepository());
       await pumpPlayer(tester, bloc: bloc, controller: controller);
@@ -173,7 +176,7 @@ void main() {
     });
 
     testWidgets('opens the queue from a playlist request', (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _StaticStreamRepository());
       final queue = VideoQueueResult(
@@ -211,7 +214,7 @@ void main() {
     });
 
     testWidgets('starts the queue at the requested index', (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _StaticStreamRepository());
       final queue = VideoQueueResult(
@@ -250,7 +253,7 @@ void main() {
 
   group('retry and restore progress', () {
     test('retry reopens the stream', () async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final stream = MediaStream(videoUrl: 'https://example.com/v.m4s');
 
@@ -263,7 +266,7 @@ void main() {
     });
 
     test('restorePositionSeconds triggers seek after open', () async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       controller.restorePositionSeconds = 30;
 
@@ -276,7 +279,7 @@ void main() {
     });
 
     test('retry after restorePositionSeconds does not re-seek', () async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final stream = MediaStream(videoUrl: 'https://example.com/v.m4s');
       controller.restorePositionSeconds = 45;
@@ -297,7 +300,7 @@ void main() {
   testWidgets(
     'opens a changed stream once and leaves reopening to the surface',
     (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _NoStreamRepository());
       addTearDown(controller.dispose);
@@ -372,7 +375,7 @@ void main() {
     }
 
     testWidgets('fills the whole box instead of a 16:9 area', (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -391,7 +394,7 @@ void main() {
     });
 
     testWidgets('embedded mode keeps the 16:9 area', (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -409,7 +412,7 @@ void main() {
     });
 
     testWidgets('embedded controls stay below the video area', (tester) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -430,7 +433,7 @@ void main() {
     testWidgets('shows the categorized error with retry action', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -460,7 +463,7 @@ void main() {
     testWidgets('offers skip when a later queue item is available', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -491,7 +494,7 @@ void main() {
     testWidgets('hides the overlay controls until the surface is tapped', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -517,7 +520,7 @@ void main() {
     testWidgets('restores the controls when leaving fullscreen', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -552,7 +555,7 @@ void main() {
     testWidgets('the minimize button only exists in fullscreen', (
       tester,
     ) async {
-      final fake = _FakePlatformPlayer();
+      final fake = FakePlatformPlayer();
       final controller = MediaPlaybackController(fake);
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
@@ -628,155 +631,6 @@ class _NoStreamRepository() implements VideoDetailRepository {
   }) async {
     return Completer<Result<MediaStream, Exception>>().future;
   }
-}
-
-// ignore_for_file: close_sinks
-class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
-  this {
-    stream = PlayerStream(
-      _playlist.stream,
-      _playing.stream,
-      _completed.stream,
-      _position.stream,
-      _duration.stream,
-      _volume.stream,
-      _rate.stream,
-      _pitch.stream,
-      _buffering.stream,
-      _bufferingPercentage.stream,
-      _buffer.stream,
-      _playlistMode.stream,
-      _shuffle.stream,
-      _audioParams.stream,
-      _videoParams.stream,
-      _audioBitrate.stream,
-      _audioDevice.stream,
-      _audioDevices.stream,
-      _track.stream,
-      _tracks.stream,
-      _width.stream,
-      _height.stream,
-      _subtitle.stream,
-      _log.stream,
-      _error.stream,
-    );
-  }
-
-  final _playlist = StreamController<Playlist>.broadcast();
-  final _playing = StreamController<bool>.broadcast();
-  final _completed = StreamController<bool>.broadcast();
-  final _position = StreamController<Duration>.broadcast();
-  final _duration = StreamController<Duration>.broadcast();
-  final _volume = StreamController<double>.broadcast();
-  final _rate = StreamController<double>.broadcast();
-  final _pitch = StreamController<double>.broadcast();
-  final _buffering = StreamController<bool>.broadcast();
-  final _buffer = StreamController<Duration>.broadcast();
-  final _bufferingPercentage = StreamController<double>.broadcast();
-  final _playlistMode = StreamController<PlaylistMode>.broadcast();
-  final _shuffle = StreamController<bool>.broadcast();
-  final _audioParams = StreamController<AudioParams>.broadcast();
-  final _videoParams = StreamController<VideoParams>.broadcast();
-  final _audioBitrate = StreamController<double?>.broadcast();
-  final _audioDevice = StreamController<AudioDevice>.broadcast();
-  final _audioDevices = StreamController<List<AudioDevice>>.broadcast();
-  final _track = StreamController<Track>.broadcast();
-  final _tracks = StreamController<Tracks>.broadcast();
-  final _width = StreamController<int?>.broadcast();
-  final _height = StreamController<int?>.broadcast();
-  final _subtitle = StreamController<List<String>>.broadcast();
-  final _log = StreamController<PlayerLog>.broadcast();
-  final _error = StreamController<String>.broadcast();
-
-  @override
-  late PlayerState state;
-
-  @override
-  late PlayerStream stream;
-
-  /// [PlatformPlayer.isVideoControllerAttached] — `VideoController`
-  /// constructor writes this; [dispose] reads it.
-  @override
-  bool isVideoControllerAttached = false;
-
-  /// 固定的原生句柄：[NativeVideoController.create] 用它做缓存键与纹理注册。
-  @override
-  final Future<int> handle = Future.value(42);
-
-  /// [NativeVideoController.create] 注册 [Player.dispose] 回调到这里。
-  @override
-  final List<Future<void> Function()> release = [];
-
-  final List<int> nextCalls = [];
-  final List<int> previousCalls = [];
-  final List<Playable> openCalls = [];
-  final List<Duration> seekCalls = [];
-  final List<double> rateCalls = [];
-
-  @override
-  Future<void> next() async => nextCalls.add(0);
-
-  @override
-  Future<void> previous() async => previousCalls.add(0);
-
-  @override
-  Future<void> jump(int index) async {}
-
-  @override
-  Future<void> add(Media media) async {}
-
-  @override
-  Future<void> remove(int index) async {}
-
-  @override
-  Future<void> move(int from, int to) async {}
-
-  @override
-  Future<void> setPlaylistMode(PlaylistMode mode) async {
-    _playlistMode.add(mode);
-  }
-
-  @override
-  Future<void> open(
-    Playable playable, {
-    bool play = true,
-    bool synchronized = true,
-  }) async {
-    openCalls.add(playable);
-    if (playable is Playlist) {
-      _playlist.add(playable);
-    }
-    // 模拟 real.dart stop(open:true, notify:true) 的 reset 事件序列：
-    // playing=false、completed=false、position/duration/buffer=zero、buffering=false。
-    _playing.add(false);
-    _completed.add(false);
-    _position.add(Duration.zero);
-    _duration.add(Duration.zero);
-    _buffering.add(false);
-    _buffer.add(Duration.zero);
-    if (play) {
-      _playing.add(true);
-    }
-  }
-
-  @override
-  Future<void> seek(Duration position) async {
-    seekCalls.add(position);
-  }
-
-  @override
-  Future<void> setRate(double rate) async {
-    rateCalls.add(rate);
-    _rate.add(rate);
-  }
-
-  /// 投喂一次速率事件，驱动 [MediaPlaybackController.states] 的 rate 字段。
-  void emitRate(double rate) => _rate.add(rate);
-
-  @override
-  Future<void> dispose() async {}
-
-  void injectPlaybackError(String message) => _error.add(message);
 }
 
 class _HangingStreamRepository() implements VideoDetailRepository {

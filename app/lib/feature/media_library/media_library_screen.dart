@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -121,6 +123,16 @@ class const MediaLibraryScreen({
                       ),
                     ),
                   ),
+                  // 清空入口同样常驻、只按状态禁用：出现/消失会让整行文字在
+                  // 删除最后一条的瞬间横跳。
+                  IconButton(
+                    onPressed: headerState.itemCount == 0
+                        ? null
+                        : () => unawaited(_confirmClearHistory(context)),
+                    tooltip:
+                        l10n?.clearAllWatchHistory ?? 'Clear all watch history',
+                    icon: const Icon(Icons.delete_sweep_outlined),
+                  ),
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
                   Tooltip(
@@ -156,6 +168,92 @@ class const MediaLibraryScreen({
 
 bool _loadMoreButtonEnabled({required bool hasMore, required bool isLoading}) =>
     hasMore && !isLoading;
+
+/// 清空全部历史：先确认再删，删除后给出可感知的结果提示
+///
+/// 清空不可撤销，所以确认对话框是唯一入口，不提供「长按一次就清空」的快捷路径。
+Future<void> _confirmClearHistory(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final cubit = context.read<MediaHistoryCubit>();
+  // 对话框与删除都会让发起调用的 context 退出树（列表清空后整段重建），
+  // messenger 必须先取好，否则提示发不出去。
+  final messenger = ScaffoldMessenger.of(context);
+  unawaited(HapticFeedback.mediumImpact());
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n?.clearWatchHistoryConfirm ?? 'Clear all watch history?'),
+      content: Text(
+        l10n?.clearWatchHistoryMessage ??
+            'This removes every entry from your watch history. '
+                'The action cannot be undone.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n?.cancel ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n?.delete ?? 'Delete'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return;
+  final cleared = await cubit.clearAll();
+  if (!cleared) return;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(l10n?.watchHistoryCleared ?? 'Watch history cleared'),
+      ),
+    );
+}
+
+/// 删除单条历史：确认后删库并提示
+///
+/// 长按而不是常驻删除按钮：历史行是回看入口，误触删除的代价比多点一次长按高。
+Future<void> _confirmDeleteHistoryItem(
+  BuildContext context,
+  MediaHistoryItem item,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final cubit = context.read<MediaHistoryCubit>();
+  // 删除后这一行本身就从树里消失，发起调用的 context 随即失效。
+  final messenger = ScaffoldMessenger.of(context);
+  unawaited(HapticFeedback.mediumImpact());
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        l10n?.deleteHistoryItemConfirm(item.video.title) ??
+            'Delete "${item.video.title}" from history?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n?.cancel ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n?.delete ?? 'Delete'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return;
+  final removed = await cubit.removeItem(item);
+  if (!removed) return;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(l10n?.historyItemRemoved ?? 'Removed from history'),
+      ),
+    );
+}
 
 String tooltipMessage(
   AppLocalizations? l10n, {
@@ -304,6 +402,8 @@ class const _HistoryRows({
               thumbWidth: thumbWidth,
               sourceLabel: sourceNames[item.sourceId],
               onTap: () => onVideoTap?.call(item.sourceId, item.video.id),
+              onLongPress: () =>
+                  unawaited(_confirmDeleteHistoryItem(context, item)),
             );
           },
         );
@@ -318,6 +418,7 @@ class const _HistoryRow({
   final MediaHistoryProgress? progress,
   required final double thumbWidth,
   required final VoidCallback? onTap,
+  final VoidCallback? onLongPress,
   final String? sourceLabel,
 }) extends StatelessWidget {
   @override
@@ -344,12 +445,14 @@ class const _HistoryRow({
           ...progressSemantics,
           l10n?.watchedAt(viewedAtLabel),
         ].whereType<String>().join(l10n?.commaSeparator ?? ','),
+        onLongPress: onLongPress,
         excludeSemantics: true,
         child: InkWell(
           onTap: () {
             HapticFeedback.lightImpact();
             onTap?.call();
           },
+          onLongPress: onLongPress,
           child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: $styles.insets.sm,

@@ -1,4 +1,6 @@
 import 'package:app/database/app_database.dart';
+import 'package:app/database/dao/media_history_dao.dart';
+import 'package:app/database/table/media.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
@@ -221,4 +223,144 @@ void main() {
 
     await cubit.close();
   });
+
+  test('removeItem deletes the row and drops it from the list', () async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+    await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    await settle(cubit);
+    final target = cubit.state.items.firstWhere(
+      (item) => item.video.id == 'v1',
+    );
+
+    expect(await cubit.removeItem(target), isTrue);
+
+    expect(idsOf(cubit), ['v2']);
+    expect(
+      cubit.state.progressByMedia,
+      isNot(contains((sourceId: 'bilibili', originalId: 'v1'))),
+    );
+    // 数据库里也没了：只看内存列表的话，重进页面又会冒出来。
+    final rows = await db.mediaHistoryDao.getHistoryWithMedia();
+    expect(rows.map((row) => row.media.originalId), ['v2']);
+
+    await cubit.close();
+  });
+
+  test('removeItem only removes the item from its own source', () async {
+    await addVideo('shared', sourceId: 'bilibili', minutesAgo: 1);
+    await addVideo('shared', sourceId: 'youtube', minutesAgo: 2);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    await settle(cubit);
+    final target = cubit.state.items.firstWhere(
+      (item) => item.sourceId == 'bilibili',
+    );
+
+    await cubit.removeItem(target);
+
+    expect(cubit.state.items.map((item) => item.sourceId), ['youtube']);
+    final rows = await db.mediaHistoryDao.getHistoryWithMedia();
+    expect(rows.map((row) => row.media.sourceId), ['youtube']);
+
+    await cubit.close();
+  });
+
+  test(
+    'removeItem keeps the pagination cursor aligned for the next page',
+    () async {
+      // 三页各两条。删掉第一页的一条后，已消费行数必须跟着减，否则下一页的
+      // offset 会把紧跟被删行的那条（v2）跳过。
+      await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+      await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+      await addVideo('v3', sourceId: 'bilibili', minutesAgo: 3);
+      await addVideo('v4', sourceId: 'bilibili', minutesAgo: 4);
+
+      final cubit = MediaHistoryCubit(
+        mediaHistoryDao: db.mediaHistoryDao,
+        pageSize: 2,
+      );
+      await settle(cubit);
+      expect(idsOf(cubit), ['v1', 'v2']);
+
+      await cubit.removeItem(
+        cubit.state.items.firstWhere((item) => item.video.id == 'v1'),
+      );
+      expect(idsOf(cubit), ['v2']);
+
+      await cubit.loadMore();
+      await settle(cubit);
+      expect(idsOf(cubit), ['v2', 'v3', 'v4']);
+
+      await cubit.close();
+    },
+  );
+
+  test('clearAll empties the list and resets pagination', () async {
+    for (var i = 1; i <= 3; i++) {
+      await addVideo('v$i', sourceId: 'bilibili', minutesAgo: i);
+    }
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 2,
+    );
+    await settle(cubit);
+    expect(idsOf(cubit), hasLength(2));
+
+    expect(await cubit.clearAll(), isTrue);
+
+    expect(cubit.state.items, isEmpty);
+    expect(cubit.state.progressByMedia, isEmpty);
+    expect(cubit.state.hasMore, isTrue);
+    expect(await db.mediaHistoryDao.getHistoryWithMedia(), isEmpty);
+
+    // 清空后写入新记录，列表应重新从第一页开始显示它。
+    await addVideo('v9', sourceId: 'bilibili', minutesAgo: 0);
+    final refreshed = await cubit.stream
+        .firstWhere((state) => state.items.isNotEmpty)
+        .timeout(const Duration(seconds: 10));
+    expect(refreshed.items.map((item) => item.video.id), ['v9']);
+
+    await cubit.close();
+  });
+
+  test(
+    'removeItem surfaces a database failure without dropping the row',
+    () async {
+      await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+      await addVideo('v2', sourceId: 'bilibili', minutesAgo: 2);
+
+      final cubit = MediaHistoryCubit(
+        mediaHistoryDao: _FailingDeleteHistoryDao(db),
+        pageSize: 10,
+      );
+      await settle(cubit);
+      final target = cubit.state.items.first;
+
+      expect(await cubit.removeItem(target), isFalse);
+
+      expect(cubit.state.error, isNotNull);
+      expect(idsOf(cubit), ['v1', 'v2']);
+
+      await cubit.close();
+    },
+  );
+}
+
+/// 删除必然失败的 DAO 包装：只覆盖删除路径，查询仍走真实数据库。
+final class _FailingDeleteHistoryDao(super.db) extends MediaHistoryDao {
+  @override
+  Future<int> deleteHistoryForMediaKey({
+    required String sourceId,
+    required String originalId,
+    String type = Media.typeVideo,
+  }) async => throw StateError('delete failed');
 }
