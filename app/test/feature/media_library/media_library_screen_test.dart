@@ -324,8 +324,9 @@ void main() {
     expect(find.text('Delete "Video v1" from history?'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
-    // 只推进到提示出现：pumpAndSettle 会把 SnackBar 的自动消失计时也走完，
-    // 提示刚好在断言前被移除。
+    // 删除先写库再发提示，库操作是真实异步 I/O：假时钟推不动它，必须让出
+    // 真实时间；随后只 pump 一帧断言提示，pumpAndSettle 会把 SnackBar 的
+    // 自动消失计时一起走完。
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
@@ -379,6 +380,7 @@ void main() {
     expect(find.text('Clear all watch history?'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // 同上：清空同样先写库，真实 I/O 需要让出真实时间。
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
