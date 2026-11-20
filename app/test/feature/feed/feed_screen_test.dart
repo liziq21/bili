@@ -2,7 +2,7 @@ import 'package:app/database/app_database.dart';
 import 'package:app/database/table/local_library.dart';
 import 'package:app/feature/feed/feed_cubit.dart';
 import 'package:app/feature/feed/feed_screen.dart';
-import 'package:app/feature/feed/widgets/feed_channel_section.dart';
+import 'package:app/feature/feed/widgets/feed_channel_header.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';

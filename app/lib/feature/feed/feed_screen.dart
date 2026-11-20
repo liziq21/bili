@@ -10,7 +10,8 @@ import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../home/widgets/feed_status_view.dart';
 import 'feed_cubit.dart';
-import 'widgets/feed_channel_section.dart';
+import 'widgets/feed_channel_header.dart';
+import 'widgets/feed_entry_tile.dart';
 
 /// 订阅动态页：已落库的订阅投稿按频道分组，组可展开/收起。
 ///
