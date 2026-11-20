@@ -10,6 +10,7 @@ import '../database/app_database.dart';
 import '../database/dao/media_history_dao.dart';
 import '../database/dao/local_library_dao.dart';
 import '../database/dao/creator_profile_dao.dart';
+import '../database/dao/feed_dao.dart';
 import '../database/dao/recent_search_query_dao.dart';
 import '../datastore/preferences_data_source.dart';
 import '../domain/get_recent_search_queries_use_case.dart';
@@ -45,6 +46,9 @@ List<RepositoryProvider> get databaseProviders => [
   ),
   RepositoryProvider<CreatorProfileDao>(
     create: (context) => context.read<AppDatabase>().creatorProfileDao,
+  ),
+  RepositoryProvider<FeedDao>(
+    create: (context) => context.read<AppDatabase>().feedDao,
   ),
 ];
 

@@ -8,6 +8,7 @@ import 'package:provider/single_child_widget.dart';
 
 import '../data/repository/app_search_suggest_repository.dart';
 import '../data/repository/creator_profile_repository.dart';
+import '../data/repository/feed_repository.dart';
 import '../data/repository/danmaku_repository.dart';
 import '../data/repository/app_live_room_repository.dart';
 import '../data/repository/playlist_content_repository.dart';
@@ -20,6 +21,11 @@ import '../data/repository/video_comment_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import 'media_sources_provider.dart';
 import '../database/dao/creator_profile_dao.dart';
+import '../database/dao/feed_dao.dart';
+import '../database/dao/local_library_dao.dart';
+import '../domain/feed_load_manager.dart';
+import '../feature/notification/feed_update_notifier.dart';
+import '../datastore/preferences_data_source.dart';
 
 /// Injects one route-scoped [MediaSource] and the repositories for its
 /// optional capabilities.
@@ -178,6 +184,22 @@ class _SourceScopeState() extends State<_SourceScope> {
           create: (_) =>
               AppPlaylistContentRepository(playlistContentDataSource),
         ),
+      if (source.userVideosDataSource case final userVideosDataSource?) ...[
+        RepositoryProvider<FeedRepository>(
+          create: (context) => FeedRepository(
+            feedDao: context.read<FeedDao>(),
+            libraryDao: context.read<LocalLibraryDao>(),
+            remoteDataSource: userVideosDataSource,
+          ),
+        ),
+        RepositoryProvider<FeedLoadManager>(
+          create: (context) => FeedLoadManager(
+            repository: context.read<FeedRepository>(),
+            notifier: context.read<FeedUpdateNotifier>(),
+            preferences: context.read<PreferencesDataSource>(),
+          ),
+        ),
+      ],
     ];
   }
 
