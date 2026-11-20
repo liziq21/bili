@@ -4572,6 +4572,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearAllSearchHistory => '清空搜索历史';
 
   @override
+  String get clearAllWatchHistory => '清空观看历史';
+
+  @override
+  String get clearWatchHistoryConfirm => '清空全部观看历史？';
+
+  @override
+  String get clearWatchHistoryMessage => '这将移除观看历史中的全部记录。此操作不可撤销。';
+
+  @override
+  String get historyItemRemoved => '已从历史中移除';
+
+  @override
+  String get watchHistoryCleared => '观看历史已清空';
+
+  @override
   String get clearSearchHistoryConfirm => '清空搜索历史？';
 
   @override

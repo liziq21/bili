@@ -6172,6 +6172,26 @@
   "@clearAllSearchHistory": {
     "description": "Button to clear all search history"
   },
+  "clearAllWatchHistory": "Clear all watch history",
+  "@clearAllWatchHistory": {
+    "description": "Tooltip and button label for clearing the whole local watch history"
+  },
+  "clearWatchHistoryConfirm": "Clear all watch history?",
+  "@clearWatchHistoryConfirm": {
+    "description": "Dialog title for confirming clearing the whole watch history"
+  },
+  "clearWatchHistoryMessage": "This removes every entry from your watch history. The action cannot be undone.",
+  "@clearWatchHistoryMessage": {
+    "description": "Dialog message for confirming clearing the whole watch history"
+  },
+  "historyItemRemoved": "Removed from history",
+  "@historyItemRemoved": {
+    "description": "Snack bar shown after a single history entry is deleted"
+  },
+  "watchHistoryCleared": "Watch history cleared",
+  "@watchHistoryCleared": {
+    "description": "Snack bar shown after the whole watch history is cleared"
+  },
   "clearSearchHistoryConfirm": "Clear all search history?",
   "@clearSearchHistoryConfirm": {
     "description": "Dialog title for confirming clear all search history"

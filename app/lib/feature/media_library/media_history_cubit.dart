@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bloc/bloc.dart';
 import 'package:data/data.dart';
@@ -94,6 +95,71 @@ class MediaHistoryCubit({
     emit(state.copyWith(isLoading: true, clearError: true));
     await _stopWatching();
     await _fetch(offset: 0, replace: true);
+  }
+
+  /// 删除一条历史并从当前列表移除
+  ///
+  /// 先写库再改状态：写库失败时列表保持不变，不会出现「界面上没了、重进又回来」。
+  /// 删除后已消费行数按实际删除行数回退，否则下一页的 offset 会跳过紧跟其后的一条。
+  Future<void> removeItem(MediaHistoryItem item) async {
+    if (_isClosing || isClosed) return;
+    final int deleted;
+    try {
+      deleted = await _mediaHistoryDao.deleteHistoryForMediaKey(
+        sourceId: item.sourceId,
+        originalId: item.video.id,
+      );
+    } catch (e) {
+      if (_isClosing || isClosed) return;
+      emit(state.copyWith(error: '$e'));
+      return;
+    }
+    if (_isClosing || isClosed) return;
+
+    final key = (sourceId: item.sourceId, originalId: item.video.id);
+    final items = [
+      for (final existing in state.items)
+        if ((sourceId: existing.sourceId, originalId: existing.video.id) != key)
+          existing,
+    ];
+    final progressByMedia = {...state.progressByMedia}..remove(key);
+    _rowOffset = math.max(0, _rowOffset - deleted);
+    emit(
+      state.copyWith(
+        items: items,
+        progressByMedia: progressByMedia,
+        clearError: true,
+      ),
+    );
+    await _stopWatching();
+    await _watchVisibleHistory();
+  }
+
+  /// 清空全部观看历史
+  ///
+  /// 清空后回到首屏加载的起点：`hasMore` 复位为 true 且 offset 归零，
+  /// 之后若有新记录写入，[loadMore] 与监听流都从第一页重新开始。
+  Future<void> clearAll() async {
+    if (_isClosing || isClosed) return;
+    try {
+      await _mediaHistoryDao.clearHistory();
+    } catch (e) {
+      if (_isClosing || isClosed) return;
+      emit(state.copyWith(error: '$e'));
+      return;
+    }
+    if (_isClosing || isClosed) return;
+    _rowOffset = 0;
+    emit(
+      state.copyWith(
+        items: const [],
+        progressByMedia: const {},
+        hasMore: true,
+        clearError: true,
+      ),
+    );
+    await _stopWatching();
+    await _watchVisibleHistory();
   }
 
   /// 取一页并写回状态

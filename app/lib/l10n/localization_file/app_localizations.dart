@@ -7895,6 +7895,36 @@ abstract class AppLocalizations {
   /// **'Clear all search history'**
   String get clearAllSearchHistory;
 
+  /// Tooltip and button label for clearing the whole local watch history
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all watch history'**
+  String get clearAllWatchHistory;
+
+  /// Dialog title for confirming clearing the whole watch history
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all watch history?'**
+  String get clearWatchHistoryConfirm;
+
+  /// Dialog message for confirming clearing the whole watch history
+  ///
+  /// In en, this message translates to:
+  /// **'This removes every entry from your watch history. The action cannot be undone.'**
+  String get clearWatchHistoryMessage;
+
+  /// Snack bar shown after a single history entry is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from history'**
+  String get historyItemRemoved;
+
+  /// Snack bar shown after the whole watch history is cleared
+  ///
+  /// In en, this message translates to:
+  /// **'Watch history cleared'**
+  String get watchHistoryCleared;
+
   /// Dialog title for confirming clear all search history
   ///
   /// In en, this message translates to:

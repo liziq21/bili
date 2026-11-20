@@ -6172,6 +6172,26 @@
   "@clearAllSearchHistory": {
     "description": "Button to clear all search history"
   },
+  "clearAllWatchHistory": "清空观看历史",
+  "@clearAllWatchHistory": {
+    "description": "Tooltip and button label for clearing the whole local watch history"
+  },
+  "clearWatchHistoryConfirm": "清空全部观看历史？",
+  "@clearWatchHistoryConfirm": {
+    "description": "Dialog title for confirming clearing the whole watch history"
+  },
+  "clearWatchHistoryMessage": "这将移除观看历史中的全部记录。此操作不可撤销。",
+  "@clearWatchHistoryMessage": {
+    "description": "Dialog message for confirming clearing the whole watch history"
+  },
+  "historyItemRemoved": "已从历史中移除",
+  "@historyItemRemoved": {
+    "description": "Snack bar shown after a single history entry is deleted"
+  },
+  "watchHistoryCleared": "观看历史已清空",
+  "@watchHistoryCleared": {
+    "description": "Snack bar shown after the whole watch history is cleared"
+  },
   "clearSearchHistoryConfirm": "清空搜索历史？",
   "@clearSearchHistoryConfirm": {
     "description": "Dialog title for confirming clear all search history"
