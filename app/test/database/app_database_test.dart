@@ -343,7 +343,7 @@ void main() {
 
     test('deleting history keeps the media row it pointed at', () async {
       final historyDao = db.mediaHistoryDao;
-      final mediaId = await historyDao.getOrCreateMediaId(
+      await historyDao.getOrCreateMediaId(
         'bilibili',
         'BV_MEDIA_KEPT',
         Media.typeVideo,
@@ -351,7 +351,10 @@ void main() {
         url: 'https://example.com/kept',
       );
 
-      await historyDao.deleteHistoryForMedia(mediaId);
+      await historyDao.deleteHistoryForMediaKey(
+        sourceId: 'bilibili',
+        originalId: 'BV_MEDIA_KEPT',
+      );
 
       expect(await historyDao.getHistoryWithMedia(), isEmpty);
       // media 行可能被书签或播放列表引用，删历史不该把它一起带走。

@@ -92,14 +92,10 @@ class MediaHistoryDao(super.db)
     return rows.first.progressSeconds?.toInt();
   }
 
-  /// 删除单个媒体的观看历史，返回删除的行数。
+  /// 按 `{sourceId, type, originalId}` 删除一条历史，返回删除的行数。
   ///
   /// 只删历史行，保留 `media` 行：同一媒体可能被书签或播放列表引用，
   /// 删掉媒体本身会连带清掉那些本地条目。
-  Future<int> deleteHistoryForMedia(int mediaId) =>
-      (delete(mediaHistory)..where((h) => h.mediaId.equals(mediaId))).go();
-
-  /// 按 `{sourceId, type, originalId}` 删除一条历史，返回删除的行数。
   ///
   /// 列表项只带这三个字段，不带 `media.internalId`；用子查询定位 media 行，
   /// 避免调用方为了一次删除再查一次 id。
@@ -122,7 +118,7 @@ class MediaHistoryDao(super.db)
 
   /// 清空全部观看历史，返回删除的行数。
   ///
-  /// 与 [deleteHistoryForMedia] 一样只删历史行，不动 `media` 表。
+  /// 与 [deleteHistoryForMediaKey] 一样只删历史行，不动 `media` 表。
   Future<int> clearHistory() => delete(mediaHistory).go();
 
   /// Gets the history rows joined with their media rows.
