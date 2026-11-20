@@ -8044,6 +8044,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off'**
   String get feedUpdateThresholdOff;
+
+  /// App bar title and bottom navigation label for the subscription feed
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription feed'**
+  String get feedTitle;
+
+  /// Unread entry count badge of a channel group
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unread'**
+  String feedUnreadCount(int count);
+
+  /// Action that marks every entry of a channel as read
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get feedMarkAllRead;
+
+  /// Tooltip that expands a collapsed channel group
+  ///
+  /// In en, this message translates to:
+  /// **'Expand {channel}'**
+  String feedExpandChannel(String channel);
+
+  /// Tooltip that collapses an expanded channel group
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse {channel}'**
+  String feedCollapseChannel(String channel);
+
+  /// Empty state title of the subscription feed
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription updates yet'**
+  String get feedEmptyTitle;
+
+  /// Empty state description of the subscription feed
+  ///
+  /// In en, this message translates to:
+  /// **'New posts from channels you follow will appear here'**
+  String get feedEmptyDescription;
+
+  /// Shown when the data source cannot fetch channel uploads
+  ///
+  /// In en, this message translates to:
+  /// **'This source has no subscription feed'**
+  String get feedUnsupportedTitle;
 }
 
 class _AppLocalizationsDelegate

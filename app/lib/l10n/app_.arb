@@ -6301,5 +6301,52 @@
   "feedUpdateThresholdOff": "Off",
   "@feedUpdateThresholdOff": {
     "description": "Threshold option to disable notifications"
+  },
+  "feedTitle": "Subscription feed",
+  "@feedTitle": {
+    "description": "App bar title and bottom navigation label for the subscription feed"
+  },
+  "feedUnreadCount": "{count} unread",
+  "@feedUnreadCount": {
+    "description": "Unread entry count badge of a channel group",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedMarkAllRead": "Mark all as read",
+  "@feedMarkAllRead": {
+    "description": "Action that marks every entry of a channel as read"
+  },
+  "feedExpandChannel": "Expand {channel}",
+  "@feedExpandChannel": {
+    "description": "Tooltip that expands a collapsed channel group",
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "feedCollapseChannel": "Collapse {channel}",
+  "@feedCollapseChannel": {
+    "description": "Tooltip that collapses an expanded channel group",
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "feedEmptyTitle": "No subscription updates yet",
+  "@feedEmptyTitle": {
+    "description": "Empty state title of the subscription feed"
+  },
+  "feedEmptyDescription": "New posts from channels you follow will appear here",
+  "@feedEmptyDescription": {
+    "description": "Empty state description of the subscription feed"
+  },
+  "feedUnsupportedTitle": "This source has no subscription feed",
+  "@feedUnsupportedTitle": {
+    "description": "Shown when the data source cannot fetch channel uploads"
   }
 }

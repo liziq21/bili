@@ -73,7 +73,7 @@ void main() {
       expect(topLevel.whereType<ShellRoute>().length, 1);
     });
 
-    test('the three bottom bar destinations are branch roots', () {
+    test('every bottom bar destination is a branch root', () {
       final branchRoots = table
           .where(
             (({String fullPath, int? branchIndex}) e) => e.branchIndex != null,
@@ -82,7 +82,31 @@ void main() {
           .toSet();
       expect(
         branchRoots,
-        containsAll(<String>[Routes.home, Routes.searchEntry, Routes.library]),
+        <String>{Routes.home, Routes.feed, Routes.searchEntry, Routes.library},
+        reason:
+            'each branch must own exactly one root: a destination without a '
+            'branch root navigates nowhere, and an extra branch root has no '
+            'destination to reach it',
+      );
+    });
+
+    test('the indexed shell has one branch per bottom bar destination', () {
+      final shell = router.configuration.routes
+          .whereType<StatefulShellRoute>()
+          .single;
+      expect(shell.branches, hasLength(4));
+    });
+
+    test('the feed branch is reachable and sits second in the shell', () {
+      final feed = table.where((entry) => entry.fullPath == Routes.feed);
+
+      expect(feed, hasLength(1));
+      expect(
+        feed.single.branchIndex,
+        1,
+        reason:
+            'the subscription feed destination must own its own branch: '
+            'sharing a branch with home would make both tabs highlight at once',
       );
     });
 

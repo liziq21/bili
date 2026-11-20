@@ -4672,4 +4672,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedUpdateThresholdOff => 'Off';
+
+  @override
+  String get feedTitle => 'Subscription feed';
+
+  @override
+  String feedUnreadCount(int count) {
+    return '$count unread';
+  }
+
+  @override
+  String get feedMarkAllRead => 'Mark all as read';
+
+  @override
+  String feedExpandChannel(String channel) {
+    return 'Expand $channel';
+  }
+
+  @override
+  String feedCollapseChannel(String channel) {
+    return 'Collapse $channel';
+  }
+
+  @override
+  String get feedEmptyTitle => 'No subscription updates yet';
+
+  @override
+  String get feedEmptyDescription =>
+      'New posts from channels you follow will appear here';
+
+  @override
+  String get feedUnsupportedTitle => 'This source has no subscription feed';
 }

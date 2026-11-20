@@ -6301,5 +6301,52 @@
   "feedUpdateThresholdOff": "关闭",
   "@feedUpdateThresholdOff": {
     "description": "Threshold option to disable notifications"
+  },
+  "feedTitle": "订阅动态",
+  "@feedTitle": {
+    "description": "App bar title and bottom navigation label for the subscription feed"
+  },
+  "feedUnreadCount": "{count} 条未读",
+  "@feedUnreadCount": {
+    "description": "Unread entry count badge of a channel group",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedMarkAllRead": "全部已读",
+  "@feedMarkAllRead": {
+    "description": "Action that marks every entry of a channel as read"
+  },
+  "feedExpandChannel": "展开{channel}",
+  "@feedExpandChannel": {
+    "description": "Tooltip that expands a collapsed channel group",
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "feedCollapseChannel": "收起{channel}",
+  "@feedCollapseChannel": {
+    "description": "Tooltip that collapses an expanded channel group",
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  },
+  "feedEmptyTitle": "暂无订阅更新",
+  "@feedEmptyTitle": {
+    "description": "Empty state title of the subscription feed"
+  },
+  "feedEmptyDescription": "关注的频道有新内容时会显示在这里",
+  "@feedEmptyDescription": {
+    "description": "Empty state description of the subscription feed"
+  },
+  "feedUnsupportedTitle": "该数据源暂不支持订阅动态",
+  "@feedUnsupportedTitle": {
+    "description": "Shown when the data source cannot fetch channel uploads"
   }
 }

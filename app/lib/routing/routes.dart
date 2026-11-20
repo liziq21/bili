@@ -3,6 +3,10 @@ abstract final class Routes() {
   static const home = '/';
   static const live = '/$liveRelative';
   static const liveRelative = 'live';
+
+  /// 底部导航的订阅动态页
+  static const feed = '/$feedRelative';
+  static const feedRelative = 'feed';
   static const search = '/$searchRelative';
   static const searchRelative = 'search';
 
