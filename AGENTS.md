@@ -248,6 +248,8 @@ Flutter 自身对该层的指导见 `flutter/flutter` 仓库的 `docs/rules/rule
 - **Widget 测试框架**：断言缩略图实际**加载**的测试必须将其 pump 包裹在 `network_image_mock` 的 `mockNetworkImagesFor` 中——加载失败的 `CachedNetworkImage` 仍留在树中，断言组件存在证明不了任何事。只断言文字、布局或语义的测试无需 mock。`app/test/flutter_test_config.dart` 已安装假 `path_provider` 和按文件的临时根目录，测试文件中无需再次设置。
 - **Widget 测试外壳**：用 `material_ui` fork 的 `MaterialApp` 构建树并注册 `GlobalMaterialLocalizations.delegates`。Flutter 自身的 `MaterialApp` 不提供 fork 的 `MaterialLocalizations`，在非英文 locale 下会抛出异常。
 - **断言 widget 树**：当被测代码读取可变全局状态（如 `$styles`）时，测试必须改变该状态并断言渲染输出。从测试中读回同一静态值无论 widget 树是否重建都会通过。
+- **真实数据库 I/O 与假时钟**：widget 测试里的 `NativeDatabase.memory()` 仍走真实异步 I/O，`tester.pump` / `pumpAndSettle` 只推进假时钟，推不动未完成的 Future。先 `await tester.runAsync(() => Future.delayed(...))` 让 I/O 落地，再 `pump()` 一帧断言；不要用 `pumpAndSettle` 断言 `SnackBar`，它会连自动消失计时一起走完。
+- **异步回调里取 messenger**：删除类操作会让发起调用的 `context` 退出树（行被删、列表清空后整段重建），`ScaffoldMessenger.of(context)` 必须在第一个 `await` 之前取好，否则提示发不出去。
 - **泄漏追踪**：从 `app/` 运行 `LEAK_TRACKING=true flutter test` 报告未释放的 disposable。测试在清理前抛出导致的泄漏是可接受的例外；将其标记为例外而非删除测试。
 - **测试分类矩阵**：`app/test/TEST_MATRIX.md` 由 `tool/test_matrix.py --report` 生成，映射 125 个测试文件到六类（unit/widget/golden/contract/integration/performance）。新增/移动测试文件须登记分类，`python3 tool/test_matrix.py --check` 是 CI 门禁（Tool Tests job），映射与测试树不一致即红。分类维度定义见该文件。
 
