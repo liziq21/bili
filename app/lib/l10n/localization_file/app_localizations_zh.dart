@@ -4657,4 +4657,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get feedUpdateThresholdOff => '关闭';
+
+  @override
+  String get feedTitle => '订阅动态';
+
+  @override
+  String feedUnreadCount(int count) {
+    return '$count 条未读';
+  }
+
+  @override
+  String get feedMarkAllRead => '全部已读';
+
+  @override
+  String feedExpandChannel(String channel) {
+    return '展开$channel';
+  }
+
+  @override
+  String feedCollapseChannel(String channel) {
+    return '收起$channel';
+  }
+
+  @override
+  String get feedEmptyTitle => '暂无订阅更新';
+
+  @override
+  String get feedEmptyDescription => '关注的频道有新内容时会显示在这里';
+
+  @override
+  String get feedUnsupportedTitle => '该数据源暂不支持订阅动态';
 }

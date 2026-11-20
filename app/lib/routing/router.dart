@@ -14,6 +14,8 @@ import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import '../datastore/preferences_data_source.dart';
 import '../domain/feed_load_manager.dart';
+import '../feature/feed/feed_cubit.dart';
+import '../feature/feed/feed_screen.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
 import '../feature/media_library/local_library_screen.dart';
@@ -125,14 +127,19 @@ MediaSourceDefinition? _resolveSource(
 
 /// 底部导航目的地
 ///
-/// 只列仓内已有数据支撑的三项。设计稿里的「订阅更新」不做：它需要订阅表
-/// （`database/table/` 无此表），给出点开是空的导航项比不给更差。
+/// 只列仓内已有数据支撑的四项：首页 / 订阅动态 / 搜索 / 我的。订阅动态读
+/// `feed_entry` 表（[FeedLoadManager] 落库），数据源不提供频道投稿能力时
+/// 页面给出「该数据源暂不支持订阅动态」，而不是给一个点开就崩的导航项。
 List<AppNavDestination> _navDestinations(BuildContext context) {
   final l10n = AppLocalizations.of(context);
   return [
     AppNavDestination(
       label: l10n?.navHomeLabel ?? 'Home',
       icon: Icons.home_rounded,
+    ),
+    AppNavDestination(
+      label: l10n?.feedTitle ?? 'Subscription feed',
+      icon: Icons.rss_feed_rounded,
     ),
     AppNavDestination(
       label: l10n?.search ?? 'Search',
@@ -173,7 +180,7 @@ final GoRouter router = GoRouter(
     logRoutingException(state);
   },
   routes: [
-    // 底部导航的三个主分支。用 indexedStack 而非普通 ShellRoute：切分支时
+    // 底部导航的四个主分支。用 indexedStack 而非普通 ShellRoute：切分支时
     // 保留各分支的导航栈，从详情页返回时回到离开前的那一屏而不是分支根。
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => ChangeNotifierProvider(
@@ -193,6 +200,14 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Routes.home,
               builder: (context, state) => _buildHome(context),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.feed,
+              builder: (context, state) => _buildFeed(context),
             ),
           ],
         ),
@@ -307,6 +322,34 @@ Widget _buildHome(BuildContext context) {
         ),
       ),
     ),
+  );
+}
+
+/// 订阅动态分支
+///
+/// 与首页共用 [_ScopedSourceBuilder]：两个分支都从 [AppBloc] 的
+/// `userData.sourceId` 解析源目录。`FeedCubit` 直接读 [FeedDao] 与
+/// [LocalLibraryDao]（顶层 provider 注入），不依赖数据源实例；只有刷新时
+/// 用到的 [FeedLoadManager] 是可选能力，数据源不提供频道投稿时页面显示
+/// 「该数据源暂不支持订阅动态」。
+Widget _buildFeed(BuildContext context) {
+  return _ScopedSourceBuilder(
+    keyPrefix: 'feed',
+    builder: (context) {
+      final source = context.read<MediaSource>();
+      return BlocProvider<FeedCubit>(
+        create: (context) => FeedCubit(
+          feedDao: context.read(),
+          libraryDao: context.read(),
+          sourceId: source.id,
+          feedLoadManager: context.read<FeedLoadManager?>(),
+        ),
+        child: FeedScreen(
+          onVideo: context.defaultNavigateToVideo,
+          sourceSupportsFeed: source.userVideosDataSource != null,
+        ),
+      );
+    },
   );
 }
 
