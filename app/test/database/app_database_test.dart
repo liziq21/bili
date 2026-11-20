@@ -357,7 +357,7 @@ void main() {
       );
 
       expect(await historyDao.getHistoryWithMedia(), isEmpty);
-      // media 行可能被书签或播放列表引用，删历史不该把它一起带走。
+      // media 是元数据缓存（时长、播放量、封面），详情页直接读它；清历史不该连它一起删。
       final media = await db.select(db.media).get();
       expect(media.map((row) => row.originalId), ['BV_MEDIA_KEPT']);
     });
