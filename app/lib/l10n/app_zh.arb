@@ -6348,5 +6348,18 @@
   "feedUnsupportedTitle": "该数据源暂不支持订阅动态",
   "@feedUnsupportedTitle": {
     "description": "Shown when the data source cannot fetch channel uploads"
+  },
+  "feedUpdateNotificationTitle": "订阅动态有更新",
+  "@feedUpdateNotificationTitle": {
+    "description": "Title of the system notification shown when the subscription feed grows past the threshold"
+  },
+  "feedUpdateNotificationBody": "{count, plural, =1{订阅动态有 1 条新内容} other{订阅动态有 {count} 条新内容}}",
+  "@feedUpdateNotificationBody": {
+    "description": "Body of the feed update notification; {count} is the number of new unread entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

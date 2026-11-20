@@ -20,6 +20,7 @@ import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
 import '../feature/media_library/local_library_screen.dart';
 import '../feature/not_found/no_media_source_screen.dart';
+import '../feature/notification/feed_notification_listener.dart';
 import '../feature/search/bloc/search_bloc.dart';
 import '../feature/search/bloc/search_result_bloc.dart';
 import '../providers/service_source_providers.dart';
@@ -185,11 +186,13 @@ final GoRouter router = GoRouter(
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => ChangeNotifierProvider(
         create: (_) => SearchFocusController(),
-        child: Builder(
-          builder: (context) => AppScaffold(
-            child: AppNavigationShell(
-              navigationShell: navigationShell,
-              destinations: _navDestinations(context),
+        child: FeedNotificationListener(
+          child: Builder(
+            builder: (context) => AppScaffold(
+              child: AppNavigationShell(
+                navigationShell: navigationShell,
+                destinations: _navDestinations(context),
+              ),
             ),
           ),
         ),

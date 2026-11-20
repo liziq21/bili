@@ -1,34 +1,73 @@
+import 'dart:async';
+import 'dart:ui' show Locale, PlatformDispatcher;
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:model/model.dart';
 
 import '../../datastore/preferences_data_source.dart';
+import '../../l10n/localization_file/app_localizations.dart';
 import 'feed_update_notifier.dart';
+import 'notification_presenter.dart';
 
 /// Android implementation of [FeedUpdateNotifier] backed by
-/// `flutter_local_notifications`.
+/// [NotificationPresenter].
 ///
 /// Every method is best effort: notification failures are reported as
 /// [Error] results and never thrown, so a missing permission or a broken
 /// platform channel cannot break the caller that polls the feed.
 ///
-/// On platforms other than Android (and on web) [isSupported] is false and
-/// all calls resolve without side effects.
-final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
-    implements FeedUpdateNotifier {
-  static const _channelId = 'feed_updates';
+/// Threshold arithmetic lives here; showing, cancelling and receiving taps is
+/// delegated to the presenter so the decision logic stays testable without a
+/// platform channel.
+final class LocalFeedUpdateNotifier(
+  final PreferencesDataSource _preferences, {
+  NotificationPresenter? presenter,
+  AppLocalizations? localizations,
+}) implements FeedUpdateNotifier {
+  final NotificationPresenter _presenter =
+      presenter ?? AndroidNotificationPresenter();
 
-  final _plugin = FlutterLocalNotificationsPlugin();
+  /// 通知文案与界面同语言。
+  ///
+  /// 通知在 UI 之外发出，拿不到 `BuildContext`，所以按系统语言解析；解析
+  /// 规则与 `MaterialApp.localeResolutionCallback` 一致（只比语言码，不支持的
+  /// 语言回落到第一项，即英文）。测试可注入固定文案。
+  final AppLocalizations _l10n =
+      localizations ??
+      lookupAppLocalizations(
+        switch (PlatformDispatcher.instance.locale.languageCode) {
+          'zh' => const Locale('zh'),
+          _ => const Locale('en'),
+        },
+      );
+
+  // broadcast: 应用生命周期内可能有多个监听者（shell 重建），而 `initialize`
+  // 之前通常还没有人订阅。
+  //
+  // 冷启动的点击在 [initialize] 里就落地了，那时订阅者往往还没挂上；记成
+  // 待投递标志，首个订阅者到来时补发一次，否则由通知拉起的启动会静默丢掉
+  // 那次跳转。用 `onListen` 而不是在 getter 里补发：只读取流不订阅不该消耗它。
+  late final _opened = StreamController<void>.broadcast(
+    onListen: _flushPending,
+  );
+
+  bool _pendingColdStart = false;
   bool _initialized = false;
 
-  @override
-  bool get isSupported =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  void _flushPending() {
+    if (!_pendingColdStart || _opened.isClosed) return;
+    _pendingColdStart = false;
+    // 首次订阅时 onListen 早于订阅真正生效，同步 add 会丢；推迟一个微任务。
+    scheduleMicrotask(() {
+      if (!_opened.isClosed) _opened.add(null);
+    });
+  }
 
-  AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
-      .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin
-      >();
+  @override
+  bool get isSupported => _presenter.isSupported;
+
+  @override
+  Stream<void> get feedOpened => _opened.stream;
 
   @override
   Future<Result<void, Exception>> initialize() async {
@@ -37,22 +76,13 @@ final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
     }
 
     try {
-      // Channel creation does not prompt; the dialog is triggered explicitly
-      // via [requestPermission] when the user opts in from settings.
-      await _android?.createNotificationChannel(
-        const AndroidNotificationChannel(
-          _channelId,
-          'Feed updates',
-          description: 'Notifies about new items in your feed',
-          importance: Importance.high,
-        ),
-      );
-      await _plugin.initialize(
-        settings: const InitializationSettings(
-          android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-        ),
-      );
+      // 通道创建不弹框；权限由 [requestPermission] 在用户显式开启时申请。
+      await _presenter.initialize(onTap: (_) => _emitOpened());
       _initialized = true;
+
+      final launch = await _presenter.launchDetails();
+      if (launch.launched) _emitOpened();
+
       return const Result.success(null);
     } on Object catch (error, stackTrace) {
       return Result.error(
@@ -61,19 +91,28 @@ final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
     }
   }
 
+  /// 点击既可能发生在应用已运行时，也可能就是拉起应用的那一下。
+  ///
+  /// 没有订阅者时记为待投递，而不是直接丢弃。通知本身由 Android 的
+  /// `autoCancel` 在点击时移除，这里不需要再 cancel 一次。
+  void _emitOpened() {
+    final controller = _opened;
+    if (controller.isClosed) return;
+    if (!controller.hasListener) {
+      _pendingColdStart = true;
+      return;
+    }
+    controller.add(null);
+  }
+
   @override
   Future<Result<bool, Exception>> requestPermission() async {
     // Desktop and web builds have no notification permission model to ask for.
     if (!isSupported) return const Result.success(false);
 
     try {
-      final android = _android;
-      // The platform channel is absent in headless runs (widget tests, unit
-      // tests without the Android host), which is not an error: there is
-      // simply nobody to ask.
-      if (android == null) return const Result.success(false);
-      final granted = await android.requestNotificationsPermission();
-      return Result.success(granted ?? true);
+      final granted = await _presenter.requestPermission();
+      return Result.success(granted);
     } on Object catch (error, stackTrace) {
       // A missing or broken channel is indistinguishable from a denial here;
       // callers treat both as "cannot notify right now".
@@ -107,19 +146,12 @@ final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
     }
 
     try {
-      await _plugin.show(
-        id: 0,
-        title: 'New feed items',
-        body: '$newItems new items in your feed',
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            _channelId,
-            'Feed updates',
-            channelDescription: 'Notifies about new items in your feed',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-        ),
+      await _presenter.show(
+        title: _l10n.feedUpdateNotificationTitle,
+        body: _l10n.feedUpdateNotificationBody(newItems),
+        // Payload 标记目的地；目前点击只关心「发生了点击」，保留载荷让将来
+        // 的深链（例如定位到具体频道）不必再改接口。
+        payload: 'feed',
       );
       await _preferences.set(
         PreferencesKey.feedUpdateNotificationLastCount,
@@ -136,5 +168,6 @@ final class LocalFeedUpdateNotifier(final PreferencesDataSource _preferences)
   @override
   Future<void> dispose() async {
     _initialized = false;
+    await _opened.close();
   }
 }

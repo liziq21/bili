@@ -4703,4 +4703,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedUnsupportedTitle => 'This source has no subscription feed';
+
+  @override
+  String get feedUpdateNotificationTitle => 'New feed items';
+
+  @override
+  String feedUpdateNotificationBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new items in your feed',
+      one: '1 new item in your feed',
+    );
+    return '$_temp0';
+  }
 }

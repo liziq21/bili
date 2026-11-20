@@ -4687,4 +4687,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get feedUnsupportedTitle => '该数据源暂不支持订阅动态';
+
+  @override
+  String get feedUpdateNotificationTitle => '订阅动态有更新';
+
+  @override
+  String feedUpdateNotificationBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '订阅动态有 $count 条新内容',
+      one: '订阅动态有 1 条新内容',
+    );
+    return '$_temp0';
+  }
 }

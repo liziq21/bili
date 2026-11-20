@@ -3,6 +3,7 @@ import 'package:app/database/table/local_library.dart';
 import 'package:app/feature/feed/feed_cubit.dart';
 import 'package:app/feature/feed/feed_screen.dart';
 import 'package:app/feature/feed/widgets/feed_channel_header.dart';
+import 'package:app/feature/feed/widgets/feed_entry_tile.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
@@ -269,6 +270,31 @@ void main() {
 
     expect(find.byType(UnreadBadge), findsNothing);
     expect(find.text(l10n.feedMarkAllRead), findsNothing);
+  });
+
+  testWidgets('a 120-entry channel builds only the rows on screen', (
+    tester,
+  ) async {
+    // Given one channel with 120 stored entries.
+    await addSubscription(tester, 'c1', 'Channel One');
+    for (var index = 0; index < 120; index++) {
+      await addEntry(
+        tester,
+        'c1',
+        'v$index',
+        title: 'Entry $index',
+        publishedAt: DateTime(2026, 5, 1).add(Duration(minutes: index)),
+      );
+    }
+
+    // When the feed renders.
+    await pumpFeed(tester);
+    await settleUntil(tester, () => cubit.state.groups.isNotEmpty);
+
+    // Then all entries are in state, but only the visible slice is in the tree.
+    expect(cubit.state.groups.single.entries, hasLength(120));
+    expect(tester.widgetList(find.byType(FeedEntryTile)).length, lessThan(120));
+    expect(find.byType(FeedEntryTile), findsWidgets);
   });
 
   testWidgets('renders the empty state when nothing is stored', (tester) async {
