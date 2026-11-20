@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 71 |
+| unit | 73 |
 | widget | 53 |
 | golden | 8 |
 | contract | 12 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **146** |
+| **合计** | **148** |
 
 ## 分类定义
 
@@ -24,10 +24,11 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（71）
+## unit（73）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
+- `app/test/data/repository/feed_repository_test.dart`
 - `app/test/data/repository/playlist_content_repository_test.dart`
 - `app/test/data/repository/video_comment_repository_test.dart`
 - `app/test/data/repository/video_detail_repository_test.dart`
@@ -39,6 +40,7 @@
 - `app/test/database/local_playlist_migration_test.dart`
 - `app/test/datastore/media_history_settings_test.dart`
 - `app/test/datastore/preferences_data_source_test.dart`
+- `app/test/domain/feed_load_manager_test.dart`
 - `app/test/domain/get_recent_search_queries_use_case_test.dart`
 - `app/test/domain/get_search_contents_use_case_test.dart`
 - `app/test/feature/home/home_config_test.dart`

@@ -7,6 +7,7 @@ import 'package:model/model.dart';
 
 import '../../../data/repository/user_data/user_data_repository.dart';
 import '../../../datastore/preferences_data_source.dart';
+import '../../../domain/feed_load_manager.dart';
 import '../home_config.dart';
 import 'feed_section_state.dart';
 
@@ -19,11 +20,13 @@ class HomeBloc({
   required final UserDataRepository userDataRepository,
   required final PreferencesDataSource? preferences,
   required final MediaSource source,
+  final FeedLoadManager? feedLoadManager,
 }) extends Bloc<HomeEvent, HomeState> {
   this
     : _userDataRepository = userDataRepository,
       _preferences = preferences,
       _source = source,
+      _feedLoadManager = feedLoadManager,
       super(HomeState(sourceId: source.id, homeConfig: HomeConfig({}))) {
     on<ServiceSourceChanged>(_onServiceSourceChanged);
     on<FeedsRequested>(_onFeedsRequested);
@@ -36,6 +39,7 @@ class HomeBloc({
   final UserDataRepository _userDataRepository;
   final PreferencesDataSource? _preferences;
   final MediaSource _source;
+  final FeedLoadManager? _feedLoadManager;
   final _log = Logger('HomeBloc');
   final Map<String, int> _videoRequestVersions = {};
   final Map<String, int> _liveRequestVersions = {};
@@ -98,6 +102,10 @@ class HomeBloc({
       ),
     );
 
+    // 启动与下拉刷新都走这里：先拉远端订阅增量落库，再读首页 Feed。
+    // 失败不影响首页：Feed 加载是增强，不能让它挡住推荐流。
+    await _loadSubscriptions(source.id);
+
     await Future.wait([
       for (final feed in videoFeeds)
         _fetchVideoPage(feed, emit, sourceId: source.id, pageKey: 1),
@@ -106,6 +114,16 @@ class HomeBloc({
     ]);
 
     if (state.isRefreshing) emit(state.copyWith(isRefreshing: false));
+  }
+
+  Future<void> _loadSubscriptions(String sourceId) async {
+    final manager = _feedLoadManager;
+    if (manager == null) return;
+    try {
+      await manager.load(sourceId: sourceId);
+    } on Object catch (error, stackTrace) {
+      _log.warning('Failed to load subscription feed', error, stackTrace);
+    }
   }
 
   Future<void> _onFeedNextPageRequested(

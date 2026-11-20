@@ -13,6 +13,7 @@ import '../data/repository/search_contents_repository.dart';
 import '../data/repository/search_suggest_repository.dart';
 import '../data/repository/video_detail_repository.dart';
 import '../datastore/preferences_data_source.dart';
+import '../domain/feed_load_manager.dart';
 import '../feature/home/bloc/home_bloc.dart';
 import '../feature/media_library/media_history_cubit.dart';
 import '../feature/media_library/local_library_screen.dart';
@@ -292,6 +293,8 @@ Widget _buildHome(BuildContext context) {
         userDataRepository: context.read(),
         preferences: context.read<PreferencesDataSource?>(),
         source: context.read<MediaSource>(),
+        // 数据源不支持频道投稿时不注入，HomeBloc 跳过订阅增量加载。
+        feedLoadManager: context.read<FeedLoadManager?>(),
       ),
       child: Builder(
         builder: (context) => _withSearchBloc(

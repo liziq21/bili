@@ -78,6 +78,38 @@ void main() {
       },
     );
 
+    test('reports stored entry ids per channel only', () async {
+      await dao.upsertEntries([
+        _entry(entryId: 'a-1', channelId: 'creator-1'),
+        _entry(entryId: 'a-2', channelId: 'creator-1'),
+        _entry(entryId: 'b-1', channelId: 'creator-2'),
+        _entry(entryId: 'other-1', sourceId: 'youtube', channelId: 'creator-1'),
+      ]);
+
+      expect(
+        await dao.getEntryIds(sourceId: 'bilibili', channelId: 'creator-1'),
+        {'a-1', 'a-2'},
+      );
+      expect(
+        await dao.getEntryIds(sourceId: 'bilibili', channelId: 'unknown'),
+        isEmpty,
+      );
+    });
+
+    test('counts unread entries across every channel of a source', () async {
+      await dao.upsertEntries([
+        _entry(entryId: 'a-1', channelId: 'creator-1'),
+        _entry(entryId: 'a-2', channelId: 'creator-1'),
+        _entry(entryId: 'b-1', channelId: 'creator-2'),
+        _entry(entryId: 'other-1', sourceId: 'youtube', channelId: 'creator-1'),
+      ]);
+      await dao.markAsRead('bilibili', 'creator-1', 'a-1');
+
+      expect(await dao.getUnreadCountForSource('bilibili'), 2);
+      expect(await dao.getUnreadCountForSource('youtube'), 1);
+      expect(await dao.getUnreadCountForSource('unknown'), 0);
+    });
+
     test('deletes only expired entries in the requested channel', () async {
       final now = DateTime.now();
       await dao.upsertEntries([

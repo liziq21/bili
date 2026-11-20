@@ -100,6 +100,36 @@ class FeedDao(super.db)
         .write(const FeedEntryCompanion(isRead: Value(true)));
   }
 
+  /// 指定频道已落库的条目 id 集合。
+  ///
+  /// 供增量加载判定「哪些是本次新条目」：upsert 前先取一次，避免逐条查询。
+  Future<Set<String>> getEntryIds({
+    required String sourceId,
+    required String channelId,
+  }) async {
+    final query = selectOnly(feedEntry)
+      ..addColumns([feedEntry.entryId])
+      ..where(
+        feedEntry.sourceId.equals(sourceId) &
+            feedEntry.channelId.equals(channelId),
+      );
+    final rows = await query.get();
+    return {for (final row in rows) row.read(feedEntry.entryId)!};
+  }
+
+  /// 整个数据源下未读条目总数（跨频道）。
+  ///
+  /// 更新通知按「整个订阅 Feed 新增了多少」判断，不按单频道。
+  Future<int> getUnreadCountForSource(String sourceId) async {
+    final count = feedEntry.internalId.count();
+    final query = selectOnly(feedEntry)
+      ..addColumns([count])
+      ..where(
+        feedEntry.sourceId.equals(sourceId) & feedEntry.isRead.equals(false),
+      );
+    return (await query.getSingle()).read(count) ?? 0;
+  }
+
   Future<void> markAllRead(String sourceId, String channelId) async {
     await (update(feedEntry)..where(
           (e) => e.sourceId.equals(sourceId) & e.channelId.equals(channelId),

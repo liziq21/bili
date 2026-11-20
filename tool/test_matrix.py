@@ -134,6 +134,7 @@ TEST_MATRIX = {
     'unit': [
         'app/test/data/local_library_repository_test.dart',
         'app/test/data/repository/creator_profile_repository_test.dart',
+        'app/test/data/repository/feed_repository_test.dart',
         'app/test/data/repository/playlist_content_repository_test.dart',
         'app/test/data/repository/video_comment_repository_test.dart',
         'app/test/data/repository/video_detail_repository_test.dart',
@@ -145,6 +146,7 @@ TEST_MATRIX = {
         'app/test/database/local_playlist_migration_test.dart',
         'app/test/datastore/media_history_settings_test.dart',
         'app/test/datastore/preferences_data_source_test.dart',
+        'app/test/domain/feed_load_manager_test.dart',
         'app/test/domain/get_recent_search_queries_use_case_test.dart',
         'app/test/domain/get_search_contents_use_case_test.dart',
         'app/test/feature/home/home_config_test.dart',
