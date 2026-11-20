@@ -101,8 +101,11 @@ class MediaHistoryCubit({
   ///
   /// 先写库再改状态：写库失败时列表保持不变，不会出现「界面上没了、重进又回来」。
   /// 删除后已消费行数按实际删除行数回退，否则下一页的 offset 会跳过紧跟其后的一条。
-  Future<void> removeItem(MediaHistoryItem item) async {
-    if (_isClosing || isClosed) return;
+  ///
+  /// 返回是否真的删掉了：调用方据此决定提示「已移除」还是保持沉默，
+  /// 失败时 [MediaHistoryState.error] 已经带上了原因，界面不需要再编一条成功提示。
+  Future<bool> removeItem(MediaHistoryItem item) async {
+    if (_isClosing || isClosed) return false;
     final int deleted;
     try {
       deleted = await _mediaHistoryDao.deleteHistoryForMediaKey(
@@ -110,11 +113,11 @@ class MediaHistoryCubit({
         originalId: item.video.id,
       );
     } catch (e) {
-      if (_isClosing || isClosed) return;
+      if (_isClosing || isClosed) return false;
       emit(state.copyWith(error: '$e'));
-      return;
+      return false;
     }
-    if (_isClosing || isClosed) return;
+    if (_isClosing || isClosed) return false;
 
     final key = (sourceId: item.sourceId, originalId: item.video.id);
     final items = [
@@ -133,22 +136,25 @@ class MediaHistoryCubit({
     );
     await _stopWatching();
     await _watchVisibleHistory();
+    return true;
   }
 
   /// 清空全部观看历史
   ///
   /// 清空后回到首屏加载的起点：`hasMore` 复位为 true 且 offset 归零，
   /// 之后若有新记录写入，[loadMore] 与监听流都从第一页重新开始。
-  Future<void> clearAll() async {
-    if (_isClosing || isClosed) return;
+  ///
+  /// 返回是否真的清空了，语义同 [removeItem]。
+  Future<bool> clearAll() async {
+    if (_isClosing || isClosed) return false;
     try {
       await _mediaHistoryDao.clearHistory();
     } catch (e) {
-      if (_isClosing || isClosed) return;
+      if (_isClosing || isClosed) return false;
       emit(state.copyWith(error: '$e'));
-      return;
+      return false;
     }
-    if (_isClosing || isClosed) return;
+    if (_isClosing || isClosed) return false;
     _rowOffset = 0;
     emit(
       state.copyWith(
@@ -160,6 +166,7 @@ class MediaHistoryCubit({
     );
     await _stopWatching();
     await _watchVisibleHistory();
+    return true;
   }
 
   /// 取一页并写回状态

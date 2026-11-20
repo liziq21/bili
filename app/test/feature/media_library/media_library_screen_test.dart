@@ -1,6 +1,8 @@
 // ignore_for_file: use_declaring_parameters
 
 import 'package:app/database/app_database.dart';
+import 'package:app/database/dao/media_history_dao.dart';
+import 'package:app/database/table/media.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:app/feature/media_library/media_library_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
@@ -394,6 +396,33 @@ void main() {
     expect(await db.mediaHistoryDao.getHistoryWithMedia(), isEmpty);
   });
 
+  testWidgets('a failed delete shows no success snack bar', (tester) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: _FailingDeleteHistoryDao(db),
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    await tester.longPress(find.textContaining('Video v1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+    // 先等对话框退场，否则它的标题里也含「Video v1」，与列表行的断言撞在一起。
+    await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    // 写库失败时行还在树上，提示不能说「已移除」——那与用户看到的画面矛盾。
+    expect(find.text('Removed from history'), findsNothing);
+    expect(find.textContaining('Video v1'), findsOneWidget);
+    expect(cubit.state.error, isNotNull);
+  });
+
   testWidgets('the clear action is disabled while the list is empty', (
     tester,
   ) async {
@@ -461,4 +490,14 @@ void main() {
     expect(tapped.single.video.id, 'v1');
     expect(tapped.single.sourceId, 'bilibili');
   });
+}
+
+/// 删除必然失败的 DAO 包装：只覆盖删除路径，查询仍走真实数据库。
+final class _FailingDeleteHistoryDao(super.db) extends MediaHistoryDao {
+  @override
+  Future<int> deleteHistoryForMediaKey({
+    required String sourceId,
+    required String originalId,
+    String type = Media.typeVideo,
+  }) async => throw StateError('delete failed');
 }

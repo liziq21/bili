@@ -237,7 +237,7 @@ void main() {
       (item) => item.video.id == 'v1',
     );
 
-    await cubit.removeItem(target);
+    expect(await cubit.removeItem(target), isTrue);
 
     expect(idsOf(cubit), ['v2']);
     expect(
@@ -315,7 +315,7 @@ void main() {
     await settle(cubit);
     expect(idsOf(cubit), hasLength(2));
 
-    await cubit.clearAll();
+    expect(await cubit.clearAll(), isTrue);
 
     expect(cubit.state.items, isEmpty);
     expect(cubit.state.progressByMedia, isEmpty);
@@ -345,7 +345,7 @@ void main() {
       await settle(cubit);
       final target = cubit.state.items.first;
 
-      await cubit.removeItem(target);
+      expect(await cubit.removeItem(target), isFalse);
 
       expect(cubit.state.error, isNotNull);
       expect(idsOf(cubit), ['v1', 'v2']);

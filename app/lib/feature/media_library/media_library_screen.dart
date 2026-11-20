@@ -201,7 +201,8 @@ Future<void> _confirmClearHistory(BuildContext context) async {
     ),
   );
   if (confirmed != true) return;
-  await cubit.clearAll();
+  final cleared = await cubit.clearAll();
+  if (!cleared) return;
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
@@ -243,7 +244,8 @@ Future<void> _confirmDeleteHistoryItem(
     ),
   );
   if (confirmed != true) return;
-  await cubit.removeItem(item);
+  final removed = await cubit.removeItem(item);
+  if (!removed) return;
   messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
