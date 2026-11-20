@@ -6348,5 +6348,18 @@
   "feedUnsupportedTitle": "This source has no subscription feed",
   "@feedUnsupportedTitle": {
     "description": "Shown when the data source cannot fetch channel uploads"
+  },
+  "feedUpdateNotificationTitle": "New feed items",
+  "@feedUpdateNotificationTitle": {
+    "description": "Title of the system notification shown when the subscription feed grows past the threshold"
+  },
+  "feedUpdateNotificationBody": "{count, plural, =1{1 new item in your feed} other{{count} new items in your feed}}",
+  "@feedUpdateNotificationBody": {
+    "description": "Body of the feed update notification; {count} is the number of new unread entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

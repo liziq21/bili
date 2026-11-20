@@ -8092,6 +8092,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This source has no subscription feed'**
   String get feedUnsupportedTitle;
+
+  /// Title of the system notification shown when the subscription feed grows past the threshold
+  ///
+  /// In en, this message translates to:
+  /// **'New feed items'**
+  String get feedUpdateNotificationTitle;
+
+  /// Body of the feed update notification; {count} is the number of new unread entries
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new item in your feed} other{{count} new items in your feed}}'**
+  String feedUpdateNotificationBody(int count);
 }
 
 class _AppLocalizationsDelegate

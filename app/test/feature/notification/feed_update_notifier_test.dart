@@ -1,11 +1,45 @@
+import 'dart:ui' show Locale;
+
 import 'package:app/feature/notification/feed_update_notifier.dart';
 import 'package:app/feature/notification/local_feed_update_notifier.dart';
+import 'package:app/feature/notification/notification_presenter.dart';
 import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+
+/// 一个「平台支持通知」的替身。
+///
+/// 测试跑在 Linux 宿主上，真实 presenter 的 `isSupported` 恒为 false，任何
+/// 走到「发送通知」分支的断言都会变成空转。这个替身让该分支可被断言。
+final class _SupportedPresenter() implements NotificationPresenter {
+  final shown = <String>[];
+
+  @override
+  bool get isSupported => true;
+
+  @override
+  Future<void> initialize({
+    required void Function(String? payload) onTap,
+  }) async {}
+
+  @override
+  Future<({bool launched, String? payload})> launchDetails() async =>
+      (launched: false, payload: null);
+
+  @override
+  Future<bool> requestPermission() async => true;
+
+  @override
+  Future<void> show({
+    required String title,
+    required String body,
+    required String payload,
+  }) async => shown.add(payload);
+}
 
 /// Platform-agnostic feed update decision logic.
 ///
@@ -60,24 +94,56 @@ void main() {
     });
 
     test(
-      'exactly reaching the threshold advances to the current count',
+      'exactly reaching the threshold notifies and advances to the count',
       () async {
-        // Given a threshold of 3 and exactly 3 new items.
-        // When the feed is polled. The platform is not Android in the test
-        // runner, so the show() path is skipped but the arithmetic still runs
-        // through the same guard order.
-        final result = await notifier.notifyIfThresholdReached(
+        // Given a supported platform, a threshold of 3 and exactly 3 new items.
+        final presenter = _SupportedPresenter();
+        final supported = LocalFeedUpdateNotifier(
+          preferences,
+          presenter: presenter,
+          localizations: lookupAppLocalizations(const Locale('en')),
+        );
+        addTearDown(supported.dispose);
+
+        // When the feed is polled.
+        final result = await supported.notifyIfThresholdReached(
           currentCount: 6,
           threshold: 3,
           lastNotifiedCount: 3,
         );
 
-        // Then the count is either acknowledged (notification shown) or left
-        // alone (notifications unavailable on this platform) — never bogus.
-        final count = (result as Success<int, Exception>).success;
-        expect(count, anyOf(3, 6));
+        // Then one notification is shown and the count is acknowledged.
+        expect((result as Success<int, Exception>).success, 6);
+        expect(presenter.shown, hasLength(1));
       },
     );
+
+    test('reaching the threshold twice in a row notifies only once', () async {
+      // Given the first poll already showed a notification.
+      final presenter = _SupportedPresenter();
+      final supported = LocalFeedUpdateNotifier(
+        preferences,
+        presenter: presenter,
+        localizations: lookupAppLocalizations(const Locale('en')),
+      );
+      addTearDown(supported.dispose);
+      final first = await supported.notifyIfThresholdReached(
+        currentCount: 6,
+        threshold: 3,
+        lastNotifiedCount: 3,
+      );
+      final acknowledged = (first as Success<int, Exception>).success;
+
+      // When the same unread count is polled again with that baseline.
+      await supported.notifyIfThresholdReached(
+        currentCount: 6,
+        threshold: 3,
+        lastNotifiedCount: acknowledged,
+      );
+
+      // Then no second notification is pushed for the same entries.
+      expect(presenter.shown, hasLength(1));
+    });
 
     test('a shrunken feed never triggers or advances', () async {
       // Given the last notified count is above the current count.

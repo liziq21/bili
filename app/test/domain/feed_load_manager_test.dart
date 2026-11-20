@@ -21,6 +21,9 @@ final class _RecordingNotifier({final Result<int, Exception>? result})
   bool get isSupported => true;
 
   @override
+  Stream<void> get feedOpened => const Stream.empty();
+
+  @override
   Future<Result<void, Exception>> initialize() async =>
       const Result.success(null);
 

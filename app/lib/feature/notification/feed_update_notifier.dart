@@ -10,13 +10,22 @@ import 'package:model/model.dart';
 ///
 /// Implementations must never throw: failures come back as [Error] results and
 /// the caller keeps working with its previous count.
-abstract interface class FeedUpdateNotifier {
+abstract interface class FeedUpdateNotifier() {
   /// Whether this platform can deliver feed update notifications at all.
   bool get isSupported;
 
+  /// Fires when the user taps a feed update notification.
+  ///
+  /// Also fires for a cold start where the notification launched the app, so
+  /// subscribers do not need to distinguish "app was already running" from
+  /// "app was just started by the tap". A cold-start signal is buffered until
+  /// the first listener arrives.
+  Stream<void> get feedOpened;
+
   /// Prepares the platform notification system (channel and plugin).
   ///
-  /// Call once at startup. Does not prompt for permission; use
+  /// Registers the tap handler and drains a pending cold-start tap, so call it
+  /// once at startup. Does not prompt for permission; use
   /// [requestPermission] for that, from a place where a system dialog is
   /// expected. Safe to call repeatedly.
   Future<Result<void, Exception>> initialize();

@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 74 |
-| widget | 54 |
+| unit | 75 |
+| widget | 55 |
 | golden | 8 |
 | contract | 12 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **150** |
+| **合计** | **152** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（74）
+## unit（75）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -46,6 +46,7 @@
 - `app/test/feature/feed/feed_cubit_test.dart`
 - `app/test/feature/home/home_config_test.dart`
 - `app/test/feature/media_library/media_history_cubit_test.dart`
+- `app/test/feature/notification/feed_opened_routing_test.dart`
 - `app/test/feature/notification/feed_update_notifier_test.dart`
 - `app/test/feature/search_state_test.dart`
 - `app/test/feature/video/media_stream_bloc_test.dart`
@@ -101,7 +102,7 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 
-## widget（54）
+## widget（55）
 
 - `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/danmaku_settings_screen_test.dart`
@@ -109,6 +110,7 @@
 - `app/test/feature/filter_bar_test.dart`
 - `app/test/feature/history_settings_screen_test.dart`
 - `app/test/feature/feed/feed_screen_test.dart`
+- `app/test/feature/notification/feed_notification_listener_test.dart`
 - `app/test/feature/home/feed_status_view_test.dart`
 - `app/test/feature/home/home_config_editor_screen_test.dart`
 - `app/test/feature/home/live_feed_section_test.dart`

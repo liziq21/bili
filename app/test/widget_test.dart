@@ -136,6 +136,11 @@ final class _FakeFeedUpdateNotifier() implements FeedUpdateNotifier {
   @override
   bool get isSupported => true;
 
+  // 这条冒烟测试不验证点击跳转，给一个空流即可（真实链路见
+  // feed_notification_listener_test.dart）。
+  @override
+  Stream<void> get feedOpened => const Stream.empty();
+
   @override
   Future<Result<void, Exception>> initialize() async =>
       const Result.success(null);
