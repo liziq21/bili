@@ -5,6 +5,11 @@ import 'package:ypi/ypi.dart';
 import 'data/source/search/youtube_creator_profile_search_remote_data_source.dart';
 import 'data/source/search/youtube_search_suggest_remote_data_source.dart';
 import 'data/source/search/youtube_video_search_remote_data_source.dart';
+import 'data/source/youtube_media_stream_remote_data_source.dart';
+import 'data/source/youtube_playlist_content_remote_data_source.dart';
+import 'data/source/youtube_user_videos_remote_data_source.dart';
+import 'data/source/youtube_video_comment_remote_data_source.dart';
+import 'data/source/youtube_video_detail_remote_data_source.dart';
 
 class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
     implements MediaSource {
@@ -44,11 +49,15 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   LiveRoomSearchRemoteDataSource? get liveRoomSearchDataSource => null;
 
   @override
-  VideoDetailRemoteDataSource? get videoDetailDataSource => null;
+  YouTubeVideoDetailRemoteDataSource get videoDetailDataSource =>
+      YouTubeVideoDetailRemoteDataSource(_youtubeService);
 
   @override
-  VideoCommentRemoteDataSource? get videoCommentDataSource => null;
+  YouTubeVideoCommentRemoteDataSource get videoCommentDataSource =>
+      YouTubeVideoCommentRemoteDataSource(_youtubeService);
 
+  /// 二级回复使用评论线程里的 reply continuation token，响应形态与顶层
+  /// 评论列表不同；仓库内只有顶层评论 fixture，故不声明该能力。
   @override
   VideoCommentRepliesRemoteDataSource? get videoCommentRepliesDataSource =>
       null;
@@ -58,10 +67,12 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   @override
   LiveDanmakuRemoteDataSource? get liveDanmakuDataSource => null;
 
-  /// YouTube 播放能力尚未接入：分离流地址的签名解密需要执行 player JS，
-  /// 成本与 B站不同量级，故本项显式声明为不支持而非留空。
   @override
-  MediaStreamRemoteDataSource? get mediaStreamDataSource => null;
+  YouTubeMediaStreamRemoteDataSource get mediaStreamDataSource =>
+      YouTubeMediaStreamRemoteDataSource(
+        _youtubeService,
+        _youtubeService.playerUserAgent,
+      );
   @override
   LiveRoomDetailRemoteDataSource? get liveRoomDetailDataSource => null;
 
@@ -72,10 +83,12 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
 
   @override
-  UserVideosRemoteDataSource? get userVideosDataSource => null;
+  YouTubeUserVideosRemoteDataSource get userVideosDataSource =>
+      YouTubeUserVideosRemoteDataSource(_youtubeService);
 
   @override
-  PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
+  YouTubePlaylistContentRemoteDataSource get playlistContentDataSource =>
+      YouTubePlaylistContentRemoteDataSource(_youtubeService);
 
   @override
   Future<void> close() async {

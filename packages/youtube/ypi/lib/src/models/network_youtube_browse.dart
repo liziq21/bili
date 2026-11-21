@@ -72,6 +72,40 @@ final class NetworkYouTubeChannelHeader {
   final NetworkYouTubeText? subscriberCountText;
 }
 
+/// Channel-level metadata carried under `metadata.channelMetadataRenderer`.
+///
+/// The modern `pageHeaderRenderer` header carries only the title; avatar and
+/// description live here. This block is also the only place that reliably
+/// carries `externalId`, which the header uses when it has no channel ID.
+final class NetworkYouTubeChannelMetadata {
+  const NetworkYouTubeChannelMetadata({
+    required this.channelId,
+    this.title,
+    this.description,
+    this.avatar,
+  });
+
+  factory NetworkYouTubeChannelMetadata.fromJson(Map<String, dynamic> json) {
+    final channelId = _string(json['externalId']);
+    if (channelId == null || channelId.isEmpty) {
+      throw const FormatException(
+        'channelMetadataRenderer is missing externalId',
+      );
+    }
+    return NetworkYouTubeChannelMetadata(
+      channelId: channelId,
+      title: _string(json['title']),
+      description: _string(json['description']),
+      avatar: NetworkYouTubeThumbnail.fromJson(json['avatar']),
+    );
+  }
+
+  final String channelId;
+  final String? title;
+  final String? description;
+  final NetworkYouTubeThumbnail? avatar;
+}
+
 /// A tab of a channel page. YouTube uses `tabRenderer` for the fixed tabs and
 /// `expandableTabRenderer` for the search entry; only the former carries
 /// content in the browse response.
@@ -157,6 +191,7 @@ final class NetworkYouTubeBrowseResponse {
   const NetworkYouTubeBrowseResponse({
     this.responseContext,
     this.header,
+    this.channelMetadata,
     this.tabs = const [],
     this.items = const [],
     this.continuationToken,
@@ -166,9 +201,20 @@ final class NetworkYouTubeBrowseResponse {
     _throwInnerTubeError(json);
     _throwAlertError(json);
 
-    final externalChannelId = _string(
-      _map(_map(json['metadata'])?['channelMetadataRenderer'])?['externalId'],
+    final channelMetadataMap = _map(
+      _map(json['metadata'])?['channelMetadataRenderer'],
     );
+    NetworkYouTubeChannelMetadata? channelMetadata;
+    if (channelMetadataMap != null) {
+      try {
+        channelMetadata = NetworkYouTubeChannelMetadata.fromJson(
+          channelMetadataMap,
+        );
+      } on FormatException {
+        channelMetadata = null;
+      }
+    }
+    final externalChannelId = channelMetadata?.channelId;
 
     NetworkYouTubeChannelHeader? header;
     final headerMap = _map(json['header']);
@@ -269,6 +315,7 @@ final class NetworkYouTubeBrowseResponse {
               _map(json['responseContext'])!,
             ),
       header: header,
+      channelMetadata: channelMetadata,
       tabs: List.unmodifiable(tabs),
       items: List.unmodifiable(items),
       continuationToken: continuationToken,
@@ -277,6 +324,7 @@ final class NetworkYouTubeBrowseResponse {
 
   final NetworkYouTubeResponseContext? responseContext;
   final NetworkYouTubeChannelHeader? header;
+  final NetworkYouTubeChannelMetadata? channelMetadata;
   final List<NetworkYouTubeTab> tabs;
   final List<NetworkYouTubeLockupItem> items;
   final String? continuationToken;
