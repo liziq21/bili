@@ -11,7 +11,6 @@ import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
-import '../../utils/platfrom_info.dart';
 import '../../data/repository/video_detail_repository.dart';
 import '../../database/dao/media_history_dao.dart';
 import '../../database/table/media.dart';
@@ -430,16 +429,31 @@ class _VideoContentState() extends State<_VideoContent> {
     super.dispose();
   }
 
+  /// 双栏布局的最小可用宽度。
+  ///
+  /// 低于 600dp 时详情与评论改为标签页：并排两栏在手机上每栏不足 300dp，
+  /// 标题与评论都会频繁换行。
+  static const double _twoPaneMinWidth = 600;
+
+  /// 常驻播放队列侧栏的最小可用宽度。
+  ///
+  /// 折叠屏展开态与手机横屏通常落在 700–900dp：此时再塞入 320dp 的队列侧栏，
+  /// 详情与评论各只剩约 240dp，正是「挤占大量空间、布局混乱」的来源。
+  /// 达不到这个宽度时队列改由播放器控制条上的入口以弹层打开，不占布局宽度。
+  static const double _queuePaneMinWidth = 1280;
+  static const double _queuePaneWidth = 320;
+
+  /// 内嵌播放器最多占页面可用高度的比例。
+  ///
+  /// 横屏 / 折叠屏横屏时 16:9 画面按宽度铺开后会吃掉整屏高度，把下方内容
+  /// 压成零高并触发 RenderFlex 溢出。超出上限时画面等比收缩、两侧留边，
+  /// 剩余空间留给详情与评论。
+  static const double _maxPlayerHeightFactorPortrait = 0.6;
+  static const double _maxPlayerHeightFactorLandscape = 0.68;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
-    final twoColumnAspect = PlatformInfo.isMobile ? .85 : 1.0;
-    // ⚡ Bolt Optimization: Use MediaQuery.sizeOf(context) instead of MediaQuery.of(context).size.
-    // Targeted size lookup prevents _VideoContent and descendant subtrees from rebuilding
-    // when unrelated MediaQuery properties change (e.g., soft keyboard viewInsets or system padding).
-    final size = MediaQuery.sizeOf(context);
-    final bool useTwoColumnLayout =
-        size.aspectRatio > twoColumnAspect || size.width >= 800;
 
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayer.
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower
@@ -455,51 +469,106 @@ class _VideoContentState() extends State<_VideoContent> {
       queue: widget.queue,
       surfaceBuilder: widget.surfaceBuilder,
     );
-    final content = Column(
-      children: [
-        if (!_fullscreen && widget.onBackClick != null)
-          AppBar(
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-              onPressed: widget.onBackClick,
+
+    // 全屏走沉浸模式，不套 SafeArea：系统栏 inset 会在画面四周压出一圈边。
+    if (_fullscreen) {
+      return Stack(
+        children: [
+          Positioned.fill(child: player),
+          // 返回按钮独立于播放器控制层：控制层会自动收起，页面级返回入口
+          // 必须始终可见。全屏下它先退出全屏，而不是直接离开页面。
+          Positioned(
+            top: $styles.insets.xs,
+            left: $styles.insets.xs,
+            child: _PlayerBackButton(
+              onPressed: _toggleFullscreen,
               tooltip: l10n.back,
-              icon: const Icon(AppIcons.back),
             ),
           ),
-        // 全屏时播放器铺满整屏，信息区一并收起。
-        if (_fullscreen) Expanded(child: player) else player,
-        if (!_fullscreen)
-          Expanded(
-            child: useTwoColumnLayout
-                ? _buildTwoColumnLayout()
-                : _buildNarrowTabContainer(l10n),
-          ),
-      ],
+        ],
+      );
+    }
+
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLandscape = constraints.maxWidth > constraints.maxHeight;
+          final maxPlayerHeight =
+              constraints.maxHeight *
+              (isLandscape
+                  ? _maxPlayerHeightFactorLandscape
+                  : _maxPlayerHeightFactorPortrait);
+          return Column(
+            children: [
+              // 播放器与返回按钮同处一个 Stack：按钮叠在画面上，不再用一整条
+              // AppBar 占掉竖向空间。按钮在 Stack 里而不是播放器的控制层里，
+              // 因此不随控制层自动隐藏。
+              Stack(
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: maxPlayerHeight),
+                    child: player,
+                  ),
+                  if (widget.onBackClick != null)
+                    Positioned(
+                      top: $styles.insets.xs,
+                      left: $styles.insets.xs,
+                      child: _PlayerBackButton(
+                        onPressed: widget.onBackClick!,
+                        tooltip: l10n.back,
+                      ),
+                    ),
+                ],
+              ),
+              Expanded(child: _buildContent(constraints.maxWidth, l10n)),
+            ],
+          );
+        },
+      ),
     );
-    // 全屏走沉浸模式，不套 SafeArea：系统栏 inset 会在画面四周压出一圈边。
-    if (_fullscreen) return content;
-    return SafeArea(child: content);
   }
 
-  Widget _buildTwoColumnLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Expanded(child: VideoInfoView()),
-        VerticalDivider(
-          width: 1,
-          color: $styles.colors.outline.withValues(alpha: 0.2),
-        ),
-        const Expanded(child: VideoCommentsView()),
-        VerticalDivider(
-          width: 1,
-          color: $styles.colors.outline.withValues(alpha: 0.2),
-        ),
-        SizedBox(
-          width: 320,
-          child: PlaybackQueueSheet(controller: widget.playbackController),
-        ),
-      ],
+  /// 详情 / 评论 / 队列的响应式排布。
+  ///
+  /// 队列只在足够宽时作为常驻侧栏；中等宽度下详情与评论并排，队列走弹层；
+  /// 紧凑宽度下三者退回标签页。这样折叠屏展开态不会因为队列侧栏而把
+  /// 详情和评论压成窄条。
+  Widget _buildContent(double width, AppLocalizations l10n) {
+    if (width >= _queuePaneMinWidth) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Expanded(child: VideoInfoView()),
+          _paneDivider(),
+          const Expanded(child: VideoCommentsView()),
+          _paneDivider(),
+          SizedBox(
+            width: _queuePaneWidth,
+            child: PlaybackQueueSheet(
+              controller: widget.playbackController,
+              embedded: true,
+            ),
+          ),
+        ],
+      );
+    }
+    if (width >= _twoPaneMinWidth) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Expanded(child: VideoInfoView()),
+          _paneDivider(),
+          const Expanded(child: VideoCommentsView()),
+        ],
+      );
+    }
+    return _buildNarrowTabContainer(l10n);
+  }
+
+  Widget _paneDivider() {
+    return VerticalDivider(
+      width: 1,
+      color: $styles.colors.outline.withValues(alpha: 0.2),
     );
   }
 
@@ -533,11 +602,38 @@ class _VideoContentState() extends State<_VideoContent> {
               children: [
                 VideoInfoView(),
                 VideoCommentsView(),
-                PlaybackQueueSheet(controller: widget.playbackController),
+                PlaybackQueueSheet(
+                  controller: widget.playbackController,
+                  embedded: true,
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 叠在播放器左上角的页面返回入口。
+///
+/// 半透明 scrim 圆底让图标在任意画面上都保持对比度；尺寸走 Material 默认
+/// 的 48dp 触达范围，不随画面缩放。它不属于播放器控制层，因此播放器全屏
+/// 自动收起控制项时本按钮仍保持可见。
+class const _PlayerBackButton({
+  required final VoidCallback onPressed,
+  required final String tooltip,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      icon: const Icon(AppIcons.back),
+      style: IconButton.styleFrom(
+        backgroundColor: $styles.colors.scrim.withValues(alpha: 0.55),
+        foregroundColor: $styles.colors.onScrim,
+        minimumSize: const Size(48, 48),
       ),
     );
   }
