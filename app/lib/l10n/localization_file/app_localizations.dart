@@ -7769,6 +7769,12 @@ abstract class AppLocalizations {
   /// **'Discovery'**
   String get settingsDiscovery;
 
+  /// Settings group and subpage title - channel page tabs
+  ///
+  /// In en, this message translates to:
+  /// **'Channel'**
+  String get settingsChannel;
+
   /// Home configuration editor page title
   ///
   /// In en, this message translates to:

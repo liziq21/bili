@@ -140,6 +140,13 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   /// decoded by [HomeConfig] as the default configuration.
   static const homeConfig = PreferencesKey<String>._('HOME_CONFIG', '{}');
 
+  /// JSON-encoded channel-page tab visibility. Missing ids stay visible so a
+  /// newly added tab is not hidden by a setting written before it existed.
+  static const channelTabVisibility = PreferencesKey<String>._(
+    'CHANNEL_TAB_VISIBILITY',
+    '{}',
+  );
+
   static const useDynamicColor = PreferencesKey<bool>._(
     'USE_DYNAMIC_COLOR',
     true,

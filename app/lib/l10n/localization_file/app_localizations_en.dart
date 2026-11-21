@@ -4519,6 +4519,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDiscovery => 'Discovery';
 
   @override
+  String get settingsChannel => 'Channel';
+
+  @override
   String get homeConfigTitle => 'Home';
 
   @override
