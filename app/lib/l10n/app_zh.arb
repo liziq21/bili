@@ -6361,5 +6361,13 @@
         "type": "int"
       }
     }
+  },
+  "channelVideosUnsupported": "该数据源暂不支持频道视频",
+  "@channelVideosUnsupported": {
+    "description": "Shown on a creator page when the source cannot list channel videos"
+  },
+  "channelVideosEmpty": "暂无视频",
+  "@channelVideosEmpty": {
+    "description": "Shown on a creator page when the channel has no uploaded videos"
   }
 }

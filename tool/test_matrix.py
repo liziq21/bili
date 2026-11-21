@@ -159,6 +159,7 @@ TEST_MATRIX = {
         'app/test/feature/notification/feed_opened_routing_test.dart',
         'app/test/feature/notification/feed_update_notifier_test.dart',
         'app/test/feature/search_state_test.dart',
+        'app/test/feature/space/channel_videos_cubit_test.dart',
         'app/test/feature/video/media_stream_bloc_test.dart',
         'app/test/feature/video/player/media_edl_test.dart',
         'app/test/feature/video/player/media_playback_controller_test.dart',

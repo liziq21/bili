@@ -8104,6 +8104,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 new item in your feed} other{{count} new items in your feed}}'**
   String feedUpdateNotificationBody(int count);
+
+  /// Shown on a creator page when the source cannot list channel videos
+  ///
+  /// In en, this message translates to:
+  /// **'This source has no channel videos'**
+  String get channelVideosUnsupported;
+
+  /// Shown on a creator page when the channel has no uploaded videos
+  ///
+  /// In en, this message translates to:
+  /// **'No videos yet'**
+  String get channelVideosEmpty;
 }
 
 class _AppLocalizationsDelegate

@@ -4701,4 +4701,10 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get channelVideosUnsupported => '该数据源暂不支持频道视频';
+
+  @override
+  String get channelVideosEmpty => '暂无视频';
 }

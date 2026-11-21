@@ -23,7 +23,11 @@ class const SpaceRouteData({required final String mid, final String? source})
 
     return ServiceSourceProviders(
       source: effectiveSource.id,
-      child: SpaceScreen(mid: mid, onBackClick: () => context.pop()),
+      child: SpaceScreen(
+        mid: mid,
+        onBackClick: () => context.pop(),
+        onVideo: context.defaultNavigateToVideo,
+      ),
     );
   }
 }

@@ -6361,5 +6361,13 @@
         "type": "int"
       }
     }
+  },
+  "channelVideosUnsupported": "This source has no channel videos",
+  "@channelVideosUnsupported": {
+    "description": "Shown on a creator page when the source cannot list channel videos"
+  },
+  "channelVideosEmpty": "No videos yet",
+  "@channelVideosEmpty": {
+    "description": "Shown on a creator page when the channel has no uploaded videos"
   }
 }

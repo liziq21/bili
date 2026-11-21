@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../data/repository/app_search_suggest_repository.dart';
+import '../data/repository/channel_videos_repository.dart';
 import '../data/repository/creator_profile_repository.dart';
 import '../data/repository/feed_repository.dart';
 import '../data/repository/danmaku_repository.dart';
@@ -185,6 +186,9 @@ class _SourceScopeState() extends State<_SourceScope> {
               AppPlaylistContentRepository(playlistContentDataSource),
         ),
       if (source.userVideosDataSource case final userVideosDataSource?) ...[
+        RepositoryProvider<ChannelVideosRepository>(
+          create: (_) => AppChannelVideosRepository(userVideosDataSource),
+        ),
         RepositoryProvider<FeedRepository>(
           create: (context) => FeedRepository(
             feedDao: context.read<FeedDao>(),
