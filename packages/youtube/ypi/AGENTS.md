@@ -54,4 +54,4 @@
 4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐 HTTP status、非敏感请求参数、client context、来源与抓取日期；成功 fixture 记录成功形态，negative fixture 必须明确写出 `negative` 及用途；响应形态的特殊之处写进该文件的说明段。
 5. 实现 service 方法与 DTO，一个 endpoint 对应 `YoutubeService` 上的一个方法；DTO 用 `NetworkYouTube` 前缀加端点或角色语义命名。
 6. 写四项测试：成功（或明确标记的 negative）fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身；若成功 fixture 尚未取得，必须在文档中标明 endpoint 尚不可视为完成。
-7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos`，两者全绿。
+7. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos --fatal-warnings`，两者全绿。

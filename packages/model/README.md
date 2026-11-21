@@ -25,7 +25,7 @@
 dart pub get
 
 # 静态分析
-dart analyze
+dart analyze --fatal-infos --fatal-warnings
 
 # 当前没有 test/ 目录
 # 新增测试后，从本目录运行：dart test

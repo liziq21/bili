@@ -1,7 +1,7 @@
 import 'package:data/data.dart';
 
 /// The neutral [FilterGroup.key] values YouTube search filters carry.
-abstract final class YoutubeFilterKey {
+abstract final class YoutubeFilterKey() {
   static const uploadDate = 'upload_date';
   static const duration = 'duration';
   static const feature = 'feature';
@@ -19,7 +19,7 @@ abstract final class YoutubeFilterKey {
 ///
 /// [paramValue] is the raw value the option writes into the InnerTube search
 /// params.
-abstract interface class YoutubeFilterOption implements FilterOption {
+abstract interface class YoutubeFilterOption() implements FilterOption {
   /// The raw value the option writes into the InnerTube search params.
   int get paramValue;
 }

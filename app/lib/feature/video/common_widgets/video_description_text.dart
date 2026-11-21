@@ -23,7 +23,7 @@ enum DescriptionTokenType() {
 class const DescriptionToken({
   required final DescriptionTokenType type,
   required final String text,
-}) with EquatableMixin {
+}) with Equatable {
   @override
   List<Object?> get props => [type, text];
 }

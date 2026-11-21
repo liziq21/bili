@@ -73,7 +73,7 @@ Use `flutter` commands for `app`:
 
 | Task | Command |
 |------|---------|
-| Analyze | `flutter analyze`（在 `app/` 执行只覆盖本包；CI 在仓库根目录执行，覆盖 workspace 全部包，含 `app/test/`） |
+| Analyze | `flutter analyze --fatal-infos --fatal-warnings`（在 `app/` 执行只覆盖本包；CI 在仓库根目录执行，覆盖 workspace 全部包，含 `app/test/`） |
 | Test | `flutter test` |
 | Test (single file) | `flutter test test/feature/home_bloc_test.dart` |
 | Test (single case) | `flutter test test/feature/home_bloc_test.dart --plain-name "Refresh with no source emits refreshing then not refreshing"` |
@@ -82,7 +82,7 @@ Use `flutter` commands for `app`:
 | Full Code Generation | `dart run build_runner build --delete-conflicting-outputs` |
 | Pub Get | `flutter pub get` |
 
-CI 对分析的处理分两档：Jules 相关 PR 用 `--fatal-infos --fatal-warnings`，其余 PR 用 `--no-fatal-infos --no-fatal-warnings`。也就是说 info 级问题在普通 PR 上不会让 CI 变红。要按 CI 的严格档自查，本地跑 `flutter analyze --fatal-infos --fatal-warnings`。
+静态分析统一使用严格档：CI 的 `Run analyze` 步骤对 push 与 PR 一律执行 `flutter analyze --fatal-infos --fatal-warnings`，info 与 warning 都会让检查失败。规则见根 [`AGENTS.md`](../AGENTS.md#静态分析)。
 
 Generated outputs are committed, but never hand-edit them: change the source, run the narrowest generator above (or the full command when several generators are affected), then review the generated diff.
 

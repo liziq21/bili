@@ -54,28 +54,11 @@ jobs:
           --delete-conflicting-outputs \
           --verbose
 
-      - name: Cache build_runner generated files
-        uses: actions/cache@v4
-        with:
-          path: |
-            packages/bilibili/bpi/lib/src/**/*.g.dart
-            packages/bilibili/bpi/lib/src/**/*.chopper.dart
-            packages/youtube/ypi/lib/src/**/*.g.dart
-            packages/youtube/ypi/lib/src/**/*.chopper.dart
-          key: build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-${{ github.sha }}
-          restore-keys: |
-            build-runner-${{ hashFiles('packages/bilibili/bpi/pubspec.yaml', 'packages/youtube/ypi/pubspec.yaml') }}-
-
       - name: Run analyze
-        env:
-          IS_JULES_RELATED: ${{ contains(join(github.event.pull_request.assignees.*.login, ','), 'google-labs-jules[bot]') || github.event.pull_request.user.login == 'google-labs-jules[bot]' }}
+        # pipefail 必需：管道最后一段是 tee，默认退出码来自 tee，会把 analyze 的失败吞掉。
         run: |
-          if [ "$IS_JULES_RELATED" = "true" ]; then
-            echo "检测到与 google-labs-jules 相关的 PR，提升警告和一般提示为错误级别..."
-            flutter analyze --fatal-infos --fatal-warnings 2>&1 | tee flutter_analyze.txt
-          else
-            flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee flutter_analyze.txt
-          fi
+          set -o pipefail
+          flutter analyze --fatal-infos --fatal-warnings 2>&1 | tee flutter_analyze.txt
 
       - name: Dart Analyze to SARIF
         uses: advanced-security/dart-analyzer-sarif@63edda78ee1ce2b3b5bc5b8c0418ce3128887e23 # main

@@ -4,10 +4,9 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
-class _FakeChannelVideosRepository implements ChannelVideosRepository {
-  _FakeChannelVideosRepository(this.responses);
-
-  final Map<int, Result<Page<VideoModel>, Exception>> responses;
+class _FakeChannelVideosRepository(
+  final Map<int, Result<Page<VideoModel>, Exception>> responses,
+) implements ChannelVideosRepository {
   final List<String> requestedChannels = [];
   final List<int> requestedPages = [];
 
