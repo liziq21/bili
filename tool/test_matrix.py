@@ -91,6 +91,7 @@ TEST_MATRIX = {
         'app/test/feature/home_bloc_test.dart',
         'app/test/feature/home_filter_bar_test.dart',
         'app/test/feature/home_source_selector_test.dart',
+        'app/test/feature/live/live_danmaku_overlay_test.dart',
         'app/test/feature/live/live_quality_chip_test.dart',
         'app/test/feature/live/live_screen_test.dart',
         'app/test/feature/library_settings_screen_test.dart',

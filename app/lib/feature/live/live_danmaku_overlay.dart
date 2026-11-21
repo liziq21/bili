@@ -133,6 +133,20 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
   }
 
   @override
+  void didUpdateWidget(covariant LiveDanmakuOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.roomId == widget.roomId) return;
+    // 换房间：旧订阅指向旧房间，必须断开；已到达的弹幕属于旧房间，
+    // 不能混进新房间的浮层。build 紧跟 didUpdateWidget，直接赋值即可。
+    _danmakuSubscription?.cancel();
+    _danmakuSubscription = null;
+    _stopTicker();
+    _streamStart = DateTime.now();
+    _comments = const [];
+    _subscribeDanmaku();
+  }
+
+  @override
   void dispose() {
     _danmakuSubscription?.cancel();
     _settingSubscriptions?.forEach((s) => s.cancel());
