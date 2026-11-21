@@ -123,6 +123,10 @@ void main() {
     // lives in `metadata.channelMetadataRenderer.externalId`.
     expect(response.header?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
     expect(response.header?.title, 'Rick Astley');
+    expect(response.channelMetadata?.channelId, 'UCuAXFkgsw1L7xaCfnd5JJOw');
+    expect(response.channelMetadata?.title, 'Rick Astley');
+    expect(response.channelMetadata?.description, isNotEmpty);
+    expect(response.channelMetadata?.avatar?.thumbnails, isNotEmpty);
 
     expect(response.tabs, hasLength(8));
     expect(response.tabs.where((tab) => tab.selected).map((tab) => tab.title), [

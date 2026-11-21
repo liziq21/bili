@@ -20,7 +20,8 @@ final class YoutubeService {
     YoutubeClientConfig config = const YoutubeClientConfig(),
     YoutubeClientConfig playerConfig = const YoutubeClientConfig.ios(),
   }) : _httpClient = httpClient ?? http.Client(),
-       _ownsHttpClient = httpClient == null {
+       _ownsHttpClient = httpClient == null,
+       _playerConfig = playerConfig {
     _validateConfig(config);
     _validateConfig(playerConfig);
     _chopperClient = ChopperClient(
@@ -39,10 +40,18 @@ final class YoutubeService {
 
   final http.Client _httpClient;
   final bool _ownsHttpClient;
+  final YoutubeClientConfig _playerConfig;
   late final ChopperClient _chopperClient;
   late final ChopperClient _playerChopperClient;
   late final YoutubeApi _api;
   late final YoutubeApi _playerApi;
+
+  /// The user agent used for player requests.
+  ///
+  /// Stream URLs returned by the player endpoint are requested by the media
+  /// player rather than this HTTP client, so the adapter layer forwards this
+  /// value as the playback request's `User-Agent`.
+  String get playerUserAgent => _playerConfig.userAgent;
 
   void close() {
     _chopperClient.dispose();

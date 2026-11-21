@@ -13,6 +13,12 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
 ) extends CreatorProfileSearchRemoteDataSource with YouTubeRemoteDataSource {
   static final RegExp _controlChars = RegExp(r'[\x00-\x1F\x7F]');
 
+  /// YouTube channel IDs are `UC` plus 22 URL-safe characters. The app's
+  /// creator-profile repository resolves a channel page by passing the channel
+  /// ID as a search query; a text search for an ID does not reliably return
+  /// that channel, so ID-shaped queries browse the channel directly.
+  static final RegExp _channelIdPattern = RegExp(r'^UC[A-Za-z0-9_-]{22}$');
+
   @override
   List<SortOption> get sortOptions => const [];
 
@@ -34,6 +40,37 @@ final class const YouTubeCreatorProfileSearchRemoteDataSource(
             data: const [],
           ),
         );
+      }
+      if (targetPage == 1 && _channelIdPattern.hasMatch(sanitizedQuery)) {
+        final response = await _youtubeService.browseChannel(
+          browseId: sanitizedQuery,
+        );
+        final metadata = response.channelMetadata;
+        final header = response.header;
+        if (metadata != null || header != null) {
+          final avatar = metadata?.avatar ?? header?.avatar;
+          return Result.success(
+            Page<CreatorProfile>(
+              number: 1,
+              totalPages: 1,
+              data: [
+                CreatorProfile(
+                  id: metadata?.channelId ?? header!.channelId,
+                  name: metadata?.title ?? header?.title ?? '',
+                  description: metadata?.description,
+                  thumbnailUrl: normalizeYoutubeUrl(
+                    avatar == null || avatar.thumbnails.isEmpty
+                        ? null
+                        : avatar.thumbnails.last.url,
+                  ),
+                  subscribers: parseYoutubeCount(
+                    header?.subscriberCountText?.value,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
       }
       final continuationKey = '$sanitizedQuery:$targetPage';
       final previousContinuationKey = '$sanitizedQuery:${targetPage - 1}';

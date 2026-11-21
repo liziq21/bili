@@ -1,4 +1,6 @@
 import 'package:app/data/repository/app_search_suggest_repository.dart';
+import 'package:app/data/repository/channel_videos_repository.dart';
+import 'package:app/data/repository/playlist_content_repository.dart';
 import 'package:app/data/repository/search/app_creator_profile_search_repository.dart';
 import 'package:app/data/repository/search/app_live_room_search_repository.dart';
 import 'package:app/data/repository/search/app_video_search_repository.dart';
@@ -76,51 +78,51 @@ void main() {
     expect(found[VideoCommentRepository], isA<AppVideoCommentRepository>());
   });
 
-  testWidgets(
-    'injects YouTube search capabilities but omits unsupported ones',
-    (tester) async {
-      final found = <Type, Object?>{};
-      await tester.pumpWidget(
-        buildWithCatalog(
-          ServiceSourceProviders(
-            source: 'youtube',
-            child: Builder(
-              builder: (context) {
-                found[VideoSearchRepository] = context
-                    .read<VideoSearchRepository>();
-                found[CreatorProfileSearchRepository] = context
-                    .read<CreatorProfileSearchRepository>();
-                found[SearchSuggestRepository] = context
-                    .read<SearchSuggestRepository>();
-                try {
-                  found[VideoDetailRepository] = context
-                      .read<VideoDetailRepository>();
-                } on ProviderNotFoundException catch (error) {
-                  found[VideoDetailRepository] = error;
-                }
-                try {
-                  found[VideoCommentRepository] = context
-                      .read<VideoCommentRepository>();
-                } on ProviderNotFoundException catch (error) {
-                  found[VideoCommentRepository] = error;
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+  testWidgets('injects every YouTube capability the source implements', (
+    tester,
+  ) async {
+    final found = <Type, Object?>{};
+    await tester.pumpWidget(
+      buildWithCatalog(
+        ServiceSourceProviders(
+          source: 'youtube',
+          child: Builder(
+            builder: (context) {
+              found[VideoSearchRepository] = context
+                  .read<VideoSearchRepository>();
+              found[CreatorProfileSearchRepository] = context
+                  .read<CreatorProfileSearchRepository>();
+              found[SearchSuggestRepository] = context
+                  .read<SearchSuggestRepository>();
+              found[VideoDetailRepository] = context
+                  .read<VideoDetailRepository>();
+              found[VideoCommentRepository] = context
+                  .read<VideoCommentRepository>();
+              found[PlaylistContentRepository] = context
+                  .read<PlaylistContentRepository>();
+              found[ChannelVideosRepository] = context
+                  .read<ChannelVideosRepository>();
+              return const SizedBox.shrink();
+            },
           ),
         ),
-      );
+      ),
+    );
 
-      expect(found[VideoSearchRepository], isA<AppVideoSearchRepository>());
-      expect(
-        found[CreatorProfileSearchRepository],
-        isA<AppCreatorProfileSearchRepository>(),
-      );
-      expect(found[SearchSuggestRepository], isA<AppSearchSuggestRepository>());
-      expect(found[VideoDetailRepository], isA<ProviderNotFoundException>());
-      expect(found[VideoCommentRepository], isA<ProviderNotFoundException>());
-    },
-  );
+    expect(found[VideoSearchRepository], isA<AppVideoSearchRepository>());
+    expect(
+      found[CreatorProfileSearchRepository],
+      isA<AppCreatorProfileSearchRepository>(),
+    );
+    expect(found[SearchSuggestRepository], isA<AppSearchSuggestRepository>());
+    expect(found[VideoDetailRepository], isA<AppVideoDetailRepository>());
+    expect(found[VideoCommentRepository], isA<AppVideoCommentRepository>());
+    expect(
+      found[PlaylistContentRepository],
+      isA<AppPlaylistContentRepository>(),
+    );
+    expect(found[ChannelVideosRepository], isA<AppChannelVideosRepository>());
+  });
 
   testWidgets('unknown sources fail before a route child is built', (
     tester,
