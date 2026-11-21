@@ -250,9 +250,9 @@ Staff _$StaffFromJson(Map<String, dynamic> json) =>
         title: $checkedConvert('title', (v) => v as String),
         name: $checkedConvert('name', (v) => v as String),
         face: $checkedConvert('face', (v) => v as String),
-        vip: $checkedConvert('vip', (v) => (v as num).toInt()),
-        official: $checkedConvert('official', (v) => (v as num).toInt()),
-        follower: $checkedConvert('follower', (v) => (v as num).toInt()),
+        follower: $checkedConvert('follower', (v) => (v as num?)?.toInt()),
+        vip: $checkedConvert('vip', (v) => v),
+        official: $checkedConvert('official', (v) => v),
       );
       return val;
     });

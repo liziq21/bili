@@ -178,15 +178,19 @@ class VideoPart({
 }
 
 /// 13. 联合创作 Staff 成员辅助模型
+///
+/// `vip` 与 `official` 在该接口里是对象或 null，不是整数；`follower` 也可能
+/// 缺省。把它们当必填 int 解码会让整条 `/x/web-interface/view` 响应解析失败，
+/// 联合创作视频因此连标题和播放地址都拿不到。
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class Staff({
   required final int mid,
   required final String title,
   required final String name,
   required final String face,
-  required final int vip,
-  required final int official,
-  required final int follower,
+  final int? follower,
+  final Object? vip,
+  final Object? official,
 }) {
   factory Staff.fromJson(Map<String, dynamic> json) => _$StaffFromJson(json);
 }

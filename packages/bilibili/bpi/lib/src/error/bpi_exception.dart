@@ -35,6 +35,21 @@ final class WbiException extends BpiException {
   });
 }
 
+/// Bilibili answered with a GAIA risk-control challenge instead of data.
+///
+/// The envelope still carries `code: 0`, so this is not an API error and not a
+/// decoding bug: `data` holds only `v_voucher`, which needs a captcha the
+/// client cannot solve. The request is safe to retry later.
+final class BiliRiskControlException extends BpiException {
+  const BiliRiskControlException(
+    super.message, {
+    super.uri,
+    super.statusCode,
+    super.biliCode,
+    super.cause,
+  });
+}
+
 final class BpiSerializationException extends BpiException {
   const BpiSerializationException(
     super.message, {

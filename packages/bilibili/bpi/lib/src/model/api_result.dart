@@ -1,5 +1,9 @@
 import '../error/bpi_exception.dart';
 
+/// `data` 只有 `v_voucher` 时是 GAIA 风控挑战，而不是业务数据。
+bool _isRiskControlChallenge(Map<String, dynamic> data) =>
+    data.containsKey('v_voucher') && !data.containsKey('result');
+
 sealed class const ApiResult<T>() {
   const factory ApiResult.error({required int code, String? message}) = Error._;
   const factory ApiResult.ok({required int code, required T data}) = Ok._;
@@ -33,6 +37,13 @@ sealed class const ApiResult<T>() {
     } else {
       throw BpiSerializationException(
         'Successful Bilibili response is missing an object data/result field.',
+        biliCode: code,
+      );
+    }
+
+    if (_isRiskControlChallenge(dataMap)) {
+      throw BiliRiskControlException(
+        'Bilibili answered with a risk-control challenge instead of data.',
         biliCode: code,
       );
     }

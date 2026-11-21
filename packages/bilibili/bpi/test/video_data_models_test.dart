@@ -131,4 +131,61 @@ void main() {
       expect(replyData, isNotNull);
     });
   });
+
+  group('Staff (联合创作)', () {
+    // 联合创作视频的 /x/web-interface/view 响应里 staff 条目的 vip 与
+    // official 是对象或 null，follower 可能缺省；按必填 int 解码会让整条
+    // 详情响应解析失败，页面连标题都显示不出来。
+    test('parses staff entries whose vip and official are null', () {
+      final video = VideoDetailData.fromJson({
+        'bvid': 'BV1atse6EEfx',
+        'aid': 1,
+        'videos': 1,
+        'tid': 1,
+        'tname': 't',
+        'copyright': 1,
+        'pic': 'https://example/pic.jpg',
+        'title': 'title',
+        'pubdate': 1700000000,
+        'ctime': 1700000000,
+        'desc': 'desc',
+        'state': 0,
+        'duration': 60,
+        'cid': 1,
+        'owner': {'mid': 1, 'name': 'up', 'face': 'https://example/face.jpg'},
+        'pages': [
+          {
+            'cid': 1,
+            'page': 1,
+            'from': 'vupload',
+            'part': 'p1',
+            'duration': 60,
+          },
+        ],
+        'staff': [
+          {
+            'mid': 652239032,
+            'title': 'UP主',
+            'name': 'IGN中国',
+            'face': 'https://example/staff.jpg',
+            'vip': null,
+            'official': null,
+            'follower': 2109229,
+            'label_style': 0,
+          },
+          {
+            'mid': 1328260,
+            'title': '参演',
+            'name': '某某',
+            'face': 'https://example/staff2.jpg',
+          },
+        ],
+      });
+
+      expect(video.staff, hasLength(2));
+      expect(video.staff!.first.mid, equals(652239032));
+      expect(video.staff!.first.follower, equals(2109229));
+      expect(video.staff!.last.follower, isNull);
+    });
+  });
 }
