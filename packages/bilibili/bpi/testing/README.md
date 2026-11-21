@@ -13,7 +13,7 @@
 | `video_relation.json` | `/x/web-interface/archive/relation` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
 | `related_videos.json` | `/x/web-interface/archive/related` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
 | `reply_*.json` | `/x/v2/reply/*` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共 | 原始抓取日期未保留 |
-| `play_url.json` | `/x/player/wbi/playurl` | GET | 未保留（原始记录未保留） | 未记录 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | WBI | 原始抓取日期未保留 |
+| `play_url.json` | `/x/player/wbi/playurl` | GET | `bvid=BV1Deht6rEpZ&cid=42164617674&qn=80&fnver=0&fnval=4048&fourk=1&try_look=1&web_location=1315873&dm_img_list=[]&dm_img_str=<base64>&dm_cover_img_str=<base64>&dm_img_inter=<json>` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | WBI | 2026-11-21 |
 | `player_v2.json` | `/x/player/v2` | GET | `bvid=BV1GJ411x7vy&cid=137646676` | 未记录 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-09-25 |
 | `popular.json` | `/x/web-interface/popular` | GET | `pn=1&ps=20` | 未记录 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |
 | `ranking.json` | `/x/web-interface/ranking/v2` | GET | `rid=0&type=all` | 未记录 | Bilibili 实际公开 Web API 响应 / [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | 公共请求 | 2026-09-25 |

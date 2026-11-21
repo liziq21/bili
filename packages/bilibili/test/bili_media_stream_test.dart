@@ -660,16 +660,20 @@ void main() {
 
       final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
 
-      // fixture 实测两路视频（480p / 360p）、三路音频，无 durl。
-      expect(stream.height, 480);
+      // fixture 实测 12 路视频（1080p / 720p / 480p / 360p 各多种编码）、
+      // 三路音频，无 durl；默认取码率最高的一路。
+      expect(stream.height, 1080);
+      expect(stream.width, 1920);
       expect(stream.videoUrl, contains('http'));
       expect(stream.audioUrl, isNotNull);
       expect(stream.hasSeparateAudio, isTrue);
-      expect(stream.duration, const Duration(seconds: 105));
-      // 音频取码率最高的一路（30280，321815）。
-      expect(stream.codecs, 'avc1.64001F');
-      expect(stream.qualityLabel, '清晰 480P');
-      expect(stream.alternatives.single.label, '流畅 360P');
+      expect(stream.duration, const Duration(seconds: 399));
+      expect(stream.codecs, 'avc1.640032');
+      expect(stream.qualityLabel, '高清 1080P');
+      expect(
+        stream.alternatives.map((option) => option.height),
+        containsAll(<int>[720, 480, 360]),
+      );
     });
 
     test('既无 dash 视频流也无 durl 时报不可播放', () async {

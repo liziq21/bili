@@ -30,14 +30,21 @@ final class YoutubeRequestConverter extends JsonConverter {
 
   final YoutubeClientConfig config;
 
-  Map<String, dynamic> get clientContext => {
-    'client': {
+  Map<String, dynamic> get clientContext {
+    final client = <String, dynamic>{
       'clientName': config.clientName,
       'clientVersion': config.clientVersion,
       'hl': config.language,
       'gl': config.country,
-    },
-  };
+      if (config.osName != null) 'osName': config.osName,
+      if (config.osVersion != null) 'osVersion': config.osVersion,
+      if (config.androidSdkVersion != null)
+        'androidSdkVersion': config.androidSdkVersion,
+      if (config.deviceMake != null) 'deviceMake': config.deviceMake,
+      if (config.deviceModel != null) 'deviceModel': config.deviceModel,
+    };
+    return {'client': client};
+  }
 
   @override
   Request convertRequest(Request request) {

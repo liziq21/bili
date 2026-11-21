@@ -5,6 +5,7 @@ import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 
 import '../api.dart';
+import '../device/bili_device_fingerprint.dart';
 import '../error/bpi_exception.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
@@ -130,6 +131,13 @@ abstract class BiliNetworkApi extends ChopperService {
     @query int qn = 80,
     @query int fnval = 4048,
     @query int fourk = 1,
+    @Query('fnver') int fnver = 0,
+    @Query('try_look') int tryLook = 1,
+    @Query('web_location') int webLocation = 1315873,
+    @Query('dm_img_list') String dmImgList = '[]',
+    @Query('dm_img_str') required String dmImgStr,
+    @Query('dm_cover_img_str') required String dmCoverImgStr,
+    @Query('dm_img_inter') required String dmImgInter,
     @tag String tag = 'WBI',
   });
 
@@ -217,7 +225,8 @@ class BiliNetworkSearch
         NetworkUserDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
-      _ownsHttpClient = client == null {
+      _ownsHttpClient = client == null,
+      _device = BiliDeviceFingerprint.forge() {
     final converter = JsonSerializableConverter(
       {
         NetworkSearchResult: NetworkSearchResult.fromJson,
@@ -260,6 +269,7 @@ class BiliNetworkSearch
 
   final http.Client _httpClient;
   final bool _ownsHttpClient;
+  final BiliDeviceFingerprint _device;
   late final ChopperClient _chopperClient;
   late final BiliNetworkApi _networkApi;
 
@@ -531,7 +541,17 @@ class BiliNetworkSearch
     int qn = 80,
     int fnval = 4048,
     int fourk = 1,
-  }) => _networkApi.getPlayUrl(bvid, cid, qn: qn, fnval: fnval, fourk: fourk);
+  }) => _networkApi.getPlayUrl(
+    bvid,
+    cid,
+    qn: qn,
+    fnval: fnval,
+    fourk: fourk,
+    dmImgList: BiliDeviceFingerprint.dmImgList,
+    dmImgStr: _device.dmImgStr,
+    dmCoverImgStr: _device.dmCoverImgStr,
+    dmImgInter: _device.dmImgInter,
+  );
 
   @override
   Future<NetworkBiliPlayerInfo> getPlayerInfo({

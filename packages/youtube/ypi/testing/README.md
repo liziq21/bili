@@ -15,7 +15,7 @@
 | `browse_playlist.json` | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`VLPL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-09-30 |
 | `watch_next.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-02 |
 | `comments.json` | `https://www.youtube.com/youtubei/v1/next` | POST | 200 | continuation=取自 `watch_next.json` 的 comments-section 续页 token | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN | 2026-10-03 |
-| `player.json`（negative） | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 视频播放器与流信息 | 2026-10-04（实测状态 `UNPLAYABLE`，仅用于失败路径；成功响应待重抓） |
+| `player.json` | `https://www.youtube.com/youtubei/v1/player` | POST | 200 | videoId=`dQw4w9WgXcQ` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | IOS 20.10.4（`X-YouTube-Client-Name: 5`），hl=zh-CN，视频播放器与流信息 | 2026-11-21（`status=OK`，27 条 `adaptiveFormats` 带直接 `url`，含 1080P/2160P，并返回 `hlsManifestUrl`） |
 | `home_feed.json`（negative） | `https://www.youtube.com/youtubei/v1/browse` | POST | 200 | browseId=`FEwhat_to_watch` | [PipePipe / InnerTube](https://github.com/PipePipe-App/PipePipe) | WEB 2.20230818.00.00, hl=zh-CN, 首页推荐 feed | 2026-10-04（匿名 session 登录门控：只有 `feedNudgeRenderer`，无视频条目；仅用于能力边界回归） |
 
 ## 频道搜索的 renderer 形态
@@ -74,15 +74,13 @@ header 有两种形态，取决于频道状态。有效频道的 `pageHeaderRend
 
 ## 视频 Player 的响应形态
 
-`getPlayer` 解析 `/youtubei/v1/player` 接口返回的播放器数据，包含 `playabilityStatus`（播放状态与不可播放原因）、`videoDetails`（视频 ID、标题、作者、频道 ID、时长、观看量、描述与缩略图等）、`microformat.playerMicroformatRenderer`（发布时间、分类等）及 `streamingData`（`formats` 与 `adaptiveFormats` 中的媒体流格式、qualityLabel、mimeType、url、bitrate 等）。
+`getPlayer` 解析 `/youtubei/v1/player` 接口返回的播放器数据，包含 `playabilityStatus`（播放状态与不可播放原因）、`videoDetails`（视频 ID、标题、作者、频道 ID、时长、观看量、描述与缩略图等）、`microformat.playerMicroformatRenderer`（发布时间、分类等）及 `streamingData`（`formats` / `adaptiveFormats` 中的媒体流格式、qualityLabel、mimeType、url、bitrate 等，以及 `hlsManifestUrl` / `dashManifestUrl` / `serverAbrStreamingUrl`）。
 
 若响应中存在顶层 `error`、`alerts` 中的错误信息，或 `playabilityStatus.status` 非 `OK`，按包内规范抛出 `YpiInnerTubeException`。仅当无法取得非空 `videoId` 且未提供非空 `requestedVideoId` 时，才因缺少 `videoId` 抛出 `FormatException`。`getPlayer` 会传入请求中的 `videoId`；`videoDetails` 缺失或其中的 `videoId` 无效时，解析器仍会返回 DTO，且 `videoDetails` 为 `null`。
 
-`playabilityStatus.status` 非 `OK` 时的响应没有 `streamingData`，此前会被解析成 DTO 返回，调用方无法区分「平台拒绝播放」与「解析失败」；`getPlayer` 传入的 `videoId` 兜底又让 `videoId` 始终非空，问题更难发现。现按上表抛 `YpiInnerTubeException`。
+**Player 请求默认使用 IOS client**（`clientName=IOS`、`clientVersion=20.10.4`、`X-YouTube-Client-Name: 5`）。2026-11-21 实测：同一视频用 WEB client 的 `adaptiveFormats` 只有 SABR 元数据、没有 `url`；用 IOS client 返回 27 条带直接 `url` 的 adaptive format（含 1080P/2160P）和 `hlsManifestUrl`。搜索 / browse / next 仍使用 WEB client，只有 player 走独立的 `playerConfig`；调用方可用 `YoutubeService(playerConfig: ...)` 覆盖。
 
-**`player.json` 当前记录的是 `UNPLAYABLE` 业务失败响应**，不满足「fixture 须保存成功且业务有效响应」的规范，需在可访问 YouTube 的环境用抓取脚本重新获取 `status == 'OK'` 且含 `streamingData` 的响应。`tool/capture/fetch_fixtures.dart` 目前没有 player 分支，该 fixture 最初为手工放入。在重抓完成前，`from_json_test.dart` 里对它的断言走失败路径。
-
-**Player 成功路径目前未经真实 fixture 回归**：`youtube_service_test.dart` 的 `getPlayer` 用例由 MockClient 合成响应，只验证请求形状与成功 DTO 的字段映射，不能验证真实 InnerTube 响应契约。取得 `status == 'OK'` 的真实响应后，需用它补成功路径断言。
+`player.json` 已是成功响应 fixture（`status=OK`），`from_json_test.dart` 用它断言直接可播放的 adaptive format 与 HLS manifest；失败路径由内联的 `UNPLAYABLE` / `LOGIN_REQUIRED` 用例覆盖。
 
 ## 播放列表搜索的 renderer 形态
 

@@ -409,6 +409,11 @@ final endpointSpecs = <EndpointSpec>[
         json['data'] as Map<String, dynamic>,
       );
       expect(playUrl.dash, isNotNull);
+      expect(
+        playUrl.dash?.video?.map((stream) => stream.height),
+        contains(1080),
+        reason: 'the anonymous playurl fixture must keep a 1080P stream',
+      );
       return playUrl;
     },
   ),
