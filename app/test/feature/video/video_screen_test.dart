@@ -4,6 +4,10 @@ import 'package:app/database/dao/media_history_dao.dart';
 import 'package:app/database/table/media.dart';
 import 'package:app/datastore/media_history_settings.dart';
 import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/feature/video/common_widgets/playback_queue_sheet.dart';
+import 'package:app/feature/video/common_widgets/video_comments_view.dart';
+import 'package:app/feature/video/common_widgets/video_info_view.dart';
+import 'package:app/feature/video/common_widgets/video_player.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:app/feature/video/video_screen.dart';
 import 'package:data/data.dart';
@@ -24,10 +28,9 @@ void main() {
   testWidgets('video detail page exposes a page back button', (tester) async {
     var backPressed = false;
 
-    // 设置测试视口大小，避免 PlaybackQueueSheet 在极小约束下溢出。
+    // 设置测试视口大小，避免内容区在极小约束下溢出。
     // 必须在 pumpWidget 之前设置 tester.view.physicalSize，
     // 否则 MaterialApp 会捕获默认的 320x30 视口尺寸。
-    // 使用更高的视口 (800x1200) 确保队列有足够空间滚动。
     tester.view.physicalSize = const Size(800, 1200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -45,14 +48,100 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(AppBar), findsOneWidget);
+    // 返回按钮叠在播放器上，不再占一整条 AppBar 的高度。
+    expect(find.byType(AppBar), findsNothing);
     expect(find.byIcon(AppIcons.back), findsOneWidget);
+    final playerRect = tester.getRect(find.byType(VideoPlayer));
+    final backRect = tester.getRect(find.byIcon(AppIcons.back));
+    expect(playerRect.contains(backRect.center), isTrue);
 
     await tester.tap(find.byIcon(AppIcons.back));
     expect(backPressed, isTrue);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+  });
+
+  group('responsive layout', () {
+    /// 按指定视口尺寸 pump 整个页面，并保证测试结束时卸载页面释放播放器。
+    Future<void> pumpAt(
+      WidgetTester tester,
+      Size size, {
+      VoidCallback? onBack,
+    }) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        Provider<MediaSource>.value(
+          value: const _TestMediaSource(),
+          child: RepositoryProvider<VideoDetailRepository>.value(
+            value: const _FailingVideoDetailRepository(),
+            child: MaterialApp(home: VideoScreen(onBackClick: onBack ?? () {})),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    Future<void> unmount(WidgetTester tester) async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+
+    testWidgets('compact width keeps the tabbed layout', (tester) async {
+      await pumpAt(tester, const Size(400, 900));
+
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(PlaybackQueueSheet), findsNothing);
+      expect(find.byIcon(AppIcons.back), findsOneWidget);
+
+      await unmount(tester);
+    });
+
+    testWidgets('foldable landscape shows info and comments side by side', (
+      tester,
+    ) async {
+      // 折叠屏展开态横屏：宽度足以双栏，但塞不下 320dp 的队列侧栏。
+      await pumpAt(tester, const Size(841, 673));
+
+      expect(find.byType(TabBar), findsNothing);
+      expect(find.byType(VideoInfoView), findsOneWidget);
+      expect(find.byType(VideoCommentsView), findsOneWidget);
+      expect(find.byType(PlaybackQueueSheet), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await unmount(tester);
+    });
+
+    testWidgets('expanded width restores the persistent queue pane', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(1440, 900));
+
+      expect(find.byType(TabBar), findsNothing);
+      expect(find.byType(VideoInfoView), findsOneWidget);
+      expect(find.byType(VideoCommentsView), findsOneWidget);
+      expect(find.byType(PlaybackQueueSheet), findsOneWidget);
+      // 内嵌侧栏不是模态弹层，不应出现会 pop 掉视频路由的关闭按钮。
+      expect(find.byIcon(AppIcons.close), findsNothing);
+
+      await unmount(tester);
+    });
+
+    testWidgets('short landscape caps the player instead of overflowing', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(800, 360));
+
+      expect(find.byType(VideoInfoView), findsOneWidget);
+      expect(tester.getSize(find.byType(VideoInfoView)).height, greaterThan(0));
+      expect(tester.takeException(), isNull);
+
+      await unmount(tester);
+    });
   });
 
   group('resume from watch history', () {

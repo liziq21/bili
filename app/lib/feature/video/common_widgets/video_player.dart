@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -224,7 +225,43 @@ class _VideoPlayerState() extends State<VideoPlayer> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AspectRatio(aspectRatio: widget.aspectRatio, child: surface),
+              // Flexible 让页面在横屏 / 折叠屏等矮视口里给播放器设高度上限时，
+              // 画面按 16:9 等比收缩，而不是把下方内容挤成零高。
+              //
+              // 收缩后左右多出的区域用 scrim 填满：视频页的留边应是深色，
+              // 而不是页面 surface 色，否则画面看起来像浮在白色背景上。
+              Flexible(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (!constraints.hasBoundedWidth ||
+                        !constraints.hasBoundedHeight) {
+                      return AspectRatio(
+                        aspectRatio: widget.aspectRatio,
+                        child: surface,
+                      );
+                    }
+                    final naturalHeight =
+                        constraints.maxWidth / widget.aspectRatio;
+                    final height = math.min(
+                      naturalHeight,
+                      constraints.maxHeight,
+                    );
+                    return SizedBox(
+                      width: constraints.maxWidth,
+                      height: height,
+                      child: ColoredBox(
+                        color: $styles.colors.scrim,
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: widget.aspectRatio,
+                            child: surface,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
               _PlayerControlBar(
                 controller: _playback!,
                 stream: stream,
@@ -244,7 +281,10 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        surface,
+        // 与内层画面同理：让页面给播放器设的高度上限能传到 16:9 画面。
+        // 外层 Column 若不把 surface 设为 Flexible，非弹性子项会拿到无界高度，
+        // 内层的 Flexible 就永远收不到这个上限。
+        Flexible(child: surface),
         _QueueControlBar(controller: widget.controller!),
       ],
     );
@@ -777,68 +817,87 @@ class const _ErrorView({
     final category = _categoryLabel(l10n, error.category);
     return Container(
       color: $styles.colors.scrim,
-      alignment: Alignment.center,
-      padding: EdgeInsets.all($styles.insets.md),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(AppIcons.error, color: $styles.colors.onScrim, size: 32),
-          const Gap(8),
-          Text(
-            category,
-            textAlign: TextAlign.center,
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onScrim,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const Gap(4),
-          Text(
-            l10n?.videoLoadFailed ?? 'Playback failed',
-            textAlign: TextAlign.center,
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onScrim,
-            ),
-          ),
-          if (isRetrying) ...[
-            const Gap(8),
-            Text(
-              l10n?.playbackRetrying ?? 'Retrying...',
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onScrim,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // 播放器在矮视口里会被压到不足错误文案的自然高度。用可滚动容器 +
+          // 最小高度居中，既保持居中观感，也不会再触发 RenderFlex 溢出。
+          final minHeight = constraints.maxHeight.isFinite
+              ? math.max(0.0, constraints.maxHeight - $styles.insets.md * 2)
+              : 0.0;
+          return SingleChildScrollView(
+            padding: EdgeInsets.all($styles.insets.md),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: minHeight),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      AppIcons.error,
+                      color: $styles.colors.onScrim,
+                      size: 32,
+                    ),
+                    const Gap(8),
+                    Text(
+                      category,
+                      textAlign: TextAlign.center,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onScrim,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Gap(4),
+                    Text(
+                      l10n?.videoLoadFailed ?? 'Playback failed',
+                      textAlign: TextAlign.center,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onScrim,
+                      ),
+                    ),
+                    if (isRetrying) ...[
+                      const Gap(8),
+                      Text(
+                        l10n?.playbackRetrying ?? 'Retrying...',
+                        style: $styles.text.bodySmall.copyWith(
+                          color: $styles.colors.onScrim,
+                        ),
+                      ),
+                    ],
+                    if (onRetry != null || onSkip != null) ...[
+                      const Gap(8),
+                      Wrap(
+                        spacing: $styles.insets.sm,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          if (onRetry != null)
+                            TextButton(
+                              onPressed: onRetry,
+                              child: Text(
+                                l10n?.retry ?? 'Retry',
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.accentText,
+                                ),
+                              ),
+                            ),
+                          if (onSkip != null)
+                            TextButton(
+                              onPressed: onSkip,
+                              child: Text(
+                                l10n?.skip ?? 'Skip',
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.accentText,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
-          ],
-          if (onRetry != null || onSkip != null) ...[
-            const Gap(8),
-            Wrap(
-              spacing: $styles.insets.sm,
-              alignment: WrapAlignment.center,
-              children: [
-                if (onRetry != null)
-                  TextButton(
-                    onPressed: onRetry,
-                    child: Text(
-                      l10n?.retry ?? 'Retry',
-                      style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.accentText,
-                      ),
-                    ),
-                  ),
-                if (onSkip != null)
-                  TextButton(
-                    onPressed: onSkip,
-                    child: Text(
-                      l10n?.skip ?? 'Skip',
-                      style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.accentText,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ],
+          );
+        },
       ),
     );
   }

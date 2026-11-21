@@ -20,7 +20,10 @@ Future<void> showPlaybackQueueSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => PlaybackQueueSheet(controller: controller),
+    builder: (sheetContext) => PlaybackQueueSheet(
+      controller: controller,
+      onClose: () => Navigator.of(sheetContext).pop(),
+    ),
   );
 }
 
@@ -29,8 +32,16 @@ Future<void> showPlaybackQueueSheet(
 /// Tapping an item starts it immediately. Non-current items can be removed or
 /// reordered with the drag handle; the current item stays in the queue so the
 /// player always has a visible source of truth for what is playing.
+///
+/// Two hosts use it: a modal bottom sheet ([showPlaybackQueueSheet]) and an
+/// in-page pane. [embedded] switches off the sheet chrome (height cap, rounded
+/// top) because a pane already has a bounded height and is not a sheet. The
+/// close button only appears when [onClose] is supplied, so embedding it never
+/// leaves a control that pops the video route.
 class const PlaybackQueueSheet({
   required final MediaPlaybackController controller,
+  final bool embedded = false,
+  final VoidCallback? onClose,
   super.key,
 }) extends StatefulWidget {
   @override
@@ -78,64 +89,77 @@ class _PlaybackQueueSheetState() extends State<PlaybackQueueSheet> {
     final size = MediaQuery.sizeOf(context);
     final maxHeight = size.height * .82;
 
+    final content = Column(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        _QueueHeader(
+          title: l10n.playbackQueue,
+          countLabel: l10n.playbackQueueCount(_items.length),
+          mode: _playbackState.queueMode,
+          onModeChanged: _cycleMode,
+          onClose: widget.onClose,
+        ),
+        Divider(
+          height: 1,
+          color: $styles.colors.outline.withValues(alpha: 0.2),
+        ),
+        if (_items.isEmpty)
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(child: _EmptyQueue(message: l10n.queueEmpty)),
+                ),
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: ReorderableListView.builder(
+              buildDefaultDragHandles: false,
+              padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
+              itemCount: _items.length,
+              onReorderItem: _reorder,
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                return _QueueItemTile(
+                  key: ValueKey('${item.stream.videoUrl}-$index'),
+                  index: index,
+                  item: item,
+                  isCurrent: index == _playbackState.currentIndex,
+                  onTap: () => _play(index),
+                  onRemove: index == _playbackState.currentIndex
+                      ? null
+                      : () => _remove(index),
+                  dragHandle: ReorderableDragStartListener(
+                    index: index,
+                    child: Icon(
+                      AppIcons.dragHandle,
+                      color: $styles.colors.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+
     return SafeArea(
       top: false,
       child: Material(
         color: $styles.colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular($styles.corners.lg),
-        ),
+        borderRadius: widget.embedded
+            ? null
+            : BorderRadius.vertical(top: Radius.circular($styles.corners.lg)),
         clipBehavior: Clip.antiAlias,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              _QueueHeader(
-                title: l10n.playbackQueue,
-                countLabel: l10n.playbackQueueCount(_items.length),
-                mode: _playbackState.queueMode,
-                onModeChanged: _cycleMode,
-                onClose: () => Navigator.of(context).pop(),
+        child: widget.embedded
+            ? content
+            : ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: content,
               ),
-              Divider(
-                height: 1,
-                color: $styles.colors.outline.withValues(alpha: 0.2),
-              ),
-              if (_items.isEmpty)
-                _EmptyQueue(message: l10n.queueEmpty)
-              else
-                Expanded(
-                  child: ReorderableListView.builder(
-                    buildDefaultDragHandles: false,
-                    padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
-                    itemCount: _items.length,
-                    onReorderItem: _reorder,
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      return _QueueItemTile(
-                        key: ValueKey('${item.stream.videoUrl}-$index'),
-                        index: index,
-                        item: item,
-                        isCurrent: index == _playbackState.currentIndex,
-                        onTap: () => _play(index),
-                        onRemove: index == _playbackState.currentIndex
-                            ? null
-                            : () => _remove(index),
-                        dragHandle: ReorderableDragStartListener(
-                          index: index,
-                          child: Icon(
-                            AppIcons.dragHandle,
-                            color: $styles.colors.onSurfaceVariant,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -172,7 +196,7 @@ class const _QueueHeader({
   required final String countLabel,
   required final PlaybackQueueMode mode,
   required final VoidCallback onModeChanged,
-  required final VoidCallback onClose,
+  final VoidCallback? onClose,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -212,11 +236,12 @@ class const _QueueHeader({
             onPressed: onModeChanged,
             icon: Icon(_modeIcon(mode)),
           ),
-          IconButton(
-            tooltip: l10n.cancel,
-            onPressed: onClose,
-            icon: const Icon(AppIcons.close),
-          ),
+          if (onClose != null)
+            IconButton(
+              tooltip: l10n.cancel,
+              onPressed: onClose,
+              icon: const Icon(AppIcons.close),
+            ),
         ],
       ),
     );

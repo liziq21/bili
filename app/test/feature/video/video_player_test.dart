@@ -171,6 +171,8 @@ void main() {
       // The current item stays in the queue; only the following item has a
       // remove action.
       expect(find.byIcon(AppIcons.removeCircle), findsOneWidget);
+      // Modal sheet keeps its dismiss control; the in-page pane hides it.
+      expect(find.byIcon(AppIcons.close), findsOneWidget);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
