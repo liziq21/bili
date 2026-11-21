@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../datastore/preferences_data_source.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
@@ -161,7 +162,7 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
               color: $styles.colors.onSurfaceVariant,
             ),
           ),
-          Icon(Icons.chevron_right, color: $styles.colors.onSurfaceVariant),
+          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
         ],
       ),
       onTap: () {
@@ -339,7 +340,7 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     title: Text(title),
     selected: selected,
     trailing: selected
-        ? Icon(Icons.check, color: $styles.colors.accentText)
+        ? Icon(AppIcons.check, color: $styles.colors.accentText)
         : null,
     onTap: () {
       HapticFeedback.selectionClick();

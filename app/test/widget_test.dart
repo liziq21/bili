@@ -32,6 +32,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:app/design/design.dart';
 
 /// A fake AppBloc that doesn't use emit.forEach on a stream.
 /// The real AppBloc uses emit.forEach in _onStarted which creates a subscription
@@ -310,7 +311,7 @@ void main() {
         await tester.tap(
           find.descendant(
             of: find.byType(HomeScreen),
-            matching: find.byIcon(Icons.settings_outlined),
+            matching: find.byIcon(AppIcons.settings),
           ),
         );
         await tester.pumpAndSettle();

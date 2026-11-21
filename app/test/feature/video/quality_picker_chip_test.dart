@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 void main() {
   testWidgets(
@@ -70,7 +71,7 @@ void main() {
       expect(find.text('1080P low'), findsOneWidget);
       expect(find.text('1.0 Mbps'), findsOneWidget);
       expect(find.text('720P'), findsOneWidget);
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(find.byIcon(AppIcons.check), findsOneWidget);
 
       await tester.tap(find.text('1080P low'));
       await tester.pump();

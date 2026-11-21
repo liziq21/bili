@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
@@ -131,7 +132,7 @@ class const MediaLibraryScreen({
                         : () => unawaited(_confirmClearHistory(context)),
                     tooltip:
                         l10n?.clearAllWatchHistory ?? 'Clear all watch history',
-                    icon: const Icon(Icons.delete_sweep_outlined),
+                    icon: const Icon(AppIcons.deleteSweep),
                   ),
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
@@ -301,7 +302,7 @@ class const _HistoryList({final MediaLibraryVideoNavCallback? onVideoTap})
           return SliverFillRemaining(
             hasScrollBody: false,
             child: _Message(
-              icon: Icons.error_outline_rounded,
+              icon: AppIcons.error,
               message: l10n?.historyLoadFailed ?? 'Failed to load history',
               actionLabel: l10n?.retry ?? 'Retry',
               onAction: () => context.read<MediaHistoryCubit>().loadMore(),
@@ -313,7 +314,7 @@ class const _HistoryList({final MediaLibraryVideoNavCallback? onVideoTap})
           return SliverFillRemaining(
             hasScrollBody: false,
             child: _Message(
-              icon: Icons.history_rounded,
+              icon: AppIcons.history,
               message: l10n?.noWatchHistory ?? 'No watch history yet',
             ),
           );
@@ -555,7 +556,7 @@ class const _HistoryRow({
 
   Widget _placeholder(ColorScheme colorScheme) => Container(
     color: colorScheme.surfaceContainerHighest,
-    child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
+    child: Icon(AppIcons.movie, color: colorScheme.onSurfaceVariant),
   );
 
   /// 副标题：来源 · 播放进度 · 观看时间

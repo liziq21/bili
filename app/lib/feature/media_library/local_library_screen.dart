@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -155,7 +156,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.filter_list, color: $styles.colors.onSurfaceVariant),
+          Icon(AppIcons.filter, color: $styles.colors.onSurfaceVariant),
           SizedBox(width: $styles.insets.xs),
           Expanded(
             child: Text(
@@ -379,14 +380,14 @@ class const _BookmarksTab({
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
           return _LibraryMessage(
-            icon: Icons.bookmark_outline,
+            icon: AppIcons.bookmark,
             message: l10n.loadingFavorites,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
-            icon: Icons.error_outline,
+            icon: AppIcons.error,
             message: l10n.favoritesLoadFailed,
             actionLabel: l10n.retry,
             onAction: onRetry,
@@ -399,7 +400,7 @@ class const _BookmarksTab({
             .toList(growable: false);
         if (bookmarks.isEmpty) {
           return _LibraryMessage(
-            icon: Icons.bookmark_border,
+            icon: AppIcons.bookmark,
             message: l10n.noFavoritesYet,
           );
         }
@@ -411,7 +412,7 @@ class const _BookmarksTab({
             final bookmark = bookmarks[index];
             final creatorId = bookmark.creatorProfileId;
             return ListTile(
-              leading: const _LibraryLeading(icon: Icons.bookmark_outline),
+              leading: const _LibraryLeading(icon: AppIcons.bookmark),
               title: Text(
                 bookmark.title,
                 maxLines: 2,
@@ -502,14 +503,14 @@ class const _PlaylistsTab({
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
           return _LibraryMessage(
-            icon: Icons.queue_music_outlined,
+            icon: AppIcons.queue,
             message: l10n.loadingPlaylists,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
-            icon: Icons.error_outline,
+            icon: AppIcons.error,
             message: l10n.playlistLoadFailed,
             actionLabel: l10n.retry,
             onAction: onRetry,
@@ -522,7 +523,7 @@ class const _PlaylistsTab({
             .toList(growable: false);
         if (playlists.isEmpty) {
           return _LibraryMessage(
-            icon: Icons.queue_music_outlined,
+            icon: AppIcons.queue,
             message: l10n.noPlaylistsYet,
             actionLabel: l10n.newPlaylist,
             onAction: onCreate,
@@ -542,7 +543,7 @@ class const _PlaylistsTab({
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onCreate,
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(AppIcons.add),
                   label: Text(l10n.newPlaylist),
                 ),
               ),
@@ -616,7 +617,7 @@ class const _PlaylistCard({
             ),
             child: Row(
               children: [
-                Icon(Icons.queue_music, color: $styles.colors.accentText),
+                Icon(AppIcons.queue, color: $styles.colors.accentText),
                 SizedBox(width: $styles.insets.xs),
                 Expanded(
                   child: Text(
@@ -917,7 +918,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
                               .where((item) => item.sourceId == widget.sourceId)
                               .toList(growable: false),
                         ),
-                        icon: const Icon(Icons.play_circle_outline),
+                        icon: const Icon(AppIcons.playCircle),
                         label: Text(l10n.playPlaylist),
                       ),
                     ),
@@ -1003,12 +1004,12 @@ class const _PlaylistItemRow({
       dense: true,
       leading: isEditing
           ? Icon(
-              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+              isSelected ? AppIcons.checkCircle : AppIcons.radioUnchecked,
               color: isSelected
                   ? $styles.colors.accentText
                   : $styles.colors.onSurfaceVariant,
             )
-          : const _LibraryLeading(icon: Icons.play_arrow_outlined),
+          : const _LibraryLeading(icon: AppIcons.play),
       title: Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis),
       onTap: () {
         HapticFeedback.lightImpact();
@@ -1082,14 +1083,14 @@ class const _SubscriptionsTab({
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
           return _LibraryMessage(
-            icon: Icons.person_add_alt_outlined,
+            icon: AppIcons.personAdd,
             message: l10n.loadingSubscriptions,
             loading: true,
           );
         }
         if (snapshot.hasError) {
           return _LibraryMessage(
-            icon: Icons.error_outline,
+            icon: AppIcons.error,
             message: l10n.subscriptionsLoadFailed,
             actionLabel: l10n.retry,
             onAction: onRetry,
@@ -1104,7 +1105,7 @@ class const _SubscriptionsTab({
                 .toList(growable: false);
         if (subscriptions.isEmpty) {
           return _LibraryMessage(
-            icon: Icons.person_add_alt_outlined,
+            icon: AppIcons.personAdd,
             message: l10n.noSubscriptionsYet,
           );
         }
@@ -1193,7 +1194,7 @@ class const _SubscriptionGroup({
           ),
           for (final subscription in subscriptions)
             ListTile(
-              leading: const _LibraryLeading(icon: Icons.person_outline),
+              leading: const _LibraryLeading(icon: AppIcons.creator),
               title: Text(subscription.name),
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -1287,10 +1288,7 @@ class const _OperationError(final String message) extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialBanner(
       content: Text(message),
-      leading: Icon(
-        Icons.error_outline,
-        color: Theme.of(context).colorScheme.error,
-      ),
+      leading: Icon(AppIcons.error, color: Theme.of(context).colorScheme.error),
       actions: const [SizedBox.shrink()],
     );
   }

@@ -147,7 +147,7 @@ class _AppFailureViewState() extends State<AppFailureView> {
                 padding: const EdgeInsets.all(12),
                 child: ElevatedButton.icon(
                   onPressed: _copy,
-                  icon: Icon(_copied ? Icons.check : Icons.copy),
+                  icon: Icon(_copied ? AppIcons.check : AppIcons.copy),
                   label: Text(_copied ? 'Copied' : 'Copy error'),
                 ),
               ),

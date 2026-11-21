@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
@@ -172,7 +173,11 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                 )
               : null,
           child: comment.authorAvatar == null || comment.authorAvatar!.isEmpty
-              ? Icon(Icons.person, color: $styles.colors.onScrim, size: 20)
+              ? Icon(
+                  AppIcons.avatarFallback,
+                  color: $styles.colors.onScrim,
+                  size: 20,
+                )
               : null,
         ),
         Gap($styles.insets.xs),
@@ -240,8 +245,8 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                           children: [
                             Icon(
                               comment.isLiked
-                                  ? Icons.thumb_up
-                                  : Icons.thumb_up_outlined,
+                                  ? AppIcons.likeSelected
+                                  : AppIcons.like,
                               size: 14,
                               color: comment.isLiked
                                   ? $styles.colors.accentFill

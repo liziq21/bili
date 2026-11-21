@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show BlocProvider;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 /// 直播房间数据源桩：记录调用、返回可播放流。
 class _FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
@@ -94,7 +95,7 @@ void main() {
       expect(find.text('HD'), findsNWidgets(2));
       expect(find.text('Auto'), findsOneWidget);
       expect(find.text('HD+'), findsOneWidget);
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(find.byIcon(AppIcons.check), findsOneWidget);
 
       // 选「HD+」→ 以该 qn 请求。
       await tester.tap(find.text('HD+'));

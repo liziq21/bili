@@ -54,6 +54,7 @@ TEST_MATRIX = {
         'app/test/design/app_style_test.dart',
         'app/test/design/contrast_test.dart',
         'app/test/design/hardcoded_color_test.dart',
+        'app/test/design/hardcoded_icon_test.dart',
         'app/test/design/palette_test.dart',
         'app/test/design/theme_wrapper_test.dart',
         'app/test/design/token_wiring_test.dart',

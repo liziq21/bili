@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
@@ -228,7 +229,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.visibility,
+                  AppIcons.visibility,
                   size: 14,
                   color: $styles.colors.accentFill,
                 ),
@@ -251,7 +252,11 @@ class const _VideoHeaderSection() extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.forum, size: 14, color: $styles.colors.secondary),
+                Icon(
+                  AppIcons.comment,
+                  size: 14,
+                  color: $styles.colors.secondary,
+                ),
                 const Gap(2),
                 Text(
                   l10n.danmakuCountSample,
@@ -366,7 +371,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                 child:
                     creator.thumbnailUrl == null ||
                         creator.thumbnailUrl!.isEmpty
-                    ? const Icon(Icons.person)
+                    ? const Icon(AppIcons.avatarFallback)
                     : null,
               ),
               Positioned(
@@ -379,7 +384,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.check,
+                    AppIcons.check,
                     size: 10,
                     color: $styles.colors.onScrim,
                   ),
@@ -408,7 +413,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     ),
                     const Gap(4),
                     Icon(
-                      Icons.verified,
+                      AppIcons.verified,
                       size: 14,
                       color: $styles.colors.secondary,
                     ),
@@ -434,7 +439,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
             tooltip: l10n.openInBrowser,
             iconSize: 18,
             icon: Icon(
-              Icons.open_in_new,
+              AppIcons.openInNew,
               color: $styles.colors.onSurfaceVariant,
             ),
             onPressed: () {
@@ -494,7 +499,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
                     transitionBuilder: (child, animation) =>
                         ScaleTransition(scale: animation, child: child),
                     child: Icon(
-                      isSubscribed ? Icons.check : Icons.add,
+                      isSubscribed ? AppIcons.check : AppIcons.add,
                       key: ValueKey(isSubscribed),
                       size: 16,
                     ),
@@ -588,8 +593,8 @@ class _ActionButtonsSectionState()
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _ActionButton(
-              icon: Icons.thumb_up_outlined,
-              activeIcon: Icons.thumb_up,
+              icon: AppIcons.like,
+              activeIcon: AppIcons.likeSelected,
               label: _formatCount(metrics.likeCount, l10n),
               actionName: l10n.like,
               isActive: metrics.isLiked,
@@ -599,8 +604,8 @@ class _ActionButtonsSectionState()
               },
             ),
             _ActionButton(
-              icon: Icons.grade_outlined,
-              activeIcon: Icons.grade,
+              icon: AppIcons.favorite,
+              activeIcon: AppIcons.favoriteSelected,
               label: _formatCount(metrics.favoriteCount, l10n),
               actionName: l10n.favorite,
               isActive: metrics.isFavorited,
@@ -610,8 +615,8 @@ class _ActionButtonsSectionState()
               },
             ),
             _ActionButton(
-              icon: Icons.queue_music_outlined,
-              activeIcon: Icons.queue_music,
+              icon: AppIcons.queue,
+              activeIcon: AppIcons.queueSelected,
               label: l10n.list,
               actionName: l10n.addToPlaylist,
               tooltip: l10n.addToLocalPlaylist,
@@ -628,8 +633,8 @@ class _ActionButtonsSectionState()
               },
             ),
             _ActionButton(
-              icon: Icons.cloud_sync,
-              activeIcon: Icons.cloud_sync,
+              icon: AppIcons.switchSource,
+              activeIcon: AppIcons.switchSource,
               label: l10n.switchSource,
               actionName: l10n.switchSource,
               tooltip: l10n.switchVideoSource,
@@ -645,8 +650,8 @@ class _ActionButtonsSectionState()
               },
             ),
             _ActionButton(
-              icon: Icons.share_outlined,
-              activeIcon: Icons.share,
+              icon: AppIcons.share,
+              activeIcon: AppIcons.shareSelected,
               label: _formatCount(metrics.shareCount, l10n),
               actionName: l10n.share,
               tooltip: l10n.shareVideo,
@@ -662,10 +667,8 @@ class _ActionButtonsSectionState()
               },
             ),
             _ActionButton(
-              icon: _isDanmakuActive
-                  ? Icons.subtitles
-                  : Icons.subtitles_off_outlined,
-              activeIcon: Icons.subtitles,
+              icon: _isDanmakuActive ? AppIcons.danmakuOn : AppIcons.danmakuOff,
+              activeIcon: AppIcons.danmakuOn,
               label: _isDanmakuActive
                   ? l10n.danmakuStateOn
                   : l10n.danmakuStateOff,
@@ -932,7 +935,7 @@ class const _UpInfoSection() extends StatelessWidget {
                   : null,
               child:
                   creator.thumbnailUrl == null || creator.thumbnailUrl!.isEmpty
-                  ? const Icon(Icons.person)
+                  ? const Icon(AppIcons.avatarFallback)
                   : null,
             ),
             Gap($styles.insets.xs),
@@ -964,7 +967,7 @@ class const _UpInfoSection() extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right,
+              AppIcons.chevronRight,
               color: $styles.colors.onSurfaceVariant,
               size: 20,
             ),
@@ -1066,7 +1069,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, url, error) {
                                     return Icon(
-                                      Icons.play_circle_outline,
+                                      AppIcons.playCircle,
                                       color: $styles.colors.onScrim.withValues(
                                         alpha: 0.7,
                                       ),
@@ -1075,7 +1078,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                   },
                                 )
                               : Icon(
-                                  Icons.play_circle_outline,
+                                  AppIcons.playCircle,
                                   color: $styles.colors.onScrim.withValues(
                                     alpha: 0.7,
                                   ),
@@ -1149,7 +1152,7 @@ class _RelatedVideoCardState() extends State<_RelatedVideoCard> {
                                 color: $styles.colors.accentText,
                               ),
                             )
-                          : const Icon(Icons.playlist_add),
+                          : const Icon(AppIcons.playlistAdd),
                       tooltip: _isAddingToQueue
                           ? l10n.addingToQueue
                           : l10n.addToPlayQueue,

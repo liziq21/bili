@@ -35,7 +35,8 @@ This directory contains the main Flutter application (`app/`).
 - Defined in `lib/main.dart` as `AppStyle get $styles => AppScaffold.style`.
 - Access the live singleton directly (`$styles.colors`, `$styles.corners`, `$styles.insets`, `$styles.text`, etc.) — do not create local copies.
 - **Strict Rule**: When writing or updating UI components (including Stitch designs), strictly map visual elements to `$styles` design tokens. Never hardcode colors or stitch-specific style constants.
-- See [`docs/design-system.md`](docs/design-system.md) for the color-literal policy, token roles, and contrast requirements. Within `app/lib/`, [`lib/design/brand_palette.dart`](lib/design/brand_palette.dart) is the **only** file where color literals are allowed. Decision rationale and measurements are deliberately kept out of the repository — read them from the git history of the commits that established each rule.
+- **Icons**: take every icon from `AppIcons` (`lib/design/app_icons.dart`, re-exported by `design/design.dart`). `app/lib` must not reference `Icons.*` outside that file — `app/test/design/hardcoded_icon_test.dart` enforces it (R9). Selectable icons use the `x` (unselected, hollow) / `xSelected` (selected, solid) pair; `AppNavDestination` requires both `icon` and `selectedIcon` (R10).
+- See [`docs/design-system.md`](docs/design-system.md) for the color-literal policy, token roles, contrast requirements, and icon rules. Within `app/lib/`, [`lib/design/brand_palette.dart`](lib/design/brand_palette.dart) is the **only** file where color literals are allowed. Decision rationale and measurements are deliberately kept out of the repository — read them from the git history of the commits that established each rule.
 
 ### 依赖注入与源提供者（`ServiceSourceProviders`）
 - The complete source-injection contract is [`docs/source-injection.md`](docs/source-injection.md).

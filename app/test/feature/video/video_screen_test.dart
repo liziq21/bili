@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:app/design/design.dart';
 
 import 'fake_platform_player.dart';
 
@@ -45,9 +46,9 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.byIcon(AppIcons.back), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(AppIcons.back));
     expect(backPressed, isTrue);
 
     await tester.pumpWidget(const SizedBox.shrink());

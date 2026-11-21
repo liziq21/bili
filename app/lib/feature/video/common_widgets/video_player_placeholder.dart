@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:gap/gap.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 
@@ -84,7 +85,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: $styles.colors.onScrim),
+                    icon: Icon(AppIcons.back, color: $styles.colors.onScrim),
                     tooltip: l10n?.back ?? 'Back',
                     onPressed: () {
                       HapticFeedback.lightImpact();
@@ -116,7 +117,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                   ? (l10n?.pause ?? 'Pause')
                   : (l10n?.play ?? 'Play'),
               icon: Icon(
-                _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                _isPlaying ? AppIcons.pauseCircle : AppIcons.playCircleFilled,
                 color: $styles.colors.accentFill,
               ),
               onPressed: () {
@@ -155,7 +156,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                           ? (l10n?.pause ?? 'Pause')
                           : (l10n?.play ?? 'Play'),
                       icon: Icon(
-                        _isPlaying ? Icons.pause : Icons.play_arrow,
+                        _isPlaying ? AppIcons.pause : AppIcons.play,
                         color: $styles.colors.onScrim,
                       ),
                       onPressed: () {
@@ -249,7 +250,7 @@ class _VideoPlayerPlaceholderState() extends State<VideoPlayerPlaceholder> {
                       iconSize: 20,
                       tooltip: l10n?.fullscreen ?? 'Fullscreen',
                       icon: Icon(
-                        Icons.fullscreen,
+                        AppIcons.fullscreen,
                         color: $styles.colors.onScrim,
                       ),
                       onPressed: () {

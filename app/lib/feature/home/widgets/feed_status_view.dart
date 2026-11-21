@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 
@@ -21,7 +22,7 @@ class const FeedStatusView({
     required VoidCallback onRetry,
   }) => FeedStatusView(
     key: key,
-    icon: Icons.cloud_off_rounded,
+    icon: AppIcons.cloudOff,
     message: title,
     failureTitle: title,
     onRetry: onRetry,
@@ -30,7 +31,7 @@ class const FeedStatusView({
   /// 空结果提示
   factory empty({Key? key, required String title}) => FeedStatusView(
     key: key,
-    icon: Icons.inbox_rounded,
+    icon: AppIcons.inbox,
     message: title,
     emptyTitle: title,
   );
@@ -82,7 +83,7 @@ class const FeedStatusView({
                 HapticFeedback.lightImpact();
                 onRetry!();
               },
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(AppIcons.refresh),
               label: Text(l10n?.retry ?? 'Retry'),
             ),
           ],

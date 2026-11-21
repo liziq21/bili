@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
@@ -49,7 +50,7 @@ class const LiveFeedSection({
         SliverToBoxAdapter(
           child: FeedSectionHeader(
             title: section.title,
-            icon: Icons.sensors_rounded,
+            icon: AppIcons.liveFeed,
             iconColor: Theme.of(context).colorScheme.error,
           ),
         ),
@@ -108,7 +109,7 @@ class const _LiveRoomCard({
 }) extends StatelessWidget {
   Widget _thumbnailPlaceholder(ColorScheme colorScheme) => Container(
     color: colorScheme.surfaceContainerHighest,
-    child: Icon(Icons.live_tv, color: colorScheme.onSurfaceVariant),
+    child: Icon(AppIcons.liveTv, color: colorScheme.onSurfaceVariant),
   );
 
   @override

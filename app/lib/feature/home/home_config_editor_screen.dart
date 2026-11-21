@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../datastore/preferences_data_source.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
@@ -110,7 +111,7 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
 
   Widget _gridColumnsSection(AppLocalizations l10n) {
     return ListTile(
-      leading: Icon(Icons.grid_view, color: $styles.colors.onSurfaceVariant),
+      leading: Icon(AppIcons.gridView, color: $styles.colors.onSurfaceVariant),
       title: Text(l10n.homeConfigGridColumns, style: $styles.text.body),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +240,10 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
           enabled: !isMain,
           excludeSemantics: true,
           child: IconButton(
-            icon: Icon(isMain ? Icons.star : Icons.star_border, size: 18.0),
+            icon: Icon(
+              isMain ? AppIcons.mainSectionSelected : AppIcons.mainSection,
+              size: 18.0,
+            ),
             tooltip: l10n.homeConfigSetMain,
             onPressed: isMain
                 ? null
@@ -255,7 +259,7 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
           enabled: !isFirst,
           excludeSemantics: true,
           child: IconButton(
-            icon: const Icon(Icons.arrow_upward, size: 18),
+            icon: const Icon(AppIcons.moveUp, size: 18),
             tooltip: l10n.homeConfigMoveUp,
             onPressed: isFirst
                 ? null
@@ -271,7 +275,7 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
           enabled: !isLast,
           excludeSemantics: true,
           child: IconButton(
-            icon: const Icon(Icons.arrow_downward, size: 18),
+            icon: const Icon(AppIcons.moveDown, size: 18),
             tooltip: l10n.homeConfigMoveDown,
             onPressed: isLast
                 ? null

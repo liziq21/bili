@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:app/design/design.dart';
 
 /// `MediaSource` without the service clients behind it: the screen only reads
 /// `id` and `name` to label the source badge.
@@ -436,7 +437,7 @@ void main() {
 
     // 空列表上清空没有意义；常驻但禁用，比忽隐忽现更容易预期。
     final button = tester.widget<IconButton>(
-      find.widgetWithIcon(IconButton, Icons.delete_sweep_outlined),
+      find.widgetWithIcon(IconButton, AppIcons.deleteSweep),
     );
     expect(button.onPressed, isNull);
   });

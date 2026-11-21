@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 class _FakeCreatorProfileRepository(
   var Result<CreatorProfile, Exception> result,
@@ -93,7 +94,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final backButton = find.byIcon(Icons.arrow_back);
+    final backButton = find.byIcon(AppIcons.back);
     expect(backButton, findsOneWidget);
 
     await tester.tap(backButton);

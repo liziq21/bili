@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 
@@ -140,10 +141,7 @@ class const CreatorProfileItem({
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: $styles.colors.outline,
-                  ),
+                  Icon(AppIcons.chevronRight, color: $styles.colors.outline),
                 ],
               ),
             ),

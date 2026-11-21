@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 // ignore_for_file: use_primary_constructors
 
@@ -49,7 +50,7 @@ void main() {
     bloc.add(const FetchNextPage());
     await tester.pump();
 
-    expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
+    expect(find.byIcon(AppIcons.searchOff), findsOneWidget);
     expect(find.text('Nothing found'), findsOneWidget);
   });
 }

@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 import '../../data/repository/creator_profile_repository.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -73,7 +74,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                   widget.onBackClick?.call();
                 },
                 tooltip: l10n.back,
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(AppIcons.back),
               ),
         title: Text(l10n.creatorTab),
       ),
@@ -116,7 +117,7 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, color: $styles.colors.outline),
+            Icon(AppIcons.error, color: $styles.colors.outline),
             SizedBox(height: $styles.insets.xs),
             Text(
               l10n.loadFailedRetryLater,

@@ -5,6 +5,7 @@ import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:network_image_mock/network_image_mock.dart';
+import 'package:app/design/design.dart';
 
 import '../flutter_test_config.dart' show clearImageCacheDuringTest;
 import 'golden_font.dart';
@@ -108,7 +109,7 @@ void main() {
       expect(find.byType(CachedNetworkImage), findsWidgets);
       // 图片加载失败时 CachedNetworkImage 仍留在树里，光断言它存在证明不了
       // 加载成功——必须断言错误占位图不存在。
-      expect(find.byIcon(Icons.movie_outlined), findsNothing);
+      expect(find.byIcon(AppIcons.movie), findsNothing);
     });
     await clearImageCacheDuringTest(tester);
   });

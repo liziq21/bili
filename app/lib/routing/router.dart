@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../design/design.dart';
 import '../l10n/localization_file/app_localizations.dart';
 import '../app_bloc.dart';
 import '../app_scaffold.dart';
@@ -136,23 +137,25 @@ List<AppNavDestination> _navDestinations(BuildContext context) {
   return [
     AppNavDestination(
       label: l10n?.navHomeLabel ?? 'Home',
-      icon: Icons.home_rounded,
+      icon: AppIcons.home,
+      selectedIcon: AppIcons.homeSelected,
     ),
     AppNavDestination(
       label: l10n?.feedTitle ?? 'Subscription feed',
-      icon: Icons.rss_feed_rounded,
+      icon: AppIcons.feed,
+      selectedIcon: AppIcons.feedSelected,
     ),
     AppNavDestination(
       label: l10n?.search ?? 'Search',
-      icon: Icons.search_rounded,
-      railIcon: Icons.search_rounded,
+      icon: AppIcons.search,
+      selectedIcon: AppIcons.searchSelected,
       // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
       onReselect: () => context.read<SearchFocusController>().requestFocus(),
     ),
     AppNavDestination(
       label: l10n?.mine ?? 'Mine',
-      icon: Icons.video_library_rounded,
-      railIcon: Icons.video_library_rounded,
+      icon: AppIcons.profile,
+      selectedIcon: AppIcons.profileSelected,
     ),
   ];
 }

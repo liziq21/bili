@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../feed_state.dart';
@@ -41,7 +42,7 @@ class const FeedChannelHeader({
                   icon: AnimatedRotation(
                     turns: expanded ? 0 : -0.25,
                     duration: $styles.times.fast,
-                    child: const Icon(Icons.expand_more_rounded),
+                    child: const Icon(AppIcons.expandMore),
                   ),
                 ),
                 Expanded(

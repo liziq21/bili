@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 void main() {
   Future<void> pumpPlayer(
@@ -49,7 +50,7 @@ void main() {
     await pumpPlayer(tester, bloc: bloc);
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline), findsNothing);
+    expect(find.byIcon(AppIcons.error), findsNothing);
 
     addTearDown(bloc.close);
   });
@@ -169,7 +170,7 @@ void main() {
       expect(find.text('Second video'), findsOneWidget);
       // The current item stays in the queue; only the following item has a
       // remove action.
-      expect(find.byIcon(Icons.remove_circle_outline), findsOneWidget);
+      expect(find.byIcon(AppIcons.removeCircle), findsOneWidget);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
@@ -569,7 +570,7 @@ void main() {
         fullscreen: false,
         onMinimize: () => minimized = true,
       );
-      expect(find.byIcon(Icons.picture_in_picture_alt), findsNothing);
+      expect(find.byIcon(AppIcons.pictureInPicture), findsNothing);
 
       await pumpSurface(
         tester,
@@ -582,7 +583,7 @@ void main() {
       // onTap 与 onDoubleTap 共存时，首次单击要等双击判定窗结束才回调。
       await tester.pump(const Duration(milliseconds: 400));
 
-      await tester.tap(find.byIcon(Icons.picture_in_picture_alt));
+      await tester.tap(find.byIcon(AppIcons.pictureInPicture));
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(minimized, isTrue);

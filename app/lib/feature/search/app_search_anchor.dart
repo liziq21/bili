@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/model/recent_search_query.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import 'bloc/search_bloc.dart';
 
@@ -401,7 +402,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
 
     return ListTile(
       leading: Icon(
-        isHistory ? Icons.history : Icons.public,
+        isHistory ? AppIcons.history : AppIcons.web,
         color: isHistory ? theme.colorScheme.onSurfaceVariant : null,
       ),
       title: Text(item),
@@ -414,7 +415,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
             }
           : null,
       trailing: IconButton(
-        icon: const Icon(Icons.north_west),
+        icon: const Icon(AppIcons.fillQuery),
         // The tooltip names the suggestion it fills, so a screen-reader user
         // moving between rows can tell them apart. Wording stays inside the
         // golden font subset (app/test/fonts/subset-characters.txt); adding a

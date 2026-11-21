@@ -1,3 +1,4 @@
+import 'package:app/design/design.dart';
 import 'package:app/ui/common/app_navigation_shell.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -22,10 +23,15 @@ void main() {
             width: 400,
             navigationShell: navigationShell,
             destinations: [
-              const AppNavDestination(label: '首页', icon: Icons.home_rounded),
+              const AppNavDestination(
+                label: '首页',
+                icon: AppIcons.home,
+                selectedIcon: AppIcons.homeSelected,
+              ),
               AppNavDestination(
                 label: '搜索',
-                icon: Icons.search_rounded,
+                icon: AppIcons.search,
+                selectedIcon: AppIcons.searchSelected,
                 onReselect: () => reselected++,
               ),
             ],
@@ -96,8 +102,16 @@ void main() {
             width: 400,
             navigationShell: navigationShell,
             destinations: const [
-              AppNavDestination(label: '首页', icon: Icons.home_rounded),
-              AppNavDestination(label: '搜索', icon: Icons.search_rounded),
+              AppNavDestination(
+                label: '首页',
+                icon: AppIcons.home,
+                selectedIcon: AppIcons.homeSelected,
+              ),
+              AppNavDestination(
+                label: '搜索',
+                icon: AppIcons.search,
+                selectedIcon: AppIcons.searchSelected,
+              ),
             ],
           ),
           branches: [
@@ -141,4 +155,76 @@ void main() {
     expect(find.text('home detail'), findsNothing);
     expect(find.text('home root'), findsOneWidget);
   });
+
+  // R10：未选中目的地渲染空心图标，选中目的地渲染实心图标。底部导航与侧边
+  // 导航都必须遵守——只断言一个壳层会漏掉另一条渲染路径。
+  for (final (width, description) in [
+    (400.0, 'bottom navigation'),
+    (1200.0, 'rail'),
+  ]) {
+    testWidgets('selected destination uses selectedIcon ($description)', (
+      tester,
+    ) async {
+      final router = GoRouter(
+        initialLocation: '/home',
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) => AppNavigationShell(
+              width: width,
+              navigationShell: navigationShell,
+              destinations: const [
+                AppNavDestination(
+                  label: '首页',
+                  icon: AppIcons.home,
+                  selectedIcon: AppIcons.homeSelected,
+                ),
+                AppNavDestination(
+                  label: '我的',
+                  icon: AppIcons.profile,
+                  selectedIcon: AppIcons.profileSelected,
+                ),
+              ],
+            ),
+            branches: [
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/home',
+                    builder: (context, state) =>
+                        const Scaffold(body: Text('home root')),
+                  ),
+                ],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/mine',
+                    builder: (context, state) =>
+                        const Scaffold(body: Text('mine root')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(AppIcons.homeSelected), findsOneWidget);
+      expect(find.byIcon(AppIcons.home), findsNothing);
+      expect(find.byIcon(AppIcons.profile), findsOneWidget);
+      expect(find.byIcon(AppIcons.profileSelected), findsNothing);
+
+      await tester.tap(find.text('我的'));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(AppIcons.profileSelected), findsOneWidget);
+      expect(find.byIcon(AppIcons.profile), findsNothing);
+      expect(find.byIcon(AppIcons.home), findsOneWidget);
+      expect(find.byIcon(AppIcons.homeSelected), findsNothing);
+    });
+  }
 }
