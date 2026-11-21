@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 75 |
+| unit | 77 |
 | widget | 56 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **154** |
+| **合计** | **156** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（75）
+## unit（77）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -64,6 +64,7 @@
 - `packages/bilibili/bpi/test/api_result_test.dart`
 - `packages/bilibili/bpi/test/bangumi_play_url_test.dart`
 - `packages/bilibili/bpi/test/bangumi_season_test.dart`
+- `packages/bilibili/bpi/test/bili_device_fingerprint_test.dart`
 - `packages/bilibili/bpi/test/danmaku_test.dart`
 - `packages/bilibili/bpi/test/danmaku_ws/danmaku_message_test.dart`
 - `packages/bilibili/bpi/test/danmaku_ws/packet_test.dart`
@@ -71,6 +72,7 @@
 - `packages/bilibili/bpi/test/live_danmaku_test.dart`
 - `packages/bilibili/bpi/test/live_room_detail_test.dart`
 - `packages/bilibili/bpi/test/live_room_play_info_test.dart`
+- `packages/bilibili/bpi/test/play_url_test.dart`
 - `packages/bilibili/bpi/test/player_v2_test.dart`
 - `packages/bilibili/bpi/test/popular_feed_test.dart`
 - `packages/bilibili/bpi/test/ranking_feed_test.dart`

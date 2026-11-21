@@ -68,6 +68,10 @@ void main() {
           final body = json.decode(request.body) as Map<String, dynamic>;
           expect(body['query'], 'flutter');
           expect(body['context'], isA<Map<String, dynamic>>());
+          final client =
+              (body['context'] as Map<String, dynamic>)['client']
+                  as Map<String, dynamic>;
+          expect(client['clientName'], equals('WEB'));
           return http.Response(
             json.encode(mockJsonResponse),
             200,
@@ -1449,8 +1453,17 @@ void main() {
       final mockClient = MockClient((request) async {
         expect(request.method, equals('POST'));
         expect(request.url.path, equals('/youtubei/v1/player'));
+        expect(request.headers['X-YouTube-Client-Name'], equals('5'));
+        expect(request.headers['X-YouTube-Client-Version'], equals('20.10.4'));
         final body = json.decode(request.body) as Map<String, dynamic>;
         expect(body['videoId'], equals('dQw4w9WgXcQ'));
+        final client =
+            (body['context'] as Map<String, dynamic>)['client']
+                as Map<String, dynamic>;
+        expect(client['clientName'], equals('IOS'));
+        expect(client['clientVersion'], equals('20.10.4'));
+        expect(client['osName'], equals('iPhone'));
+        expect(client['deviceModel'], equals('iPhone16,2'));
         return http.Response(
           json.encode({
             'playabilityStatus': {'status': 'OK'},

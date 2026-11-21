@@ -184,6 +184,9 @@ final class NetworkYouTubeStreamingData {
   const NetworkYouTubeStreamingData({
     this.formats = const [],
     this.adaptiveFormats = const [],
+    this.hlsManifestUrl,
+    this.dashManifestUrl,
+    this.serverAbrStreamingUrl,
   });
 
   factory NetworkYouTubeStreamingData.fromJson(Map<String, dynamic> json) {
@@ -193,11 +196,19 @@ final class NetworkYouTubeStreamingData {
     return NetworkYouTubeStreamingData(
       formats: List.unmodifiable(formats),
       adaptiveFormats: List.unmodifiable(adaptiveFormats),
+      hlsManifestUrl: _string(json['hlsManifestUrl']),
+      dashManifestUrl: _string(json['dashManifestUrl']),
+      serverAbrStreamingUrl: _string(json['serverAbrStreamingUrl']),
     );
   }
 
   final List<NetworkYouTubeStreamFormat> formats;
   final List<NetworkYouTubeStreamFormat> adaptiveFormats;
+
+  /// Manifest URLs some InnerTube clients return instead of per-format URLs.
+  final String? hlsManifestUrl;
+  final String? dashManifestUrl;
+  final String? serverAbrStreamingUrl;
 }
 
 /// Response model for YouTube InnerTube `/youtubei/v1/player`.

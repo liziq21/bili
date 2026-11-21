@@ -538,26 +538,32 @@ void main() {
     );
   });
 
-  test(
-    'rejects the current player fixture, which records an UNPLAYABLE response',
-    () {
-      // player.json 记录的是 UNPLAYABLE 业务失败响应（无 streamingData），
-      // 尚未在可访问 YouTube 的环境重抓。fromJson 对非 OK 状态抛
-      // YpiInnerTubeException，与 browse / watchNext 的口径一致。
-      expect(
-        () => NetworkYouTubePlayerResponse.fromJson(
-          loadFixtureMap('player.json'),
-        ),
-        throwsA(
-          isA<YpiInnerTubeException>().having(
-            (e) => e.reason,
-            'reason',
-            isNotNull,
-          ),
-        ),
-      );
-    },
-  );
+  test('parses the real player fixture with directly playable formats', () {
+    final response = NetworkYouTubePlayerResponse.fromJson(
+      loadFixtureMap('player.json'),
+    );
+
+    expect(response.playabilityStatus?.status, equals('OK'));
+    expect(response.videoDetails?.title, isNotEmpty);
+
+    final streamingData = response.streamingData;
+    expect(streamingData, isNotNull);
+    expect(streamingData!.adaptiveFormats, isNotEmpty);
+    expect(
+      streamingData.adaptiveFormats.any(
+        (format) => format.url != null && format.url!.isNotEmpty,
+      ),
+      isTrue,
+      reason: 'the IOS player fixture must carry direct adaptive URLs',
+    );
+    expect(streamingData.hlsManifestUrl, isNotEmpty);
+    expect(
+      streamingData.adaptiveFormats
+          .map((format) => format.height)
+          .whereType<int>(),
+      contains(1080),
+    );
+  });
 
   test('parses the real suggest fixture into a typed suggestion DTO', () {
     final file = File('testing/search_suggest.json');

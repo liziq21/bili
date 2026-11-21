@@ -292,6 +292,13 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
     int qn = 80,
     int fnval = 4048,
     int fourk = 1,
+    int fnver = 0,
+    int tryLook = 1,
+    int webLocation = 1315873,
+    String dmImgList = '[]',
+    required String dmImgStr,
+    required String dmCoverImgStr,
+    required String dmImgInter,
     String tag = 'WBI',
   }) async {
     final Uri $url = Uri.parse('https://api.bilibili.com/x/player/wbi/playurl');
@@ -301,6 +308,13 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       'qn': qn,
       'fnval': fnval,
       'fourk': fourk,
+      'fnver': fnver,
+      'try_look': tryLook,
+      'web_location': webLocation,
+      'dm_img_list': dmImgList,
+      'dm_img_str': dmImgStr,
+      'dm_cover_img_str': dmCoverImgStr,
+      'dm_img_inter': dmImgInter,
     };
     final Request $request = Request(
       'GET',

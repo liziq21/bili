@@ -287,9 +287,9 @@ Future<void> main(List<String> args) async {
       final playerResponse = await client
           .post(
             Uri.parse('https://www.youtube.com/youtubei/v1/player'),
-            headers: _headers,
+            headers: _playerHeaders,
             body: jsonEncode(<String, dynamic>{
-              'context': _clientContext,
+              'context': _playerContext,
               'videoId': _watchNextVideoId,
             }),
           )
@@ -529,6 +529,31 @@ const _clientContext = <String, dynamic>{
   'client': {
     'clientName': 'WEB',
     'clientVersion': '2.20230818.00.00',
+    'hl': 'zh-CN',
+    'gl': 'US',
+  },
+};
+
+const _playerHeaders = <String, String>{
+  'Content-Type': 'application/json',
+  'User-Agent':
+      'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 '
+      'like Mac OS X;)',
+  'X-YouTube-Client-Name': '5',
+  'X-YouTube-Client-Version': '20.10.4',
+};
+
+/// The WEB client no longer returns direct stream URLs: adaptive formats carry
+/// only SABR metadata. The IOS client returns `url` values and an HLS
+/// manifest, so the player fixture is captured with it.
+const _playerContext = <String, dynamic>{
+  'client': {
+    'clientName': 'IOS',
+    'clientVersion': '20.10.4',
+    'deviceMake': 'Apple',
+    'deviceModel': 'iPhone16,2',
+    'osName': 'iPhone',
+    'osVersion': '18.3.2.22D82',
     'hl': 'zh-CN',
     'gl': 'US',
   },
@@ -863,6 +888,23 @@ void _validatePlayerResponse(dynamic json) {
   if (title is! String || title.isEmpty) {
     throw const FormatException(
       'InnerTube player response videoDetails missing title',
+    );
+  }
+  final streamingData = json['streamingData'] as Map;
+  final adaptiveFormats = streamingData['adaptiveFormats'];
+  final hasDirectUrl =
+      adaptiveFormats is List &&
+      adaptiveFormats.any(
+        (format) =>
+            format is Map &&
+            format['url'] is String &&
+            (format['url'] as String).isNotEmpty,
+      );
+  final hlsManifestUrl = streamingData['hlsManifestUrl'];
+  if (!hasDirectUrl && (hlsManifestUrl is! String || hlsManifestUrl.isEmpty)) {
+    throw const FormatException(
+      'InnerTube player response has no directly playable adaptive format '
+      'or HLS manifest; the WEB client now returns SABR-only formats',
     );
   }
 }

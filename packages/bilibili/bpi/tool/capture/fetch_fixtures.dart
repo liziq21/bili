@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bpi/bpi.dart';
+import 'package:bpi/src/device/bili_device_fingerprint.dart';
 import 'package:bpi/src/utils/wbi_utils.dart';
 import 'package:http/http.dart' as http;
 
@@ -285,6 +286,10 @@ Future<void> main(List<String> args) async {
     const sampleBvid = 'BV1GJ411x7vy';
     const sampleAid = 80431228;
     const sampleCid = 137646676;
+    // The play URL fixture needs a source that actually offers 1080P; the
+    // metadata sample above only has a 720P ladder.
+    const playUrlSampleBvid = 'BV1Deht6rEpZ';
+    const playUrlSampleCid = 42164617674;
 
     // 1. Search suggest
     if (!shouldFetch('testing/search_suggest.json')) {
@@ -459,14 +464,22 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/play_url.json')) {
       skipNote('testing/play_url.json');
     } else {
+      final device = BiliDeviceFingerprint.forge();
       final playUrl = await getWbiJson(
         'https://api.bilibili.com/x/player/wbi/playurl',
         {
-          'bvid': sampleBvid,
-          'cid': sampleCid,
+          'bvid': playUrlSampleBvid,
+          'cid': playUrlSampleCid,
           'qn': 80,
+          'fnver': 0,
           'fnval': 4048,
           'fourk': 1,
+          'try_look': 1,
+          'web_location': 1315873,
+          'dm_img_list': BiliDeviceFingerprint.dmImgList,
+          'dm_img_str': device.dmImgStr,
+          'dm_cover_img_str': device.dmCoverImgStr,
+          'dm_img_inter': device.dmImgInter,
         },
         'play URL',
       );
@@ -490,6 +503,15 @@ Future<void> main(List<String> args) async {
           false;
       if (!hasDash && !hasDurl) {
         throw const FormatException('play URL has no playable streams');
+      }
+      final heights =
+          dashVideo?.map((stream) => stream.height).whereType<int>().toSet() ??
+          const <int>{};
+      if (!heights.contains(1080)) {
+        throw FormatException(
+          'play URL has no 1080P stream (heights: $heights); the anonymous '
+          'dm_img_* + try_look request shape did not unlock the HD ladder',
+        );
       }
       saveResponse('testing/play_url.json', playUrl);
     }

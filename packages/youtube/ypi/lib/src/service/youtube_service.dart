@@ -18,26 +18,35 @@ final class YoutubeService {
   YoutubeService({
     http.Client? httpClient,
     YoutubeClientConfig config = const YoutubeClientConfig(),
+    YoutubeClientConfig playerConfig = const YoutubeClientConfig.ios(),
   }) : _httpClient = httpClient ?? http.Client(),
-       _ownsHttpClient = httpClient == null,
-       _config = config {
-    _validateConfig();
+       _ownsHttpClient = httpClient == null {
+    _validateConfig(config);
+    _validateConfig(playerConfig);
     _chopperClient = ChopperClient(
       client: _httpClient,
       converter: YoutubeRequestConverter(config),
       interceptors: [YoutubeInnerTubeInterceptor(config)],
     );
     _api = YoutubeApi.create(_chopperClient);
+    _playerChopperClient = ChopperClient(
+      client: _httpClient,
+      converter: YoutubeRequestConverter(playerConfig),
+      interceptors: [YoutubeInnerTubeInterceptor(playerConfig)],
+    );
+    _playerApi = YoutubeApi.create(_playerChopperClient);
   }
 
   final http.Client _httpClient;
   final bool _ownsHttpClient;
-  final YoutubeClientConfig _config;
   late final ChopperClient _chopperClient;
+  late final ChopperClient _playerChopperClient;
   late final YoutubeApi _api;
+  late final YoutubeApi _playerApi;
 
   void close() {
     _chopperClient.dispose();
+    _playerChopperClient.dispose();
     if (_ownsHttpClient) {
       _httpClient.close();
     }
@@ -170,7 +179,7 @@ final class YoutubeService {
     }
     final body = <String, dynamic>{'videoId': sanitizedVideoId};
 
-    final response = await _send(_api.player, body);
+    final response = await _send(_playerApi.player, body);
     return _parseResponse(
       response,
       (json) => NetworkYouTubePlayerResponse.fromJson(
@@ -354,14 +363,18 @@ final class YoutubeService {
     throw YpiHttpException(response.statusCode);
   }
 
-  void _validateConfig() {
+  void _validateConfig(YoutubeClientConfig config) {
     final fields = <String, String>{
-      'clientName': _config.clientName,
-      'clientNameId': _config.clientNameId,
-      'clientVersion': _config.clientVersion,
-      'language': _config.language,
-      'country': _config.country,
-      'userAgent': _config.userAgent,
+      'clientName': config.clientName,
+      'clientNameId': config.clientNameId,
+      'clientVersion': config.clientVersion,
+      'language': config.language,
+      'country': config.country,
+      'userAgent': config.userAgent,
+      if (config.osName != null) 'osName': config.osName!,
+      if (config.osVersion != null) 'osVersion': config.osVersion!,
+      if (config.deviceMake != null) 'deviceMake': config.deviceMake!,
+      if (config.deviceModel != null) 'deviceModel': config.deviceModel!,
     };
     for (final entry in fields.entries) {
       if (entry.value.trim().isEmpty) {
@@ -369,6 +382,12 @@ final class YoutubeService {
           'YoutubeClientConfig.${entry.key} must not be empty',
         );
       }
+    }
+    final sdk = config.androidSdkVersion;
+    if (sdk != null && sdk <= 0) {
+      throw const YpiClientContextException(
+        'YoutubeClientConfig.androidSdkVersion must be positive',
+      );
     }
   }
 }
