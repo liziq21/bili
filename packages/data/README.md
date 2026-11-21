@@ -26,7 +26,7 @@
 dart pub get
 
 # 静态分析
-dart analyze
+dart analyze --fatal-infos --fatal-warnings
 
 # 单元测试
 dart test

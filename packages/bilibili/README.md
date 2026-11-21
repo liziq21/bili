@@ -26,7 +26,7 @@ Bilibili 相关 API 客户端与远程数据源实现 package。
 flutter pub get
 
 # 静态分析
-flutter analyze
+flutter analyze --fatal-infos --fatal-warnings
 
 # 单元测试
 flutter test

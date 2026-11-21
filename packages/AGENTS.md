@@ -17,14 +17,14 @@ This directory contains shared packages and modules (`packages/*`). A directory 
 
 | Package | Type | Analysis Command | Test Command | Notes |
 |---------|------|------------------|--------------|-------|
-| `packages/bilibili` | Flutter | `flutter analyze` | `flutter test` | API client & l10n (imports Flutter SDK) |
-| `packages/youtube` | Flutter | `flutter analyze` | `flutter test` | API client (`ypi`), l10n, Chopper & Protobuf encoder |
-| `packages/bilibili/bpi` | Dart-only | `dart analyze` | `dart test` | Bilibili Web API client, no Flutter SDK dependency |
-| `packages/youtube/ypi` | Dart-only | `dart analyze` | `dart test` | YouTube InnerTube API client, no Flutter SDK dependency |
-| `packages/data` | Dart-only | `dart analyze` | `dart test` | Shared models & RemoteDataSource abstraction |
-| `packages/model` | Dart-only | `dart analyze` | — (no `test/` currently) | Shared models (`UserData`, `Result<T>`) |
+| `packages/bilibili` | Flutter | `flutter analyze --fatal-infos --fatal-warnings` | `flutter test` | API client & l10n (imports Flutter SDK) |
+| `packages/youtube` | Flutter | `flutter analyze --fatal-infos --fatal-warnings` | `flutter test` | API client (`ypi`), l10n, Chopper & Protobuf encoder |
+| `packages/bilibili/bpi` | Dart-only | `dart analyze --fatal-infos --fatal-warnings` | `dart test` | Bilibili Web API client, no Flutter SDK dependency |
+| `packages/youtube/ypi` | Dart-only | `dart analyze --fatal-infos --fatal-warnings` | `dart test` | YouTube InnerTube API client, no Flutter SDK dependency |
+| `packages/data` | Dart-only | `dart analyze --fatal-infos --fatal-warnings` | `dart test` | Shared models & RemoteDataSource abstraction |
+| `packages/model` | Dart-only | `dart analyze --fatal-infos --fatal-warnings` | — (no `test/` currently) | Shared models (`UserData`, `Result<T>`) |
 
-**Rule**: For Dart-only packages (`model`, `data`, `bilibili/bpi`, `youtube/ypi`), use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands. The two API sub-packages must not declare a Flutter SDK dependency in their `pubspec.yaml`; a new `flutter:` key under `environment` or a `flutter` entry under `dependencies` is the signal the boundary has been broken.
+**Rule**: For Dart-only packages (`model`, `data`, `bilibili/bpi`, `youtube/ypi`), use `dart` commands from the package directory. For Flutter packages (`bilibili`, `youtube`), use `flutter` commands. Every analysis command runs in strict mode with `--fatal-infos --fatal-warnings`; the policy is owned by the root [`AGENTS.md`](../AGENTS.md#静态分析). The two API sub-packages must not declare a Flutter SDK dependency in their `pubspec.yaml`; a new `flutter:` key under `environment` or a `flutter` entry under `dependencies` is the signal the boundary has been broken.
 
 **CI scope**: The CI test step runs `app/` and every workspace package that has tests: `packages/bilibili`, `packages/bilibili/bpi`, `packages/youtube`, `packages/youtube/ypi`, and `packages/data` — see `.github/workflows/ci-test.yml` for the authoritative list. `packages/model` currently has no test files, but remains covered by workspace analysis. Every change to a package with tests must pass its own test command locally before being considered done; packages without a `test/` directory must at least pass analysis. CI uses `flutter test` for Flutter packages and `dart test` for Dart-only packages that have tests; the runner choice does not change a package's dependency boundary.
 

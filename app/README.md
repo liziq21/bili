@@ -33,7 +33,7 @@ flutter pub get
 ### 静态分析与测试
 
 ```bash
-flutter analyze
+flutter analyze --fatal-infos --fatal-warnings
 flutter test
 ```
 

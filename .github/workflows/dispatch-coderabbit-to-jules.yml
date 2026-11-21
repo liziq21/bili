@@ -130,7 +130,7 @@ jobs:
             echo "  你在旧快照上工作会把 main 上已合入的改动回退掉。"
             echo "- 只改意见里点名的文件，不顺手重构、不动无关格式。"
             echo "- 每条意见要么修掉，要么回帖说明为什么不改。"
-            echo "- 改完自己跑 \`flutter analyze\` 和受影响的测试。"
+            echo "- 改完自己跑 \`flutter analyze --fatal-infos --fatal-warnings\` 和受影响的测试。"
           } > /tmp/body.md
           # 必须带 --repo：pull_request_review 事件不 checkout，
           # gh pr comment 在无 .git 的目录里会报 fatal: not a git repository。

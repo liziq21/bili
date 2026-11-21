@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// 管理搜索页输入框的聚焦请求，替代全局可变闭包。
-// ignore: use_primary_constructors
-// ChangeNotifier 的构造函数不是 const，无法用 const 主构造函数替代。
-class SearchFocusController extends ChangeNotifier {
+class SearchFocusController() extends ChangeNotifier {
   VoidCallback? _focusCallback;
 
   /// 由 SearchScreen 在挂载时注册聚焦动作，销毁时传入 null 注销。

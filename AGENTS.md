@@ -27,7 +27,7 @@ Before writing or modifying code in this repository, read the specification file
 
 **开工前必读：**
 
-- [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, primary constructor syntax, immutability, testing.
+- [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, strict static analysis, screenshot testing, primary constructor syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
 - [`packages/AGENTS.md`](packages/AGENTS.md) — package classification, data layer rules, API sub-package conventions (`bilibili`/`youtube`), CI test scope.
 - [`app/docs/design-system.md`](app/docs/design-system.md) — design token policy: color literal allow-list, contrast requirements, token roles, icon single source and selected/unselected icon pairs. **Must read before touching any UI colors, icons, tokens, or theme code.**
@@ -141,6 +141,24 @@ Linear sync 附带的 `c:` 标签优先于标题前缀分桶。agent 派单时�
 原因：`dart format` 的输出随 SDK 版本变化，同一份源码在不同 formatter 上会得到不同排版。agent 在与仓库不一致的 SDK 上跑一次格式化，它碰过的每个文件都会被整体重排；如果这些文件此后又与 main 前进过的版本撞车，PR 就会变成 dirty，而这类 dirty 的净差异里混着「把 main 已合内容改回旧写法」的回退，只能关单重开。2026-10-04 的六条 PR 全部是这个成因。
 
 CI 的 Flutter 版本由根 `pubspec.yaml` 的 `environment` 约束经 `pubspec-matrix-action` 展开，产出下限版本（来自 `pubspec.yaml`）与最新 stable 两项；`.fvmrc` 与下限项一致，也是 `rerecord-goldens.yml` 录制 golden 基线所用的版本。**升级 SDK 时 `.fvmrc`、`pubspec.yaml`、ruleset 的 required check 名三者必须同一次改动里一起改。**
+
+### 静态分析
+
+静态分析统一使用严格档：`--fatal-infos` 与 `--fatal-warnings` 必须同时开启，info 与 warning 都按失败处理。
+
+- 仓库根目录（覆盖 workspace 全部包，含 `app/test/`）：
+
+  ```bash
+  flutter analyze --fatal-infos --fatal-warnings
+  ```
+
+- 纯 Dart 包（`packages/data`、`packages/model`、`packages/bilibili/bpi`、`packages/youtube/ypi`）在包目录执行：
+
+  ```bash
+  dart analyze --fatal-infos --fatal-warnings
+  ```
+
+CI 的 `Run analyze` 步骤对 push 与 PR 一律跑上面的严格档，并用 `pipefail` 保留 `flutter analyze` 的退出码；info 级问题会让检查变红。不得通过删减 `analysis_options.yaml` 规则、添加 `// ignore` 注释或改用非 fatal 档来让门禁变绿。
 
 ### 格式
 提交代码前对本次改动的文件运行格式检查；`analysis_options.yaml` 配置了 `formatter`，默认参数见 `dart format --help -v`。

@@ -16,7 +16,6 @@ import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/providers/service_source_providers.dart';
 import 'package:app/routing/router.dart';
 import 'package:data/data.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -35,9 +34,9 @@ import 'package:provider/single_child_widget.dart';
 /// 用单订阅的 [StreamController] 而不是 `Stream.multi`，是因为后者的
 /// `MultiStreamController.close()` 与订阅者的取消回调在 teardown 阶段会与
 /// 事件派发交错，触发 `Bad state: Cannot add event while adding stream`。
-class FakeUserDataRepository implements UserDataRepository {
-  FakeUserDataRepository({UserData initial = const UserData()})
-    : _current = initial {
+class FakeUserDataRepository({UserData initial = const UserData()})
+    implements UserDataRepository {
+  this : _current = initial {
     // 挂上监听后立即补发当前值：单订阅流不会为新订阅者重放。
     _controller.onListen = () => _controller.add(_current);
   }
@@ -77,7 +76,7 @@ class FakeUserDataRepository implements UserDataRepository {
 }
 
 /// 一次性返回 [UserData] 后保持打开的仓库，不给测试留下需关闭的 broadcast 流。
-class _EmptyUserDataRepository implements UserDataRepository {
+class _EmptyUserDataRepository() implements UserDataRepository {
   @override
   Stream<UserData> get data => Stream<UserData>.value(const UserData());
 
@@ -101,7 +100,7 @@ class _EmptyUserDataRepository implements UserDataRepository {
 
 /// 最小可用的 [PreferencesDataSource]：[SearchBloc] 构造器要求它，但本组测试
 /// 不触碰偏好读写，全部返回默认值。
-class _FakePreferencesDataSource implements PreferencesDataSource {
+class _FakePreferencesDataSource() implements PreferencesDataSource {
   @override
   Future<Result<T, Exception>> get<T>(PreferencesKey<T> key) async =>
       Result.success(key.defaultValue);
@@ -148,11 +147,8 @@ class SuggestCapableMediaSource(final String _id) extends MediaSource {
   SearchSuggestRemoteDataSource? get searchSuggestDataSource => _suggest;
 }
 
-class _RecordingSuggestDataSource extends SearchSuggestRemoteDataSource {
-  _RecordingSuggestDataSource(this._sourceId);
-
-  final String _sourceId;
-
+class _RecordingSuggestDataSource(final String _sourceId)
+    extends SearchSuggestRemoteDataSource {
   @override
   String get sourceId => _sourceId;
 
@@ -165,8 +161,8 @@ class _RecordingSuggestDataSource extends SearchSuggestRemoteDataSource {
 /// 是否被下发。
 ///
 /// 用单订阅 [StreamController] 避免 teardown 时的 broadcast double-close 问题。
-class RecordingRecentSearchRepository implements RecentSearchQueryRepository {
-  RecordingRecentSearchRepository() {
+class RecordingRecentSearchRepository() implements RecentSearchQueryRepository {
+  this {
     _controller.onListen = () => _controller.add(const []);
   }
 
@@ -201,16 +197,11 @@ class RecordingRecentSearchRepository implements RecentSearchQueryRepository {
 /// 与 router.dart 私有 `_ScopedSourceBuilder` 语义相同：从 [AppBloc] 取
 /// `userData.sourceId`，经目录解析后注入 [ServiceSourceProviders]；无源时渲染
 /// [NoMediaSourceScreen]。`keyPrefix` 决定 ValueKey，切换数据源时按分支重建。
-class TestScopedSource extends StatelessWidget {
-  const TestScopedSource({
-    super.key,
-    required this.keyPrefix,
-    required this.builder,
-  });
-
-  final String keyPrefix;
-  final WidgetBuilder builder;
-
+class const TestScopedSource({
+  super.key,
+  required final String keyPrefix,
+  required final WidgetBuilder builder,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocSelector<AppBloc, AppState, String?>(
@@ -253,9 +244,7 @@ Widget testWithSearchBloc(BuildContext context, Widget child) {
 /// [SearchScreen] 自带 Scaffold，只能作为整页渲染；把它塞进 Column 会拿到
 /// 无界高度约束并溢出。这里用 [Stack] 叠在探测文字之上取样，屏幕尺寸由
 /// 最外层 Scaffold 提供。
-class SearchEntryProbe extends StatelessWidget {
-  const SearchEntryProbe({super.key});
-
+class const SearchEntryProbe({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasBloc = _probeSearchBloc(context);
@@ -300,26 +289,18 @@ class SearchEntryProbe extends StatelessWidget {
 void _noopSearch(String _) {}
 
 /// 自带清理的测试外壳：repository 与 bloc 随树销毁，避免手动 dispose 的 teardown 竞态。
-class _TestWrapper extends StatefulWidget {
-  const _TestWrapper({
-    required this.repository,
-    required this.appBloc,
-    required this.catalog,
-    required this.child,
-    this.extraProviders = const [],
-  });
-
-  final FakeUserDataRepository repository;
-  final AppBloc appBloc;
-  final MediaSourceCatalog catalog;
-  final Widget child;
-  final List<SingleChildWidget> extraProviders;
-
+class const _TestWrapper({
+  required final FakeUserDataRepository repository,
+  required final AppBloc appBloc,
+  required final MediaSourceCatalog catalog,
+  required final Widget child,
+  final List<SingleChildWidget> extraProviders = const [],
+}) extends StatefulWidget {
   @override
   State<_TestWrapper> createState() => _TestWrapperState();
 }
 
-class _TestWrapperState extends State<_TestWrapper> {
+class _TestWrapperState() extends State<_TestWrapper> {
   @override
   void dispose() {
     // 按 LIFO：先关 bloc（内部 emit.forEach 订阅），再关 repository
@@ -344,22 +325,16 @@ class _TestWrapperState extends State<_TestWrapper> {
 }
 
 /// Router 专用外壳：不需要 FakeUserDataRepository 时使用（如 _EmptyUserDataRepository）
-class _RouterTestWrapper extends StatefulWidget {
-  const _RouterTestWrapper({
-    required this.appBloc,
-    required this.catalog,
-    required this.router,
-  });
-
-  final AppBloc appBloc;
-  final MediaSourceCatalog catalog;
-  final GoRouter router;
-
+class const _RouterTestWrapper({
+  required final AppBloc appBloc,
+  required final MediaSourceCatalog catalog,
+  required final GoRouter router,
+}) extends StatefulWidget {
   @override
   State<_RouterTestWrapper> createState() => _RouterTestWrapperState();
 }
 
-class _RouterTestWrapperState extends State<_RouterTestWrapper> {
+class _RouterTestWrapperState() extends State<_RouterTestWrapper> {
   @override
   void dispose() {
     widget.appBloc.close();

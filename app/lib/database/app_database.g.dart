@@ -6250,10 +6250,11 @@ class $$MediaTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (mediaHistoryRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          MediaHistoryEntity
+                          MediaHistoryEntity,
+                          $MediaHistoryTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
@@ -6264,61 +6265,56 @@ class $$MediaTableTableManager
                                 table,
                                 p0,
                               ).mediaHistoryRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (videoRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          VideoEntity
+                          VideoEntity,
+                          $VideoTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._videoRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).videoRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (articleRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          ArticleEntity
+                          ArticleEntity,
+                          $ArticleTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._articleRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).articleRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                       if (postRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           MediaEntity,
                           $MediaTable,
-                          PostEntity
+                          PostEntity,
+                          $PostTable
                         >(
                           currentTable: table,
                           referencedTable: $$MediaTableReferences
                               ._postRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$MediaTableReferences(db, table, p0).postRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.mediaId == item.internalId,
-                              ),
+                          currentColumn: 'internal_id',
+                          referencedColumn: 'media_id',
                           typedResults: items,
                         ),
                     ];
@@ -8365,10 +8361,11 @@ class $$LocalPlaylistTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (localPlaylistItemRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       LocalPlaylistEntity,
                       $LocalPlaylistTable,
-                      LocalPlaylistItemEntity
+                      LocalPlaylistItemEntity,
+                      $LocalPlaylistItemTable
                     >(
                       currentTable: table,
                       referencedTable: $$LocalPlaylistTableReferences
@@ -8379,10 +8376,8 @@ class $$LocalPlaylistTableTableManager
                             table,
                             p0,
                           ).localPlaylistItemRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.playlistId == item.internalId,
-                          ),
+                      currentColumn: 'internal_id',
+                      referencedColumn: 'playlist_id',
                       typedResults: items,
                     ),
                 ];

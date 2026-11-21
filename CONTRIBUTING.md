@@ -18,7 +18,7 @@
    flutter analyze --fatal-infos --fatal-warnings
    ```
 
-   这是严格自查档；CI 当前对 Jules 作者或被指派 Jules 的 PR 使用严格档，其余使用非 fatal 的 info/warning 档，见 [`ci-test.yml`](.github/workflows/ci-test.yml)。已有问题须单独报告，不借机做全库修复，也不把未运行的检查记为通过。
+   这是唯一允许的静态分析档，CI 的 `Run analyze` 步骤对 push 与 PR 一律执行同一命令，info 与 warning 都会让检查失败，见 [`ci-test.yml`](.github/workflows/ci-test.yml)。规则见根 [`AGENTS.md`](AGENTS.md#静态分析)。不把未运行的检查记为通过。
 
 4. 测试从包目录运行。以下命令都从**仓库根目录**开始，括号保证连续复制执行不会改变后续命令的工作目录：
 
