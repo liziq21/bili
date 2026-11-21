@@ -130,6 +130,26 @@ void main() {
     expect(find.byIcon(Icons.playlist_add), findsOneWidget);
   });
 
+  testWidgets('lays related videos out in a horizontal scroll view', (
+    tester,
+  ) async {
+    await pumpWithQueue(
+      tester,
+      streamResult: Result.success(queueStream),
+      controller: _RecordingPlaybackController(),
+    );
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is SingleChildScrollView &&
+            widget.scrollDirection == Axis.horizontal,
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('关联视频'), findsOneWidget);
+  });
+
   testWidgets('the button resolves and appends the stream on tap', (
     tester,
   ) async {

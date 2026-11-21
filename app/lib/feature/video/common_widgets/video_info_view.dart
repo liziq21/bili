@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
@@ -16,6 +17,7 @@ import '../../../routing/router.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
+import 'video_description_text.dart';
 
 String _formatCount(int count, AppLocalizations l10n) {
   if (count >= 10000) {
@@ -155,12 +157,40 @@ class const _RecommendationsSection() extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        for (final video in relatedVideos) _RelatedVideoCard(video: video),
-      ],
+    return SizedBox(
+      height: _relatedRecommendationExtent(context),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: $styles.insets.xs),
+        child: Row(
+          children: [
+            for (final video in relatedVideos)
+              SizedBox(width: 300, child: _RelatedVideoCard(video: video)),
+          ],
+        ),
+      ),
     );
   }
+}
+
+/// 横向推荐卡片的高度：封面与两行文字取较大者，再随字体缩放。
+///
+/// 固定高度会让放大字号后的第二行文字被裁掉；行高按卡片实际使用的
+/// 令牌值计算，末尾向上取整避免亚像素误差。
+double _relatedRecommendationExtent(BuildContext context) {
+  final textScaler = MediaQuery.textScalerOf(context);
+  const titleFontSize = 13.0;
+  const titleHeight = 1.25;
+  const subtitleFontSize = 11.0;
+  final subtitleHeight = $styles.text.bodySmall.height ?? 1.4;
+  final textHeight =
+      textScaler.scale(titleFontSize * titleHeight) * 2 +
+      4 +
+      textScaler.scale(subtitleFontSize * subtitleHeight);
+  return (math.max(68.0, textHeight) +
+          $styles.insets.xxs * 2 +
+          $styles.insets.xs)
+      .ceilToDouble();
 }
 
 class const _VideoHeaderSection() extends StatelessWidget {
@@ -745,18 +775,11 @@ class _SynopsisSectionState()
             duration: Motion.standard,
             curve: Motion.easingEmphasized,
             alignment: Alignment.topCenter,
-            child: Text(
-              desc != null && desc.isNotEmpty
+            child: VideoDescriptionText(
+              text: desc != null && desc.isNotEmpty
                   ? desc
                   : l10n.sampleSynopsisFallback,
-              maxLines: _isDescExpanded ? null : 2,
-              overflow: _isDescExpanded
-                  ? TextOverflow.visible
-                  : TextOverflow.ellipsis,
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onSurface,
-                height: 1.4,
-              ),
+              isExpanded: _isDescExpanded,
             ),
           ),
         ],

@@ -111,6 +111,7 @@ TEST_MATRIX = {
         'app/test/feature/video/player_keyboard_shortcuts_test.dart',
         'app/test/feature/video/quality_picker_chip_test.dart',
         'app/test/feature/video/sleep_timer_chip_test.dart',
+        'app/test/feature/video/video_description_text_test.dart',
         'app/test/feature/video/video_info_view_chapters_test.dart',
         'app/test/feature/video/video_info_view_queue_test.dart',
         'app/test/feature/video/video_player_placeholder_test.dart',
