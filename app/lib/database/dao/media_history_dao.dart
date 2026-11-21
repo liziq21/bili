@@ -46,12 +46,19 @@ class MediaHistoryDao(super.db)
 
   /// 按 (sourceId, originalId, type) 查找 media 行的 internalId；
   /// 不存在时插入 media + media_history 行并返回新 id。
+  ///
+  /// 元数据是可选的：进度读取先于详情到达，此时只能拿到 id。后续带元数据的
+  /// 调用会补写这些列——否则历史列表永远显示原始 id 和空白封面。
   Future<int> getOrCreateMediaId(
     String sourceId,
     String originalId,
     String type, {
     String? title,
     String? url,
+    String? thumbnailUrl,
+    String? creatorProfileName,
+    String? creatorProfileId,
+    DateTime? uploadDate,
   }) async {
     return transaction(() async {
       final mediaCompanion = MediaCompanion.insert(
@@ -60,6 +67,10 @@ class MediaHistoryDao(super.db)
         title: title ?? originalId,
         url: url ?? '',
         type: type,
+        thumbnailUrl: Value(thumbnailUrl),
+        creatorProfileName: Value(creatorProfileName),
+        creatorProfileId: Value(creatorProfileId),
+        uploadDate: Value(uploadDate),
       );
       final inserted = await into(media).insertReturning(
         mediaCompanion,
@@ -68,6 +79,12 @@ class MediaHistoryDao(super.db)
             sourceId: Value(sourceId),
             originalId: Value(originalId),
             type: Value(type),
+            title: Value.absentIfNull(title),
+            url: Value.absentIfNull(url),
+            thumbnailUrl: Value.absentIfNull(thumbnailUrl),
+            creatorProfileName: Value.absentIfNull(creatorProfileName),
+            creatorProfileId: Value.absentIfNull(creatorProfileId),
+            uploadDate: Value.absentIfNull(uploadDate),
           ),
           target: [media.sourceId, media.type, media.originalId],
         ),
@@ -81,6 +98,26 @@ class MediaHistoryDao(super.db)
       );
       return inserted.internalId;
     });
+  }
+
+  /// 按 (sourceId, originalId, type) 查 media 行的 internalId，不存在时返回 null。
+  ///
+  /// 读路径专用：只为恢复进度而打开视频页时不该凭空建出一条历史记录，
+  /// 否则「看过」列表里会多出只有 BV 号、没有标题和封面的空条目。
+  Future<int?> findMediaId(
+    String sourceId,
+    String originalId,
+    String type,
+  ) async {
+    final row =
+        await (select(media)..where(
+              (m) =>
+                  m.sourceId.equals(sourceId) &
+                  m.originalId.equals(originalId) &
+                  m.type.equals(type),
+            ))
+            .getSingleOrNull();
+    return row?.internalId;
   }
 
   /// 取指定媒体的播放进度（秒），无记录或进度为 null 时返回 null。

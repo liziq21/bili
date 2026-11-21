@@ -198,6 +198,59 @@ void main() {
       expect(stream.duration, const Duration(seconds: 105));
     });
 
+    test('镜像 CDN 被排在首位时改选自有 CDN', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://upos-hz-mirrorakam.akamaized.net/v.m4s',
+              'backupUrl': ['https://upos-sz-mirrorcosov.bilivideo.com/v.m4s'],
+              'height': 720,
+            },
+          ],
+          audio: [
+            {
+              'id': 30280,
+              'baseUrl': 'https://upos-hz-mirrorakam.akamaized.net/a.m4s',
+              'backupUrl': ['https://upos-sz-mirrorcosov.bilivideo.com/a.m4s'],
+              'bandwidth': 192000,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+
+      expect(
+        stream.videoUrl,
+        'https://upos-sz-mirrorcosov.bilivideo.com/v.m4s',
+        reason: '镜像对开放式 Range 请求返回 403，应优先自有 CDN',
+      );
+      expect(
+        stream.audioUrl,
+        'https://upos-sz-mirrorcosov.bilivideo.com/a.m4s',
+      );
+    });
+
+    test('只有镜像地址时仍返回该地址，不丢弃可用候选', () async {
+      final source = makeSource(
+        buildPlayUrl(
+          video: [
+            {
+              'id': 32,
+              'baseUrl': 'https://upos-hz-mirrorakam.akamaized.net/v.m4s',
+              'height': 720,
+            },
+          ],
+        ),
+      );
+
+      final stream = expectOk(await source.getMediaStream('BV1GJ411x7vy'));
+
+      expect(stream.videoUrl, 'https://upos-hz-mirrorakam.akamaized.net/v.m4s');
+    });
+
     test('请求头带浏览器标识与 Referer', () async {
       final source = makeSource(
         buildPlayUrl(

@@ -40,6 +40,7 @@ class const SearchResultScreen({
           title: Padding(
             padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
             child: AppSearchAnchor(
+              initialQuery: query,
               onSearch: (newQuery) {
                 if (newQuery.isNotEmpty && newQuery != query) {
                   context.defaultNavigateToSearchResult(newQuery);

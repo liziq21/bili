@@ -354,165 +354,198 @@ class const _CreatorProfileSection() extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    creator.thumbnailUrl != null &&
-                        creator.thumbnailUrl!.isNotEmpty
-                    ? ResizeImage.resizeIfNeeded(
-                        96,
-                        96,
-                        CachedNetworkImageProvider(creator.thumbnailUrl!),
-                      )
-                    : null,
-                child:
-                    creator.thumbnailUrl == null ||
-                        creator.thumbnailUrl!.isEmpty
-                    ? const Icon(AppIcons.avatarFallback)
-                    : null,
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: $styles.colors.accentFill,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    AppIcons.check,
-                    size: 10,
-                    color: $styles.colors.onScrim,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Gap($styles.insets.xs),
-          // Name & Fan Count
+          // 头像与昵称整块可点：进入 UP 主空间页。关注按钮留在 InkWell 外，
+          // 免得点关注时连带跳页。
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        creator.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: $styles.text.bodyBold.copyWith(
-                          color: $styles.colors.onSurfaceStrong,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    const Gap(4),
-                    Icon(
-                      AppIcons.verified,
-                      size: 14,
-                      color: $styles.colors.secondary,
-                    ),
-                  ],
-                ),
-                Text(
-                  l10n.subscribersWeeklyTagline(
-                    _formatCount(creator.subscribers ?? 528000, l10n),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                context.navigateToSpace(creator.id);
+              },
+              borderRadius: BorderRadius.circular($styles.corners.sm),
+              child: Row(
+                children: [
+                  _creatorAvatar(creator),
+                  Gap($styles.insets.xs),
+                  Expanded(child: _creatorNames(creator, l10n)),
+                ],
+              ),
             ),
           ),
           Gap($styles.insets.xs),
-          // Open External Origin Link & Follow Button
-          IconButton(
-            tooltip: l10n.openInBrowser,
-            iconSize: 18,
-            icon: Icon(
-              AppIcons.openInNew,
-              color: $styles.colors.onSurfaceVariant,
+          _copyCreatorLinkButton(context, l10n, creator),
+          _followButton(context, l10n, creator, isSubscribed),
+        ],
+      ),
+    );
+  }
+
+  Widget _creatorAvatar(CreatorProfile creator) {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 20,
+          backgroundImage:
+              creator.thumbnailUrl != null && creator.thumbnailUrl!.isNotEmpty
+              ? ResizeImage.resizeIfNeeded(
+                  96,
+                  96,
+                  CachedNetworkImageProvider(creator.thumbnailUrl!),
+                )
+              : null,
+          child: creator.thumbnailUrl == null || creator.thumbnailUrl!.isEmpty
+              ? const Icon(AppIcons.avatarFallback)
+              : null,
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: $styles.colors.accentFill,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              AppIcons.check,
+              size: 10,
+              color: $styles.colors.onScrim,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _creatorNames(CreatorProfile creator, AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                creator.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: $styles.text.bodyBold.copyWith(
+                  color: $styles.colors.onSurfaceStrong,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const Gap(4),
+            Icon(AppIcons.verified, size: 14, color: $styles.colors.secondary),
+          ],
+        ),
+        Text(
+          l10n.subscribersWeeklyTagline(
+            _formatCount(creator.subscribers ?? 528000, l10n),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: $styles.text.bodySmall.copyWith(
+            color: $styles.colors.onSurfaceVariant,
+            fontSize: 11,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 复制 UP 主空间页链接。
+  ///
+  /// 只读客户端不拉起外部浏览器（没有 url_launcher 依赖），复制的链接和简介里
+  /// 的站外链接走同一条路：写进剪贴板，由用户自己粘到浏览器。
+  Widget _copyCreatorLinkButton(
+    BuildContext context,
+    AppLocalizations l10n,
+    CreatorProfile creator,
+  ) {
+    return IconButton(
+      tooltip: l10n.copyCreatorLink,
+      iconSize: 18,
+      icon: Icon(AppIcons.copy, color: $styles.colors.onSurfaceVariant),
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        unawaited(
+          Clipboard.setData(
+            ClipboardData(text: 'https://space.bilibili.com/${creator.id}'),
+          ),
+        );
+        messenger?.showSnackBar(
+          SnackBar(
+            content: Text(l10n.trackCopiedToClipboard),
+            duration: $styles.times.fast,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _followButton(
+    BuildContext context,
+    AppLocalizations l10n,
+    CreatorProfile creator,
+    bool isSubscribed,
+  ) {
+    return Tooltip(
+      message: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
+      child: Semantics(
+        button: true,
+        selected: isSubscribed,
+        excludeSemantics: true,
+        label: isSubscribed
+            ? l10n.followingCreatorNamed(creator.name)
+            : l10n.followCreatorNamed(creator.name),
+        tooltip: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
+        },
+        child: AnimatedContainer(
+          duration: Motion.standard,
+          curve: Motion.easingStandard,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSubscribed
+                  ? $styles.colors.outline.withValues(alpha: 0.3)
+                  : $styles.colors.accentFill,
+              foregroundColor: isSubscribed
+                  ? $styles.colors.onSurface
+                  : $styles.colors.onScrim,
+              elevation: 0,
+              padding: EdgeInsets.symmetric(
+                horizontal: $styles.insets.xs,
+                vertical: $styles.insets.xxs,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular($styles.corners.lg),
+              ),
             ),
             onPressed: () {
               HapticFeedback.lightImpact();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.visitCreatorHome),
-                  duration: $styles.times.fast,
-                ),
-              );
+              context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
             },
-          ),
-          Tooltip(
-            message: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
-            child: Semantics(
-              button: true,
-              selected: isSubscribed,
-              excludeSemantics: true,
-              label: isSubscribed
-                  ? l10n.followingCreatorNamed(creator.name)
-                  : l10n.followCreatorNamed(creator.name),
-              tooltip: isSubscribed ? l10n.unfollowCreator : l10n.followCreator,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                context.read<VideoBloc>().add(const ToggleCreatorSubscribe());
-              },
-              child: AnimatedContainer(
-                duration: Motion.standard,
-                curve: Motion.easingStandard,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isSubscribed
-                        ? $styles.colors.outline.withValues(alpha: 0.3)
-                        : $styles.colors.accentFill,
-                    foregroundColor: isSubscribed
-                        ? $styles.colors.onSurface
-                        : $styles.colors.onScrim,
-                    elevation: 0,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: $styles.insets.xs,
-                      vertical: $styles.insets.xxs,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular($styles.corners.lg),
-                    ),
-                  ),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    context.read<VideoBloc>().add(
-                      const ToggleCreatorSubscribe(),
-                    );
-                  },
-                  icon: AnimatedSwitcher(
-                    duration: Motion.standard,
-                    switchInCurve: Motion.easingEmphasized,
-                    switchOutCurve: Motion.easingDecelerate,
-                    transitionBuilder: (child, animation) =>
-                        ScaleTransition(scale: animation, child: child),
-                    child: Icon(
-                      isSubscribed ? AppIcons.check : AppIcons.add,
-                      key: ValueKey(isSubscribed),
-                      size: 16,
-                    ),
-                  ),
-                  label: Text(
-                    isSubscribed ? l10n.following : l10n.follow,
-                    style: $styles.text.btn.copyWith(fontSize: 12),
-                  ),
-                ),
+            icon: AnimatedSwitcher(
+              duration: Motion.standard,
+              switchInCurve: Motion.easingEmphasized,
+              switchOutCurve: Motion.easingDecelerate,
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
+              child: Icon(
+                isSubscribed ? AppIcons.check : AppIcons.add,
+                key: ValueKey(isSubscribed),
+                size: 16,
               ),
             ),
+            label: Text(
+              isSubscribed ? l10n.following : l10n.follow,
+              style: $styles.text.btn.copyWith(fontSize: 12),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

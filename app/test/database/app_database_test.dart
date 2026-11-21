@@ -297,6 +297,81 @@ void main() {
       expect(rows.single.media.url, 'https://example.com/video');
     });
 
+    test('backfills title and cover when metadata arrives later', () async {
+      final historyDao = db.mediaHistoryDao;
+
+      // 进度读取先于详情：第一调用只拿得到 id，行里只能先放原始 id。
+      final mediaId = await historyDao.getOrCreateMediaId(
+        'bilibili',
+        'BV_META',
+        Media.typeVideo,
+      );
+      var rows = await historyDao.getHistoryWithMedia();
+      expect(rows.single.media.title, 'BV_META');
+      expect(rows.single.media.thumbnailUrl, null);
+
+      // 详情到达后补写元数据，历史列表才能显示标题与封面。
+      expect(
+        await historyDao.getOrCreateMediaId(
+          'bilibili',
+          'BV_META',
+          Media.typeVideo,
+          title: 'A real title',
+          url: 'https://www.bilibili.com/video/BV_META',
+          thumbnailUrl: 'https://example.com/cover.jpg',
+          creatorProfileName: 'UP',
+          creatorProfileId: '42',
+        ),
+        mediaId,
+      );
+
+      rows = await historyDao.getHistoryWithMedia();
+      expect(rows, hasLength(1));
+      expect(rows.single.media.title, 'A real title');
+      expect(rows.single.media.thumbnailUrl, 'https://example.com/cover.jpg');
+      expect(rows.single.media.creatorProfileName, 'UP');
+    });
+
+    test('findMediaId never creates a history row', () async {
+      final historyDao = db.mediaHistoryDao;
+
+      // Given 一条还没被看过的视频。
+      // When 只用读路径查它（打开视频页恢复进度走的就是这条路径）。
+      final missing = await historyDao.findMediaId(
+        'bilibili',
+        'BV_UNSEEN',
+        Media.typeVideo,
+      );
+
+      // Then 查不到，而且没有凭空多出一条只有原始 id 的历史记录。
+      // `isNull` 在 drift 与 matcher 之间同名冲突，这里用字面量 null。
+      expect(missing, null);
+      expect(await historyDao.getHistoryWithMedia(), isEmpty);
+    });
+
+    test('findMediaId returns the id created by the write path', () async {
+      final historyDao = db.mediaHistoryDao;
+
+      // Given 一条已经写过进度的视频。
+      final created = await historyDao.getOrCreateMediaId(
+        'bilibili',
+        'BV_SEEN',
+        Media.typeVideo,
+        title: 'Seen',
+      );
+
+      // When 读路径查同一个 (sourceId, originalId, type)。
+      final found = await historyDao.findMediaId(
+        'bilibili',
+        'BV_SEEN',
+        Media.typeVideo,
+      );
+
+      // Then 拿到同一行，历史记录数不变。
+      expect(found, created);
+      expect(await historyDao.getHistoryWithMedia(), hasLength(1));
+    });
+
     test(
       'deleteHistoryForMediaKey removes only the matching history row',
       () async {

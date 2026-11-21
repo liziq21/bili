@@ -250,6 +250,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.settings,
           builder: (context, _) => SettingScreen(
+            onBackClick: () => context.pop(),
             onSectionSelected: (section) =>
                 context.push<void>(switch (section) {
                   SettingsSection.player => Routes.settingsPlayer,

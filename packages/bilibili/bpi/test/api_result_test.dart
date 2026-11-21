@@ -48,6 +48,32 @@ void main() {
     );
   });
 
+  test('reports a GAIA challenge as risk control, not a decode failure', () {
+    // 风控挑战的信封也是 code: 0，data 里只有 v_voucher。按解码失败处理会把
+    // 「请求被拦」说成「数据格式变了」，排查时找错方向。
+    expect(
+      () => ApiResult<Map<String, dynamic>>.fromJson({
+        'code': 0,
+        'message': '0',
+        'data': {'v_voucher': 'voucher-token'},
+      }, decode),
+      throwsA(isA<BiliRiskControlException>()),
+    );
+  });
+
+  test('decodes data that carries a v_voucher next to real results', () {
+    final result = ApiResult<Map<String, dynamic>>.fromJson({
+      'code': 0,
+      'message': '0',
+      'data': {
+        'v_voucher': 'voucher-token',
+        'result': {'value': 1},
+      },
+    }, decode);
+
+    expect(result, isA<Ok<Map<String, dynamic>>>());
+  });
+
   test('rejects responses without a numeric code', () {
     expect(
       () => ApiResult<Map<String, dynamic>>.fromJson({

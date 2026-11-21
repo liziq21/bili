@@ -170,6 +170,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get librarySearchHistoryRetentionForever => 'Forever';
 
   @override
+  String get danmakuSettingsSubtitle =>
+      'Opacity, font size, duration and how many rows pinned at the top and bottom';
+
+  @override
+  String get clearImageCache => 'Clear image cache';
+
+  @override
+  String get clearImageCacheSubtitle =>
+      'Frees decoded images held in memory; covers reload when shown again';
+
+  @override
+  String get imageCacheCleared => 'Image cache cleared';
+
+  @override
   String get settingsAdvanced => 'Advanced';
 
   @override
@@ -1439,6 +1453,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackInstrumental => 'Instrumental track';
+
+  @override
+  String get copyCreatorLink => 'Copy creator page link';
 
   @override
   String get trackCopiedToClipboard => 'Copied to clipboard';

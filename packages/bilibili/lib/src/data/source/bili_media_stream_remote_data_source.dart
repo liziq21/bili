@@ -75,6 +75,27 @@ final class BiliMediaStreamRemoteDataSource({
     }
   }
 
+  /// 第三方镜像对开放式 Range 请求（`Range: bytes=0-`，mpv/ffmpeg 取流时的
+  /// 默认写法）返回 403，只有带上界的分片请求才能取到数据。playurl 每次响应
+  /// 的 baseUrl/backupUrl 顺序都会轮换，镜像被排在首位时整条 EDL 打不开，
+  /// 表现为「视频加载失败」。自有 CDN 接受开放式 Range，故优先选它。
+  static const List<String> _mirrorHostSuffixes = ['akamaized.net'];
+
+  /// 从一条流地址候选中取第一个可用的非镜像地址。
+  String _preferredUrl(MediaStreamItem item) {
+    final candidates = item.playUrls.where((url) => url.isNotEmpty).toList();
+    if (candidates.isEmpty) return '';
+    return candidates.firstWhere(
+      (url) => !_isMirrorHost(url),
+      orElse: () => candidates.first,
+    );
+  }
+
+  bool _isMirrorHost(String url) {
+    final host = Uri.tryParse(url)?.host ?? '';
+    return _mirrorHostSuffixes.any(host.endsWith);
+  }
+
   Map<String, String> get _headers => {
     'User-Agent': browserUserAgent,
     'Referer': 'https://www.bilibili.com/',
@@ -98,14 +119,8 @@ final class BiliMediaStreamRemoteDataSource({
     final video = _pickVideo(videoItems, preferHeight, preferStreamId);
     final audio = _pickAudio(audioItems);
 
-    final rawVideoUrl = video.playUrls.firstWhere(
-      (candidate) => candidate.isNotEmpty,
-      orElse: () => '',
-    );
-    final rawAudioUrl = audio.playUrls.firstWhere(
-      (candidate) => candidate.isNotEmpty,
-      orElse: () => '',
-    );
+    final rawVideoUrl = _preferredUrl(video);
+    final rawAudioUrl = _preferredUrl(audio);
     final videoUrl = normalizeBiliUrl(rawVideoUrl);
     final audioUrl = normalizeBiliUrl(rawAudioUrl);
 

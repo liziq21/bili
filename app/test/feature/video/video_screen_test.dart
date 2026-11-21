@@ -181,6 +181,7 @@ void main() {
       WidgetTester tester, {
       required MediaPlaybackController controller,
       String videoId = 'BV1resume',
+      VideoDetailRepository repository = const _ReadyStreamRepository(),
     }) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1.0;
@@ -190,7 +191,7 @@ void main() {
         Provider<MediaSource>.value(
           value: const _TestMediaSource(),
           child: RepositoryProvider<VideoDetailRepository>.value(
-            value: const _ReadyStreamRepository(),
+            value: repository,
             child: RepositoryProvider<AppDatabase>.value(
               value: db,
               child: RepositoryProvider<MediaHistoryDao>.value(
@@ -230,6 +231,36 @@ void main() {
       expect(fake.seekCalls.single, const Duration(seconds: 42));
       // seek 只该发生一次：续播位置用完即清零，重建不该再跳。
       expect(controller.restorePositionSeconds, 0);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      addTearDown(controller.dispose);
+    });
+
+    testWidgets('records title and cover once the detail arrives', (
+      tester,
+    ) async {
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+
+      await pumpPage(
+        tester,
+        controller: controller,
+        repository: const _TitledVideoRepository(),
+      );
+      // 详情到达后写库是异步的：让真实 I/O 落地，再断言。
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+
+      final rows = await tester.runAsync(
+        () => db.mediaHistoryDao.getHistoryWithMedia(),
+      );
+      expect(rows, hasLength(1));
+      expect(rows!.single.media.title, 'A real title');
+      expect(rows.single.media.thumbnailUrl, 'https://example.com/cover.jpg');
+      expect(rows.single.media.creatorProfileName, 'UP');
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -293,6 +324,48 @@ class const _ReadyStreamRepository() implements VideoDetailRepository {
   @override
   Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
       Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool, Exception>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.error(Exception('unused'));
+
+  @override
+  Future<Result<MediaStream, Exception>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  }) async => Result.success(
+    MediaStream(videoUrl: 'https://example.com/$id.m4s', height: 1080),
+  );
+}
+
+class const _TitledVideoRepository() implements VideoDetailRepository {
+  @override
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async =>
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: id,
+            title: 'A real title',
+            url: 'https://www.bilibili.com/video/$id',
+            thumbnailUrl: 'https://example.com/cover.jpg',
+            creatorProfileName: 'UP',
+            creatorProfileId: '42',
+          ),
+        ),
+      );
 
   @override
   Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>

@@ -12,8 +12,9 @@ part 'search_result_state.dart';
 
 class SearchResultBloc<T>({
   required final SearchContentsRepository<T> searchContentsRepository,
+  required final String query,
 }) extends Bloc<SearchResultEvent, SearchResultState<T>> {
-  this : super(SearchResultState(pagingState: .new())) {
+  this : super(SearchResultState(query: query, pagingState: .new())) {
     on<FetchNextPage>(_fetchNextPage);
   }
 
