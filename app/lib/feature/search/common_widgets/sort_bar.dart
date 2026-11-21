@@ -5,12 +5,14 @@ import 'package:youtube/youtube.dart';
 class const SortBar({
   super.key,
   required final List<SortOption> sortOptions,
+  final SortOption? current,
   final void Function(SortOption?)? onChanged,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    if (sortOptions.isEmpty) return const SizedBox.shrink();
     return DropdownButton<SortOption>(
-      value: sortOptions.first,
+      value: current ?? sortOptions.first,
       onChanged: onChanged,
       items: sortOptions.map((option) {
         return DropdownMenuItem<SortOption>(

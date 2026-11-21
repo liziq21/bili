@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 81 |
-| widget | 57 |
+| unit | 83 |
+| widget | 58 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **161** |
+| **合计** | **164** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（81）
+## unit（83）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -48,6 +48,8 @@
 - `app/test/feature/media_library/media_history_cubit_test.dart`
 - `app/test/feature/notification/feed_opened_routing_test.dart`
 - `app/test/feature/notification/feed_update_notifier_test.dart`
+- `app/test/feature/search/search_filter_preferences_test.dart`
+- `app/test/feature/search/search_result_bloc_test.dart`
 - `app/test/feature/search_state_test.dart`
 - `app/test/feature/setting/channel_tab_settings_test.dart`
 - `app/test/feature/space/channel_videos_cubit_test.dart`
@@ -108,7 +110,7 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 
-## widget（57）
+## widget（58）
 
 - `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/danmaku_settings_screen_test.dart`
@@ -134,6 +136,7 @@
 - `app/test/feature/playlist/playlist_screen_test.dart`
 - `app/test/feature/player_settings_screen_test.dart`
 - `app/test/feature/search/app_search_anchor_history_test.dart`
+- `app/test/feature/search/search_result_screen_filters_test.dart`
 - `app/test/feature/search/search_result_screen_test.dart`
 - `app/test/feature/search_result_test.dart`
 - `app/test/feature/search_screen_test.dart`

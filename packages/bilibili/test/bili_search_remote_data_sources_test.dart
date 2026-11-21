@@ -6,6 +6,7 @@ import 'package:model/model.dart';
 
 class MockNetworkSearchDataSource() implements NetworkSearchDataSource {
   String? lastCapturedQuery;
+  Map<Symbol, dynamic>? lastNamedArguments;
 
   static final _emptyResult = NetworkSearchResult.fromJson(const {
     'page': 1,
@@ -20,6 +21,7 @@ class MockNetworkSearchDataSource() implements NetworkSearchDataSource {
     if (invocation.positionalArguments.isNotEmpty) {
       lastCapturedQuery = invocation.positionalArguments.first as String;
     }
+    lastNamedArguments = invocation.namedArguments;
     return Future.value(_emptyResult);
   }
 }
@@ -46,6 +48,33 @@ void main() {
         expect(result, isA<Success<Page<VideoModel>, Exception>>());
         expect(mockNetwork.lastCapturedQuery, equals('flutter'));
       });
+
+      test('passes the selected sort and duration to the network', () async {
+        await dataSource.searchVideo(
+          SearchQuery(
+            query: 'flutter',
+            sortOption: PhotoOrVideoSearchSort.pubdate,
+            filters: [
+              const VideoDurationFilter().copyWith(
+                selection: VideoDurationFilterOption.tenTo30Minutes,
+              ),
+            ],
+          ),
+        );
+
+        expect(mockNetwork.lastNamedArguments?[#order], 'pubdate');
+        expect(mockNetwork.lastNamedArguments?[#duration], '2');
+      });
+
+      test(
+        'omits the duration parameter for the all-duration option',
+        () async {
+          await dataSource.searchVideo(const SearchQuery(query: 'flutter'));
+
+          expect(mockNetwork.lastNamedArguments?[#order], isNull);
+          expect(mockNetwork.lastNamedArguments?[#duration], isNull);
+        },
+      );
 
       test(
         'returns empty Page when search video query is empty or whitespace',

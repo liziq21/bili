@@ -94,7 +94,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // English fallback labels should be rendered when AppLocalizations is null
-      expect(find.text('Creators'), findsOneWidget);
+      expect(find.text('Channels'), findsOneWidget);
       expect(find.text('Videos'), findsOneWidget);
       expect(find.text('creatorProfile'), findsNothing);
     },

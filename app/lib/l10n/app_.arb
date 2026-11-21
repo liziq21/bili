@@ -10,7 +10,25 @@
     "description": "Bottom navigation - Home tab"
   },
   "searchResultTypeAll": "All",
+  "@searchResultTypeAll": {
+    "description": "Search result category - all results"
+  },
   "searchResultTypeVideo": "Video",
+  "@searchResultTypeVideo": {
+    "description": "Search result category - videos"
+  },
+  "searchResultTypeChannel": "Channels",
+  "@searchResultTypeChannel": {
+    "description": "Search result category - channels"
+  },
+  "searchResultTypeLive": "Live",
+  "@searchResultTypeLive": {
+    "description": "Search result category - live rooms"
+  },
+  "searchResultTypePlaylist": "Playlists",
+  "@searchResultTypePlaylist": {
+    "description": "Search result category - playlists"
+  },
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"

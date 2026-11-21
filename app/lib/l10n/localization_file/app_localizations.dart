@@ -110,17 +110,35 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get navHome;
 
-  /// No description provided for @searchResultTypeAll.
+  /// Search result category - all results
   ///
   /// In en, this message translates to:
   /// **'All'**
   String get searchResultTypeAll;
 
-  /// No description provided for @searchResultTypeVideo.
+  /// Search result category - videos
   ///
   /// In en, this message translates to:
   /// **'Video'**
   String get searchResultTypeVideo;
+
+  /// Search result category - channels
+  ///
+  /// In en, this message translates to:
+  /// **'Channels'**
+  String get searchResultTypeChannel;
+
+  /// Search result category - live rooms
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get searchResultTypeLive;
+
+  /// Search result category - playlists
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get searchResultTypePlaylist;
 
   /// Bottom navigation - Library tab
   ///

@@ -22,6 +22,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchResultTypeVideo => 'Video';
 
   @override
+  String get searchResultTypeChannel => 'Channels';
+
+  @override
+  String get searchResultTypeLive => 'Live';
+
+  @override
+  String get searchResultTypePlaylist => 'Playlists';
+
+  @override
   String get navLibrary => 'Library';
 
   @override

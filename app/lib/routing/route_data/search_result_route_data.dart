@@ -49,6 +49,14 @@ class const SearchRouteData({
                   query: keyword,
                 ),
               ),
+            if (context.read<LiveRoomSearchRepository?>()
+                case final searchContentsRepo?)
+              BlocProvider<SearchResultBloc<LiveRoomModel>>(
+                create: (context) => SearchResultBloc<LiveRoomModel>(
+                  searchContentsRepository: searchContentsRepo,
+                  query: keyword,
+                ),
+              ),
           ],
           child: SearchResultScreen(
             query: keyword,
@@ -56,6 +64,7 @@ class const SearchRouteData({
             source: effectiveSource.id,
             onVideo: context.defaultNavigateToVideo,
             onSpace: context.defaultNavigateToSpace,
+            onLive: context.defaultNavigateToLive,
           ),
         ),
       ),

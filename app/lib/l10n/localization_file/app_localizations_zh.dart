@@ -22,6 +22,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchResultTypeVideo => '视频';
 
   @override
+  String get searchResultTypeChannel => '频道';
+
+  @override
+  String get searchResultTypeLive => '直播';
+
+  @override
+  String get searchResultTypePlaylist => '播放列表';
+
+  @override
   String get navLibrary => 'Library';
 
   @override

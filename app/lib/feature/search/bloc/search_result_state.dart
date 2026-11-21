@@ -1,11 +1,6 @@
 part of 'search_result_bloc.dart';
 
-// sealed class SearchResultState<T> extends Equatable {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// final class SearchResultStateInitial extends SearchResultState;
+const Object _unset = Object();
 
 final class const SearchResultState<T>({
   required final String query,
@@ -48,13 +43,15 @@ final class const SearchResultState<T>({
     String? query,
     List<FilterGroup>? filters,
     List<SortOption>? sortOption,
-    SortOption? currentSort,
+    Object? currentSort = _unset,
     PagingState<int, T>? pagingState,
   }) => SearchResultState<T>(
     query: query ?? this.query,
     filters: filters ?? this.filters,
     sortOption: sortOption ?? this.sortOption,
-    currentSort: currentSort ?? this.currentSort,
+    currentSort: identical(currentSort, _unset)
+        ? this.currentSort
+        : currentSort as SortOption?,
     pagingState: pagingState ?? this.pagingState,
   );
 }
