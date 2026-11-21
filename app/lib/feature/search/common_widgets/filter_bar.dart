@@ -12,6 +12,7 @@ class const FilterBar({
   super.key,
   required final List<FilterGroup> filters,
   required final FilterChangedCallback onChanged,
+  final List<FilterGroup>? defaults,
   final String? title,
 }) extends StatelessWidget {
   @override
@@ -27,8 +28,10 @@ class const FilterBar({
   }
 
   void _showFilterBottomSheet(BuildContext context, String effectiveTitle) {
-    // 深拷贝一份数据，避免直接修改外部原始数据
-    // 如果没有点击确定，外部数据不应改变
+    // 深拷贝一份数据，避免直接修改 bloc state 里的列表。
+    final working = List<FilterGroup>.of(filters);
+    final resetValues = defaults ?? filters;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -53,18 +56,18 @@ class const FilterBar({
                       child: ListView.builder(
                         controller: scrollController,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: filters.length,
+                        itemCount: working.length,
                         itemBuilder: (context, index) {
                           return FilterGroupSection(
-                            group: filters[index],
+                            group: working[index],
                             onChanged: (f) => setModalState(() {
-                              filters[index] = f;
+                              working[index] = f;
                             }), // 刷新面板
                           );
                         },
                       ),
                     ),
-                    _buildFooter(context),
+                    _buildFooter(context, working, resetValues),
                   ],
                 );
               },
@@ -101,7 +104,11 @@ class const FilterBar({
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(
+    BuildContext context,
+    List<FilterGroup> working,
+    List<FilterGroup> resetValues,
+  ) {
     final l10n = AppLocalizations.of(context);
     return SafeArea(
       top: false,
@@ -112,7 +119,7 @@ class const FilterBar({
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  // 实现重置逻辑
+                  onChanged(List.unmodifiable(resetValues));
                   Navigator.pop(context);
                 },
                 child: Text(l10n?.reset ?? 'Reset'),
@@ -122,7 +129,7 @@ class const FilterBar({
             Expanded(
               child: FilledButton(
                 onPressed: () {
-                  onChanged(filters);
+                  onChanged(List.unmodifiable(working));
                   Navigator.pop(context);
                 },
                 child: Text(l10n?.confirm ?? 'Confirm'),

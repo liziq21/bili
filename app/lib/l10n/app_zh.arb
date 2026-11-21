@@ -10,7 +10,25 @@
     "description": "Bottom navigation - Home tab"
   },
   "searchResultTypeAll": "全部",
+  "@searchResultTypeAll": {
+    "description": "Search result category - all results"
+  },
   "searchResultTypeVideo": "视频",
+  "@searchResultTypeVideo": {
+    "description": "Search result category - videos"
+  },
+  "searchResultTypeChannel": "频道",
+  "@searchResultTypeChannel": {
+    "description": "Search result category - channels"
+  },
+  "searchResultTypeLive": "直播",
+  "@searchResultTypeLive": {
+    "description": "Search result category - live rooms"
+  },
+  "searchResultTypePlaylist": "播放列表",
+  "@searchResultTypePlaylist": {
+    "description": "Search result category - playlists"
+  },
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"

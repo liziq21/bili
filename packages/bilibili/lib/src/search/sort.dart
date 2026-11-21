@@ -18,12 +18,12 @@ enum ArticleSearchSort(@override final String label) implements SortOption {
 
 enum PhotoOrVideoSearchSort(@override final String label)
     implements SortOption {
-  totalrank('totalrank'),
-  click('click'),
-  dm('dm'),
-  pubdate('pubdate'),
-  scores('scores'),
-  stow('stow');
+  totalrank('综合'),
+  click('最多播放'),
+  dm('最多弹幕'),
+  pubdate('最新发布'),
+  scores('最多评论'),
+  stow('最多收藏');
 
   @override
   String get value => name;

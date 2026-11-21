@@ -273,6 +273,12 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     30,
   );
 
+  /// 按服务源记忆的搜索结果筛选与排序（JSON）。
+  ///
+  /// 每个服务源独立保存，避免 B 站的中文筛选项套到 YouTube 的 InnerTube
+  /// 参数上。
+  static const searchFilters = PreferencesKey<String>._('SEARCH_FILTERS', '{}');
+
   /// Feed 更新通知阈值：当检测到的新条目数 ≥ 该值时触发通知。
   ///
   /// 设为 0 表示完全关闭该通知。默认 3。
