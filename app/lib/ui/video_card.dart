@@ -131,6 +131,16 @@ class const VideoCard({
       l10n?.commaSeparator ?? ',',
     );
 
+    // `excludeSemantics: true` drops the InkWell's own semantics, so the tap
+    // action has to be declared on the Semantics node too; otherwise the card
+    // is announced as a button that TalkBack/VoiceOver cannot activate.
+    final handleTap = onTap == null
+        ? null
+        : () {
+            HapticFeedback.lightImpact();
+            onTap!();
+          };
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Tooltip(
@@ -139,14 +149,10 @@ class const VideoCard({
           button: true,
           enabled: onTap != null,
           label: semanticLabel,
+          onTap: handleTap,
           excludeSemantics: true,
           child: InkWell(
-            onTap: onTap != null
-                ? () {
-                    HapticFeedback.lightImpact();
-                    onTap!();
-                  }
-                : null,
+            onTap: handleTap,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

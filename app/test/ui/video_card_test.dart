@@ -50,6 +50,73 @@ void main() {
     },
   );
 
+  testWidgets('VideoCard default variant exposes a screen-reader tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    var tapCount = 0;
+    final video = VideoModel(
+      id: 'BV1semanticsTap',
+      title: 'Semantics tap title',
+      url: 'https://example.com/video/semantics',
+      thumbnailUrl: 'https://example.com/thumb.jpg',
+      viewCount: 100,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            height: 250,
+            child: VideoCard(videoInfoBase: video, onTap: () => tapCount++),
+          ),
+        ),
+      ),
+    );
+
+    final node = tester.getSemantics(find.byType(VideoCard));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(tapCount, 1);
+    semantics.dispose();
+    await clearImageCacheDuringTest(tester);
+  });
+
+  testWidgets('VideoCard without onTap exposes no screen-reader tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final video = VideoModel(
+      id: 'BV1semanticsDisabled',
+      title: 'Semantics disabled title',
+      url: 'https://example.com/video/disabled',
+      thumbnailUrl: 'https://example.com/thumb.jpg',
+      viewCount: 100,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            height: 250,
+            child: VideoCard(videoInfoBase: video),
+          ),
+        ),
+      ),
+    );
+
+    final node = tester.getSemantics(find.byType(VideoCard));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+
+    semantics.dispose();
+    await clearImageCacheDuringTest(tester);
+  });
+
   testWidgets('VideoCard feed variant renders badge and creator info', (
     WidgetTester tester,
   ) async {

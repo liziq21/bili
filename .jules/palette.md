@@ -87,3 +87,9 @@
 **Learning:** Overlay control chips in the video player (`PlaybackSpeedChip`, `QualityPickerChip`, `SleepTimerChip`) wrapped `InkWell` directly without `Semantics` or `Tooltip`, causing screen readers (TalkBack/VoiceOver) to read raw text values (e.g. "1x", "1080P", "Timer") without button roles or contextual description (e.g., "Speed 1x"), while taps lacked tactile response. Wrapping chip contents with `Tooltip`, `Semantics(button: true, label: '$title $value', excludeSemantics: true)`, and adding `HapticFeedback.lightImpact()` on tap creates a clear, tactile, and screen-reader accessible control interface.
 
 **Action:** Always wrap video player control chips with explicit `Tooltip`, state-aware `Semantics(button: true, label: '$title $value', excludeSemantics: true)`, and `HapticFeedback.lightImpact()` on selection trigger.
+
+## 2026-11-21 - `Semantics(excludeSemantics: true)` 会丢掉子节点的点击动作
+
+**Learning:** `Semantics(button: true, label: ..., excludeSemantics: true, child: InkWell(onTap: ...))` 只保留本节点的 label / flags，子节点的语义整棵被丢弃，其中包含 InkWell 提供的 `SemanticsAction.tap`。实测（`tester.getSemantics(...)` 后 `node.owner!.performAction(node.id, SemanticsAction.tap)`）：该节点 flags 含 `isButton`，但 `hasAction(tap) == false`，TalkBack / VoiceOver 无法激活；同一 `VideoCard` 未加 `excludeSemantics` 的 feed 变体则能激活，说明差异来自该 flag 而非 InkWell 本身。修复是把同一个点击回调同时交给 `Semantics.onTap` 与 `InkWell.onTap`；`onTap == null` 时两者都传 null，避免禁用卡片被当成可激活按钮。
+
+**Action:** 用 `excludeSemantics: true` 包住可点击子组件时，必须在同一个 `Semantics` 上显式提供 `onTap`。`VideoCard` 默认变体已修复并由 `app/test/ui/video_card_test.dart` 锁定；仓库内其他同样写法的控件未在本次改动中一并处理，见对应 PR 报告。
