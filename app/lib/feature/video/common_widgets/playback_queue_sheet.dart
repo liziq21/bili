@@ -4,6 +4,7 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
@@ -124,7 +125,7 @@ class _PlaybackQueueSheetState() extends State<PlaybackQueueSheet> {
                         dragHandle: ReorderableDragStartListener(
                           index: index,
                           child: Icon(
-                            Icons.drag_handle,
+                            AppIcons.dragHandle,
                             color: $styles.colors.onSurfaceVariant,
                           ),
                         ),
@@ -185,7 +186,7 @@ class const _QueueHeader({
       ),
       child: Row(
         children: [
-          Icon(Icons.queue_music, color: $styles.colors.accentFill),
+          Icon(AppIcons.queue, color: $styles.colors.accentFill),
           SizedBox(width: $styles.insets.xs),
           Expanded(
             child: Column(
@@ -214,7 +215,7 @@ class const _QueueHeader({
           IconButton(
             tooltip: l10n.cancel,
             onPressed: onClose,
-            icon: const Icon(Icons.close),
+            icon: const Icon(AppIcons.close),
           ),
         ],
       ),
@@ -231,9 +232,9 @@ class const _QueueHeader({
 
   IconData _modeIcon(PlaybackQueueMode mode) {
     return switch (mode) {
-      PlaybackQueueMode.none => Icons.repeat,
-      PlaybackQueueMode.single => Icons.repeat_one,
-      PlaybackQueueMode.loop => Icons.repeat,
+      PlaybackQueueMode.none => AppIcons.repeatOff,
+      PlaybackQueueMode.single => AppIcons.repeatOne,
+      PlaybackQueueMode.loop => AppIcons.repeatQueue,
     };
   }
 }
@@ -293,7 +294,7 @@ class const _QueueItemTile({
               IconButton(
                 tooltip: l10n.removeFromQueue,
                 onPressed: onRemove,
-                icon: const Icon(Icons.remove_circle_outline),
+                icon: const Icon(AppIcons.removeCircle),
               ),
             SizedBox(width: 40, child: Center(child: dragHandle)),
           ],
@@ -311,13 +312,13 @@ class const _QueueThumbnail({
   Widget build(BuildContext context) {
     final thumbnailUrl = item.thumbnailUrl;
     final image = thumbnailUrl == null || thumbnailUrl.isEmpty
-        ? const Icon(Icons.play_circle_outline)
+        ? const Icon(AppIcons.playCircle)
         : CachedNetworkImage(
             imageUrl: thumbnailUrl,
             fit: BoxFit.cover,
             memCacheWidth: 160,
             errorBuilder: (context, url, error) =>
-                const Icon(Icons.play_circle_outline),
+                const Icon(AppIcons.playCircle),
           );
 
     return ClipRRect(
@@ -343,7 +344,7 @@ class const _QueueThumbnail({
                   right: 2,
                   bottom: 2,
                   child: Icon(
-                    Icons.equalizer,
+                    AppIcons.equalizer,
                     size: 14,
                     color: $styles.colors.accentFill,
                   ),
@@ -366,7 +367,7 @@ class const _EmptyQueue({required final String message})
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.queue_music_outlined,
+            AppIcons.queue,
             size: 40,
             color: $styles.colors.onSurfaceVariant,
           ),

@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../design/motion.dart';
 
 class ToggleSwitchComponent extends StatefulWidget {
@@ -209,11 +210,7 @@ class _ToggleSwitchComponentState() extends State<ToggleSwitchComponent> {
       _ToggleSwitchExecutionState.successful => Padding(
         key: const ValueKey('toggle-state-success'),
         padding: const EdgeInsets.symmetric(horizontal: 1),
-        child: Icon(
-          Icons.check_outlined,
-          size: 22,
-          color: theme.colorScheme.primary,
-        ),
+        child: Icon(AppIcons.check, size: 22, color: theme.colorScheme.primary),
       ),
     };
   }

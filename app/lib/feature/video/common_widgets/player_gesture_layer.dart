@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../main.dart';
 import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
@@ -410,7 +411,7 @@ class const _VerticalIndicator({required final _VerticalDrag vertical})
     final percent = (vertical.value * 100).round();
     final icon = vertical.isVolume
         ? _volumeIcon(vertical.value)
-        : Icons.brightness_6_outlined;
+        : AppIcons.brightness;
 
     return Align(
       alignment: Alignment.center,
@@ -447,9 +448,9 @@ class const _VerticalIndicator({required final _VerticalDrag vertical})
   }
 
   IconData _volumeIcon(double value) {
-    if (value <= 0) return Icons.volume_off;
-    if (value < 0.5) return Icons.volume_down;
-    return Icons.volume_up;
+    if (value <= 0) return AppIcons.volumeOff;
+    if (value < 0.5) return AppIcons.volumeLow;
+    return AppIcons.volumeHigh;
   }
 }
 
@@ -473,9 +474,7 @@ class const _SkipHint({required final Duration delta}) extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isForward
-                  ? Icons.fast_forward_rounded
-                  : Icons.fast_rewind_rounded,
+              isForward ? AppIcons.fastForward : AppIcons.fastRewind,
               color: $styles.colors.onScrim,
               size: 28,
             ),

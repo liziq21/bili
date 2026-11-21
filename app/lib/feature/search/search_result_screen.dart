@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../../routing/router.dart';
@@ -54,7 +55,7 @@ class const SearchResultScreen({
           ),
           leading: onBackClick != null
               ? IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded),
+                  icon: const Icon(AppIcons.back),
                   tooltip: backTooltip,
                   onPressed: () {
                     HapticFeedback.lightImpact();

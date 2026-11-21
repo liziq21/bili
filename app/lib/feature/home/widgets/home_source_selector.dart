@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../providers/media_sources_provider.dart';
@@ -39,10 +40,7 @@ class const HomeSourceSelector({
           child: DropdownButton<String>(
             value: activeSourceId,
             isDense: true,
-            icon: Icon(
-              Icons.arrow_drop_down,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(AppIcons.dropDown, color: colorScheme.onSurfaceVariant),
             items: [
               for (final source in sources)
                 DropdownMenuItem<String>(

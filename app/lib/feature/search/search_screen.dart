@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../data/model/recent_search_query.dart';
 import '../../data/repository/recent_search_query/recent_search_query_repository.dart';
 import '../../data/repository/search_suggest_repository.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
@@ -192,7 +193,7 @@ class const _RecentSearches({
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
-                      Icons.history_rounded,
+                      AppIcons.history,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     title: Text(q.query),

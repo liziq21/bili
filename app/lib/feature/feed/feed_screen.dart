@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../database/app_database.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
@@ -61,7 +62,7 @@ class const FeedScreen({
           }
           if (!sourceSupportsFeed && state.isEmpty) {
             return FeedStatusView(
-              icon: Icons.rss_feed_rounded,
+              icon: AppIcons.feed,
               message:
                   l10n?.feedUnsupportedTitle ??
                   'This source has no subscription feed',
@@ -75,7 +76,7 @@ class const FeedScreen({
                 children: [
                   SizedBox(height: $styles.insets.xxl),
                   FeedStatusView(
-                    icon: Icons.rss_feed_rounded,
+                    icon: AppIcons.feed,
                     message: l10n?.feedEmptyTitle ?? 'No subscription updates',
                     description: l10n?.feedEmptyDescription,
                   ),

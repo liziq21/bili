@@ -12,6 +12,7 @@ import 'package:model/model.dart';
 
 import '../../../datastore/preferences_data_source.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../design/design.dart';
 import '../../setting/app_settings.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
@@ -321,7 +322,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
                     widget.controller.previous();
                   }
                 : null,
-            icon: Icon(Icons.skip_previous),
+            icon: Icon(AppIcons.skipPrevious),
           ),
           IconButton(
             tooltip: l10n?.nextItem ?? 'Next',
@@ -333,7 +334,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
                     widget.controller.next();
                   }
                 : null,
-            icon: Icon(Icons.skip_next),
+            icon: Icon(AppIcons.skipNext),
           ),
           Gap($styles.insets.xs),
           IconButton(
@@ -356,7 +357,7 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
             color: $styles.colors.onSurfaceVariant,
             onPressed: () =>
                 showPlaybackQueueSheet(context, controller: widget.controller),
-            icon: const Icon(Icons.queue_music),
+            icon: const Icon(AppIcons.queue),
           ),
           const Spacer(),
           if (queueActive)
@@ -397,11 +398,11 @@ class _QueueControlBarState() extends State<_QueueControlBar> {
   IconData _queueModeIcon(PlaybackQueueMode mode) {
     switch (mode) {
       case PlaybackQueueMode.none:
-        return Icons.repeat;
+        return AppIcons.repeatOff;
       case PlaybackQueueMode.single:
-        return Icons.repeat_one;
+        return AppIcons.repeatOne;
       case PlaybackQueueMode.loop:
-        return Icons.repeat;
+        return AppIcons.repeatQueue;
     }
   }
 }
@@ -717,7 +718,7 @@ class const _PlayerControlBar({
       _FullscreenButton(fullscreen: fullscreen, onPressed: onToggleFullscreen),
       if (fullscreen && onMinimize != null)
         _OverlayIconButton(
-          icon: Icons.picture_in_picture_alt,
+          icon: AppIcons.pictureInPicture,
           tooltip: l10n?.minimize ?? 'Minimize',
           onPressed: () {
             HapticFeedback.lightImpact();
@@ -781,7 +782,7 @@ class const _ErrorView({
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.error_outline, color: $styles.colors.onScrim, size: 32),
+          Icon(AppIcons.error, color: $styles.colors.onScrim, size: 32),
           const Gap(8),
           Text(
             category,
@@ -883,7 +884,7 @@ class const _FullscreenButton({
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _OverlayIconButton(
-      icon: fullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
+      icon: fullscreen ? AppIcons.fullscreenExit : AppIcons.fullscreen,
       tooltip: fullscreen
           ? (l10n?.back ?? 'Back')
           : (l10n?.fullscreen ?? 'Fullscreen'),

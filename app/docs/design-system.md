@@ -15,6 +15,7 @@
 | D5 | 亮色色板**重新取值**，接受亮色观感变化；放弃「亮色取值逐字节不变」这一性质 |
 | D6 | DynamicColor 开启时自研 widget 跟随壁纸色相；**同屏出现两种以上不受壁纸色相约束的强调色相属缺陷** |
 | D7 | **服务源无关性** —— 界面与设计系统不得按服务源分支，服务身份色不进设计系统 |
+| D8 | 图标由 `AppIcons` **单一来源**提供；可选中图标按状态分空心 / 实心两套字形 |
 
 ## 2. 条款
 
@@ -100,12 +101,34 @@ DynamicColorBuilder 拿到壁纸色  →  ThemeData.copyWith(colorScheme: dynami
 
 **服务清单的正确落点**是数据 / DI 层：应用配置决定支持哪些服务，这是配置，不是设计系统。按服务名 switch 构造实例同属该层，位置正确。
 
+### R9 —— 图标单一来源
+
+`app/lib/` 内允许引用 `Icons.*` 的文件**只有一个**：`app/lib/design/app_icons.dart`。其余一切图标从 `AppIcons` 取。G3 门禁强制。
+
+`AppIcons` 是**静态常量命名空间**（`static const IconData`），不是 `AppStyle` 的实例成员：图标不随亮度、动态色或屏幕尺寸变化，且必须保持 `const` —— 挂到 `$styles` 上会让所有 `const Icon(...)` 失去编译期常量。
+
+白名单文件内容同样受限：只有 `static const IconData` 字段的初始值可以引用 `Icons.*`；getter、方法、局部变量中的引用一律报出（G3）。新增图标只能改该文件。
+
+### R10 —— 可选中图标的状态区分
+
+可选中 / 可切换的图标必须提供**两套字形**：
+
+| 状态 | 字形 | 命名 |
+|---|---|---|
+| 未选中 / 关闭 | 空心（`_outlined` / `_border_rounded`） | `x` |
+| 选中 / 开启 | 实心（`_rounded`） | `xSelected` |
+
+- `AppNavDestination` 的 `icon` / `selectedIcon` 都必须给出；`NavigationBar` 与 `NavigationRail` 必须分别传入 `icon` / `selectedIcon`。没有空心 / 实心两套字形的图标（如搜索）两个字段同值。
+- 只有一种状态、不可切换的图标（返回、关闭、刷新等）只声明一个常量。
+- 同一屏内不得用同一字形表示两个不同状态（例如播放模式的「关闭」与「循环」）。
+
 ## 3. 目录结构
 
 ```
 app/lib/design/
   brand_palette.dart     # R1 唯一白名单：品牌 fallback 色板 + ColorScheme 构造 + 自有角色取值
   app_colors.dart        # 从 ColorScheme 派生的角色访问器，零硬编码色值
+  app_icons.dart         # R9 图标唯一来源：静态常量命名空间
   app_theme.dart         # 构造 ThemeData
   app_style.dart         # scale / corners / insets / times / text
   contrast.dart          # WCAG 相对亮度、对比度与门槛常量（供测试与调色用）
@@ -131,6 +154,16 @@ app/lib/design/
 `app/test/design/contrast_test.dart` 枚举**受支持的**前景/背景组合（不做笛卡尔积），在亮 / 暗两种亮度下各断言一次，门槛取 `contrast.dart` 的 `aaText` / `aaNonText`。
 
 **G2 必须先于 G1 满额通过。** G1 拦住的是「新增硬编码色」，G2 拦住的是「改了色板但没算对比度」。反序上线会出现门禁全绿而界面仍不可访问。
+
+### G3 —— 图标单一来源
+
+`app/test/design/hardcoded_icon_test.dart` 扫描 `app/lib` 下全部 `.dart` 文件：
+
+- 只有 `lib/design/app_icons.dart` 允许出现 `Icons.*` 引用；
+- 该文件内只放行 `static const IconData` 字段初始值中的引用，getter / 方法 / 局部变量中的引用同样报出；
+- 门禁自带探针自检，证明违规能被报出——扫描器若恒返回空，「迁移已完成」与「扫描器坏了」长得一样。
+
+与 G1 同理，不用 custom_lint，跟着现有 `cd app && flutter test` 走，不新增 CI 步骤。
 
 ### 验证范围声明
 

@@ -2,6 +2,7 @@ import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:youtube/youtube.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import 'filter_chip_item.dart';
 
@@ -120,7 +121,7 @@ class const _DateRangeView({
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.calendar_month, size: 18),
+        icon: const Icon(AppIcons.calendar, size: 18),
         label: Text(label),
         onPressed: () async {
           final picked = await showDateRangePicker(

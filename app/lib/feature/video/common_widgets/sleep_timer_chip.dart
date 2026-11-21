@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 import '../../../datastore/preferences_data_source.dart';
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../setting/app_settings.dart' as settings;
@@ -330,7 +331,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   }) => ListTile(
     title: Text(title),
     trailing: selected
-        ? Icon(Icons.check, color: $styles.colors.accentText)
+        ? Icon(AppIcons.check, color: $styles.colors.accentText)
         : null,
     onTap: () {
       HapticFeedback.selectionClick();

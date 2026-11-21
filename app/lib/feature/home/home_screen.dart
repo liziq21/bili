@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:data/data.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../app_scaffold.dart' show $styles;
 import '../../providers/media_sources_provider.dart';
@@ -60,7 +61,7 @@ class const HomeScreen({
               actions: [
                 IconButton(
                   icon: Icon(
-                    Icons.settings_outlined,
+                    AppIcons.settings,
                     color: colorScheme.onSurfaceVariant,
                   ),
                   tooltip:
@@ -116,7 +117,7 @@ class const HomeScreen({
         SliverFillRemaining(
           hasScrollBody: false,
           child: FeedStatusView(
-            icon: Icons.inbox_rounded,
+            icon: AppIcons.inbox,
             message:
                 AppLocalizations.of(context)
                     ?.sourceNoRecommendations(sourceName) ??
@@ -138,7 +139,7 @@ class const HomeScreen({
         SliverFillRemaining(
           hasScrollBody: false,
           child: FeedStatusView(
-            icon: Icons.inbox_rounded,
+            icon: AppIcons.inbox,
             message:
                 AppLocalizations.of(context)
                     ?.sourceNoRecommendations(sourceName) ??

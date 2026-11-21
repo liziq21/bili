@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../datastore/preferences_data_source.dart';
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
@@ -158,7 +159,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
                           ),
                         ),
                   trailing: _isCurrent(option, fallbackHeight: currentHeight)
-                      ? Icon(Icons.check, color: $styles.colors.accentText)
+                      ? Icon(AppIcons.check, color: $styles.colors.accentText)
                       : null,
                   onTap: () {
                     HapticFeedback.selectionClick();

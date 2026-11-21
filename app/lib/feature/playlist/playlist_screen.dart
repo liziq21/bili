@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 import '../../data/repository/playlist_content_repository.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -106,7 +107,7 @@ class _PlaylistScreenState() extends State<PlaylistScreen> {
                   widget.onBackClick?.call();
                 },
                 tooltip: l10n.back,
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(AppIcons.back),
               ),
         title: Text(l10n.playlistTitle),
       ),
@@ -236,7 +237,7 @@ class const _PlaylistHeader({
                     errorBuilder: (context, url, error) => Container(
                       color: colorScheme.surfaceContainerHighest,
                       child: Icon(
-                        Icons.playlist_play_rounded,
+                        AppIcons.playlistPlay,
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -305,7 +306,7 @@ class const _PlaylistHeader({
                                 color: $styles.colors.onAccentFill,
                               ),
                             )
-                          : const Icon(Icons.download_rounded),
+                          : const Icon(AppIcons.download),
                       label: Text(l10n.playlistFetchAll),
                     ),
                   ),
@@ -337,7 +338,7 @@ class const _PlaylistLoadError({required final VoidCallback onRetry})
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline_rounded, color: $styles.colors.outline),
+            Icon(AppIcons.error, color: $styles.colors.outline),
             SizedBox(height: $styles.insets.xs),
             Text(
               l10n.loadFailedRetryLater,

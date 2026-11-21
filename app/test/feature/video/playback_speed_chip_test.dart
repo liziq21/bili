@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:app/design/design.dart';
 
 /// 假播放器：只实现倍速路径需要的方法。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
@@ -175,7 +176,7 @@ void main() {
       ]) {
         expect(find.text(label), findsWidgets);
       }
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(find.byIcon(AppIcons.check), findsOneWidget);
     });
 
     testWidgets('selecting a rate applies it and closes the picker', (

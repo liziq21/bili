@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 // 是另一个 fork 的类型，查找会失败。
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 class FakePreferencesDataSource() implements PreferencesDataSource {
   @override
@@ -188,7 +189,7 @@ void main() {
       // Verify trailing fill button has tooltip
       final fillButtonFinder = find.widgetWithIcon(
         IconButton,
-        Icons.north_west,
+        AppIcons.fillQuery,
       );
       expect(fillButtonFinder, findsOneWidget);
       final buttonWidget = tester.widget<IconButton>(fillButtonFinder);

@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 
@@ -27,33 +28,25 @@ class const SettingScreen({
         padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
         children: [
           for (final (section, label, icon) in [
-            (
-              SettingsSection.player,
-              l10n.settingsPlayer,
-              Icons.play_circle_outline,
-            ),
+            (SettingsSection.player, l10n.settingsPlayer, AppIcons.playCircle),
             (
               SettingsSection.appearance,
               l10n.settingsAppearance,
-              Icons.palette_outlined,
+              AppIcons.palette,
             ),
-            (SettingsSection.history, l10n.settingsHistory, Icons.history),
+            (SettingsSection.history, l10n.settingsHistory, AppIcons.history),
             (
               SettingsSection.library,
               l10n.settingsLibrary,
-              Icons.video_library_outlined,
+              AppIcons.videoLibrary,
             ),
             (
               SettingsSection.notifications,
               l10n.settingsNotifications,
-              Icons.notifications_outlined,
+              AppIcons.notifications,
             ),
-            (SettingsSection.advanced, l10n.settingsAdvanced, Icons.tune),
-            (
-              SettingsSection.discovery,
-              l10n.settingsDiscovery,
-              Icons.home_outlined,
-            ),
+            (SettingsSection.advanced, l10n.settingsAdvanced, AppIcons.tune),
+            (SettingsSection.discovery, l10n.settingsDiscovery, AppIcons.home),
           ])
             Tooltip(
               message: label,
@@ -66,7 +59,7 @@ class const SettingScreen({
                   ),
                 ),
                 trailing: Icon(
-                  Icons.chevron_right,
+                  AppIcons.chevronRight,
                   color: $styles.colors.onSurfaceVariant,
                 ),
                 onTap: () {

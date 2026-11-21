@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
     implements SearchContentsRepository<VideoModel> {
@@ -177,7 +178,7 @@ void main() {
       await tester.tap(find.text('Videos'));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.byIcon(AppIcons.error), findsOneWidget);
       expect(find.text('Load failed. Please try again later.'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
 
@@ -228,7 +229,7 @@ void main() {
       await tester.tap(find.text('Videos'));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.search_off_rounded), findsOneWidget);
+      expect(find.byIcon(AppIcons.searchOff), findsOneWidget);
       expect(find.text('Nothing found'), findsOneWidget);
     },
   );
@@ -272,10 +273,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final backButton = find.widgetWithIcon(
-        IconButton,
-        Icons.arrow_back_rounded,
-      );
+      final backButton = find.widgetWithIcon(IconButton, AppIcons.back);
       expect(backButton, findsOneWidget);
 
       final iconBtn = tester.widget<IconButton>(backButton);

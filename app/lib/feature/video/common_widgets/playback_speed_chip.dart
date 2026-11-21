@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../player/media_playback_controller.dart';
@@ -108,7 +109,7 @@ class _PlaybackSpeedChipState() extends State<PlaybackSpeedChip> {
                 ListTile(
                   title: Text(rateLabel(rate)),
                   trailing: rate == _rate
-                      ? Icon(Icons.check, color: $styles.colors.accentText)
+                      ? Icon(AppIcons.check, color: $styles.colors.accentText)
                       : null,
                   onTap: () {
                     HapticFeedback.selectionClick();

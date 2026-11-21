@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../main.dart';
 import '../bloc/home_bloc.dart';
 
@@ -23,17 +24,17 @@ class const HomeFilterBar({
   }
 
   static IconData iconFor(HomeFilter filter) => switch (filter.rawId) {
-    'all' => Icons.auto_awesome_rounded,
-    'top100' => Icons.local_fire_department_rounded,
-    'hot' || 'trending' => Icons.whatshot_rounded,
-    'recommend' => Icons.recommend_rounded,
-    'sub' => Icons.rss_feed_rounded,
-    'bookmarks' => Icons.bookmark_border_rounded,
-    'downloaded' => Icons.download_done_rounded,
-    'history' => Icons.history_rounded,
+    'all' => AppIcons.sparkle,
+    'top100' => AppIcons.fire,
+    'hot' || 'trending' => AppIcons.hot,
+    'recommend' => AppIcons.recommend,
+    'sub' => AppIcons.feed,
+    'bookmarks' => AppIcons.bookmark,
+    'downloaded' => AppIcons.downloaded,
+    'history' => AppIcons.history,
     _ => switch (filter.kind) {
-      HomeFilterKind.liveFeed => Icons.sensors_rounded,
-      _ => Icons.video_library_rounded,
+      HomeFilterKind.liveFeed => AppIcons.liveFeed,
+      _ => AppIcons.videoLibrary,
     },
   };
 

@@ -15,7 +15,7 @@ Before writing or modifying code in this repository, read the specification file
 
 - Executable configuration is authoritative for what the tooling actually does: `.fvmrc`, the root `pubspec.yaml`, `analysis_options.yaml`, package `pubspec.yaml` files, and `.github/workflows/`.
 - `AGENTS.md` rules apply to the directory they are in. When rules overlap, the most specific applicable `AGENTS.md` wins; a package rule may narrow a root rule but must not silently contradict it.
-- `app/docs/design-system.md` owns color, theme, token, and contrast policy. `packages/AGENTS.md` owns shared package and API-package boundaries; `bpi/AGENTS.md` and `ypi/AGENTS.md` add platform-specific details only.
+- `app/docs/design-system.md` owns color, theme, token, contrast, and icon policy. `packages/AGENTS.md` owns shared package and API-package boundaries; `bpi/AGENTS.md` and `ypi/AGENTS.md` add platform-specific details only.
 - `README.md`, learning journeys, journals, and postmortems provide context or history. They must link to the owning rule instead of creating a second source of truth. `docs/runbook.md` is normative only for incident recovery steps.
 - If a document and executable configuration disagree, do not guess: fix the document or configuration in the same change, and state which behavior is intended.
 
@@ -30,7 +30,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`AGENTS.md`](AGENTS.md) (root) — universal guidelines: language, module separation, UI framework constraints, generated files, screenshot testing, primary constructor syntax, immutability, testing.
 - [`app/AGENTS.md`](app/AGENTS.md) — application layer: architecture, `$styles` token usage, Drift database conventions, DI patterns, caching strategy.
 - [`packages/AGENTS.md`](packages/AGENTS.md) — package classification, data layer rules, API sub-package conventions (`bilibili`/`youtube`), CI test scope.
-- [`app/docs/design-system.md`](app/docs/design-system.md) — design token policy: color literal allow-list, contrast requirements, token roles. **Must read before touching any UI colors, tokens, or theme code.**
+- [`app/docs/design-system.md`](app/docs/design-system.md) — design token policy: color literal allow-list, contrast requirements, token roles, icon single source and selected/unselected icon pairs. **Must read before touching any UI colors, icons, tokens, or theme code.**
 - [`packages/bilibili/bpi/AGENTS.md`](packages/bilibili/bpi/AGENTS.md) — Bilibili API sub-package rules.
 - [`packages/youtube/ypi/AGENTS.md`](packages/youtube/ypi/AGENTS.md) — YouTube API sub-package rules.
 - [`.coderabbit.yaml`](.coderabbit.yaml) — CodeRabbit review configuration (language, review profile, ignore rules).
@@ -56,6 +56,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 |---|---|
 | Write or change any app/ widget, Bloc, or repository | `app/AGENTS.md` |
 | Touch colors, themes, or design tokens | `app/docs/design-system.md` + `app/AGENTS.md` (Global Style Access section) |
+| Add or change an icon, or an icon's selected/unselected style | `app/docs/design-system.md` (R9/R10/G3) + `app/lib/design/app_icons.dart` |
 | Add or modify a package under `packages/` | `packages/AGENTS.md` + the relevant sub-package `AGENTS.md` |
 | Add a new API endpoint or DTO in `bpi` or `ypi` | The corresponding sub-package `AGENTS.md` (API 子包通用规范 section) |
 | Write a test (unit, widget, or golden) | Root `AGENTS.md` (Testing section) + the test's layer file |
@@ -122,6 +123,7 @@ Linear sync 附带的 `c:` 标签优先于标题前缀分桶。agent 派单时�
 ### 不得触碰
 
 - 不得手动修改生成文件（Drift .drift 产物、l10n 等）。修改源文件后运行对应生成命令。
+- 不得在 `app/lib/design/app_icons.dart` 之外引用 `Icons.*`（G3 门禁）。
 - 不得硬编码面向用户的文案（日志与错误类文案除外）。
 - 不得在测试中访问真实网络。
 - 不得使用 `material.dart` 或 `cupertino.dart`，使用 `material_ui`。

@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:app/design/design.dart';
 
 class _FakeMediaSource() extends MediaSource {
   @override
@@ -114,7 +115,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byIcon(Icons.arrow_upward).at(1));
+    await tester.tap(find.byIcon(AppIcons.moveUp).at(1));
     await tester.pump();
 
     final config = await persistedConfig();
@@ -128,7 +129,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byIcon(Icons.star_border));
+    await tester.tap(find.byIcon(AppIcons.mainSection));
     await tester.pump();
 
     final config = await persistedConfig();

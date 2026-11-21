@@ -2,6 +2,7 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../database/app_database.dart';
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/video_card.dart';
@@ -47,7 +48,7 @@ class const FeedEntryTile({
     final fallback = SizedBox(
       width: 72,
       height: 40,
-      child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
+      child: Icon(AppIcons.movie, color: colorScheme.onSurfaceVariant),
     );
     if (url == null || url.isEmpty) return fallback;
 

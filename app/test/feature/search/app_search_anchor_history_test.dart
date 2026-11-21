@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 // flutter 的 MaterialApp 提供的是另一个 fork 的类型，查找会失败。
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 class FakePreferencesDataSource() implements PreferencesDataSource {
   @override
@@ -371,7 +372,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 第二行的填入按钮（第一行对应 flutter）
-      final fillButtons = find.widgetWithIcon(IconButton, Icons.north_west);
+      final fillButtons = find.widgetWithIcon(IconButton, AppIcons.fillQuery);
       expect(fillButtons, findsNWidgets(3));
 
       await tester.tap(fillButtons.at(1));

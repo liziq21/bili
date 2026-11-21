@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app_scaffold.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import 'bloc/live_bloc.dart';
 
@@ -115,7 +116,7 @@ class _LiveQualityChipState() extends State<LiveQualityChip> {
                 ListTile(
                   title: Text(option.label),
                   trailing: option.streamId == stream.streamId
-                      ? Icon(Icons.check, color: $styles.colors.accentText)
+                      ? Icon(AppIcons.check, color: $styles.colors.accentText)
                       : null,
                   onTap: () {
                     HapticFeedback.selectionClick();

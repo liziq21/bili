@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../design/design.dart';
 import '../l10n/localization_file/app_localizations.dart';
 import '../main.dart';
 
@@ -70,7 +71,7 @@ class const VideoCard({
 
   Widget _thumbnailPlaceholder(ColorScheme colorScheme) => Container(
     color: colorScheme.surfaceContainerHighest,
-    child: Icon(Icons.movie_outlined, color: colorScheme.onSurfaceVariant),
+    child: Icon(AppIcons.movie, color: colorScheme.onSurfaceVariant),
   );
 
   Widget _thumbnail(ColorScheme colorScheme) =>
@@ -436,7 +437,7 @@ class const VideoCard({
                         IconButton(
                           tooltip: l10n?.moreOptions ?? 'More options',
                           icon: Icon(
-                            Icons.more_vert_rounded,
+                            AppIcons.moreVert,
                             semanticLabel: l10n?.moreOptions ?? 'More options',
                             size: 20,
                             color: colorScheme.onSurfaceVariant,

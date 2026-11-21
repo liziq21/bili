@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'bloc/search_result_bloc.dart';
@@ -64,7 +65,7 @@ class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline_rounded, size: 48, color: colorScheme.error),
+          Icon(AppIcons.error, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
             l10n?.loadFailedRetryLater ??
@@ -119,11 +120,7 @@ class const _NewPageErrorIndicator<T>({super.key}) extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.refresh_rounded,
-                    size: 18,
-                    color: colorScheme.error,
-                  ),
+                  Icon(AppIcons.refresh, size: 18, color: colorScheme.error),
                   SizedBox(width: $styles.insets.xs),
                   Text(
                     l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
@@ -154,11 +151,7 @@ class const _EmptySearchIndicator() extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: colorScheme.outline,
-            ),
+            Icon(AppIcons.searchOff, size: 48, color: colorScheme.outline),
             SizedBox(height: $styles.insets.xs),
             Text(
               l10n?.nothingFound ?? 'Nothing found',

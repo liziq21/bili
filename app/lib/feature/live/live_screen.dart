@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:media_kit_video/media_kit_video.dart' hide VideoState;
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -101,7 +102,7 @@ class _LiveScreenState() extends State<LiveScreen> {
           leading: IconButton(
             onPressed: widget.onBackClick,
             tooltip: l10n.back,
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+            icon: const Icon(AppIcons.back, size: 18),
           ),
           title: const Text('Live'),
         ),
@@ -189,7 +190,7 @@ class _LiveScreenState() extends State<LiveScreen> {
                           // 在线人数。
                           Row(
                             children: [
-                              const Icon(Icons.people_alt_rounded, size: 16),
+                              const Icon(AppIcons.viewers, size: 16),
                               const Gap(4),
                               Text(
                                 '${detail.online} ${l10n.liveViewers}',
@@ -346,7 +347,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.error_outline_rounded,
+                  AppIcons.error,
                   size: 32,
                   color: $styles.colors.onSurfaceVariant,
                 ),
@@ -396,7 +397,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.error_outline_rounded,
+                      AppIcons.error,
                       size: 32,
                       color: $styles.colors.onSurfaceVariant,
                     ),
@@ -476,9 +477,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
                           );
                         },
                         icon: Icon(
-                          _state.isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                          _state.isPlaying ? AppIcons.pause : AppIcons.play,
                         ),
                       ),
                       // 画质切换。
@@ -490,7 +489,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
                           HapticFeedback.lightImpact();
                           widget.onToggleFullscreen();
                         },
-                        icon: const Icon(Icons.fullscreen_rounded),
+                        icon: const Icon(AppIcons.fullscreen),
                       ),
                       // 弹幕设置。
                       IconButton(
@@ -504,7 +503,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.forum_outlined),
+                        icon: const Icon(AppIcons.comment),
                       ),
                     ],
                   ),
@@ -544,7 +543,7 @@ class const _ErrorView({
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.cloud_off_rounded,
+            AppIcons.cloudOff,
             size: 48,
             color: $styles.colors.onSurfaceVariant,
           ),

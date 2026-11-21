@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -115,7 +116,7 @@ class _LocalPlaylistPickerDialogState()
                             excludeSemantics: true,
                             child: ListTile(
                               enabled: !_isSaving,
-                              leading: const Icon(Icons.queue_music_outlined),
+                              leading: const Icon(AppIcons.queue),
                               title: Text(playlist.name),
                               onTap: () {
                                 HapticFeedback.lightImpact();
@@ -135,7 +136,7 @@ class _LocalPlaylistPickerDialogState()
                           HapticFeedback.lightImpact();
                           _createPlaylist();
                         },
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(AppIcons.add),
                   label: Text(l10n.newPlaylist),
                 ),
               ],

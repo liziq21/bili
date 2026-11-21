@@ -75,9 +75,7 @@ void main() {
         ),
       );
 
-      final chevron = tester.widget<Icon>(
-        find.byIcon(Icons.chevron_right_rounded),
-      );
+      final chevron = tester.widget<Icon>(find.byIcon(AppIcons.chevronRight));
       expect(
         chevron.color,
         $styles.colors.outline,

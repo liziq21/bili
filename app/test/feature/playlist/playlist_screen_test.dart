@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
+import 'package:app/design/design.dart';
 
 /// 记录调用参数并按需返回固定内容的 fake 仓库。
 final class _FakePlaylistContentRepository({
@@ -188,7 +189,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(AppIcons.back));
     await tester.pumpAndSettle();
 
     expect(backPressed, isTrue);
@@ -204,7 +205,7 @@ void main() {
     final l10n = _l10nOf(tester);
 
     expect(find.text(l10n.loadFailedRetryLater), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+    expect(find.byIcon(AppIcons.error), findsOneWidget);
   });
 
   testWidgets('fetches every page on tap and shows the item count', (

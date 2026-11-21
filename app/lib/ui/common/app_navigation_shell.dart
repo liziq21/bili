@@ -13,11 +13,11 @@ final class const AppNavDestination({
   /// 目的地文案，底部与侧边导航共用
   required final String label,
 
-  /// 底部导航图标
+  /// 未选中图标（空心，R10）
   required final IconData icon,
 
-  /// 侧边导航图标，留空时回落到 [icon]
-  final IconData? railIcon,
+  /// 选中图标（实心，R10）。没有空心/实心两套字形的图标（如搜索）传 [icon]。
+  required final IconData selectedIcon,
 
   /// 重复点按当前目的地时额外执行的动作
   ///
@@ -76,7 +76,8 @@ final class const AppNavigationShell({
               destinations: [
                 for (final d in destinations)
                   NavigationRailDestination(
-                    icon: Icon(d.railIcon ?? d.icon),
+                    icon: Icon(d.icon),
+                    selectedIcon: Icon(d.selectedIcon),
                     label: Text(d.label),
                   ),
               ],
@@ -101,7 +102,11 @@ final class const AppNavigationShell({
         onDestinationSelected: _goBranch,
         destinations: [
           for (final d in destinations)
-            NavigationDestination(icon: Icon(d.icon), label: d.label),
+            NavigationDestination(
+              icon: Icon(d.icon),
+              selectedIcon: Icon(d.selectedIcon),
+              label: d.label,
+            ),
         ],
       ),
     );

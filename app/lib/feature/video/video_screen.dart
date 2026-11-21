@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
@@ -462,7 +463,7 @@ class _VideoContentState() extends State<_VideoContent> {
             leading: IconButton(
               onPressed: widget.onBackClick,
               tooltip: l10n.back,
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(AppIcons.back),
             ),
           ),
         // 全屏时播放器铺满整屏，信息区一并收起。

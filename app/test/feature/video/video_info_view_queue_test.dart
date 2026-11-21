@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
+import 'package:app/design/design.dart';
 
 /// 「加入播放队列」按钮路径的 widget 测试。
 ///
@@ -127,7 +128,7 @@ void main() {
     );
 
     expect(find.text('关联视频'), findsOneWidget);
-    expect(find.byIcon(Icons.playlist_add), findsOneWidget);
+    expect(find.byIcon(AppIcons.playlistAdd), findsOneWidget);
   });
 
   testWidgets('lays related videos out in a horizontal scroll view', (
@@ -161,7 +162,7 @@ void main() {
       controller: controller,
     );
 
-    await tester.tap(find.byIcon(Icons.playlist_add));
+    await tester.tap(find.byIcon(AppIcons.playlistAdd));
     // 只推进到 SnackBar 出现。$styles.times.fast 在禁用动画的测试环境下是 1ms，
     // pumpAndSettle 会跨过整个显示窗口，反馈一闪即逝无法断言。
     await tester.pump(const Duration(milliseconds: 50));
@@ -182,7 +183,7 @@ void main() {
       controller: controller,
     );
 
-    await tester.tap(find.byIcon(Icons.playlist_add));
+    await tester.tap(find.byIcon(AppIcons.playlistAdd));
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(controller.added, isEmpty);
@@ -211,7 +212,7 @@ void main() {
 
     // 关联卡片仍渲染，但没有可点的加入入口。
     expect(find.text('关联视频'), findsOneWidget);
-    expect(find.byIcon(Icons.playlist_add), findsNothing);
+    expect(find.byIcon(AppIcons.playlistAdd), findsNothing);
   });
 
   testWidgets('tapping related video card triggers navigation', (tester) async {

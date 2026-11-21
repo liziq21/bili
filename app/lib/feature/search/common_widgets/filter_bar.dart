@@ -1,6 +1,7 @@
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import 'filter_group_section.dart';
@@ -21,7 +22,7 @@ class const FilterBar({
     return IconButton(
       tooltip: effectiveTitle,
       onPressed: () => _showFilterBottomSheet(context, effectiveTitle),
-      icon: const Icon(Icons.filter_list),
+      icon: const Icon(AppIcons.filter),
     );
   }
 
