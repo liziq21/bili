@@ -4717,4 +4717,10 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get channelVideosUnsupported => 'This source has no channel videos';
+
+  @override
+  String get channelVideosEmpty => 'No videos yet';
 }
