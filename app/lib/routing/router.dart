@@ -39,6 +39,7 @@ import '../feature/search/search_result_screen.dart';
 import '../feature/search/search_screen.dart';
 import '../feature/setting/advanced_settings_screen.dart';
 import '../feature/setting/appearance_settings_screen.dart';
+import '../feature/setting/channel_settings_screen.dart';
 import '../feature/setting/history_settings_screen.dart';
 import '../feature/setting/library_settings_screen.dart';
 import '../feature/setting/notification_settings_screen.dart';
@@ -258,6 +259,7 @@ final GoRouter router = GoRouter(
                   SettingsSection.notifications => Routes.settingsNotifications,
                   SettingsSection.advanced => Routes.settingsAdvanced,
                   SettingsSection.discovery => Routes.settingsDiscovery,
+                  SettingsSection.channel => Routes.settingsChannel,
                 }),
           ),
           routes: [
@@ -288,6 +290,10 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: Routes.settingsDiscoveryRelative,
               builder: (_, _) => const HomeConfigEditorScreen(),
+            ),
+            GoRoute(
+              path: Routes.settingsChannelRelative,
+              builder: (_, _) => const ChannelSettingsScreen(),
             ),
           ],
         ),

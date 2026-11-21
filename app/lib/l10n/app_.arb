@@ -6084,6 +6084,10 @@
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"
   },
+  "settingsChannel": "Channel",
+  "@settingsChannel": {
+    "description": "Settings group and subpage title - channel page tabs"
+  },
   "homeConfigTitle": "Home",
   "@homeConfigTitle": {
     "description": "Home configuration editor page title"

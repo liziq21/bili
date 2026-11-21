@@ -1,5 +1,6 @@
 import 'package:app/data/repository/channel_videos_repository.dart';
 import 'package:app/data/repository/creator_profile_repository.dart';
+import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
@@ -8,6 +9,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:app/design/design.dart';
 
 class _FakeCreatorProfileRepository(
@@ -253,5 +258,53 @@ void main() {
     expect(find.text(l10n.videoTab), findsOneWidget);
     expect(find.text(l10n.channelVideosUnsupported), findsOneWidget);
     expect(find.byType(VideoCard), findsNothing);
+  });
+
+  testWidgets('hides the videos tab without fetching when disabled', (
+    tester,
+  ) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    final preferences = PreferencesDataSource(
+      sharedPreferences: SharedPreferencesAsync(),
+    );
+    addTearDown(preferences.dispose);
+    await preferences.set(
+      PreferencesKey.channelTabVisibility,
+      '{"videos":false}',
+    );
+
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.success(Page(number: 1, totalPages: 1, data: [_video('v1')])),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      Provider<PreferencesDataSource>.value(
+        value: preferences,
+        child: MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<CreatorProfileRepository>.value(
+              value: profileRepository,
+            ),
+            RepositoryProvider<ChannelVideosRepository>.value(
+              value: videosRepository,
+            ),
+          ],
+          child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('CodeCraft'), findsOneWidget);
+    expect(find.text(l10n.videoTab), findsNothing);
+    expect(find.byType(TabBar), findsNothing);
+    expect(find.byType(VideoCard), findsNothing);
+    expect(videosRepository.requestedPages, isEmpty);
   });
 }

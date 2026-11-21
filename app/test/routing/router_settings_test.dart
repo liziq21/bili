@@ -19,6 +19,7 @@ void main() {
     (Routes.settingsLibrary, 'Library'),
     (Routes.settingsNotifications, '通知'),
     (Routes.settingsAdvanced, 'Advanced'),
+    (Routes.settingsChannel, '频道'),
   ]) {
     testWidgets('$path opens without any source or preferences providers', (
       tester,
@@ -53,7 +54,7 @@ void main() {
         }
         expect(router.state.uri.path, Routes.settings);
         expect(find.byType(SettingScreen), findsOneWidget);
-        expect(find.byType(ListTile), findsNWidgets(7));
+        expect(find.byType(ListTile), findsNWidgets(8));
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

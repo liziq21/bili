@@ -13,6 +13,7 @@ enum SettingsSection() {
   notifications,
   advanced,
   discovery,
+  channel,
 }
 
 class const SettingScreen({
@@ -47,6 +48,7 @@ class const SettingScreen({
             ),
             (SettingsSection.advanced, l10n.settingsAdvanced, AppIcons.tune),
             (SettingsSection.discovery, l10n.settingsDiscovery, AppIcons.home),
+            (SettingsSection.channel, l10n.settingsChannel, AppIcons.creator),
           ])
             Tooltip(
               message: label,

@@ -4509,6 +4509,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsDiscovery => '发现';
 
   @override
+  String get settingsChannel => '频道';
+
+  @override
   String get homeConfigTitle => '首页';
 
   @override

@@ -8,12 +8,14 @@ import 'package:model/model.dart';
 
 import '../../data/repository/channel_videos_repository.dart';
 import '../../data/repository/creator_profile_repository.dart';
+import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../../ui/video_card.dart';
+import '../setting/app_settings.dart';
 import 'bloc/channel_videos_cubit.dart';
 
 class const SpaceScreen({
@@ -29,15 +31,38 @@ class const SpaceScreen({
 class _SpaceScreenState() extends State<SpaceScreen> {
   CreatorProfileRepository? _repository;
   Future<Result<CreatorProfile, Exception>>? _profileFuture;
+  ChannelTabSettings _tabSettings = const ChannelTabSettings();
+  bool _tabSettingsReady = false;
+  bool _tabSettingsRequested = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final repository = context.read<CreatorProfileRepository?>();
-    if (_profileFuture != null && identical(repository, _repository)) return;
+    if (_profileFuture == null || !identical(repository, _repository)) {
+      _repository = repository;
+      _profileFuture = _loadProfile();
+    }
 
-    _repository = repository;
-    _profileFuture = _loadProfile();
+    if (!_tabSettingsRequested) {
+      _tabSettingsRequested = true;
+      _loadTabSettings();
+    }
+  }
+
+  Future<void> _loadTabSettings() async {
+    final preferences = context.read<PreferencesDataSource?>();
+    if (preferences == null) {
+      if (mounted) setState(() => _tabSettingsReady = true);
+      return;
+    }
+
+    final settings = await ChannelTabSettings.load(preferences);
+    if (!mounted) return;
+    setState(() {
+      _tabSettings = settings;
+      _tabSettingsReady = true;
+    });
   }
 
   @override
@@ -84,32 +109,39 @@ class _SpaceScreenState() extends State<SpaceScreen> {
               ),
         title: Text(l10n.creatorTab),
       ),
-      body: FutureBuilder<Result<CreatorProfile, Exception>>(
-        future: _profileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return Center(
+      body: !_tabSettingsReady
+          ? Center(
               child: CircularProgressIndicator(
                 color: $styles.colors.accentFill,
               ),
-            );
-          }
+            )
+          : FutureBuilder<Result<CreatorProfile, Exception>>(
+              future: _profileFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: $styles.colors.accentFill,
+                    ),
+                  );
+                }
 
-          if (snapshot.hasError || snapshot.data == null) {
-            return _ProfileLoadError(onRetry: _retry);
-          }
+                if (snapshot.hasError || snapshot.data == null) {
+                  return _ProfileLoadError(onRetry: _retry);
+                }
 
-          return switch (snapshot.data!) {
-            Success(:final success) => _SpaceContent(
-              profile: success,
-              mid: widget.mid,
-              colorScheme: colorScheme,
-              onVideo: widget.onVideo,
+                return switch (snapshot.data!) {
+                  Success(:final success) => _SpaceContent(
+                    profile: success,
+                    mid: widget.mid,
+                    colorScheme: colorScheme,
+                    onVideo: widget.onVideo,
+                    tabSettings: _tabSettings,
+                  ),
+                  Error() => _ProfileLoadError(onRetry: _retry),
+                };
+              },
             ),
-            Error() => _ProfileLoadError(onRetry: _retry),
-          };
-        },
-      ),
     );
   }
 }
@@ -117,17 +149,28 @@ class _SpaceScreenState() extends State<SpaceScreen> {
 /// 资料头 + 内容 tab。
 ///
 /// tab 按数据源真实能力生成：当前只有「视频」有频道级端点，直播 / 短视频 /
-/// 播放列表没有可用的频道列表接口，因此不挂空 tab。
+/// 播放列表没有可用的频道列表接口，因此不挂空 tab。用户关闭某个 tab 后该 tab
+/// 及其内容都不挂载，因此也不会发起对应网络请求。
 class const _SpaceContent({
   required final CreatorProfile profile,
   required final String mid,
   required final ColorScheme colorScheme,
   required final VideoNavCallback? onVideo,
+  required final ChannelTabSettings tabSettings,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final videosRepository = context.read<ChannelVideosRepository?>();
+
+    if (!tabSettings.isVisible(ChannelTabs.videos)) {
+      return ListView(
+        children: [
+          _CreatorProfileHeader(profile: profile, colorScheme: colorScheme),
+        ],
+      );
+    }
+
     final tabBar = TabBar(
       isScrollable: true,
       tabAlignment: TabAlignment.start,

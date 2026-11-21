@@ -202,6 +202,7 @@ void main() {
         (Routes.settingsHistory, '/settings/history'),
         (Routes.settingsLibrary, '/settings/library'),
         (Routes.settingsAdvanced, '/settings/advanced'),
+        (Routes.settingsChannel, '/settings/channel'),
         (Routes.danmakuSettings, '/settings/danmaku'),
       ]) {
         test('$expectedPath resolves outside every bottom bar branch', () {
@@ -235,7 +236,7 @@ void main() {
           (route) => route.path == Routes.danmakuSettings,
         );
 
-        // Then all six children are relative and danmaku stays a sibling.
+        // Then all eight children are relative and danmaku stays a sibling.
         expect(
           settings.routes.whereType<GoRoute>().map((route) => route.path),
           unorderedEquals([
@@ -246,6 +247,7 @@ void main() {
             'notifications',
             'advanced',
             'discovery',
+            'channel',
           ]),
         );
         expect(danmaku, hasLength(1));

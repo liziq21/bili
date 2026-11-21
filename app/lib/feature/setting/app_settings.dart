@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
@@ -230,6 +232,58 @@ final class const LibrarySettings({
       resumePlaybackEnabled,
     ),
   ]);
+}
+
+/// Stable identifiers for the tabs a channel page can show.
+abstract final class ChannelTabs() {
+  static const videos = 'videos';
+}
+
+/// Per-tab visibility for the channel page.
+///
+/// Unknown ids default to visible so a tab added after the setting was written
+/// does not inherit a hidden state that was never chosen for it.
+@immutable
+final class const ChannelTabSettings({
+  final Map<String, bool> visibility = const {},
+}) {
+  bool isVisible(String tabId) => visibility[tabId] ?? true;
+
+  ChannelTabSettings withTabVisible(String tabId, bool visible) =>
+      ChannelTabSettings(visibility: {...visibility, tabId: visible});
+
+  static ChannelTabSettings fromJson(Object? raw) {
+    if (raw is! Map) return const ChannelTabSettings();
+    final visibility = <String, bool>{};
+    for (final MapEntry(:key, :value) in raw.entries) {
+      if (key is String && value is bool) visibility[key] = value;
+    }
+    return ChannelTabSettings(visibility: visibility);
+  }
+
+  static ChannelTabSettings fromJsonString(String raw) {
+    try {
+      return fromJson(jsonDecode(raw));
+    } on FormatException {
+      return const ChannelTabSettings();
+    }
+  }
+
+  static Future<ChannelTabSettings> load(
+    PreferencesDataSource preferences,
+  ) async {
+    final result = await preferences.get(PreferencesKey.channelTabVisibility);
+    return switch (result) {
+      Success(:final success) => fromJsonString(success),
+      Error() => const ChannelTabSettings(),
+    };
+  }
+
+  Future<Result<void, Exception>> save(PreferencesDataSource preferences) =>
+      preferences.set(
+        PreferencesKey.channelTabVisibility,
+        jsonEncode(visibility),
+      );
 }
 
 /// 读一个标量设置键，读取失败时退回 [fallback]。

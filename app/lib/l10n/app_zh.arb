@@ -6084,6 +6084,10 @@
   "@settingsDiscovery": {
     "description": "Settings group and subpage title - home configuration"
   },
+  "settingsChannel": "频道",
+  "@settingsChannel": {
+    "description": "Settings group and subpage title - channel page tabs"
+  },
   "homeConfigTitle": "首页",
   "@homeConfigTitle": {
     "description": "Home configuration editor page title"

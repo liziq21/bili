@@ -27,7 +27,7 @@ void main() {
   ];
 
   group('SettingScreen', () {
-    testWidgets('shows the settings title and exactly seven groups in order', (
+    testWidgets('shows the settings title and exactly eight groups in order', (
       tester,
     ) async {
       // Given the app's zh locale and both material localization delegates.
@@ -49,7 +49,7 @@ void main() {
         expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
 
         final tiles = find.byType(ListTile);
-        expect(tiles, findsNWidgets(7));
+        expect(tiles, findsNWidgets(8));
         final orderedLabels = [
           l10n.settingsPlayer,
           l10n.settingsAppearance,
@@ -58,6 +58,7 @@ void main() {
           l10n.settingsNotifications,
           l10n.settingsAdvanced,
           l10n.settingsDiscovery,
+          l10n.settingsChannel,
         ];
         for (final (index, label) in orderedLabels.indexed) {
           final tile = tiles.at(index);
@@ -128,6 +129,32 @@ void main() {
 
         // Then exactly one callback identifies that group.
         expect(selections, [SettingsSection.notifications]);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    testWidgets('selecting Channel reports only its section', (tester) async {
+      // Given an index with a recording selection callback.
+      final selections = <SettingsSection>[];
+
+      try {
+        await tester.pumpWidget(
+          _buildScreen(SettingScreen(onSectionSelected: selections.add)),
+        );
+        await tester.pump();
+
+        // When the channel tile is tapped (label is localized).
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(SettingScreen)),
+        )!;
+        await tester.tap(find.widgetWithText(ListTile, l10n.settingsChannel));
+        await tester.pump();
+
+        // Then exactly one callback identifies the channel group.
+        expect(selections, [SettingsSection.channel]);
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());
