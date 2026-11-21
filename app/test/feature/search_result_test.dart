@@ -31,6 +31,7 @@ void main() {
     final repository = FakeEmptySearchContentsRepository();
     final bloc = SearchResultBloc<VideoModel>(
       searchContentsRepository: repository,
+      query: 'keyword',
     );
     addTearDown(bloc.close);
 
@@ -53,4 +54,37 @@ void main() {
     expect(find.byIcon(AppIcons.searchOff), findsOneWidget);
     expect(find.text('Nothing found'), findsOneWidget);
   });
+
+  test('bloc searches the keyword given at construction', () async {
+    final repository = _RecordingSearchContentsRepository();
+    final bloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: repository,
+      query: 'ign',
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const FetchNextPage());
+    await Future<void>.delayed(Duration.zero);
+
+    expect(repository.queries, hasLength(1));
+    expect(repository.queries.single.query, 'ign');
+    expect(repository.queries.single.pageKey, 1);
+  });
+}
+
+class _RecordingSearchContentsRepository
+    implements SearchContentsRepository<VideoModel> {
+  final List<SearchQuery> queries = [];
+
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
+
+  @override
+  Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
+    queries.add(searchQuery);
+    return Result.success(Page<VideoModel>(data: [], number: 1, totalPages: 1));
+  }
 }

@@ -66,9 +66,11 @@ void main() {
 
       final videoBloc = SearchResultBloc<VideoModel>(
         searchContentsRepository: videoRepo,
+        query: 'keyword',
       );
       final creatorBloc = SearchResultBloc<CreatorProfile>(
         searchContentsRepository: creatorRepo,
+        query: 'keyword',
       );
 
       addTearDown(videoBloc.close);
@@ -106,9 +108,11 @@ void main() {
 
       final videoBloc = SearchResultBloc<VideoModel>(
         searchContentsRepository: videoRepo,
+        query: 'keyword',
       );
       final creatorBloc = SearchResultBloc<CreatorProfile>(
         searchContentsRepository: creatorRepo,
+        query: 'keyword',
       );
 
       addTearDown(videoBloc.close);
@@ -146,9 +150,11 @@ void main() {
 
       final videoBloc = SearchResultBloc<VideoModel>(
         searchContentsRepository: videoRepo,
+        query: 'keyword',
       );
       final creatorBloc = SearchResultBloc<CreatorProfile>(
         searchContentsRepository: creatorRepo,
+        query: 'keyword',
       );
 
       addTearDown(videoBloc.close);
@@ -199,9 +205,11 @@ void main() {
 
       final videoBloc = SearchResultBloc<VideoModel>(
         searchContentsRepository: videoRepo,
+        query: 'keyword',
       );
       final creatorBloc = SearchResultBloc<CreatorProfile>(
         searchContentsRepository: creatorRepo,
+        query: 'keyword',
       );
 
       addTearDown(videoBloc.close);
@@ -243,9 +251,11 @@ void main() {
 
       final videoBloc = SearchResultBloc<VideoModel>(
         searchContentsRepository: videoRepo,
+        query: 'keyword',
       );
       final creatorBloc = SearchResultBloc<CreatorProfile>(
         searchContentsRepository: creatorRepo,
+        query: 'keyword',
       );
 
       addTearDown(videoBloc.close);

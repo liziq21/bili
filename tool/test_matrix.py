@@ -162,6 +162,7 @@ TEST_MATRIX = {
         'app/test/feature/search_state_test.dart',
         'app/test/feature/setting/channel_tab_settings_test.dart',
         'app/test/feature/space/channel_videos_cubit_test.dart',
+        'app/test/feature/video/danmaku_lane_test.dart',
         'app/test/feature/video/media_stream_bloc_test.dart',
         'app/test/feature/video/player/media_edl_test.dart',
         'app/test/feature/video/player/media_playback_controller_test.dart',

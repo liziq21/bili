@@ -222,10 +222,29 @@ class MediaPlaybackController([
   bool _isPlaying = false;
   bool _isBuffering = false;
 
+  /// 播放器选项只设置一次；重复 open 不必再发一遍。
+  Future<void>? _audioFallbackFuture;
+
+  static const _audioFallbackOption = 'audio-fallback-to-null';
+
   static Player _createPlayer(PlatformPlayer? platformPlayer) {
     if (platformPlayer != null) return Player(platformPlayer: platformPlayer);
     MediaKit.ensureInitialized();
     return Player();
+  }
+
+  /// 让 mpv 在打不开音频设备时退回空音频输出。
+  ///
+  /// 默认行为是整次播放判为失败：没有声卡、PipeWire 未运行、独占设备被占用
+  /// 都会命中，而视频轨本来可以正常解码。不设这一项时用户看到的是
+  /// 「视频加载失败」，画面其实可播。
+  Future<void> _applyAudioFallback() =>
+      _audioFallbackFuture ??= _setAudioFallback();
+
+  Future<void> _setAudioFallback() async {
+    final platform = _player.platform;
+    if (platform is! NativePlayer) return;
+    await platform.setProperty(_audioFallbackOption, 'yes');
   }
 
   /// 视频渲染控制器，交给 `Video` 组件使用。
@@ -321,6 +340,7 @@ class MediaPlaybackController([
         currentIndex: index,
       ),
     );
+    await _applyAudioFallback();
     await _player.open(
       Playlist(
         streams
@@ -552,6 +572,7 @@ class MediaPlaybackController([
               index: _state.currentIndex,
             )
           : Media(MediaEdl.uriOf(stream), httpHeaders: stream.headers);
+      await _applyAudioFallback();
       await _player.open(playable);
       if (generation != _openGeneration) return;
       _subscribeToPlayerErrors(generation);

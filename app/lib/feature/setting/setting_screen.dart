@@ -19,12 +19,25 @@ enum SettingsSection() {
 class const SettingScreen({
   super.key,
   required final ValueChanged<SettingsSection> onSectionSelected,
+  final VoidCallback? onBackClick,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsTitle)),
+      appBar: AppBar(
+        leading: onBackClick == null
+            ? null
+            : IconButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onBackClick?.call();
+                },
+                tooltip: l10n.back,
+                icon: const Icon(AppIcons.back),
+              ),
+        title: Text(l10n.settingsTitle),
+      ),
       body: ListView(
         padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
         children: [

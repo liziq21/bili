@@ -9,13 +9,13 @@
   "@navHome": {
     "description": "Bottom navigation - Home tab"
   },
-  "searchResultTypeAll": "All",
+  "searchResultTypeAll": "全部",
   "searchResultTypeVideo": "视频",
   "navLibrary": "Library",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"
   },
-  "navSettings": "Settings",
+  "navSettings": "设置",
   "@navSettings": {
     "description": "Home app bar - settings entry tooltip"
   },
@@ -55,11 +55,11 @@
   "@historySearchHint": {
     "description": "Search bar placeholder in history"
   },
-  "settingsTitle": "Settings",
+  "settingsTitle": "设置",
   "@settingsTitle": {
     "description": "Settings screen title"
   },
-  "settingsPlayer": "Player",
+  "settingsPlayer": "播放器",
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"
   },
@@ -140,27 +140,27 @@
       }
     }
   },
-  "settingsHistory": "History",
+  "settingsHistory": "历史记录",
   "@settingsHistory": {
     "description": "Settings group and subpage title - watch history"
   },
-  "historyRecording": "Save watch history",
+  "historyRecording": "保存观看历史",
   "@historyRecording": {
     "description": "Toggle for recording watched videos in local history"
   },
-  "historyRecordingSubtitle": "Keep watched videos in the local history",
+  "historyRecordingSubtitle": "把看过的视频保存在本地历史中",
   "@historyRecordingSubtitle": {
     "description": "Subtitle for the watch history recording toggle"
   },
-  "historyResumePlayback": "Resume playback",
+  "historyResumePlayback": "续播",
   "@historyResumePlayback": {
     "description": "Toggle for restoring the last saved video position"
   },
-  "historyResumePlaybackSubtitle": "Continue videos from the last saved position",
+  "historyResumePlaybackSubtitle": "从上次保存的位置继续播放",
   "@historyResumePlaybackSubtitle": {
     "description": "Subtitle for the resume playback toggle"
   },
-  "settingsLibrary": "Library",
+  "settingsLibrary": "媒体库",
   "@settingsLibrary": {
     "description": "Settings group and subpage title - local library"
   },
@@ -196,7 +196,11 @@
   "@librarySearchHistoryRetentionForever": {
     "description": "Retention option - keep forever"
   },
-  "settingsAdvanced": "Advanced",
+  "danmakuSettingsSubtitle": "不透明度、字号、停留时长，以及顶部与底部各固定几行",
+  "clearImageCache": "清除图片缓存",
+  "clearImageCacheSubtitle": "释放内存中已解码的图片，封面在再次显示时重新解码",
+  "imageCacheCleared": "图片缓存已清除",
+  "settingsAdvanced": "高级",
   "@settingsAdvanced": {
     "description": "Settings group and subpage title - advanced options"
   },
@@ -204,7 +208,7 @@
   "@settingsDownload": {
     "description": "Settings section - download options"
   },
-  "settingsAppearance": "Appearance",
+  "settingsAppearance": "外观",
   "@settingsAppearance": {
     "description": "Settings section - visual customization"
   },
@@ -248,15 +252,15 @@
   "@appearanceTitle": {
     "description": "Appearance settings page title"
   },
-  "appearanceThemeSystem": "System",
+  "appearanceThemeSystem": "跟随系统",
   "@appearanceThemeSystem": {
     "description": "Follow system theme"
   },
-  "appearanceThemeLight": "Light",
+  "appearanceThemeLight": "浅色",
   "@appearanceThemeLight": {
     "description": "Light theme"
   },
-  "appearanceThemeDark": "Dark",
+  "appearanceThemeDark": "深色",
   "@appearanceThemeDark": {
     "description": "Dark theme"
   },
@@ -268,7 +272,7 @@
   "@appearanceDynamicColorSubtitle": {
     "description": "Subtitle for dynamic color"
   },
-  "appearanceTheme": "Theme",
+  "appearanceTheme": "主题",
   "@appearanceTheme": {
     "description": "Appearance settings placeholder entry for theme"
   },
@@ -276,46 +280,46 @@
   "@appearanceNightMode": {
     "description": "Appearance settings placeholder entry for night mode"
   },
-  "appearanceEyeComfort": "Eye Comfort",
+  "appearanceEyeComfort": "护眼模式",
   "@appearanceEyeComfort": {
     "description": "Appearance settings placeholder entry for eye comfort"
   },
-  "appearanceThemeSubtitle": "Theme mode for the app",
+  "appearanceThemeSubtitle": "应用的主题模式",
   "@appearanceThemeSubtitle": {
     "description": "Subtitle for theme setting",
     "type": "String"
   },
-  "appearanceFontSize": "Font Size",
+  "appearanceFontSize": "字号",
   "@appearanceFontSize": {
     "description": "Font size setting label",
     "type": "String"
   },
-  "appearanceFontSizeSubtitle": "Adjust text size across the app",
+  "appearanceFontSizeSubtitle": "调整应用内文字大小",
   "@appearanceFontSizeSubtitle": {
     "description": "Subtitle for font size setting",
     "type": "String"
   },
-  "appearanceEyeComfortSubtitle": "Reduce eye strain in dark environments",
+  "appearanceEyeComfortSubtitle": "在暗环境下减轻视觉疲劳",
   "@appearanceEyeComfortSubtitle": {
     "description": "Subtitle for eye comfort setting",
     "type": "String"
   },
-  "appearanceFontSizeSmall": "Small",
+  "appearanceFontSizeSmall": "小",
   "@appearanceFontSizeSmall": {
     "description": "Font size option: Small",
     "type": "String"
   },
-  "appearanceFontSizeStandard": "Standard",
+  "appearanceFontSizeStandard": "标准",
   "@appearanceFontSizeStandard": {
     "description": "Font size option: Standard",
     "type": "String"
   },
-  "appearanceFontSizeLarge": "Large",
+  "appearanceFontSizeLarge": "大",
   "@appearanceFontSizeLarge": {
     "description": "Font size option: Large",
     "type": "String"
   },
-  "appearanceFontSizeXLarge": "X-Large",
+  "appearanceFontSizeXLarge": "特大",
   "@appearanceFontSizeXLarge": {
     "description": "Font size option: X-Large",
     "type": "String"
@@ -894,7 +898,7 @@
   "@setupAllowAccessToManageFiles": {
     "description": "Instruction for file access permission"
   },
-  "dialogCancel": "Cancel",
+  "dialogCancel": "取消",
   "@dialogCancel": {
     "description": "Dialog button - cancel action"
   },
@@ -1866,7 +1870,8 @@
   "@trackInstrumental": {
     "description": "Message when track is instrumental (no lyrics)"
   },
-  "trackCopiedToClipboard": "Copied to clipboard",
+  "copyCreatorLink": "复制创作者主页链接",
+  "trackCopiedToClipboard": "已复制到剪贴板",
   "@trackCopiedToClipboard": {
     "description": "Snackbar - content copied"
   },
@@ -6018,7 +6023,7 @@
   "@videoDetailSourceUnsupported": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "progress": "Progress",
+  "progress": "进度",
   "@progress": {
     "description": "Video player placeholder slider progress label"
   },

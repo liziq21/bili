@@ -9,17 +9,29 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   tearDownAll(router.dispose);
 
-  // Titles are the zh values from `app_zh.arb`: most settings labels are still
-  // English there, but the notifications page was translated.
-  for (final (path, title) in [
-    (Routes.settings, 'Settings'),
-    (Routes.settingsPlayer, 'Player'),
-    (Routes.settingsAppearance, 'Appearance'),
-    (Routes.settingsHistory, 'History'),
-    (Routes.settingsLibrary, 'Library'),
-    (Routes.settingsNotifications, '通知'),
-    (Routes.settingsAdvanced, 'Advanced'),
-    (Routes.settingsChannel, '频道'),
+  // 标题直接取 l10n：设置各页的标签都已本地化，把英文写死在测试里会在翻译
+  // 落地后整片变红。
+  String titleFor(AppLocalizations l10n, String path) => switch (path) {
+    Routes.settings => l10n.settingsTitle,
+    Routes.settingsPlayer => l10n.settingsPlayer,
+    Routes.settingsAppearance => l10n.settingsAppearance,
+    Routes.settingsHistory => l10n.settingsHistory,
+    Routes.settingsLibrary => l10n.settingsLibrary,
+    Routes.settingsNotifications => l10n.settingsNotifications,
+    Routes.settingsAdvanced => l10n.settingsAdvanced,
+    Routes.settingsChannel => l10n.settingsChannel,
+    _ => path,
+  };
+
+  for (final path in [
+    Routes.settings,
+    Routes.settingsPlayer,
+    Routes.settingsAppearance,
+    Routes.settingsHistory,
+    Routes.settingsLibrary,
+    Routes.settingsNotifications,
+    Routes.settingsAdvanced,
+    Routes.settingsChannel,
   ]) {
     testWidgets('$path opens without any source or preferences providers', (
       tester,
@@ -43,7 +55,11 @@ void main() {
 
         // Then only the requested settings page is visible and usable.
         expect(router.state.uri.path, path);
-        expect(find.widgetWithText(AppBar, title), findsOneWidget);
+        final l10n = AppLocalizations.of(tester.element(find.byType(AppBar)))!;
+        expect(
+          find.widgetWithText(AppBar, titleFor(l10n, path)),
+          findsOneWidget,
+        );
         expect(find.byType(NavigationBar), findsNothing);
         expect(find.byType(NavigationRail), findsNothing);
         expect(tester.takeException(), isNull);

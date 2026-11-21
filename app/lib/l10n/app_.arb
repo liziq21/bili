@@ -196,6 +196,10 @@
   "@librarySearchHistoryRetentionForever": {
     "description": "Retention option - keep forever"
   },
+  "danmakuSettingsSubtitle": "Opacity, font size, duration and how many rows pinned at the top and bottom",
+  "clearImageCache": "Clear image cache",
+  "clearImageCacheSubtitle": "Frees decoded images held in memory; covers reload when shown again",
+  "imageCacheCleared": "Image cache cleared",
   "settingsAdvanced": "Advanced",
   "@settingsAdvanced": {
     "description": "Settings group and subpage title - advanced options"
@@ -1866,6 +1870,7 @@
   "@trackInstrumental": {
     "description": "Message when track is instrumental (no lyrics)"
   },
+  "copyCreatorLink": "Copy creator page link",
   "trackCopiedToClipboard": "Copied to clipboard",
   "@trackCopiedToClipboard": {
     "description": "Snackbar - content copied"

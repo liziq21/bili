@@ -38,6 +38,7 @@ class const SearchRouteData({
               BlocProvider<SearchResultBloc<VideoModel>>(
                 create: (context) => SearchResultBloc<VideoModel>(
                   searchContentsRepository: searchContentsRepo,
+                  query: keyword,
                 ),
               ),
             if (context.read<CreatorProfileSearchRepository?>()
@@ -45,6 +46,7 @@ class const SearchRouteData({
               BlocProvider<SearchResultBloc<CreatorProfile>>(
                 create: (context) => SearchResultBloc<CreatorProfile>(
                   searchContentsRepository: searchContentsRepo,
+                  query: keyword,
                 ),
               ),
           ],

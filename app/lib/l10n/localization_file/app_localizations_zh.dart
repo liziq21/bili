@@ -16,7 +16,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get searchResultTypeAll => 'All';
+  String get searchResultTypeAll => '全部';
 
   @override
   String get searchResultTypeVideo => '视频';
@@ -25,7 +25,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navLibrary => 'Library';
 
   @override
-  String get navSettings => 'Settings';
+  String get navSettings => '设置';
 
   @override
   String get navStore => 'Repo';
@@ -55,10 +55,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get historySearchHint => 'Search history...';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => '设置';
 
   @override
-  String get settingsPlayer => 'Player';
+  String get settingsPlayer => '播放器';
 
   @override
   String get playerDefaultQuality => '默认画质';
@@ -117,24 +117,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settingsHistory => 'History';
+  String get settingsHistory => '历史记录';
 
   @override
-  String get historyRecording => 'Save watch history';
+  String get historyRecording => '保存观看历史';
 
   @override
-  String get historyRecordingSubtitle =>
-      'Keep watched videos in the local history';
+  String get historyRecordingSubtitle => '把看过的视频保存在本地历史中';
 
   @override
-  String get historyResumePlayback => 'Resume playback';
+  String get historyResumePlayback => '续播';
 
   @override
-  String get historyResumePlaybackSubtitle =>
-      'Continue videos from the last saved position';
+  String get historyResumePlaybackSubtitle => '从上次保存的位置继续播放';
 
   @override
-  String get settingsLibrary => 'Library';
+  String get settingsLibrary => '媒体库';
 
   @override
   String get libraryBookmarkSync => '同步收藏';
@@ -161,13 +159,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get librarySearchHistoryRetentionForever => '永久';
 
   @override
-  String get settingsAdvanced => 'Advanced';
+  String get danmakuSettingsSubtitle => '不透明度、字号、停留时长，以及顶部与底部各固定几行';
+
+  @override
+  String get clearImageCache => '清除图片缓存';
+
+  @override
+  String get clearImageCacheSubtitle => '释放内存中已解码的图片，封面在再次显示时重新解码';
+
+  @override
+  String get imageCacheCleared => '图片缓存已清除';
+
+  @override
+  String get settingsAdvanced => '高级';
 
   @override
   String get settingsDownload => 'Download';
 
   @override
-  String get settingsAppearance => 'Appearance';
+  String get settingsAppearance => '外观';
 
   @override
   String get settingsOptions => 'Options';
@@ -202,13 +212,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appearanceTitle => 'Appearance';
 
   @override
-  String get appearanceThemeSystem => 'System';
+  String get appearanceThemeSystem => '跟随系统';
 
   @override
-  String get appearanceThemeLight => 'Light';
+  String get appearanceThemeLight => '浅色';
 
   @override
-  String get appearanceThemeDark => 'Dark';
+  String get appearanceThemeDark => '深色';
 
   @override
   String get appearanceDynamicColor => 'Dynamic Color';
@@ -217,38 +227,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appearanceDynamicColorSubtitle => 'Use colors from your wallpaper';
 
   @override
-  String get appearanceTheme => 'Theme';
+  String get appearanceTheme => '主题';
 
   @override
   String get appearanceNightMode => 'Night Mode';
 
   @override
-  String get appearanceEyeComfort => 'Eye Comfort';
+  String get appearanceEyeComfort => '护眼模式';
 
   @override
-  String get appearanceThemeSubtitle => 'Theme mode for the app';
+  String get appearanceThemeSubtitle => '应用的主题模式';
 
   @override
-  String get appearanceFontSize => 'Font Size';
+  String get appearanceFontSize => '字号';
 
   @override
-  String get appearanceFontSizeSubtitle => 'Adjust text size across the app';
+  String get appearanceFontSizeSubtitle => '调整应用内文字大小';
 
   @override
-  String get appearanceEyeComfortSubtitle =>
-      'Reduce eye strain in dark environments';
+  String get appearanceEyeComfortSubtitle => '在暗环境下减轻视觉疲劳';
 
   @override
-  String get appearanceFontSizeSmall => 'Small';
+  String get appearanceFontSizeSmall => '小';
 
   @override
-  String get appearanceFontSizeStandard => 'Standard';
+  String get appearanceFontSizeStandard => '标准';
 
   @override
-  String get appearanceFontSizeLarge => 'Large';
+  String get appearanceFontSizeLarge => '大';
 
   @override
-  String get appearanceFontSizeXLarge => 'X-Large';
+  String get appearanceFontSizeXLarge => '特大';
 
   @override
   String get appearanceHistoryView => 'History View';
@@ -701,7 +710,7 @@ class AppLocalizationsZh extends AppLocalizations {
       'Please enable \"Allow access to manage all files\" in the next screen.';
 
   @override
-  String get dialogCancel => 'Cancel';
+  String get dialogCancel => '取消';
 
   @override
   String get dialogSave => 'Save';
@@ -1432,7 +1441,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackInstrumental => 'Instrumental track';
 
   @override
-  String get trackCopiedToClipboard => 'Copied to clipboard';
+  String get copyCreatorLink => '复制创作者主页链接';
+
+  @override
+  String get trackCopiedToClipboard => '已复制到剪贴板';
 
   @override
   String get trackDeleteConfirmTitle => 'Remove from device?';
@@ -4467,7 +4479,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoDetailSourceUnsupported => '当前数据源暂不支持查看视频详情';
 
   @override
-  String get progress => 'Progress';
+  String get progress => '进度';
 
   @override
   String get switchAction => '切换';

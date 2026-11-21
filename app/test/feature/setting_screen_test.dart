@@ -3,6 +3,7 @@ import 'package:app/feature/setting/advanced_settings_screen.dart';
 import 'package:app/feature/setting/appearance_settings_screen.dart';
 import 'package:app/feature/setting/library_settings_screen.dart';
 import 'package:app/feature/setting/setting_screen.dart';
+import 'package:app/feature/video/danmaku/danmaku_settings_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -46,7 +47,6 @@ void main() {
         expect(Localizations.localeOf(context), const Locale('zh'));
         expect(MaterialLocalizations.of(context), isNotNull);
         expect(find.widgetWithText(AppBar, l10n.settingsTitle), findsOneWidget);
-        expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
 
         final tiles = find.byType(ListTile);
         expect(tiles, findsNWidgets(8));
@@ -91,8 +91,20 @@ void main() {
           await tester.pump();
           expect(selections, isEmpty);
 
-          // When this group's actual tile is tapped.
-          await tester.tap(find.widgetWithText(ListTile, label));
+          // When this group's actual tile is tapped. 界面语言是 zh，标签要用
+          // l10n 取，不能用测试名里的英文名去匹配。
+          final l10n = AppLocalizations.of(
+            tester.element(find.byType(SettingScreen)),
+          )!;
+          final localizedLabel = switch (section) {
+            SettingsSection.player => l10n.settingsPlayer,
+            SettingsSection.appearance => l10n.settingsAppearance,
+            SettingsSection.history => l10n.settingsHistory,
+            SettingsSection.library => l10n.settingsLibrary,
+            SettingsSection.advanced => l10n.settingsAdvanced,
+            _ => label,
+          };
+          await tester.tap(find.widgetWithText(ListTile, localizedLabel));
           await tester.pump();
 
           // Then exactly one callback identifies that group.
@@ -164,30 +176,80 @@ void main() {
   });
 
   group('Settings subpages', () {
-    testWidgets('advanced page has a matching app bar and empty content', (
+    testWidgets('advanced page lists the danmaku entry and the cache action', (
       tester,
     ) async {
-      // Given a localized settings subpage.
+      // Given a localized advanced settings page.
       try {
-        // When the skeleton is rendered.
+        // When it is rendered.
         await tester.pumpWidget(_buildScreen(const AdvancedSettingsScreen()));
         await tester.pump();
 
-        // Then only its app bar title is present, with no settings content.
+        // Then the app bar names the page and both actions are listed.
         final l10n = AppLocalizations.of(tester.element(find.byType(AppBar)))!;
         expect(
           find.widgetWithText(AppBar, l10n.settingsAdvanced),
           findsOneWidget,
         );
-        expect(find.byType(ListTile), findsNothing);
-        final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+        expect(find.byType(ListTile), findsNWidgets(2));
         expect(
-          scaffold.body,
-          anyOf(
-            isNull,
-            isA<SizedBox>().having((body) => body.child, 'child', isNull),
-          ),
+          find.widgetWithText(ListTile, l10n.danmakuSettingsTitle),
+          findsOneWidget,
         );
+        expect(
+          find.widgetWithText(ListTile, l10n.clearImageCache),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    testWidgets('advanced page opens the danmaku settings page', (
+      tester,
+    ) async {
+      // Given the advanced page on screen.
+      try {
+        await tester.pumpWidget(_buildScreen(const AdvancedSettingsScreen()));
+        await tester.pump();
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(AdvancedSettingsScreen)),
+        )!;
+
+        // When the danmaku entry is tapped.
+        await tester.tap(
+          find.widgetWithText(ListTile, l10n.danmakuSettingsTitle),
+        );
+        await tester.pumpAndSettle();
+
+        // Then the danmaku settings page is pushed on top.
+        expect(find.byType(DanmakuSettingsScreen), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    testWidgets('advanced page reports a cleared image cache', (tester) async {
+      // Given the advanced page on screen.
+      try {
+        await tester.pumpWidget(_buildScreen(const AdvancedSettingsScreen()));
+        await tester.pump();
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(AdvancedSettingsScreen)),
+        )!;
+
+        // When the cache action is tapped.
+        await tester.tap(find.widgetWithText(ListTile, l10n.clearImageCache));
+        await tester.pump();
+
+        // Then the user is told the cache was cleared, and nothing throws.
+        // （内存图片缓存由 TestImageCache 接管，计数断言没有意义，这里断言
+        // 用户可见的结果。）
+        expect(find.text(l10n.imageCacheCleared), findsOneWidget);
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

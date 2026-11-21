@@ -41,6 +41,9 @@ class const AppSearchAnchor({
   /// 这里在 viewOnChanged 里截断，等价于旧 TextField 的
   /// [MaxLengthEnforcement.enforced]。
   final int maxQueryLength = 200,
+
+  /// 初始填入输入框的关键词。搜索结果页用它回显当前查询。
+  final String initialQuery = '',
 }) extends StatefulWidget {
   @override
   State<AppSearchAnchor> createState() => _AppSearchAnchorState();
@@ -108,6 +111,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   @override
   void initState() {
     super.initState();
+    _controller.text = widget.initialQuery;
     // 只在注册与注销之间持有回调：外部可能在 dispose 之后仍持有它，
     // 那时调用会打到已销毁的 controller。
     widget.onFocusInputReady?.call(focusInput);
@@ -116,6 +120,9 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   @override
   void didUpdateWidget(AppSearchAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialQuery != widget.initialQuery) {
+      _controller.text = widget.initialQuery;
+    }
     if (oldWidget.onFocusInputReady != widget.onFocusInputReady) {
       oldWidget.onFocusInputReady?.call(null);
       widget.onFocusInputReady?.call(focusInput);

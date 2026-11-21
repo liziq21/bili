@@ -89,6 +89,7 @@ Widget buildAnchor({
   List<RecentSearchQuery> recentSearchQuery = const [],
   void Function(String)? onDeleteRecentSearch,
   void Function()? onClearRecentSearch,
+  String initialQuery = '',
 }) {
   return MaterialApp(
     home: BlocProvider<SearchBloc>.value(
@@ -96,6 +97,7 @@ Widget buildAnchor({
       child: Scaffold(
         body: AppSearchAnchor(
           onSearch: onSearch,
+          initialQuery: initialQuery,
           recentSearchQuery: recentSearchQuery,
           onDeleteRecentSearch: onDeleteRecentSearch,
           onClearRecentSearch: onClearRecentSearch,
@@ -233,6 +235,48 @@ void main() {
       );
 
       expect(result, ['a', 'b', 'c', 'd']);
+    });
+  });
+
+  group('AppSearchAnchor initial query', () {
+    testWidgets('bar shows the query the result page was opened with', (
+      tester,
+    ) async {
+      // Given 结果页带着关键词打开搜索栏。
+      await tester.pumpWidget(
+        buildAnchor(
+          bloc: buildBloc(FakeSuggestRepository(const [])),
+          onSearch: (_) {},
+          useBar: true,
+          initialQuery: 'linux',
+        ),
+      );
+      await tester.pump();
+
+      // Then 输入框回显该关键词，而不是只剩占位提示。
+      expect(find.text('linux'), findsOneWidget);
+    });
+
+    testWidgets('bar picks up a new query when the widget is updated', (
+      tester,
+    ) async {
+      // Given 结果页已经渲染过一次。
+      Widget build(String query) => buildAnchor(
+        bloc: buildBloc(FakeSuggestRepository(const [])),
+        onSearch: (_) {},
+        useBar: true,
+        initialQuery: query,
+      );
+      await tester.pumpWidget(build('linux'));
+      await tester.pump();
+
+      // When 用另一个关键词重新打开结果页。
+      await tester.pumpWidget(build('dart'));
+      await tester.pump();
+
+      // Then 输入框跟着换成新关键词。
+      expect(find.text('dart'), findsOneWidget);
+      expect(find.text('linux'), findsNothing);
     });
   });
 

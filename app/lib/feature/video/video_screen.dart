@@ -60,6 +60,12 @@ class VideoScreenState() extends State<VideoScreen> {
   /// 播放队列解析结果。仅在进入页面时带 [VideoScreen.queue] 时有值。
   VideoQueueResult? _queueResult;
 
+  /// 详情到达后的视频元数据，用于给历史记录补上标题与封面。
+  ///
+  /// 进度读取先于详情，建历史行时只有 id；没有这一步，历史列表会一直显示
+  /// 原始 id 和空白封面。
+  VideoModel? _videoModel;
+
   /// 进度周期性保存定时器（每 10 秒）。
   Timer? _progressSaveTimer;
 
@@ -173,14 +179,45 @@ class VideoScreenState() extends State<VideoScreen> {
     final generation = ++_progressGeneration;
     final requestedVideoId = videoId ?? widget.videoId;
     try {
-      final mediaId = await dao.getOrCreateMediaId(
+      final mediaId = await dao.findMediaId(
         sourceId,
         requestedVideoId,
         Media.typeVideo,
       );
+      if (mediaId == null) return;
       final progress = await dao.getProgressForMedia(mediaId);
       if (generation != _progressGeneration) return;
       if (progress != null && progress > 0) _restorePositionSeconds = progress;
+    } catch (_) {}
+  }
+
+  /// 详情到达：记下元数据并立即补写历史行，避免只看几秒就退出时行里没有标题。
+  void _onVideoDetail(VideoModel? video) {
+    if (video == null) return;
+    _videoModel = video;
+    unawaited(_upsertHistoryMedia(video.id));
+  }
+
+  /// 用当前详情元数据补写历史行的标题、封面与作者。
+  Future<void> _upsertHistoryMedia(String videoId) async {
+    final dao = _mediaHistoryDao;
+    final sourceId = _sourceId;
+    if (dao == null || sourceId == null) return;
+    if (!_historySettings.shouldWriteHistory) return;
+    final video = _videoModel;
+    final matches = video != null && video.id == videoId;
+    try {
+      await dao.getOrCreateMediaId(
+        sourceId,
+        videoId,
+        Media.typeVideo,
+        title: matches ? video.title : null,
+        url: matches ? video.url : null,
+        thumbnailUrl: matches ? video.thumbnailUrl : null,
+        creatorProfileName: matches ? video.creatorProfileName : null,
+        creatorProfileId: matches ? video.creatorProfileId : null,
+        uploadDate: matches ? video.uploadDate : null,
+      );
     } catch (_) {}
   }
 
@@ -260,6 +297,7 @@ class VideoScreenState() extends State<VideoScreen> {
     if (positionSeconds < 10) return;
 
     try {
+      await _upsertHistoryMedia(widget.videoId);
       final mediaId = await dao.getOrCreateMediaId(
         _sourceId!,
         widget.videoId,
@@ -281,6 +319,7 @@ class VideoScreenState() extends State<VideoScreen> {
     final positionSeconds = controller.state.position.inSeconds;
     if (positionSeconds < 10) return;
     try {
+      await _upsertHistoryMedia(widget.videoId);
       final mediaId = await dao.getOrCreateMediaId(
         _sourceId!,
         widget.videoId,
@@ -347,6 +386,7 @@ class VideoScreenState() extends State<VideoScreen> {
             playbackController: controller,
             queue: _queueResult,
             onBackClick: widget.onBackClick,
+            onVideoDetail: _onVideoDetail,
             surfaceBuilder: widget.surfaceBuilder,
           ),
         ),
@@ -380,6 +420,7 @@ class const _VideoContent({
   required final MediaPlaybackController playbackController,
   final VideoQueueResult? queue,
   final VoidCallback? onBackClick,
+  final ValueChanged<VideoModel?>? onVideoDetail,
   final Widget Function(MediaPlaybackController controller)? surfaceBuilder,
 }) extends StatefulWidget {
   @override
@@ -453,6 +494,17 @@ class _VideoContentState() extends State<_VideoContent> {
 
   @override
   Widget build(BuildContext context) {
+    final onVideoDetail = widget.onVideoDetail;
+    if (onVideoDetail == null) return _buildBody(context);
+    return BlocListener<VideoBloc, VideoState>(
+      listenWhen: (previous, current) =>
+          previous.videoDetail != current.videoDetail,
+      listener: (context, state) => onVideoDetail(state.videoDetail?.video),
+      child: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
 
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayer.

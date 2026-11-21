@@ -392,6 +392,30 @@ abstract class AppLocalizations {
   /// **'Forever'**
   String get librarySearchHistoryRetentionForever;
 
+  /// No description provided for @danmakuSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opacity, font size, duration and how many rows pinned at the top and bottom'**
+  String get danmakuSettingsSubtitle;
+
+  /// No description provided for @clearImageCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear image cache'**
+  String get clearImageCache;
+
+  /// No description provided for @clearImageCacheSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frees decoded images held in memory; covers reload when shown again'**
+  String get clearImageCacheSubtitle;
+
+  /// No description provided for @imageCacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Image cache cleared'**
+  String get imageCacheCleared;
+
   /// Settings group and subpage title - advanced options
   ///
   /// In en, this message translates to:
@@ -2665,6 +2689,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Instrumental track'**
   String get trackInstrumental;
+
+  /// No description provided for @copyCreatorLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy creator page link'**
+  String get copyCreatorLink;
 
   /// Snackbar - content copied
   ///
