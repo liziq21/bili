@@ -74,15 +74,16 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     final sourceId = _sourceId;
     if (repository == null || sourceId == null) return;
 
+    final requestedMid = widget.mid;
     try {
-      final subscribed = await repository.isSubscribed(sourceId, widget.mid);
-      if (!mounted) return;
+      final subscribed = await repository.isSubscribed(sourceId, requestedMid);
+      if (!mounted || widget.mid != requestedMid) return;
       setState(() {
         _isSubscribed = subscribed;
         _subscriptionReady = true;
       });
     } on Exception {
-      if (!mounted) return;
+      if (!mounted || widget.mid != requestedMid) return;
       setState(() => _subscriptionReady = false);
     }
   }
@@ -92,6 +93,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     final sourceId = _sourceId;
     if (repository == null || sourceId == null) return;
 
+    final requestedMid = widget.mid;
     final target = !_isSubscribed;
     setState(() => _isSubscribed = target);
 
@@ -103,7 +105,9 @@ class _SpaceScreenState() extends State<SpaceScreen> {
       );
     } on Exception catch (error) {
       if (!mounted) return;
-      setState(() => _isSubscribed = !target);
+      if (widget.mid == requestedMid) {
+        setState(() => _isSubscribed = !target);
+      }
       final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
       ScaffoldMessenger.of(
         context,

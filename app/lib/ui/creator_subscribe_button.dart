@@ -38,7 +38,7 @@ class const CreatorSubscribeButton({
                 : $styles.colors.accentFill,
             foregroundColor: isSubscribed
                 ? $styles.colors.onSurface
-                : $styles.colors.onScrim,
+                : $styles.colors.onAccentFill,
             elevation: 0,
             padding: EdgeInsets.symmetric(
               horizontal: compact ? $styles.insets.xs : $styles.insets.sm,

@@ -62,6 +62,35 @@ class const FakeCreatorProfileSearchRepository({
   }
 }
 
+Future<void> _pumpUntil(WidgetTester tester, bool Function() condition) async {
+  for (var attempt = 0; attempt < 200; attempt++) {
+    if (condition()) return;
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  fail('condition not satisfied after 2 seconds');
+}
+
+Future<void> _waitForSubscription(
+  WidgetTester tester,
+  LocalLibraryRepository library, {
+  required bool subscribed,
+}) async {
+  for (var attempt = 0; attempt < 200; attempt++) {
+    final actual = await tester.runAsync(
+      () => library.isSubscribed('test', 'creator-1'),
+    );
+    if (actual == subscribed) return;
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  fail('subscription did not become $subscribed');
+}
+
 void main() {
   testWidgets(
     'SearchResultScreen renders fallback tab headers without raw identifier key',
@@ -337,34 +366,24 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    await _pumpUntil(
+      tester,
+      () => find.text('Subscribe').evaluate().isNotEmpty,
     );
-    await tester.pump();
-
-    expect(find.text('Subscribe'), findsOneWidget);
 
     await tester.tap(find.text('Subscribe'));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
-    );
-    await tester.pump();
-
-    expect(
-      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
-      isTrue,
+    await _waitForSubscription(tester, library, subscribed: true);
+    await _pumpUntil(
+      tester,
+      () => find.text('Unsubscribe').evaluate().isNotEmpty,
     );
     expect(find.text('Unsubscribe'), findsOneWidget);
 
     await tester.tap(find.text('Unsubscribe'));
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
-    );
-    await tester.pump();
-
-    expect(
-      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
-      isFalse,
+    await _waitForSubscription(tester, library, subscribed: false);
+    await _pumpUntil(
+      tester,
+      () => find.text('Subscribe').evaluate().isNotEmpty,
     );
     expect(find.text('Subscribe'), findsOneWidget);
 
