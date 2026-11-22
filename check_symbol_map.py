@@ -15,11 +15,28 @@ To update the symbol map:
 
 import sys
 import json
+import re
 import subprocess
 import argparse
 from pathlib import Path
 
 SYMBOL_INDEX = Path("/workspace/bili/symbol_index.json")
+
+# `--end-of-options` already stops git from reading the value as an option; this
+# additionally keeps out whitespace, control characters, revision ranges, and
+# shell metacharacters without narrowing the set of valid ref names.
+_UNSAFE_REF = re.compile(r"[\s\x00-\x1f\x7f$`;|&<>]")
+
+
+def is_safe_ref(ref: str) -> bool:
+    """Whether `ref` is a revision that cannot be read as an option or a range."""
+    return (
+        bool(ref)
+        and not ref.startswith("-")
+        and ".." not in ref
+        and not ref.endswith(".lock")
+        and not _UNSAFE_REF.search(ref)
+    )
 
 
 def get_changed_files(base: str) -> list[str]:
@@ -31,19 +48,19 @@ def get_changed_files(base: str) -> list[str]:
         # Use merge-base to find common ancestor, then diff from there to HEAD
         # This works correctly whether HEAD is ahead or behind base
         merge_base = subprocess.run(
-            ["git", "merge-base", base, "HEAD"],
+            ["git", "merge-base", "--end-of-options", base, "HEAD"],
             capture_output=True, text=True, cwd="/workspace/bili"
         ).stdout.strip()
         
         if not merge_base:
             # Fallback: direct diff (may show reverse if behind)
             result = subprocess.run(
-                ["git", "diff", "--name-only", f"{base}..HEAD"],
+                ["git", "diff", "--name-only", "--end-of-options", f"{base}..HEAD"],
                 capture_output=True, text=True, cwd="/workspace/bili"
             )
         else:
             result = subprocess.run(
-                ["git", "diff", "--name-only", f"{merge_base}..HEAD"],
+                ["git", "diff", "--name-only", "--end-of-options", f"{merge_base}..HEAD"],
                 capture_output=True, text=True, cwd="/workspace/bili"
             )
         
@@ -86,6 +103,10 @@ def main():
     parser.add_argument("--base", default="origin/main", help="Base ref to compare against")
     parser.add_argument("--update", action="store_true", help="Regenerate symbol map if stale")
     args = parser.parse_args()
+
+    if not is_safe_ref(args.base):
+        print(f"Invalid base ref: {args.base!r}", file=sys.stderr)
+        return 2
 
     changed = get_changed_files(args.base)
     if not changed:

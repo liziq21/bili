@@ -276,15 +276,32 @@ def run_git(*args: str) -> str:
     return result.stdout.strip()
 
 
+# `--end-of-options` already stops git from reading the value as an option; this
+# additionally keeps out whitespace, control characters, revision ranges, and
+# shell metacharacters without narrowing the set of valid ref names.
+_UNSAFE_REF = re.compile(r"[\s\x00-\x1f\x7f$`;|&<>]")
+
+
+def is_safe_rev(ref: str) -> bool:
+    """Whether `ref` is a revision that cannot be read as an option or a range."""
+    return (
+        bool(ref)
+        and not ref.startswith("-")
+        and ".." not in ref
+        and not ref.endswith(".lock")
+        and not _UNSAFE_REF.search(ref)
+    )
+
+
 def collect_tags(repo_root: str) -> list[tuple[str, dt.datetime]]:
     """Return `(tag, commit date)` newest first, newest by tag version order."""
     raw = run_git("-C", repo_root, "tag", "--sort=-v:refname")
     tags: list[tuple[str, dt.datetime]] = []
     for line in raw.splitlines():
         tag = line.strip()
-        if not tag:
+        if not tag or not is_safe_rev(tag):
             continue
-        stamp = run_git("-C", repo_root, "log", "-1", "--format=%cI", tag)
+        stamp = run_git("-C", repo_root, "log", "-1", "--format=%cI", "--end-of-options", tag)
         tags.append((tag, parse_iso(stamp)))
     return tags
 
@@ -366,20 +383,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("error: set GH_TOKEN or GITHUB_TOKEN", file=sys.stderr)
         return 1
 
+    repo_root = os.path.abspath(args.repo_root)
+    if not os.path.isdir(repo_root):
+        print(f"error: --repo-root is not a directory: {args.repo_root}", file=sys.stderr)
+        return 1
+
     if args.repo:
         repo_slug = parse_repo_slug(args.repo)
     else:
         try:
-            repo_slug = parse_repo_slug(run_git("-C", args.repo_root, "remote", "get-url", "origin"))
+            repo_slug = parse_repo_slug(run_git("-C", repo_root, "remote", "get-url", "origin"))
         except (subprocess.CalledProcessError, ValueError) as error:
             print(f"error: cannot determine repository: {error}", file=sys.stderr)
             return 1
 
-    tags = collect_tags(args.repo_root)
+    tags = collect_tags(repo_root)
     pull_requests = fetch_merged_pull_requests(repo_slug, token, args.base)
     document = build_document(tags, pull_requests)
 
-    output_path = os.path.join(args.repo_root, args.output) if args.repo_root != "." else args.output
+    output_path = os.path.join(repo_root, args.output)
     existing = None
     if os.path.exists(output_path):
         with open(output_path, encoding="utf-8") as handle:
