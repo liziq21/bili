@@ -93,6 +93,13 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                         bookmarked: false,
                       ),
                     ),
+                    onRemoveMany: (bookmarks) => _runOperation(
+                      () => _repository.deleteBookmarks(
+                        internalIds: bookmarks
+                            .map((bookmark) => bookmark.internalId)
+                            .toList(growable: false),
+                      ),
+                    ),
                   ),
                   _PlaylistsTab(
                     key: ValueKey('playlists-$_retry'),
@@ -370,12 +377,118 @@ class const _BookmarksTab({
   required final VoidCallback onRetry,
   required final bool busy,
   required final Future<void> Function(LocalBookmarkEntity bookmark) onRemove,
-}) extends StatelessWidget {
+  required final Future<void> Function(List<LocalBookmarkEntity> bookmarks)
+  onRemoveMany,
+}) extends StatefulWidget {
+  @override
+  State<_BookmarksTab> createState() => _BookmarksTabState();
+}
+
+class _BookmarksTabState() extends State<_BookmarksTab> {
+  final TextEditingController _searchController = TextEditingController();
+  final Set<int> _selected = <int>{};
+  bool _isEditing = false;
+  bool _searching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _startSearch() => setState(() => _searching = true);
+
+  void _stopSearch() {
+    _searchController.clear();
+    setState(() => _searching = false);
+  }
+
+  void _exitEditing() => setState(() {
+    _isEditing = false;
+    _selected.clear();
+  });
+
+  void _toggleSelection(int internalId) => setState(() {
+    if (!_selected.remove(internalId)) _selected.add(internalId);
+  });
+
+  void _toggleSelectAll(List<LocalBookmarkEntity> bookmarks) => setState(() {
+    if (_selected.length == bookmarks.length) {
+      _selected.clear();
+    } else {
+      _selected
+        ..clear()
+        ..addAll(bookmarks.map((bookmark) => bookmark.internalId));
+    }
+  });
+
+  Future<void> _confirmDelete(List<LocalBookmarkEntity> bookmarks) async {
+    final selected = bookmarks
+        .where((bookmark) => _selected.contains(bookmark.internalId))
+        .toList(growable: false);
+    if (selected.isEmpty) return;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.batchDeleteConfirm),
+        content: Text(l10n.batchDeleteNote(selected.length)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    await widget.onRemoveMany(selected);
+    if (!mounted) return;
+    _exitEditing();
+  }
+
+  Future<void> _export(List<LocalBookmarkEntity> bookmarks) async {
+    final selected = _isEditing
+        ? bookmarks
+              .where((bookmark) => _selected.contains(bookmark.internalId))
+              .toList(growable: false)
+        : bookmarks;
+    if (selected.isEmpty) return;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final messenger = ScaffoldMessenger.of(context);
+    final text = selected
+        .map((bookmark) => '${bookmark.title}\n${bookmark.url}')
+        .join('\n\n');
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } on Object {
+      if (!mounted) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.favoritesExportFailed)));
+      return;
+    }
+    if (!mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.trackCopiedToClipboard)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return StreamBuilder<List<LocalBookmarkEntity>>(
-      stream: stream,
+      stream: widget.stream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
@@ -390,77 +503,208 @@ class const _BookmarksTab({
             icon: AppIcons.error,
             message: l10n.favoritesLoadFailed,
             actionLabel: l10n.retry,
-            onAction: onRetry,
+            onAction: widget.onRetry,
           );
         }
-        final bookmarks = (snapshot.data ?? const <LocalBookmarkEntity>[])
+        final allBookmarks = (snapshot.data ?? const <LocalBookmarkEntity>[])
             .where(
-              (bookmark) => sourceId == null || bookmark.sourceId == sourceId,
+              (bookmark) =>
+                  widget.sourceId == null ||
+                  bookmark.sourceId == widget.sourceId,
             )
             .toList(growable: false);
-        if (bookmarks.isEmpty) {
+        if (allBookmarks.isEmpty) {
           return _LibraryMessage(
             icon: AppIcons.bookmark,
             message: l10n.noFavoritesYet,
           );
         }
-        return ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
-          itemCount: bookmarks.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final bookmark = bookmarks[index];
-            final creatorId = bookmark.creatorProfileId;
-            return ListTile(
-              leading: const _LibraryLeading(icon: AppIcons.bookmark),
-              title: Text(
-                bookmark.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                [
-                  ?sourceName(bookmark.sourceId),
-                  if (bookmark.creatorProfileName case final name?
-                      when name.isNotEmpty)
-                    name,
-                ].join(l10n.spacedDot),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              onTap: () {
-                HapticFeedback.lightImpact();
-                onVideoTap?.call(bookmark.sourceId, bookmark.originalId);
-              },
-              trailing: PopupMenuButton<_BookmarkAction>(
-                enabled: !busy,
-                tooltip: l10n.favoriteActions,
-                onSelected: (action) {
-                  switch (action) {
-                    case _BookmarkAction.remove:
-                      onRemove(bookmark);
-                    case _BookmarkAction.creator:
-                      if (creatorId != null && creatorId.isNotEmpty) {
-                        onCreatorTap?.call(bookmark.sourceId, creatorId);
-                      }
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (creatorId != null && creatorId.isNotEmpty)
-                    PopupMenuItem(
-                      value: _BookmarkAction.creator,
-                      child: Text(l10n.openCreator),
+        final query = _searchController.text.trim().toLowerCase();
+        final bookmarks = query.isEmpty
+            ? allBookmarks
+            : allBookmarks
+                  .where(
+                    (bookmark) =>
+                        bookmark.title.toLowerCase().contains(query) ||
+                        (bookmark.creatorProfileName?.toLowerCase().contains(
+                              query,
+                            ) ??
+                            false),
+                  )
+                  .toList(growable: false);
+        return Column(
+          children: [
+            _toolbar(l10n, bookmarks),
+            Expanded(
+              child: bookmarks.isEmpty
+                  ? _LibraryMessage(
+                      icon: AppIcons.search,
+                      message: l10n.listEmpty,
+                    )
+                  : ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        vertical: $styles.insets.xs,
+                      ),
+                      itemCount: bookmarks.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (context, index) =>
+                          _row(l10n, bookmarks[index]),
                     ),
-                  PopupMenuItem(
-                    value: _BookmarkAction.remove,
-                    child: Text(l10n.unfavorite),
-                  ),
-                ],
-              ),
-            );
-          },
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _toolbar(AppLocalizations l10n, List<LocalBookmarkEntity> bookmarks) {
+    final selectedCount = bookmarks
+        .where((bookmark) => _selected.contains(bookmark.internalId))
+        .length;
+    final allSelected =
+        bookmarks.isNotEmpty && selectedCount == bookmarks.length;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        $styles.insets.sm,
+        $styles.insets.xs,
+        $styles.insets.sm,
+        $styles.insets.xs,
+      ),
+      child: Column(
+        children: [
+          if (_searching)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: l10n.itemsSearchHint,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.cancel,
+                  icon: const Icon(AppIcons.close),
+                  onPressed: _stopSearch,
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                IconButton(
+                  tooltip: l10n.search,
+                  icon: const Icon(AppIcons.search),
+                  onPressed: _startSearch,
+                ),
+                IconButton(
+                  tooltip: l10n.exportFavorites,
+                  icon: const Icon(AppIcons.copy),
+                  onPressed:
+                      bookmarks.isEmpty || (_isEditing && selectedCount == 0)
+                      ? null
+                      : () => _export(bookmarks),
+                ),
+                const Spacer(),
+                if (_isEditing) ...[
+                  TextButton(
+                    onPressed: selectedCount == 0
+                        ? null
+                        : () => _confirmDelete(bookmarks),
+                    child: Text(l10n.deleteSelected),
+                  ),
+                  TextButton(onPressed: _exitEditing, child: Text(l10n.done)),
+                ] else
+                  OutlinedButton(
+                    onPressed: () => setState(() => _isEditing = true),
+                    child: Text(l10n.editMode),
+                  ),
+              ],
+            ),
+          if (_isEditing)
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => _toggleSelectAll(bookmarks),
+                  child: Text(
+                    allSelected ? l10n.actionDeselect : l10n.actionSelectAll,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  l10n.selectionSelected(selectedCount),
+                  style: $styles.text.bodySmall.copyWith(
+                    color: $styles.colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(AppLocalizations l10n, LocalBookmarkEntity bookmark) {
+    final creatorId = bookmark.creatorProfileId;
+    final isSelected = _selected.contains(bookmark.internalId);
+    return ListTile(
+      leading: _isEditing
+          ? Icon(
+              isSelected ? AppIcons.checkCircle : AppIcons.radioUnchecked,
+              color: isSelected
+                  ? $styles.colors.accentText
+                  : $styles.colors.onSurfaceVariant,
+            )
+          : const _LibraryLeading(icon: AppIcons.bookmark),
+      title: Text(bookmark.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        [
+          ?widget.sourceName(bookmark.sourceId),
+          if (bookmark.creatorProfileName case final name? when name.isNotEmpty)
+            name,
+        ].join(l10n.spacedDot),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        if (_isEditing) {
+          _toggleSelection(bookmark.internalId);
+        } else {
+          widget.onVideoTap?.call(bookmark.sourceId, bookmark.originalId);
+        }
+      },
+      trailing: _isEditing
+          ? null
+          : PopupMenuButton<_BookmarkAction>(
+              enabled: !widget.busy,
+              tooltip: l10n.favoriteActions,
+              onSelected: (action) {
+                switch (action) {
+                  case _BookmarkAction.remove:
+                    widget.onRemove(bookmark);
+                  case _BookmarkAction.creator:
+                    if (creatorId != null && creatorId.isNotEmpty) {
+                      widget.onCreatorTap?.call(bookmark.sourceId, creatorId);
+                    }
+                }
+              },
+              itemBuilder: (context) => [
+                if (creatorId != null && creatorId.isNotEmpty)
+                  PopupMenuItem(
+                    value: _BookmarkAction.creator,
+                    child: Text(l10n.openCreator),
+                  ),
+                PopupMenuItem(
+                  value: _BookmarkAction.remove,
+                  child: Text(l10n.unfavorite),
+                ),
+              ],
+            ),
     );
   }
 }

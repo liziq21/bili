@@ -6533,6 +6533,18 @@ abstract class AppLocalizations {
   /// **'收藏加载失败'**
   String get favoritesLoadFailed;
 
+  /// Tooltip for exporting the bookmark list to the clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportFavorites;
+
+  /// Snackbar shown when the bookmark list could not be copied
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get favoritesExportFailed;
+
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:

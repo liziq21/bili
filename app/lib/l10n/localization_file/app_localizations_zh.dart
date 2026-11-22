@@ -3801,6 +3801,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get favoritesLoadFailed => '收藏加载失败';
 
   @override
+  String get exportFavorites => '导出';
+
+  @override
+  String get favoritesExportFailed => '导出失败';
+
+  @override
   String get noFavoritesYet => '还没有收藏';
 
   @override

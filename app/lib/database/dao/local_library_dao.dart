@@ -53,6 +53,18 @@ class LocalLibraryDao(super.db)
         .go();
   }
 
+  Future<void> deleteBookmarks({required List<int> internalIds}) async {
+    if (internalIds.isEmpty) return;
+    await batch((batch) {
+      for (final internalId in internalIds) {
+        batch.deleteWhere(
+          localBookmark,
+          (bookmark) => bookmark.internalId.equals(internalId),
+        );
+      }
+    });
+  }
+
   Future<List<LocalBookmarkEntity>> getBookmarks() => _bookmarks().get();
 
   Stream<List<LocalBookmarkEntity>> watchBookmarks() => _bookmarks().watch();
