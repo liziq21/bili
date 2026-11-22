@@ -1040,6 +1040,114 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
     }
   }
 
+  /// 搜索过滤后的顺序不是用户的播放列表顺序，批量编辑时点击用于勾选，
+  /// 因此这两种状态下不挂拖拽，避免把过滤结果或误触写回 `position`。
+  bool get _canReorder =>
+      !_isEditing && !widget.busy && _searchController.text.trim().isEmpty;
+
+  Widget _list({
+    required List<LocalPlaylistItemEntity> allItems,
+    required List<LocalPlaylistItemEntity> items,
+  }) {
+    if (!_canReorder) {
+      return Column(
+        children: [
+          for (var index = 0; index < items.length; index++)
+            _row(allItems: allItems, items: items, index: index),
+        ],
+      );
+    }
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      itemCount: items.length,
+      onReorderItem: (oldIndex, newIndex) => _reorder(
+        allItems: allItems,
+        items: items,
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+      ),
+      itemBuilder: (context, index) => _row(
+        allItems: allItems,
+        items: items,
+        index: index,
+        dragIndex: index,
+      ),
+    );
+  }
+
+  Widget _row({
+    required List<LocalPlaylistItemEntity> allItems,
+    required List<LocalPlaylistItemEntity> items,
+    required int index,
+    int? dragIndex,
+  }) {
+    final item = items[index];
+    final actualIndex = allItems.indexWhere(
+      (entry) => entry.internalId == item.internalId,
+    );
+    return _PlaylistItemRow(
+      key: ValueKey(item.internalId),
+      item: item,
+      isFirst: index == 0,
+      isLast: index == items.length - 1,
+      busy: widget.busy,
+      onTap: () => widget.onVideoTap?.call(item.sourceId, item.originalId),
+      onRemove: widget.busy ? null : () => widget.onRemoveItem(item),
+      onMoveUp: index == 0 || actualIndex < 0
+          ? null
+          : () {
+              if (!widget.busy) {
+                widget.onMoveItem(item, actualIndex, actualIndex - 1);
+              }
+            },
+      onMoveDown: index == items.length - 1 || actualIndex < 0
+          ? null
+          : () {
+              if (!widget.busy) {
+                widget.onMoveItem(item, actualIndex, actualIndex + 1);
+              }
+            },
+      dragHandle: dragIndex == null
+          ? null
+          : ReorderableDragStartListener(
+              index: dragIndex,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: $styles.insets.xs),
+                child: Icon(
+                  AppIcons.dragHandle,
+                  color: $styles.colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+      isSelected: _selectedItems.contains(item.internalId),
+      onToggleSelect: _isEditing ? () => _toggleItem(item.internalId) : null,
+    );
+  }
+
+  /// [ReorderableListView.onReorderItem] 已经把「移除前的插入位」换算成
+  /// 「移除后的最终下标」，因此 [newIndex] 可以直接作为落库目标位置。
+  void _reorder({
+    required List<LocalPlaylistItemEntity> allItems,
+    required List<LocalPlaylistItemEntity> items,
+    required int oldIndex,
+    required int newIndex,
+  }) {
+    if (widget.busy || oldIndex == newIndex) return;
+    final moved = items[oldIndex];
+    final anchor = items[newIndex.clamp(0, items.length - 1)];
+    final fromIndex = allItems.indexWhere(
+      (item) => item.internalId == moved.internalId,
+    );
+    final toIndex = allItems.indexWhere(
+      (item) => item.internalId == anchor.internalId,
+    );
+    if (fromIndex < 0 || toIndex < 0 || fromIndex == toIndex) return;
+    HapticFeedback.selectionClick();
+    widget.onMoveItem(moved, fromIndex, toIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
@@ -1167,57 +1275,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
                       ),
                     ),
                   ),
-                for (var index = 0; index < items.length; index++)
-                  _PlaylistItemRow(
-                    key: ValueKey(items[index].internalId),
-                    item: items[index],
-                    isFirst: index == 0,
-                    isLast: index == items.length - 1,
-                    busy: widget.busy,
-                    onTap: () => widget.onVideoTap?.call(
-                      items[index].sourceId,
-                      items[index].originalId,
-                    ),
-                    onRemove: widget.busy
-                        ? null
-                        : () => widget.onRemoveItem(items[index]),
-                    onMoveUp: index == 0
-                        ? null
-                        : () {
-                            final actualIndex = allItems.indexWhere(
-                              (item) =>
-                                  item.internalId == items[index].internalId,
-                            );
-                            if (!widget.busy) {
-                              widget.onMoveItem(
-                                items[index],
-                                actualIndex,
-                                actualIndex - 1,
-                              );
-                            }
-                          },
-                    onMoveDown: index == items.length - 1
-                        ? null
-                        : () {
-                            final actualIndex = allItems.indexWhere(
-                              (item) =>
-                                  item.internalId == items[index].internalId,
-                            );
-                            if (!widget.busy) {
-                              widget.onMoveItem(
-                                items[index],
-                                actualIndex,
-                                actualIndex + 1,
-                              );
-                            }
-                          },
-                    isSelected: _selectedItems.contains(
-                      items[index].internalId,
-                    ),
-                    onToggleSelect: _isEditing
-                        ? () => _toggleItem(items[index].internalId)
-                        : null,
-                  ),
+                _list(allItems: allItems, items: items),
               ],
             );
           },
@@ -1237,6 +1295,7 @@ class const _PlaylistItemRow({
   required final VoidCallback? onRemove,
   required final VoidCallback? onMoveUp,
   required final VoidCallback? onMoveDown,
+  final Widget? dragHandle,
   final bool isSelected = false,
   final VoidCallback? onToggleSelect,
 }) extends StatelessWidget {
@@ -1265,33 +1324,39 @@ class const _PlaylistItemRow({
       },
       trailing: isEditing
           ? null
-          : PopupMenuButton<_PlaylistItemAction>(
-              enabled: !busy,
-              tooltip: l10n.itemActions,
-              onSelected: (action) {
-                switch (action) {
-                  case _PlaylistItemAction.up:
-                    onMoveUp?.call();
-                  case _PlaylistItemAction.down:
-                    onMoveDown?.call();
-                  case _PlaylistItemAction.remove:
-                    onRemove?.call();
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _PlaylistItemAction.up,
-                  enabled: !isFirst,
-                  child: Text(l10n.moveUp),
-                ),
-                PopupMenuItem(
-                  value: _PlaylistItemAction.down,
-                  enabled: !isLast,
-                  child: Text(l10n.moveDown),
-                ),
-                PopupMenuItem(
-                  value: _PlaylistItemAction.remove,
-                  child: Text(l10n.removeThisEntry),
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ?dragHandle,
+                PopupMenuButton<_PlaylistItemAction>(
+                  enabled: !busy,
+                  tooltip: l10n.itemActions,
+                  onSelected: (action) {
+                    switch (action) {
+                      case _PlaylistItemAction.up:
+                        onMoveUp?.call();
+                      case _PlaylistItemAction.down:
+                        onMoveDown?.call();
+                      case _PlaylistItemAction.remove:
+                        onRemove?.call();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: _PlaylistItemAction.up,
+                      enabled: !isFirst,
+                      child: Text(l10n.moveUp),
+                    ),
+                    PopupMenuItem(
+                      value: _PlaylistItemAction.down,
+                      enabled: !isLast,
+                      child: Text(l10n.moveDown),
+                    ),
+                    PopupMenuItem(
+                      value: _PlaylistItemAction.remove,
+                      child: Text(l10n.removeThisEntry),
+                    ),
+                  ],
                 ),
               ],
             ),
