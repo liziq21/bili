@@ -458,6 +458,18 @@ class FetchMergedPullRequestsTest(unittest.TestCase):
                 gc.fetch_merged_pull_requests("liziq21/bili", "t")
 
 
+class SafeRevTest(unittest.TestCase):
+    """Tag names reach `git log` as arguments, so option-like names are refused."""
+
+    def test_plain_revisions_are_allowed(self):
+        for rev in ["v1.0.0", "main", "release/1.2", "HEAD", "HEAD~2"]:
+            self.assertTrue(gc.is_safe_rev(rev), rev)
+
+    def test_option_or_path_like_values_are_rejected(self):
+        for rev in ["--upload-pack=evil", "-1", "", "a..b", "x.lock", "a b", "$(id)"]:
+            self.assertFalse(gc.is_safe_rev(rev), rev)
+
+
 class CollectTagsTest(unittest.TestCase):
     """Tag names decide the release sections, so their order is load-bearing."""
 
@@ -575,6 +587,21 @@ class MainTest(unittest.TestCase):
             with contextlib.redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(gc.main(["--repo", "liziq21/bili"]), 1)
         self.assertIn("GH_TOKEN", stderr.getvalue())
+        self.assertFalse(os.path.exists(self.path))
+
+    def test_a_missing_repo_root_fails_before_any_work(self):
+        with unittest.mock.patch.dict(os.environ, {"GH_TOKEN": "t"}):
+            with contextlib.redirect_stderr(io.StringIO()) as stderr:
+                code = gc.main(
+                    [
+                        "--repo",
+                        "liziq21/bili",
+                        "--repo-root",
+                        os.path.join(self.tmp.name, "does-not-exist"),
+                    ]
+                )
+        self.assertEqual(code, 1)
+        self.assertIn("--repo-root", stderr.getvalue())
         self.assertFalse(os.path.exists(self.path))
 
 if __name__ == "__main__":

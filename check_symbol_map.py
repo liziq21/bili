@@ -15,11 +15,21 @@ To update the symbol map:
 
 import sys
 import json
+import re
 import subprocess
 import argparse
 from pathlib import Path
 
 SYMBOL_INDEX = Path("/workspace/bili/symbol_index.json")
+
+# A git revision never starts with "-" and uses only these characters, so a
+# value such as "--upload-pack=..." cannot be parsed as an option.
+_SAFE_REF = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._/@+~^-]*\Z")
+
+
+def is_safe_ref(ref: str) -> bool:
+    """Whether `ref` is a plain revision that is safe to pass to git."""
+    return bool(_SAFE_REF.match(ref)) and ".." not in ref and not ref.endswith(".lock")
 
 
 def get_changed_files(base: str) -> list[str]:
@@ -31,19 +41,19 @@ def get_changed_files(base: str) -> list[str]:
         # Use merge-base to find common ancestor, then diff from there to HEAD
         # This works correctly whether HEAD is ahead or behind base
         merge_base = subprocess.run(
-            ["git", "merge-base", base, "HEAD"],
+            ["git", "merge-base", "--end-of-options", base, "HEAD"],
             capture_output=True, text=True, cwd="/workspace/bili"
         ).stdout.strip()
         
         if not merge_base:
             # Fallback: direct diff (may show reverse if behind)
             result = subprocess.run(
-                ["git", "diff", "--name-only", f"{base}..HEAD"],
+                ["git", "diff", "--name-only", "--end-of-options", f"{base}..HEAD"],
                 capture_output=True, text=True, cwd="/workspace/bili"
             )
         else:
             result = subprocess.run(
-                ["git", "diff", "--name-only", f"{merge_base}..HEAD"],
+                ["git", "diff", "--name-only", "--end-of-options", f"{merge_base}..HEAD"],
                 capture_output=True, text=True, cwd="/workspace/bili"
             )
         
@@ -86,6 +96,10 @@ def main():
     parser.add_argument("--base", default="origin/main", help="Base ref to compare against")
     parser.add_argument("--update", action="store_true", help="Regenerate symbol map if stale")
     args = parser.parse_args()
+
+    if not is_safe_ref(args.base):
+        print(f"Invalid base ref: {args.base!r}", file=sys.stderr)
+        return 2
 
     changed = get_changed_files(args.base)
     if not changed:

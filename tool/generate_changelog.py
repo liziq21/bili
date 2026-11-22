@@ -276,15 +276,25 @@ def run_git(*args: str) -> str:
     return result.stdout.strip()
 
 
+# A git revision never starts with "-" and uses only these characters, so a
+# value such as "--upload-pack=..." cannot be parsed as an option.
+_SAFE_REV = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._/@+~^-]*\Z")
+
+
+def is_safe_rev(rev: str) -> bool:
+    """Whether `rev` is a plain revision that is safe to pass to git."""
+    return bool(_SAFE_REV.match(rev)) and ".." not in rev and not rev.endswith(".lock")
+
+
 def collect_tags(repo_root: str) -> list[tuple[str, dt.datetime]]:
     """Return `(tag, commit date)` newest first, newest by tag version order."""
     raw = run_git("-C", repo_root, "tag", "--sort=-v:refname")
     tags: list[tuple[str, dt.datetime]] = []
     for line in raw.splitlines():
         tag = line.strip()
-        if not tag:
+        if not tag or not is_safe_rev(tag):
             continue
-        stamp = run_git("-C", repo_root, "log", "-1", "--format=%cI", tag)
+        stamp = run_git("-C", repo_root, "log", "-1", "--format=%cI", "--end-of-options", tag)
         tags.append((tag, parse_iso(stamp)))
     return tags
 
@@ -366,20 +376,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("error: set GH_TOKEN or GITHUB_TOKEN", file=sys.stderr)
         return 1
 
+    repo_root = os.path.abspath(args.repo_root)
+    if not os.path.isdir(repo_root):
+        print(f"error: --repo-root is not a directory: {args.repo_root}", file=sys.stderr)
+        return 1
+
     if args.repo:
         repo_slug = parse_repo_slug(args.repo)
     else:
         try:
-            repo_slug = parse_repo_slug(run_git("-C", args.repo_root, "remote", "get-url", "origin"))
+            repo_slug = parse_repo_slug(run_git("-C", repo_root, "remote", "get-url", "origin"))
         except (subprocess.CalledProcessError, ValueError) as error:
             print(f"error: cannot determine repository: {error}", file=sys.stderr)
             return 1
 
-    tags = collect_tags(args.repo_root)
+    tags = collect_tags(repo_root)
     pull_requests = fetch_merged_pull_requests(repo_slug, token, args.base)
     document = build_document(tags, pull_requests)
 
-    output_path = os.path.join(args.repo_root, args.output) if args.repo_root != "." else args.output
+    output_path = os.path.join(repo_root, args.output)
     existing = None
     if os.path.exists(output_path):
         with open(output_path, encoding="utf-8") as handle:
