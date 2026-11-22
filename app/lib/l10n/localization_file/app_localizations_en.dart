@@ -3816,6 +3816,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favoritesLoadFailed => '收藏加载失败';
 
   @override
+  String get exportFavorites => 'Export';
+
+  @override
+  String get favoritesExportFailed => 'Export failed';
+
+  @override
   String get noFavoritesYet => '还没有收藏';
 
   @override

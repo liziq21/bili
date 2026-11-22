@@ -39,6 +39,9 @@ class LocalLibraryRepository({required final LocalLibraryDao dao}) {
     }
   }
 
+  Future<void> deleteBookmarks({required List<int> internalIds}) =>
+      dao.deleteBookmarks(internalIds: internalIds);
+
   Future<List<LocalBookmarkEntity>> getBookmarks() => dao.getBookmarks();
 
   Future<bool> isSubscribed(String sourceId, String originalId) async {

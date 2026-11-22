@@ -2,12 +2,14 @@
 
 import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
+import 'package:app/design/design.dart';
 import 'package:app/feature/media_library/local_library_screen.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/navigation_callbacks.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -355,6 +357,118 @@ void main() {
     await tester.tap(find.text('重试'));
     await pumpLibrary(tester);
     expect(find.text('还没有收藏'), findsOneWidget);
+  });
+
+  testLibraryWidgets('filters bookmarks by title and creator', (tester) async {
+    for (final video in const [
+      VideoModel(
+        id: 'a',
+        title: 'Alpha video',
+        url: 'https://example.com/a',
+        creatorProfileName: 'First creator',
+      ),
+      VideoModel(
+        id: 'b',
+        title: 'Beta video',
+        url: 'https://example.com/b',
+        creatorProfileName: 'Second creator',
+      ),
+    ]) {
+      await repository.setBookmark(
+        sourceId: 'bilibili',
+        video: video,
+        bookmarked: true,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '收藏');
+    expect(find.text('Alpha video'), findsOneWidget);
+    expect(find.text('Beta video'), findsOneWidget);
+
+    await tester.tap(find.byIcon(AppIcons.search));
+    await pumpLibrary(tester);
+    await tester.enterText(find.byType(TextField), 'second creator');
+    await pumpLibrary(tester);
+
+    expect(find.text('Alpha video'), findsNothing);
+    expect(find.text('Beta video'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'alpha');
+    await pumpLibrary(tester);
+    expect(find.text('Alpha video'), findsOneWidget);
+    expect(find.text('Beta video'), findsNothing);
+  });
+
+  testLibraryWidgets('selects all bookmarks and deletes them in one batch', (
+    tester,
+  ) async {
+    for (final video in const [
+      VideoModel(id: 'a', title: 'First', url: 'https://example.com/a'),
+      VideoModel(id: 'b', title: 'Second', url: 'https://example.com/b'),
+      VideoModel(id: 'c', title: 'Third', url: 'https://example.com/c'),
+    ]) {
+      await repository.setBookmark(
+        sourceId: 'bilibili',
+        video: video,
+        bookmarked: true,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '收藏');
+
+    await tester.tap(find.text('编辑'));
+    await pumpLibrary(tester);
+    await tester.tap(find.text('Select All'));
+    await pumpLibrary(tester);
+    expect(find.text('3 selected'), findsOneWidget);
+
+    await tester.tap(find.text('删除选中'));
+    await pumpRoute(tester);
+    await tester.tap(find.text('删除').last);
+    await pumpLibrary(tester);
+
+    expect(find.text('还没有收藏'), findsOneWidget);
+    expect(await repository.getBookmarks(), isEmpty);
+  });
+
+  testLibraryWidgets('exports bookmarks to the clipboard', (tester) async {
+    await repository.setBookmark(
+      sourceId: 'bilibili',
+      video: const VideoModel(
+        id: 'a',
+        title: 'Alpha',
+        url: 'https://example.com/a',
+      ),
+      bookmarked: true,
+    );
+    final clipboardCalls = <MethodCall>[];
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') clipboardCalls.add(call);
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '收藏');
+
+    await tester.tap(find.byIcon(AppIcons.copy));
+    await pumpLibrary(tester);
+
+    expect(clipboardCalls, hasLength(1));
+    final text =
+        (clipboardCalls.single.arguments as Map<Object?, Object?>)['text']
+            as String;
+    expect(text, contains('Alpha'));
+    expect(text, contains('https://example.com/a'));
   });
 
   testLibraryWidgets('renames a playlist through the menu', (tester) async {

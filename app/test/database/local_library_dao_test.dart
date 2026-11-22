@@ -35,6 +35,26 @@ void main() {
     expect(await dao.isBookmarked('source-b', 'same-id'), isTrue);
   });
 
+  test('deletes only the requested bookmarks', () async {
+    await dao.saveBookmark(_bookmark('source-a', 'a', 'A'));
+    await dao.saveBookmark(_bookmark('source-a', 'b', 'B'));
+    await dao.saveBookmark(_bookmark('source-b', 'c', 'C'));
+
+    final all = await dao.getBookmarks();
+    await dao.deleteBookmarks(
+      internalIds: all
+          .where((bookmark) => bookmark.originalId != 'b')
+          .map((bookmark) => bookmark.internalId)
+          .toList(growable: false),
+    );
+
+    final remaining = await dao.getBookmarks();
+    expect(remaining.map((bookmark) => bookmark.originalId), ['b']);
+
+    await dao.deleteBookmarks(internalIds: const []);
+    expect(await dao.getBookmarks(), hasLength(1));
+  });
+
   test(
     'keeps duplicate playlist entries distinct and positions dense',
     () async {

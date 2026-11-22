@@ -5032,6 +5032,14 @@
   "@favoritesLoadFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
+  "exportFavorites": "Export",
+  "@exportFavorites": {
+    "description": "Tooltip for exporting the bookmark list to the clipboard"
+  },
+  "favoritesExportFailed": "Export failed",
+  "@favoritesExportFailed": {
+    "description": "Snackbar shown when the bookmark list could not be copied"
+  },
   "noFavoritesYet": "还没有收藏",
   "@noFavoritesYet": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
