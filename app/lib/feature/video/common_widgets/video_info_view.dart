@@ -123,7 +123,6 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             Divider(color: $styles.colors.outline.withValues(alpha: 0.2)),
             const _SynopsisSection(),
             const _ChaptersSection(),
-            const _UpInfoSection(),
             Gap($styles.insets.md),
             const _RecommendationsHeader(),
             Gap($styles.insets.xs),
@@ -922,89 +921,6 @@ class const _ChapterItem({
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// UP 主信息块：点击进入该 UP 主的空间页。
-class const _UpInfoSection() extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
-    final creator = context.select<VideoBloc, CreatorProfile?>(
-      (bloc) => bloc.state.videoDetail?.creator,
-    );
-    if (creator == null) return const SizedBox.shrink();
-    return Container(
-      margin: EdgeInsets.only(top: $styles.insets.md),
-      padding: EdgeInsets.all($styles.insets.xs),
-      decoration: BoxDecoration(
-        color: $styles.colors.surface,
-        borderRadius: BorderRadius.circular($styles.corners.md),
-        border: Border.all(
-          color: $styles.colors.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          context.navigateToSpace(creator.id);
-        },
-        borderRadius: BorderRadius.circular($styles.corners.md),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundImage:
-                  creator.thumbnailUrl != null &&
-                      creator.thumbnailUrl!.isNotEmpty
-                  ? ResizeImage.resizeIfNeeded(
-                      128,
-                      128,
-                      CachedNetworkImageProvider(creator.thumbnailUrl!),
-                    )
-                  : null,
-              child:
-                  creator.thumbnailUrl == null || creator.thumbnailUrl!.isEmpty
-                  ? const Icon(AppIcons.avatarFallback)
-                  : null,
-            ),
-            Gap($styles.insets.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    creator.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: $styles.text.bodyBold.copyWith(
-                      color: $styles.colors.onSurfaceStrong,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    l10n.followersCount(
-                      _formatCount(creator.subscribers ?? 0, l10n),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: $styles.text.bodySmall.copyWith(
-                      color: $styles.colors.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              AppIcons.chevronRight,
-              color: $styles.colors.onSurfaceVariant,
-              size: 20,
-            ),
-          ],
         ),
       ),
     );
