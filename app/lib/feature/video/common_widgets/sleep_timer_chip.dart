@@ -175,11 +175,23 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
     final result = await preferences.get(
       PreferencesKey.sleepTimerDefaultMinutes,
     );
+    final actionResult = await preferences.get(
+      PreferencesKey.sleepTimerDefaultAfterCurrent,
+    );
     if (!mounted || _userSelected) return;
+    final afterCurrent = switch (actionResult) {
+      Success(:final success) => success,
+      Error() => false,
+    };
     switch (result) {
       case Success(:final success)
           when settings.isValidSleepTimerMinutes(success):
-        _sleep.start(success);
+        _sleep.start(
+          success,
+          action: afterCurrent
+              ? SleepTimerAction.afterCurrent
+              : SleepTimerAction.pauseNow,
+        );
       case Success() || Error():
         break;
     }

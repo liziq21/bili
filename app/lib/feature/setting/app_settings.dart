@@ -62,12 +62,16 @@ final class const PlayerSettings({
 
   /// 睡眠定时器的默认档位（分钟）。0 表示进入播放器不自动开始计时。
   final int sleepTimerDefaultMinutes = 0,
+
+  /// 自动开始的睡眠定时器到点行为：true 表示播完当前条目再停。
+  final bool sleepTimerDefaultAfterCurrent = false,
 }) {
   PlayerSettings copyWith({
     double? playbackRate,
     Object? preferredQualityHeight = _unset,
     Object? preferredQualityStreamId = _unset,
     int? sleepTimerDefaultMinutes,
+    bool? sleepTimerDefaultAfterCurrent,
   }) => PlayerSettings(
     playbackRate: playbackRate ?? this.playbackRate,
     preferredQualityHeight: identical(preferredQualityHeight, _unset)
@@ -78,6 +82,8 @@ final class const PlayerSettings({
         : preferredQualityStreamId as int?,
     sleepTimerDefaultMinutes:
         sleepTimerDefaultMinutes ?? this.sleepTimerDefaultMinutes,
+    sleepTimerDefaultAfterCurrent:
+        sleepTimerDefaultAfterCurrent ?? this.sleepTimerDefaultAfterCurrent,
   );
 
   static Future<PlayerSettings> load(PreferencesDataSource preferences) async =>
@@ -102,6 +108,11 @@ final class const PlayerSettings({
           PreferencesKey.sleepTimerDefaultMinutes,
           0,
         ),
+        sleepTimerDefaultAfterCurrent: await readSetting(
+          preferences,
+          PreferencesKey.sleepTimerDefaultAfterCurrent,
+          false,
+        ),
       );
 
   Future<void> save(PreferencesDataSource preferences) => Future.wait([
@@ -120,6 +131,11 @@ final class const PlayerSettings({
       preferences,
       PreferencesKey.sleepTimerDefaultMinutes,
       sleepTimerDefaultMinutes,
+    ),
+    writeSetting(
+      preferences,
+      PreferencesKey.sleepTimerDefaultAfterCurrent,
+      sleepTimerDefaultAfterCurrent,
     ),
   ]);
 }

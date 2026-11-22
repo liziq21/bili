@@ -138,6 +138,12 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                   value: _sleepTimerLabel(l10n),
                   onTap: () => _showSleepTimerPicker(context),
                 ),
+                _valueTile(
+                  title: l10n.playerSleepTimerAction,
+                  subtitle: l10n.playerSleepTimerActionSubtitle,
+                  value: _sleepTimerActionLabel(l10n),
+                  onTap: () => _showSleepTimerActionPicker(context),
+                ),
               ],
             ),
     );
@@ -194,6 +200,43 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     final minutes = _playerSettings.sleepTimerDefaultMinutes;
     if (minutes == 0) return l10n.playerSleepTimerOff;
     return l10n.minutesValue('$minutes');
+  }
+
+  String _sleepTimerActionLabel(AppLocalizations l10n) =>
+      _playerSettings.sleepTimerDefaultAfterCurrent
+      ? l10n.sleepTimerAfterCurrentTitle
+      : l10n.sleepTimerActionNowLabel;
+
+  void _showSleepTimerActionPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            _pickerTitle(l10n.playerSleepTimerAction),
+            for (final afterCurrent in const [false, true])
+              _pickerOption(
+                title: afterCurrent
+                    ? l10n.sleepTimerAfterCurrentTitle
+                    : l10n.sleepTimerActionNowLabel,
+                selected:
+                    afterCurrent ==
+                    _playerSettings.sleepTimerDefaultAfterCurrent,
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _updatePlayer(
+                    _playerSettings.copyWith(
+                      sleepTimerDefaultAfterCurrent: afterCurrent,
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showQualityPicker(BuildContext context) {

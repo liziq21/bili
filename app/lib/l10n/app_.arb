@@ -145,6 +145,14 @@
   "@playerSleepTimerOff": {
     "description": "Value meaning that the default sleep timer is disabled"
   },
+  "playerSleepTimerAction": "When the sleep timer ends",
+  "@playerSleepTimerAction": {
+    "description": "Player setting - default sleep timer end action"
+  },
+  "playerSleepTimerActionSubtitle": "Pause immediately or finish the current video before stopping",
+  "@playerSleepTimerActionSubtitle": {
+    "description": "Subtitle for the default sleep timer end action setting"
+  },
   "playerQualityAuto": "Auto",
   "@playerQualityAuto": {
     "description": "Automatic player quality selection"

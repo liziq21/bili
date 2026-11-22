@@ -58,6 +58,14 @@ void main() {
     expect(find.text(l10n.playerQualityAuto), findsOneWidget);
     expect(find.text('1x'), findsOneWidget);
     expect(find.text(l10n.playerSleepTimerOff), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.playerSleepTimerAction),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text(l10n.playerSleepTimerAction), findsOneWidget);
+    expect(find.text(l10n.sleepTimerActionNowLabel), findsOneWidget);
   });
 
   testWidgets('changes player values and writes them to preferences', (
@@ -89,11 +97,22 @@ void main() {
     await tester.tap(find.text(l10n.minutesValue('30')));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.text(l10n.playerSleepTimerAction),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text(l10n.playerSleepTimerAction));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sleepTimerAfterCurrentTitle));
+    await tester.pumpAndSettle();
+
     final settings = await PlayerSettings.load(preferences);
     expect(settings.preferredQualityHeight, 1080);
     expect(settings.preferredQualityStreamId, isNull);
     expect(settings.playbackRate, 1.5);
     expect(settings.sleepTimerDefaultMinutes, 30);
+    expect(settings.sleepTimerDefaultAfterCurrent, isTrue);
   });
 
   testWidgets('saves a custom sleep timer duration', (tester) async {
@@ -135,6 +154,7 @@ void main() {
 
     expect(l10n.playerDefaultQuality, 'Default video quality');
     expect(l10n.playerGestures, 'Playback gestures');
+    expect(l10n.playerSleepTimerAction, 'When the sleep timer ends');
     expect(find.text(l10n.playerDefaultQuality), findsOneWidget);
     expect(find.text('默认画质'), findsNothing);
   });
