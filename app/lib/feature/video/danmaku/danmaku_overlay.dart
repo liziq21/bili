@@ -24,10 +24,12 @@ class const DanmakuOverlay({
 class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   StreamSubscription<PlaybackState>? _subscription;
   List<StreamSubscription>? _settingSubscriptions;
+  Timer? _settingsReloadTimer;
   PlaybackState? _playbackState;
   DanmakuSettings _settings = const DanmakuSettings();
   List<DanmakuComment> _comments = const [];
   int _loadGeneration = 0;
+  int _settingsGeneration = 0;
 
   @override
   void initState() {
@@ -43,48 +45,68 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   Future<void> _initialize() async {
     final preferences = context.read<PreferencesDataSource?>();
     if (preferences == null) return;
-    await _reloadSettings(preferences);
-    if (!mounted) return;
+    // Subscribe before the first read: a change made while it is in flight
+    // must not be missed.
     _subscribeSettings(preferences);
+    await _reloadSettings(preferences);
+    if (!mounted || _loadGeneration != 0) return;
     await _loadComments();
   }
 
   /// 弹幕开关、字号等设置由设置页修改后立即生效，不必等切换视频。
   void _subscribeSettings(PreferencesDataSource preferences) {
     if (_settingSubscriptions != null) return;
+    // `DanmakuSettings.save` writes all eight keys, so one adjustment emits
+    // eight events. Coalesce them into a single snapshot read.
+    void onChange(Object? _) => _scheduleSettingsReload();
+    void onError(Object _, StackTrace _) {}
     _settingSubscriptions = [
       preferences
           .streamOf(PreferencesKey.danmakuEnabled)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuRegularDuration)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuTopBottomDuration)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuOpacity)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuFontSize)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuOutlineRadius)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuTopMaxRows)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuBottomMaxRows)
-          .listen((_) => _reloadSettings()),
+          .listen(onChange, onError: onError),
     ];
+  }
+
+  void _scheduleSettingsReload() {
+    _settingsReloadTimer?.cancel();
+    _settingsReloadTimer = Timer(const Duration(milliseconds: 50), () {
+      if (!mounted) return;
+      unawaited(_reloadSettings());
+    });
   }
 
   Future<void> _reloadSettings([PreferencesDataSource? source]) async {
     final preferences = source ?? context.read<PreferencesDataSource?>();
     if (preferences == null) return;
-    final settings = await DanmakuSettings.load(preferences);
-    if (!mounted) return;
+    final generation = ++_settingsGeneration;
+    // A failed read keeps the value already on screen; the global defaults
+    // would otherwise turn danmaku back on mid-playback.
+    final settings = await DanmakuSettings.load(
+      preferences,
+      fallback: _settings,
+    );
+    if (!mounted || generation != _settingsGeneration) return;
     setState(() => _settings = settings);
   }
 
@@ -118,6 +140,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   void dispose() {
     _subscription?.cancel();
     _settingSubscriptions?.forEach((subscription) => subscription.cancel());
+    _settingsReloadTimer?.cancel();
     super.dispose();
   }
 

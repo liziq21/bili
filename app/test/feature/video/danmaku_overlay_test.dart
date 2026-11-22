@@ -5,6 +5,7 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/video/danmaku/danmaku_overlay.dart';
 import 'package:app/feature/video/danmaku/danmaku_painter.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -90,6 +91,12 @@ void main() {
   });
 
   Widget appFor(String videoId) => MaterialApp(
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      ...AppLocalizations.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Provider<PreferencesDataSource>.value(
       value: preferences,
       child: Provider<DanmakuRepository>.value(
@@ -160,6 +167,29 @@ void main() {
 
     // Then the same comments are shown again and BV1 was only fetched once.
     expect(_painterFinder, findsOneWidget);
+    expect(repository.requestedVideoIds, ['BV1']);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('applies display settings without refetching comments', (
+    tester,
+  ) async {
+    // Given an overlay showing comments with the default font size.
+    repository.result = Result.success([_comment('style')]);
+    await tester.pumpWidget(appFor('BV1'));
+    await tester.pumpAndSettle();
+    expect(_painterOf(tester).settings.fontSize, 18);
+
+    // When the user changes the font size from the settings page.
+    await preferences.set(PreferencesKey.danmakuFontSize, 30.0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.pump();
+    await tester.pump();
+
+    // Then the mounted painter picks it up without reloading the comments.
+    expect(_painterOf(tester).settings.fontSize, 30.0);
     expect(repository.requestedVideoIds, ['BV1']);
 
     await tester.pumpWidget(const SizedBox.shrink());

@@ -74,9 +74,17 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
     // ignore: close_sinks
     final controller = StreamController<R>.broadcast(
       onListen: () async {
-        final initialData = await fetchInitialData();
-        if (cacheMap.containsKey(cacheKey) && !cacheMap[cacheKey]!.isClosed) {
-          cacheMap[cacheKey]!.add(initialData);
+        try {
+          final initialData = await fetchInitialData();
+          if (cacheMap.containsKey(cacheKey) && !cacheMap[cacheKey]!.isClosed) {
+            cacheMap[cacheKey]!.add(initialData);
+          }
+        } on Object catch (error, stackTrace) {
+          // Surface the failure to subscribers instead of leaving it as an
+          // unhandled async error from this callback.
+          if (cacheMap.containsKey(cacheKey) && !cacheMap[cacheKey]!.isClosed) {
+            cacheMap[cacheKey]!.addError(error, stackTrace);
+          }
         }
       },
       onCancel: () => cacheMap.remove(cacheKey),

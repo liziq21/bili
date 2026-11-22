@@ -49,6 +49,35 @@ void _paint(
   recorder.endRecording().dispose();
 }
 
+/// Counts pixels with a non-zero alpha so a painter that silently draws nothing
+/// fails instead of merely returning without throwing.
+Future<int> _paintedPixelCount(
+  List<DanmakuComment> comments, {
+  Duration position = const Duration(seconds: 1),
+  Size size = _size,
+}) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+  DanmakuPainter(
+    comments: comments,
+    position: position,
+    settings: const DanmakuSettings(),
+    colors: _colors,
+  ).paint(canvas, size);
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(size.width.toInt(), size.height.toInt());
+  final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  image.dispose();
+  picture.dispose();
+  if (data == null) return 0;
+  final bytes = data.buffer.asUint8List();
+  var count = 0;
+  for (var i = 3; i < bytes.length; i += 4) {
+    if (bytes[i] != 0) count++;
+  }
+  return count;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -195,6 +224,26 @@ void main() {
         () => _paint([_comment(DanmakuMode.scrolling)], size: Size.zero),
         returnsNormally,
       );
+    });
+
+    test('draws visible pixels for an on-screen comment', () async {
+      // Given a comment that should be visible one second in.
+      // When rasterising the frame.
+      final painted = await _paintedPixelCount([
+        _comment(DanmakuMode.scrolling),
+      ]);
+
+      // Then the painter actually wrote pixels, not just returned.
+      expect(painted, greaterThan(0));
+    });
+
+    test('leaves the canvas blank when there are no comments', () async {
+      // Given an empty comment list.
+      // When rasterising the frame.
+      final painted = await _paintedPixelCount(const []);
+
+      // Then nothing is drawn, so the positive case above is meaningful.
+      expect(painted, 0);
     });
 
     test('paints a dense frame of over one thousand comments', () {
