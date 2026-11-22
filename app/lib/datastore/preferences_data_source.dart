@@ -71,15 +71,32 @@ class PreferencesDataSource({SharedPreferencesAsync? sharedPreferences}) {
       return cacheMap[cacheKey]!.stream as Stream<R>;
     }
 
+    late final StreamController<R> controller;
     // ignore: close_sinks
-    final controller = StreamController<R>.broadcast(
+    controller = StreamController<R>.broadcast(
       onListen: () async {
-        final initialData = await fetchInitialData();
-        if (cacheMap.containsKey(cacheKey) && !cacheMap[cacheKey]!.isClosed) {
-          cacheMap[cacheKey]!.add(initialData);
+        try {
+          final initialData = await fetchInitialData();
+          // The listener may have been cancelled and a new controller cached
+          // under the same key while this read was in flight.
+          if (identical(cacheMap[cacheKey], controller) &&
+              !controller.isClosed) {
+            controller.add(initialData);
+          }
+        } on Object catch (error, stackTrace) {
+          // Surface the failure to subscribers instead of leaving it as an
+          // unhandled async error from this callback.
+          if (identical(cacheMap[cacheKey], controller) &&
+              !controller.isClosed) {
+            controller.addError(error, stackTrace);
+          }
         }
       },
-      onCancel: () => cacheMap.remove(cacheKey),
+      onCancel: () {
+        if (identical(cacheMap[cacheKey], controller)) {
+          cacheMap.remove(cacheKey);
+        }
+      },
     );
 
     cacheMap[cacheKey] = controller;

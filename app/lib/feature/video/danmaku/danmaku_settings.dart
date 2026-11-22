@@ -34,27 +34,50 @@ final class const DanmakuSettings({
     bottomMaxRows: bottomMaxRows ?? this.bottomMaxRows,
   );
 
-  static Future<DanmakuSettings> load(PreferencesDataSource preferences) async {
+  static Future<DanmakuSettings> load(
+    PreferencesDataSource preferences, {
+    DanmakuSettings fallback = const DanmakuSettings(),
+  }) async {
     return DanmakuSettings(
-      enabled: await _read(preferences, PreferencesKey.danmakuEnabled),
+      enabled: await _read(
+        preferences,
+        PreferencesKey.danmakuEnabled,
+        fallback.enabled,
+      ),
       regularDuration: await _read(
         preferences,
         PreferencesKey.danmakuRegularDuration,
+        fallback.regularDuration,
       ),
       topBottomDuration: await _read(
         preferences,
         PreferencesKey.danmakuTopBottomDuration,
+        fallback.topBottomDuration,
       ),
-      opacity: await _read(preferences, PreferencesKey.danmakuOpacity),
-      fontSize: await _read(preferences, PreferencesKey.danmakuFontSize),
+      opacity: await _read(
+        preferences,
+        PreferencesKey.danmakuOpacity,
+        fallback.opacity,
+      ),
+      fontSize: await _read(
+        preferences,
+        PreferencesKey.danmakuFontSize,
+        fallback.fontSize,
+      ),
       outlineRadius: await _read(
         preferences,
         PreferencesKey.danmakuOutlineRadius,
+        fallback.outlineRadius,
       ),
-      topMaxRows: await _read(preferences, PreferencesKey.danmakuTopMaxRows),
+      topMaxRows: await _read(
+        preferences,
+        PreferencesKey.danmakuTopMaxRows,
+        fallback.topMaxRows,
+      ),
       bottomMaxRows: await _read(
         preferences,
         PreferencesKey.danmakuBottomMaxRows,
+        fallback.bottomMaxRows,
       ),
     );
   }
@@ -79,11 +102,12 @@ final class const DanmakuSettings({
   static Future<T> _read<T>(
     PreferencesDataSource preferences,
     PreferencesKey<T> key,
+    T fallback,
   ) async {
     final result = await preferences.get(key);
     return switch (result) {
       Success(:final success) => success,
-      Error() => key.defaultValue,
+      Error() => fallback,
     };
   }
 

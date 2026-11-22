@@ -23,10 +23,13 @@ class const DanmakuOverlay({
 
 class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   StreamSubscription<PlaybackState>? _subscription;
+  List<StreamSubscription>? _settingSubscriptions;
+  Timer? _settingsReloadTimer;
   PlaybackState? _playbackState;
   DanmakuSettings _settings = const DanmakuSettings();
   List<DanmakuComment> _comments = const [];
   int _loadGeneration = 0;
+  int _settingsGeneration = 0;
 
   @override
   void initState() {
@@ -36,25 +39,88 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
-    unawaited(_load());
+    unawaited(_initialize());
   }
 
-  Future<void> _load() async {
-    final generation = ++_loadGeneration;
+  Future<void> _initialize() async {
     final preferences = context.read<PreferencesDataSource?>();
     if (preferences == null) return;
+    // Subscribe before the first read: a change made while it is in flight
+    // must not be missed.
+    _subscribeSettings(preferences);
+    await _reloadSettings(preferences);
+    if (!mounted || _loadGeneration != 0) return;
+    await _loadComments();
+  }
+
+  /// 弹幕开关、字号等设置由设置页修改后立即生效，不必等切换视频。
+  void _subscribeSettings(PreferencesDataSource preferences) {
+    if (_settingSubscriptions != null) return;
+    // `DanmakuSettings.save` writes all eight keys, so one adjustment emits
+    // eight events. Coalesce them into a single snapshot read.
+    void onChange(Object? _) => _scheduleSettingsReload();
+    void onError(Object _, StackTrace _) {}
+    _settingSubscriptions = [
+      preferences
+          .streamOf(PreferencesKey.danmakuEnabled)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuRegularDuration)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuTopBottomDuration)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuOpacity)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuFontSize)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuOutlineRadius)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuTopMaxRows)
+          .listen(onChange, onError: onError),
+      preferences
+          .streamOf(PreferencesKey.danmakuBottomMaxRows)
+          .listen(onChange, onError: onError),
+    ];
+  }
+
+  void _scheduleSettingsReload() {
+    _settingsReloadTimer?.cancel();
+    _settingsReloadTimer = Timer(const Duration(milliseconds: 50), () {
+      if (!mounted) return;
+      unawaited(_reloadSettings());
+    });
+  }
+
+  Future<void> _reloadSettings([PreferencesDataSource? source]) async {
+    final preferences = source ?? context.read<PreferencesDataSource?>();
+    if (preferences == null) return;
+    final generation = ++_settingsGeneration;
+    // A failed read keeps the value already on screen; the global defaults
+    // would otherwise turn danmaku back on mid-playback.
+    final settings = await DanmakuSettings.load(
+      preferences,
+      fallback: _settings,
+    );
+    if (!mounted || generation != _settingsGeneration) return;
+    setState(() => _settings = settings);
+  }
+
+  Future<void> _loadComments() async {
+    final generation = ++_loadGeneration;
     final repository = context.read<DanmakuRepository?>();
-    final settings = await DanmakuSettings.load(preferences);
-    if (generation != _loadGeneration) return;
     if (repository == null) {
-      if (mounted) setState(() => _settings = settings);
+      if (mounted) setState(() => _comments = const []);
       return;
     }
 
     final result = await repository.getDanmaku(widget.videoId);
     if (!mounted || generation != _loadGeneration) return;
     setState(() {
-      _settings = settings;
       _comments = switch (result) {
         Success(:final success) => success,
         _ => const [],
@@ -67,12 +133,14 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.videoId == widget.videoId) return;
     setState(() => _comments = const []);
-    unawaited(_load());
+    unawaited(_loadComments());
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _settingSubscriptions?.forEach((subscription) => subscription.cancel());
+    _settingsReloadTimer?.cancel();
     super.dispose();
   }
 
