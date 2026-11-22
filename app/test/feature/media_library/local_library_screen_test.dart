@@ -651,6 +651,78 @@ void main() {
       expect(played.single, ['a', 'b']);
     },
   );
+
+  testLibraryWidgets('drag-reorders playlist items and persists the order', (
+    tester,
+  ) async {
+    final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+    for (final video in const [
+      VideoModel(id: 'a', title: 'Alpha video', url: 'https://example.com/a'),
+      VideoModel(id: 'b', title: 'Beta video', url: 'https://example.com/b'),
+      VideoModel(id: 'c', title: 'Gamma video', url: 'https://example.com/c'),
+    ]) {
+      await repository.addToPlaylist(
+        playlistId: playlistId,
+        sourceId: 'bilibili',
+        video: video,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '播放列表');
+
+    final handles = find.byIcon(AppIcons.dragHandle);
+    expect(handles, findsNWidgets(3));
+
+    // Given 抓住第一条的拖拽手柄。
+    final gesture = await tester.startGesture(tester.getCenter(handles.first));
+    await tester.pump();
+    // When 向下拖过另外两条。
+    for (var step = 0; step < 10; step++) {
+      await gesture.moveBy(const Offset(0, 12));
+      await tester.pump();
+    }
+    await gesture.up();
+    await pumpLibrary(tester);
+
+    // Then 落库顺序跟着拖拽结果走。
+    final items = await repository.getPlaylistItems(playlistId);
+    expect(items.map((item) => item.originalId), ['b', 'c', 'a']);
+  });
+
+  testLibraryWidgets('hides drag handles while searching or editing', (
+    tester,
+  ) async {
+    final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+    for (final video in const [
+      VideoModel(id: 'a', title: 'Alpha video', url: 'https://example.com/a'),
+      VideoModel(id: 'b', title: 'Beta video', url: 'https://example.com/b'),
+    ]) {
+      await repository.addToPlaylist(
+        playlistId: playlistId,
+        sourceId: 'bilibili',
+        video: video,
+      );
+    }
+
+    await tester.pumpWidget(app(screen()));
+    await pumpLibrary(tester);
+    await openTab(tester, '播放列表');
+    expect(find.byIcon(AppIcons.dragHandle), findsNWidgets(2));
+
+    await tester.enterText(find.byType(TextField), 'Alpha');
+    await pumpLibrary(tester);
+    expect(find.byIcon(AppIcons.dragHandle), findsNothing);
+
+    await tester.enterText(find.byType(TextField), '');
+    await pumpLibrary(tester);
+    expect(find.byIcon(AppIcons.dragHandle), findsNWidgets(2));
+
+    await tester.tap(find.text('编辑'));
+    await pumpLibrary(tester);
+    expect(find.byIcon(AppIcons.dragHandle), findsNothing);
+  });
 }
 
 MediaSource _bilibili() => const _FakeSource(id: 'bilibili', name: 'Bilibili');
