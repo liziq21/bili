@@ -22,14 +22,21 @@ from pathlib import Path
 
 SYMBOL_INDEX = Path("/workspace/bili/symbol_index.json")
 
-# A git revision never starts with "-" and uses only these characters, so a
-# value such as "--upload-pack=..." cannot be parsed as an option.
-_SAFE_REF = re.compile(r"\A[A-Za-z0-9_][A-Za-z0-9._/@+~^-]*\Z")
+# `--end-of-options` already stops git from reading the value as an option; this
+# additionally keeps out whitespace, control characters, revision ranges, and
+# shell metacharacters without narrowing the set of valid ref names.
+_UNSAFE_REF = re.compile(r"[\s\x00-\x1f\x7f$`;|&<>]")
 
 
 def is_safe_ref(ref: str) -> bool:
-    """Whether `ref` is a plain revision that is safe to pass to git."""
-    return bool(_SAFE_REF.match(ref)) and ".." not in ref and not ref.endswith(".lock")
+    """Whether `ref` is a revision that cannot be read as an option or a range."""
+    return (
+        bool(ref)
+        and not ref.startswith("-")
+        and ".." not in ref
+        and not ref.endswith(".lock")
+        and not _UNSAFE_REF.search(ref)
+    )
 
 
 def get_changed_files(base: str) -> list[str]:

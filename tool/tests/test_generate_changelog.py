@@ -462,7 +462,16 @@ class SafeRevTest(unittest.TestCase):
     """Tag names reach `git log` as arguments, so option-like names are refused."""
 
     def test_plain_revisions_are_allowed(self):
-        for rev in ["v1.0.0", "main", "_feature", "release/1.2", "HEAD", "HEAD~2"]:
+        for rev in [
+            "v1.0.0",
+            "main",
+            "_feature",
+            "release/1.2",
+            "HEAD",
+            "HEAD~2",
+            "feat/issue#12",
+            "fix/a=b",
+        ]:
             self.assertTrue(gc.is_safe_rev(rev), rev)
 
     def test_option_or_path_like_values_are_rejected(self):
