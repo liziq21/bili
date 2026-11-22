@@ -23,6 +23,7 @@ class const DanmakuOverlay({
 
 class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   StreamSubscription<PlaybackState>? _subscription;
+  List<StreamSubscription>? _settingSubscriptions;
   PlaybackState? _playbackState;
   DanmakuSettings _settings = const DanmakuSettings();
   List<DanmakuComment> _comments = const [];
@@ -36,25 +37,68 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
       if (!mounted) return;
       setState(() => _playbackState = state);
     });
-    unawaited(_load());
+    unawaited(_initialize());
   }
 
-  Future<void> _load() async {
-    final generation = ++_loadGeneration;
+  Future<void> _initialize() async {
     final preferences = context.read<PreferencesDataSource?>();
     if (preferences == null) return;
-    final repository = context.read<DanmakuRepository?>();
+    await _reloadSettings(preferences);
+    if (!mounted) return;
+    _subscribeSettings(preferences);
+    await _loadComments();
+  }
+
+  /// 弹幕开关、字号等设置由设置页修改后立即生效，不必等切换视频。
+  void _subscribeSettings(PreferencesDataSource preferences) {
+    if (_settingSubscriptions != null) return;
+    _settingSubscriptions = [
+      preferences
+          .streamOf(PreferencesKey.danmakuEnabled)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuRegularDuration)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuTopBottomDuration)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuOpacity)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuFontSize)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuOutlineRadius)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuTopMaxRows)
+          .listen((_) => _reloadSettings()),
+      preferences
+          .streamOf(PreferencesKey.danmakuBottomMaxRows)
+          .listen((_) => _reloadSettings()),
+    ];
+  }
+
+  Future<void> _reloadSettings([PreferencesDataSource? source]) async {
+    final preferences = source ?? context.read<PreferencesDataSource?>();
+    if (preferences == null) return;
     final settings = await DanmakuSettings.load(preferences);
-    if (generation != _loadGeneration) return;
+    if (!mounted) return;
+    setState(() => _settings = settings);
+  }
+
+  Future<void> _loadComments() async {
+    final generation = ++_loadGeneration;
+    final repository = context.read<DanmakuRepository?>();
     if (repository == null) {
-      if (mounted) setState(() => _settings = settings);
+      if (mounted) setState(() => _comments = const []);
       return;
     }
 
     final result = await repository.getDanmaku(widget.videoId);
     if (!mounted || generation != _loadGeneration) return;
     setState(() {
-      _settings = settings;
       _comments = switch (result) {
         Success(:final success) => success,
         _ => const [],
@@ -67,12 +111,13 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.videoId == widget.videoId) return;
     setState(() => _comments = const []);
-    unawaited(_load());
+    unawaited(_loadComments());
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _settingSubscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
   }
 

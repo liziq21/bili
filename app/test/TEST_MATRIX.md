@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 83 |
-| widget | 59 |
+| unit | 84 |
+| widget | 60 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **165** |
+| **合计** | **167** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（83）
+## unit（84）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -54,6 +54,7 @@
 - `app/test/feature/setting/channel_tab_settings_test.dart`
 - `app/test/feature/space/channel_videos_cubit_test.dart`
 - `app/test/feature/video/danmaku_lane_test.dart`
+- `app/test/feature/video/danmaku_painter_test.dart`
 - `app/test/feature/video/media_stream_bloc_test.dart`
 - `app/test/feature/video/player/media_edl_test.dart`
 - `app/test/feature/video/player/media_playback_controller_test.dart`
@@ -110,7 +111,7 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 
-## widget（59）
+## widget（60）
 
 - `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/danmaku_settings_screen_test.dart`
@@ -126,6 +127,7 @@
 - `app/test/feature/home_filter_bar_test.dart`
 - `app/test/feature/home_source_selector_test.dart`
 - `app/test/feature/live/live_danmaku_overlay_test.dart`
+- `app/test/feature/video/danmaku_overlay_test.dart`
 - `app/test/feature/live/live_quality_chip_test.dart`
 - `app/test/feature/live/live_screen_test.dart`
 - `app/test/feature/library_settings_screen_test.dart`

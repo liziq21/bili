@@ -139,6 +139,38 @@ int? _claimLane(
   return null;
 }
 
+/// 单条弹幕在画面上的落点。
+///
+/// 顶部/底部弹幕水平居中并停在自己的轨道上；滚动弹幕从右向左穿过画面，
+/// 逆向弹幕从左向右。`progress` 为 0 时在入场边缘，1 时在出场边缘。
+///
+/// 抽成纯函数是为了让四种模式的落点可以被直接断言，不必截图比对像素。
+@visibleForTesting
+Offset danmakuTextOffset({
+  required Size size,
+  required double textWidth,
+  required DanmakuMode mode,
+  required int lane,
+  required double lineHeight,
+  required double progress,
+}) {
+  return switch (mode) {
+    DanmakuMode.top => Offset((size.width - textWidth) / 2, lane * lineHeight),
+    DanmakuMode.bottom => Offset(
+      (size.width - textWidth) / 2,
+      size.height - (lane + 1) * lineHeight,
+    ),
+    DanmakuMode.reverse => Offset(
+      progress * (size.width + textWidth) - textWidth,
+      lane * lineHeight,
+    ),
+    DanmakuMode.scrolling || DanmakuMode.special => Offset(
+      size.width - progress * (size.width + textWidth),
+      lane * lineHeight,
+    ),
+  };
+}
+
 /// 共享弹幕画家：视频弹幕浮层与直播弹幕浮层复用。
 ///
 /// [position] 是当前时间轴位置（Duration），[comments] 中的每条弹幕
@@ -209,26 +241,14 @@ final class DanmakuPainter({
         comment.startTime.inMicroseconds / Duration.microsecondsPerSecond;
     final duration = _durationOf(comment, settings);
     final progress = (elapsed / duration).clamp(0.0, 1.0);
-    final Offset offset;
-    switch (comment.mode) {
-      case DanmakuMode.top:
-        offset = Offset((size.width - painter.width) / 2, lane * lineHeight);
-      case DanmakuMode.bottom:
-        offset = Offset(
-          (size.width - painter.width) / 2,
-          size.height - (lane + 1) * lineHeight,
-        );
-      case DanmakuMode.reverse:
-        offset = Offset(
-          progress * (size.width + painter.width) - painter.width,
-          lane * lineHeight,
-        );
-      case DanmakuMode.scrolling || DanmakuMode.special:
-        offset = Offset(
-          size.width - progress * (size.width + painter.width),
-          lane * lineHeight,
-        );
-    }
+    final offset = danmakuTextOffset(
+      size: size,
+      textWidth: painter.width,
+      mode: comment.mode,
+      lane: lane,
+      lineHeight: lineHeight,
+      progress: progress,
+    );
 
     painter.paint(canvas, offset);
   }
