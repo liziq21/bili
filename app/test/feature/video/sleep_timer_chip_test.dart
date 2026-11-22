@@ -211,6 +211,59 @@ void main() {
       expect(find.text('15:00'), findsOneWidget);
     });
 
+    testWidgets('defaults to pausing when the countdown ends', (tester) async {
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      final preferences = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(preferences.dispose);
+      await preferences.set(PreferencesKey.sleepTimerDefaultMinutes, 1);
+
+      await pumpChip(tester, preferences: preferences);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('01:00'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 61));
+
+      expect(fake.pauseCalls, isNotEmpty);
+    });
+
+    testWidgets('applies the configured after-current default action', (
+      tester,
+    ) async {
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      final preferences = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(preferences.dispose);
+      await preferences.set(PreferencesKey.sleepTimerDefaultMinutes, 1);
+      await preferences.set(PreferencesKey.sleepTimerDefaultAfterCurrent, true);
+
+      await pumpChip(tester, preferences: preferences);
+      await tester.pump();
+      await tester.pump();
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/a.m4s'),
+        MediaStream(videoUrl: 'https://e.com/b.m4s'),
+      ]);
+      fake.emitPlaylist(index: 0, length: 2);
+      await tester.pump();
+
+      expect(find.text('01:00'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 61));
+
+      // after-current 默认值：归零时不打断当前条目。
+      expect(fake.pauseCalls, isEmpty);
+
+      fake.emitPlaylist(index: 1, length: 2);
+      await tester.pump();
+
+      expect(fake.pauseCalls, isNotEmpty);
+    });
+
     testWidgets('tapping the chip opens the picker with all durations', (
       tester,
     ) async {

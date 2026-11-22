@@ -125,6 +125,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerSleepTimerOff => 'Off';
 
   @override
+  String get playerSleepTimerAction => 'When the sleep timer ends';
+
+  @override
+  String get playerSleepTimerActionSubtitle =>
+      'Pause immediately or finish the current video before stopping';
+
+  @override
   String get playerQualityAuto => 'Auto';
 
   @override

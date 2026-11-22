@@ -314,6 +314,18 @@ abstract class AppLocalizations {
   /// **'Off'**
   String get playerSleepTimerOff;
 
+  /// Player setting - default sleep timer end action
+  ///
+  /// In en, this message translates to:
+  /// **'When the sleep timer ends'**
+  String get playerSleepTimerAction;
+
+  /// Subtitle for the default sleep timer end action setting
+  ///
+  /// In en, this message translates to:
+  /// **'Pause immediately or finish the current video before stopping'**
+  String get playerSleepTimerActionSubtitle;
+
   /// Automatic player quality selection
   ///
   /// In en, this message translates to:

@@ -118,6 +118,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerSleepTimerOff => '关闭';
 
   @override
+  String get playerSleepTimerAction => '睡眠定时结束行为';
+
+  @override
+  String get playerSleepTimerActionSubtitle => '选择倒计时结束后立即暂停，还是播完当前视频再停';
+
+  @override
   String get playerQualityAuto => '自动';
 
   @override
