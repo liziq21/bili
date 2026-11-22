@@ -3,6 +3,7 @@ import 'package:app/feature/video/common_widgets/video_info_view.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 class MockVideoBloc(super.initialState)
@@ -406,6 +407,55 @@ void main() {
 
       expect(find.text('视频加载失败，请重试'), findsOneWidget);
       expect(likeButton(), findsNothing);
+    });
+  });
+
+  group('VideoInfoView creator navigation', () {
+    testWidgets('tapping the creator block navigates to the space route', (
+      tester,
+    ) async {
+      final detail = VideoDetail(
+        video: const VideoModel(
+          id: 'BV1nav',
+          url: 'https://example.com/nav',
+          title: 'UP 主跳转测试',
+          viewCount: 100,
+        ),
+        creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
+      );
+      final bloc = MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: detail),
+      );
+      addTearDown(bloc.close);
+
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => Scaffold(
+              body: BlocProvider<VideoBloc>.value(
+                value: bloc,
+                child: const VideoInfoView(),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/space/:mid',
+            builder: (context, state) =>
+                Scaffold(body: Text('space:${state.pathParameters['mid']}')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('测试UP主'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('space:test_creator'), findsOneWidget);
     });
   });
 }
