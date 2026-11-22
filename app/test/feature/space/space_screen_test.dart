@@ -1,10 +1,14 @@
 import 'package:app/data/repository/channel_videos_repository.dart';
 import 'package:app/data/repository/creator_profile_repository.dart';
+import 'package:app/data/repository/local_library_repository.dart';
+import 'package:app/database/app_database.dart';
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
+import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/native.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
@@ -14,6 +18,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:app/design/design.dart';
+
+class const _TestMediaSource() extends MediaSource {
+  @override
+  String get id => 'test';
+
+  @override
+  String get name => 'Test';
+}
 
 class _FakeCreatorProfileRepository(
   var Result<CreatorProfile, Exception> result,
@@ -305,5 +317,71 @@ void main() {
     expect(find.byType(TabBar), findsNothing);
     expect(find.byType(VideoCard), findsNothing);
     expect(videosRepository.requestedPages, isEmpty);
+  });
+
+  testWidgets('subscribes and unsubscribes the creator locally', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final database = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
+    addTearDown(database.close);
+    final library = LocalLibraryRepository(dao: database.localLibraryDao);
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<LocalLibraryRepository>.value(value: library),
+          RepositoryProvider<MediaSource>.value(
+            value: const _TestMediaSource(),
+          ),
+        ],
+        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+      ),
+    );
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(find.text('Subscribe'), findsOneWidget);
+
+    await tester.tap(find.text('Subscribe'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(
+      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
+      isTrue,
+    );
+    expect(find.text('Unsubscribe'), findsOneWidget);
+
+    await tester.tap(find.text('Unsubscribe'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(
+      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
+      isFalse,
+    );
+    expect(find.text('Subscribe'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }

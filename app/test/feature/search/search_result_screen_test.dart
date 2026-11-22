@@ -1,7 +1,11 @@
+import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/data/repository/search_contents_repository.dart';
+import 'package:app/database/app_database.dart';
 import 'package:app/feature/search/bloc/search_result_bloc.dart';
 import 'package:app/feature/search/search_result_screen.dart';
 import 'package:data/data.dart';
+import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/native.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
@@ -41,8 +45,9 @@ class TrackingFailingVideoSearchRepository()
   }
 }
 
-class const FakeCreatorProfileSearchRepository()
-    implements SearchContentsRepository<CreatorProfile> {
+class const FakeCreatorProfileSearchRepository({
+  final List<CreatorProfile> items = const [],
+}) implements SearchContentsRepository<CreatorProfile> {
   @override
   List<FilterGroup> get filters => const [];
 
@@ -52,7 +57,7 @@ class const FakeCreatorProfileSearchRepository()
   @override
   Future<PagedResult<CreatorProfile>> search(SearchQuery searchQuery) async {
     return Result.success(
-      Page<CreatorProfile>(data: [], number: 1, totalPages: 1),
+      Page<CreatorProfile>(data: items, number: 1, totalPages: 1),
     );
   }
 }
@@ -295,4 +300,75 @@ void main() {
       expect(backClicked, isTrue);
     },
   );
+
+  testWidgets('SearchResultScreen toggles local subscriptions', (tester) async {
+    const creator = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final creatorRepo = const FakeCreatorProfileSearchRepository(
+      items: [creator],
+    );
+    final creatorBloc = SearchResultBloc<CreatorProfile>(
+      searchContentsRepository: creatorRepo,
+      query: 'keyword',
+    );
+    addTearDown(creatorBloc.close);
+
+    final database = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
+    addTearDown(database.close);
+    final library = LocalLibraryRepository(dao: database.localLibraryDao);
+
+    await tester.pumpWidget(
+      RepositoryProvider<LocalLibraryRepository>.value(
+        value: library,
+        child: MaterialApp(
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<SearchResultBloc<CreatorProfile>>.value(
+                value: creatorBloc,
+              ),
+            ],
+            child: const SearchResultScreen(query: 'keyword', source: 'test'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(find.text('Subscribe'), findsOneWidget);
+
+    await tester.tap(find.text('Subscribe'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(
+      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
+      isTrue,
+    );
+    expect(find.text('Unsubscribe'), findsOneWidget);
+
+    await tester.tap(find.text('Unsubscribe'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+
+    expect(
+      await tester.runAsync(() => library.isSubscribed('test', 'creator-1')),
+      isFalse,
+    );
+    expect(find.text('Subscribe'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
 }

@@ -1,3 +1,4 @@
+import 'package:app/design/design.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
@@ -99,4 +100,43 @@ void main() {
       expect(subtitleWidget.overflow, TextOverflow.ellipsis);
     },
   );
+
+  testWidgets('CreatorProfileItem renders and forwards the subscribe action', (
+    WidgetTester tester,
+  ) async {
+    const creator = CreatorProfile(id: '188339', name: 'CodeCraft');
+    var itemTapped = false;
+    var toggles = 0;
+
+    Widget build({required bool isSubscribed}) => MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 320,
+          height: 80,
+          child: CreatorProfileItem(
+            creatorProfile: creator,
+            onTap: () => itemTapped = true,
+            isSubscribed: isSubscribed,
+            onToggleSubscribe: () => toggles++,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(isSubscribed: false));
+
+    expect(find.text('Subscribe'), findsOneWidget);
+    expect(find.byIcon(AppIcons.chevronRight), findsNothing);
+
+    await tester.tap(find.text('Subscribe'));
+    expect(toggles, 1);
+    expect(itemTapped, isFalse);
+
+    await tester.pumpWidget(build(isSubscribed: true));
+
+    expect(find.text('Unsubscribe'), findsOneWidget);
+    await tester.tap(find.text('Unsubscribe'));
+    expect(toggles, 2);
+    expect(itemTapped, isFalse);
+  });
 }

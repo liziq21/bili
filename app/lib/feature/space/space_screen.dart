@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -8,15 +10,19 @@ import 'package:model/model.dart';
 
 import '../../data/repository/channel_videos_repository.dart';
 import '../../data/repository/creator_profile_repository.dart';
+import '../../data/repository/local_library_repository.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
+import '../../ui/creator_subscribe_button.dart';
 import '../../ui/video_card.dart';
 import '../setting/app_settings.dart';
 import 'bloc/channel_videos_cubit.dart';
+
+typedef _SubscribeToggle = Future<void> Function(CreatorProfile profile);
 
 class const SpaceScreen({
   super.key,
@@ -34,6 +40,11 @@ class _SpaceScreenState() extends State<SpaceScreen> {
   ChannelTabSettings _tabSettings = const ChannelTabSettings();
   bool _tabSettingsReady = false;
   bool _tabSettingsRequested = false;
+  LocalLibraryRepository? _localLibrary;
+  String? _sourceId;
+  bool _isSubscribed = false;
+  bool _subscriptionReady = false;
+  bool _subscriptionRequested = false;
 
   @override
   void didChangeDependencies() {
@@ -44,9 +55,59 @@ class _SpaceScreenState() extends State<SpaceScreen> {
       _profileFuture = _loadProfile();
     }
 
+    _localLibrary ??= context.read<LocalLibraryRepository?>();
+    _sourceId ??= context.read<MediaSource?>()?.id;
+
     if (!_tabSettingsRequested) {
       _tabSettingsRequested = true;
       _loadTabSettings();
+    }
+
+    if (!_subscriptionRequested) {
+      _subscriptionRequested = true;
+      unawaited(_loadSubscription());
+    }
+  }
+
+  Future<void> _loadSubscription() async {
+    final repository = _localLibrary;
+    final sourceId = _sourceId;
+    if (repository == null || sourceId == null) return;
+
+    try {
+      final subscribed = await repository.isSubscribed(sourceId, widget.mid);
+      if (!mounted) return;
+      setState(() {
+        _isSubscribed = subscribed;
+        _subscriptionReady = true;
+      });
+    } on Exception {
+      if (!mounted) return;
+      setState(() => _subscriptionReady = false);
+    }
+  }
+
+  Future<void> _toggleSubscription(CreatorProfile profile) async {
+    final repository = _localLibrary;
+    final sourceId = _sourceId;
+    if (repository == null || sourceId == null) return;
+
+    final target = !_isSubscribed;
+    setState(() => _isSubscribed = target);
+
+    try {
+      await repository.setSubscription(
+        sourceId: sourceId,
+        creator: profile,
+        subscribed: target,
+      );
+    } on Exception catch (error) {
+      if (!mounted) return;
+      setState(() => _isSubscribed = !target);
+      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.operationFailed('$error'))));
     }
   }
 
@@ -70,6 +131,9 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.mid == widget.mid) return;
     _profileFuture = _loadProfile();
+    _isSubscribed = false;
+    _subscriptionReady = false;
+    unawaited(_loadSubscription());
   }
 
   Future<Result<CreatorProfile, Exception>> _loadProfile() {
@@ -94,6 +158,9 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     // is a mutable singleton refreshed by AppScaffold.
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final toggleSubscription = _localLibrary != null && _sourceId != null
+        ? _toggleSubscription
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -137,6 +204,8 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                     colorScheme: colorScheme,
                     onVideo: widget.onVideo,
                     tabSettings: _tabSettings,
+                    isSubscribed: _subscriptionReady ? _isSubscribed : null,
+                    onToggleSubscribe: toggleSubscription,
                   ),
                   Error() => _ProfileLoadError(onRetry: _retry),
                 };
@@ -157,6 +226,8 @@ class const _SpaceContent({
   required final ColorScheme colorScheme,
   required final VideoNavCallback? onVideo,
   required final ChannelTabSettings tabSettings,
+  required final bool? isSubscribed,
+  required final _SubscribeToggle? onToggleSubscribe,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -166,7 +237,12 @@ class const _SpaceContent({
     if (!tabSettings.isVisible(ChannelTabs.videos)) {
       return ListView(
         children: [
-          _CreatorProfileHeader(profile: profile, colorScheme: colorScheme),
+          _CreatorProfileHeader(
+            profile: profile,
+            colorScheme: colorScheme,
+            isSubscribed: isSubscribed,
+            onToggleSubscribe: onToggleSubscribe,
+          ),
         ],
       );
     }
@@ -187,6 +263,8 @@ class const _SpaceContent({
             child: _CreatorProfileHeader(
               profile: profile,
               colorScheme: colorScheme,
+              isSubscribed: isSubscribed,
+              onToggleSubscribe: onToggleSubscribe,
             ),
           ),
           SliverPersistentHeader(
@@ -424,6 +502,8 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
 class const _CreatorProfileHeader({
   required final CreatorProfile profile,
   required final ColorScheme colorScheme,
+  required final bool? isSubscribed,
+  required final _SubscribeToggle? onToggleSubscribe,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -436,6 +516,8 @@ class const _CreatorProfileHeader({
         l10n.videosCount(_formatCount(videos, l10n)),
       if (profile.isLive == true) l10n.liveNow,
     ];
+    final subscribed = isSubscribed;
+    final toggleSubscribe = onToggleSubscribe;
 
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
@@ -443,79 +525,95 @@ class const _CreatorProfileHeader({
         clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: EdgeInsets.all($styles.insets.sm),
-          child: Semantics(
-            container: true,
-            label: [
-              profile.name,
-              l10n.creatorLabel('@${profile.id}'),
-              if (description != null && description.isNotEmpty) description,
-              ...stats,
-            ].join(l10n.commaSeparator),
-            excludeSemantics: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                container: true,
+                label: [
+                  profile.name,
+                  l10n.creatorLabel('@${profile.id}'),
+                  if (description != null && description.isNotEmpty)
+                    description,
+                  ...stats,
+                ].join(l10n.commaSeparator),
+                excludeSemantics: true,
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _CreatorAvatar(profile: profile, colorScheme: colorScheme),
-                    SizedBox(width: $styles.insets.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            profile.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: $styles.text.h3.copyWith(
-                              color: $styles.colors.onSurfaceStrong,
-                            ),
-                          ),
-                          SizedBox(height: $styles.insets.xxs),
-                          Text(
-                            l10n.creatorLabel('@${profile.id}'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: $styles.text.bodySmall.copyWith(
-                              color: $styles.colors.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: $styles.insets.sm),
-                Text(
-                  description != null && description.isNotEmpty
-                      ? description
-                      : l10n.spaceDescriptionUnavailable,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onSurface,
-                    height: 1.4,
-                  ),
-                ),
-                if (stats.isNotEmpty) ...[
-                  SizedBox(height: $styles.insets.sm),
-                  Wrap(
-                    spacing: $styles.insets.sm,
-                    runSpacing: $styles.insets.xxs,
-                    children: [
-                      for (final stat in stats)
-                        Text(
-                          stat,
-                          style: $styles.text.bodySmallBold.copyWith(
-                            color: $styles.colors.accentText,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _CreatorAvatar(
+                          profile: profile,
+                          colorScheme: colorScheme,
+                        ),
+                        SizedBox(width: $styles.insets.sm),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                profile.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: $styles.text.h3.copyWith(
+                                  color: $styles.colors.onSurfaceStrong,
+                                ),
+                              ),
+                              SizedBox(height: $styles.insets.xxs),
+                              Text(
+                                l10n.creatorLabel('@${profile.id}'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: $styles.text.bodySmall.copyWith(
+                                  color: $styles.colors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                      ],
+                    ),
+                    SizedBox(height: $styles.insets.sm),
+                    Text(
+                      description != null && description.isNotEmpty
+                          ? description
+                          : l10n.spaceDescriptionUnavailable,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onSurface,
+                        height: 1.4,
+                      ),
+                    ),
+                    if (stats.isNotEmpty) ...[
+                      SizedBox(height: $styles.insets.sm),
+                      Wrap(
+                        spacing: $styles.insets.sm,
+                        runSpacing: $styles.insets.xxs,
+                        children: [
+                          for (final stat in stats)
+                            Text(
+                              stat,
+                              style: $styles.text.bodySmallBold.copyWith(
+                                color: $styles.colors.accentText,
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              if (subscribed != null && toggleSubscribe != null) ...[
+                SizedBox(height: $styles.insets.sm),
+                CreatorSubscribeButton(
+                  isSubscribed: subscribed,
+                  onPressed: () => unawaited(toggleSubscribe(profile)),
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),

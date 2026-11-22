@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/repository/local_library_repository.dart';
+import '../../database/app_database.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
@@ -38,11 +40,62 @@ class const SearchResultScreen({
 class _SearchResultScreenState() extends State<SearchResultScreen> {
   PreferencesDataSource? _preferences;
   bool _restored = false;
+  LocalLibraryRepository? _localLibrary;
+  String? _sourceId;
+  StreamSubscription<List<LocalSubscriptionEntity>>? _subscription;
+  Set<String> _subscribedCreatorIds = const {};
+  bool _subscriptionsLoaded = false;
 
   @override
   void initState() {
     super.initState();
     unawaited(_restoreOptions());
+    _watchSubscriptions();
+  }
+
+  void _watchSubscriptions() {
+    final repository = context.read<LocalLibraryRepository?>();
+    final sourceId = widget.source;
+    if (repository == null || sourceId == null) return;
+
+    _localLibrary = repository;
+    _sourceId = sourceId;
+    _subscription = repository.watchSubscriptions().listen((subscriptions) {
+      if (!mounted) return;
+      setState(() {
+        _subscriptionsLoaded = true;
+        _subscribedCreatorIds = {
+          for (final subscription in subscriptions)
+            if (subscription.sourceId == sourceId) subscription.originalId,
+        };
+      });
+    });
+  }
+
+  Future<void> _toggleSubscription(CreatorProfile creator) async {
+    final repository = _localLibrary;
+    final sourceId = _sourceId;
+    if (repository == null || sourceId == null) return;
+
+    try {
+      await repository.setSubscription(
+        sourceId: sourceId,
+        creator: creator,
+        subscribed: !_subscribedCreatorIds.contains(creator.id),
+      );
+    } on Exception catch (error) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n?.operationFailed('$error') ?? '$error')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_subscription?.cancel());
+    super.dispose();
   }
 
   Future<void> _restoreOptions() async {
@@ -177,6 +230,12 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
   ) => CreatorProfileItem(
     creatorProfile: creatorProfile,
     onTap: () => widget.onSpace?.call(creatorProfile.id),
+    isSubscribed: _subscriptionsLoaded
+        ? _subscribedCreatorIds.contains(creatorProfile.id)
+        : null,
+    onToggleSubscribe: _localLibrary == null
+        ? null
+        : () => unawaited(_toggleSubscription(creatorProfile)),
   );
 
   Widget _buildLiveRoomItem(
