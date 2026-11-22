@@ -24,7 +24,7 @@ SYMBOL_INDEX = Path("/workspace/bili/symbol_index.json")
 
 # A git revision never starts with "-" and uses only these characters, so a
 # value such as "--upload-pack=..." cannot be parsed as an option.
-_SAFE_REF = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._/@+~^-]*\Z")
+_SAFE_REF = re.compile(r"\A[A-Za-z0-9_][A-Za-z0-9._/@+~^-]*\Z")
 
 
 def is_safe_ref(ref: str) -> bool:

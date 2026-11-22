@@ -278,7 +278,7 @@ def run_git(*args: str) -> str:
 
 # A git revision never starts with "-" and uses only these characters, so a
 # value such as "--upload-pack=..." cannot be parsed as an option.
-_SAFE_REV = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._/@+~^-]*\Z")
+_SAFE_REV = re.compile(r"\A[A-Za-z0-9_][A-Za-z0-9._/@+~^-]*\Z")
 
 
 def is_safe_rev(rev: str) -> bool:
