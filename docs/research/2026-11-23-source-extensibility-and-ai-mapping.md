@@ -11,7 +11,7 @@
 2. **把“任意源 → 通用模型”做成运行时 AI 模型，技术上可行，生产上不推荐**。确定性、精确值（ID/URL/时间/计数）、静默错误、离线 CI、成本/延迟、隐私与提示注入、跨平台端上推理、模型版本与评测都会成为新的维护面。
 3. **推荐把 AI 放在构建期/运维期**：用 LLM 从 fixture + 目标 schema 生成/修复声明式描述符或适配器代码，再用确定性的 fixture 契约测试验收；运行时零模型调用。
 4. **推荐数据是最适合确定性映射的场景**（结构化、字段少、量大），不是最需要 AI 的场景。当前 YouTube 源没有匿名推荐 Feed（`videoFeedDataSources` 为空），瓶颈是能力/端点，不是映射。
-5. **低风险 PoC 已验证声明式映射可行**：新增通用映射引擎与 B 站热门/排行描述符，用现有 fixture 对比旧 adapter，相关包共 152 个测试通过（data 19、bilibili 133，其中新增 18 个），并加入 fixture → canonical golden 的 conformance 门禁与 `schemaVersion`；workspace 严格分析和 test matrix 门禁均通过。
+5. **低风险 PoC 已验证声明式映射可行**：新增通用映射引擎与 B 站热门/排行/用户投稿描述符，用现有 fixture 对比旧 adapter，相关包共 155 个测试通过（data 20、bilibili 135，其中新增 21 个），并加入 fixture → canonical golden 的 conformance 门禁与 `schemaVersion`；workspace 严格分析和 test matrix 门禁均通过。
 
 ## 2. 现状与证据
 
@@ -196,17 +196,18 @@ tool/capture 抓 fixture
 
 - `packages/data/lib/src/mapping/`
   - `json_path.dart`：最小 JSON path（`$`、点号、`[n]`、`[*]`）。
-  - `mapping_descriptor.dart`：`FieldMapping` / `FeedMappingDescriptor`，后者带 `schemaVersion`。
+  - `mapping_descriptor.dart`：`FieldMapping` / `FeedMappingDescriptor`，后者带 `schemaVersion`，分页支持 `hasMorePath` 或 `totalCountPath` + `pageSize`。
   - `mapping_transform.dart`：确定性 transform 注册表（`string`、`int`、`parseCount`、`parseDuration`、`epochSeconds`、`httpsUrl`、`htmlText`、`pathSegment`）。
-  - `declarative_feed_data_source.dart`：`MappingEvaluator` + `DeclarativeFeedDataSource<T>`，暴露 `schemaVersion`。
+  - `declarative_feed_data_source.dart`：`MappingEvaluator` + `DeclarativeFeedDataSource<T>`，暴露 `schemaVersion`，并按描述符计算 `totalPages`。
   - `mapping_conformance.dart`：结构化 JSON 差异比较，供测试与 CLI 共用。
 - `packages/data/lib/src/model/video_model.dart` / `live_room_model.dart`
   - 各自声明 `schemaVersion` 常量，描述符显式指向该版本。
 - `packages/bilibili/lib/src/data/source/declarative/bili_feed_descriptors.dart`
   - 共享的 B 站视频字段规则；
   - 热门 / 排行两个 `FeedMappingDescriptor`；
+  - 用户投稿描述符（`$.data.list.vlist[*]`，`totalCountPath` + `pageSize`），用于验证第二种分页语义与不同 item 形状；
   - B 站专属 transform（`biliWatchUrl`、`biliUrl`）；
-  - `createBiliPopularDeclarativeFeed` / `createBiliRankingDeclarativeFeed`。
+  - `createBiliPopularDeclarativeFeed` / `createBiliRankingDeclarativeFeed` / `createBiliUserVideosDeclarativeFeed`。
 - `packages/bilibili/lib/src/data/source/declarative/bili_feed_conformance.dart`
   - `canonicalVideoJson`：把 `VideoModel` 序列化为稳定、可 diff 的 canonical JSON。
 - `packages/bilibili/tool/mapping_conformance.dart`
@@ -220,10 +221,11 @@ tool/capture 抓 fixture
 
 新增：
 
-- `packages/data/test/declarative_feed_data_source_test.dart`：7 个测试，覆盖 transform、envelope、分页、丢弃无效条目、未知 transform、`schemaVersion`、JSON path。
+- `packages/data/test/declarative_feed_data_source_test.dart`：8 个测试，覆盖 transform、envelope、分页（`hasMore` 与 total count）、丢弃无效条目、未知 transform、`schemaVersion`、JSON path。
 - `packages/data/test/mapping_conformance_test.dart`：3 个测试，覆盖结构化 JSON 差异比较的相等、嵌套值/缺失 key/列表长度、类型不匹配。
 - `packages/bilibili/test/bili_declarative_feed_test.dart`：5 个测试，使用真实 `popular.json` / `ranking.json` fixture，逐项对比声明式 Feed 与旧 adapter 的输出；覆盖 envelope 失败、`no_more`、缺少 `bvid` 的条目。
 - `packages/bilibili/test/bili_mapping_conformance_test.dart`：3 个测试，把声明式输出与由旧 adapter 生成的 canonical golden 做结构 diff，并校验描述符指向的 canonical `schemaVersion`。
+- `packages/bilibili/test/bili_user_videos_mapping_test.dart`：2 个测试，用 `space_videos.json` 对比声明式用户投稿 Feed 与 `BiliUserVideosRemoteDataSource`，覆盖 `totalCountPath` 分页与不同的 item 字段形状。
 
 实际执行（Flutter 3.50.0 / Dart 3.14.0，与 `.fvmrc` 一致）：
 
@@ -231,21 +233,22 @@ tool/capture 抓 fixture
 (cd packages/bilibili && dart run tool/mapping_conformance.dart --feed popular)  # 20 items conform
 (cd packages/bilibili && dart run tool/mapping_conformance.dart --feed ranking)  # 100 items conform
 (cd packages/data && dart analyze --fatal-infos --fatal-warnings)               # No issues found!
-(cd packages/data && dart test)                                                  # 19 tests passed
+(cd packages/data && dart test)                                                  # 20 tests passed
 (cd packages/bilibili && flutter analyze --fatal-infos --fatal-warnings)         # No issues found!
-(cd packages/bilibili && flutter test test/)                                     # 133 tests passed
+(cd packages/bilibili && flutter test test/)                                     # 135 tests passed
 flutter analyze --fatal-infos --fatal-warnings                                   # No issues found!
-python3 tool/test_matrix.py --check                                              # 176/176 classified
+python3 tool/test_matrix.py --check                                              # 177/177 classified
 ```
 
-结论：对 B 站热门与排行，声明式描述符产出的 `VideoModel` 与旧 adapter 完全一致；conformance 门禁再用旧 adapter 生成的 golden 锁住这一行为。PoC 的风险被限制在新增文件与测试内。
+结论：对 B 站热门、排行与用户投稿，声明式描述符产出的 `VideoModel` 与旧 adapter 一致；热门/排行由 conformance 门禁再用旧 adapter 生成的 golden 锁住，用户投稿由等价性测试锁住。PoC 的风险被限制在新增文件与测试内。
 
 ### 6.3 限制
 
-- 引擎目前只覆盖“简单 JSON feed”：不处理签名、WBI、continuation token、媒体流、复杂 renderer 树；这些继续用 Dart adapter。
+- 引擎目前只覆盖“简单 JSON feed”：不处理签名、WBI、continuation token、媒体流、复杂 renderer 树；这些继续用 Dart adapter。分页已支持布尔 `hasMore` 与 total count，continuation token 未支持。
 - `tool/mapping_conformance.dart` 已实现，但尚未接入独立的 CI job；当前由 `packages/bilibili` 的测试套件执行同一 conformance 检查。
 - LLM 生成描述符的流水线尚未实现；本次只验证“确定性端”可行。
-- 两个 feed 的 PoC 仍然引入了共享引擎代码；在 2 个源的规模上，代码量不一定下降。收益来自第 N 个简单源的边际成本。
+- 三个 feed 的 PoC 仍然引入了共享引擎代码；在 3 个源的规模上，代码量不一定下降。收益来自第 N 个简单源的边际成本：第三个 feed 主要新增一份字段表 + 描述符 + 一个等价性测试，引擎只为 total-count 分页增加了约 20 行。
+- 用户投稿是 mapping-only PoC，尚未接入生产 capability；它用于验证不同 item 形状与分页语义，不代表推荐流已经全部迁移。
 - 跨源聚合的 `(sourceId, id)` 复合键尚未引入；`schemaVersion` 已加入 descriptor 与 canonical model，但还没有迁移/升级策略。
 
 ## 7. 未决问题
@@ -253,6 +256,8 @@ python3 tool/test_matrix.py --check                                             
 - 是否把描述符从 Dart 常量迁移到 YAML/JSON 资产，以便非 Dart 工具和 LLM 直接生成？
 - 是否把 `tool/mapping_conformance.dart` 接入独立 CI job，还是继续由包测试套件承担？
 - 是否为跨源聚合引入 `(sourceId, id)` 复合键？
+- 是否需要为 continuation token 分页增加描述符字段？
+- 是否把用户投稿的声明式映射接入生产 capability，还是保持 mapping-only PoC？
 - 运行时 LLM 兜底是否需要，以及如何在“测试/CI 不联网”的约束下评测？
 - `app/AGENTS.md` 引用的 `docs/source-injection.md` 在当前 checkout 中不存在；源注入契约文档需要补回。
 

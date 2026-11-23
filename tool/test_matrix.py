@@ -215,6 +215,7 @@ TEST_MATRIX = {
         'packages/bilibili/test/bili_media_stream_test.dart',
         'packages/bilibili/test/bili_playlist_content_remote_data_source_test.dart',
         'packages/bilibili/test/bili_popular_feed_test.dart',
+        'packages/bilibili/test/bili_user_videos_mapping_test.dart',
         'packages/bilibili/test/bili_user_videos_remote_data_source_test.dart',
         'packages/bilibili/test/bili_search_remote_data_sources_test.dart',
         'packages/bilibili/test/bili_search_suggest_remote_data_source_test.dart',

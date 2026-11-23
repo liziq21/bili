@@ -178,6 +178,41 @@ void main() {
     expect(result.isError(), isTrue);
   });
 
+  test('computes total pages from a total count', () async {
+    const counted = FeedMappingDescriptor(
+      itemsPath: r'$.data.list[*]',
+      totalCountPath: r'$.data.page.count',
+      pageSize: 30,
+      fields: {
+        'id': FieldMapping(path: r'$.id'),
+        'title': FieldMapping(path: r'$.title'),
+      },
+    );
+    final json = {
+      'data': {
+        'list': [
+          {'id': 'a', 'title': 'a'},
+        ],
+        'page': {'count': 43},
+      },
+    };
+
+    final first = await source(json, mapping: counted).fetchFeed();
+    final firstPage = switch (first) {
+      Success(:final success) => success,
+      Error(:final error) => fail('expected success: $error'),
+    };
+    expect(firstPage.totalPages, 2);
+
+    final second = await source(json, mapping: counted).fetchFeed(pageKey: 2);
+    final secondPage = switch (second) {
+      Success(:final success) => success,
+      Error(:final error) => fail('expected success: $error'),
+    };
+    expect(secondPage.number, 2);
+    expect(secondPage.totalPages, 2);
+  });
+
   test('exposes the canonical schema version', () {
     expect(descriptor.schemaVersion, VideoModel.schemaVersion);
     expect(source(feedJson()).schemaVersion, VideoModel.schemaVersion);

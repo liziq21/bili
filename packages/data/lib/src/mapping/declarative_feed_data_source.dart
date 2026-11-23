@@ -71,6 +71,25 @@ final class MappingEvaluator({
     return readJsonPath(root, path) == descriptor.hasMoreWhen;
   }
 
+  /// The total page count for [page], using the descriptor's pagination rule.
+  int totalPages(Object? root, int page) {
+    final countPath = descriptor.totalCountPath;
+    final pageSize = descriptor.pageSize;
+    if (countPath != null && pageSize != null && pageSize > 0) {
+      final count = switch (readJsonPath(root, countPath)) {
+        final int value => value,
+        final num value => value.toInt(),
+        final String value => int.tryParse(value),
+        _ => null,
+      };
+      if (count != null && count > 0) {
+        final total = (count + pageSize - 1) ~/ pageSize;
+        return total < page ? page : total;
+      }
+    }
+    return hasMore(root) ? page + 1 : page;
+  }
+
   Object? _resolveField(
     Map<dynamic, dynamic> item,
     FieldMapping mapping,
@@ -144,7 +163,7 @@ final class DeclarativeFeedDataSource<T>({
       return Result.success(
         Page<T>(
           number: page,
-          totalPages: _evaluator.hasMore(json) ? page + 1 : page,
+          totalPages: _evaluator.totalPages(json, page),
           data: data,
         ),
       );

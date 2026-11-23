@@ -19,8 +19,9 @@ final class const FieldMapping({
 /// [itemsPath] must select a JSON list (for example `$.data.list[*]`).
 /// [fields] maps canonical field names to their extraction rules. [schemaVersion]
 /// declares which canonical model version the fields target. The optional
-/// envelope fields decide success from the source's business code, and the
-/// optional [hasMorePath] decides whether another page exists.
+/// envelope fields decide success from the source's business code. Pagination
+/// can be described either by [hasMorePath] (a boolean-style flag) or by
+/// [totalCountPath] together with [pageSize].
 @immutable
 final class const FeedMappingDescriptor({
   required final String itemsPath,
@@ -31,4 +32,6 @@ final class const FeedMappingDescriptor({
   final String? messagePath,
   final String? hasMorePath,
   final bool hasMoreWhen = true,
+  final String? totalCountPath,
+  final int? pageSize,
 });

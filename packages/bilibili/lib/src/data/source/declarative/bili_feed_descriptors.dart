@@ -39,6 +39,34 @@ const biliRankingFeedDescriptor = FeedMappingDescriptor(
   fields: biliVideoFeedFields,
 );
 
+/// Field rules for the space uploads feed.
+///
+/// The item shape differs from popular/ranking: counts are `play`, the author
+/// is `author`/`mid`, and the duration is an `mm:ss` string.
+const biliUserVideoFeedFields = <String, FieldMapping>{
+  'id': FieldMapping(path: r'$.bvid'),
+  'title': FieldMapping(path: r'$.title', fallbackPath: r'$.bvid'),
+  'url': FieldMapping(path: r'$.bvid', transform: 'biliWatchUrl'),
+  'thumbnailUrl': FieldMapping(path: r'$.pic', transform: 'biliUrl'),
+  'viewCount': FieldMapping(path: r'$.play', transform: 'int'),
+  'uploadDate': FieldMapping(path: r'$.created', transform: 'epochSeconds'),
+  'duration': FieldMapping(path: r'$.length', transform: 'parseDuration'),
+  'desc': FieldMapping(path: r'$.description'),
+  'creatorProfileName': FieldMapping(path: r'$.author'),
+  'creatorProfileId': FieldMapping(path: r'$.mid', transform: 'string'),
+};
+
+const biliUserVideosDescriptor = FeedMappingDescriptor(
+  itemsPath: r'$.data.list.vlist[*]',
+  schemaVersion: VideoModel.schemaVersion,
+  successCodePath: r'$.code',
+  successCode: 0,
+  messagePath: r'$.message',
+  totalCountPath: r'$.data.page.count',
+  pageSize: 30,
+  fields: biliUserVideoFeedFields,
+);
+
 /// Bilibili-specific transforms layered on the neutral defaults.
 final Map<String, MappingTransform> biliMappingTransforms = {
   'biliWatchUrl': (value, _) =>
@@ -61,6 +89,7 @@ VideoModel? buildBiliFeedVideoModel(Map<String, Object?> item) {
     viewCount: item['viewCount'] as int?,
     uploadDate: item['uploadDate'] as DateTime?,
     duration: item['duration'] as int?,
+    desc: item['desc'] as String?,
     creatorProfileName: item['creatorProfileName'] as String?,
     creatorProfileId: item['creatorProfileId'] as String?,
   );
@@ -85,6 +114,18 @@ DeclarativeFeedDataSource<VideoModel> createBiliRankingDeclarativeFeed({
   id: 'ranking',
   title: '排行榜',
   descriptor: biliRankingFeedDescriptor,
+  fetchJson: fetchJson,
+  buildItem: buildBiliFeedVideoModel,
+  transforms: MappingTransformRegistry(biliMappingTransforms),
+);
+
+DeclarativeFeedDataSource<VideoModel> createBiliUserVideosDeclarativeFeed({
+  required FeedJsonFetcher fetchJson,
+}) => DeclarativeFeedDataSource<VideoModel>(
+  sourceId: 'bilibili',
+  id: 'user-videos',
+  title: '用户投稿',
+  descriptor: biliUserVideosDescriptor,
   fetchJson: fetchJson,
   buildItem: buildBiliFeedVideoModel,
   transforms: MappingTransformRegistry(biliMappingTransforms),

@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 93 |
+| unit | 94 |
 | widget | 60 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **176** |
+| **合计** | **177** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（93）
+## unit（94）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -101,6 +101,7 @@
 - `packages/bilibili/test/bili_media_stream_test.dart`
 - `packages/bilibili/test/bili_playlist_content_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_popular_feed_test.dart`
+- `packages/bilibili/test/bili_user_videos_mapping_test.dart`
 - `packages/bilibili/test/bili_user_videos_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_search_remote_data_sources_test.dart`
 - `packages/bilibili/test/bili_search_suggest_remote_data_source_test.dart`
