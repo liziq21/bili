@@ -5126,7 +5126,12 @@
   },
   "batchDeleteNote": "确定删除选中的 {count} 个条目？此操作不可撤销。",
   "@batchDeleteNote": {
-    "description": "批量删除确认对话框内容"
+    "description": "批量删除确认对话框内容",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deleteSelected": "删除选中",
   "@deleteSelected": {
@@ -5290,7 +5295,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5299,7 +5304,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5308,7 +5313,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5435,7 +5440,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5448,7 +5453,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5931,7 +5936,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5940,7 +5945,7 @@
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },

@@ -6674,8 +6674,8 @@ abstract class AppLocalizations {
   /// Dialog content for batch delete confirmation
   ///
   /// In en, this message translates to:
-  /// **'Delete the {count} selected items? This can\'t be undone.'**
-  String batchDeleteNote(Object count);
+  /// **'Delete the {count, plural, =1{selected item} other{{count} selected items}}? This can\'t be undone.'**
+  String batchDeleteNote(int count);
 
   /// Button label to delete selected items in edit mode
   ///
@@ -6878,20 +6878,20 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} min ago'**
-  String minutesAgo(String p1);
+  /// **'{p1, plural, =1{1 minute ago} other{{p1} minutes ago}}'**
+  String minutesAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} hr ago'**
-  String hoursAgo(String p1);
+  /// **'{p1, plural, =1{1 hour ago} other{{p1} hours ago}}'**
+  String hoursAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} days ago'**
-  String daysAgo(String p1);
+  /// **'{p1, plural, =1{1 day ago} other{{p1} days ago}}'**
+  String daysAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7028,8 +7028,8 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} rows'**
-  String topRowsValue(String p1);
+  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
+  String topRowsValue(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7040,8 +7040,8 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} rows'**
-  String bottomRowsValue(String p1);
+  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
+  String bottomRowsValue(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7652,14 +7652,14 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} years ago'**
-  String yearsAgoCompact(String p1);
+  /// **'{p1, plural, =1{1 year ago} other{{p1} years ago}}'**
+  String yearsAgoCompact(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} months ago'**
-  String monthsAgoCompact(String p1);
+  /// **'{p1, plural, =1{1 month ago} other{{p1} months ago}}'**
+  String monthsAgoCompact(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///

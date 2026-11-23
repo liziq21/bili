@@ -3886,8 +3886,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get batchDeleteConfirm => 'Delete items in bulk';
 
   @override
-  String batchDeleteNote(Object count) {
-    return 'Delete the $count selected items? This can\'t be undone.';
+  String batchDeleteNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected items',
+      one: 'selected item',
+    );
+    return 'Delete the $_temp0? This can\'t be undone.';
   }
 
   @override
@@ -4000,18 +4006,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get justNow => 'Just Now';
 
   @override
-  String minutesAgo(String p1) {
-    return '$p1 min ago';
+  String minutesAgo(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 minutes ago',
+      one: '1 minute ago',
+    );
+    return '$_temp0';
   }
 
   @override
-  String hoursAgo(String p1) {
-    return '$p1 hr ago';
+  String hoursAgo(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
   }
 
   @override
-  String daysAgo(String p1) {
-    return '$p1 days ago';
+  String daysAgo(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4094,16 +4118,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get topMaxRows => 'Max top rows';
 
   @override
-  String topRowsValue(String p1) {
-    return '$p1 rows';
+  String topRowsValue(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 rows',
+      one: '1 row',
+    );
+    return '$_temp0';
   }
 
   @override
   String get bottomMaxRows => 'Max bottom rows';
 
   @override
-  String bottomRowsValue(String p1) {
-    return '$p1 rows';
+  String bottomRowsValue(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 rows',
+      one: '1 row',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -4442,13 +4478,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String yearsAgoCompact(String p1) {
-    return '$p1 years ago';
+  String yearsAgoCompact(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 years ago',
+      one: '1 year ago',
+    );
+    return '$_temp0';
   }
 
   @override
-  String monthsAgoCompact(String p1) {
-    return '$p1 months ago';
+  String monthsAgoCompact(int p1) {
+    String _temp0 = intl.Intl.pluralLogic(
+      p1,
+      locale: localeName,
+      other: '$p1 months ago',
+      one: '1 month ago',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -5124,9 +5124,14 @@
   "@batchDeleteConfirm": {
     "description": "Dialog title for batch-deleting selected items"
   },
-  "batchDeleteNote": "Delete the {count} selected items? This can't be undone.",
+  "batchDeleteNote": "Delete the {count, plural, =1{selected item} other{{count} selected items}}? This can't be undone.",
   "@batchDeleteNote": {
-    "description": "Dialog content for batch delete confirmation"
+    "description": "Dialog content for batch delete confirmation",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deleteSelected": "Delete selected",
   "@deleteSelected": {
@@ -5285,30 +5290,30 @@
   "@justNow": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "minutesAgo": "{p1} min ago",
+  "minutesAgo": "{p1, plural, =1{1 minute ago} other{{p1} minutes ago}}",
   "@minutesAgo": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
-  "hoursAgo": "{p1} hr ago",
+  "hoursAgo": "{p1, plural, =1{1 hour ago} other{{p1} hours ago}}",
   "@hoursAgo": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
-  "daysAgo": "{p1} days ago",
+  "daysAgo": "{p1, plural, =1{1 day ago} other{{p1} days ago}}",
   "@daysAgo": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5430,12 +5435,12 @@
   "@topMaxRows": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "topRowsValue": "{p1} rows",
+  "topRowsValue": "{p1, plural, =1{1 row} other{{p1} rows}}",
   "@topRowsValue": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5443,12 +5448,12 @@
   "@bottomMaxRows": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "bottomRowsValue": "{p1} rows",
+  "bottomRowsValue": "{p1, plural, =1{1 row} other{{p1} rows}}",
   "@bottomRowsValue": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
@@ -5926,21 +5931,21 @@
       }
     }
   },
-  "yearsAgoCompact": "{p1} years ago",
+  "yearsAgoCompact": "{p1, plural, =1{1 year ago} other{{p1} years ago}}",
   "@yearsAgoCompact": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },
-  "monthsAgoCompact": "{p1} months ago",
+  "monthsAgoCompact": "{p1, plural, =1{1 month ago} other{{p1} months ago}}",
   "@monthsAgoCompact": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "int"
       }
     }
   },

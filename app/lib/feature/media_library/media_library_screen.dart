@@ -606,13 +606,13 @@ class const _HistoryRow({
     final difference = now.difference(viewedAt);
     if (difference.inMinutes < 1) return l10n?.justNow ?? 'Just now';
     if (difference.inHours < 1) {
-      return l10n?.minutesAgo('${difference.inMinutes}') ?? 'Just now';
+      return l10n?.minutesAgo(difference.inMinutes) ?? 'Just now';
     }
     if (difference.inDays < 1) {
-      return l10n?.hoursAgo('${difference.inHours}') ?? 'Earlier today';
+      return l10n?.hoursAgo(difference.inHours) ?? 'Earlier today';
     }
     if (difference.inDays < 7) {
-      return l10n?.daysAgo('${difference.inDays}') ?? 'This week';
+      return l10n?.daysAgo(difference.inDays) ?? 'This week';
     }
     final sameYear = viewedAt.year == now.year;
     final month = viewedAt.month.toString().padLeft(2, '0');
