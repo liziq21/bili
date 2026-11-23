@@ -38,6 +38,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`.fvmrc`](.fvmrc), [`pubspec.yaml`](pubspec.yaml), [`analysis_options.yaml`](analysis_options.yaml), and [`.github/workflows/`](.github/workflows/) — executable SDK, dependency, analysis, and CI behavior; consult these when a rule mentions a command, version, or gate.
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/product-boundary.md`](docs/product-boundary.md) — 产品边界：只读客户端，不登录、不向平台写。**新增功能、评审工单、triage 判档前必读**；工单标题/描述与它冲突时以它为准。
+- [`docs/source-descriptors.md`](docs/source-descriptors.md) — 源描述符与声明式映射规范：`FeedMappingDescriptor` / `SourceDescriptor` 边界、分页、provenance/fingerprint、验证命令与 review checklist。**新增或修改声明式源、生成描述符前必读。**
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
 - [`docs/research/`](docs/research/README.md) — 研究记录：调查、选型、可行性研究与方案对比的留档索引。做研究或依据研究结论改代码前先读它。
 
@@ -56,6 +57,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 | You are about to… | Read first |
 |---|---|
 | Write or change any app/ widget, Bloc, or repository | `app/AGENTS.md` |
+| Add or change a declarative source, descriptor, or mapping transform | `docs/source-descriptors.md` + `packages/AGENTS.md` |
 | Touch colors, themes, or design tokens | `app/docs/design-system.md` + `app/AGENTS.md` (Global Style Access section) |
 | Add or change an icon, or an icon's selected/unselected style | `app/docs/design-system.md` (R9/R10/G3) + `app/lib/design/app_icons.dart` |
 | Add or modify a package under `packages/` | `packages/AGENTS.md` + the relevant sub-package `AGENTS.md` |

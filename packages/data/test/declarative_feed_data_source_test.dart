@@ -191,6 +191,61 @@ void main() {
     expect(page.data.first.title, 'first');
   });
 
+  test('follows continuation cursors and exposes the next cursor', () async {
+    const cursorDescriptor = FeedMappingDescriptor(
+      itemsPath: r'$.data.list[*]',
+      continuationTokenPath: r'$.data.next',
+      fields: {
+        'id': FieldMapping(path: r'$.id'),
+        'title': FieldMapping(path: r'$.title'),
+      },
+    );
+    final cursors = <Object?>[];
+    final source = DeclarativeFeedDataSource<VideoModel>(
+      sourceId: 'test',
+      id: 'feed',
+      title: 'Feed',
+      descriptor: cursorDescriptor,
+      fetchJson: ({int? pageKey}) async => fail('page fetcher must not run'),
+      fetchJsonWithCursor: ({Object? cursor}) async {
+        cursors.add(cursor);
+        return {
+          'data': {
+            'list': [
+              {'id': cursor == null ? 'v1' : 'v2', 'title': 'item'},
+            ],
+            'next': cursor == null ? 'abc' : null,
+          },
+        };
+      },
+      buildItem: build,
+    );
+
+    final first = await source.fetchFeedPage();
+    final firstPage = switch (first) {
+      Success(:final success) => success,
+      Error(:final error) => fail('expected success: $error'),
+    };
+    expect(firstPage.number, 1);
+    expect(firstPage.totalPages, 2);
+    expect(firstPage.nextCursor, 'abc');
+    expect(firstPage.data.single.id, 'v1');
+
+    final second = await source.fetchFeedPage(
+      cursor: firstPage.nextCursor,
+      pageKey: 2,
+    );
+    final secondPage = switch (second) {
+      Success(:final success) => success,
+      Error(:final error) => fail('expected success: $error'),
+    };
+    expect(secondPage.number, 2);
+    expect(secondPage.totalPages, 2);
+    expect(secondPage.nextCursor, isNull);
+    expect(secondPage.data.single.id, 'v2');
+    expect(cursors, [null, 'abc']);
+  });
+
   test('returns Result.error for an unknown transform', () async {
     const bad = FeedMappingDescriptor(
       itemsPath: r'$.data.list[*]',

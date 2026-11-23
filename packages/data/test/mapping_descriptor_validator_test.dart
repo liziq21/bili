@@ -51,6 +51,27 @@ void main() {
     );
   });
 
+  test('reports empty field descriptions and examples', () {
+    const descriptor = FeedMappingDescriptor(
+      itemsPath: r'$.data.list[*]',
+      fields: {
+        'id': FieldMapping(
+          path: r'$.id',
+          description: ' ',
+          examples: ['ok', ''],
+        ),
+      },
+    );
+
+    final issues = validateFeedMappingDescriptor(
+      descriptor,
+      requiredFields: const {},
+    );
+
+    expect(issues, contains('field id has an empty description'));
+    expect(issues, contains('field id has an empty example'));
+  });
+
   test('reports contradictory pagination and envelope settings', () {
     const broken = FeedMappingDescriptor(
       itemsPath: r'$.data.list[*]',
@@ -87,6 +108,26 @@ void main() {
     expect(
       pairingIssues,
       contains('totalCountPath and pageSize must be set together'),
+    );
+  });
+
+  test('reports contradictory continuation-token settings', () {
+    const broken = FeedMappingDescriptor(
+      itemsPath: r'$.data.list[*]',
+      hasMorePath: r'$.data.has_more',
+      continuationTokenPath: ' ',
+      fields: {'id': FieldMapping(path: r'$.id')},
+    );
+
+    final issues = validateFeedMappingDescriptor(
+      broken,
+      requiredFields: const {},
+    );
+
+    expect(issues, contains('continuationTokenPath must not be empty'));
+    expect(
+      issues,
+      contains('continuationTokenPath and hasMorePath are mutually exclusive'),
     );
   });
 }

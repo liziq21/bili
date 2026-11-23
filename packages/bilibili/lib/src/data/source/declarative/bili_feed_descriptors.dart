@@ -8,15 +8,51 @@ import '../../../bili_utils.dart';
 /// `owner` and `stat` sub-objects. Only the envelope, item path and pagination
 /// differ, so the field rules are kept in one place.
 const biliVideoFeedFields = <String, FieldMapping>{
-  'id': FieldMapping(path: r'$.bvid'),
-  'title': FieldMapping(path: r'$.title', fallbackPath: r'$.bvid'),
-  'url': FieldMapping(path: r'$.bvid', transform: 'biliWatchUrl'),
-  'thumbnailUrl': FieldMapping(path: r'$.pic', transform: 'biliUrl'),
-  'viewCount': FieldMapping(path: r'$.stat.view', transform: 'int'),
-  'uploadDate': FieldMapping(path: r'$.pubdate', transform: 'epochSeconds'),
-  'duration': FieldMapping(path: r'$.duration', transform: 'int'),
-  'creatorProfileName': FieldMapping(path: r'$.owner.name'),
-  'creatorProfileId': FieldMapping(path: r'$.owner.mid', transform: 'string'),
+  'id': FieldMapping(
+    path: r'$.bvid',
+    description: 'Stable Bilibili video id.',
+    examples: ['BV1Deht6rEpZ'],
+  ),
+  'title': FieldMapping(
+    path: r'$.title',
+    fallbackPath: r'$.bvid',
+    description: 'Display title; falls back to the id when missing.',
+  ),
+  'url': FieldMapping(
+    path: r'$.bvid',
+    transform: 'biliWatchUrl',
+    description: 'Canonical watch URL built from the id.',
+    examples: ['https://www.bilibili.com/video/BV1Deht6rEpZ'],
+  ),
+  'thumbnailUrl': FieldMapping(
+    path: r'$.pic',
+    transform: 'biliUrl',
+    description: 'HTTPS cover URL.',
+  ),
+  'viewCount': FieldMapping(
+    path: r'$.stat.view',
+    transform: 'int',
+    description: 'View count as an integer.',
+  ),
+  'uploadDate': FieldMapping(
+    path: r'$.pubdate',
+    transform: 'epochSeconds',
+    description: 'Publication time as a DateTime.',
+  ),
+  'duration': FieldMapping(
+    path: r'$.duration',
+    transform: 'int',
+    description: 'Duration in seconds.',
+  ),
+  'creatorProfileName': FieldMapping(
+    path: r'$.owner.name',
+    description: 'Uploader display name.',
+  ),
+  'creatorProfileId': FieldMapping(
+    path: r'$.owner.mid',
+    transform: 'string',
+    description: 'Uploader mid as a string.',
+  ),
 };
 
 const biliPopularFeedDescriptor = FeedMappingDescriptor(
@@ -62,16 +98,55 @@ const biliRankingFeedDescriptor = FeedMappingDescriptor(
 /// The item shape differs from popular/ranking: counts are `play`, the author
 /// is `author`/`mid`, and the duration is an `mm:ss` string.
 const biliUserVideoFeedFields = <String, FieldMapping>{
-  'id': FieldMapping(path: r'$.bvid'),
-  'title': FieldMapping(path: r'$.title', fallbackPath: r'$.bvid'),
-  'url': FieldMapping(path: r'$.bvid', transform: 'biliWatchUrl'),
-  'thumbnailUrl': FieldMapping(path: r'$.pic', transform: 'biliUrl'),
-  'viewCount': FieldMapping(path: r'$.play', transform: 'int'),
-  'uploadDate': FieldMapping(path: r'$.created', transform: 'epochSeconds'),
-  'duration': FieldMapping(path: r'$.length', transform: 'parseDuration'),
-  'desc': FieldMapping(path: r'$.description'),
-  'creatorProfileName': FieldMapping(path: r'$.author'),
-  'creatorProfileId': FieldMapping(path: r'$.mid', transform: 'string'),
+  'id': FieldMapping(
+    path: r'$.bvid',
+    description: 'Stable Bilibili video id.',
+    examples: ['BV1ujNV6qEXg'],
+  ),
+  'title': FieldMapping(
+    path: r'$.title',
+    fallbackPath: r'$.bvid',
+    description: 'Display title; falls back to the id when missing.',
+  ),
+  'url': FieldMapping(
+    path: r'$.bvid',
+    transform: 'biliWatchUrl',
+    description: 'Canonical watch URL built from the id.',
+    examples: ['https://www.bilibili.com/video/BV1ujNV6qEXg'],
+  ),
+  'thumbnailUrl': FieldMapping(
+    path: r'$.pic',
+    transform: 'biliUrl',
+    description: 'HTTPS cover URL.',
+  ),
+  'viewCount': FieldMapping(
+    path: r'$.play',
+    transform: 'int',
+    description: 'Play count as an integer.',
+  ),
+  'uploadDate': FieldMapping(
+    path: r'$.created',
+    transform: 'epochSeconds',
+    description: 'Creation time as a DateTime.',
+  ),
+  'duration': FieldMapping(
+    path: r'$.length',
+    transform: 'parseDuration',
+    description: 'Duration in seconds, parsed from mm:ss.',
+  ),
+  'desc': FieldMapping(
+    path: r'$.description',
+    description: 'Optional video description.',
+  ),
+  'creatorProfileName': FieldMapping(
+    path: r'$.author',
+    description: 'Uploader display name.',
+  ),
+  'creatorProfileId': FieldMapping(
+    path: r'$.mid',
+    transform: 'string',
+    description: 'Uploader mid as a string.',
+  ),
 };
 
 const biliUserVideosDescriptor = FeedMappingDescriptor(

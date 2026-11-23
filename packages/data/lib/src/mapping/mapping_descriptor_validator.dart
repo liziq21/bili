@@ -62,6 +62,12 @@ List<String> validateFeedMappingDescriptor(
     if (mapping.transform != null && mapping.transform!.trim().isEmpty) {
       issues.add('field ${entry.key} has an empty transform');
     }
+    if (mapping.description != null && mapping.description!.trim().isEmpty) {
+      issues.add('field ${entry.key} has an empty description');
+    }
+    if (mapping.examples.any((example) => example.trim().isEmpty)) {
+      issues.add('field ${entry.key} has an empty example');
+    }
   }
 
   final hasTotalCount = descriptor.totalCountPath != null;
@@ -71,6 +77,18 @@ List<String> validateFeedMappingDescriptor(
   }
   if (descriptor.pageSize != null && descriptor.pageSize! <= 0) {
     issues.add('pageSize must be positive');
+  }
+  final hasContinuation = descriptor.continuationTokenPath != null;
+  if (hasContinuation && descriptor.continuationTokenPath!.trim().isEmpty) {
+    issues.add('continuationTokenPath must not be empty');
+  }
+  if (hasContinuation && descriptor.hasMorePath != null) {
+    issues.add('continuationTokenPath and hasMorePath are mutually exclusive');
+  }
+  if (hasContinuation && hasTotalCount) {
+    issues.add(
+      'continuationTokenPath and totalCountPath are mutually exclusive',
+    );
   }
   if (descriptor.hasMorePath != null && hasTotalCount) {
     issues.add('hasMorePath and totalCountPath are mutually exclusive');

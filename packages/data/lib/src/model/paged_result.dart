@@ -6,4 +6,5 @@ class Page<T>({
   required final int number,
   required final int totalPages,
   required final List<T> data,
+  final Object? nextCursor,
 });

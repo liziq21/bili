@@ -9,6 +9,11 @@ import 'mapping_transform.dart';
 /// Fetches one raw JSON page for a declarative feed.
 typedef FeedJsonFetcher = Future<Map<String, dynamic>> Function({int? pageKey});
 
+/// Fetches one raw JSON page using a continuation cursor.
+typedef FeedJsonCursorFetcher = Future<Map<String, dynamic>> Function({
+  Object? cursor,
+});
+
 /// Builds a canonical item from the descriptor-resolved field map.
 ///
 /// Returning null drops the item, matching the API packages' rule that items
@@ -71,8 +76,20 @@ final class MappingEvaluator({
     return readJsonPath(root, path) == descriptor.hasMoreWhen;
   }
 
+  /// The continuation cursor for the next page, or null on the last page.
+  Object? nextCursor(Object? root) {
+    final path = descriptor.continuationTokenPath;
+    if (path == null) return null;
+    final value = readJsonPath(root, path);
+    if (value == null || (value is String && value.isEmpty)) return null;
+    return value;
+  }
+
   /// The total page count for [page], using the descriptor's pagination rule.
-  int totalPages(Object? root, int page) {
+  int totalPages(Object? root, int page, {Object? nextCursor}) {
+    if (descriptor.continuationTokenPath != null) {
+      return nextCursor == null ? page : page + 1;
+    }
     final countPath = descriptor.totalCountPath;
     final pageSize = descriptor.pageSize;
     if (countPath != null && pageSize != null && pageSize > 0) {
@@ -133,6 +150,7 @@ final class DeclarativeFeedDataSource<T>({
   @override required final String title,
   required final FeedMappingDescriptor descriptor,
   required final FeedJsonFetcher fetchJson,
+  final FeedJsonCursorFetcher? fetchJsonWithCursor,
   required final FeedItemBuilder<T> buildItem,
   final MappingTransformRegistry? transforms,
   final String? Function(T item)? identityOf,
@@ -146,10 +164,22 @@ final class DeclarativeFeedDataSource<T>({
   int get schemaVersion => descriptor.schemaVersion;
 
   @override
-  Future<Result<Page<T>, Exception>> fetchFeed({int? pageKey}) async {
-    final page = pageKey ?? 1;
+  Future<Result<Page<T>, Exception>> fetchFeed({int? pageKey}) =>
+      fetchFeedPage(cursor: pageKey, pageKey: pageKey);
+
+  /// Fetches a page by continuation [cursor] and/or page number.
+  ///
+  /// Cursor-based sources should provide [fetchJsonWithCursor]. Page-based
+  /// sources keep using [fetchJson] and pass [pageKey].
+  Future<Result<Page<T>, Exception>> fetchFeedPage({
+    Object? cursor,
+    int? pageKey,
+  }) async {
+    final page = pageKey ?? (cursor is int ? cursor : 1);
     try {
-      final json = await fetchJson(pageKey: page);
+      final json = fetchJsonWithCursor != null
+          ? await fetchJsonWithCursor!(cursor: cursor)
+          : await fetchJson(pageKey: page);
       final envelopeError = _evaluator.validateEnvelope(json);
       if (envelopeError != null) {
         return Result.error(Exception(envelopeError));
@@ -165,11 +195,13 @@ final class DeclarativeFeedDataSource<T>({
         data.add(built);
       }
 
+      final nextCursor = _evaluator.nextCursor(json);
       return Result.success(
         Page<T>(
           number: page,
-          totalPages: _evaluator.totalPages(json, page),
+          totalPages: _evaluator.totalPages(json, page, nextCursor: nextCursor),
           data: data,
+          nextCursor: nextCursor,
         ),
       );
     } catch (error) {

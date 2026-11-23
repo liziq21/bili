@@ -9,8 +9,8 @@
 - 源 fixture 路径（必须是已提交、可离线读取的 JSON）。
 - 目标模型（`VideoModel`、`LiveRoomModel` 等）及其 `schemaVersion` / `requiredFields`。
 - capability 与 feed id/title。
-- 分页形状：`hasMorePath`，或 `totalCountPath` + `pageSize`。
-- 认证/签名说明（描述符不实现签名；需要签名的源继续用 Dart adapter）。
+- 分页形状：`hasMorePath`、`totalCountPath` + `pageSize`，或 `continuationTokenPath`。
+- 认证/签名说明（`FeedMappingDescriptor` 不实现签名；需要签名的源继续用 Dart adapter；传输元数据可放 `SourceDescriptor`）。
 - 已知怪癖：空列表、字段缺失、类型不一致、URL 规范化、HTML 标题等。
 
 ## 硬性规则
@@ -21,7 +21,7 @@
 - ID、URL、时间、计数必须走确定性 transform，不得让模型在运行时推断。
 - `schemaVersion` 必须等于目标模型的 `schemaVersion`。
 - 目标模型的 `requiredFields` 必须全部出现。
-- 分页只支持 `hasMorePath` 或 `totalCountPath` + `pageSize`；遇到 continuation token、签名分页或 WBI 时停止并升级，不要硬编码进描述符。
+- 分页支持 `hasMorePath`、`totalCountPath` + `pageSize`、`continuationTokenPath`；三者互斥。签名分页/WBI 仍用 Dart adapter，不要硬编码进描述符。
 - 业务成功码必须显式写成 `successCodePath` + `successCode`。
 - 必须同时提交：fixture 等价性测试；能由旧 adapter 生成 canonical golden 时，再加 conformance golden。
 - 不得在测试中访问网络。
@@ -29,20 +29,23 @@
 ## 2026-11 复核补充
 
 - **schema 合法不等于任务正确**：除 JSON 结构外，必须断言精确 ID、URL、计数、时长、时间、分页和去重；不要把 schema validity 当作唯一验收指标。
-- **记录 provenance**：在 PR 描述或描述符旁注中记录生成模型、prompt 版本、生成日期、fixture 哈希、reviewer；模型升级不应改变描述符语义。
+- **记录 provenance**：使用 `MappingProvenance` 记录生成模型、prompt 版本、生成日期、reviewer、`fixtureHash`、`sourceSchemaHash`；哈希由 `fingerprintJson(fixture)` 计算，模型升级不应改变描述符语义。
 - **字段顺序**：需要中间推理字段时，采用 reasoning-first 顺序；避免 answer-first，后者会显著伤害小模型。
 - **不要用运行时模型生成 ID/URL/计数**：这些必须走确定性 transform；运行时模型只考虑窄语义分类，并配 validator + fallback。
 - **记录 source schema 哈希**：源结构变化时先让 conformance 变红，再由构建期 agent 提 PR；不要自动合并。
-- **区分映射与传输**：`FeedMappingDescriptor` 只做 item → canonical model；endpoint、auth、签名、WBI、媒体流继续用 Dart adapter，不强行描述符化。
+- **区分映射与传输**：`FeedMappingDescriptor` 只做 item → canonical model；endpoint、auth、pagination、rate limit 用 `SourceDescriptor`；签名、WBI、媒体流继续用 Dart adapter，不强行描述符化。
+- **字段语义**：为字段补 `description` 和可选 `examples`，供构建期匹配与 review；运行时忽略。
+- **cursor 分页**：使用 `continuationTokenPath`，并通过 `Page.nextCursor` / `fetchFeedPage(cursor:)` 传递；不要把它伪装成页码。
 - **不要放凭据**：API key/token 不得进入 prompt、日志、描述符或测试 fixture。
 
 ## 输出格式
 
-1. `FeedMappingDescriptor` 代码片段。
-2. 新增 transform（如有）及其单元测试。
-3. fixture 等价性测试骨架（声明式输出 vs 旧 adapter）。
-4. 验证命令与预期结果。
-5. 未支持/有风险的部分（明确列出，不要静默跳过）。
+1. `FeedMappingDescriptor` 代码片段（含 `MappingProvenance`）。
+2. 如涉及传输元数据，给出 `SourceDescriptor` 代码片段。
+3. 新增 transform（如有）及其单元测试。
+4. fixture 等价性测试骨架（声明式输出 vs 旧 adapter），包含精确 ID/URL/计数/时长/时间/分页/去重断言。
+5. 验证命令与预期结果。
+6. 未支持/有风险的部分（明确列出，不要静默跳过）。
 
 ## 验证命令
 
@@ -66,7 +69,9 @@ python3 tool/test_matrix.py --check
 
 - [ ] 描述符通过 `validateFeedMappingDescriptor`，且 `requiredFields` 全覆盖。
 - [ ] `schemaVersion` 与目标模型一致。
-- [ ] 分页形状与源实际行为一致，且没有同时设置 `hasMorePath` 与 `totalCountPath`。
+- [ ] 分页形状与源实际行为一致，且没有同时设置 `hasMorePath`、`totalCountPath`、`continuationTokenPath` 中的多个。
+- [ ] `MappingProvenance` 完整，fixture/schema 哈希与 fixture 匹配。
+- [ ] `SourceDescriptor`（如使用）通过 `validateSourceDescriptor`，且没有存凭据。
 - [ ] 成功码/错误消息路径显式，失败时返回 `Result.error` 而不是空列表。
 - [ ] ID/URL/时间/计数使用确定性 transform。
 - [ ] fixture 等价性测试逐字段比较，不只比较数量。
@@ -76,7 +81,7 @@ python3 tool/test_matrix.py --check
 ## 提示模板
 
 ```text
-你是本仓库的构建期映射助手。请根据以下输入生成一个 FeedMappingDescriptor。
+你是本仓库的构建期映射助手。请根据以下输入生成一个 FeedMappingDescriptor；如涉及传输元数据，再生成 SourceDescriptor。
 
 源 fixture: <path>
 目标模型: <VideoModel|LiveRoomModel> (schemaVersion=<n>, requiredFields=<...>)

@@ -8,6 +8,7 @@ export 'src/mapping/mapping_descriptor.dart';
 export 'src/mapping/mapping_descriptor_validator.dart';
 export 'src/mapping/mapping_fingerprint.dart';
 export 'src/mapping/mapping_transform.dart';
+export 'src/mapping/source_descriptor.dart';
 export 'src/model/creator_profile_model.dart';
 export 'src/model/danmaku.dart';
 export 'src/model/filter_group.dart';

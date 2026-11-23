@@ -14,6 +14,8 @@ final class const FieldMapping({
   final String? transform,
   final Map<String, Object?> args = const {},
   final String? template,
+  final String? description,
+  final List<String> examples = const [],
 });
 
 /// A source-neutral description of one feed page.
@@ -22,8 +24,9 @@ final class const FieldMapping({
 /// [fields] maps canonical field names to their extraction rules. [schemaVersion]
 /// declares which canonical model version the fields target. The optional
 /// envelope fields decide success from the source's business code. Pagination
-/// can be described either by [hasMorePath] (a boolean-style flag) or by
-/// [totalCountPath] together with [pageSize].
+/// can be described by [hasMorePath] (a boolean-style flag), by
+/// [totalCountPath] together with [pageSize], or by [continuationTokenPath]
+/// for cursor-based APIs.
 @immutable
 final class const FeedMappingDescriptor({
   required final String itemsPath,
@@ -36,5 +39,6 @@ final class const FeedMappingDescriptor({
   final bool hasMoreWhen = true,
   final String? totalCountPath,
   final int? pageSize,
+  final String? continuationTokenPath,
   final MappingProvenance? provenance,
 });
