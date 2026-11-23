@@ -15,9 +15,12 @@ Usage:
   python3 tool/generate_subset_characters.py --write   # update the file
   python3 tool/generate_subset_characters.py --check   # exit 1 if stale
 
-CI step (in .github/workflows/ci-test.yml, after `flutter pub get`):
-  - name: Check font subset is up to date
-    run: python3 tool/generate_subset_characters.py --check
+No workflow runs --check, so a stale list is silent until someone regenerates
+the OTF from it. The automated gate is
+app/test/golden/golden_font_contract_test.dart, which asserts that every
+non-ASCII character in lib/ and test/ string literals has a glyph in the OTF and
+that the list names no glyph the OTF lacks — but never that the list matches
+source. Run --write after changing user-facing copy.
 """
 
 from __future__ import annotations
@@ -289,9 +292,12 @@ def main() -> int:
             "      --unicodes=U+0020-007E \\\n"
             "      --output-file=app/test/fonts/NotoSansSC-golden-subset.otf \\\n"
             "      --flavor=none --layout-features='*' --no-hinting --desubroutinize\n"
-            "    # then re-record goldens:\n"
-            "    cd app && flutter test --concurrency=1 --update-goldens test/golden/\n"
-            "    # then commit both files and push.",
+            "    # then re-record goldens from the workflow, not locally:\n"
+            "    gh workflow run rerecord-goldens.yml \\\n"
+            "      -f target_ref=<branch> -f reason='<why the glyph set changed>'\n"
+            "    # a locally recorded PNG fails ci-golden-provenance.yml, which\n"
+            "    # only accepts blobs produced by a successful rerecord run.\n"
+            "    # then commit the list, the OTF and the re-recorded goldens together.",
             file=sys.stderr,
         )
         return 1
