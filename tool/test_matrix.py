@@ -195,6 +195,7 @@ TEST_MATRIX = {
         'packages/bilibili/bpi/test/live_room_play_info_test.dart',
         'packages/bilibili/bpi/test/play_url_test.dart',
         'packages/bilibili/bpi/test/player_v2_test.dart',
+        'packages/bilibili/bpi/test/playlist_content_test.dart',
         'packages/bilibili/bpi/test/popular_feed_test.dart',
         'packages/bilibili/bpi/test/ranking_feed_test.dart',
         'packages/bilibili/bpi/test/reply_pagination_test.dart',
