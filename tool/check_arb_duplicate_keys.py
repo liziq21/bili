@@ -10,7 +10,7 @@ The check walks the whole document, not just the top level: JSON allows
 duplicate members in any object, and nested placeholders are no different.
 
 Usage:
-  python3 tool/check_arb_duplicate_keys.py            # check the app ARB files
+  python3 tool/check_arb_duplicate_keys.py            # check every source ARB
   python3 tool/check_arb_duplicate_keys.py path.arb   # check specific files
 """
 
@@ -23,9 +23,16 @@ from collections.abc import Iterator
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_ARB_FILES = (
-    REPO_ROOT / 'app/lib/l10n/app_.arb',
-    REPO_ROOT / 'app/lib/l10n/app_zh.arb',
+# Every source ARB in the workspace, not just the app pair: package ARBs feed
+# their own gen-l10n runs and have the same last-wins problem. Build outputs can
+# contain copies, so skip them.
+_IGNORED_DIRS = frozenset({'build', '.dart_tool', '.symlinks'})
+DEFAULT_ARB_FILES = tuple(
+    sorted(
+        path
+        for path in REPO_ROOT.glob('**/lib/l10n/*.arb')
+        if not _IGNORED_DIRS & set(path.relative_to(REPO_ROOT).parts)
+    )
 )
 
 
@@ -39,15 +46,17 @@ def _parse_pairs(text: str) -> object:
 
 def find_duplicates(data: object, path: tuple[str, ...] = ()) -> Iterator[tuple[tuple[str, ...], str]]:
     """Yield ``(path, key)`` for every repeated key in ``data``."""
-    if not isinstance(data, _Members):
-        return
-    seen: set[str] = set()
-    for key, value in data:
-        if key in seen:
-            yield path, key
-        else:
-            seen.add(key)
-        yield from find_duplicates(value, (*path, key))
+    if isinstance(data, _Members):
+        seen: set[str] = set()
+        for key, value in data:
+            if key in seen:
+                yield path, key
+            else:
+                seen.add(key)
+            yield from find_duplicates(value, (*path, key))
+    elif isinstance(data, list):
+        for index, value in enumerate(data):
+            yield from find_duplicates(value, (*path, str(index)))
 
 
 def check_file(path: Path) -> list[str]:

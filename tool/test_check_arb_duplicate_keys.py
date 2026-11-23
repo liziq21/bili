@@ -45,6 +45,10 @@ class FindDuplicatesTest(unittest.TestCase):
         data = arb._parse_pairs('{"a": {"x": 1}, "b": {"x": 2}}')
         self.assertEqual(list(arb.find_duplicates(data)), [])
 
+    def test_duplicate_inside_array_element_is_reported(self):
+        data = arb._parse_pairs('{"a": [{"b": 1, "b": 2}]}')
+        self.assertEqual(list(arb.find_duplicates(data)), [(('a', '0'), 'b')])
+
 
 class CheckFileTest(unittest.TestCase):
     def test_clean_file_has_no_problems(self):
@@ -85,6 +89,12 @@ class MainTest(unittest.TestCase):
 
 
 class RealArbFilesTest(unittest.TestCase):
+    def test_default_set_covers_app_and_package_arbs(self):
+        paths = {path.relative_to(REPO_ROOT).as_posix() for path in arb.DEFAULT_ARB_FILES}
+        self.assertIn('app/lib/l10n/app_.arb', paths)
+        self.assertIn('packages/bilibili/lib/l10n/bilibili_en.arb', paths)
+        self.assertIn('packages/youtube/lib/l10n/youtube_en.arb', paths)
+
     def test_committed_arb_files_have_no_duplicate_keys(self):
         with redirect_stdout(io.StringIO()) as stdout, redirect_stderr(io.StringIO()):
             code = arb.main([str(path) for path in arb.DEFAULT_ARB_FILES])
