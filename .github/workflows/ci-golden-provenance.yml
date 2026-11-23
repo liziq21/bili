@@ -31,15 +31,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          # 任何未预期的失败都必须判红：`|| true` 只能吞掉「grep 无匹配」，
+          # 不能把 API 失败当成「无 golden 改动」。
+          set -euo pipefail
           if [ -f tool/check_golden_provenance.py ]; then
             python3 tool/check_golden_provenance.py
             exit $?
           fi
           # base 上还没有校验脚本（引入本门禁的那个 PR）。不能一律放行，否则
           # 任何缺少脚本的 base 分支都成了绕过口；只在 PR 没有 golden 改动时通过。
-          goldens=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
-            --jq '.[] | select(.status != "removed") | .filename' \
+          files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | select(.status != "removed") | .filename')
+          goldens=$(printf '%s\n' "$files" \
             | grep -E '^app/test/golden/goldens/ci/.*\.png$' || true)
           if [ -n "$goldens" ]; then
             echo "::error::golden baseline changed, but the provenance checker is not on this base branch"
