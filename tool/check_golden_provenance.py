@@ -37,9 +37,9 @@ RERECORD_WORKFLOW = '.github/workflows/rerecord-goldens.yml'
 ARTIFACT_PREFIX = 'goldens-'
 # The re-record workflow commits on top of the checked-out target ref, so the
 # run head is normally the immediate parent of the commit that adds the PNGs.
-# A short walk still covers squash merges and rebases without turning a
-# tampered pull request into hundreds of API calls.
-ANCESTOR_DEPTH = 25
+# The walk is bounded so a tampered pull request cannot turn the check into an
+# unbounded crawl; 100 commits also covers squash merges and late rebases.
+ANCESTOR_DEPTH = 100
 # The pull request files API stops at 3000 entries; past that the diff cannot
 # be inspected completely, so the check refuses to pass.
 MAX_PULL_FILES = 3000
@@ -114,6 +114,12 @@ def git_blob_sha(content: bytes) -> str:
     """Return the git object id a file with ``content`` would have."""
     header = b'blob %d\0' % len(content)
     return hashlib.sha1(header + content).hexdigest()
+
+
+def is_rerecord_run(run: WorkflowRun) -> bool:
+    # Some run payloads carry a ref suffix, e.g.
+    # `.github/workflows/rerecord-goldens.yml@refs/heads/main`.
+    return run.path.split('@', 1)[0] == RERECORD_WORKFLOW
 
 
 def is_golden_png(path: str) -> bool:
@@ -242,7 +248,7 @@ def _proving_run(
     # request base's history, so tie it there instead.
     if base_sha:
         for run in api.recent_runs():
-            if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
+            if not is_rerecord_run(run) or run.conclusion != 'success':
                 continue
             if api.is_ancestor(run.head_sha, base_sha) and _run_proves(
                 api, run, changed, trusted_recorders
@@ -257,7 +263,7 @@ def _run_proves(
     changed: PullFile,
     trusted_recorders: set[str] | None,
 ) -> bool:
-    if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
+    if not is_rerecord_run(run) or run.conclusion != 'success':
         return False
     if trusted_recorders is not None:
         recorder = api.file_blob(RERECORD_WORKFLOW, run.head_sha)
@@ -411,7 +417,7 @@ class HttpGitHubApi:
         if cached is not None:
             return cached
         try:
-            response = self._json(
+            entries = self._paginate(
                 f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
                 {'head_sha': sha, 'per_page': 100},
             )
@@ -428,7 +434,7 @@ class HttpGitHubApi:
                 path=run.get('path', ''),
                 html_url=run.get('html_url', ''),
             )
-            for run in response.get('workflow_runs', [])
+            for run in entries
         ]
         self._run_cache[sha] = runs
         return runs

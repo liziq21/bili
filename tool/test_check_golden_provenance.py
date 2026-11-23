@@ -94,12 +94,16 @@ class FakeApi:
         return self.artifacts.get(run_id)
 
 
-def _run(run_id: int = 1, conclusion: str | None = 'success') -> provenance.WorkflowRun:
+def _run(
+    run_id: int = 1,
+    conclusion: str | None = 'success',
+    path: str = RERECORD,
+) -> provenance.WorkflowRun:
     return provenance.WorkflowRun(
         id=run_id,
         head_sha='run-head',
         conclusion=conclusion,
-        path=RERECORD,
+        path=path,
         html_url=f'https://example.test/runs/{run_id}',
     )
 
@@ -337,6 +341,16 @@ class FindUnprovenancedTest(unittest.TestCase):
             ancestor_pairs={('run-head', 'base-sha')},
         )
         self.assertEqual(len(_problems(api, base='base-sha')), 1)
+
+    def test_run_path_with_ref_suffix_is_accepted(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7, path=f'{RERECORD}@refs/heads/main')]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+        )
+        self.assertEqual(_problems(api), [])
 
     def test_modified_recorder_does_not_prove(self):
         api = FakeApi(
