@@ -65,61 +65,108 @@ void main() {
   }
 
   group('BiliPlaylistContentRemoteDataSource', () {
-    test('maps the real playlist fixture to a playlist detail page', () async {
-      final network = _FakeNetworkUserDataSource(response: loadFixture());
-      final source = BiliPlaylistContentRemoteDataSource(network: network);
+    test(
+      'maps the real seasons_archives_list fixture to a detail page',
+      () async {
+        final network = _FakeNetworkUserDataSource(response: loadFixture());
+        final source = BiliPlaylistContentRemoteDataSource(network: network);
 
-      final result = await source.fetchPlaylistContent(
-        playlistId: '2:12345',
-        page: 1,
-        pageSize: 30,
-      );
+        final result = await source.fetchPlaylistContent(
+          playlistId: '946974:2046621',
+          page: 1,
+          pageSize: 30,
+        );
 
-      expect(result.isSuccess(), isTrue);
-      final page = switch (result) {
-        Success(:final success) => success,
-        Error() => fail('expected a successful page'),
-      };
-      expect(page.number, 1);
-      expect(page.totalPages, 1);
-      expect(page.data, hasLength(1));
-      final detail = page.data.single;
-      expect(detail.id, '2:12345');
-      expect(detail.title, 'Test Playlist');
-      expect(detail.description, 'Test playlist description');
-      expect(detail.coverUrl, startsWith('https://'));
-      expect(detail.creatorName, 'auto');
-      expect(detail.creatorId, '2');
-      expect(detail.totalCount, 1);
-      expect(detail.items, hasLength(1));
-      final video = detail.items.single;
-      expect(video.id, 'BV1xx411x7vy');
-      expect(video.title, 'Test Video Title');
-      expect(video.thumbnailUrl, startsWith('https://'));
-      expect(video.viewCount, 10000);
-      expect(video.duration, 205);
-      expect(video.creatorProfileName, 'Test Author');
-      expect(video.creatorProfileId, '2');
-      expect(network.requestedMid, 2);
-      expect(network.requestedSeasonId, 12345);
-      expect(network.requestedPageNum, 1);
-      expect(network.requestedPageSize, 30);
-    });
+        expect(result.isSuccess(), isTrue);
+        final page = switch (result) {
+          Success(:final success) => success,
+          Error() => fail('expected a successful page'),
+        };
+        expect(page.number, 1);
+        expect(page.totalPages, 1);
+        expect(page.data, hasLength(1));
+        final detail = page.data.single;
+        expect(detail.id, '946974:2046621');
+        expect(detail.title, '合集·样片日记');
+        expect(detail.description, isEmpty);
+        expect(detail.coverUrl, startsWith('https://'));
+        expect(detail.creatorId, '946974');
+        expect(detail.totalCount, 26);
+        expect(detail.items, hasLength(5));
+        final video = detail.items.first;
+        expect(video.id, 'BV1be41127ft');
+        expect(video.title, '零下26度的新疆，跟着影视飓风去拍样片！');
+        expect(video.thumbnailUrl, startsWith('https://'));
+        // 详情端点把播放量放在 stat.view、时长放在秒数字段，而不是 play/length。
+        expect(video.viewCount, 3303255);
+        expect(video.duration, 974);
+        expect(network.requestedMid, 946974);
+        expect(network.requestedSeasonId, 2046621);
+        expect(network.requestedPageNum, 1);
+        expect(network.requestedPageSize, 30);
+      },
+    );
 
     test('computes total pages from the advertised playlist total', () async {
       final network = _FakeNetworkUserDataSource(response: loadFixture());
       final source = BiliPlaylistContentRemoteDataSource(network: network);
 
       final result = await source.fetchPlaylistContent(
-        playlistId: '2:12345',
-        pageSize: 1,
+        playlistId: '946974:2046621',
+        pageSize: 5,
       );
 
       final page = switch (result) {
         Success(:final success) => success,
         Error() => fail('expected a successful page'),
       };
-      expect(page.totalPages, 1);
+      expect(page.totalPages, 6);
+    });
+
+    test('falls back to the items_lists series shape', () async {
+      final data = NetworkBiliPlaylistContentData.fromJson({
+        'items_lists': {
+          'page': {'page_num': 1, 'page_size': 30, 'total': 1},
+          'seasons_list': <Object>[],
+          'series_list': [
+            {
+              'series_id': 12345,
+              'archives': [
+                {
+                  'aid': 1,
+                  'bvid': 'BV1xx411x7vy',
+                  'title': 'Series Video',
+                  'play': 10000,
+                  'length': '03:25',
+                },
+              ],
+              'meta': {
+                'series_id': 12345,
+                'name': 'Test Series',
+                'description': 'Series description',
+                'creator': 'author',
+                'mid': 2,
+                'total': 1,
+                'cover': 'https://i0.hdslb.com/cover.jpg',
+              },
+            },
+          ],
+        },
+      });
+      final network = _FakeNetworkUserDataSource(response: data);
+      final source = BiliPlaylistContentRemoteDataSource(network: network);
+
+      final result = await source.fetchPlaylistContent(playlistId: '2:12345');
+
+      final page = switch (result) {
+        Success(:final success) => success,
+        Error() => fail('expected a successful page'),
+      };
+      final detail = page.data.single;
+      expect(detail.title, 'Test Series');
+      expect(detail.description, 'Series description');
+      expect(detail.creatorName, 'author');
+      expect(detail.items.single.id, 'BV1xx411x7vy');
     });
 
     test(

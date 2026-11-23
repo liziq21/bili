@@ -56,20 +56,34 @@ final class const BiliPlaylistContentRemoteDataSource({
         seasonId: ref.id,
       ),
     ).then((response) {
+      // 详情端点直接返回合集本身；`items_lists` 是列表端点的形状，保留为
+      // 回退以兼容按 series/season 分组的响应。
       final lists = response.itemsLists;
       final series = _findSeries(lists?.seriesList, ref.id);
       final season = _findSeason(lists?.seasonsList, ref.id);
-      final archives = series?.archives ?? season?.archives;
-      final total = series?.meta?.total ?? season?.meta?.total;
-      final totalPages = total == null
+      final detailMeta = response.meta;
+      final archives =
+          response.archives ?? series?.archives ?? season?.archives;
+      final total =
+          detailMeta?.total ?? series?.meta?.total ?? season?.meta?.total;
+      final effectiveTotal = response.page?.total ?? total;
+      final totalPages = effectiveTotal == null
           ? (archives == null || archives.length < pageSize ? page : page + 1)
-          : ((total + pageSize - 1) ~/ pageSize).clamp(page, 1 << 30);
+          : ((effectiveTotal + pageSize - 1) ~/ pageSize).clamp(page, 1 << 30);
       final creator = series?.meta?.creator;
-      final title = series?.meta?.name ?? season?.meta?.name ?? '${ref.id}';
+      final title =
+          detailMeta?.name ??
+          series?.meta?.name ??
+          season?.meta?.name ??
+          '${ref.id}';
       final description =
-          series?.meta?.description ?? season?.meta?.description;
-      final cover = series?.meta?.cover ?? season?.meta?.cover;
-      final creatorMid = series?.meta?.mid ?? season?.meta?.mid;
+          detailMeta?.description ??
+          series?.meta?.description ??
+          season?.meta?.description;
+      final cover =
+          detailMeta?.cover ?? series?.meta?.cover ?? season?.meta?.cover;
+      final creatorMid =
+          detailMeta?.mid ?? series?.meta?.mid ?? season?.meta?.mid;
 
       return Page<PlaylistDetail>(
         number: page,

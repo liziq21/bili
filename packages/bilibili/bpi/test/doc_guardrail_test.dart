@@ -463,9 +463,10 @@ final endpointSpecs = <EndpointSpec>[
       final data = NetworkBiliPlaylistContentData.fromJson(
         json['data'] as Map<String, dynamic>,
       );
-      expect(data.itemsLists, isNotNull);
-      expect(data.itemsLists?.page, isNotNull);
-      expect(data.itemsLists?.seriesList, isNotEmpty);
+      expect(data.archives, isNotEmpty);
+      expect(data.meta, isNotNull);
+      expect(data.meta?.seasonId, isNotNull);
+      expect(data.page, isNotNull);
       return data;
     },
   ),

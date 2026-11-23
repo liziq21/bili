@@ -6,9 +6,23 @@ part 'network_bili_playlist_content.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class NetworkBiliPlaylistContentData {
-  const NetworkBiliPlaylistContentData({this.itemsLists});
+  const NetworkBiliPlaylistContentData({
+    this.itemsLists,
+    this.aids,
+    this.archives,
+    this.meta,
+    this.page,
+  });
 
+  /// 列表端点（`seasons_series_list`）把合集/系列包在 `items_lists` 下。
   final NetworkBiliPlaylistItemsLists? itemsLists;
+
+  /// 详情端点（`seasons_archives_list`）直接返回合集自身的条目与信息，
+  /// 不再包一层 `items_lists`。
+  final List<int>? aids;
+  final List<NetworkBiliPlaylistVideoItem>? archives;
+  final NetworkBiliPlaylistSeasonMeta? meta;
+  final NetworkBiliPlaylistSeasonPage? page;
 
   factory NetworkBiliPlaylistContentData.fromJson(Map<String, dynamic> json) =>
       _$NetworkBiliPlaylistContentDataFromJson(json);
@@ -235,6 +249,7 @@ class NetworkBiliPlaylistVideoItem {
     this.pubdate,
     this.review,
     this.seasonId,
+    this.stat,
     this.state,
     this.subtitle,
     this.title,
@@ -301,6 +316,7 @@ class NetworkBiliPlaylistVideoItem {
   final int? review;
   @NullableIntOrStringConverter()
   final int? seasonId;
+  final NetworkBiliPlaylistVideoMetaStat? stat;
   @NullableIntOrStringConverter()
   final int? state;
   final String? subtitle;

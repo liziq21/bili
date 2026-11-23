@@ -607,12 +607,15 @@ Future<void> main(List<String> args) async {
     if (!shouldFetch('testing/playlist_content.json')) {
       skipNote('testing/playlist_content.json');
     } else {
+      // 详情端点必须带 `season_id`；`mid=2` 没有合集，故用一个有合集的
+      // UP 主（影视飓风 946974）的首个合集（2046621）。
       final playlistContent = await getWbiJson(
-        'https://api.bilibili.com/x/polymer/space/seasons_archives_list',
+        'https://api.bilibili.com/x/polymer/web-space/seasons_archives_list',
         {
-          'mid': '2',
+          'mid': '946974',
+          'season_id': '2046621',
           'page_num': '1',
-          'page_size': '30',
+          'page_size': '5',
           'sort_reverse': 'false',
         },
         'playlist content',
@@ -1007,42 +1010,27 @@ void _requireBangumiPlayUrl(Map<String, dynamic> json, String label) {
 
 void _requirePlaylistContent(Map<String, dynamic> json, String label) {
   final data = _requireDataObject(json, label);
-  final itemsLists = data['items_lists'];
-  if (itemsLists is! Map) {
-    throw FormatException('$label data.items_lists is not an object');
-  }
-  final page = itemsLists['page'];
+  final page = data['page'];
   if (page is! Map) {
-    throw FormatException('$label data.items_lists.page is not an object');
+    throw FormatException('$label data.page is not an object');
   }
   final pageNum = page['page_num'];
   final pageSize = page['page_size'];
   final total = page['total'];
   if (pageNum is! int || pageSize is! int || total is! int) {
-    throw FormatException(
-      '$label data.items_lists.page missing required fields',
-    );
+    throw FormatException('$label data.page missing required fields');
   }
-  final seriesList = itemsLists['series_list'];
-  if (seriesList is! List || seriesList.isEmpty) {
-    throw FormatException(
-      '$label data.items_lists.series_list is not a non-empty list',
-    );
+  final meta = data['meta'];
+  if (meta is! Map) {
+    throw FormatException('$label data.meta is not an object');
   }
-  final hasValidSeries = seriesList.any((item) {
-    if (item is! Map) return false;
-    final seriesId = item['series_id'];
-    return seriesId is int && seriesId > 0;
-  });
-  if (!hasValidSeries) {
-    throw FormatException('$label has no valid series with series_id');
+  final seasonId = meta['season_id'];
+  if (seasonId is! int || seasonId <= 0) {
+    throw FormatException('$label data.meta has no valid season_id');
   }
-  // 校验第一个 series 的视频列表
-  final firstSeries = seriesList.first;
-  if (firstSeries is! Map) return;
-  final archives = firstSeries['archives'];
+  final archives = data['archives'];
   if (archives is! List || archives.isEmpty) {
-    throw FormatException('$label first series has no archives');
+    throw FormatException('$label data.archives is not a non-empty list');
   }
   final hasValidVideo = archives.any((item) {
     if (item is! Map) return false;
@@ -1051,8 +1039,6 @@ void _requirePlaylistContent(Map<String, dynamic> json, String label) {
     return (aid is int && aid > 0) || (bvid is String && bvid.isNotEmpty);
   });
   if (!hasValidVideo) {
-    throw FormatException(
-      '$label first series has no valid video with aid or bvid',
-    );
+    throw FormatException('$label has no valid video with aid or bvid');
   }
 }
