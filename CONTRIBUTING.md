@@ -54,6 +54,10 @@ dart run tool/test_local.dart --require-flutter
 
 当前 CI 不使用降级入口，仍按 `.github/workflows/ci-test.yml` 执行完整测试。
 
+## 研究记录
+
+针对本项目的调查、选型、可行性研究或方案对比，必须按 [`docs/research/README.md`](docs/research/README.md) 留档，记录研究日期与参考资料；索引见该目录。没有记录的结论不进入决策。
+
 ## Pull request
 
 1. 从最新 `main` 开分支，分支名用 `类型/描述`（如 `feat/media-history`、`docs/rule-ownership`）。保留已有未提交工作，不用 reset/force-push 清理他人的改动。

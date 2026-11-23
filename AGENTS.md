@@ -39,6 +39,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/product-boundary.md`](docs/product-boundary.md) — 产品边界：只读客户端，不登录、不向平台写。**新增功能、评审工单、triage 判档前必读**；工单标题/描述与它冲突时以它为准。
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
+- [`docs/research/`](docs/research/README.md) — 研究记录：调查、选型、可行性研究与方案对比的留档索引。做研究或依据研究结论改代码前先读它。
 
 ### Linear 规范
 
@@ -253,6 +254,15 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 #### 不可变性与值相等
 - **`@immutable`**: Always apply `@immutable` from `package:meta` to data models, state classes, DTOs, and value objects.
 - **`EquatableMixin`**: Use `package:equatable` (preferably `EquatableMixin` to preserve class hierarchies) for structural equality on state classes and models. Include all identifying properties in `props`.
+
+## 研究记录
+
+任何针对本项目的调查、选型、可行性研究或方案对比，都要在 [`docs/research/`](docs/research/README.md) 留档；没有记录的研究结论不进入决策。
+
+- 文件名为 `<YYYY-MM-DD>-<slug>.md`，正文开头必须写明**研究日期**和**参考资料**；参考资料要给出可访问链接或仓库内路径，不能只写“网上资料”。
+- 记录至少包含：研究问题、结论、证据、方案与取舍、验证方式、未决问题。
+- 研究结论改变代码或规则时，在同一次改动中链接到对应 PR/commit。
+- 索引与模板见 [`docs/research/README.md`](docs/research/README.md)。
 
 ## 外部 agent 派单
 
