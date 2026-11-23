@@ -69,6 +69,10 @@ def _run(run_id: int = 1, conclusion: str | None = 'success') -> provenance.Work
     )
 
 
+def _problems(api: FakeApi, depth: int = provenance.ANCESTOR_DEPTH):
+    return provenance.check_provenance(api, 1, 'head', depth).problems
+
+
 def _golden(path: str = GOLDEN, blob: str = MATCHING_BLOB,
             status: str = 'added') -> provenance.PullFile:
     return provenance.PullFile(path=path, status=status, blob_sha=blob)
@@ -123,11 +127,11 @@ class GoldenPngTest(unittest.TestCase):
 class FindUnprovenancedTest(unittest.TestCase):
     def test_ignores_pull_requests_without_golden_changes(self):
         api = FakeApi(files=[provenance.PullFile('app/lib/main.dart', 'modified', 'c' * 40)])
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
 
     def test_ignores_deleted_goldens(self):
         api = FakeApi(files=[_golden(status='removed')])
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
 
     def test_matching_artifact_proves_provenance(self):
         api = FakeApi(
@@ -137,7 +141,33 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7)]},
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
+
+    def test_report_records_the_proving_run(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7)]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+        )
+        report = provenance.check_provenance(api, 1, 'head')
+        self.assertEqual(report.checked, 1)
+        self.assertEqual([item.path for item in report.proven], [GOLDEN])
+        self.assertEqual(report.proven[0].run.id, 7)
+
+    def test_report_counts_proven_and_unprovenanced_files(self):
+        api = FakeApi(
+            files=[_golden(), _golden(OTHER_GOLDEN, blob=SWAPPED_BLOB)],
+            commits={GOLDEN: ['record-commit'], OTHER_GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7)]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+        )
+        report = provenance.check_provenance(api, 1, 'head')
+        self.assertEqual(report.checked, 2)
+        self.assertEqual(len(report.proven), 1)
+        self.assertEqual(len(report.problems), 1)
 
     def test_run_on_grandparent_is_found(self):
         api = FakeApi(
@@ -147,7 +177,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(9)]},
             artifacts={9: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
 
     def test_missing_run_fails(self):
         api = FakeApi(
@@ -155,7 +185,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             commits={GOLDEN: ['record-commit']},
             parents={'record-commit': []},
         )
-        problems = provenance.find_unprovenanced(api, 1, 'head')
+        problems = _problems(api)
         self.assertEqual(len(problems), 1)
         self.assertEqual(problems[0].path, GOLDEN)
         self.assertIn('no successful rerecord-goldens.yml run', problems[0].reason)
@@ -168,7 +198,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7, conclusion='failure')]},
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(len(provenance.find_unprovenanced(api, 1, 'head')), 1)
+        self.assertEqual(len(_problems(api)), 1)
 
     def test_other_workflow_run_is_not_provenance(self):
         api = FakeApi(
@@ -187,7 +217,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             },
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(len(provenance.find_unprovenanced(api, 1, 'head')), 1)
+        self.assertEqual(len(_problems(api)), 1)
 
     def test_swapped_png_with_copied_run_identity_fails(self):
         """The negative case from the postmortem: reuse the run, swap the PNG."""
@@ -198,7 +228,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7)]},
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        problems = provenance.find_unprovenanced(api, 1, 'head')
+        problems = _problems(api)
         self.assertEqual(len(problems), 1)
         self.assertIn('uploaded these exact bytes', problems[0].reason)
 
@@ -210,7 +240,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'unrelated-head': [_run(7)]},
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(len(provenance.find_unprovenanced(api, 1, 'head')), 1)
+        self.assertEqual(len(_problems(api)), 1)
         self.assertNotIn('unrelated-head', api.run_requests)
 
     def test_missing_artifact_fails(self):
@@ -221,7 +251,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7)]},
             artifacts={7: None},
         )
-        self.assertEqual(len(provenance.find_unprovenanced(api, 1, 'head')), 1)
+        self.assertEqual(len(_problems(api)), 1)
 
     def test_artifact_with_full_repository_path_is_accepted(self):
         api = FakeApi(
@@ -231,7 +261,7 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7)]},
             artifacts={7: {GOLDEN: MATCHING_BLOB}},
         )
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
 
     def test_every_unprovenanced_file_is_reported(self):
         api = FakeApi(
@@ -246,7 +276,7 @@ class FindUnprovenancedTest(unittest.TestCase):
                 }
             },
         )
-        problems = provenance.find_unprovenanced(api, 1, 'head')
+        problems = _problems(api)
         self.assertEqual([problem.path for problem in problems], [OTHER_GOLDEN])
 
     def test_two_files_can_share_one_run(self):
@@ -262,7 +292,7 @@ class FindUnprovenancedTest(unittest.TestCase):
                 }
             },
         )
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head'), [])
+        self.assertEqual(_problems(api), [])
         # Both files resolve to the same run; HttpGitHubApi caches the archive
         # per run id so the real client downloads it once.
         self.assertEqual(api.artifact_requests, [7, 7])
@@ -275,12 +305,12 @@ class FindUnprovenancedTest(unittest.TestCase):
             runs={'run-head': [_run(7)]},
             artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
         )
-        self.assertEqual(len(provenance.find_unprovenanced(api, 1, 'head', depth=3)), 1)
-        self.assertEqual(provenance.find_unprovenanced(api, 1, 'head', depth=4), [])
+        self.assertEqual(len(_problems(api, depth=3)), 1)
+        self.assertEqual(_problems(api, depth=4), [])
 
     def test_missing_blob_id_is_reported(self):
         api = FakeApi(files=[_golden(blob='')])
-        problems = provenance.find_unprovenanced(api, 1, 'head')
+        problems = _problems(api)
         self.assertEqual(len(problems), 1)
         self.assertIn('no blob id', problems[0].reason)
 
@@ -291,7 +321,7 @@ class FindUnprovenancedTest(unittest.TestCase):
                 for index in range(provenance.MAX_PULL_FILES)
             ]
         )
-        problems = provenance.find_unprovenanced(api, 1, 'head')
+        problems = _problems(api)
         self.assertEqual(len(problems), 1)
         self.assertIn('cannot be inspected', problems[0].reason)
 

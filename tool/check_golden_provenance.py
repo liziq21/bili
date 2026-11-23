@@ -68,6 +68,22 @@ class GoldenProblem:
     reason: str
 
 
+@dataclass(frozen=True)
+class ProvenancedGolden:
+    path: str
+    run: WorkflowRun
+
+
+@dataclass(frozen=True)
+class ProvenanceReport:
+    proven: list[ProvenancedGolden]
+    problems: list[GoldenProblem]
+
+    @property
+    def checked(self) -> int:
+        return len(self.proven) + len(self.problems)
+
+
 class GitHubApi(Protocol):
     def pull_files(self, pr: int) -> list[PullFile]: ...
 
@@ -106,22 +122,26 @@ def artifact_entry_matches(entry: str, path: str) -> bool:
     return entry.endswith('/' + path) or path.endswith('/' + entry)
 
 
-def find_unprovenanced(
+def check_provenance(
     api: GitHubApi,
     pr: int,
     head_sha: str,
     depth: int = ANCESTOR_DEPTH,
-) -> list[GoldenProblem]:
+) -> ProvenanceReport:
     files = api.pull_files(pr)
     if len(files) >= MAX_PULL_FILES:
-        return [
-            GoldenProblem(
-                GOLDEN_DIR,
-                f'the pull request changes at least {MAX_PULL_FILES} files; '
-                'the golden diff cannot be inspected',
-            )
-        ]
+        return ProvenanceReport(
+            proven=[],
+            problems=[
+                GoldenProblem(
+                    GOLDEN_DIR,
+                    f'the pull request changes at least {MAX_PULL_FILES} files; '
+                    'the golden diff cannot be inspected',
+                )
+            ],
+        )
 
+    proven: list[ProvenancedGolden] = []
     problems: list[GoldenProblem] = []
     for changed in files:
         if not is_golden_png(changed.path):
@@ -142,7 +162,9 @@ def find_unprovenanced(
                     'uploaded these exact bytes',
                 )
             )
-    return problems
+        else:
+            proven.append(ProvenancedGolden(changed.path, run))
+    return ProvenanceReport(proven=proven, problems=problems)
 
 
 def _proving_run(
@@ -214,6 +236,7 @@ class HttpGitHubApi:
             _StripAuthorizationOnHostChange
         )
         self._run_cache: dict[str, list[WorkflowRun]] = {}
+        self._parent_cache: dict[str, list[str]] = {}
         self._artifact_cache: dict[int, dict[str, str] | None] = {}
 
     def _request(self, url: str) -> bytes:
@@ -271,13 +294,19 @@ class HttpGitHubApi:
         return [entry['sha'] for entry in entries]
 
     def parents(self, sha: str) -> list[str]:
+        cached = self._parent_cache.get(sha)
+        if cached is not None:
+            return cached
         try:
             commit = self._json(f'/commits/{sha}')
         except urllib.error.HTTPError as error:
             if error.code == 404:
+                self._parent_cache[sha] = []
                 return []
             raise
-        return [parent['sha'] for parent in commit.get('parents', [])]
+        parents = [parent['sha'] for parent in commit.get('parents', [])]
+        self._parent_cache[sha] = parents
+        return parents
 
     def runs_for_head(self, sha: str) -> list[WorkflowRun]:
         cached = self._run_cache.get(sha)
@@ -381,7 +410,7 @@ def main(argv: list[str] | None = None) -> int:
 
     api = HttpGitHubApi(args.repo, args.token, args.api_url)
     try:
-        problems = find_unprovenanced(api, args.pr, args.head_sha, args.depth)
+        report = check_provenance(api, args.pr, args.head_sha, args.depth)
     except urllib.error.HTTPError as error:
         print(
             f'::error::GitHub API request failed with {error.code} {error.reason}; '
@@ -397,11 +426,18 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    if not problems:
-        print('Golden baselines in this pull request are all recorded by CI.')
+    if report.checked == 0:
+        print('No golden baseline changes in this pull request.')
         return 0
 
-    for problem in problems:
+    for item in report.proven:
+        print(f'{item.path} <- rerecord run {item.run.id} ({item.run.head_sha})')
+
+    if not report.problems:
+        print(f'All {report.checked} golden baseline change(s) are recorded by CI.')
+        return 0
+
+    for problem in report.problems:
         print(
             f'::error file={problem.path}::golden baseline changed without CI '
             f'provenance: {problem.reason}'
