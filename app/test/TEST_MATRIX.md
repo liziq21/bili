@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 91 |
+| unit | 93 |
 | widget | 60 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **174** |
+| **合计** | **176** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（91）
+## unit（93）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -97,6 +97,7 @@
 - `packages/bilibili/test/bili_live_danmaku_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_room_detail_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_room_stream_test.dart`
+- `packages/bilibili/test/bili_mapping_conformance_test.dart`
 - `packages/bilibili/test/bili_media_stream_test.dart`
 - `packages/bilibili/test/bili_playlist_content_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_popular_feed_test.dart`
@@ -111,6 +112,7 @@
 - `packages/data/test/danmaku_test.dart`
 - `packages/data/test/declarative_feed_data_source_test.dart`
 - `packages/data/test/full_playlist_fetcher_test.dart`
+- `packages/data/test/mapping_conformance_test.dart`
 - `packages/data/test/remote_data_source_test.dart`
 - `packages/youtube/test/youtube_test.dart`
 - `packages/youtube/test/youtube_remote_data_sources_test.dart`
