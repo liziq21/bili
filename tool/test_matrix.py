@@ -162,6 +162,7 @@ TEST_MATRIX = {
         'app/test/feature/media_library/media_history_cubit_test.dart',
         'app/test/feature/notification/feed_opened_routing_test.dart',
         'app/test/feature/notification/feed_update_notifier_test.dart',
+        'app/test/feature/notification/sleep_timer_notifier_test.dart',
         'app/test/feature/search/search_filter_preferences_test.dart',
         'app/test/feature/search/search_result_bloc_test.dart',
         'app/test/feature/search_state_test.dart',

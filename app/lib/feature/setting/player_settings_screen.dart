@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
+import '../../domain/sleep_timer_action.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
@@ -141,7 +142,10 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                 _valueTile(
                   title: l10n.playerSleepTimerAction,
                   subtitle: l10n.playerSleepTimerActionSubtitle,
-                  value: _sleepTimerActionLabel(l10n),
+                  value: _sleepTimerActionLabel(
+                    l10n,
+                    _playerSettings.sleepTimerDefaultAction,
+                  ),
                   onTap: () => _showSleepTimerActionPicker(context),
                 ),
               ],
@@ -202,10 +206,14 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     return l10n.minutesValue('$minutes');
   }
 
-  String _sleepTimerActionLabel(AppLocalizations l10n) =>
-      _playerSettings.sleepTimerDefaultAfterCurrent
-      ? l10n.sleepTimerAfterCurrentTitle
-      : l10n.sleepTimerActionNowLabel;
+  String _sleepTimerActionLabel(
+    AppLocalizations l10n,
+    SleepTimerAction action,
+  ) => switch (action) {
+    SleepTimerAction.pauseNow => l10n.sleepTimerActionNowLabel,
+    SleepTimerAction.afterCurrent => l10n.sleepTimerAfterCurrentTitle,
+    SleepTimerAction.exitPlayer => l10n.sleepTimerActionExitPlayerLabel,
+  };
 
   void _showSleepTimerActionPicker(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -216,20 +224,14 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
           shrinkWrap: true,
           children: [
             _pickerTitle(l10n.playerSleepTimerAction),
-            for (final afterCurrent in const [false, true])
+            for (final action in SleepTimerAction.values)
               _pickerOption(
-                title: afterCurrent
-                    ? l10n.sleepTimerAfterCurrentTitle
-                    : l10n.sleepTimerActionNowLabel,
-                selected:
-                    afterCurrent ==
-                    _playerSettings.sleepTimerDefaultAfterCurrent,
+                title: _sleepTimerActionLabel(l10n, action),
+                selected: action == _playerSettings.sleepTimerDefaultAction,
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   _updatePlayer(
-                    _playerSettings.copyWith(
-                      sleepTimerDefaultAfterCurrent: afterCurrent,
-                    ),
+                    _playerSettings.copyWith(sleepTimerDefaultAction: action),
                   );
                 },
               ),

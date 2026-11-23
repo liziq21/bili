@@ -149,7 +149,7 @@
   "@playerSleepTimerAction": {
     "description": "Player setting - default sleep timer end action"
   },
-  "playerSleepTimerActionSubtitle": "选择倒计时结束后立即暂停，还是播完当前视频再停",
+  "playerSleepTimerActionSubtitle": "选择倒计时结束后立即暂停、播完当前视频再停，还是关闭播放器",
   "@playerSleepTimerActionSubtitle": {
     "description": "Subtitle for the default sleep timer end action setting"
   },
@@ -6412,5 +6412,21 @@
   "channelVideosEmpty": "暂无视频",
   "@channelVideosEmpty": {
     "description": "Shown on a creator page when the channel has no uploaded videos"
+  },
+  "sleepTimerActionExitPlayerLabel": "关闭播放器",
+  "@sleepTimerActionExitPlayerLabel": {
+    "description": "Sleep timer action that pauses playback and closes the player when the countdown ends"
+  },
+  "sleepTimerDuration": "时长",
+  "@sleepTimerDuration": {
+    "description": "Sleep timer picker section heading for the duration list"
+  },
+  "sleepTimerEndingSoonTitle": "睡眠定时器",
+  "@sleepTimerEndingSoonTitle": {
+    "description": "Title of the system notification shown one minute before the sleep timer stops playback"
+  },
+  "sleepTimerEndingSoonBody": "1 分钟后将停止播放",
+  "@sleepTimerEndingSoonBody": {
+    "description": "Body of the system notification shown one minute before the sleep timer stops playback"
   }
 }

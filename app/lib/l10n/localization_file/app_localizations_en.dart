@@ -129,7 +129,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerSleepTimerActionSubtitle =>
-      'Pause immediately or finish the current video before stopping';
+      'Pause immediately, finish the current video, or close the player when the timer ends';
 
   @override
   String get playerQualityAuto => 'Auto';
@@ -1043,22 +1043,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sleepTimerLabel => 'Timer';
 
   @override
-  String get sleepTimerTitle => '睡眠定时器';
+  String get sleepTimerTitle => 'Sleep timer';
 
   @override
   String get sleepTimerCancel => '取消定时';
 
   @override
-  String get sleepTimerActionNowLabel => '到时暂停';
+  String get sleepTimerActionNowLabel => 'Pause now';
 
   @override
-  String get sleepTimerAfterCurrentTitle => '播完本条即停';
+  String get sleepTimerAfterCurrentTitle => 'After current video';
 
   @override
-  String get sleepTimerAfterCurrentOptionSuffix => '（播完本条）';
+  String get sleepTimerAfterCurrentOptionSuffix => ' (after current)';
 
   @override
-  String get sleepTimerAfterCurrentPending => '播完本条';
+  String get sleepTimerAfterCurrentPending => 'After current';
 
   @override
   String get qualityPickerTitle => '画质选择';
@@ -4120,29 +4120,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get singleQualityOnly => '当前源只提供一个档位';
 
   @override
-  String get afterCurrentItem => '播完本条';
+  String get afterCurrentItem => 'After current';
 
   @override
   String get timer => 'Timer';
 
   @override
-  String get pauseWhenTimeUp => '到时暂停';
+  String get pauseWhenTimeUp => 'When time is up';
 
   @override
   String minutesValue(String p1) {
-    return '$p1 分钟';
+    return '$p1 min';
   }
 
   @override
-  String get stopAfterCurrentItem => '播完本条即停';
+  String get stopAfterCurrentItem => 'Stop after current';
 
   @override
   String minutesWithSuffix(String p1) {
-    return '$p1 分钟';
+    return '$p1 min';
   }
 
   @override
-  String get cancelTimer => '取消定时';
+  String get cancelTimer => 'Cancel timer';
 
   @override
   String get sleepTimerCustom => 'Custom';
@@ -4765,4 +4765,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channelVideosEmpty => 'No videos yet';
+
+  @override
+  String get sleepTimerActionExitPlayerLabel => 'Close player';
+
+  @override
+  String get sleepTimerDuration => 'Duration';
+
+  @override
+  String get sleepTimerEndingSoonTitle => 'Sleep timer';
+
+  @override
+  String get sleepTimerEndingSoonBody => 'Playback stops in 1 minute';
 }

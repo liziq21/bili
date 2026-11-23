@@ -323,7 +323,7 @@ abstract class AppLocalizations {
   /// Subtitle for the default sleep timer end action setting
   ///
   /// In en, this message translates to:
-  /// **'Pause immediately or finish the current video before stopping'**
+  /// **'Pause immediately, finish the current video, or close the player when the timer ends'**
   String get playerSleepTimerActionSubtitle;
 
   /// Automatic player quality selection
@@ -1925,7 +1925,7 @@ abstract class AppLocalizations {
   /// Sleep timer picker title
   ///
   /// In en, this message translates to:
-  /// **'睡眠定时器'**
+  /// **'Sleep timer'**
   String get sleepTimerTitle;
 
   /// Cancel the running sleep timer
@@ -1937,25 +1937,25 @@ abstract class AppLocalizations {
   /// Sleep timer group heading for pausing as soon as the countdown ends
   ///
   /// In en, this message translates to:
-  /// **'到时暂停'**
+  /// **'Pause now'**
   String get sleepTimerActionNowLabel;
 
   /// Sleep timer group heading for stopping after the current item finishes
   ///
   /// In en, this message translates to:
-  /// **'播完本条即停'**
+  /// **'After current video'**
   String get sleepTimerAfterCurrentTitle;
 
   /// Suffix appended to sleep timer durations in the stop-after-current group so the two groups are not textually identical
   ///
   /// In en, this message translates to:
-  /// **'（播完本条）'**
+  /// **' (after current)'**
   String get sleepTimerAfterCurrentOptionSuffix;
 
   /// Sleep timer chip label while the countdown has ended and the stop is waiting for the current item to finish
   ///
   /// In en, this message translates to:
-  /// **'播完本条'**
+  /// **'After current'**
   String get sleepTimerAfterCurrentPending;
 
   /// Quality picker title
@@ -7076,7 +7076,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播完本条'**
+  /// **'After current'**
   String get afterCurrentItem;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7088,31 +7088,31 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'到时暂停'**
+  /// **'When time is up'**
   String get pauseWhenTimeUp;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 分钟'**
+  /// **'{p1} min'**
   String minutesValue(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播完本条即停'**
+  /// **'Stop after current'**
   String get stopAfterCurrentItem;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 分钟'**
+  /// **'{p1} min'**
   String minutesWithSuffix(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消定时'**
+  /// **'Cancel timer'**
   String get cancelTimer;
 
   /// Sleep timer option for entering a custom duration
@@ -8194,6 +8194,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No videos yet'**
   String get channelVideosEmpty;
+
+  /// Sleep timer action that pauses playback and closes the player when the countdown ends
+  ///
+  /// In en, this message translates to:
+  /// **'Close player'**
+  String get sleepTimerActionExitPlayerLabel;
+
+  /// Sleep timer picker section heading for the duration list
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get sleepTimerDuration;
+
+  /// Title of the system notification shown one minute before the sleep timer stops playback
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get sleepTimerEndingSoonTitle;
+
+  /// Body of the system notification shown one minute before the sleep timer stops playback
+  ///
+  /// In en, this message translates to:
+  /// **'Playback stops in 1 minute'**
+  String get sleepTimerEndingSoonBody;
 }
 
 class _AppLocalizationsDelegate

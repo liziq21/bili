@@ -1,10 +1,12 @@
 import 'package:app/app_scaffold.dart';
 import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/domain/sleep_timer_action.dart';
 import 'package:app/feature/setting/app_settings.dart';
 import 'package:app/feature/setting/player_settings_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -112,7 +114,44 @@ void main() {
     expect(settings.preferredQualityStreamId, isNull);
     expect(settings.playbackRate, 1.5);
     expect(settings.sleepTimerDefaultMinutes, 30);
-    expect(settings.sleepTimerDefaultAfterCurrent, isTrue);
+    expect(settings.sleepTimerDefaultAction, SleepTimerAction.afterCurrent);
+  });
+
+  testWidgets('persists the close-player default action', (tester) async {
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(PlayerSettingsScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    await tester.scrollUntilVisible(
+      find.text(l10n.playerSleepTimerAction),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text(l10n.playerSleepTimerAction));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.sleepTimerActionExitPlayerLabel));
+    await tester.pumpAndSettle();
+
+    final settings = await PlayerSettings.load(preferences);
+    expect(settings.sleepTimerDefaultAction, SleepTimerAction.exitPlayer);
+    expect(
+      await preferences.get(PreferencesKey.sleepTimerDefaultAction),
+      isA<Success<String?, Exception>>().having(
+        (r) => r.success,
+        'value',
+        'exitPlayer',
+      ),
+    );
+  });
+
+  testWidgets('migrates the legacy after-current boolean', (tester) async {
+    await preferences.set(PreferencesKey.sleepTimerDefaultAfterCurrent, true);
+
+    final settings = await PlayerSettings.load(preferences);
+
+    expect(settings.sleepTimerDefaultAction, SleepTimerAction.afterCurrent);
   });
 
   testWidgets('saves a custom sleep timer duration', (tester) async {

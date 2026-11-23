@@ -69,6 +69,9 @@ class const VideoPlayer({
   /// 最小化：退出全屏并暂停播放，保留播放位置。
   final VoidCallback? onMinimize,
 
+  /// 睡眠定时器到点选择「关闭播放器」时调用，通常是页面的返回入口。
+  final VoidCallback? onExit,
+
   /// 画面构建器，缺省渲染原生 [Video]。
   ///
   /// 真 [Video] 依赖平台 Texture Registry 与 libmpv OpenGL，widget 测试里
@@ -215,6 +218,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             keyboardSeekStepWithShift: widget.keyboardSeekStepWithShift,
             onToggleFullscreen: widget.onToggleFullscreen,
             onMinimize: widget.onMinimize,
+            onExit: widget.onExit,
             onTapSurface: _toggleControls,
             surfaceBuilder: widget.surfaceBuilder,
             queue: widget.queue,
@@ -267,6 +271,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                 stream: stream,
                 fullscreen: false,
                 onToggleFullscreen: widget.onToggleFullscreen,
+                onExit: widget.onExit,
               ),
             ],
           );
@@ -464,6 +469,7 @@ class const _VideoSurface({
   required final Duration keyboardSeekStepWithShift,
   required final VoidCallback? onToggleFullscreen,
   required final VoidCallback? onMinimize,
+  final VoidCallback? onExit,
   required final VoidCallback onTapSurface,
   required final Widget Function(MediaPlaybackController controller)?
   surfaceBuilder,
@@ -708,6 +714,7 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
               fullscreen: true,
               onToggleFullscreen: widget.onToggleFullscreen,
               onMinimize: widget.onMinimize,
+              onExit: widget.onExit,
             ),
           ),
         ListenableBuilder(
@@ -747,12 +754,13 @@ class const _PlayerControlBar({
   required final bool fullscreen,
   required final VoidCallback? onToggleFullscreen,
   final VoidCallback? onMinimize,
+  final VoidCallback? onExit,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = <Widget>[
-      SleepTimerChip(controller: controller),
+      SleepTimerChip(controller: controller, onExit: onExit),
       QualityPickerChip(controller: controller, stream: stream),
       PlaybackSpeedChip(controller: controller),
       _FullscreenButton(fullscreen: fullscreen, onPressed: onToggleFullscreen),

@@ -518,6 +518,7 @@ class _VideoContentState() extends State<_VideoContent> {
       onRetry: () =>
           context.read<VideoBloc>().add(LoadMediaStream(widget.videoId)),
       onMinimize: _minimize,
+      onExit: widget.onBackClick,
       queue: widget.queue,
       surfaceBuilder: widget.surfaceBuilder,
     );

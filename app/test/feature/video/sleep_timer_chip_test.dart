@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:app/datastore/preferences_data_source.dart';
+import 'package:app/domain/sleep_timer_action.dart';
+import 'package:app/feature/notification/sleep_timer_notifier.dart';
 import 'package:app/feature/video/common_widgets/sleep_timer_chip.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:data/data.dart';
@@ -105,17 +107,24 @@ void main() {
   Future<void> pumpChip(
     WidgetTester tester, {
     PreferencesDataSource? preferences,
+    SleepTimerNotifier? notifier,
+    VoidCallback? onExit,
   }) async {
     // [MediaPlaybackController._subscribe] 由 openQueue 触发。
     await controller.openQueue([MediaStream(videoUrl: 'https://e.com/v.m4s')]);
     Widget child = MaterialApp(
-      home: Scaffold(body: SleepTimerChip(controller: controller)),
+      home: Scaffold(
+        body: SleepTimerChip(controller: controller, onExit: onExit),
+      ),
     );
     if (preferences != null) {
       child = Provider<PreferencesDataSource>.value(
         value: preferences,
         child: child,
       );
+    }
+    if (notifier != null) {
+      child = Provider<SleepTimerNotifier>.value(value: notifier, child: child);
     }
     await tester.pumpWidget(child);
   }
@@ -176,7 +185,7 @@ void main() {
     });
   });
 
-  /// 弹窗分两组共 9 项，默认 600px 视口只构建首屏，放大到能一次建全。
+  /// 弹窗有行为选项、六个档位和自定义项，默认 600px 视口只构建首屏，放大到能一次建全。
   void useTallViewport(WidgetTester tester) {
     tester.view.physicalSize = const Size(1000, 2400);
     tester.view.devicePixelRatio = 1;
@@ -209,6 +218,36 @@ void main() {
       await tester.pump();
 
       expect(find.text('15:00'), findsOneWidget);
+    });
+
+    testWidgets('keeps the default action when no default timer is set', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      SharedPreferencesAsyncPlatform.instance =
+          InMemorySharedPreferencesAsync.empty();
+      final preferences = PreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(preferences.dispose);
+      await preferences.set(
+        PreferencesKey.sleepTimerDefaultAction,
+        'exitPlayer',
+      );
+
+      await pumpChip(tester, preferences: preferences);
+      await tester.pump();
+
+      // 默认档位为 0 时不自动开始，但弹窗里的行为选择应跟随持久化默认值。
+      expect(find.text('Timer'), findsOneWidget);
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+
+      ListTile tileFor(String label) => tester.widget<ListTile>(
+        find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+      );
+      expect(tileFor('Close player').trailing, isNotNull);
+      expect(tileFor('Pause now').trailing, isNull);
     });
 
     testWidgets('defaults to pausing when the countdown ends', (tester) async {
@@ -283,7 +322,7 @@ void main() {
       ]) {
         expect(find.text(minutes), findsOneWidget);
       }
-      expect(find.text('Custom'), findsNWidgets(2));
+      expect(find.text('Custom'), findsOneWidget);
     });
 
     testWidgets('selecting a duration shows the remaining time', (
@@ -436,8 +475,8 @@ void main() {
     });
   });
 
-  group('SleepTimerChip after-current picker', () {
-    testWidgets('lists the after-current group below the pause group', (
+  group('SleepTimerChip action picker', () {
+    testWidgets('lists every ending action and the duration list', (
       tester,
     ) async {
       useTallViewport(tester);
@@ -446,11 +485,12 @@ void main() {
       await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
 
-      expect(find.text('When time up'), findsOneWidget);
-      expect(find.text('10 min (after current)'), findsOneWidget);
-      // 两组档位文案不再相同，第一组是裸的「10 分钟」。
+      expect(find.text('When the sleep timer ends'), findsOneWidget);
+      expect(find.text('Pause now'), findsOneWidget);
+      expect(find.text('After current video'), findsOneWidget);
+      expect(find.text('Close player'), findsOneWidget);
+      expect(find.text('Duration'), findsOneWidget);
       expect(find.text('10 min'), findsOneWidget);
-      expect(find.text('10 min (after current)'), findsOneWidget);
     });
 
     testWidgets('after-current selection shows the pending label', (
@@ -465,7 +505,9 @@ void main() {
 
       await tester.tap(find.text('Timer'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('10 min (after current)'));
+      await tester.tap(find.text('After current video'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
       await tester.pumpAndSettle();
       expect(find.text('10:00'), findsOneWidget);
 
@@ -475,5 +517,127 @@ void main() {
 
       expect(find.text('After current'), findsOneWidget);
     });
+
+    testWidgets('close-player selection pauses and exits the player', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      var exitCalls = 0;
+      await pumpChip(tester, onExit: () => exitCalls++);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Close player'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 601));
+
+      expect(fake.pauseCalls, isNotEmpty);
+      expect(exitCalls, 1);
+    });
+
+    testWidgets('requests notification permission once per session', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final notifier = _RecordingSleepTimerNotifier();
+      await pumpChip(tester, notifier: notifier);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('10:00'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('20 min'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.permissionRequests, 1);
+    });
   });
+
+  group('SleepTimerController ending-soon warning', () {
+    testWidgets('fires once when a longer timer enters the last minute', (
+      tester,
+    ) async {
+      await pumpChip(tester);
+      var warnings = 0;
+      final sleep = SleepTimerController(
+        controller,
+        onEndingSoon: () async => warnings++,
+      );
+      addTearDown(sleep.dispose);
+
+      sleep.start(2);
+      await tester.pump(const Duration(seconds: 61));
+      expect(warnings, 1);
+
+      await tester.pump(const Duration(seconds: 60));
+      expect(warnings, 1);
+      sleep.cancel();
+    });
+
+    testWidgets('does not warn for the after-current action', (tester) async {
+      await pumpChip(tester);
+      var warnings = 0;
+      final sleep = SleepTimerController(
+        controller,
+        onEndingSoon: () async => warnings++,
+      );
+      addTearDown(sleep.dispose);
+
+      sleep.start(2, action: SleepTimerAction.afterCurrent);
+      await tester.pump(const Duration(seconds: 61));
+
+      expect(warnings, 0);
+      sleep.cancel();
+    });
+
+    testWidgets('skips the warning for a one-minute timer', (tester) async {
+      await pumpChip(tester);
+      var warnings = 0;
+      final sleep = SleepTimerController(
+        controller,
+        onEndingSoon: () async => warnings++,
+      );
+      addTearDown(sleep.dispose);
+
+      sleep.start(1);
+      await tester.pump(const Duration(seconds: 61));
+
+      expect(warnings, 0);
+      expect(fake.pauseCalls, isNotEmpty);
+    });
+
+    testWidgets('routes the warning to the notifier', (tester) async {
+      useTallViewport(tester);
+      final notifier = _RecordingSleepTimerNotifier();
+      await pumpChip(tester, notifier: notifier);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 541));
+
+      expect(notifier.endingSoonCalls, 1);
+    });
+  });
+}
+
+class _RecordingSleepTimerNotifier() implements SleepTimerNotifier {
+  int permissionRequests = 0;
+  int endingSoonCalls = 0;
+
+  @override
+  Future<void> requestPermission() async {
+    permissionRequests++;
+  }
+
+  @override
+  Future<void> notifyEndingSoon() async {
+    endingSoonCalls++;
+  }
 }

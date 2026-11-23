@@ -1,6 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+/// 订阅更新通知的通道。
+const feedUpdatesChannelId = 'feed_updates';
+const feedUpdatesChannelName = 'Feed updates';
+const feedUpdatesChannelDescription = 'Notifies about new items in your feed';
+
+/// 睡眠定时器提醒的通道，与订阅更新分开，便于用户单独关闭。
+const sleepTimerChannelId = 'sleep_timer';
+const sleepTimerChannelName = 'Sleep timer';
+const sleepTimerChannelDescription = 'Warns one minute before playback stops';
+
 /// 平台通知的薄封装。
 ///
 /// 只做三件事：注册点击回调、报告「应用是否由点击本通知拉起」、显示通知。
@@ -23,10 +33,18 @@ abstract interface class NotificationPresenter() {
   /// 申请通知权限；没有权限模型的平台返回 false。
   Future<bool> requestPermission();
 
+  /// 显示一条通知。
+  ///
+  /// [channelId] 等通道参数默认沿用订阅更新通道；其他用途应传入自己的通道，
+  /// 否则会与订阅更新共用同一组系统设置。相同 [id] 的通知会互相替换。
   Future<void> show({
     required String title,
     required String body,
     required String payload,
+    int id = 0,
+    String channelId = feedUpdatesChannelId,
+    String channelName = feedUpdatesChannelName,
+    String channelDescription = feedUpdatesChannelDescription,
   });
 }
 
@@ -35,10 +53,6 @@ abstract interface class NotificationPresenter() {
 /// 每个方法都可能因为缺少平台通道（headless 测试、未注册插件）而失败，
 /// 调用方需要把失败当成「暂时不能通知」而不是崩溃。
 final class AndroidNotificationPresenter() implements NotificationPresenter {
-  static const channelId = 'feed_updates';
-  static const _channelName = 'Feed updates';
-  static const _channelDescription = 'Notifies about new items in your feed';
-
   final _plugin = FlutterLocalNotificationsPlugin();
 
   @override
@@ -61,9 +75,9 @@ final class AndroidNotificationPresenter() implements NotificationPresenter {
     // 建通道不会弹权限框：权限由用户从设置页显式开启时再申请。
     await android.createNotificationChannel(
       const AndroidNotificationChannel(
-        channelId,
-        _channelName,
-        description: _channelDescription,
+        feedUpdatesChannelId,
+        feedUpdatesChannelName,
+        description: feedUpdatesChannelDescription,
         importance: Importance.high,
       ),
     );
@@ -102,17 +116,30 @@ final class AndroidNotificationPresenter() implements NotificationPresenter {
     required String title,
     required String body,
     required String payload,
+    int id = 0,
+    String channelId = feedUpdatesChannelId,
+    String channelName = feedUpdatesChannelName,
+    String channelDescription = feedUpdatesChannelDescription,
   }) async {
+    // 通道创建是幂等的；在这里再做一次，调用方就不必先走 initialize。
+    await _android?.createNotificationChannel(
+      AndroidNotificationChannel(
+        channelId,
+        channelName,
+        description: channelDescription,
+        importance: Importance.high,
+      ),
+    );
     await _plugin.show(
-      id: 0,
+      id: id,
       title: title,
       body: body,
       payload: payload,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
-          _channelName,
-          channelDescription: _channelDescription,
+          channelName,
+          channelDescription: channelDescription,
           importance: Importance.high,
           priority: Priority.high,
         ),

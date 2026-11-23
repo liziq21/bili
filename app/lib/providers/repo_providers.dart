@@ -16,6 +16,7 @@ import '../datastore/preferences_data_source.dart';
 import '../domain/get_recent_search_queries_use_case.dart';
 import '../feature/notification/feed_update_notifier.dart';
 import '../feature/notification/local_feed_update_notifier.dart';
+import '../feature/notification/sleep_timer_notifier.dart';
 
 final _log = Logger('DatabaseProviders');
 
@@ -79,5 +80,8 @@ List<RepositoryProvider> get repoProviders => [
   RepositoryProvider<FeedUpdateNotifier>(
     create: (context) => LocalFeedUpdateNotifier(context.read()),
     dispose: (notifier) => notifier.dispose(),
+  ),
+  RepositoryProvider<SleepTimerNotifier>(
+    create: (_) => LocalSleepTimerNotifier(),
   ),
 ];

@@ -38,6 +38,10 @@ final class _SupportedPresenter() implements NotificationPresenter {
     required String title,
     required String body,
     required String payload,
+    int id = 0,
+    String channelId = feedUpdatesChannelId,
+    String channelName = feedUpdatesChannelName,
+    String channelDescription = feedUpdatesChannelDescription,
   }) async => shown.add(payload);
 }
 

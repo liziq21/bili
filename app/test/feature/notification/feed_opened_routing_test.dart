@@ -45,6 +45,10 @@ final class _FakePresenter(final bool launchFromNotification)
     required String title,
     required String body,
     required String payload,
+    int id = 0,
+    String channelId = feedUpdatesChannelId,
+    String channelName = feedUpdatesChannelName,
+    String channelDescription = feedUpdatesChannelDescription,
   }) async {
     shown.add((title: title, body: body, payload: payload));
   }

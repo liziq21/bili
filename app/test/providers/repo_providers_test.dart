@@ -193,10 +193,10 @@ void main() {
   ) async {
     // The trailing constant counts the providers defined directly in
     // `repoProviders`: UserDataRepository, RecentSearchQueryRepository,
-    // LocalLibraryRepository, GetRecentSearchQueriesUseCase and
-    // FeedUpdateNotifier.
+    // LocalLibraryRepository, GetRecentSearchQueriesUseCase,
+    // FeedUpdateNotifier and SleepTimerNotifier.
     expect(
-      databaseProviders.length + preferencesProviders.length + 5,
+      databaseProviders.length + preferencesProviders.length + 6,
       repoProviders.length,
     );
   });

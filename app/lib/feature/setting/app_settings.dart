@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
 import '../../datastore/preferences_data_source.dart';
+import '../../domain/sleep_timer_action.dart';
 
 /// 睡眠定时器常用档位（分钟）。
 ///
@@ -63,15 +64,15 @@ final class const PlayerSettings({
   /// 睡眠定时器的默认档位（分钟）。0 表示进入播放器不自动开始计时。
   final int sleepTimerDefaultMinutes = 0,
 
-  /// 自动开始的睡眠定时器到点行为：true 表示播完当前条目再停。
-  final bool sleepTimerDefaultAfterCurrent = false,
+  /// 自动开始的睡眠定时器到点行为。
+  final SleepTimerAction sleepTimerDefaultAction = SleepTimerAction.pauseNow,
 }) {
   PlayerSettings copyWith({
     double? playbackRate,
     Object? preferredQualityHeight = _unset,
     Object? preferredQualityStreamId = _unset,
     int? sleepTimerDefaultMinutes,
-    bool? sleepTimerDefaultAfterCurrent,
+    SleepTimerAction? sleepTimerDefaultAction,
   }) => PlayerSettings(
     playbackRate: playbackRate ?? this.playbackRate,
     preferredQualityHeight: identical(preferredQualityHeight, _unset)
@@ -82,8 +83,8 @@ final class const PlayerSettings({
         : preferredQualityStreamId as int?,
     sleepTimerDefaultMinutes:
         sleepTimerDefaultMinutes ?? this.sleepTimerDefaultMinutes,
-    sleepTimerDefaultAfterCurrent:
-        sleepTimerDefaultAfterCurrent ?? this.sleepTimerDefaultAfterCurrent,
+    sleepTimerDefaultAction:
+        sleepTimerDefaultAction ?? this.sleepTimerDefaultAction,
   );
 
   static Future<PlayerSettings> load(PreferencesDataSource preferences) async =>
@@ -108,12 +109,29 @@ final class const PlayerSettings({
           PreferencesKey.sleepTimerDefaultMinutes,
           0,
         ),
-        sleepTimerDefaultAfterCurrent: await readSetting(
-          preferences,
-          PreferencesKey.sleepTimerDefaultAfterCurrent,
-          false,
-        ),
+        sleepTimerDefaultAction: await _readSleepTimerAction(preferences),
       );
+
+  /// 新键缺失时回退到旧版布尔键，让升级用户保留原来的默认行为。
+  static Future<SleepTimerAction> _readSleepTimerAction(
+    PreferencesDataSource preferences,
+  ) async {
+    final stored = await readSetting<String?>(
+      preferences,
+      PreferencesKey.sleepTimerDefaultAction,
+      null,
+    );
+    final parsed = SleepTimerAction.fromStorage(stored);
+    if (parsed != null) return parsed;
+    final legacyAfterCurrent = await readSetting(
+      preferences,
+      PreferencesKey.sleepTimerDefaultAfterCurrent,
+      false,
+    );
+    return legacyAfterCurrent
+        ? SleepTimerAction.afterCurrent
+        : SleepTimerAction.pauseNow;
+  }
 
   Future<void> save(PreferencesDataSource preferences) => Future.wait([
     writeSetting(preferences, PreferencesKey.playbackRate, playbackRate),
@@ -134,8 +152,8 @@ final class const PlayerSettings({
     ),
     writeSetting(
       preferences,
-      PreferencesKey.sleepTimerDefaultAfterCurrent,
-      sleepTimerDefaultAfterCurrent,
+      PreferencesKey.sleepTimerDefaultAction,
+      sleepTimerDefaultAction.name,
     ),
   ]);
 }

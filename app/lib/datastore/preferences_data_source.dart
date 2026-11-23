@@ -246,9 +246,18 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     0,
   );
 
-  /// 自动开始的睡眠定时器到点行为：false 立即暂停，true 播完当前条目再停。
+  /// 自动开始的睡眠定时器到点行为，存 `SleepTimerAction` 的名字。
   ///
   /// 只影响自动计时；运行时弹窗里的单次选择不会改写这个默认值。
+  /// 旧版本只存了下面的布尔键，读取时先看本键，缺失才回退。
+  static const sleepTimerDefaultAction = PreferencesKey<String?>._(
+    'SLEEP_TIMER_DEFAULT_ACTION',
+    null,
+  );
+
+  /// 旧版到点行为键：false 立即暂停，true 播完当前条目再停。
+  ///
+  /// 只为迁移保留，不再写入。新代码写 [sleepTimerDefaultAction]。
   static const sleepTimerDefaultAfterCurrent = PreferencesKey<bool>._(
     'SLEEP_TIMER_DEFAULT_AFTER_CURRENT',
     false,
