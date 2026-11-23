@@ -52,6 +52,9 @@ final class _FakePresenter(final bool launchFromNotification)
   }) async {
     shown.add((title: title, body: body, payload: payload));
   }
+
+  @override
+  Future<void> cancel({int id = 0}) async {}
 }
 
 void main() {
@@ -110,6 +113,27 @@ void main() {
 
       // Then the buffered tap is delivered instead of being lost.
       expect(events, hasLength(1));
+    });
+
+    test('a sleep timer warning tap does not open the feed', () async {
+      // Given the sleep timer shares the same notification plugin.
+      final presenter = _FakePresenter(false);
+      final notifier = LocalFeedUpdateNotifier(
+        preferences,
+        presenter: presenter,
+      );
+      addTearDown(notifier.dispose);
+      final events = <void>[];
+      final subscription = notifier.feedOpened.listen(events.add);
+      addTearDown(subscription.cancel);
+      await notifier.initialize();
+
+      // When the user taps the sleep timer warning.
+      presenter.onTap!(sleepTimerNotificationPayload);
+      await Future<void>.delayed(Duration.zero);
+
+      // Then no feed navigation is requested.
+      expect(events, isEmpty);
     });
 
     test('a normal start does not emit anything', () async {

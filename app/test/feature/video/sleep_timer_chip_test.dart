@@ -17,6 +17,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 /// 假播放器：只实现睡眠定时器路径需要的方法。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   final _playlist = StreamController<Playlist>.broadcast();
+  final _playing = StreamController<bool>.broadcast();
   final List<bool> pauseCalls = [];
 
   @override
@@ -25,7 +26,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   @override
   PlayerStream get stream => PlayerStream(
     _playlist.stream, // playlist
-    const Stream<bool>.empty(), // playing
+    _playing.stream, // playing
     const Stream<bool>.empty(), // completed
     const Stream<Duration>.empty(), // position
     const Stream<Duration>.empty(), // duration
@@ -58,11 +59,13 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
     bool synchronized = true,
   }) async {
     if (playable is Playlist) _playlist.add(playable);
+    _playing.add(play);
   }
 
   @override
   Future<void> pause() async {
     pauseCalls.add(true);
+    _playing.add(false);
   }
 
   @override
@@ -83,6 +86,7 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
 
   void disposeStreams() {
     _playlist.close();
+    _playing.close();
   }
 }
 
@@ -556,6 +560,81 @@ void main() {
 
       expect(notifier.permissionRequests, 1);
     });
+
+    testWidgets('after-current selection does not request permission', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final notifier = _RecordingSleepTimerNotifier();
+      await pumpChip(tester, notifier: notifier);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('After current video'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
+      await tester.pumpAndSettle();
+
+      // afterCurrent 不发「即将停止播放」提醒，不该弹权限框。
+      expect(notifier.permissionRequests, 0);
+    });
+
+    testWidgets('cancelling the timer dismisses the ending-soon warning', (
+      tester,
+    ) async {
+      useTallViewport(tester);
+      final notifier = _RecordingSleepTimerNotifier();
+      await pumpChip(tester, notifier: notifier);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('10 min'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('10:00'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(notifier.cancelCalls, 1);
+      expect(find.text('Timer'), findsOneWidget);
+    });
+  });
+
+  group('SleepTimerScope', () {
+    testWidgets('keeps the countdown when the control bar is rebuilt', (
+      tester,
+    ) async {
+      await controller.openQueue([
+        MediaStream(videoUrl: 'https://e.com/v.m4s'),
+      ]);
+      final timer = SleepTimerController(controller);
+      addTearDown(timer.dispose);
+
+      Widget build(Key chipKey) => MaterialApp(
+        home: Scaffold(
+          body: SleepTimerScope(
+            controller: timer,
+            defaultAction: SleepTimerAction.pauseNow,
+            onTimerStarted: (_) {},
+            child: SleepTimerChip(key: chipKey, controller: controller),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(build(const ValueKey('first')));
+      timer.start(10);
+      await tester.pump();
+      expect(find.text('10:00'), findsOneWidget);
+
+      // 全屏切换 / 控制栏自动隐藏会重建按钮；倒计时属于播放器，不属于按钮。
+      await tester.pumpWidget(build(const ValueKey('second')));
+      await tester.pump();
+
+      expect(find.text('10:00'), findsOneWidget);
+      expect(timer.isActive, isTrue);
+      timer.cancel();
+    });
   });
 
   group('SleepTimerController ending-soon warning', () {
@@ -630,6 +709,7 @@ void main() {
 class _RecordingSleepTimerNotifier() implements SleepTimerNotifier {
   int permissionRequests = 0;
   int endingSoonCalls = 0;
+  int cancelCalls = 0;
 
   @override
   Future<void> requestPermission() async {
@@ -639,5 +719,10 @@ class _RecordingSleepTimerNotifier() implements SleepTimerNotifier {
   @override
   Future<void> notifyEndingSoon() async {
     endingSoonCalls++;
+  }
+
+  @override
+  Future<void> cancel() async {
+    cancelCalls++;
   }
 }

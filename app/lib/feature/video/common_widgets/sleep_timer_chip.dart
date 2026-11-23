@@ -20,7 +20,7 @@ const kSleepTimerMinutes = settings.kSleepTimerMinutes;
 /// 睡眠定时器状态机：倒计时归零时按 [SleepTimerAction] 停播。
 ///
 /// 单独存在是为了让倒计时逻辑可以被单元测试直接驱动，不必渲染 UI。
-/// 计时器在 [MediaPlaybackController.pause] 被调用后自动取消。
+/// 生命周期归播放器所有，控制栏重建不会打断倒计时，见 [SleepTimerScope]。
 class SleepTimerController(
   final MediaPlaybackController _controller, {
 
@@ -29,8 +29,13 @@ class SleepTimerController(
 
   /// [SleepTimerAction.exitPlayer] 到点时回调，用于关闭播放器。
   final VoidCallback? onExitPlayer,
+
+  /// 定时器被取消、重设或释放时回调，用于撤掉已经发出的提醒。
+  final VoidCallback? onCanceled,
 }) extends ChangeNotifier {
   this {
+    // 队列可能已经播到中间，从当前序号起算，避免把「同一条播完」误判成换条。
+    _queueIndex = _controller.state.currentIndex;
     _subscription = _controller.states.listen(_onState);
   }
 
@@ -95,12 +100,12 @@ class SleepTimerController(
       _timer = null;
       switch (_action) {
         case SleepTimerAction.pauseNow:
-          _controller.pause();
+          unawaited(_pause());
         case SleepTimerAction.afterCurrent:
           _pendingStop = true;
         case SleepTimerAction.exitPlayer:
-          _controller.pause();
-          onExitPlayer?.call();
+          // 先等暂停落地再关页面：页面一关，控制器随之释放，暂停可能丢。
+          unawaited(_pauseThenExit());
       }
       notifyListeners();
       return;
@@ -109,13 +114,29 @@ class SleepTimerController(
     notifyListeners();
   }
 
+  Future<void> _pause() async {
+    try {
+      await _controller.pause();
+    } on Object catch (_) {
+      // 暂停失败不打断定时器流程；关闭页面的动作仍然继续。
+    }
+  }
+
+  Future<void> _pauseThenExit() async {
+    await _pause();
+    onExitPlayer?.call();
+  }
+
   /// 剩余时间进入最后一分钟时提醒一次。
   ///
   /// 总时长本来就不到一分钟时立刻提醒没有意义，故只在 [_total] 更长时触发。
-  /// `afterCurrent` 到点并不会立刻停播，提醒「一分钟后停止」会是假消息。
+  /// `afterCurrent` 到点并不会立刻停播，提醒「一分钟后停止」会是假消息；
+  /// 已经暂停（且不在缓冲）时同理。
   void _maybeWarnEndingSoon(Duration next) {
+    final state = _controller.state;
     if (_warned ||
         _action == SleepTimerAction.afterCurrent ||
+        (!state.isPlaying && !state.isBuffering) ||
         _total <= const Duration(minutes: 1) ||
         next > const Duration(minutes: 1) ||
         next <= Duration.zero) {
@@ -146,6 +167,7 @@ class SleepTimerController(
 
   /// 取消计时。档位标记与待生效标记一并清掉，与「未启动」状态对齐。
   void cancel() {
+    final hadState = isActive || _warned;
     _timer?.cancel();
     _timer = null;
     _remaining = null;
@@ -154,20 +176,50 @@ class SleepTimerController(
     _action = SleepTimerAction.pauseNow;
     _total = Duration.zero;
     _warned = false;
+    if (hadState) onCanceled?.call();
     notifyListeners();
   }
 
   @override
   void dispose() {
+    final hadState = isActive || _warned;
     _timer?.cancel();
     unawaited(_subscription?.cancel());
+    if (hadState) onCanceled?.call();
     super.dispose();
   }
+}
+
+/// 让同一播放器的多个控制栏实例共享一份倒计时状态。
+///
+/// 全屏切换会重建整条控制栏，全屏控制层自动隐藏也会卸载它。倒计时若跟着
+/// 按钮走，每次重建都会把定时器清掉；播放器在控制栏之外持有本作用域，
+/// 重建后的按钮从这里取回同一个控制器。
+class const SleepTimerScope({
+  super.key,
+  required final SleepTimerController controller,
+
+  /// 持久化的默认到点行为，用作选择器的初始选中项。
+  required final SleepTimerAction defaultAction,
+
+  /// 用户从选择器启动计时后的回调，用于按行为申请通知权限。
+  required final ValueChanged<SleepTimerAction> onTimerStarted,
+  required super.child,
+}) extends InheritedWidget {
+  static SleepTimerScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SleepTimerScope>();
+
+  @override
+  bool updateShouldNotify(SleepTimerScope oldWidget) =>
+      controller != oldWidget.controller ||
+      defaultAction != oldWidget.defaultAction;
 }
 
 /// 睡眠定时按钮：未启动时显示「定时」，启动后显示剩余时间或待生效标记。
 ///
 /// 点击弹底部选择器：先选到点行为，再选时长；启动后额外提供「取消定时」。
+/// 播放器通过 [SleepTimerScope] 提供共享控制器；没有作用域时（例如单独测试
+/// 这个按钮）由按钮自己创建并释放控制器，并自行恢复默认档位。
 class const SleepTimerChip({
   super.key,
   required final MediaPlaybackController controller,
@@ -180,33 +232,57 @@ class const SleepTimerChip({
 }
 
 class _SleepTimerChipState() extends State<SleepTimerChip> {
-  late final SleepTimerController _sleep;
+  /// 当前使用的控制器：来自作用域，或由本按钮创建。
+  SleepTimerController? _timer;
+  SleepTimerController? _ownedTimer;
+  SleepTimerScope? _scope;
   PreferencesDataSource? _preferences;
   SleepTimerNotifier? _notifier;
   bool _userSelected = false;
   bool _permissionRequested = false;
+  bool _restoredDefault = false;
 
   /// 下一次启动计时使用的到点行为；由持久化默认值初始化。
   SleepTimerAction _pendingAction = SleepTimerAction.pauseNow;
 
   @override
-  void initState() {
-    super.initState();
-    _sleep = SleepTimerController(
-      widget.controller,
-      onEndingSoon: _notifyEndingSoon,
-      onExitPlayer: widget.onExit,
-    );
-    _sleep.addListener(() {
-      if (mounted) setState(() {});
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final scope = SleepTimerScope.maybeOf(context);
+    final timer = scope?.controller ?? (_ownedTimer ??= _createOwnTimer());
+    if (!identical(timer, _timer)) {
+      _timer?.removeListener(_handleTimerChanged);
+      _timer = timer..addListener(_handleTimerChanged);
+    }
+    _scope = scope;
+    if (scope != null) {
+      if (!_userSelected) _pendingAction = scope.defaultAction;
+      return;
+    }
+    // 没有作用域时（单独使用本按钮）自行恢复默认档位，只做一次。
+    if (!_restoredDefault) {
+      _restoredDefault = true;
+      unawaited(_restoreDefaultTimer());
+    }
+  }
+
+  SleepTimerController _createOwnTimer() {
     try {
       _preferences = context.read<PreferencesDataSource>();
     } on Object catch (_) {}
     try {
       _notifier = context.read<SleepTimerNotifier>();
     } on Object catch (_) {}
-    _restoreDefaultTimer();
+    return SleepTimerController(
+      widget.controller,
+      onEndingSoon: _notifyEndingSoon,
+      onExitPlayer: widget.onExit,
+      onCanceled: () => unawaited(_notifier?.cancel()),
+    );
+  }
+
+  void _handleTimerChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _notifyEndingSoon() async {
@@ -217,31 +293,48 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
     final preferences = _preferences;
     if (preferences == null) return;
     final loaded = await settings.PlayerSettings.load(preferences);
-    if (!mounted || _userSelected) return;
-    _pendingAction = loaded.sleepTimerDefaultAction;
-    if (!settings.isValidSleepTimerMinutes(loaded.sleepTimerDefaultMinutes)) {
+    if (!mounted) return;
+    if (!_userSelected) _pendingAction = loaded.sleepTimerDefaultAction;
+    if (_userSelected ||
+        !settings.isValidSleepTimerMinutes(loaded.sleepTimerDefaultMinutes)) {
       return;
     }
-    _sleep.start(
+    _timer!.start(
       loaded.sleepTimerDefaultMinutes,
       action: loaded.sleepTimerDefaultAction,
     );
+    _requestPermission(loaded.sleepTimerDefaultAction);
+  }
+
+  /// 只有会真正停播的行为才申请通知权限；`afterCurrent` 不发提醒。
+  void _requestPermission(SleepTimerAction action) {
+    final scope = _scope;
+    if (scope != null) {
+      scope.onTimerStarted(action);
+      return;
+    }
+    if (_permissionRequested || action == SleepTimerAction.afterCurrent) {
+      return;
+    }
+    _permissionRequested = true;
+    unawaited(_notifier?.requestPermission());
   }
 
   @override
   void dispose() {
-    _sleep.dispose();
+    _timer?.removeListener(_handleTimerChanged);
+    _ownedTimer?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final active = _sleep.isActive;
-    final label = _sleep.pendingAfterCurrent
+    final active = _timer!.isActive;
+    final label = _timer!.pendingAfterCurrent
         ? (l10n?.afterCurrentItem ?? 'After current')
         : active
-        ? _formatRemaining(_sleep.remaining!)
+        ? _formatRemaining(_timer!.remaining!)
         : (l10n?.timer ?? 'Timer');
     final timerTitle = l10n?.sleepTimerTitle ?? 'Sleep timer';
 
@@ -334,12 +427,12 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                   _option(
                     l10n?.minutesValue('$minutes') ?? '$minutes min',
                     selected:
-                        minutes == _sleep.selectedMinutes &&
-                        _sleep.action == _pendingAction,
+                        minutes == _timer!.selectedMinutes &&
+                        _timer!.action == _pendingAction,
                     onTap: () => _pick(sheetContext, minutes, _pendingAction),
                   ),
                 _customOption(sheetContext),
-                if (_sleep.isActive)
+                if (_timer!.isActive)
                   ListTile(
                     title: Text(
                       l10n?.cancelTimer ?? 'Cancel',
@@ -348,7 +441,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
                     onTap: () {
                       HapticFeedback.selectionClick();
                       _userSelected = true;
-                      _sleep.cancel();
+                      _timer!.cancel();
                       Navigator.of(sheetContext).pop();
                     },
                   ),
@@ -387,11 +480,11 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
 
   Widget _customOption(BuildContext sheetContext) {
     final l10n = AppLocalizations.of(sheetContext);
-    final selectedMinutes = _sleep.selectedMinutes;
+    final selectedMinutes = _timer!.selectedMinutes;
     final selected =
         selectedMinutes != null &&
         !kSleepTimerMinutes.contains(selectedMinutes) &&
-        _sleep.action == _pendingAction;
+        _timer!.action == _pendingAction;
     return _option(
       selected
           ? (l10n?.sleepTimerCustomValue('$selectedMinutes') ??
@@ -425,11 +518,8 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   void _pick(BuildContext sheetContext, int minutes, SleepTimerAction action) {
     _userSelected = true;
     _pendingAction = action;
-    _sleep.start(minutes, action: action);
-    if (!_permissionRequested) {
-      _permissionRequested = true;
-      unawaited(_notifier?.requestPermission());
-    }
+    _timer!.start(minutes, action: action);
+    _requestPermission(action);
     Navigator.of(sheetContext).pop();
   }
 }

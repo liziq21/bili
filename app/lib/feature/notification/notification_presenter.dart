@@ -7,9 +7,15 @@ const feedUpdatesChannelName = 'Feed updates';
 const feedUpdatesChannelDescription = 'Notifies about new items in your feed';
 
 /// 睡眠定时器提醒的通道，与订阅更新分开，便于用户单独关闭。
+///
+/// 通道名称与说明由调用方按界面语言传入，见 `SleepTimerNotifier`。
 const sleepTimerChannelId = 'sleep_timer';
-const sleepTimerChannelName = 'Sleep timer';
-const sleepTimerChannelDescription = 'Warns one minute before playback stops';
+
+/// 订阅更新通知的载荷；点击回调按它区分是不是订阅提醒。
+const feedNotificationPayload = 'feed';
+
+/// 睡眠定时器提醒的载荷。
+const sleepTimerNotificationPayload = 'sleep_timer';
 
 /// 平台通知的薄封装。
 ///
@@ -46,6 +52,9 @@ abstract interface class NotificationPresenter() {
     String channelName = feedUpdatesChannelName,
     String channelDescription = feedUpdatesChannelDescription,
   });
+
+  /// 撤掉已经显示的通知；通知不存在时什么也不做。
+  Future<void> cancel({int id = 0});
 }
 
 /// Android 实现，基于 `flutter_local_notifications`。
@@ -145,5 +154,11 @@ final class AndroidNotificationPresenter() implements NotificationPresenter {
         ),
       ),
     );
+  }
+
+  @override
+  Future<void> cancel({int id = 0}) async {
+    if (!isSupported) return;
+    await _plugin.cancel(id: id);
   }
 }

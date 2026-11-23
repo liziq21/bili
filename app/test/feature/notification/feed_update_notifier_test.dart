@@ -43,6 +43,9 @@ final class _SupportedPresenter() implements NotificationPresenter {
     String channelName = feedUpdatesChannelName,
     String channelDescription = feedUpdatesChannelDescription,
   }) async => shown.add(payload);
+
+  @override
+  Future<void> cancel({int id = 0}) async {}
 }
 
 /// Platform-agnostic feed update decision logic.

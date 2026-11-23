@@ -51,16 +51,28 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
     });
   }
 
-  Future<void> _updatePlayer(PlayerSettings settings) async {
-    setState(() => _playerSettings = settings);
-    final preferences = _preferences;
-    if (preferences != null) await settings.save(preferences);
+  /// 写入队列：并发保存可能乱序完成，让旧快照覆盖用户刚选的新值。
+  Future<void> _saveQueue = Future<void>.value();
+
+  Future<void> _enqueueSave(Future<void> Function() save) {
+    final next = _saveQueue.then((_) => save());
+    // 一次失败不该让后续保存全部短路；错误仍会传给本次调用方。
+    _saveQueue = next.catchError((Object _) {});
+    return next;
   }
 
-  Future<void> _updateGestures(GestureSettings settings) async {
+  Future<void> _updatePlayer(PlayerSettings settings) {
+    setState(() => _playerSettings = settings);
+    final preferences = _preferences;
+    if (preferences == null) return Future<void>.value();
+    return _enqueueSave(() => settings.save(preferences));
+  }
+
+  Future<void> _updateGestures(GestureSettings settings) {
     setState(() => _gestureSettings = settings);
     final preferences = _preferences;
-    if (preferences != null) await settings.save(preferences);
+    if (preferences == null) return Future<void>.value();
+    return _enqueueSave(() => settings.save(preferences));
   }
 
   @override

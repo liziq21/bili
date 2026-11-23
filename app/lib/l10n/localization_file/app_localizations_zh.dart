@@ -4755,4 +4755,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sleepTimerEndingSoonBody => '1 分钟后将停止播放';
+
+  @override
+  String get sleepTimerChannelName => '睡眠定时器';
+
+  @override
+  String get sleepTimerChannelDescription => '播放停止前一分钟提示';
 }

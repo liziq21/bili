@@ -8218,6 +8218,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Playback stops in 1 minute'**
   String get sleepTimerEndingSoonBody;
+
+  /// Android notification channel name for the sleep timer, shown in system settings
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get sleepTimerChannelName;
+
+  /// Android notification channel description for the sleep timer, shown in system settings
+  ///
+  /// In en, this message translates to:
+  /// **'Warns one minute before playback stops'**
+  String get sleepTimerChannelDescription;
 }
 
 class _AppLocalizationsDelegate

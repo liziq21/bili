@@ -6428,5 +6428,13 @@
   "sleepTimerEndingSoonBody": "1 分钟后将停止播放",
   "@sleepTimerEndingSoonBody": {
     "description": "Body of the system notification shown one minute before the sleep timer stops playback"
+  },
+  "sleepTimerChannelName": "睡眠定时器",
+  "@sleepTimerChannelName": {
+    "description": "Android notification channel name for the sleep timer, shown in system settings"
+  },
+  "sleepTimerChannelDescription": "播放停止前一分钟提示",
+  "@sleepTimerChannelDescription": {
+    "description": "Android notification channel description for the sleep timer, shown in system settings"
   }
 }

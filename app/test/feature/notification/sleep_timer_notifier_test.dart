@@ -8,8 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 final class _RecordingPresenter() implements NotificationPresenter {
   bool supported = true;
   int permissionRequests = 0;
-  final List<({String title, String body, int id, String channelId})> shown =
-      [];
+  final List<int> canceled = [];
+  final List<
+    ({
+      String title,
+      String body,
+      String payload,
+      int id,
+      String channelId,
+      String channelName,
+    })
+  >
+  shown = [];
 
   @override
   bool get isSupported => supported;
@@ -39,7 +49,19 @@ final class _RecordingPresenter() implements NotificationPresenter {
     String channelName = feedUpdatesChannelName,
     String channelDescription = feedUpdatesChannelDescription,
   }) async {
-    shown.add((title: title, body: body, id: id, channelId: channelId));
+    shown.add((
+      title: title,
+      body: body,
+      payload: payload,
+      id: id,
+      channelId: channelId,
+      channelName: channelName,
+    ));
+  }
+
+  @override
+  Future<void> cancel({int id = 0}) async {
+    canceled.add(id);
   }
 }
 
@@ -61,7 +83,21 @@ void main() {
       expect(shown.title, l10n.sleepTimerEndingSoonTitle);
       expect(shown.body, l10n.sleepTimerEndingSoonBody);
       expect(shown.channelId, sleepTimerChannelId);
+      expect(shown.channelName, l10n.sleepTimerChannelName);
+      expect(shown.payload, sleepTimerNotificationPayload);
       expect(shown.id, 1);
+    });
+
+    test('cancels the warning by id', () async {
+      final presenter = _RecordingPresenter();
+      final notifier = LocalSleepTimerNotifier(
+        presenter: presenter,
+        localizations: l10n,
+      );
+
+      await notifier.cancel();
+
+      expect(presenter.canceled, [1]);
     });
 
     test('forwards the permission request', () async {
@@ -85,9 +121,11 @@ void main() {
 
       await notifier.requestPermission();
       await notifier.notifyEndingSoon();
+      await notifier.cancel();
 
       expect(presenter.permissionRequests, 0);
       expect(presenter.shown, isEmpty);
+      expect(presenter.canceled, isEmpty);
     });
   });
 }

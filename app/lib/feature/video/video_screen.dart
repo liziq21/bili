@@ -458,6 +458,21 @@ class _VideoContentState() extends State<_VideoContent> {
     unawaited(widget.playbackController.pause());
   }
 
+  /// 睡眠定时器到点选择「关闭播放器」时退出本页。
+  ///
+  /// 只在播放器是当前路由时关闭：被队列弹层或另一个视频盖住时弹栈会关掉
+  /// 别人的页面，此时只保留已经生效的暂停。没有外部返回入口时自行弹栈。
+  void _exitOnTimerEnd() {
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+    final back = widget.onBackClick;
+    if (back != null) {
+      back();
+      return;
+    }
+    if (route != null) unawaited(Navigator.of(context).maybePop());
+  }
+
   Future<void> _restorePortrait() async {
     await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -518,7 +533,7 @@ class _VideoContentState() extends State<_VideoContent> {
       onRetry: () =>
           context.read<VideoBloc>().add(LoadMediaStream(widget.videoId)),
       onMinimize: _minimize,
-      onExit: widget.onBackClick,
+      onExit: _exitOnTimerEnd,
       queue: widget.queue,
       surfaceBuilder: widget.surfaceBuilder,
     );

@@ -4777,4 +4777,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sleepTimerEndingSoonBody => 'Playback stops in 1 minute';
+
+  @override
+  String get sleepTimerChannelName => 'Sleep timer';
+
+  @override
+  String get sleepTimerChannelDescription =>
+      'Warns one minute before playback stops';
 }

@@ -6428,5 +6428,13 @@
   "sleepTimerEndingSoonBody": "Playback stops in 1 minute",
   "@sleepTimerEndingSoonBody": {
     "description": "Body of the system notification shown one minute before the sleep timer stops playback"
+  },
+  "sleepTimerChannelName": "Sleep timer",
+  "@sleepTimerChannelName": {
+    "description": "Android notification channel name for the sleep timer, shown in system settings"
+  },
+  "sleepTimerChannelDescription": "Warns one minute before playback stops",
+  "@sleepTimerChannelDescription": {
+    "description": "Android notification channel description for the sleep timer, shown in system settings"
   }
 }
