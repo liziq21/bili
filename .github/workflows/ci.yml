@@ -66,6 +66,11 @@ jobs:
   build:
     uses: ./.github/workflows/ci-build.yml
 
+  # golden 基线来源校验：PR 改动的 golden PNG 必须能追溯到 rerecord-goldens run，
+  # 且 artifact 中的字节与 PR head 一致。无 golden 改动的 PR 快速通过。
+  golden_provenance:
+    uses: ./.github/workflows/ci-golden-provenance.yml
+
   tools:
     uses: ./.github/workflows/ci-tools.yml
 
