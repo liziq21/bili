@@ -233,6 +233,19 @@ def _scan_string_literals(source: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _is_tracked_code_point(code_point: int) -> bool:
+    """True for non-ASCII, non-astral characters that can live in the subset.
+
+    Astral code points are excluded because Noto Sans CJK has no glyph for them,
+    and surrogate halves (`\\uD83D`, the escaped spelling of an astral
+    character) are excluded because they are not characters at all — writing one
+    into the list raises UnicodeEncodeError.
+    """
+    if not 0x7F < code_point < 0x10000:
+        return False
+    return not 0xD800 <= code_point <= 0xDFFF
+
+
 def collect_non_ascii_codepoints(dart_dirs: list[Path]) -> set[int]:
     """Scan all .dart files under *dart_dirs* and return non-ASCII code points
     found inside string-literal text bodies."""
@@ -247,7 +260,7 @@ def collect_non_ascii_codepoints(dart_dirs: list[Path]) -> set[int]:
             bodies = _scan_string_literals(source)
             for ch in bodies:
                 cp = ord(ch)
-                if cp > 0x7F and cp < 0x10000:
+                if _is_tracked_code_point(cp):
                     code_points.add(cp)
     print(f"  scanned {total_files} .dart files", file=sys.stderr)
     return code_points
@@ -327,8 +340,11 @@ def main() -> int:
         print(
             "\n  To fix:\n"
             "    python3 tool/generate_subset_characters.py --write\n"
-            "    # then regenerate the OTF:\n"
-            "    pyftsubset /path/to/NotoSansCJK-Regular.ttc \\\n"
+            "    # then regenerate the OTF. The source font is not vendored:\n"
+            "    #   curl -LO https://raw.githubusercontent.com/notofonts/noto-cjk/"
+            "main/Sans/OTC/NotoSansCJK-Regular.ttc\n"
+            "    #   face 2 of that collection is Noto Sans CJK SC.\n"
+            "    pyftsubset NotoSansCJK-Regular.ttc \\\n"
             "      --font-number=2 \\\n"
             f"      --text-file={SUBSET_PATH} \\\n"
             "      --unicodes=U+0020-007E \\\n"

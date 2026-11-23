@@ -23,8 +23,15 @@ class ScanStringLiteralsTest(unittest.TestCase):
         self.assertEqual(scan('/* 中文 */ const s = "ok";'), '')
 
     def test_interpolation_hole_is_skipped(self):
+        # Raw Python string, so the `$` reaches the scanner unescaped. The hole
+        # holds non-ASCII on purpose: were it kept, the assertion would see it.
         # Only non-ASCII text survives the scan, so the surrounding spaces drop.
-        self.assertEqual(scan("final s = '前缀 \${name} 后缀';"), '前缀后缀')
+        self.assertEqual(scan(r"final s = '前缀 ${中文变量} 后缀';"), '前缀后缀')
+
+    def test_dollar_before_non_ascii_is_literal_text(self):
+        # `$ident` needs an ASCII identifier start, so this `$` is text: the
+        # characters after it are rendered, not code.
+        self.assertEqual(scan(r"final s = '前缀 $中文变量 后缀';"), '前缀中文变量后缀')
 
     def test_unicode_escape_is_decoded(self):
         # The contract test reads literal *values*, so an escaped character
@@ -49,6 +56,23 @@ class ScanStringLiteralsTest(unittest.TestCase):
 
     def test_multiple_literals_are_concatenated(self):
         self.assertEqual(scan("final a = '中'; final b = '文';"), '中文')
+
+
+class TrackedCodePointTest(unittest.TestCase):
+    def test_ascii_is_not_tracked(self):
+        self.assertFalse(subset._is_tracked_code_point(0x41))
+
+    def test_cjk_is_tracked(self):
+        self.assertTrue(subset._is_tracked_code_point(0x4E2D))
+
+    def test_astral_is_not_tracked(self):
+        self.assertFalse(subset._is_tracked_code_point(0x1F44D))
+
+    def test_surrogate_half_is_not_tracked(self):
+        # An escaped astral character (`\uD83D\uDC4D`) decodes to two surrogate
+        # halves; writing either one into the list raises UnicodeEncodeError.
+        self.assertFalse(subset._is_tracked_code_point(0xD83D))
+        self.assertFalse(subset._is_tracked_code_point(0xDC4D))
 
 
 class RenderSortedTest(unittest.TestCase):
