@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
         'files',
         nargs='*',
         type=Path,
-        help='ARB files to check (default: the app English and Chinese files)',
+        help='ARB files to check (default: every source ARB under lib/l10n)',
     )
     args = parser.parse_args(argv)
     files = args.files or list(DEFAULT_ARB_FILES)
