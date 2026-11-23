@@ -56,9 +56,17 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
 
   Future<void> _enqueueSave(Future<void> Function() save) {
     final next = _saveQueue.then((_) => save());
-    // 一次失败不该让后续保存全部短路；错误仍会传给本次调用方。
-    _saveQueue = next.catchError((Object _) {});
-    return next;
+    // 一次失败不该让后续保存全部短路；失败在这里报告一次，调用方无需处理。
+    _saveQueue = next.catchError((Object error, StackTrace stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'player settings',
+        ),
+      );
+    });
+    return _saveQueue;
   }
 
   Future<void> _updatePlayer(PlayerSettings settings) {

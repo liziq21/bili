@@ -69,6 +69,11 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   }
 
   @override
+  Future<void> play() async {
+    _playing.add(true);
+  }
+
+  @override
   Future<void> setRate(double rate) async {}
 
   @override
@@ -591,12 +596,19 @@ void main() {
       await tester.tap(find.text('10 min'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('10:00'));
+      // 进入最后一分钟，提醒先发出，再取消。
+      await tester.pump(const Duration(seconds: 541));
+      await tester.pump();
+      expect(notifier.endingSoonCalls, 1);
+      expect(find.text('00:59'), findsOneWidget);
+
+      await tester.tap(find.text('00:59'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
       expect(notifier.cancelCalls, 1);
+      expect(notifier.canceledIds, [notifier.endingSoonIds.single]);
       expect(find.text('Timer'), findsOneWidget);
     });
   });
@@ -690,6 +702,30 @@ void main() {
       expect(fake.pauseCalls, isNotEmpty);
     });
 
+    testWidgets('does not warn late when the crossing happens while paused', (
+      tester,
+    ) async {
+      await pumpChip(tester);
+      var warnings = 0;
+      final sleep = SleepTimerController(
+        controller,
+        onEndingSoon: () async => warnings++,
+      );
+      addTearDown(sleep.dispose);
+
+      sleep.start(2);
+      // 90 秒时暂停，越过最后一分钟，再在 50 秒时恢复播放。
+      await tester.pump(const Duration(seconds: 30));
+      await controller.pause();
+      await tester.pump(const Duration(seconds: 40));
+      await controller.play();
+      await tester.pump(const Duration(seconds: 10));
+
+      // 恢复后剩余已不足一分钟，此时再提醒「一分钟后停止」是假消息。
+      expect(warnings, 0);
+      sleep.cancel();
+    });
+
     testWidgets('routes the warning to the notifier', (tester) async {
       useTallViewport(tester);
       final notifier = _RecordingSleepTimerNotifier();
@@ -710,6 +746,8 @@ class _RecordingSleepTimerNotifier() implements SleepTimerNotifier {
   int permissionRequests = 0;
   int endingSoonCalls = 0;
   int cancelCalls = 0;
+  final List<int> endingSoonIds = [];
+  final List<int> canceledIds = [];
 
   @override
   Future<void> requestPermission() async {
@@ -717,12 +755,16 @@ class _RecordingSleepTimerNotifier() implements SleepTimerNotifier {
   }
 
   @override
-  Future<void> notifyEndingSoon() async {
+  Future<void> notifyEndingSoon({
+    int id = defaultSleepTimerNotificationId,
+  }) async {
     endingSoonCalls++;
+    endingSoonIds.add(id);
   }
 
   @override
-  Future<void> cancel() async {
+  Future<void> cancel({int id = defaultSleepTimerNotificationId}) async {
     cancelCalls++;
+    canceledIds.add(id);
   }
 }

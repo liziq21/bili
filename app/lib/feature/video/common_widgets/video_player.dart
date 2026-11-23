@@ -323,6 +323,9 @@ class _SleepTimerHostState() extends State<_SleepTimerHost> {
   bool _userStarted = false;
   bool _permissionRequested = false;
 
+  /// 本播放器独占的提醒 id，叠加播放器时互不影响。
+  final int _notificationId = allocateSleepTimerNotificationId();
+
   @override
   void initState() {
     super.initState();
@@ -339,11 +342,11 @@ class _SleepTimerHostState() extends State<_SleepTimerHost> {
   }
 
   Future<void> _notifyEndingSoon() async {
-    await _notifier?.notifyEndingSoon();
+    await _notifier?.notifyEndingSoon(id: _notificationId);
   }
 
   void _cancelNotification() {
-    unawaited(_notifier?.cancel());
+    unawaited(_notifier?.cancel(id: _notificationId));
   }
 
   Future<void> _restoreDefault() async {

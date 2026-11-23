@@ -11,11 +11,19 @@ abstract interface class SleepTimerNotifier() {
   Future<void> requestPermission();
 
   /// 倒计时进入最后一分钟时提醒一次。
-  Future<void> notifyEndingSoon();
+  Future<void> notifyEndingSoon({int id = defaultSleepTimerNotificationId});
 
   /// 撤掉「即将停止播放」提醒：定时器被取消、重设或离开播放器时调用。
-  Future<void> cancel();
+  Future<void> cancel({int id = defaultSleepTimerNotificationId});
 }
+
+/// 单条提醒的默认 id；每个计时会话应当用 [allocateSleepTimerNotificationId]
+/// 领一个自己的 id，叠加两个播放器时取消其一不会撤掉另一个的提醒。
+const defaultSleepTimerNotificationId = 1;
+
+int _nextNotificationId = defaultSleepTimerNotificationId + 1;
+
+int allocateSleepTimerNotificationId() => _nextNotificationId++;
 
 /// Android 实现，基于 [NotificationPresenter] 的独立通道。
 ///
@@ -43,14 +51,16 @@ final class LocalSleepTimerNotifier({
   }
 
   @override
-  Future<void> notifyEndingSoon() async {
+  Future<void> notifyEndingSoon({
+    int id = defaultSleepTimerNotificationId,
+  }) async {
     if (!_presenter.isSupported) return;
     try {
       await _presenter.show(
         title: _l10n.sleepTimerEndingSoonTitle,
         body: _l10n.sleepTimerEndingSoonBody,
         payload: sleepTimerNotificationPayload,
-        id: 1,
+        id: id,
         channelId: sleepTimerChannelId,
         channelName: _l10n.sleepTimerChannelName,
         channelDescription: _l10n.sleepTimerChannelDescription,
@@ -61,10 +71,10 @@ final class LocalSleepTimerNotifier({
   }
 
   @override
-  Future<void> cancel() async {
+  Future<void> cancel({int id = defaultSleepTimerNotificationId}) async {
     if (!_presenter.isSupported) return;
     try {
-      await _presenter.cancel(id: 1);
+      await _presenter.cancel(id: id);
     } on Object catch (_) {
       // 通知不存在或通道不可用时无需处理。
     }

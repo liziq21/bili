@@ -130,19 +130,20 @@ class SleepTimerController(
   /// 剩余时间进入最后一分钟时提醒一次。
   ///
   /// 总时长本来就不到一分钟时立刻提醒没有意义，故只在 [_total] 更长时触发。
-  /// `afterCurrent` 到点并不会立刻停播，提醒「一分钟后停止」会是假消息；
-  /// 已经暂停（且不在缓冲）时同理。
+  /// `afterCurrent` 到点并不会立刻停播，提醒「一分钟后停止」会是假消息。
   void _maybeWarnEndingSoon(Duration next) {
-    final state = _controller.state;
     if (_warned ||
         _action == SleepTimerAction.afterCurrent ||
-        (!state.isPlaying && !state.isBuffering) ||
         _total <= const Duration(minutes: 1) ||
         next > const Duration(minutes: 1) ||
         next <= Duration.zero) {
       return;
     }
+    // 越过最后一分钟这一刻就定性：暂停期间不补发。倒计时照走，恢复播放时
+    // 剩余可能已不足一分钟，那时再说「一分钟后停止」就是假消息。
     _warned = true;
+    final state = _controller.state;
+    if (!state.isPlaying && !state.isBuffering) return;
     unawaited(onEndingSoon?.call() ?? Future<void>.value());
   }
 
@@ -238,6 +239,9 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   SleepTimerScope? _scope;
   PreferencesDataSource? _preferences;
   SleepTimerNotifier? _notifier;
+
+  /// 自建控制器时本按钮独占的提醒 id；走作用域时由播放器分配。
+  final int _notificationId = allocateSleepTimerNotificationId();
   bool _userSelected = false;
   bool _permissionRequested = false;
   bool _restoredDefault = false;
@@ -277,7 +281,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
       widget.controller,
       onEndingSoon: _notifyEndingSoon,
       onExitPlayer: widget.onExit,
-      onCanceled: () => unawaited(_notifier?.cancel()),
+      onCanceled: () => unawaited(_notifier?.cancel(id: _notificationId)),
     );
   }
 
@@ -286,7 +290,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
   }
 
   Future<void> _notifyEndingSoon() async {
-    await _notifier?.notifyEndingSoon();
+    await _notifier?.notifyEndingSoon(id: _notificationId);
   }
 
   Future<void> _restoreDefaultTimer() async {
