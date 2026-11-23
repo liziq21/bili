@@ -75,7 +75,7 @@ git log --oneline --name-only <base>..<head> -- app/test/golden/goldens/ci/
 
 在 GitHub 上追溯引入 PNG 的 PR、原始提交及 `Re-record screenshot baselines` run，并核对该 run 上传的 `goldens-<run_id>` artifact 中对应 PNG 的内容/hash。只有相同分支前缀、作者或 run 链接不构成内容来源证据；squash 后需追溯原始 PR，而非要求合并 SHA 等于 run 的源 SHA。
 
-PR 上的 `Check Golden Provenance`（`ci-golden-provenance.yml`）自动化了同一判断：它要求 run 的 artifact 中存在该路径且 blob 与 PR head 一致、文件在 run 自己的 head 上确实不同、且 run 使用的 `rerecord-goldens.yml` 版本出现在 base 分支历史上。本地可用 `python3 tool/check_golden_provenance.py --repo <owner/repo> --pr <n>` 复现；加 `--head-sha <ref>` 可核对历史提交。
+PR 上的 `Check Golden Provenance`（`ci-golden-provenance.yml`）自动化了同一判断：它要求 run 的 artifact 中存在该路径且 blob 与 PR head 一致、文件在 run 自己的 head 上确实不同、且 run 使用的 `rerecord-goldens.yml` 版本出现在 base 分支历史上。本地可用 `python3 tool/check_golden_provenance.py --repo <owner/repo> --pr <n>` 复现，需要环境变量 `GITHUB_TOKEN`（或用 `--token` 传入，需 `actions: read`、`contents: read`、`pull-requests: read`）；加 `--head-sha <ref>` 可核对历史提交。
 
 - 功能分支合法合入 CI 基线后也会包含 PNG，不得因此回滚。
 - artifact 已过期或来源无法确认时，记录证据缺口，交由维护者核实或重新走 CI 录制；不要直接判违规或撤销合法基线。

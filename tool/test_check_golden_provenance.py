@@ -52,11 +52,13 @@ class FakeApi:
         self.recorder_history = recorder_history or ['recorder-commit']
         self.artifact_requests: list[int] = []
         self.run_requests: list[str] = []
+        self.head_requests = 0
 
     def pull_files(self, pr: int) -> list[provenance.PullFile]:
         return self.files
 
     def pull_head(self, pr: int) -> str:
+        self.head_requests += 1
         return 'head'
 
     def pull_base(self, pr: int) -> str:
@@ -164,6 +166,48 @@ class ArtifactEntryMatchTest(unittest.TestCase):
                 'failures/app/test/golden/goldens/ci/home_screen.png', GOLDEN
             )
         )
+
+
+class PaginateTest(unittest.TestCase):
+    class _Stub(provenance.HttpGitHubApi):
+        def __init__(self, pages):
+            super().__init__('owner/repo', 'token', 'https://api.github.com')
+            self.pages = pages
+            self.requests = []
+
+        def _json(self, path, params=None):
+            self.requests.append(dict(params or {}))
+            return self.pages.get((params or {}).get('page'), {'workflow_runs': []})
+
+    def test_reads_a_keyed_collection_across_pages(self):
+        api = self._Stub(
+            {
+                1: {'workflow_runs': [{'id': 1}] * 100},
+                2: {'workflow_runs': [{'id': 2}]},
+            }
+        )
+        runs = api._paginate('/runs', {'per_page': 100}, key='workflow_runs')
+        self.assertEqual(len(runs), 101)
+        self.assertEqual(runs[-1], {'id': 2})
+
+    def test_flat_list_response_is_still_supported(self):
+        api = self._Stub({1: [{'id': 1}], 2: []})
+        self.assertEqual(api._paginate('/files', {'per_page': 100}), [{'id': 1}])
+
+
+class NoGoldenChangeTest(unittest.TestCase):
+    def test_non_golden_pull_request_returns_early(self):
+        api = FakeApi(
+            files=[
+                provenance.PullFile(
+                    path='lib/main.dart', status='modified', blob_sha='x'
+                )
+            ]
+        )
+        report = provenance.check_provenance(api, 1, 'head')
+        self.assertEqual(report.checked, 0)
+        self.assertEqual(api.head_requests, 0)
+        self.assertEqual(api.artifact_requests, [])
 
 
 class GoldenPngTest(unittest.TestCase):

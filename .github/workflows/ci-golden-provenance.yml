@@ -17,8 +17,7 @@ jobs:
     timeout-minutes: 15
     steps:
       # 从 base 分支取校验脚本：PR 不能修改自己受检的门禁逻辑。golden 差异
-      # 通过 API 读取，不依赖工作区。首个引入本门禁的 PR 在 base 上还没有该
-      # 脚本，此时给出 warning 并跳过（合并后所有 PR 都会走 base 版本）。
+      # 通过 API 读取，不依赖工作区。
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.base.sha || github.sha }}
@@ -31,9 +30,20 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ ! -f tool/check_golden_provenance.py ]; then
-            echo "::warning::tool/check_golden_provenance.py is not on the base branch yet; skipping for this pull request"
-            exit 0
+          if [ -f tool/check_golden_provenance.py ]; then
+            python3 tool/check_golden_provenance.py
+            exit $?
           fi
-          python3 tool/check_golden_provenance.py
+          # base 上还没有校验脚本（引入本门禁的那个 PR）。不能一律放行，否则
+          # 任何缺少脚本的 base 分支都成了绕过口；只在 PR 没有 golden 改动时通过。
+          goldens=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | select(.status != "removed") | .filename' \
+            | grep -E '^app/test/golden/goldens/ci/.*\.png$' || true)
+          if [ -n "$goldens" ]; then
+            echo "::error::golden baseline changed, but the provenance checker is not on this base branch"
+            echo "$goldens"
+            exit 1
+          fi
+          echo "No golden baseline changes in this pull request."

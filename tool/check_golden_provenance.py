@@ -167,6 +167,14 @@ def check_provenance(
                 )
             ],
         )
+    relevant = [
+        changed
+        for changed in files
+        if is_golden_png(changed.path) and changed.status in CHANGED_STATUSES
+    ]
+    if not relevant:
+        return ProvenanceReport(proven=[], problems=[])
+
     # The files list comes from the live pull request, so resolve history against
     # the same head by default. Pinning history to the event SHA would compare a
     # newer file list with an older history when the pull request advanced
@@ -181,11 +189,7 @@ def check_provenance(
     trusted_recorders = _trusted_recorders(api, base_sha or api.pull_base(pr))
     proven: list[ProvenancedGolden] = []
     problems: list[GoldenProblem] = []
-    for changed in files:
-        if not is_golden_png(changed.path):
-            continue
-        if changed.status not in CHANGED_STATUSES:
-            continue
+    for changed in relevant:
         if not changed.blob_sha:
             problems.append(
                 GoldenProblem(changed.path, 'the pull request API returned no blob id')
@@ -354,14 +358,25 @@ class HttpGitHubApi:
             url = f'{url}?{urllib.parse.urlencode(params)}'
         return json.loads(self._request(url))
 
-    def _paginate(self, path: str, params: dict[str, object]) -> list[dict]:
+    def _paginate(
+        self,
+        path: str,
+        params: dict[str, object],
+        key: str | None = None,
+    ) -> list[dict]:
+        """Collect every page of a list endpoint.
+
+        Some endpoints (``/actions/workflows/<file>/runs``) wrap the list in an
+        object under ``key``; others return the list directly.
+        """
         items: list[dict] = []
         page = 1
         while True:
             query = dict(params, page=page)
-            batch = self._json(path, query)
+            response = self._json(path, query)
+            batch = response.get(key, []) if key else response
             if not isinstance(batch, list):
-                raise RuntimeError(f'unexpected response for {path}: {batch!r}')
+                raise RuntimeError(f'unexpected response for {path}: {response!r}')
             items.extend(batch)
             if len(batch) < int(params.get('per_page', 100)):
                 return items
@@ -420,6 +435,7 @@ class HttpGitHubApi:
             entries = self._paginate(
                 f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
                 {'head_sha': sha, 'per_page': 100},
+                key='workflow_runs',
             )
         except urllib.error.HTTPError as error:
             if error.code == 404:
@@ -442,27 +458,21 @@ class HttpGitHubApi:
     def recent_runs(self) -> list[WorkflowRun]:
         if self._recent_runs_cache is not None:
             return self._recent_runs_cache
-        runs: list[WorkflowRun] = []
-        page = 1
-        while page <= MAX_RUN_PAGES:
-            response = self._json(
-                f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
-                {'per_page': 100, 'page': page},
+        entries = self._paginate(
+            f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
+            {'per_page': 100},
+            key='workflow_runs',
+        )[: MAX_RUN_PAGES * 100]
+        runs = [
+            WorkflowRun(
+                id=run['id'],
+                head_sha=run.get('head_sha', ''),
+                conclusion=run.get('conclusion'),
+                path=run.get('path', ''),
+                html_url=run.get('html_url', ''),
             )
-            batch = response.get('workflow_runs', [])
-            runs.extend(
-                WorkflowRun(
-                    id=run['id'],
-                    head_sha=run.get('head_sha', ''),
-                    conclusion=run.get('conclusion'),
-                    path=run.get('path', ''),
-                    html_url=run.get('html_url', ''),
-                )
-                for run in batch
-            )
-            if len(batch) < 100:
-                break
-            page += 1
+            for run in entries
+        ]
         self._recent_runs_cache = runs
         return runs
 
