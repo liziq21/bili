@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 /// A reference to the remote playlist (Bilibili UGC season / collection) that a
@@ -13,4 +14,7 @@ final class const VideoPlaylistRef({
   required final String title,
   final String? coverUrl,
   final int? totalCount,
-});
+}) extends Equatable {
+  @override
+  List<Object?> get props => [id, title, coverUrl, totalCount];
+}

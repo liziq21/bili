@@ -107,7 +107,8 @@ final class BiliVideoDetailRemoteDataSource({
   /// 内容端点同时需要归属用户与合集 id。
   VideoPlaylistRef? _playlistOf(VideoDetailData detail) {
     final season = detail.ugcSeason;
-    if (season == null || season.id <= 0) return null;
+    // 列表标识需要归属 mid；缺它或非正数的合集无法请求内容端点。
+    if (season == null || season.id <= 0 || season.mid <= 0) return null;
     final total = season.sections.fold<int>(
       0,
       (sum, section) => sum + section.episodes.length,

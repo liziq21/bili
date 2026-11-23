@@ -315,6 +315,52 @@ void main() {
     });
 
     test(
+      'getVideoDetail ignores a ugc_season whose owner mid is non-positive',
+      () async {
+        final detailJson =
+            loadJson('video_detail.json') as Map<String, dynamic>;
+        final data = Map<String, dynamic>.from(
+          detailJson['data'] as Map<String, dynamic>,
+        );
+        data['ugc_season'] = {
+          'id': 777,
+          'title': '合集标题',
+          'cover': '//i0.hdslb.com/bfs/archive/cover.jpg',
+          'mid': 0,
+          'intro': 'intro',
+          'sections': [
+            {
+              'title': '第一节',
+              'id': 1,
+              'episodes': [
+                {'id': 1, 'aid': 11, 'cid': 21, 'title': 'e1', 'bvid': 'BV1a'},
+              ],
+            },
+          ],
+        };
+
+        final ugcNetwork = MockNetworkVideoDataSource(
+          videoDetailJson: {'data': data},
+          videoRelationJson:
+              loadJson('video_relation.json') as Map<String, dynamic>,
+          relatedVideosJson:
+              (loadJson('related_videos.json') as Map<String, dynamic>)['data']
+                  as List<dynamic>,
+          replyListJson: loadJson('reply_list.json') as Map<String, dynamic>,
+          replyReplyListJson:
+              loadJson('reply_reply_list.json') as Map<String, dynamic>,
+        );
+        final ugcDataSource = BiliVideoDetailRemoteDataSource(
+          network: ugcNetwork,
+        );
+
+        final result = await ugcDataSource.getVideoDetail('BV1GJ411x7vy');
+        expect(result.isSuccess(), isTrue);
+        expect((result as dynamic).success.playlist, isNull);
+      },
+    );
+
+    test(
       'getVideoDetail leaves playlist null when the video has no ugc_season',
       () async {
         final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
