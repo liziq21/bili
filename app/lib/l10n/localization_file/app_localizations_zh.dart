@@ -3717,9 +3717,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoTab => '视频';
 
   @override
-  String get recentSearches => '最近搜索';
-
-  @override
   String get clearRecentSearchHistory => '清空最近搜索历史';
 
   @override
@@ -3873,7 +3870,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get batchDeleteConfirm => '批量删除条目';
 
   @override
-  String batchDeleteNote(Object count) {
+  String batchDeleteNote(int count) {
     return '确定删除选中的 $count 个条目？此操作不可撤销。';
   }
 
@@ -3987,17 +3984,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get justNow => '刚刚';
 
   @override
-  String minutesAgo(String p1) {
+  String minutesAgo(int p1) {
     return '$p1 分钟前';
   }
 
   @override
-  String hoursAgo(String p1) {
+  String hoursAgo(int p1) {
     return '$p1 小时前';
   }
 
   @override
-  String daysAgo(String p1) {
+  String daysAgo(int p1) {
     return '$p1 天前';
   }
 
@@ -4080,7 +4077,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get topMaxRows => '顶部最大行数';
 
   @override
-  String topRowsValue(String p1) {
+  String topRowsValue(int p1) {
     return '$p1 行';
   }
 
@@ -4088,7 +4085,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bottomMaxRows => '底部最大行数';
 
   @override
-  String bottomRowsValue(String p1) {
+  String bottomRowsValue(int p1) {
     return '$p1 行';
   }
 
@@ -4425,12 +4422,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String yearsAgoCompact(String p1) {
+  String yearsAgoCompact(int p1) {
     return '$p1 年前';
   }
 
   @override
-  String monthsAgoCompact(String p1) {
+  String monthsAgoCompact(int p1) {
     return '$p1 个月前';
   }
 
@@ -4597,6 +4594,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get liveRoomEnded => '直播已结束';
+
+  @override
+  String get recentSearches => '最近搜索';
 
   @override
   String get searchHistory => '搜索历史';

@@ -6248,31 +6248,31 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 暂无可用推荐'**
+  /// **'No recommendations available from {p1}'**
   String sourceNoRecommendations(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'该数据源未提供首页 Feed'**
+  /// **'This source doesn\'t provide a home feed'**
   String get sourceNoHomeFeed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 加载失败'**
+  /// **'Failed to load {p1}'**
   String sectionLoadFailed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'请检查网络连接后重试'**
+  /// **'Check your network connection and try again'**
   String get checkNetworkRetry;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 暂无内容'**
+  /// **'No content in {p1}'**
   String sectionEmpty(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6284,91 +6284,91 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'切换数据源'**
+  /// **'Switch source'**
   String get switchDataSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'切换视频与媒体数据源'**
+  /// **'Switch video and media source'**
   String get switchVideoMediaSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'未知主播'**
+  /// **'Unknown streamer'**
   String get unknownStreamer;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'主播: {p1}'**
+  /// **'Streamer: {p1}'**
   String streamerLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'，'**
+  /// **', '**
   String get commaSeparator;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'继续加载'**
+  /// **'Load more'**
   String get continueLoading;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'没有更多了'**
+  /// **'No more items'**
   String get noMoreItems;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'搜索...'**
+  /// **'Search...'**
   String get searchHint;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 放入搜索框'**
+  /// **'Put {p1} in the search box'**
   String putIntoSearchBox(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加载失败，请稍后重试'**
+  /// **'Failed to load. Try again later'**
   String get loadFailedRetryLater;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加载失败，重试'**
+  /// **'Failed to load. Retry'**
   String get loadFailedRetry;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'更多数据加载失败，重试'**
+  /// **'Failed to load more. Retry'**
   String get moreLoadFailedRetry;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'未找到内容'**
+  /// **'Nothing found'**
   String get nothingFound;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'创作者'**
+  /// **'Creators'**
   String get creatorTab;
 
   /// Fallback text when a creator has no profile description
   ///
   /// In en, this message translates to:
-  /// **'暂无简介'**
+  /// **'No description available'**
   String get spaceDescriptionUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6377,28 +6377,22 @@ abstract class AppLocalizations {
   /// **'Video'**
   String get videoTab;
 
-  /// Header for recent search history list
-  ///
-  /// In en, this message translates to:
-  /// **'Recent searches'**
-  String get recentSearches;
-
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'清空最近搜索历史'**
+  /// **'Clear recent search history'**
   String get clearRecentSearchHistory;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'清空'**
+  /// **'Clear'**
   String get clear;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'搜索 \"{p1}\"'**
+  /// **'Search \"{p1}\"'**
   String searchQueryLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6410,13 +6404,13 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'筛选器'**
+  /// **'Filters'**
   String get filters;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'重置'**
+  /// **'Reset'**
   String get reset;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6428,13 +6422,13 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'选择日期范围'**
+  /// **'Select date range'**
   String get selectDateRange;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'本地库'**
+  /// **'Local library'**
   String get localLibrary;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6458,19 +6452,19 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'订阅'**
+  /// **'Subscribe'**
   String get subscribe;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'全部来源'**
+  /// **'All sources'**
   String get allSources;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'来源：{p1}'**
+  /// **'Source: {p1}'**
   String sourceLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6482,19 +6476,19 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'选择来源'**
+  /// **'Select source'**
   String get selectSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'删除播放列表？'**
+  /// **'Delete playlist?'**
   String get deletePlaylistConfirm;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'列表中的本地条目也会被删除。'**
+  /// **'Local entries in this list will also be deleted.'**
   String get deletePlaylistNote;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6512,25 +6506,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'该来源没有可添加的收藏'**
+  /// **'No favorites to add from this source'**
   String get noFavoritesFromSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'操作失败：{p1}'**
+  /// **'Operation failed: {p1}'**
   String operationFailed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'正在加载收藏'**
+  /// **'Loading favorites'**
   String get loadingFavorites;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'收藏加载失败'**
+  /// **'Failed to load favorites'**
   String get favoritesLoadFailed;
 
   /// Tooltip for exporting the bookmark list to the clipboard
@@ -6548,7 +6542,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'还没有收藏'**
+  /// **'No favorites yet'**
   String get noFavoritesYet;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6560,109 +6554,109 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'收藏操作'**
+  /// **'Favorite actions'**
   String get favoriteActions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'打开创作者'**
+  /// **'Open creator'**
   String get openCreator;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消收藏'**
+  /// **'Remove from favorites'**
   String get unfavorite;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'正在加载播放列表'**
+  /// **'Loading playlists'**
   String get loadingPlaylists;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播放列表加载失败'**
+  /// **'Failed to load playlists'**
   String get playlistLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'还没有播放列表'**
+  /// **'No playlists yet'**
   String get noPlaylistsYet;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'新建播放列表'**
+  /// **'New playlist'**
   String get newPlaylist;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'播放列表操作'**
+  /// **'Playlist actions'**
   String get playlistActions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'添加收藏'**
+  /// **'Add to favorites'**
   String get addFavorite;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'删除播放列表'**
+  /// **'Delete playlist'**
   String get deletePlaylist;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'条目加载失败'**
+  /// **'Failed to load items'**
   String get itemsLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'列表为空'**
+  /// **'The list is empty'**
   String get listEmpty;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'条目操作'**
+  /// **'Item actions'**
   String get itemActions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'上移'**
+  /// **'Move up'**
   String get moveUp;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'下移'**
+  /// **'Move down'**
   String get moveDown;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'移除这一次'**
+  /// **'Remove this entry'**
   String get removeThisEntry;
 
   /// Menu item to rename a local playlist
   ///
   /// In en, this message translates to:
-  /// **'重命名播放列表'**
+  /// **'Rename playlist'**
   String get renamePlaylist;
 
   /// Dialog title for renaming a playlist
   ///
   /// In en, this message translates to:
-  /// **'重命名播放列表'**
+  /// **'Rename playlist'**
   String get renamePlaylistConfirm;
 
   /// Menu item to batch-delete playlist items
@@ -6674,91 +6668,91 @@ abstract class AppLocalizations {
   /// Dialog title for batch-deleting selected items
   ///
   /// In en, this message translates to:
-  /// **'批量删除条目'**
+  /// **'Delete items in bulk'**
   String get batchDeleteConfirm;
 
   /// Dialog content for batch delete confirmation
   ///
   /// In en, this message translates to:
-  /// **'确定删除选中的 {count} 个条目？此操作不可撤销。'**
-  String batchDeleteNote(Object count);
+  /// **'Delete the {count, plural, =1{selected item} other{{count} selected items}}? This can\'t be undone.'**
+  String batchDeleteNote(int count);
 
   /// Button label to delete selected items in edit mode
   ///
   /// In en, this message translates to:
-  /// **'删除选中'**
+  /// **'Delete selected'**
   String get deleteSelected;
 
   /// Button to enter edit mode for playlist items
   ///
   /// In en, this message translates to:
-  /// **'编辑'**
+  /// **'Edit'**
   String get editMode;
 
   /// Button to exit edit mode
   ///
   /// In en, this message translates to:
-  /// **'完成'**
+  /// **'Done'**
   String get done;
 
   /// Search box placeholder for playlist items
   ///
   /// In en, this message translates to:
-  /// **'搜索条目...'**
+  /// **'Search items...'**
   String get itemsSearchHint;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'正在加载订阅'**
+  /// **'Loading subscriptions'**
   String get loadingSubscriptions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'订阅加载失败'**
+  /// **'Failed to load subscriptions'**
   String get subscriptionsLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'还没有订阅'**
+  /// **'No subscriptions yet'**
   String get noSubscriptionsYet;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'未分组'**
+  /// **'Ungrouped'**
   String get ungrouped;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'订阅操作'**
+  /// **'Subscription actions'**
   String get subscriptionActions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'设置分组'**
+  /// **'Set group'**
   String get setGroup;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消订阅'**
+  /// **'Unsubscribe'**
   String get unsubscribe;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'添加'**
+  /// **'Add'**
   String get add;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'来源'**
+  /// **'Source'**
   String get source;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6770,19 +6764,19 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'创建'**
+  /// **'Create'**
   String get create;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'分组名称'**
+  /// **'Group name'**
   String get groupName;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'留空表示未分组'**
+  /// **'Leave empty for ungrouped'**
   String get groupNameHint;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6800,79 +6794,79 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'观看历史'**
+  /// **'Watch history'**
   String get watchHistory;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'观看历史 · 已载入 {p1} 条'**
+  /// **'Watch history · {p1} loaded'**
   String watchHistoryLoadedCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} · 加载失败'**
+  /// **'{p1} · Failed to load'**
   String tabLoadFailed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加载更多'**
+  /// **'Load more'**
   String get loadMore;
 
   /// Migrated from hardcoded literal (PR #345 tooltip)
   ///
   /// In en, this message translates to:
-  /// **'正在加载历史记录...'**
+  /// **'Loading history...'**
   String get loadingHistory;
 
   /// Migrated from hardcoded literal (PR #345 tooltip)
   ///
   /// In en, this message translates to:
-  /// **'加载更多历史记录'**
+  /// **'Load more history'**
   String get loadMoreHistory;
 
   /// Migrated from hardcoded literal (PR #345 tooltip)
   ///
   /// In en, this message translates to:
-  /// **'已加载全部历史记录'**
+  /// **'All history loaded'**
   String get allHistoryLoaded;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'历史记录加载失败'**
+  /// **'Failed to load history'**
   String get historyLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'还没有观看记录'**
+  /// **'No watch history yet'**
   String get noWatchHistory;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'时长 {p1}'**
+  /// **'Duration {p1}'**
   String durationLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'观看于 {p1}'**
+  /// **'Watched {p1}'**
   String watchedAt(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'已看完'**
+  /// **'Finished'**
   String get finishedWatching;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'已观看 {p1}'**
+  /// **'Watched {p1}'**
   String watchedDuration(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6884,20 +6878,20 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 分钟前'**
-  String minutesAgo(String p1);
+  /// **'{p1, plural, =1{1 minute ago} other{{p1} minutes ago}}'**
+  String minutesAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 小时前'**
-  String hoursAgo(String p1);
+  /// **'{p1, plural, =1{1 hour ago} other{{p1} hours ago}}'**
+  String hoursAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 天前'**
-  String daysAgo(String p1);
+  /// **'{p1, plural, =1{1 day ago} other{{p1} days ago}}'**
+  String daysAgo(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -6908,43 +6902,43 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'添加到 {p1}'**
+  /// **'Add to {p1}'**
   String addToNamedPlaylist(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'添加到播放列表 {p1}'**
+  /// **'Add to playlist {p1}'**
   String addToNamedPlaylistLong(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'添加失败：{p1}'**
+  /// **'Failed to add: {p1}'**
   String addFailed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'创建或添加失败：{p1}'**
+  /// **'Failed to create or add: {p1}'**
   String createOrAddFailed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'请输入播放列表名称'**
+  /// **'Enter a playlist name'**
   String get playlistNameRequired;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'简介与相关'**
+  /// **'Info & related'**
   String get infoAndRelated;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'评论区 (1,429)'**
+  /// **'Comments (1,429)'**
   String get commentsCountTab;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -6968,86 +6962,86 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'弹幕设置'**
+  /// **'Danmaku settings'**
   String get danmakuSettingsTitle;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'显示弹幕'**
+  /// **'Show danmaku'**
   String get showDanmaku;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'在视频画面上显示时间轴弹幕'**
+  /// **'Show timeline danmaku over the video'**
   String get showTimelineDanmakuOnVideo;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'普通弹幕时长'**
+  /// **'Regular danmaku duration'**
   String get regularDanmakuDuration;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 秒'**
+  /// **'{p1} s'**
   String secondsValue(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'顶/底弹幕时长'**
+  /// **'Top/bottom danmaku duration'**
   String get topBottomDanmakuDuration;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 秒'**
+  /// **'{p1} s'**
   String secondsValueTopBottom(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'不透明度'**
+  /// **'Opacity'**
   String get opacity;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'字号'**
+  /// **'Font size'**
   String get fontSize;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'描边半径'**
+  /// **'Stroke radius'**
   String get strokeRadius;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'顶部最大行数'**
+  /// **'Max top rows'**
   String get topMaxRows;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 行'**
-  String topRowsValue(String p1);
+  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
+  String topRowsValue(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'底部最大行数'**
+  /// **'Max bottom rows'**
   String get bottomMaxRows;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 行'**
-  String bottomRowsValue(String p1);
+  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
+  String bottomRowsValue(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
@@ -7064,13 +7058,13 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'画质选择'**
+  /// **'Select quality'**
   String get qualitySelect;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'当前源只提供一个档位'**
+  /// **'This source offers only one quality'**
   String get singleQualityOnly;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7145,7 +7139,7 @@ abstract class AppLocalizations {
   /// **'Enter a duration from 1 to 1440 minutes.'**
   String get sleepTimerInvalidDuration;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Compact count unit for values >= 10,000. Kept as the Chinese 万 unit because call sites divide by 10,000 before formatting; an English K/M unit would need a different divisor (tracked separately).
   ///
   /// In en, this message translates to:
   /// **'{p1}万'**
@@ -7154,73 +7148,73 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'当前数据源暂不支持评论'**
+  /// **'This source doesn\'t support comments'**
   String get commentsUnsupportedSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'评论加载失败，请稍后重试'**
+  /// **'Failed to load comments. Try again later'**
   String get commentsLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'暂无评论'**
+  /// **'No comments yet'**
   String get noComments;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'点赞评论 {p1}'**
+  /// **'Like comment {p1}'**
   String likeCommentCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消点赞'**
+  /// **'Unlike comment'**
   String get unlikeComment;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'点赞评论'**
+  /// **'Like comment'**
   String get likeComment;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'收起回复'**
+  /// **'Collapse replies'**
   String get collapseReplies;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'查看 {p1} 条回复'**
+  /// **'View {p1} replies'**
   String viewReplyCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'评论回复暂不可用'**
+  /// **'Replies aren\'t available yet'**
   String get repliesUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'视频加载失败，请重试'**
+  /// **'Failed to load video. Try again'**
   String get videoLoadFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'暂无关联推荐'**
+  /// **'No related recommendations'**
   String get noRecommendations;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 播放'**
+  /// **'{p1} views'**
   String viewCountLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7232,25 +7226,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'2.4万 弹幕'**
+  /// **'24K danmaku'**
   String get danmakuCountSample;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'1天前'**
+  /// **'1 day ago'**
   String get oneDayAgoSample;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'原创技术'**
+  /// **'Original tech'**
   String get originalTech;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 关注者 · 每周硬核解析'**
+  /// **'{p1} followers · Weekly deep dives'**
   String subscribersWeeklyTagline(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7268,37 +7262,37 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消关注创作者'**
+  /// **'Unfollow creator'**
   String get unfollowCreator;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'关注创作者'**
+  /// **'Follow creator'**
   String get followCreator;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'已关注创作者 {p1}'**
+  /// **'Following creator {p1}'**
   String followingCreatorNamed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'关注创作者 {p1}'**
+  /// **'Follow creator {p1}'**
   String followCreatorNamed(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'已关注'**
+  /// **'Following'**
   String get following;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'关注'**
+  /// **'Follow'**
   String get follow;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7310,37 +7304,37 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'列表'**
+  /// **'List'**
   String get list;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加入播放列表'**
+  /// **'Add to playlist'**
   String get addToPlaylist;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加入本地播放列表'**
+  /// **'Add to local playlist'**
   String get addToLocalPlaylist;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'多源换源'**
+  /// **'Switch source'**
   String get switchSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'切换视频数据源'**
+  /// **'Switch video source'**
   String get switchVideoSource;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'自动切换至最优可用的解析线路'**
+  /// **'Automatically switch to the best available route'**
   String get autoSwitchBestRoute;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7352,25 +7346,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'分享视频'**
+  /// **'Share video'**
   String get shareVideo;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'分享多源视频链接'**
+  /// **'Share multi-source video link'**
   String get shareMultiSourceLink;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'弹幕开'**
+  /// **'Danmaku on'**
   String get danmakuStateOn;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'弹幕关'**
+  /// **'Danmaku off'**
   String get danmakuStateOff;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7382,31 +7376,31 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'关闭弹幕'**
+  /// **'Turn danmaku off'**
   String get danmakuActionOff;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'开启弹幕'**
+  /// **'Turn danmaku on'**
   String get danmakuActionOn;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'本期摘要 & 核心技术点'**
+  /// **'Summary & key takeaways'**
   String get synopsisSectionTitle;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'收起摘要'**
+  /// **'Collapse summary'**
   String get collapseSynopsis;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'展开完整大纲'**
+  /// **'Expand full outline'**
   String get expandSynopsis;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7418,13 +7412,13 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。'**
+  /// **'An in-depth look at why Flutter moved from Skia to Impeller for rendering. Covers shader precompilation, RenderPass reuse, direct Metal / Vulkan backend binding, and techniques for eliminating frame drops on mobile.'**
   String get sampleSynopsisFallback;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'章节'**
+  /// **'Chapters'**
   String get chapters;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7436,73 +7430,73 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'多源关联推荐'**
+  /// **'Multi-source recommendations'**
   String get multiSourceRecommendations;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'正在加入队列'**
+  /// **'Adding to queue'**
   String get addingToQueue;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加入播放队列'**
+  /// **'Add to play queue'**
   String get addToPlayQueue;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'已加入播放队列'**
+  /// **'Added to play queue'**
   String get addedToPlayQueue;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'加入队列失败'**
+  /// **'Failed to add to queue'**
   String get addToQueueFailed;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'取消{p1}'**
+  /// **'Cancel {p1}'**
   String cancelAction(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'上一首'**
+  /// **'Previous'**
   String get previousItem;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'下一首'**
+  /// **'Next'**
   String get nextItem;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'循环：关闭'**
+  /// **'Loop: off'**
   String get loopOff;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'单首循环'**
+  /// **'Repeat one'**
   String get loopOne;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'队列循环'**
+  /// **'Repeat queue'**
   String get loopQueue;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'最小化'**
+  /// **'Minimize'**
   String get minimize;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7556,7 +7550,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'返回'**
+  /// **'Back'**
   String get back;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7568,7 +7562,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'1080P 高码率'**
+  /// **'1080P high bitrate'**
   String get highBitrate1080;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7586,7 +7580,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'全屏切换'**
+  /// **'Toggle fullscreen'**
   String get fullscreenToggle;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7598,7 +7592,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'数据源不可用'**
+  /// **'Source unavailable'**
   String get sourceUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7649,7 +7643,7 @@ abstract class AppLocalizations {
   /// **'当前数据源不支持获取播放地址'**
   String get playUrlUnsupported;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Compact count unit for values >= 100,000,000. Kept as the Chinese 亿 unit because call sites divide by 100,000,000 before formatting; an English K/M unit would need a different divisor (tracked separately).
   ///
   /// In en, this message translates to:
   /// **'{p1}亿'**
@@ -7658,25 +7652,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 年前'**
-  String yearsAgoCompact(String p1);
+  /// **'{p1, plural, =1{1 year ago} other{{p1} years ago}}'**
+  String yearsAgoCompact(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 个月前'**
-  String monthsAgoCompact(String p1);
+  /// **'{p1, plural, =1{1 month ago} other{{p1} months ago}}'**
+  String monthsAgoCompact(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 观看 • {p2}'**
+  /// **'{p1} views • {p2}'**
   String viewsWithDate(String p1, String p2);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 观看'**
+  /// **'{p1} views'**
   String viewsCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7688,19 +7682,19 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'创作者: {p1}'**
+  /// **'Creator: {p1}'**
   String creatorLabel(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'时长 {p1}'**
+  /// **'Duration {p1}'**
   String durationPrefix(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'未知创作者'**
+  /// **'Unknown creator'**
   String get unknownCreator;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7712,25 +7706,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'更多选项'**
+  /// **'More options'**
   String get moreOptions;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 关注'**
+  /// **'{p1} followers'**
   String subscribersCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'{p1} 视频'**
+  /// **'{p1} videos'**
   String videosCount(String p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'直播中'**
+  /// **'Live now'**
   String get liveNow;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
@@ -7748,25 +7742,25 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'直播所属的数据源不可用'**
+  /// **'The live stream\'s source is unavailable'**
   String get liveSourceUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'创作者所属的数据源不可用'**
+  /// **'The creator\'s source is unavailable'**
   String get creatorSourceUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'视频所属的数据源不可用'**
+  /// **'The video\'s source is unavailable'**
   String get videoSourceUnavailable;
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'当前数据源暂不支持查看视频详情'**
+  /// **'This source doesn\'t support video details yet'**
   String get videoDetailSourceUnsupported;
 
   /// Video player placeholder slider progress label
@@ -7778,7 +7772,7 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'切换'**
+  /// **'Switch'**
   String get switchAction;
 
   /// Title and tooltip for the playback queue
@@ -7954,6 +7948,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stream ended'**
   String get liveRoomEnded;
+
+  /// Header for recent search history list
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get recentSearches;
 
   /// Header for search history section in suggestions
   ///

@@ -145,8 +145,7 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                   min: 1,
                   max: 6,
                   divisions: 5,
-                  valueLabel:
-                      l10n?.topRowsValue('${_settings.topMaxRows}') ?? '',
+                  valueLabel: l10n?.topRowsValue(_settings.topMaxRows) ?? '',
                   onChanged: (value) =>
                       _update(_settings.copyWith(topMaxRows: value.round())),
                 ),
@@ -157,7 +156,7 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                   max: 6,
                   divisions: 5,
                   valueLabel:
-                      l10n?.bottomRowsValue('${_settings.bottomMaxRows}') ?? '',
+                      l10n?.bottomRowsValue(_settings.bottomMaxRows) ?? '',
                   onChanged: (value) =>
                       _update(_settings.copyWith(bottomMaxRows: value.round())),
                 ),

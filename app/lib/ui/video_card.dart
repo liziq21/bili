@@ -53,17 +53,15 @@ class const VideoCard({
     final difference = now.difference(dateTime);
 
     if (difference.inDays >= 365) {
-      return l10n?.yearsAgoCompact('${(difference.inDays / 365).floor()}') ??
-          '';
+      return l10n?.yearsAgoCompact((difference.inDays / 365).floor()) ?? '';
     } else if (difference.inDays >= 30) {
-      return l10n?.monthsAgoCompact('${(difference.inDays / 30).floor()}') ??
-          '';
+      return l10n?.monthsAgoCompact((difference.inDays / 30).floor()) ?? '';
     } else if (difference.inDays >= 1) {
-      return l10n?.daysAgo('${difference.inDays}') ?? '';
+      return l10n?.daysAgo(difference.inDays) ?? '';
     } else if (difference.inHours >= 1) {
-      return l10n?.hoursAgo('${difference.inHours}') ?? '';
+      return l10n?.hoursAgo(difference.inHours) ?? '';
     } else if (difference.inMinutes >= 1) {
-      return l10n?.minutesAgo('${difference.inMinutes}') ?? '';
+      return l10n?.minutesAgo(difference.inMinutes) ?? '';
     } else {
       return l10n?.justNow ?? '';
     }
