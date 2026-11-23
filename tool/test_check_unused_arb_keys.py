@@ -82,10 +82,27 @@ class CodeOnlyTest(unittest.TestCase):
 
     def test_interpolated_literal_keeps_its_hole(self):
         # The hole is code: a key read inside it must still count.
-        self.assertIn('dead', arb._code_only("f('${dead}')"))
+        self.assertIn('alive', arb._code_only("f('${alive}')"))
+
+    def test_interpolated_literal_text_is_blanked(self):
+        # Only the hole is code; the surrounding text reads nothing.
+        blanked = arb._code_only("f('dead ${alive}')")
+        self.assertNotIn('dead', blanked)
+        self.assertIn('alive', blanked)
+
+    def test_short_interpolation_keeps_its_name(self):
+        blanked = arb._code_only("f('dead $alive')")
+        self.assertNotIn('dead', blanked)
+        self.assertIn('alive', blanked)
+
+    def test_escaped_dollar_is_not_interpolation(self):
+        # `\$` is literal text, so nothing in the literal is code.
+        blanked = arb._code_only("f('dead \\$alive')")
+        self.assertNotIn('dead', blanked)
+        self.assertNotIn('alive', blanked)
 
     def test_blanking_preserves_length(self):
-        source = "a // dead\nb /* x */ c 'y'"
+        source = "a // dead\nb /* x */ c 'y'\nd 'z ${w}'"
         self.assertEqual(len(arb._code_only(source)), len(source))
 
 

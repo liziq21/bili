@@ -10,10 +10,10 @@ upstream app, which is why the report exists as a script instead of a one-off
 grep.
 
 A key counts as referenced when its name appears as an identifier in the Dart
-*code* under the scanned roots. Comments and plain string literals are blanked
+*code* under the scanned roots. Comments and string literal text are blanked
 before matching, because a key is read by naming it (`l10n.key`) and a name
 written down in prose or in a literal reads nothing. Matching whole identifiers
-(not substrings) means `queue.clear()` does not keep the key `clear` alive.
+(not substrings) means `queue.clearAll()` does not keep the key `clear` alive.
 What remains is deliberately conservative — a key whose name collides with
 unrelated code is reported as referenced, never as unused — so the tool can
 never recommend deleting a key that something still reads.
@@ -65,17 +65,87 @@ def message_keys(path: Path) -> list[str]:
     return [key for key in data if not key.startswith('@')]
 
 
+def _interpolation_end(source: str, start: int) -> int:
+    """Return the index just past the `}` that closes `${` at *start*."""
+    depth = 1
+    i, n = start, len(source)
+    while i < n:
+        char = source[i]
+        if char in _QUOTES:
+            i += 1
+            while i < n and source[i] != char:
+                i += 2 if source[i] == '\\' else 1
+            i += 1
+            continue
+        if char == '{':
+            depth += 1
+        elif char == '}':
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    return n
+
+
+def _blank_literal(source: str, start: int, raw: bool) -> tuple[str, int]:
+    """Blank the literal at *start*, keeping `$name` / `${...}` holes as code.
+
+    Returns the replacement text and the index just past the literal. The
+    replacement keeps the literal's width so the result lines up with the
+    original source.
+    """
+    i = start + 1 if raw else start
+    quote = source[i]
+    closing = quote * 3 if source.startswith(quote * 3, i) else quote
+    i += len(closing)
+    pieces: list[str] = [' ' * (i - start)]
+    text: list[str] = []
+
+    def flush() -> None:
+        pieces.append(' ' * len(text))
+        text.clear()
+
+    while i < len(source):
+        if not raw and source[i] == '\\':
+            text.append(source[i : i + 2])
+            i += 2
+            continue
+        if source.startswith(closing, i):
+            break
+        if not raw and source[i] == '$':
+            following = source[i + 1 : i + 2]
+            if following == '{':
+                flush()
+                end = _interpolation_end(source, i + 2)
+                pieces.append(source[i:end])
+                i = end
+                continue
+            if following and (following.isalpha() or following in '_$'):
+                flush()
+                match = IDENTIFIER.match(source, i + 1)
+                end = match.end() if match else i + 1
+                pieces.append(source[i:end])
+                i = end
+                continue
+        text.append(source[i])
+        i += 1
+    flush()
+    end = min(i + len(closing), len(source))
+    pieces.append(' ' * (end - i))
+    return ''.join(pieces), end
+
+
 def _code_only(source: str) -> str:
-    """Return *source* with comments and plain string literals blanked out.
+    """Return *source* with comments and string literal text blanked out.
 
     A message key is referenced by naming it as an identifier (`l10n.key`), so a
-    mention inside a comment or inside a literal is not a reference. Blanking
+    mention inside a comment or inside literal text is not a reference. Blanking
     both keeps a stale mention from masking a dead key, which is the difference
     between "this key is still read" and "somebody once wrote its name down".
 
-    Interpolated literals are kept whole: their `${...}` holes are code, and a
-    key read inside one must still count. Blanking is length-preserving so
-    reported offsets, if ever added, still line up with the original text.
+    Interpolation holes are kept because they are code: a key read inside
+    `${...}` or after `$` must still count. Blanking is length-preserving so the
+    result lines up with the original source.
     """
     out: list[str] = []
     i, n = 0, len(source)
@@ -95,26 +165,8 @@ def _code_only(source: str) -> str:
             continue
         raw = char in 'rR' and i + 1 < n and source[i + 1] in _QUOTES
         if char in _QUOTES or raw:
-            start = i
-            if raw:
-                i += 1
-            quote = source[i]
-            triple = source.startswith(quote * 3, i)
-            closing = quote * 3 if triple else quote
-            i += len(closing)
-            interpolated = False
-            while i < n:
-                if not raw and source[i] == '\\':
-                    i += 2
-                    continue
-                if source.startswith(closing, i):
-                    i += len(closing)
-                    break
-                if source[i] == '$':
-                    interpolated = True
-                i += 1
-            literal = source[start:i]
-            out.append(literal if interpolated else ' ' * len(literal))
+            blanked, i = _blank_literal(source, i, raw)
+            out.append(blanked)
             continue
         out.append(char)
         i += 1
