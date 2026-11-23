@@ -228,6 +228,7 @@ TEST_MATRIX = {
         'packages/data/test/declarative_feed_data_source_test.dart',
         'packages/data/test/full_playlist_fetcher_test.dart',
         'packages/data/test/mapping_conformance_test.dart',
+        'packages/data/test/mapping_descriptor_validator_test.dart',
         'packages/data/test/remote_data_source_test.dart',
         'packages/youtube/test/youtube_test.dart',
         'packages/youtube/test/youtube_remote_data_sources_test.dart',

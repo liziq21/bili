@@ -9,4 +9,7 @@ final class const LiveRoomModel({
 }) {
   /// Version of the canonical live-room shape described by [LiveRoomModel].
   static const int schemaVersion = 1;
+
+  /// Canonical fields every live-room mapping must produce.
+  static const Set<String> requiredFields = {'id', 'title', 'url', 'isLive'};
 }

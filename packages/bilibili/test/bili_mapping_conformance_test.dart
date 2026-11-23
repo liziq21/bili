@@ -28,6 +28,22 @@ void main() {
     expect(biliPopularFeedDescriptor.schemaVersion, VideoModel.schemaVersion);
     expect(biliRankingFeedDescriptor.schemaVersion, VideoModel.schemaVersion);
   });
+
+  test('declarative descriptors satisfy the canonical video contract', () {
+    for (final descriptor in [
+      biliPopularFeedDescriptor,
+      biliRankingFeedDescriptor,
+      biliUserVideosDescriptor,
+    ]) {
+      expect(
+        validateFeedMappingDescriptor(
+          descriptor,
+          requiredFields: VideoModel.requiredFields,
+        ),
+        isEmpty,
+      );
+    }
+  });
 }
 
 Future<void> _expectConforms({

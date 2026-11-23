@@ -15,4 +15,7 @@ final class const VideoModel({
   /// Bump this when a field is removed or its meaning changes; declarative
   /// mapping descriptors declare the version they target.
   static const int schemaVersion = 1;
+
+  /// Canonical fields every video mapping must produce.
+  static const Set<String> requiredFields = {'id', 'title', 'url'};
 }
