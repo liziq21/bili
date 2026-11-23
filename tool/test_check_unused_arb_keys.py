@@ -13,6 +13,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -60,6 +61,34 @@ class CollectIdentifiersTest(unittest.TestCase):
             self.assertEqual(arb.collect_identifiers((Path(tmp) / 'nope',)), set())
 
 
+class CodeOnlyTest(unittest.TestCase):
+    def test_line_comment_is_blanked(self):
+        self.assertNotIn('dead', arb._code_only('a // dead\nb'))
+        self.assertIn('b', arb._code_only('a // dead\nb'))
+
+    def test_block_comment_is_blanked(self):
+        self.assertNotIn('dead', arb._code_only('a /* dead\nstill */ b'))
+        self.assertIn('b', arb._code_only('a /* dead\nstill */ b'))
+
+    def test_plain_string_literal_is_blanked(self):
+        self.assertNotIn('dead', arb._code_only("f('dead')"))
+        self.assertIn('f(', arb._code_only("f('dead')"))
+
+    def test_raw_string_literal_is_blanked(self):
+        self.assertNotIn('dead', arb._code_only(r"f(r'dead\n')"))
+
+    def test_triple_quoted_literal_is_blanked(self):
+        self.assertNotIn('dead', arb._code_only("f('''dead\nmore''')"))
+
+    def test_interpolated_literal_keeps_its_hole(self):
+        # The hole is code: a key read inside it must still count.
+        self.assertIn('dead', arb._code_only("f('${dead}')"))
+
+    def test_blanking_preserves_length(self):
+        source = "a // dead\nb /* x */ c 'y'"
+        self.assertEqual(len(arb._code_only(source)), len(source))
+
+
 class AnalyzeTest(unittest.TestCase):
     def test_reference_from_test_root_counts(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -69,6 +98,22 @@ class AnalyzeTest(unittest.TestCase):
             _write(root / 'test' / 'a_test.dart', 'expect(l10n.fromTest, "2");')
             report = arb.analyze((arb_file,), (root / 'lib', root / 'test'))[0]
             self.assertEqual(report.unused, ())
+
+    def test_comment_mention_is_not_a_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            arb_file = _write(root / 'app.arb', '{"dead": "1"}')
+            _write(root / 'lib' / 'a.dart', '// l10n.dead was removed\nvoid f() {}')
+            report = arb.analyze((arb_file,), (root / 'lib',))[0]
+            self.assertEqual(report.unused, ('dead',))
+
+    def test_literal_mention_is_not_a_reference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            arb_file = _write(root / 'app.arb', '{"dead": "1"}')
+            _write(root / 'lib' / 'a.dart', "const name = 'dead';")
+            report = arb.analyze((arb_file,), (root / 'lib',))[0]
+            self.assertEqual(report.unused, ('dead',))
 
     def test_unreferenced_key_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -160,6 +205,28 @@ class MainTest(unittest.TestCase):
             )
             self.assertEqual(code, 1)
             self.assertIn('file not found', output)
+
+    def test_empty_arb_selection_fails(self):
+        # A moved or renamed ARB leaves the default glob empty; that must not
+        # look like a clean audit.
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(arb, 'DEFAULT_ARB_FILES', ()):
+                code, output = self._run('--root', tmp)
+            self.assertEqual(code, 1)
+            self.assertIn('No ARB files selected', output)
+
+    def test_all_prints_referenced_and_unused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            arb_file = _write(root / 'app.arb', '{"dead": "1", "alive": "2"}')
+            _write(root / 'lib' / 'a.dart', 'Text(l10n.alive)')
+            code, output = self._run(
+                '--arb', str(arb_file), '--root', str(root / 'lib'),
+                '--allowlist', str(root / 'allow.txt'), '--all',
+            )
+            self.assertEqual(code, 0)
+            self.assertIn('referenced: alive', output)
+            self.assertIn('unused: dead', output)
 
 
 if __name__ == '__main__':

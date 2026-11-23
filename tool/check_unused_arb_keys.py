@@ -9,15 +9,18 @@ used". This repository inherited roughly 980 such keys from an unrelated
 upstream app, which is why the report exists as a script instead of a one-off
 grep.
 
-A key counts as referenced when its exact name appears as an identifier in a
-Dart file under the scanned roots. Matching whole identifiers (not substrings)
-means `clear` is not considered used by `queue.clear()`; matching is
-deliberately conservative — a key whose name happens to collide with unrelated
-code is reported as used, never as unused, so the tool can never recommend
-deleting a key that something still reads.
+A key counts as referenced when its name appears as an identifier in the Dart
+*code* under the scanned roots. Comments and plain string literals are blanked
+before matching, because a key is read by naming it (`l10n.key`) and a name
+written down in prose or in a literal reads nothing. Matching whole identifiers
+(not substrings) means `queue.clear()` does not keep the key `clear` alive.
+What remains is deliberately conservative — a key whose name collides with
+unrelated code is reported as referenced, never as unused — so the tool can
+never recommend deleting a key that something still reads.
 
 Usage:
   python3 tool/check_unused_arb_keys.py            # report unused keys
+  python3 tool/check_unused_arb_keys.py --all      # every key with its status
   python3 tool/check_unused_arb_keys.py --check    # exit 1 if any are unused
 """
 
@@ -40,6 +43,7 @@ DEFAULT_ROOTS = (APP_DIR / 'lib', APP_DIR / 'test')
 # every key look used.
 GENERATED_DIR = 'localization_file'
 IDENTIFIER = re.compile(r'[A-Za-z_$][A-Za-z0-9_$]*')
+_QUOTES = ('"', "'")
 
 
 @dataclass(frozen=True)
@@ -61,8 +65,64 @@ def message_keys(path: Path) -> list[str]:
     return [key for key in data if not key.startswith('@')]
 
 
+def _code_only(source: str) -> str:
+    """Return *source* with comments and plain string literals blanked out.
+
+    A message key is referenced by naming it as an identifier (`l10n.key`), so a
+    mention inside a comment or inside a literal is not a reference. Blanking
+    both keeps a stale mention from masking a dead key, which is the difference
+    between "this key is still read" and "somebody once wrote its name down".
+
+    Interpolated literals are kept whole: their `${...}` holes are code, and a
+    key read inside one must still count. Blanking is length-preserving so
+    reported offsets, if ever added, still line up with the original text.
+    """
+    out: list[str] = []
+    i, n = 0, len(source)
+    while i < n:
+        char = source[i]
+        if source.startswith('//', i):
+            end = source.find('\n', i)
+            end = n if end < 0 else end
+            out.append(' ' * (end - i))
+            i = end
+            continue
+        if source.startswith('/*', i):
+            end = source.find('*/', i + 2)
+            end = n if end < 0 else end + 2
+            out.append(' ' * (end - i))
+            i = end
+            continue
+        raw = char in 'rR' and i + 1 < n and source[i + 1] in _QUOTES
+        if char in _QUOTES or raw:
+            start = i
+            if raw:
+                i += 1
+            quote = source[i]
+            triple = source.startswith(quote * 3, i)
+            closing = quote * 3 if triple else quote
+            i += len(closing)
+            interpolated = False
+            while i < n:
+                if not raw and source[i] == '\\':
+                    i += 2
+                    continue
+                if source.startswith(closing, i):
+                    i += len(closing)
+                    break
+                if source[i] == '$':
+                    interpolated = True
+                i += 1
+            literal = source[start:i]
+            out.append(literal if interpolated else ' ' * len(literal))
+            continue
+        out.append(char)
+        i += 1
+    return ''.join(out)
+
+
 def collect_identifiers(roots: tuple[Path, ...]) -> set[str]:
-    """Return every identifier that appears in the Dart files under *roots*."""
+    """Return every identifier the Dart code under *roots* actually names."""
     identifiers: set[str] = set()
     for root in roots:
         if not root.is_dir():
@@ -70,9 +130,8 @@ def collect_identifiers(roots: tuple[Path, ...]) -> set[str]:
         for path in root.rglob('*.dart'):
             if GENERATED_DIR in path.parts:
                 continue
-            identifiers.update(
-                IDENTIFIER.findall(path.read_text(encoding='utf-8', errors='replace'))
-            )
+            source = path.read_text(encoding='utf-8', errors='replace')
+            identifiers.update(IDENTIFIER.findall(_code_only(source)))
     return identifiers
 
 
@@ -143,7 +202,18 @@ def main(argv: list[str] | None = None) -> int:
         action='store_true',
         help='exit 1 when an unreferenced key is not allowlisted',
     )
+    parser.add_argument(
+        '--all',
+        action='store_true',
+        help='print every key with its reference status, not just the unused ones',
+    )
     args = parser.parse_args(argv)
+
+    if not args.arb:
+        # An empty selection would report success without auditing anything, so
+        # a moved or renamed ARB must fail loudly instead.
+        print('No ARB files selected; nothing to audit.', file=sys.stderr)
+        return 1
 
     missing = [path for path in args.arb if not path.is_file()]
     if missing:
@@ -159,6 +229,11 @@ def main(argv: list[str] | None = None) -> int:
             f'{report.path}: {len(report.unused)} of {len(report.message_keys)} '
             f'message keys unreferenced ({len(offenders)} without an allowlist entry)'
         )
+        if args.all:
+            unused = set(report.unused)
+            for key in report.message_keys:
+                status = 'unused' if key in unused else 'referenced'
+                print(f'  {status}: {key}')
 
     keys = unused_keys(reports)
     if not keys:
