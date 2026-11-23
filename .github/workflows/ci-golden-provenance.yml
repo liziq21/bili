@@ -33,8 +33,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # 任何未预期的失败都必须判红：`|| true` 只能吞掉「grep 无匹配」，
-          # 不能把 API 失败当成「无 golden 改动」。
+          # 任何未预期的失败都必须判红：API 或 jq 失败不能被当成「无 golden 改动」。
           set -euo pipefail
           if [ -f tool/check_golden_provenance.py ]; then
             python3 tool/check_golden_provenance.py
@@ -43,10 +42,16 @@ jobs:
           # base 上还没有校验脚本（引入本门禁的那个 PR）。不能一律放行，否则
           # 任何缺少脚本的 base 分支都成了绕过口；只在 PR 没有 golden 改动时通过。
           # 删除 golden 也算改动：删掉基线可以掩盖渲染回归，因此不过滤 `removed`。
-          files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
-            --jq '.[].filename')
-          goldens=$(printf '%s\n' "$files" \
-            | grep -E '^app/test/golden/goldens/ci/.*\.png$' || true)
+          # 文件列表 API 最多返回 3000 条；达到上限时无法证明没有 golden 改动。
+          file_count=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
+            --jq 'length' | awk '{ total += $1 } END { print total + 0 }')
+          if [ "$file_count" -ge 3000 ]; then
+            echo "::error::pull request file list is truncated at 3000 entries; cannot verify golden changes"
+            exit 1
+          fi
+          # 匹配放在 jq 里：路径含换行符时逐行 grep 会漏掉，大小写也由 jq 统一处理。
+          goldens=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | select((.filename | startswith("app/test/golden/goldens/ci/")) and (.filename | ascii_downcase | endswith(".png"))) | .filename')
           if [ -n "$goldens" ]; then
             echo "::error::golden baseline changed, but the provenance checker is not on this base branch"
             echo "$goldens"
