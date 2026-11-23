@@ -20,6 +20,7 @@
 | 日期 | 主题 | 状态 | 记录 |
 |---|---|---|---|
 | 2026-11-23 | 可扩展源设计与 AI 通用映射可行性 | 已完成 | [source-extensibility-and-ai-mapping](2026-11-23-source-extensibility-and-ai-mapping.md) |
+| 2026-11-23 | LLM 映射与源扩展：2026-11 最新证据复核 | 已完成 | [llm-mapping-latest-evidence](2026-11-23-llm-mapping-latest-evidence.md) |
 
 ## 模板
 

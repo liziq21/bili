@@ -26,6 +26,16 @@
 - 必须同时提交：fixture 等价性测试；能由旧 adapter 生成 canonical golden 时，再加 conformance golden。
 - 不得在测试中访问网络。
 
+## 2026-11 复核补充
+
+- **schema 合法不等于任务正确**：除 JSON 结构外，必须断言精确 ID、URL、计数、时长、时间、分页和去重；不要把 schema validity 当作唯一验收指标。
+- **记录 provenance**：在 PR 描述或描述符旁注中记录生成模型、prompt 版本、生成日期、fixture 哈希、reviewer；模型升级不应改变描述符语义。
+- **字段顺序**：需要中间推理字段时，采用 reasoning-first 顺序；避免 answer-first，后者会显著伤害小模型。
+- **不要用运行时模型生成 ID/URL/计数**：这些必须走确定性 transform；运行时模型只考虑窄语义分类，并配 validator + fallback。
+- **记录 source schema 哈希**：源结构变化时先让 conformance 变红，再由构建期 agent 提 PR；不要自动合并。
+- **区分映射与传输**：`FeedMappingDescriptor` 只做 item → canonical model；endpoint、auth、签名、WBI、媒体流继续用 Dart adapter，不强行描述符化。
+- **不要放凭据**：API key/token 不得进入 prompt、日志、描述符或测试 fixture。
+
 ## 输出格式
 
 1. `FeedMappingDescriptor` 代码片段。

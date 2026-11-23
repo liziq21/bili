@@ -13,6 +13,8 @@
 4. **推荐数据是最适合确定性映射的场景**（结构化、字段少、量大），不是最需要 AI 的场景。当前 YouTube 源没有匿名推荐 Feed（`videoFeedDataSources` 为空），瓶颈是能力/端点，不是映射。
 5. **低风险 PoC 已验证声明式映射可行**：新增通用映射引擎与 B 站热门/排行/用户投稿描述符，用现有 fixture 对比旧 adapter，相关包共 159 个测试通过（data 23、bilibili 136，其中新增 25 个），并加入 fixture → canonical golden 的 conformance 门禁、描述符契约校验与 `schemaVersion`；workspace 严格分析和 test matrix 门禁均通过。
 
+> **后续复核（2026-11-23）**：模型与论文更新后的证据见 [`2026-11-23-llm-mapping-latest-evidence.md`](2026-11-23-llm-mapping-latest-evidence.md)。复核加强了“运行时 AI 不推荐、构建期 AI + 确定性描述符”的结论，并补充了 provenance、drift 检测、任务级 correctness、安全与模型评估协议。
+
 ## 2. 现状与证据
 
 ### 2.1 架构形状
