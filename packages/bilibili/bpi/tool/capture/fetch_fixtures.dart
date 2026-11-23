@@ -1050,6 +1050,25 @@ void _requirePlaylistList(Map<String, dynamic> json, String label) {
   if (!hasSeason) {
     throw FormatException('$label has no season with a valid season_id');
   }
+  final series = itemsLists['series_list'];
+  if (series is! List || series.isEmpty) {
+    throw FormatException(
+      '$label data.items_lists.series_list is not a non-empty list',
+    );
+  }
+  final hasSeries = series.any((item) {
+    if (item is! Map) return false;
+    final meta = item['meta'];
+    if (meta is! Map) return false;
+    return switch (meta['series_id']) {
+      final num value => value > 0,
+      final String value => (int.tryParse(value) ?? 0) > 0,
+      _ => false,
+    };
+  });
+  if (!hasSeries) {
+    throw FormatException('$label has no series with a valid series_id');
+  }
 }
 
 void _requirePlaylistContent(Map<String, dynamic> json, String label) {
