@@ -123,6 +123,7 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
             Divider(color: $styles.colors.outline.withValues(alpha: 0.2)),
             const _SynopsisSection(),
             const _ChaptersSection(),
+            const _PlaylistSection(),
             Gap($styles.insets.md),
             const _RecommendationsHeader(),
             Gap($styles.insets.xs),
@@ -919,6 +920,90 @@ class const _ChapterItem({
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 合集入口：视频属于某个 UGC 合集时展示，点击进入远端播放列表页。
+///
+/// 合集是否存在完全由服务源决定：不支持合集的源（如 YouTube）返回 null，
+/// 此区块整体隐藏，不影响详情页其余内容。
+class const _PlaylistSection() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final playlist = context.select<VideoBloc, VideoPlaylistRef?>(
+      (bloc) => bloc.state.videoDetail?.playlist,
+    );
+    if (playlist == null) {
+      return const SizedBox.shrink();
+    }
+    final totalCount = playlist.totalCount;
+    // `excludeSemantics: true` drops the InkWell's own semantics, so the tap
+    // action has to be declared on the Semantics node too; otherwise the entry
+    // is announced as a button that TalkBack/VoiceOver cannot activate.
+    void handleTap() {
+      HapticFeedback.lightImpact();
+      final source = context.read<MediaSource?>()?.id;
+      context.navigateToPlaylist(playlist.id, source: source);
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(top: $styles.insets.md),
+      child: Material(
+        color: $styles.colors.surface,
+        borderRadius: BorderRadius.circular($styles.corners.md),
+        clipBehavior: Clip.antiAlias,
+        child: Semantics(
+          button: true,
+          enabled: true,
+          label: '${l10n.playlistTitle}: ${playlist.title}',
+          onTap: handleTap,
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: handleTap,
+            child: Padding(
+              padding: EdgeInsets.all($styles.insets.sm),
+              child: Row(
+                children: [
+                  Icon(AppIcons.playlistPlay, color: $styles.colors.accentFill),
+                  const Gap(12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          playlist.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: $styles.text.bodyBold.copyWith(
+                            color: $styles.colors.onSurfaceStrong,
+                            fontSize: 13,
+                          ),
+                        ),
+                        if (totalCount != null) ...[
+                          const Gap(2),
+                          Text(
+                            l10n.playlistItemCount('$totalCount'),
+                            style: $styles.text.bodySmall.copyWith(
+                              color: $styles.colors.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    AppIcons.chevronRight,
+                    color: $styles.colors.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
