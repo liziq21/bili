@@ -6,8 +6,8 @@ import '../../bili_utils.dart';
 import 'bili_playlist_content_remote_data_source.dart';
 import 'bili_remote_data_source.dart';
 
-/// B 站频道页合集列表桥接：`NetworkUserDataSource.getUserPlaylists` →
-/// [ChannelPlaylistsRemoteDataSource]。
+/// B 站频道页合集列表桥接：`NetworkUserPlaylistDataSource.getUserPlaylists`
+/// → [ChannelPlaylistsRemoteDataSource]。
 ///
 /// `seasons_series_list` 同时返回合集（`seasons_list`）与系列
 /// （`series_list`）。本桥接只返回合集：系列详情走另一端点
@@ -17,7 +17,7 @@ import 'bili_remote_data_source.dart';
 /// 返回的 [PlaylistDetail] 只带列表头，`items` 为空；点开后由
 /// [BiliPlaylistContentRemoteDataSource] 按 `<mid>:<seasonId>` 拉取条目。
 final class const BiliChannelPlaylistsRemoteDataSource({
-  required final NetworkUserDataSource network,
+  required final NetworkUserPlaylistDataSource network,
 }) extends ChannelPlaylistsRemoteDataSource with BiliRemoteDataSource {
   @override
   Future<Result<Page<PlaylistDetail>, Exception>> fetchChannelPlaylists({

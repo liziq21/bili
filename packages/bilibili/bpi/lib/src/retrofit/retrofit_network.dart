@@ -213,7 +213,7 @@ abstract class BiliNetworkApi extends ChopperService {
   });
 
   @GET(path: WbiApiPath.userPlaylists)
-  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
     @query required int mid,
     @Query('page_num') int pageNum = 1,
     @Query('page_size') int pageSize = 30,
@@ -230,7 +230,8 @@ class BiliNetworkSearch
         NetworkVideoDataSource,
         NetworkBiliFeedDataSource,
         NetworkLiveDataSource,
-        NetworkUserDataSource {
+        NetworkUserDataSource,
+        NetworkUserPlaylistDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null,
@@ -254,6 +255,7 @@ class BiliNetworkSearch
         NetworkBiliUserVideosData: NetworkBiliUserVideosData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
         NetworkBiliPlaylistContentData: NetworkBiliPlaylistContentData.fromJson,
+        NetworkBiliPlaylistListData: NetworkBiliPlaylistListData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -739,7 +741,7 @@ class BiliNetworkSearch
   }
 
   @override
-  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
     required int mid,
     int pageNum = 1,
     int pageSize = 30,

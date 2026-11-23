@@ -6127,6 +6127,10 @@
   "@settingsChannel": {
     "description": "Settings group and subpage title - channel page tabs"
   },
+  "settingsSaveFailed": "Couldn't save the setting",
+  "@settingsSaveFailed": {
+    "description": "Snack bar shown when a settings toggle cannot be persisted"
+  },
   "homeConfigTitle": "Home",
   "@homeConfigTitle": {
     "description": "Home configuration editor page title"

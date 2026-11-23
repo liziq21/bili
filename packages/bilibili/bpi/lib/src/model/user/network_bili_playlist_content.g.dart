@@ -40,6 +40,20 @@ NetworkBiliPlaylistContentData _$NetworkBiliPlaylistContentDataFromJson(
   return val;
 }, fieldKeyMap: const {'itemsLists': 'items_lists'});
 
+NetworkBiliPlaylistListData _$NetworkBiliPlaylistListDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('NetworkBiliPlaylistListData', json, ($checkedConvert) {
+  final val = NetworkBiliPlaylistListData(
+    itemsLists: $checkedConvert(
+      'items_lists',
+      (v) => v == null
+          ? null
+          : NetworkBiliPlaylistItemsLists.fromJson(v as Map<String, dynamic>),
+    ),
+  );
+  return val;
+}, fieldKeyMap: const {'itemsLists': 'items_lists'});
+
 NetworkBiliPlaylistItemsLists _$NetworkBiliPlaylistItemsListsFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(

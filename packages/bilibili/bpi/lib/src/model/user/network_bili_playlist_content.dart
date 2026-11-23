@@ -14,11 +14,10 @@ class NetworkBiliPlaylistContentData {
     this.page,
   });
 
-  /// 列表端点（`seasons_series_list`）把合集/系列包在 `items_lists` 下。
+  /// 详情端点（`seasons_archives_list`）直接返回合集自身的条目与信息；
+  /// 某些按 series/season 分组的响应仍带 `items_lists`，保留作为回退。
   final NetworkBiliPlaylistItemsLists? itemsLists;
 
-  /// 详情端点（`seasons_archives_list`）直接返回合集自身的条目与信息，
-  /// 不再包一层 `items_lists`。
   final List<int>? aids;
   @NetworkBiliPlaylistArchiveConverter()
   final List<NetworkBiliPlaylistVideoItem>? archives;
@@ -27,6 +26,18 @@ class NetworkBiliPlaylistContentData {
 
   factory NetworkBiliPlaylistContentData.fromJson(Map<String, dynamic> json) =>
       _$NetworkBiliPlaylistContentDataFromJson(json);
+}
+
+/// 列表端点（`seasons_series_list`）的响应。
+@JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
+class NetworkBiliPlaylistListData {
+  const NetworkBiliPlaylistListData({this.itemsLists});
+
+  /// 合集与系列包在 `items_lists` 下。
+  final NetworkBiliPlaylistItemsLists? itemsLists;
+
+  factory NetworkBiliPlaylistListData.fromJson(Map<String, dynamic> json) =>
+      _$NetworkBiliPlaylistListDataFromJson(json);
 }
 
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
@@ -203,8 +214,12 @@ class NetworkBiliPlaylistSeriesConverter
       if (entry is! Map) continue;
       final meta = entry['meta'];
       if (meta is! Map) continue;
-      final seriesId = meta['series_id'];
-      if (seriesId is! num) continue;
+      final seriesId = switch (meta['series_id']) {
+        final num value => value.toInt(),
+        final String value => int.tryParse(value),
+        _ => null,
+      };
+      if (seriesId == null || seriesId <= 0) continue;
       items.add(
         NetworkBiliPlaylistSeries.fromJson(Map<String, dynamic>.from(entry)),
       );

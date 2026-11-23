@@ -4545,6 +4545,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsChannel => '频道';
 
   @override
+  String get settingsSaveFailed => '设置保存失败';
+
+  @override
   String get homeConfigTitle => '首页';
 
   @override

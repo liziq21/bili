@@ -7847,6 +7847,12 @@ abstract class AppLocalizations {
   /// **'Channel'**
   String get settingsChannel;
 
+  /// Snack bar shown when a settings toggle cannot be persisted
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setting'**
+  String get settingsSaveFailed;
+
   /// Home configuration editor page title
   ///
   /// In en, this message translates to:

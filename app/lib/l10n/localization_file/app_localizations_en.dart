@@ -4561,6 +4561,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChannel => 'Channel';
 
   @override
+  String get settingsSaveFailed => 'Couldn\'t save the setting';
+
+  @override
   String get homeConfigTitle => 'Home';
 
   @override

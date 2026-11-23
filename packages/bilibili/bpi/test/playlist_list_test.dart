@@ -18,7 +18,7 @@ void main() {
       final json = loadFixture();
       expect(json['code'], equals(0));
 
-      final data = NetworkBiliPlaylistContentData.fromJson(
+      final data = NetworkBiliPlaylistListData.fromJson(
         json['data'] as Map<String, dynamic>,
       );
 

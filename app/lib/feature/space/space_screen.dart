@@ -256,6 +256,7 @@ class const _SpaceContent({
           view: videosRepository == null
               ? const _ChannelVideosUnsupported()
               : BlocProvider<ChannelVideosCubit>(
+                  key: ValueKey('$mid-videos'),
                   create: (_) => ChannelVideosCubit(videosRepository, mid),
                   child: _ChannelVideosGrid(onVideo: onVideo),
                 ),
@@ -265,6 +266,7 @@ class const _SpaceContent({
         (
           label: l10n.channelTabPlaylists,
           view: BlocProvider<ChannelPlaylistsCubit>(
+            key: ValueKey('$mid-playlists'),
             create: (_) => ChannelPlaylistsCubit(playlistsRepository, mid),
             child: _ChannelPlaylistsList(onPlaylist: onPlaylist),
           ),

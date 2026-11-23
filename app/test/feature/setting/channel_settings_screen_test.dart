@@ -29,6 +29,15 @@ Widget _buildScreen(
   );
 }
 
+final class _FailingPreferencesDataSource({super.sharedPreferences})
+    extends PreferencesDataSource {
+  @override
+  Future<Result<void, Exception>> set<T>(
+    PreferencesKey<T> prefKey,
+    T? value,
+  ) async => Result.error(Exception('disk full'));
+}
+
 void main() {
   late PreferencesDataSource preferences;
 
@@ -116,6 +125,31 @@ void main() {
         (result as Success<String, Exception>).success,
         '{"playlists":false}',
       );
+    });
+
+    testWidgets('reverts the switch and reports a failed save', (tester) async {
+      // Given the channel settings page backed by a failing preferences store.
+      final failing = _FailingPreferencesDataSource(
+        sharedPreferences: SharedPreferencesAsync(),
+      );
+      addTearDown(failing.dispose);
+      await tester.pumpWidget(_buildScreen(failing));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizationsZh();
+      final switchFinder = find.widgetWithText(
+        SwitchListTile,
+        l10n.channelTabPlaylists,
+      );
+
+      // When turning the playlists switch off.
+      await tester.tap(switchFinder);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Then the optimistic change is reverted and the failure is surfaced.
+      expect(tester.widget<SwitchListTile>(switchFinder).value, isTrue);
+      expect(find.text(l10n.settingsSaveFailed), findsOneWidget);
     });
 
     testWidgets('reads a hidden tab from preferences', (tester) async {

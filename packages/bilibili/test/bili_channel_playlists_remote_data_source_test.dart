@@ -6,17 +6,17 @@ import 'package:bpi/bpi.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 
-final class _FakeNetworkUserDataSource({
-  final NetworkBiliPlaylistContentData? response,
+final class _FakeNetworkPlaylistDataSource({
+  final NetworkBiliPlaylistListData? response,
   final Object? error,
-}) implements NetworkUserDataSource {
+}) implements NetworkUserPlaylistDataSource {
   int requestCount = 0;
   int? requestedMid;
   int? requestedPageNum;
   int? requestedPageSize;
 
   @override
-  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
     required int mid,
     int pageNum = 1,
     int pageSize = 30,
@@ -28,42 +28,14 @@ final class _FakeNetworkUserDataSource({
     if (error != null) throw error!;
     return response!;
   }
-
-  @override
-  Future<NetworkBiliUserCardData> getUserCard({required int mid}) =>
-      throw UnimplementedError();
-
-  @override
-  Future<NetworkBiliUserArticlesData> getUserArticles({
-    required int mid,
-    int page = 1,
-    int pageSize = 30,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<NetworkBiliPlaylistContentData> getPlaylistContent({
-    required int mid,
-    int pageNum = 1,
-    int pageSize = 30,
-    bool sortReverse = false,
-    int? seasonId,
-  }) => throw UnimplementedError();
-
-  @override
-  Future<NetworkBiliUserVideosData> getUserVideos({
-    required int mid,
-    int page = 1,
-    int pageSize = 30,
-    String? order,
-  }) => throw UnimplementedError();
 }
 
 void main() {
-  NetworkBiliPlaylistContentData loadFixture() {
+  NetworkBiliPlaylistListData loadFixture() {
     final file = File('bpi/testing/playlist_list.json');
     expect(file.existsSync(), isTrue);
     final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
-    return NetworkBiliPlaylistContentData.fromJson(
+    return NetworkBiliPlaylistListData.fromJson(
       json['data'] as Map<String, dynamic>,
     );
   }
@@ -72,7 +44,7 @@ void main() {
     test(
       'maps the real seasons_series_list fixture to season headers',
       () async {
-        final network = _FakeNetworkUserDataSource(response: loadFixture());
+        final network = _FakeNetworkPlaylistDataSource(response: loadFixture());
         final source = BiliChannelPlaylistsRemoteDataSource(network: network);
 
         final result = await source.fetchChannelPlaylists(
@@ -103,7 +75,7 @@ void main() {
     test(
       'computes total pages from the combined season and series total',
       () async {
-        final network = _FakeNetworkUserDataSource(response: loadFixture());
+        final network = _FakeNetworkPlaylistDataSource(response: loadFixture());
         final source = BiliChannelPlaylistsRemoteDataSource(network: network);
 
         final result = await source.fetchChannelPlaylists(
@@ -120,7 +92,7 @@ void main() {
     );
 
     test('rejects a non-numeric channel id without a request', () async {
-      final network = _FakeNetworkUserDataSource(response: loadFixture());
+      final network = _FakeNetworkPlaylistDataSource(response: loadFixture());
       final source = BiliChannelPlaylistsRemoteDataSource(network: network);
 
       final result = await source.fetchChannelPlaylists(channelId: 'UC123');
@@ -130,7 +102,7 @@ void main() {
     });
 
     test('maps a network failure to an error result', () async {
-      final network = _FakeNetworkUserDataSource(
+      final network = _FakeNetworkPlaylistDataSource(
         error: Exception('network down'),
       );
       final source = BiliChannelPlaylistsRemoteDataSource(network: network);

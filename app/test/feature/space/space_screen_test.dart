@@ -500,6 +500,57 @@ void main() {
     expect(playlistsRepository.requestedPages, isEmpty);
   });
 
+  testWidgets('recreates the playlists cubit when the channel changes', (
+    tester,
+  ) async {
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(const CreatorProfile(id: 'creator-1', name: 'CodeCraft')),
+    );
+    final playlistsRepository = _FakeChannelPlaylistsRepository({
+      1: Result.success(
+        Page(number: 1, totalPages: 1, data: [_playlist('p1')]),
+      ),
+    });
+    final l10n = AppLocalizationsZh();
+    var mid = 'creator-1';
+    late StateSetter rebuild;
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelPlaylistsRepository>.value(
+            value: playlistsRepository,
+          ),
+        ],
+        child: MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SpaceScreen(mid: mid);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(l10n.channelTabPlaylists));
+    await tester.pumpAndSettle();
+    expect(playlistsRepository.requestedChannels, ['creator-1']);
+
+    mid = 'creator-2';
+    rebuild(() {});
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(l10n.channelTabPlaylists));
+    await tester.pumpAndSettle();
+
+    expect(playlistsRepository.requestedChannels, ['creator-1', 'creator-2']);
+  });
+
   testWidgets('subscribes and unsubscribes the creator locally', (
     tester,
   ) async {

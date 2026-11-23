@@ -476,7 +476,7 @@ final endpointSpecs = <EndpointSpec>[
     docCell: 'playlist_list.json',
     parse: (decoded) {
       final json = decoded as Map<String, dynamic>;
-      final data = NetworkBiliPlaylistContentData.fromJson(
+      final data = NetworkBiliPlaylistListData.fromJson(
         json['data'] as Map<String, dynamic>,
       );
       expect(data.itemsLists?.seasonsList, isNotEmpty);

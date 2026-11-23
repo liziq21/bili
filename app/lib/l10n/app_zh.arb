@@ -6127,6 +6127,10 @@
   "@settingsChannel": {
     "description": "Settings group and subpage title - channel page tabs"
   },
+  "settingsSaveFailed": "设置保存失败",
+  "@settingsSaveFailed": {
+    "description": "Snack bar shown when a settings toggle cannot be persisted"
+  },
   "homeConfigTitle": "首页",
   "@homeConfigTitle": {
     "description": "Home configuration editor page title"

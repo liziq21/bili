@@ -569,7 +569,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
   }
 
   @override
-  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
     required int mid,
     int pageNum = 1,
     int pageSize = 30,
@@ -590,8 +590,8 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
       parameters: $params,
       tag: tag,
     );
-    final Response<NetworkBiliPlaylistContentData> $response = await client
-        .send<NetworkBiliPlaylistContentData, NetworkBiliPlaylistContentData>(
+    final Response<NetworkBiliPlaylistListData> $response = await client
+        .send<NetworkBiliPlaylistListData, NetworkBiliPlaylistListData>(
           $request,
         );
     return $response.bodyOrThrow;
