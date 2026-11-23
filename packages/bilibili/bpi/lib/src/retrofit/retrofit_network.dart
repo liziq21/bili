@@ -212,6 +212,14 @@ abstract class BiliNetworkApi extends ChopperService {
     @tag String tag = 'WBI',
   });
 
+  @GET(path: WbiApiPath.userPlaylists)
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
+    @query required int mid,
+    @Query('page_num') int pageNum = 1,
+    @Query('page_size') int pageSize = 30,
+    @tag String tag = 'WBI',
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -222,7 +230,8 @@ class BiliNetworkSearch
         NetworkVideoDataSource,
         NetworkBiliFeedDataSource,
         NetworkLiveDataSource,
-        NetworkUserDataSource {
+        NetworkUserDataSource,
+        NetworkUserPlaylistDataSource {
   BiliNetworkSearch({http.Client? client, TokenStorage? storage})
     : _httpClient = client ?? http.Client(),
       _ownsHttpClient = client == null,
@@ -246,6 +255,7 @@ class BiliNetworkSearch
         NetworkBiliUserVideosData: NetworkBiliUserVideosData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
         NetworkBiliPlaylistContentData: NetworkBiliPlaylistContentData.fromJson,
+        NetworkBiliPlaylistListData: NetworkBiliPlaylistListData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
@@ -725,6 +735,33 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili playlist content network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliPlaylistListData> getUserPlaylists({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+  }) async {
+    try {
+      return await _networkApi.getUserPlaylists(
+        mid: mid,
+        pageNum: pageNum,
+        pageSize: pageSize,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili user playlists response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili user playlists network request failed.',
         cause: error,
       );
     }

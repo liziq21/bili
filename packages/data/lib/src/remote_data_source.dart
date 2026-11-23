@@ -233,3 +233,17 @@ abstract class const PlaylistContentRemoteDataSource()
     int pageSize = 30,
   });
 }
+
+/// 频道页合集（播放列表）列表能力。
+///
+/// 返回的 [PlaylistDetail] 只带列表头与条目数，`items` 为空；点开后再由
+/// [PlaylistContentRemoteDataSource] 拉取条目。
+abstract class const ChannelPlaylistsRemoteDataSource()
+    extends RemoteDataSource {
+  /// 按频道拉取合集分页。
+  Future<Result<Page<PlaylistDetail>, Exception>> fetchChannelPlaylists({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  });
+}

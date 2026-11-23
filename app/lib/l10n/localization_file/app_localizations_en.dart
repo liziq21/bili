@@ -4561,6 +4561,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChannel => 'Channel';
 
   @override
+  String get settingsSaveFailed => 'Couldn\'t save the setting';
+
+  @override
   String get homeConfigTitle => 'Home';
 
   @override
@@ -4765,6 +4768,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channelVideosEmpty => 'No videos yet';
+
+  @override
+  String get channelTabPlaylists => 'Playlists';
+
+  @override
+  String get channelPlaylistsEmpty => 'No playlists yet';
 
   @override
   String get sleepTimerActionExitPlayerLabel => 'Close player';

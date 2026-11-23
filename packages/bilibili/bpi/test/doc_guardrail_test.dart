@@ -471,6 +471,20 @@ final endpointSpecs = <EndpointSpec>[
     },
   ),
   EndpointSpec(
+    method: 'getUserPlaylists',
+    fixtures: ['playlist_list.json'],
+    docCell: 'playlist_list.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final data = NetworkBiliPlaylistListData.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      expect(data.itemsLists?.seasonsList, isNotEmpty);
+      expect(data.itemsLists?.page, isNotNull);
+      return data;
+    },
+  ),
+  EndpointSpec(
     method: 'parseFrames',
     fixtures: ['live_danmaku_frames.json'],
     docCell: 'live_danmaku_frames.json',

@@ -2,6 +2,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:http/http.dart';
 
+import 'data/source/bili_channel_playlists_remote_data_source.dart';
 import 'data/source/bili_feed_remote_data_source.dart';
 import 'data/source/bili_live_room_detail_remote_data_source.dart';
 import 'data/source/bili_danmaku_remote_data_source.dart';
@@ -39,6 +40,11 @@ class Bili() implements MediaSource {
   }
 
   NetworkUserDataSource get _userApi {
+    _networkSearch ??= BiliNetworkSearch(client: client);
+    return _networkSearch!;
+  }
+
+  NetworkUserPlaylistDataSource get _userPlaylistApi {
     _networkSearch ??= BiliNetworkSearch(client: client);
     return _networkSearch!;
   }
@@ -132,4 +138,8 @@ class Bili() implements MediaSource {
   @override
   PlaylistContentRemoteDataSource? get playlistContentDataSource =>
       BiliPlaylistContentRemoteDataSource(network: _userApi);
+
+  @override
+  ChannelPlaylistsRemoteDataSource? get channelPlaylistsDataSource =>
+      BiliChannelPlaylistsRemoteDataSource(network: _userPlaylistApi);
 }

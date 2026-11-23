@@ -22,6 +22,9 @@ typedef SpaceNavCallback = void Function(String mid);
 /// 搜索导航回调
 typedef SearchNavCallback = void Function(String query);
 
+/// 播放列表导航回调
+typedef PlaylistNavCallback = void Function(String playlistId);
+
 /// 创作者导航回调（媒体库专用，需显式 sourceId）
 typedef CreatorNavCallback = void Function(String sourceId, String creatorId);
 

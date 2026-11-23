@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:model/model.dart';
 import 'package:provider/provider.dart';
 
 import '../../datastore/preferences_data_source.dart';
@@ -47,16 +48,30 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
 
   Future<void> _setTabVisible(String tabId, bool visible) async {
     unawaited(HapticFeedback.selectionClick());
+    final previous = _settings;
     final updated = _settings.withTabVisible(tabId, visible);
     setState(() => _settings = updated);
     final preferences = _preferences;
-    if (preferences != null) await updated.save(preferences);
+    if (preferences == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await updated.save(preferences);
+    if (!mounted) return;
+    if (result case Error()) {
+      setState(() => _settings = previous);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.settingsSaveFailed),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final videosVisible = _settings.isVisible(ChannelTabs.videos);
+    final playlistsVisible = _settings.isVisible(ChannelTabs.playlists);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsChannel)),
       body: _loading
@@ -72,6 +87,17 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
                     value: videosVisible,
                     onChanged: (value) {
                       unawaited(_setTabVisible(ChannelTabs.videos, value));
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message:
+                      '${l10n.channelTabPlaylists}: ${playlistsVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
+                  child: SwitchListTile(
+                    title: Text(l10n.channelTabPlaylists),
+                    value: playlistsVisible,
+                    onChanged: (value) {
+                      unawaited(_setTabVisible(ChannelTabs.playlists, value));
                     },
                   ),
                 ),

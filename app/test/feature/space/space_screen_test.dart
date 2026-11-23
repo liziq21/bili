@@ -1,3 +1,4 @@
+import 'package:app/data/repository/channel_playlists_repository.dart';
 import 'package:app/data/repository/channel_videos_repository.dart';
 import 'package:app/data/repository/creator_profile_repository.dart';
 import 'package:app/data/repository/local_library_repository.dart';
@@ -91,6 +92,30 @@ class _FakeChannelVideosRepository(
 
 VideoModel _video(String id) =>
     VideoModel(id: id, title: 'Video $id', url: 'https://example.com/$id');
+
+class _FakeChannelPlaylistsRepository(
+  final Map<int, Result<Page<PlaylistDetail>, Exception>> responses,
+) implements ChannelPlaylistsRepository {
+  final List<String> requestedChannels = [];
+  final List<int> requestedPages = [];
+
+  @override
+  Future<Result<Page<PlaylistDetail>, Exception>> fetchPlaylists({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  }) async {
+    requestedChannels.add(channelId);
+    requestedPages.add(page);
+    return responses[page] ??
+        Result.success(
+          Page<PlaylistDetail>(number: page, totalPages: page, data: const []),
+        );
+  }
+}
+
+PlaylistDetail _playlist(String id, {int? total}) =>
+    PlaylistDetail(id: id, title: 'Playlist $id', totalCount: total);
 
 void main() {
   testWidgets('renders the creator profile header from repository data', (
@@ -346,6 +371,184 @@ void main() {
     expect(find.byType(TabBar), findsNothing);
     expect(find.byType(VideoCard), findsNothing);
     expect(videosRepository.requestedPages, isEmpty);
+  });
+
+  testWidgets('renders the playlists tab and opens a playlist on tap', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final playlistsRepository = _FakeChannelPlaylistsRepository({
+      1: Result.success(
+        Page(
+          number: 1,
+          totalPages: 1,
+          data: [
+            _playlist('creator-1:p1', total: 12),
+            _playlist('creator-1:p2', total: 3),
+          ],
+        ),
+      ),
+    });
+    final opened = <String>[];
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelPlaylistsRepository>.value(
+            value: playlistsRepository,
+          ),
+        ],
+        child: MaterialApp(
+          home: SpaceScreen(mid: 'creator-1', onPlaylist: opened.add),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.channelTabPlaylists), findsOneWidget);
+
+    await tester.tap(find.text(l10n.channelTabPlaylists));
+    await tester.pumpAndSettle();
+
+    expect(playlistsRepository.requestedChannels, ['creator-1']);
+    expect(playlistsRepository.requestedPages, [1]);
+    expect(find.text('Playlist creator-1:p1'), findsOneWidget);
+    expect(find.text(l10n.playlistItemCount('12')), findsOneWidget);
+
+    await tester.tap(find.text('Playlist creator-1:p1'));
+    await tester.pump();
+
+    expect(opened, ['creator-1:p1']);
+  });
+
+  testWidgets('does not show the playlists tab without a capability', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      RepositoryProvider<CreatorProfileRepository>.value(
+        value: profileRepository,
+        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.channelTabPlaylists), findsNothing);
+  });
+
+  testWidgets('hides the playlists tab without fetching when disabled', (
+    tester,
+  ) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    final preferences = PreferencesDataSource(
+      sharedPreferences: SharedPreferencesAsync(),
+    );
+    addTearDown(preferences.dispose);
+    await preferences.set(
+      PreferencesKey.channelTabVisibility,
+      '{"playlists":false}',
+    );
+
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final playlistsRepository = _FakeChannelPlaylistsRepository({
+      1: Result.success(
+        Page(
+          number: 1,
+          totalPages: 1,
+          data: [_playlist('creator-1:p1', total: 12)],
+        ),
+      ),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      Provider<PreferencesDataSource>.value(
+        value: preferences,
+        child: MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<CreatorProfileRepository>.value(
+              value: profileRepository,
+            ),
+            RepositoryProvider<ChannelPlaylistsRepository>.value(
+              value: playlistsRepository,
+            ),
+          ],
+          child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('CodeCraft'), findsOneWidget);
+    expect(find.text(l10n.channelTabPlaylists), findsNothing);
+    expect(playlistsRepository.requestedPages, isEmpty);
+  });
+
+  testWidgets('recreates the playlists cubit when the channel changes', (
+    tester,
+  ) async {
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(const CreatorProfile(id: 'creator-1', name: 'CodeCraft')),
+    );
+    final playlistsRepository = _FakeChannelPlaylistsRepository({
+      1: Result.success(
+        Page(number: 1, totalPages: 1, data: [_playlist('p1')]),
+      ),
+    });
+    final l10n = AppLocalizationsZh();
+    var mid = 'creator-1';
+    late StateSetter rebuild;
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelPlaylistsRepository>.value(
+            value: playlistsRepository,
+          ),
+        ],
+        child: MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              rebuild = setState;
+              return SpaceScreen(mid: mid);
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(l10n.channelTabPlaylists));
+    await tester.pumpAndSettle();
+    expect(playlistsRepository.requestedChannels, ['creator-1']);
+
+    mid = 'creator-2';
+    rebuild(() {});
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(l10n.channelTabPlaylists));
+    await tester.pumpAndSettle();
+
+    expect(playlistsRepository.requestedChannels, ['creator-1', 'creator-2']);
   });
 
   testWidgets('subscribes and unsubscribes the creator locally', (

@@ -4545,6 +4545,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsChannel => '频道';
 
   @override
+  String get settingsSaveFailed => '设置保存失败';
+
+  @override
   String get homeConfigTitle => '首页';
 
   @override
@@ -4743,6 +4746,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channelVideosEmpty => '暂无视频';
+
+  @override
+  String get channelTabPlaylists => '播放列表';
+
+  @override
+  String get channelPlaylistsEmpty => '暂无播放列表';
 
   @override
   String get sleepTimerActionExitPlayerLabel => '关闭播放器';

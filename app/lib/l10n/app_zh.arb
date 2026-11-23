@@ -6127,6 +6127,10 @@
   "@settingsChannel": {
     "description": "Settings group and subpage title - channel page tabs"
   },
+  "settingsSaveFailed": "设置保存失败",
+  "@settingsSaveFailed": {
+    "description": "Snack bar shown when a settings toggle cannot be persisted"
+  },
   "homeConfigTitle": "首页",
   "@homeConfigTitle": {
     "description": "Home configuration editor page title"
@@ -6412,6 +6416,14 @@
   "channelVideosEmpty": "暂无视频",
   "@channelVideosEmpty": {
     "description": "Shown on a creator page when the channel has no uploaded videos"
+  },
+  "channelTabPlaylists": "播放列表",
+  "@channelTabPlaylists": {
+    "description": "Creator-page tab that lists the channel's playlists (seasons)"
+  },
+  "channelPlaylistsEmpty": "暂无播放列表",
+  "@channelPlaylistsEmpty": {
+    "description": "Shown on a creator page when the channel has no playlists"
   },
   "sleepTimerActionExitPlayerLabel": "关闭播放器",
   "@sleepTimerActionExitPlayerLabel": {

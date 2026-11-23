@@ -91,6 +91,9 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
       YouTubePlaylistContentRemoteDataSource(_youtubeService);
 
   @override
+  ChannelPlaylistsRemoteDataSource? get channelPlaylistsDataSource => null;
+
+  @override
   Future<void> close() async {
     _youtubeService.close();
   }

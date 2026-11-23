@@ -28,6 +28,9 @@ abstract class const MediaSource() {
   /// 远端播放列表内容能力（可选）。
   PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
 
+  /// 频道页合集列表能力（可选）。
+  ChannelPlaylistsRemoteDataSource? get channelPlaylistsDataSource => null;
+
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => const [];
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => const [];
 

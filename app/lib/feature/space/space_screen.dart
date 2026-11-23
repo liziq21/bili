@@ -8,6 +8,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
+import '../../data/repository/channel_playlists_repository.dart';
 import '../../data/repository/channel_videos_repository.dart';
 import '../../data/repository/creator_profile_repository.dart';
 import '../../data/repository/local_library_repository.dart';
@@ -20,14 +21,19 @@ import '../../routing/navigation_callbacks.dart';
 import '../../ui/creator_subscribe_button.dart';
 import '../../ui/video_card.dart';
 import '../setting/app_settings.dart';
+import 'bloc/channel_playlists_cubit.dart';
 import 'bloc/channel_videos_cubit.dart';
 
 typedef _SubscribeToggle = Future<void> Function(CreatorProfile profile);
+
+/// 一个已挂载的频道 tab：标签文案与内容视图。
+typedef _ChannelTab = ({String label, Widget view});
 
 class const SpaceScreen({
   super.key,
   final VoidCallback? onBackClick,
   final VideoNavCallback? onVideo,
+  final PlaylistNavCallback? onPlaylist,
   required final String mid,
 }) extends StatefulWidget {
   @override
@@ -207,6 +213,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                     mid: widget.mid,
                     colorScheme: colorScheme,
                     onVideo: widget.onVideo,
+                    onPlaylist: widget.onPlaylist,
                     tabSettings: _tabSettings,
                     isSubscribed: _subscriptionReady ? _isSubscribed : null,
                     onToggleSubscribe: toggleSubscription,
@@ -221,14 +228,17 @@ class _SpaceScreenState() extends State<SpaceScreen> {
 
 /// 资料头 + 内容 tab。
 ///
-/// tab 按数据源真实能力生成：当前只有「视频」有频道级端点，直播 / 短视频 /
-/// 播放列表没有可用的频道列表接口，因此不挂空 tab。用户关闭某个 tab 后该 tab
-/// 及其内容都不挂载，因此也不会发起对应网络请求。
+/// tab 按数据源真实能力生成：视频 tab 在有 `ChannelVideosRepository` 时挂载
+/// 网格（无能力时保留一个说明页）；合集 tab 只在数据源提供
+/// `ChannelPlaylistsRepository` 时出现。直播 / 短视频没有可用的频道列表接口，
+/// 因此不挂空 tab。用户关闭某个 tab 后该 tab 及其内容都不挂载，因此也不会
+/// 发起对应网络请求。
 class const _SpaceContent({
   required final CreatorProfile profile,
   required final String mid,
   required final ColorScheme colorScheme,
   required final VideoNavCallback? onVideo,
+  required final PlaylistNavCallback? onPlaylist,
   required final ChannelTabSettings tabSettings,
   required final bool? isSubscribed,
   required final _SubscribeToggle? onToggleSubscribe,
@@ -237,56 +247,62 @@ class const _SpaceContent({
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     final videosRepository = context.read<ChannelVideosRepository?>();
+    final playlistsRepository = context.read<ChannelPlaylistsRepository?>();
 
-    if (!tabSettings.isVisible(ChannelTabs.videos)) {
-      return ListView(
-        children: [
-          _CreatorProfileHeader(
-            profile: profile,
-            colorScheme: colorScheme,
-            isSubscribed: isSubscribed,
-            onToggleSubscribe: onToggleSubscribe,
+    final tabs = <_ChannelTab>[
+      if (tabSettings.isVisible(ChannelTabs.videos))
+        (
+          label: l10n.videoTab,
+          view: videosRepository == null
+              ? const _ChannelVideosUnsupported()
+              : BlocProvider<ChannelVideosCubit>(
+                  key: ValueKey('$mid-videos'),
+                  create: (_) => ChannelVideosCubit(videosRepository, mid),
+                  child: _ChannelVideosGrid(onVideo: onVideo),
+                ),
+        ),
+      if (tabSettings.isVisible(ChannelTabs.playlists) &&
+          playlistsRepository != null)
+        (
+          label: l10n.channelTabPlaylists,
+          view: BlocProvider<ChannelPlaylistsCubit>(
+            key: ValueKey('$mid-playlists'),
+            create: (_) => ChannelPlaylistsCubit(playlistsRepository, mid),
+            child: _ChannelPlaylistsList(onPlaylist: onPlaylist),
           ),
-        ],
-      );
+        ),
+    ];
+
+    final header = _CreatorProfileHeader(
+      profile: profile,
+      colorScheme: colorScheme,
+      isSubscribed: isSubscribed,
+      onToggleSubscribe: onToggleSubscribe,
+    );
+
+    if (tabs.isEmpty) {
+      return ListView(children: [header]);
     }
 
     final tabBar = TabBar(
       isScrollable: true,
       tabAlignment: TabAlignment.start,
       onTap: (_) => HapticFeedback.selectionClick(),
-      tabs: [Tab(text: l10n.videoTab)],
+      tabs: [for (final tab in tabs) Tab(text: tab.label)],
     );
     final tabBarHeight = _tabBarHeight(context);
 
     return DefaultTabController(
-      length: 1,
+      length: tabs.length,
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          SliverToBoxAdapter(
-            child: _CreatorProfileHeader(
-              profile: profile,
-              colorScheme: colorScheme,
-              isSubscribed: isSubscribed,
-              onToggleSubscribe: onToggleSubscribe,
-            ),
-          ),
+          SliverToBoxAdapter(child: header),
           SliverPersistentHeader(
             pinned: true,
             delegate: _ChannelTabBar(tabBar: tabBar, height: tabBarHeight),
           ),
         ],
-        body: TabBarView(
-          children: [
-            if (videosRepository == null)
-              const _ChannelVideosUnsupported()
-            else
-              BlocProvider<ChannelVideosCubit>(
-                create: (_) => ChannelVideosCubit(videosRepository, mid),
-                child: _ChannelVideosGrid(onVideo: onVideo),
-              ),
-          ],
-        ),
+        body: TabBarView(children: [for (final tab in tabs) tab.view]),
       ),
     );
   }
@@ -349,10 +365,15 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
                   color: $styles.colors.accentFill,
                 ),
               ),
-              firstPageErrorIndicatorBuilder: (context) =>
-                  const _ChannelVideosError(),
+              firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
+                onRetry: () =>
+                    context.read<ChannelVideosCubit>().fetchNextPage(),
+              ),
               newPageErrorIndicatorBuilder: (context) =>
-                  const _ChannelVideosPageError(),
+                  _ChannelSectionPageError(
+                    onRetry: () =>
+                        context.read<ChannelVideosCubit>().fetchNextPage(),
+                  ),
               noItemsFoundIndicatorBuilder: (context) =>
                   const _ChannelVideosEmpty(),
             ),
@@ -369,7 +390,8 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
   }
 }
 
-class const _ChannelVideosError() extends StatelessWidget {
+class const _ChannelSectionError({required final VoidCallback onRetry})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
@@ -390,7 +412,7 @@ class const _ChannelVideosError() extends StatelessWidget {
           FilledButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              context.read<ChannelVideosCubit>().fetchNextPage();
+              onRetry();
             },
             child: Text(l10n.retry),
           ),
@@ -400,7 +422,8 @@ class const _ChannelVideosError() extends StatelessWidget {
   }
 }
 
-class const _ChannelVideosPageError() extends StatelessWidget {
+class const _ChannelSectionPageError({required final VoidCallback onRetry})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
@@ -410,7 +433,7 @@ class const _ChannelVideosPageError() extends StatelessWidget {
         child: TextButton.icon(
           onPressed: () {
             HapticFeedback.lightImpact();
-            context.read<ChannelVideosCubit>().fetchNextPage();
+            onRetry();
           },
           icon: const Icon(AppIcons.refresh, size: 18),
           label: Text(l10n.moreLoadFailedRetry),
@@ -463,6 +486,118 @@ class const _ChannelVideosUnsupported() extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class const _ChannelPlaylistsList({
+  required final PlaylistNavCallback? onPlaylist,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ChannelPlaylistsCubit, PagingState<int, PlaylistDetail>>(
+      builder: (context, state) => PagedListView<int, PlaylistDetail>(
+        state: state,
+        fetchNextPage: () =>
+            context.read<ChannelPlaylistsCubit>().fetchNextPage(),
+        builderDelegate: PagedChildBuilderDelegate<PlaylistDetail>(
+          itemBuilder: (context, playlist, index) => _ChannelPlaylistTile(
+            key: ValueKey(playlist.id),
+            playlist: playlist,
+            onTap: onPlaylist == null
+                ? null
+                : () => onPlaylist?.call(playlist.id),
+          ),
+          firstPageProgressIndicatorBuilder: (context) => Center(
+            child: CircularProgressIndicator(color: $styles.colors.accentFill),
+          ),
+          firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
+            onRetry: () =>
+                context.read<ChannelPlaylistsCubit>().fetchNextPage(),
+          ),
+          newPageErrorIndicatorBuilder: (context) => _ChannelSectionPageError(
+            onRetry: () =>
+                context.read<ChannelPlaylistsCubit>().fetchNextPage(),
+          ),
+          noItemsFoundIndicatorBuilder: (context) =>
+              const _ChannelPlaylistsEmpty(),
+        ),
+      ),
+    );
+  }
+}
+
+class const _ChannelPlaylistTile({
+  super.key,
+  required final PlaylistDetail playlist,
+  required final VoidCallback? onTap,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final total = playlist.totalCount;
+
+    return ListTile(
+      onTap: onTap,
+      leading: _cover(colorScheme),
+      title: Text(
+        playlist.title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: $styles.text.body.copyWith(color: colorScheme.onSurface),
+      ),
+      subtitle: total == null
+          ? null
+          : Text(
+              l10n.playlistItemCount('$total'),
+              style: $styles.text.bodySmall.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+    );
+  }
+
+  Widget _cover(ColorScheme colorScheme) {
+    final url = playlist.coverUrl;
+    final fallback = SizedBox(
+      width: 96,
+      height: 56,
+      child: Icon(AppIcons.videoLibrary, color: colorScheme.onSurfaceVariant),
+    );
+    if (url == null || url.isEmpty) return fallback;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular($styles.corners.sm),
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 96,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, url, error) => fallback,
+      ),
+    );
+  }
+}
+
+class const _ChannelPlaylistsEmpty() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(AppIcons.videoLibrary, color: $styles.colors.outline),
+          SizedBox(height: $styles.insets.xs),
+          Text(
+            l10n.channelPlaylistsEmpty,
+            style: $styles.text.body.copyWith(
+              color: $styles.colors.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

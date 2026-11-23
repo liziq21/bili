@@ -35,6 +35,7 @@
 | 直播弹幕服务器信息 | `GET /xlive/web-room/v1/index/getDanmuInfo` | 公共请求 | [Bilibili API Collect](https://github.com/SocialSisterYi/bilibili-API-collect) | `testing/danmaku_info.json` | 2026-10-30 |
 | 直播弹幕 WebSocket 连接 | `WSS /sub` (broadcastlv.chat.bilibili.com) | 公共请求 | Bilibili 实际 WebSocket 协议 / PipePipe | `testing/live_danmaku_frames.json` | 2026-11-04 |
 | 播放列表内容 | `GET /x/polymer/web-space/seasons_archives_list?mid&season_id&page_num&page_size&sort_reverse` | WBI | [Bilibili 实际公开 Web API](https://api.bilibili.com/x/polymer/web-space/seasons_archives_list) | `testing/playlist_content.json` | 2026-11-23 |
+| 用户合集/系列列表 | `GET /x/polymer/web-space/seasons_series_list?mid&page_num&page_size` | WBI | [Bilibili 实际公开 Web API](https://api.bilibili.com/x/polymer/web-space/seasons_series_list) | `testing/playlist_list.json` | 2026-11-23 |
 
 `getH5InfoByRoom` 和 `getRoomPlayInfo` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以对应的 fixture 为准。
 
