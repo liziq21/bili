@@ -17,6 +17,8 @@ import 'package:model/model.dart';
 /// dart run tool/mapping_conformance.dart --feed popular
 /// dart run tool/mapping_conformance.dart --feed ranking
 /// dart run tool/mapping_conformance.dart --feed popular --update
+/// dart run tool/mapping_conformance.dart --feed popular \
+///   --repair-request /tmp/popular-repair.json
 /// ```
 ///
 /// `--update` regenerates the golden from the legacy typed adapter, so the
@@ -28,6 +30,10 @@ Future<void> main(List<String> args) async {
   final goldenPath =
       _option(args, '--golden') ?? 'test/fixtures/declarative/$feed.json';
   final update = args.contains('--update');
+  final repairPath = _option(args, '--repair-request');
+  final descriptorPath =
+      _option(args, '--descriptor-file') ??
+      'lib/src/data/source/declarative/bili_feed_descriptors.dart';
 
   final fixture = _readJson(fixturePath);
   if (fixture is! Map<String, dynamic>) {
@@ -63,8 +69,27 @@ Future<void> main(List<String> args) async {
       'actual ${difference.actual}',
     );
   }
+  if (repairPath != null) {
+    final request = buildMappingRepairRequest(
+      feedId: feed,
+      fixturePath: fixturePath,
+      goldenPath: goldenPath,
+      descriptorFile: descriptorPath,
+      differences: differences,
+      requiredFields: VideoModel.requiredFields,
+      schemaVersion: _descriptorFor(feed).schemaVersion,
+    );
+    _writeJson(repairPath, request.toJson());
+    stderr.writeln('Wrote repair request: $repairPath');
+  }
   exitCode = 1;
 }
+
+FeedMappingDescriptor _descriptorFor(String feed) => switch (feed) {
+  'popular' => biliPopularFeedDescriptor,
+  'ranking' => biliRankingFeedDescriptor,
+  _ => throw ArgumentError.value(feed, 'feed', 'expected popular or ranking'),
+};
 
 Future<List<Map<String, Object?>>> _declarativePage(
   String feed,

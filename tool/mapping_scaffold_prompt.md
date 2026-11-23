@@ -60,6 +60,8 @@ flutter test test/                             # 含 Flutter 的包
 cd packages/bilibili
 dart run tool/mapping_conformance.dart --feed <feed>
 dart run tool/mapping_conformance.dart --feed <feed> --update  # 仅从旧 adapter 重录 golden
+dart run tool/mapping_conformance.dart --feed <feed> --repair-request /tmp/repair.json
+dart run tool/mapping_eval.dart --golden <golden.json> --candidate <candidate.json>
 
 # 仓库根目录
 python3 tool/test_matrix.py --check
@@ -77,6 +79,8 @@ python3 tool/test_matrix.py --check
 - [ ] fixture 等价性测试逐字段比较，不只比较数量。
 - [ ] conformance golden 由旧 adapter 生成，不是由声明式引擎自证。
 - [ ] 没有新增运行时模型调用、网络测试或手写 golden。
+- [ ] 如使用修复请求，候选仍通过 validator/conformance/任务级测试，且没有直接改 golden。
+- [ ] 如引入语义分类，使用 `ValidatedSemanticClassifier` 的 allowlist + fallback，且不生成确定性字段。
 
 ## 提示模板
 

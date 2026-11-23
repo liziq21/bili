@@ -6,7 +6,17 @@ final class const MappingDifference({
   required final String path,
   required final Object? expected,
   required final Object? actual,
-});
+  final bool expectedMissing = false,
+  final bool actualMissing = false,
+}) {
+  Map<String, Object?> toJson() => {
+    'path': path,
+    'expected': expectedMissing ? null : _jsonSafe(expected),
+    'actual': actualMissing ? null : _jsonSafe(actual),
+    'expectedMissing': expectedMissing,
+    'actualMissing': actualMissing,
+  };
+}
 
 /// Returns every difference between [expected] and [actual], in traversal order.
 ///
@@ -29,7 +39,12 @@ void _diff(
     final keys = <Object?>{...expected.keys, ...actual.keys};
     for (final key in keys) {
       final childPath = key is String ? '$path.$key' : '$path[$key]';
-      _diff(expected[key], actual[key], childPath, differences);
+      _diff(
+        expected.containsKey(key) ? expected[key] : _missing,
+        actual.containsKey(key) ? actual[key] : _missing,
+        childPath,
+        differences,
+      );
     }
     return;
   }
@@ -51,9 +66,29 @@ void _diff(
 
   if (expected != actual) {
     differences.add(
-      MappingDifference(path: path, expected: expected, actual: actual),
+      MappingDifference(
+        path: path,
+        expected: expected,
+        actual: actual,
+        expectedMissing: identical(expected, _missing),
+        actualMissing: identical(actual, _missing),
+      ),
     );
   }
 }
 
 const Object _missing = Object();
+
+Object? _jsonSafe(Object? value) {
+  if (value == null || value is num || value is bool || value is String) {
+    return value;
+  }
+  if (value is List) return [for (final item in value) _jsonSafe(item)];
+  if (value is Map) {
+    return {
+      for (final entry in value.entries)
+        entry.key.toString(): _jsonSafe(entry.value),
+    };
+  }
+  return value.toString();
+}

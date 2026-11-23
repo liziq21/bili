@@ -195,3 +195,74 @@ LLM 输出必须当作不可信输入：不得直接执行、不得直接合并�
 - [ ] provenance 完整，fixture/schema 哈希匹配。
 - [ ] conformance 与任务级断言通过。
 - [ ] 没有凭据、用户文案或运行时模型调用。
+
+## 10. 修复请求 harness
+
+conformance 失败时，CLI 可以生成确定性的修复请求，供构建期 agent 使用：
+
+```bash
+cd packages/bilibili
+dart run tool/mapping_conformance.dart --feed popular \
+  --repair-request /tmp/popular-repair.json
+```
+
+请求包含 feed id、fixture/golden 路径、描述符文件、目标 `schemaVersion`、`requiredFields` 和逐条差异（含 `expectedMissing` / `actualMissing`）。它不包含模型输出，也不包含凭据。
+
+使用规则：
+
+- 请求只是输入；agent 必须按 `tool/mapping_scaffold_prompt.md` 产出候选描述符。
+- 候选仍须通过 validator、conformance、任务级测试。
+- 不得让 agent 直接改 golden 或自动合并。
+- 修复后更新 provenance 哈希。
+
+## 11. 语义分类边界
+
+运行时模型只用于**窄语义分类**，例如把标题/标签归入固定 allowlist。实现放在 `packages/data/lib/src/semantic/semantic_classifier.dart`：
+
+```dart
+final classifier = ValidatedSemanticClassifier(
+  primary: modelBackedClassifier, // 外部 adapter；本仓库不内置网络/模型调用
+  fallback: KeywordSemanticClassifier(keywords: {...}),
+);
+```
+
+约束：
+
+- `primary` 必须只返回 `labels` 中的值；`ValidatedSemanticClassifier` 会校验并 fallback。
+- 超长输入、异常、未知 label 都走 fallback。
+- 模型不得生成 ID、URL、计数、时长、时间或分页。
+- 模型 adapter 不得读取凭据；不得在测试中访问网络。
+- 分类结果只作为建议，调用方仍要处理 `Result.error`。
+
+## 12. 模型评测 harness
+
+任何模型/prompt 的候选 canonical 输出都可以离线评分：
+
+```bash
+cd packages/bilibili
+dart run tool/mapping_eval.dart \
+  --golden test/fixtures/declarative/popular.json \
+  --candidate /tmp/popular-candidate.json \
+  --fail-on-diff
+```
+
+报告包含 `exactItems`、`itemExactMatchRate`、`matchedFields`、`fieldExactMatchRate`、`passes` 和逐条差异。
+
+季度复核协议：
+
+1. 固定一组已提交 golden（覆盖不同源、分页形状、空页、失败 envelope）。
+2. 用候选模型/prompt 生成候选 JSON；不在 CI 中调用模型。
+3. 用 `mapping_eval.dart` 打分，记录模型、prompt 版本、日期、分数。
+4. 只有分数不下降且 conformance/任务级测试通过，才更新描述符。
+5. 评测记录写入 `docs/research/` 的对应研究文档或后续记录。
+
+## 13. 实现状态
+
+| 能力 | 位置 |
+|---|---|
+| provenance / fingerprint | `mapping_fingerprint.dart`、`mapping_descriptor.dart` |
+| validator | `mapping_descriptor_validator.dart`、`source_descriptor.dart` |
+| 声明式 feed / cursor 分页 | `declarative_feed_data_source.dart` |
+| conformance / repair request | `packages/bilibili/tool/mapping_conformance.dart` |
+| 模型评测 | `mapping_eval.dart`、`packages/bilibili/tool/mapping_eval.dart` |
+| 语义分类 port + fallback | `semantic_classifier.dart` |

@@ -250,13 +250,20 @@ python3 tool/test_matrix.py --check                                             
 
 ### 6.3 限制
 
-- 引擎目前只覆盖“简单 JSON feed”：不处理签名、WBI、continuation token、媒体流、复杂 renderer 树；这些继续用 Dart adapter。分页已支持布尔 `hasMore` 与 total count，continuation token 未支持。
+- 引擎目前覆盖“简单 JSON feed”：支持布尔 `hasMore`、total count、continuation token 分页；仍不处理签名、WBI、媒体流、复杂 renderer 树，这些继续用 Dart adapter。
 - `tool/mapping_conformance.dart` 已实现，但尚未接入独立的 CI job；当前由 `packages/bilibili` 的测试套件执行同一 conformance 检查。
-- `tool/mapping_scaffold_prompt.md` 已给出构建期 LLM 的提示与评审清单，但还没有自动化的“生成 → 校验 → 提 PR”流水线；本次只验证确定性的校验/测试端。
-- LLM 生成描述符的流水线尚未实现；本次只验证“确定性端”可行。
+- `tool/mapping_scaffold_prompt.md` 已给出构建期 LLM 的提示与评审清单，并有 `--repair-request` 与 `mapping_eval.dart` 两个确定性 harness；仍未实现自动化的“生成 → 校验 → 提 PR”流水线。
+- LLM 生成描述符的流水线尚未实现；本次只验证“确定性端”可行。P0-P2 已把校验、漂移检测、修复请求、语义分类 port 与离线评测落地，但模型调用仍不在仓库内。
 - 三个 feed 的 PoC 仍然引入了共享引擎代码；在 3 个源的规模上，代码量不一定下降。收益来自第 N 个简单源的边际成本：第三个 feed 主要新增一份字段表 + 描述符 + 一个等价性测试，引擎只为 total-count 分页增加了约 20 行。
 - 用户投稿是 mapping-only PoC，尚未接入生产 capability；它用于验证不同 item 形状与分页语义，不代表推荐流已经全部迁移。
 - 跨源聚合的 `(sourceId, id)` 复合键尚未引入；`schemaVersion` 已加入 descriptor 与 canonical model，但还没有迁移/升级策略。
+
+### 6.4 P0-P2 落地记录（2026-11-23）
+
+- **P0 已落地**（`ff365bc`）：`MappingProvenance` + `fingerprintJson` 记录 fixture/schema 哈希；validator 校验 provenance；Bili 三个描述符 pin 当前 fixture；conformance 增加精确 ID/URL/计数/日期/时长/分页/去重断言；声明式 feed 可按 identity 去重。
+- **P1 已落地**（`fce37fe`）：`SourceDescriptor` / auth / pagination / rate-limit 模型与 validator；`continuationTokenPath` + `Page.nextCursor` + `fetchFeedPage(cursor:)`；`FieldMapping.description/examples`；`docs/source-descriptors.md` 成为规范性作者指南。
+- **P2 已落地**：`MappingRepairRequest` 与 conformance `--repair-request`；`MappingEvalReport` 与 `tool/mapping_eval.dart`；`SemanticClassifier` port、`KeywordSemanticClassifier` fallback、`ValidatedSemanticClassifier` allowlist/异常 fallback。
+- 验证：data 48 tests、bilibili 139 tests、app 800 tests、tool 109 tests；`python3 tool/test_matrix.py --check` 182/182；根 `flutter analyze --fatal-infos --fatal-warnings` 通过；popular/ranking conformance 通过。
 
 ## 7. 未决问题
 
@@ -264,9 +271,9 @@ python3 tool/test_matrix.py --check                                             
 - 是否把 `tool/mapping_conformance.dart` 接入独立 CI job，还是继续由包测试套件承担？
 - 是否把所有源的描述符都纳入 `validateFeedMappingDescriptor` 的 CI 门禁？
 - 是否为跨源聚合引入 `(sourceId, id)` 复合键？
-- 是否需要为 continuation token 分页增加描述符字段？
 - 是否把用户投稿的声明式映射接入生产 capability，还是保持 mapping-only PoC？
-- 运行时 LLM 兜底是否需要，以及如何在“测试/CI 不联网”的约束下评测？
+- 运行时 LLM 兜底是否需要，以及如何在“测试/CI 不联网”的约束下评测？当前只提供 port、validator、fallback 与离线 eval，不内置模型调用。
+- 是否把 `MappingRepairRequest` 接到外部 agent 的自动 PR 流程，还是保持人工触发？
 - `app/AGENTS.md` 引用的 `docs/source-injection.md` 在当前 checkout 中不存在；源注入契约文档需要补回。
 
 ## 8. 参考资料
@@ -282,6 +289,8 @@ python3 tool/test_matrix.py --check                                             
 - [`packages/youtube/lib/src/data/source/search/youtube_video_search_remote_data_source.dart`](../../packages/youtube/lib/src/data/source/search/youtube_video_search_remote_data_source.dart) — 相对日期、缩写计数、时长解析的现有实现。
 - [`packages/bilibili/bpi/testing/popular.json`](../../packages/bilibili/bpi/testing/popular.json)、[`ranking.json`](../../packages/bilibili/bpi/testing/ranking.json) — PoC 使用的真实 fixture。
 - [`packages/data/lib/src/mapping/`](../../packages/data/lib/src/mapping/) — 本次 PoC 的通用映射引擎。
+- [`docs/source-descriptors.md`](../source-descriptors.md) — P1 落地的规范性作者指南（分页、provenance、validator、repair/eval）。
+- [`packages/bilibili/tool/mapping_eval.dart`](../../packages/bilibili/tool/mapping_eval.dart) — P2 的离线模型评测 harness。
 - [`packages/bilibili/lib/src/data/source/declarative/`](../../packages/bilibili/lib/src/data/source/declarative/) — 本次 PoC 的 B 站描述符。
 
 ### 外部研究（不自动构成本仓库规则）
