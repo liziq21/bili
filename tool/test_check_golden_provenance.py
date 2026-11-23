@@ -32,12 +32,18 @@ class FakeApi:
         parents: dict[str, list[str]] | None = None,
         runs: dict[str, list[provenance.WorkflowRun]] | None = None,
         artifacts: dict[int, dict[str, str] | None] | None = None,
+        file_blobs: dict[tuple[str, str], str] | None = None,
+        recent: list[provenance.WorkflowRun] | None = None,
+        ancestor_pairs: set[tuple[str, str]] | None = None,
     ) -> None:
         self.files = files or []
         self.commits = commits or {}
         self._parents = parents or {}
         self.runs = runs or {}
         self.artifacts = artifacts or {}
+        self.file_blobs = file_blobs or {}
+        self.recent = recent or []
+        self.ancestor_pairs = ancestor_pairs or set()
         self.artifact_requests: list[int] = []
         self.run_requests: list[str] = []
 
@@ -54,6 +60,17 @@ class FakeApi:
         self.run_requests.append(sha)
         return self.runs.get(sha, [])
 
+    def recent_runs(self) -> list[provenance.WorkflowRun]:
+        return self.recent
+
+    def is_ancestor(self, ancestor: str, descendant: str) -> bool:
+        if ancestor == descendant:
+            return True
+        return (ancestor, descendant) in self.ancestor_pairs
+
+    def file_blob(self, path: str, ref: str) -> str | None:
+        return self.file_blobs.get((path, ref))
+
     def artifact_blobs(self, run_id: int) -> dict[str, str] | None:
         self.artifact_requests.append(run_id)
         return self.artifacts.get(run_id)
@@ -69,8 +86,12 @@ def _run(run_id: int = 1, conclusion: str | None = 'success') -> provenance.Work
     )
 
 
-def _problems(api: FakeApi, depth: int = provenance.ANCESTOR_DEPTH):
-    return provenance.check_provenance(api, 1, 'head', depth).problems
+def _problems(
+    api: FakeApi,
+    depth: int = provenance.ANCESTOR_DEPTH,
+    base: str | None = None,
+):
+    return provenance.check_provenance(api, 1, 'head', base, depth).problems
 
 
 def _golden(path: str = GOLDEN, blob: str = MATCHING_BLOB,
@@ -231,6 +252,65 @@ class FindUnprovenancedTest(unittest.TestCase):
         problems = _problems(api)
         self.assertEqual(len(problems), 1)
         self.assertIn('uploaded these exact bytes', problems[0].reason)
+
+    def test_run_that_did_not_change_the_file_does_not_prove(self):
+        """The artifact archives the whole directory; an unchanged PNG is not evidence."""
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7)]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            file_blobs={(GOLDEN, 'run-head'): MATCHING_BLOB},
+        )
+        self.assertEqual(len(_problems(api)), 1)
+
+    def test_dispatch_from_another_ref_is_tied_to_the_pull_request_base(self):
+        # Re-record dispatched on main with target_ref set to this branch: the run
+        # head is not an ancestor of the introducing commit, but it is an ancestor
+        # of the pull request base.
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': []},
+            recent=[_run(11)],
+            artifacts={11: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            ancestor_pairs={('run-head', 'base-sha')},
+        )
+        self.assertEqual(_problems(api, base='base-sha'), [])
+
+    def test_base_fallback_requires_ancestry(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': []},
+            recent=[_run(11)],
+            artifacts={11: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+        )
+        self.assertEqual(len(_problems(api, base='base-sha')), 1)
+
+    def test_base_fallback_still_requires_a_changed_file(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': []},
+            recent=[_run(11)],
+            artifacts={11: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            file_blobs={(GOLDEN, 'run-head'): MATCHING_BLOB},
+            ancestor_pairs={('run-head', 'base-sha')},
+        )
+        self.assertEqual(len(_problems(api, base='base-sha')), 1)
+
+    def test_base_fallback_ignores_failed_runs(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': []},
+            recent=[_run(11, conclusion='failure')],
+            artifacts={11: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            ancestor_pairs={('run-head', 'base-sha')},
+        )
+        self.assertEqual(len(_problems(api, base='base-sha')), 1)
 
     def test_run_must_be_in_the_commit_history(self):
         api = FakeApi(

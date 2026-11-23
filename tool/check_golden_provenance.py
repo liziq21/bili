@@ -43,6 +43,10 @@ ANCESTOR_DEPTH = 25
 # The pull request files API stops at 3000 entries; past that the diff cannot
 # be inspected completely, so the check refuses to pass.
 MAX_PULL_FILES = 3000
+# Artifacts expire, so only the newest runs can still be inspected. Three pages
+# of 100 is well past this repository's whole history and keeps the fallback
+# bounded when a pull request carries a tampered baseline.
+MAX_RUN_PAGES = 3
 CHANGED_STATUSES = frozenset({'added', 'modified', 'renamed', 'copied', 'changed'})
 
 
@@ -93,6 +97,12 @@ class GitHubApi(Protocol):
 
     def runs_for_head(self, sha: str) -> list[WorkflowRun]: ...
 
+    def recent_runs(self) -> list[WorkflowRun]: ...
+
+    def is_ancestor(self, ancestor: str, descendant: str) -> bool: ...
+
+    def file_blob(self, path: str, ref: str) -> str | None: ...
+
     def artifact_blobs(self, run_id: int) -> dict[str, str] | None: ...
 
 
@@ -126,6 +136,7 @@ def check_provenance(
     api: GitHubApi,
     pr: int,
     head_sha: str,
+    base_sha: str | None = None,
     depth: int = ANCESTOR_DEPTH,
 ) -> ProvenanceReport:
     files = api.pull_files(pr)
@@ -153,7 +164,7 @@ def check_provenance(
                 GoldenProblem(changed.path, 'the pull request API returned no blob id')
             )
             continue
-        run = _proving_run(api, changed, head_sha, depth)
+        run = _proving_run(api, changed, head_sha, base_sha, depth)
         if run is None:
             problems.append(
                 GoldenProblem(
@@ -172,24 +183,49 @@ def _proving_run(
     api: GitHubApi,
     changed: PullFile,
     head_sha: str,
+    base_sha: str | None,
     depth: int,
 ) -> WorkflowRun | None:
     commits = api.commits_touching(changed.path, head_sha)
     if not commits:
         return None
-    for ancestor in _ancestors(api, commits[0], depth):
+    introducing = commits[0]
+    for ancestor in _ancestors(api, introducing, depth):
         for run in api.runs_for_head(ancestor):
+            if _run_proves(api, run, changed):
+                return run
+
+    # The re-record workflow may be dispatched from another ref (for example
+    # `main`) with `target_ref` set to this branch. In that case the run head is
+    # not in the introducing commit's ancestry, but it is still in the pull
+    # request base's history, so tie it there instead.
+    if base_sha:
+        for run in api.recent_runs():
             if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
                 continue
-            blobs = api.artifact_blobs(run.id)
-            if blobs is None:
-                continue
-            for entry, blob in blobs.items():
-                if blob == changed.blob_sha and artifact_entry_matches(
-                    entry, changed.path
-                ):
-                    return run
+            if api.is_ancestor(run.head_sha, base_sha) and _run_proves(
+                api, run, changed
+            ):
+                return run
     return None
+
+
+def _run_proves(api: GitHubApi, run: WorkflowRun, changed: PullFile) -> bool:
+    if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
+        return False
+    blobs = api.artifact_blobs(run.id)
+    if blobs is None:
+        return False
+    uploaded = any(
+        blob == changed.blob_sha and artifact_entry_matches(entry, changed.path)
+        for entry, blob in blobs.items()
+    )
+    if not uploaded:
+        return False
+    # The artifact archives the whole golden directory, including files the run
+    # did not rewrite. A run only proves generation when the file differed at
+    # the run's own head; otherwise the artifact merely echoed an existing PNG.
+    return api.file_blob(changed.path, run.head_sha) != changed.blob_sha
 
 
 def _ancestors(api: GitHubApi, sha: str, depth: int) -> Iterator[str]:
@@ -237,6 +273,8 @@ class HttpGitHubApi:
             _StripAuthorizationOnHostChange
         )
         self._run_cache: dict[str, list[WorkflowRun]] = {}
+        self._recent_runs_cache: list[WorkflowRun] | None = None
+        self._ancestor_cache: dict[tuple[str, str], bool] = {}
         self._parent_cache: dict[str, list[str]] = {}
         self._artifact_cache: dict[int, dict[str, str] | None] = {}
 
@@ -336,6 +374,63 @@ class HttpGitHubApi:
         self._run_cache[sha] = runs
         return runs
 
+    def recent_runs(self) -> list[WorkflowRun]:
+        if self._recent_runs_cache is not None:
+            return self._recent_runs_cache
+        runs: list[WorkflowRun] = []
+        page = 1
+        while page <= MAX_RUN_PAGES:
+            response = self._json(
+                f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
+                {'per_page': 100, 'page': page},
+            )
+            batch = response.get('workflow_runs', [])
+            runs.extend(
+                WorkflowRun(
+                    id=run['id'],
+                    head_sha=run.get('head_sha', ''),
+                    conclusion=run.get('conclusion'),
+                    path=run.get('path', ''),
+                    html_url=run.get('html_url', ''),
+                )
+                for run in batch
+            )
+            if len(batch) < 100:
+                break
+            page += 1
+        self._recent_runs_cache = runs
+        return runs
+
+    def is_ancestor(self, ancestor: str, descendant: str) -> bool:
+        if ancestor == descendant:
+            return True
+        key = (ancestor, descendant)
+        cached = self._ancestor_cache.get(key)
+        if cached is not None:
+            return cached
+        try:
+            comparison = self._json(f'/compare/{ancestor}...{descendant}')
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                self._ancestor_cache[key] = False
+                return False
+            raise
+        result = comparison.get('status') in ('ahead', 'identical')
+        self._ancestor_cache[key] = result
+        return result
+
+    def file_blob(self, path: str, ref: str) -> str | None:
+        encoded = urllib.parse.quote(path, safe='/')
+        try:
+            entry = self._json(f'/contents/{encoded}', {'ref': ref})
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                return None
+            raise
+        if not isinstance(entry, dict):
+            return None
+        return entry.get('sha')
+
     def artifact_blobs(self, run_id: int) -> dict[str, str] | None:
         if run_id in self._artifact_cache:
             return self._artifact_cache[run_id]
@@ -373,24 +468,26 @@ class HttpGitHubApi:
         return blobs
 
 
-def _event_context() -> tuple[int | None, str | None]:
+def _event_context() -> tuple[int | None, str | None, str | None]:
     path = os.environ.get('GITHUB_EVENT_PATH')
     if not path or not os.path.isfile(path):
-        return None, None
+        return None, None, None
     with open(path, encoding='utf-8') as event_file:
         event = json.load(event_file)
     pull_request = event.get('pull_request') or {}
     number = event.get('number') or pull_request.get('number')
     head_sha = (pull_request.get('head') or {}).get('sha')
-    return number, head_sha
+    base_sha = (pull_request.get('base') or {}).get('sha')
+    return number, head_sha, base_sha
 
 
 def main(argv: list[str] | None = None) -> int:
-    event_pr, event_sha = _event_context()
+    event_pr, event_sha, event_base = _event_context()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', default=os.environ.get('GITHUB_REPOSITORY'))
     parser.add_argument('--pr', type=int, default=event_pr)
     parser.add_argument('--head-sha', default=event_sha)
+    parser.add_argument('--base-sha', default=event_base)
     parser.add_argument(
         '--token',
         default=os.environ.get('GITHUB_TOKEN')
@@ -411,7 +508,9 @@ def main(argv: list[str] | None = None) -> int:
 
     api = HttpGitHubApi(args.repo, args.token, args.api_url)
     try:
-        report = check_provenance(api, args.pr, args.head_sha, args.depth)
+        report = check_provenance(
+            api, args.pr, args.head_sha, args.base_sha, args.depth
+        )
     except urllib.error.HTTPError as error:
         print(
             f'::error::GitHub API request failed with {error.code} {error.reason}; '

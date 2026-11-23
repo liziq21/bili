@@ -16,8 +16,12 @@ jobs:
       pull-requests: read # 读取 PR 文件列表
     timeout-minutes: 15
     steps:
+      # 从 base 分支取校验脚本：PR 不能修改自己受检的门禁逻辑。golden 差异
+      # 通过 API 读取，不依赖工作区。首个引入本门禁的 PR 在 base 上还没有该
+      # 脚本，此时给出 warning 并跳过（合并后所有 PR 都会走 base 版本）。
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           persist-credentials: false
 
       # push 到 main 时没有 PR 号。用 step 级 if 让 job 保持 success：
@@ -27,4 +31,9 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 tool/check_golden_provenance.py
+        run: |
+          if [ ! -f tool/check_golden_provenance.py ]; then
+            echo "::warning::tool/check_golden_provenance.py is not on the base branch yet; skipping for this pull request"
+            exit 0
+          fi
+          python3 tool/check_golden_provenance.py
