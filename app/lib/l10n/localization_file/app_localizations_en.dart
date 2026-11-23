@@ -444,25 +444,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get optionsDetailedLoggingOff => 'Enable for bug reports';
 
   @override
-  String get optionsSpotifyCredentials => 'Spotify Credentials';
-
-  @override
-  String optionsSpotifyCredentialsConfigured(String clientId) {
-    return 'Client ID: $clientId...';
-  }
-
-  @override
-  String get optionsSpotifyCredentialsRequired => 'Required - tap to configure';
-
-  @override
-  String get optionsSpotifyWarning =>
-      'Spotify requires your own API credentials. Get them free from developer.spotify.com';
-
-  @override
-  String get optionsSpotifyDeprecationWarning =>
-      'Spotify search will be deprecated on March 3, 2026 due to Spotify API changes. Please switch to Deezer.';
-
-  @override
   String get extensionsTitle => 'Extensions';
 
   @override
@@ -497,103 +478,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeUpdate => 'Update';
 
   @override
-  String get aboutTitle => 'About';
-
-  @override
-  String get aboutContributors => 'Contributors';
-
-  @override
-  String get aboutMobileDeveloper => 'Mobile version developer';
-
-  @override
-  String get aboutOriginalCreator => 'Creator of the original SpotiFLAC';
-
-  @override
-  String get aboutLogoArtist =>
-      'The talented artist who created our beautiful app logo!';
-
-  @override
-  String get aboutTranslators => 'Translators';
-
-  @override
-  String get aboutSpecialThanks => 'Special Thanks';
-
-  @override
-  String get aboutLinks => 'Links';
-
-  @override
-  String get aboutMobileSource => 'Mobile source code';
-
-  @override
-  String get aboutPCSource => 'PC source code';
-
-  @override
-  String get aboutKeepAndroidOpen => 'Keep Android Open';
-
-  @override
-  String get aboutReportIssue => 'Report an issue';
-
-  @override
-  String get aboutReportIssueSubtitle => 'Report any problems you encounter';
-
-  @override
-  String get aboutFeatureRequest => 'Feature request';
-
-  @override
-  String get aboutFeatureRequestSubtitle => 'Suggest new features for the app';
-
-  @override
-  String get aboutTelegramChannel => 'Telegram Channel';
-
-  @override
-  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
-
-  @override
-  String get aboutTelegramChat => 'Telegram Community';
-
-  @override
-  String get aboutTelegramChatSubtitle => 'Chat with other users';
-
-  @override
-  String get aboutSocial => 'Social';
-
-  @override
-  String get aboutApp => 'App';
-
-  @override
-  String get aboutVersion => 'Version';
-
-  @override
-  String get aboutBinimumDesc =>
-      'The creator of QQDL & HiFi API. Without this API, Tidal downloads wouldn\'t exist!';
-
-  @override
-  String get aboutSachinsenalDesc =>
-      'The original HiFi project creator. The foundation of Tidal integration!';
-
-  @override
-  String get aboutSjdonadoDesc =>
-      'Creator of I Don\'t Have Spotify (IDHS). The fallback link resolver that saves the day!';
-
-  @override
-  String get aboutDabMusic => 'DAB Music';
-
-  @override
-  String get aboutDabMusicDesc =>
-      'The best Qobuz streaming API. Hi-Res downloads wouldn\'t be possible without this!';
-
-  @override
-  String get aboutSpotiSaver => 'SpotiSaver';
-
-  @override
-  String get aboutSpotiSaverDesc =>
-      'Tidal Hi-Res FLAC streaming endpoints. A key piece of the lossless puzzle!';
-
-  @override
-  String get aboutAppDescription =>
-      'Download Spotify tracks in lossless quality from Tidal and Qobuz.';
-
-  @override
   String get artistAlbums => 'Albums';
 
   @override
@@ -621,123 +505,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackMetadataDelete => 'Delete';
-
-  @override
-  String get setupGrantPermission => 'Grant Permission';
-
-  @override
-  String get setupSkip => 'Skip for now';
-
-  @override
-  String get setupStorageAccessRequired => 'Storage Access Required';
-
-  @override
-  String get setupStorageAccessMessageAndroid11 =>
-      'Android 11+ requires \"All files access\" permission to save files to your chosen download folder.';
-
-  @override
-  String get setupOpenSettings => 'Open Settings';
-
-  @override
-  String get setupPermissionDeniedMessage =>
-      'Permission denied. Please grant all permissions to continue.';
-
-  @override
-  String setupPermissionRequired(String permissionType) {
-    return '$permissionType Permission Required';
-  }
-
-  @override
-  String setupPermissionRequiredMessage(String permissionType) {
-    return '$permissionType permission is required for the best experience. You can change this later in Settings.';
-  }
-
-  @override
-  String get setupUseDefaultFolder => 'Use Default Folder?';
-
-  @override
-  String get setupNoFolderSelected =>
-      'No folder selected. Would you like to use the default Music folder?';
-
-  @override
-  String get setupUseDefault => 'Use Default';
-
-  @override
-  String get setupDownloadLocationTitle => 'Download Location';
-
-  @override
-  String get setupDownloadLocationIosMessage =>
-      'On iOS, downloads are saved to the app\'s Documents folder. You can access them via the Files app.';
-
-  @override
-  String get setupAppDocumentsFolder => 'App Documents Folder';
-
-  @override
-  String get setupAppDocumentsFolderSubtitle =>
-      'Recommended - accessible via Files app';
-
-  @override
-  String get setupChooseFromFiles => 'Choose from Files';
-
-  @override
-  String get setupChooseFromFilesSubtitle => 'Select iCloud or other location';
-
-  @override
-  String get setupIosEmptyFolderWarning =>
-      'iOS limitation: Empty folders cannot be selected. Choose a folder with at least one file.';
-
-  @override
-  String get setupIcloudNotSupported =>
-      'iCloud Drive is not supported. Please use the app Documents folder.';
-
-  @override
-  String get setupDownloadInFlac => 'Download Spotify tracks in FLAC';
-
-  @override
-  String get setupStorageGranted => 'Storage Permission Granted!';
-
-  @override
-  String get setupStorageRequired => 'Storage Permission Required';
-
-  @override
-  String get setupStorageDescription =>
-      'SpotiFLAC needs storage permission to save your downloaded music files.';
-
-  @override
-  String get setupNotificationGranted => 'Notification Permission Granted!';
-
-  @override
-  String get setupNotificationEnable => 'Enable Notifications';
-
-  @override
-  String get setupFolderChoose => 'Choose Download Folder';
-
-  @override
-  String get setupFolderDescription =>
-      'Select a folder where your downloaded music will be saved.';
-
-  @override
-  String get setupSelectFolder => 'Select Folder';
-
-  @override
-  String get setupEnableNotifications => 'Enable Notifications';
-
-  @override
-  String get setupNotificationBackgroundDescription =>
-      'Get notified about download progress and completion. This helps you track downloads when the app is in background.';
-
-  @override
-  String get setupSkipForNow => 'Skip for now';
-
-  @override
-  String get setupNext => 'Next';
-
-  @override
-  String get setupGetStarted => 'Get Started';
-
-  @override
-  String get setupAllowAccessToManageFiles =>
-      'Please enable \"Allow access to manage all files\" in the next screen.';
 
   @override
   String get dialogCancel => 'Cancel';
@@ -3004,20 +2771,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lyricsProviderExtensionDesc => 'Extension provider';
 
   @override
-  String get safMigrationTitle => 'Storage Update Required';
-
-  @override
-  String get safMigrationMessage1 =>
-      'SpotiFLAC now uses Android Storage Access Framework (SAF) for downloads. This fixes \"permission denied\" errors on Android 10+.';
-
-  @override
-  String get safMigrationMessage2 =>
-      'Please select your download folder again to switch to the new storage system.';
-
-  @override
-  String get safMigrationSuccess => 'Download folder updated to SAF mode';
-
-  @override
   String get settingsDonate => 'Donate';
 
   @override
@@ -3286,80 +3039,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editMetadataAutoFill => 'Auto-fill from online';
-
-  @override
-  String get editMetadataAutoFillDesc =>
-      'Select fields to fill automatically from online metadata';
-
-  @override
-  String get editMetadataAutoFillFetch => 'Fetch & Fill';
-
-  @override
-  String get editMetadataAutoFillSearching => 'Searching online...';
-
-  @override
-  String get editMetadataAutoFillNoResults =>
-      'No matching metadata found online';
-
-  @override
-  String editMetadataAutoFillDone(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'fields',
-      one: 'field',
-    );
-    return 'Filled $count $_temp0 from online metadata';
-  }
-
-  @override
-  String get editMetadataAutoFillNoneSelected =>
-      'Select at least one field to auto-fill';
-
-  @override
-  String get editMetadataFieldTitle => 'Title';
-
-  @override
-  String get editMetadataFieldArtist => 'Artist';
-
-  @override
-  String get editMetadataFieldAlbum => 'Album';
-
-  @override
-  String get editMetadataFieldAlbumArtist => 'Album Artist';
-
-  @override
-  String get editMetadataFieldDate => 'Date';
-
-  @override
-  String get editMetadataFieldTrackNum => 'Track #';
-
-  @override
-  String get editMetadataFieldDiscNum => 'Disc #';
-
-  @override
-  String get editMetadataFieldGenre => 'Genre';
-
-  @override
-  String get editMetadataFieldIsrc => 'ISRC';
-
-  @override
-  String get editMetadataFieldLabel => 'Label';
-
-  @override
-  String get editMetadataFieldCopyright => 'Copyright';
-
-  @override
-  String get editMetadataFieldCover => 'Cover Art';
-
-  @override
-  String get editMetadataSelectAll => 'All';
-
-  @override
-  String get editMetadataSelectEmpty => 'Empty only';
-
-  @override
   String queueDownloadingCount(int count) {
     return 'Downloading ($count)';
   }
@@ -3420,46 +3099,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectionSelectPlaylistsToDelete => 'Select playlists to delete';
-
-  @override
-  String get audioAnalysisTitle => 'Audio Quality Analysis';
-
-  @override
-  String get audioAnalysisDescription =>
-      'Verify lossless quality with spectrum analysis';
-
-  @override
-  String get audioAnalysisAnalyzing => 'Analyzing audio...';
-
-  @override
-  String get audioAnalysisSampleRate => 'Sample Rate';
-
-  @override
-  String get audioAnalysisBitDepth => 'Bit Depth';
-
-  @override
-  String get audioAnalysisChannels => 'Channels';
-
-  @override
-  String get audioAnalysisDuration => 'Duration';
-
-  @override
-  String get audioAnalysisNyquist => 'Nyquist';
-
-  @override
-  String get audioAnalysisFileSize => 'Size';
-
-  @override
-  String get audioAnalysisDynamicRange => 'Dynamic Range';
-
-  @override
-  String get audioAnalysisPeak => 'Peak';
-
-  @override
-  String get audioAnalysisRms => 'RMS';
-
-  @override
-  String get audioAnalysisSamples => 'Samples';
 
   @override
   String extensionsSearchWith(String providerName) {
@@ -3525,18 +3164,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadArtist => 'Failed to load artist';
-
-  @override
-  String get notifChannelDownloadName => 'Download Progress';
-
-  @override
-  String get notifChannelDownloadDesc => 'Shows download progress for tracks';
-
-  @override
-  String get notifChannelLibraryScanName => 'Library Scan';
-
-  @override
-  String get notifChannelLibraryScanDesc => 'Shows local library scan progress';
 
   @override
   String notifDownloadingTrack(String trackName) {
