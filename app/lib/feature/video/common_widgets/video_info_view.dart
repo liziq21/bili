@@ -943,6 +943,15 @@ class const _PlaylistSection() extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final totalCount = playlist.totalCount;
+    // `excludeSemantics: true` drops the InkWell's own semantics, so the tap
+    // action has to be declared on the Semantics node too; otherwise the entry
+    // is announced as a button that TalkBack/VoiceOver cannot activate.
+    void handleTap() {
+      HapticFeedback.lightImpact();
+      final source = context.read<MediaSource?>()?.id;
+      context.navigateToPlaylist(playlist.id, source: source);
+    }
+
     return Padding(
       padding: EdgeInsets.only(top: $styles.insets.md),
       child: Material(
@@ -951,14 +960,12 @@ class const _PlaylistSection() extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: Semantics(
           button: true,
+          enabled: true,
           label: '${l10n.playlistTitle}: ${playlist.title}',
+          onTap: handleTap,
           excludeSemantics: true,
           child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              final source = context.read<MediaSource?>()?.id;
-              context.navigateToPlaylist(playlist.id, source: source);
-            },
+            onTap: handleTap,
             child: Padding(
               padding: EdgeInsets.all($styles.insets.sm),
               child: Row(

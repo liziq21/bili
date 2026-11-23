@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/design/design.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
@@ -580,6 +582,67 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('playlist:42:777'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'collection entry exposes a screen-reader tap action that navigates',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+
+        final detail = VideoDetail(
+          video: const VideoModel(
+            id: 'BV1playlist',
+            url: 'https://example.com/video',
+            title: '带列表的视频',
+          ),
+          creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
+          playlist: const VideoPlaylistRef(
+            id: '42:777',
+            title: 'Flutter 播放列表',
+            totalCount: 3,
+          ),
+        );
+        final bloc = MockVideoBloc(
+          VideoState(isLoading: false, videoDetail: detail),
+        );
+        addTearDown(bloc.close);
+
+        final router = GoRouter(
+          initialLocation: '/',
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => Scaffold(
+                body: BlocProvider<VideoBloc>.value(
+                  value: bloc,
+                  child: const VideoInfoView(),
+                ),
+              ),
+            ),
+            GoRoute(
+              path: '/playlist/:playlistId',
+              builder: (context, state) => Scaffold(
+                body: Text('playlist:${state.pathParameters['playlistId']}'),
+              ),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+
+        final node = tester.getSemantics(
+          find.bySemanticsLabel('播放列表: Flutter 播放列表'),
+        );
+        expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+        node.owner!.performAction(node.id, SemanticsAction.tap);
+        await tester.pumpAndSettle();
+
+        expect(find.text('playlist:42:777'), findsOneWidget);
+        semantics.dispose();
       },
     );
   });
