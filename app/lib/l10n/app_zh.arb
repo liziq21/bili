@@ -4913,10 +4913,6 @@
   "@videoTab": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "recentSearches": "最近搜索",
-  "@recentSearches": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
   "clearRecentSearchHistory": "清空最近搜索历史",
   "@clearRecentSearchHistory": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
