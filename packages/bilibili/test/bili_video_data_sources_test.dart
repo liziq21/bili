@@ -257,6 +257,72 @@ void main() {
       },
     );
 
+    test('getVideoDetail maps ugc_season into a playlist ref with <mid>:<seasonId> id', () async {
+      final detailJson = loadJson('video_detail.json') as Map<String, dynamic>;
+      final data = Map<String, dynamic>.from(
+        detailJson['data'] as Map<String, dynamic>,
+      );
+      data['ugc_season'] = {
+        'id': 777,
+        'title': '合集标题',
+        'cover': '//i0.hdslb.com/bfs/archive/cover.jpg',
+        'mid': 42,
+        'intro': 'intro',
+        'sections': [
+          {
+            'title': '第一节',
+            'id': 1,
+            'episodes': [
+              {'id': 1, 'aid': 11, 'cid': 21, 'title': 'e1', 'bvid': 'BV1a'},
+              {'id': 2, 'aid': 12, 'cid': 22, 'title': 'e2', 'bvid': 'BV1b'},
+            ],
+          },
+          {
+            'title': '第二节',
+            'id': 2,
+            'episodes': [
+              {'id': 3, 'aid': 13, 'cid': 23, 'title': 'e3', 'bvid': 'BV1c'},
+            ],
+          },
+        ],
+      };
+
+      final ugcNetwork = MockNetworkVideoDataSource(
+        videoDetailJson: {'data': data},
+        videoRelationJson:
+            loadJson('video_relation.json') as Map<String, dynamic>,
+        relatedVideosJson:
+            (loadJson('related_videos.json') as Map<String, dynamic>)['data']
+                as List<dynamic>,
+        replyListJson: loadJson('reply_list.json') as Map<String, dynamic>,
+        replyReplyListJson:
+            loadJson('reply_reply_list.json') as Map<String, dynamic>,
+      );
+      final ugcDataSource = BiliVideoDetailRemoteDataSource(
+        network: ugcNetwork,
+      );
+
+      final result = await ugcDataSource.getVideoDetail('BV1GJ411x7vy');
+      expect(result.isSuccess(), isTrue);
+
+      final playlist =
+          (result as dynamic).success.playlist as VideoPlaylistRef?;
+      expect(playlist, isNotNull);
+      expect(playlist!.id, '42:777');
+      expect(playlist.title, '合集标题');
+      expect(playlist.totalCount, 3);
+      expect(playlist.coverUrl, startsWith('https://'));
+    });
+
+    test(
+      'getVideoDetail leaves playlist null when the video has no ugc_season',
+      () async {
+        final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
+        expect(result.isSuccess(), isTrue);
+        expect((result as dynamic).success.playlist, isNull);
+      },
+    );
+
     test('getVideoComments maps reply list to VideoComment page', () async {
       final result = await commentDataSource.getVideoComments(
         'BV1GJ411x7vy',

@@ -5,6 +5,7 @@ import 'package:data/data.dart';
 import 'package:model/model.dart';
 
 import '../../bili_utils.dart';
+import 'bili_playlist_content_remote_data_source.dart';
 import 'bili_remote_data_source.dart';
 
 final class BiliVideoDetailRemoteDataSource({
@@ -79,6 +80,7 @@ final class BiliVideoDetailRemoteDataSource({
           .toList();
 
       final chapters = await _chaptersOf(network, detailData);
+      final playlist = _playlistOf(detailData);
 
       final detail = VideoDetail(
         video: video,
@@ -91,12 +93,34 @@ final class BiliVideoDetailRemoteDataSource({
         isSubscribed: relation?.attention ?? false,
         relatedVideos: relatedVideos,
         chapters: chapters,
+        playlist: playlist,
       );
 
       return Result.success(detail);
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }
+  }
+
+  /// 合集来自 `/x/web-interface/view` 的 `ugc_season`。列表标识按
+  /// [NetworkBiliPlaylistRef] 的 `<mid>:<seasonId>` 格式编码，因为播放列表
+  /// 内容端点同时需要归属用户与合集 id。
+  VideoPlaylistRef? _playlistOf(VideoDetailData detail) {
+    final season = detail.ugcSeason;
+    if (season == null || season.id <= 0) return null;
+    final total = season.sections.fold<int>(
+      0,
+      (sum, section) => sum + section.episodes.length,
+    );
+    return VideoPlaylistRef(
+      id: NetworkBiliPlaylistRef.format(
+        ownerId: season.mid.toString(),
+        playlistId: season.id.toString(),
+      ),
+      title: season.title,
+      coverUrl: normalizeBiliUrl(season.cover),
+      totalCount: total > 0 ? total : null,
+    );
   }
 
   /// 章节来自 `player/v2` 的 `view_points`（视频看点），按第一个分 P 的 cid

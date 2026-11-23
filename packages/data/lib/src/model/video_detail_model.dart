@@ -1,5 +1,6 @@
 import 'creator_profile_model.dart';
 import 'video_model.dart';
+import 'video_playlist_ref.dart';
 
 /// 视频章节：源给出的时间轴点（不是分 P）。
 ///
@@ -24,6 +25,9 @@ final class const VideoDetail({
   final bool isSubscribed = false,
   final List<VideoModel> relatedVideos = const [],
   final List<VideoChapter> chapters = const [],
+
+  /// 视频所属合集/播放列表；不属于任何合集时为 null。
+  final VideoPlaylistRef? playlist,
 }) {
   VideoDetail copyWith({
     VideoModel? video,
@@ -36,6 +40,7 @@ final class const VideoDetail({
     bool? isSubscribed,
     List<VideoModel>? relatedVideos,
     List<VideoChapter>? chapters,
+    VideoPlaylistRef? playlist,
   }) {
     return VideoDetail(
       video: video ?? this.video,
@@ -48,6 +53,7 @@ final class const VideoDetail({
       isSubscribed: isSubscribed ?? this.isSubscribed,
       relatedVideos: relatedVideos ?? this.relatedVideos,
       chapters: chapters ?? this.chapters,
+      playlist: playlist ?? this.playlist,
     );
   }
 }
