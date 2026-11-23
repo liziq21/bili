@@ -36,6 +36,6 @@ Do not write one for a routine red build that the runbook handled directly.
 
 ## Index
 
-| Date | Incident | Component |
-|---|---|---|
-| 2026-09-30 | [Jules deadlocked by main-only golden recording](2026-09-30-jules-golden-baseline-deadlock.md) ([#155](https://github.com/liziq21/bili/pull/155)) | agent dispatch / golden baselines |
+| Date | Incident | Component | Status |
+|---|---|---|---|
+| 2026-09-30 | [Jules deadlocked by main-only golden recording](2026-09-30-jules-golden-baseline-deadlock.md) ([#155](https://github.com/liziq21/bili/pull/155)) | agent dispatch / golden baselines | action items 1-6 closed; detection gate landed in [#587](https://github.com/liziq21/bili/pull/587) |

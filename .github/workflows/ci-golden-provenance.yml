@@ -1,0 +1,49 @@
+# 可复用 workflow：由 ci.yml 调用（on: workflow_call），不直接触发。
+#
+# 校验 PR 中新增/修改的 golden 基线确实由 rerecord-goldens.yml 录出：
+# 在引入该文件的 commit 祖先链上找成功的 run，并逐字节比对 artifact 中的 blob。
+# 分支名与 PR 正文都可以复制，因此都不作为凭据。
+on:
+  workflow_call:
+
+jobs:
+  golden_provenance:
+    name: Check Golden Provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # 读取 workflow run 与 artifact
+      pull-requests: read # 读取 PR 文件列表
+    timeout-minutes: 15
+    steps:
+      # 从 base 分支取校验脚本：PR 不能修改自己受检的门禁逻辑。golden 差异
+      # 通过 API 读取，不依赖工作区。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+
+      # push 到 main 时没有 PR 号。用 step 级 if 让 job 保持 success：
+      # job 级 if 为假产生的 skipped job 会把整个 run 的 conclusion 拉成 failure
+      # （见 ci.yml 顶部说明）。
+      - name: Verify golden baselines came from CI
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f tool/check_golden_provenance.py ]; then
+            python3 tool/check_golden_provenance.py
+            exit $?
+          fi
+          # base 上还没有校验脚本（引入本门禁的那个 PR）。不能一律放行，否则
+          # 任何缺少脚本的 base 分支都成了绕过口；只在 PR 没有 golden 改动时通过。
+          goldens=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --paginate \
+            --jq '.[] | select(.status != "removed") | .filename' \
+            | grep -E '^app/test/golden/goldens/ci/.*\.png$' || true)
+          if [ -n "$goldens" ]; then
+            echo "::error::golden baseline changed, but the provenance checker is not on this base branch"
+            echo "$goldens"
+            exit 1
+          fi
+          echo "No golden baseline changes in this pull request."
