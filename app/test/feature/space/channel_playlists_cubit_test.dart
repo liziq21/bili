@@ -99,4 +99,47 @@ void main() {
     expect(cubit.state.pages, hasLength(2));
     expect(cubit.state.hasNextPage, isFalse);
   });
+
+  test('skips leading pages that only contain series', () async {
+    final repository = _FakeChannelPlaylistsRepository({
+      1: Result.success(Page(number: 1, totalPages: 2, data: const [])),
+      2: Result.success(
+        Page(number: 2, totalPages: 2, data: [_playlist('p2')]),
+      ),
+    });
+    final cubit = ChannelPlaylistsCubit(repository, '42');
+    addTearDown(cubit.close);
+
+    await cubit.fetchNextPage();
+
+    expect(repository.requestedPages, [1, 2]);
+    expect(cubit.state.pages, hasLength(1));
+    expect(cubit.state.pages!.single.single.id, 'p2');
+    expect(cubit.state.keys, [2]);
+    expect(cubit.state.hasNextPage, isFalse);
+    expect(cubit.state.isLoading, isFalse);
+  });
+
+  test('retries the same page after an error on a skipped page', () async {
+    final repository = _FakeChannelPlaylistsRepository({
+      1: Result.success(Page(number: 1, totalPages: 2, data: const [])),
+      2: Result.error(Exception('network down')),
+    });
+    final cubit = ChannelPlaylistsCubit(repository, '42');
+    addTearDown(cubit.close);
+
+    await cubit.fetchNextPage();
+
+    expect(cubit.state.error, isA<Exception>());
+    expect(cubit.state.pages, isNull);
+
+    repository.responses[2] = Result.success(
+      Page(number: 2, totalPages: 2, data: [_playlist('p2')]),
+    );
+    await cubit.fetchNextPage();
+
+    expect(repository.requestedPages, [1, 2, 2]);
+    expect(cubit.state.pages, hasLength(1));
+    expect(cubit.state.pages!.single.single.id, 'p2');
+  });
 }
