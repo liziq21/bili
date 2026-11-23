@@ -199,6 +199,31 @@ void main() {
       expect(detail.items.single.id, 'BV1valid');
     });
 
+    test('uses the page total when metadata omits a total', () async {
+      final data = NetworkBiliPlaylistContentData.fromJson({
+        'archives': [
+          {'aid': 1, 'bvid': 'BV1valid', 'title': 'Only'},
+        ],
+        'meta': {'season_id': 777, 'name': 'No total', 'mid': 2},
+        'page': {'page_num': 1, 'page_size': 30, 'total': 42},
+      });
+      final network = _FakeNetworkUserDataSource(response: data);
+      final source = BiliPlaylistContentRemoteDataSource(network: network);
+
+      final result = await source.fetchPlaylistContent(
+        playlistId: '2:777',
+        pageSize: 30,
+      );
+
+      final page = switch (result) {
+        Success(:final success) => success,
+        Error() => fail('expected a successful page'),
+      };
+      final detail = page.data.single;
+      expect(detail.totalCount, 42);
+      expect(page.totalPages, 2);
+    });
+
     test(
       'rejects a playlist id without an owner mid before any request',
       () async {

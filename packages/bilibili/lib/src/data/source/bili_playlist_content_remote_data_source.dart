@@ -65,11 +65,13 @@ final class const BiliPlaylistContentRemoteDataSource({
       final archives =
           response.archives ?? series?.archives ?? season?.archives;
       final total =
-          detailMeta?.total ?? series?.meta?.total ?? season?.meta?.total;
-      final effectiveTotal = response.page?.total ?? total;
-      final totalPages = effectiveTotal == null
+          response.page?.total ??
+          detailMeta?.total ??
+          series?.meta?.total ??
+          season?.meta?.total;
+      final totalPages = total == null
           ? (archives == null || archives.length < pageSize ? page : page + 1)
-          : ((effectiveTotal + pageSize - 1) ~/ pageSize).clamp(page, 1 << 30);
+          : ((total + pageSize - 1) ~/ pageSize).clamp(page, 1 << 30);
       final creator = series?.meta?.creator;
       final title =
           detailMeta?.name ??
