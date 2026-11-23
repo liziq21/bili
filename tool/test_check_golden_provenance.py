@@ -190,6 +190,20 @@ class PaginateTest(unittest.TestCase):
         self.assertEqual(len(runs), 101)
         self.assertEqual(runs[-1], {'id': 2})
 
+    def test_max_pages_bounds_the_walk(self):
+        api = self._Stub(
+            {
+                1: {'workflow_runs': [{'id': 1}] * 100},
+                2: {'workflow_runs': [{'id': 2}] * 100},
+                3: {'workflow_runs': [{'id': 3}] * 100},
+            }
+        )
+        runs = api._paginate(
+            '/runs', {'per_page': 100}, key='workflow_runs', max_pages=2
+        )
+        self.assertEqual(len(runs), 200)
+        self.assertEqual(len(api.requests), 2)
+
     def test_flat_list_response_is_still_supported(self):
         api = self._Stub({1: [{'id': 1}], 2: []})
         self.assertEqual(api._paginate('/files', {'per_page': 100}), [{'id': 1}])

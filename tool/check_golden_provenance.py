@@ -363,6 +363,7 @@ class HttpGitHubApi:
         path: str,
         params: dict[str, object],
         key: str | None = None,
+        max_pages: int | None = None,
     ) -> list[dict]:
         """Collect every page of a list endpoint.
 
@@ -379,6 +380,8 @@ class HttpGitHubApi:
                 raise RuntimeError(f'unexpected response for {path}: {response!r}')
             items.extend(batch)
             if len(batch) < int(params.get('per_page', 100)):
+                return items
+            if max_pages is not None and page >= max_pages:
                 return items
             page += 1
 
@@ -462,7 +465,8 @@ class HttpGitHubApi:
             f'/actions/workflows/{os.path.basename(RERECORD_WORKFLOW)}/runs',
             {'per_page': 100},
             key='workflow_runs',
-        )[: MAX_RUN_PAGES * 100]
+            max_pages=MAX_RUN_PAGES,
+        )
         runs = [
             WorkflowRun(
                 id=run['id'],
