@@ -199,7 +199,8 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 - 这条规则由 `app/test/golden/hardcoded_copy_test.dart` 机器执行，不是纸面约定：断言 `app/lib` 下非生成的 `.dart` 文件里不存在非 ASCII 字符串字面量。唯一的路径级排除是 gen-l10n 的产物目录 `app/lib/l10n/localization_file/`（ARB 的值是它的源，不是硬编码处）。
 - ARB 内不得出现重复 key：`tool/check_arb_duplicate_keys.py` 在 `Tool Tests` job 中运行。`json` 与 gen-l10n 都是 last-wins，重复 key 会静默丢弃前一条的值与 `@key` 描述。
 - 该护栏与 Screenshot Tests 段的字体子集契约是**两件事**：前者管文案放在哪，后者管渲染时有没有字形。新增中文文案需同步改 `app_zh.arb`；子集缺字由 `tool/generate_subset_characters.py` 从生成产物自动收进，再跑 `bin/bili-fonts` 重切 OTF。
-- `l10n.yaml` 的 `supported-locales` 必须显式列出 `en` 与 `zh`，确保生成的 `AppLocalizations.supportedLocales` 以英文为首（默认语言）。
+- `l10n.yaml` 的 `supported-locales` 必须显式列出 `en` 与 `zh`。`en` 是 gen-l10n 的模板语言，也是生成的 `AppLocalizations.supportedLocales` 首项（缺失 key 时的回退来源）。
+- **运行时默认语言是中文，不是英文**。`app/lib/app.dart` 在 `MaterialApp.router` 的 `supportedLocales` 首位放入 `Locale('zh','CN')`，`localeResolutionCallback` 对不支持的系统语言回退到该首位，因此默认渲染 `app_zh.arb`；系统语言为 `en` 时渲染 `app_.arb`（英文）。`notification_locale.dart` 的兜底同样回落到 `zh`。改动默认语言时必须同时改 `app.dart`、本段与 `notification_locale.dart`。
 
 
 ### 截图测试

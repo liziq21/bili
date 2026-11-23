@@ -3657,111 +3657,108 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String sourceNoRecommendations(String p1) {
-    return '$p1 暂无可用推荐';
+    return 'No recommendations available from $p1';
   }
 
   @override
-  String get sourceNoHomeFeed => '该数据源未提供首页 Feed';
+  String get sourceNoHomeFeed => 'This source doesn\'t provide a home feed';
 
   @override
   String sectionLoadFailed(String p1) {
-    return '$p1 加载失败';
+    return 'Failed to load $p1';
   }
 
   @override
-  String get checkNetworkRetry => '请检查网络连接后重试';
+  String get checkNetworkRetry => 'Check your network connection and try again';
 
   @override
   String sectionEmpty(String p1) {
-    return '$p1 暂无内容';
+    return 'No content in $p1';
   }
 
   @override
   String get retry => 'Retry';
 
   @override
-  String get switchDataSource => '切换数据源';
+  String get switchDataSource => 'Switch source';
 
   @override
-  String get switchVideoMediaSource => '切换视频与媒体数据源';
+  String get switchVideoMediaSource => 'Switch video and media source';
 
   @override
-  String get unknownStreamer => '未知主播';
+  String get unknownStreamer => 'Unknown streamer';
 
   @override
   String streamerLabel(String p1) {
-    return '主播: $p1';
+    return 'Streamer: $p1';
   }
 
   @override
-  String get commaSeparator => '，';
+  String get commaSeparator => ', ';
 
   @override
-  String get continueLoading => '继续加载';
+  String get continueLoading => 'Load more';
 
   @override
-  String get noMoreItems => '没有更多了';
+  String get noMoreItems => 'No more items';
 
   @override
-  String get searchHint => '搜索...';
+  String get searchHint => 'Search...';
 
   @override
   String putIntoSearchBox(String p1) {
-    return '$p1 放入搜索框';
+    return 'Put $p1 in the search box';
   }
 
   @override
-  String get loadFailedRetryLater => '加载失败，请稍后重试';
+  String get loadFailedRetryLater => 'Failed to load. Try again later';
 
   @override
-  String get loadFailedRetry => '加载失败，重试';
+  String get loadFailedRetry => 'Failed to load. Retry';
 
   @override
-  String get moreLoadFailedRetry => '更多数据加载失败，重试';
+  String get moreLoadFailedRetry => 'Failed to load more. Retry';
 
   @override
-  String get nothingFound => '未找到内容';
+  String get nothingFound => 'Nothing found';
 
   @override
-  String get creatorTab => '创作者';
+  String get creatorTab => 'Creators';
 
   @override
-  String get spaceDescriptionUnavailable => '暂无简介';
+  String get spaceDescriptionUnavailable => 'No description available';
 
   @override
   String get videoTab => 'Video';
 
   @override
-  String get recentSearches => 'Recent searches';
+  String get clearRecentSearchHistory => 'Clear recent search history';
 
   @override
-  String get clearRecentSearchHistory => '清空最近搜索历史';
-
-  @override
-  String get clear => '清空';
+  String get clear => 'Clear';
 
   @override
   String searchQueryLabel(String p1) {
-    return '搜索 \"$p1\"';
+    return 'Search \"$p1\"';
   }
 
   @override
   String get recentSearchLoadFailed => '加载最近搜索失败';
 
   @override
-  String get filters => '筛选器';
+  String get filters => 'Filters';
 
   @override
-  String get reset => '重置';
+  String get reset => 'Reset';
 
   @override
   String get confirm => 'OK';
 
   @override
-  String get selectDateRange => '选择日期范围';
+  String get selectDateRange => 'Select date range';
 
   @override
-  String get localLibrary => '本地库';
+  String get localLibrary => 'Local library';
 
   @override
   String get history => 'History';
@@ -3773,27 +3770,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playlists => 'Playlist';
 
   @override
-  String get subscribe => '订阅';
+  String get subscribe => 'Subscribe';
 
   @override
-  String get allSources => '全部来源';
+  String get allSources => 'All sources';
 
   @override
   String sourceLabel(String p1) {
-    return '来源：$p1';
+    return 'Source: $p1';
   }
 
   @override
   String get filter => 'Filter';
 
   @override
-  String get selectSource => '选择来源';
+  String get selectSource => 'Select source';
 
   @override
-  String get deletePlaylistConfirm => '删除播放列表？';
+  String get deletePlaylistConfirm => 'Delete playlist?';
 
   @override
-  String get deletePlaylistNote => '列表中的本地条目也会被删除。';
+  String get deletePlaylistNote =>
+      'Local entries in this list will also be deleted.';
 
   @override
   String get cancel => 'Cancel';
@@ -3802,18 +3800,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get noFavoritesFromSource => '该来源没有可添加的收藏';
+  String get noFavoritesFromSource => 'No favorites to add from this source';
 
   @override
   String operationFailed(String p1) {
-    return '操作失败：$p1';
+    return 'Operation failed: $p1';
   }
 
   @override
-  String get loadingFavorites => '正在加载收藏';
+  String get loadingFavorites => 'Loading favorites';
 
   @override
-  String get favoritesLoadFailed => '收藏加载失败';
+  String get favoritesLoadFailed => 'Failed to load favorites';
 
   @override
   String get exportFavorites => 'Export';
@@ -3822,126 +3820,126 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favoritesExportFailed => 'Export failed';
 
   @override
-  String get noFavoritesYet => '还没有收藏';
+  String get noFavoritesYet => 'No favorites yet';
 
   @override
   String get spacedDot => ' · ';
 
   @override
-  String get favoriteActions => '收藏操作';
+  String get favoriteActions => 'Favorite actions';
 
   @override
-  String get openCreator => '打开创作者';
+  String get openCreator => 'Open creator';
 
   @override
-  String get unfavorite => '取消收藏';
+  String get unfavorite => 'Remove from favorites';
 
   @override
-  String get loadingPlaylists => '正在加载播放列表';
+  String get loadingPlaylists => 'Loading playlists';
 
   @override
-  String get playlistLoadFailed => '播放列表加载失败';
+  String get playlistLoadFailed => 'Failed to load playlists';
 
   @override
-  String get noPlaylistsYet => '还没有播放列表';
+  String get noPlaylistsYet => 'No playlists yet';
 
   @override
-  String get newPlaylist => '新建播放列表';
+  String get newPlaylist => 'New playlist';
 
   @override
-  String get playlistActions => '播放列表操作';
+  String get playlistActions => 'Playlist actions';
 
   @override
-  String get addFavorite => '添加收藏';
+  String get addFavorite => 'Add to favorites';
 
   @override
-  String get deletePlaylist => '删除播放列表';
+  String get deletePlaylist => 'Delete playlist';
 
   @override
-  String get itemsLoadFailed => '条目加载失败';
+  String get itemsLoadFailed => 'Failed to load items';
 
   @override
-  String get listEmpty => '列表为空';
+  String get listEmpty => 'The list is empty';
 
   @override
-  String get itemActions => '条目操作';
+  String get itemActions => 'Item actions';
 
   @override
-  String get moveUp => '上移';
+  String get moveUp => 'Move up';
 
   @override
-  String get moveDown => '下移';
+  String get moveDown => 'Move down';
 
   @override
-  String get removeThisEntry => '移除这一次';
+  String get removeThisEntry => 'Remove this entry';
 
   @override
-  String get renamePlaylist => '重命名播放列表';
+  String get renamePlaylist => 'Rename playlist';
 
   @override
-  String get renamePlaylistConfirm => '重命名播放列表';
+  String get renamePlaylistConfirm => 'Rename playlist';
 
   @override
   String get batchDelete => '批量删除';
 
   @override
-  String get batchDeleteConfirm => '批量删除条目';
+  String get batchDeleteConfirm => 'Delete items in bulk';
 
   @override
   String batchDeleteNote(Object count) {
-    return '确定删除选中的 $count 个条目？此操作不可撤销。';
+    return 'Delete the $count selected items? This can\'t be undone.';
   }
 
   @override
-  String get deleteSelected => '删除选中';
+  String get deleteSelected => 'Delete selected';
 
   @override
-  String get editMode => '编辑';
+  String get editMode => 'Edit';
 
   @override
-  String get done => '完成';
+  String get done => 'Done';
 
   @override
-  String get itemsSearchHint => '搜索条目...';
+  String get itemsSearchHint => 'Search items...';
 
   @override
-  String get loadingSubscriptions => '正在加载订阅';
+  String get loadingSubscriptions => 'Loading subscriptions';
 
   @override
-  String get subscriptionsLoadFailed => '订阅加载失败';
+  String get subscriptionsLoadFailed => 'Failed to load subscriptions';
 
   @override
-  String get noSubscriptionsYet => '还没有订阅';
+  String get noSubscriptionsYet => 'No subscriptions yet';
 
   @override
-  String get ungrouped => '未分组';
+  String get ungrouped => 'Ungrouped';
 
   @override
-  String get subscriptionActions => '订阅操作';
+  String get subscriptionActions => 'Subscription actions';
 
   @override
-  String get setGroup => '设置分组';
+  String get setGroup => 'Set group';
 
   @override
-  String get unsubscribe => '取消订阅';
+  String get unsubscribe => 'Unsubscribe';
 
   @override
-  String get add => '添加';
+  String get add => 'Add';
 
   @override
-  String get source => '来源';
+  String get source => 'Source';
 
   @override
   String get name => 'Name';
 
   @override
-  String get create => '创建';
+  String get create => 'Create';
 
   @override
-  String get groupName => '分组名称';
+  String get groupName => 'Group name';
 
   @override
-  String get groupNameHint => '留空表示未分组';
+  String get groupNameHint => 'Leave empty for ungrouped';
 
   @override
   String get save => 'Save';
@@ -3950,52 +3948,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mine => 'Me';
 
   @override
-  String get watchHistory => '观看历史';
+  String get watchHistory => 'Watch history';
 
   @override
   String watchHistoryLoadedCount(String p1) {
-    return '观看历史 · 已载入 $p1 条';
+    return 'Watch history · $p1 loaded';
   }
 
   @override
   String tabLoadFailed(String p1) {
-    return '$p1 · 加载失败';
+    return '$p1 · Failed to load';
   }
 
   @override
-  String get loadMore => '加载更多';
+  String get loadMore => 'Load more';
 
   @override
-  String get loadingHistory => '正在加载历史记录...';
+  String get loadingHistory => 'Loading history...';
 
   @override
-  String get loadMoreHistory => '加载更多历史记录';
+  String get loadMoreHistory => 'Load more history';
 
   @override
-  String get allHistoryLoaded => '已加载全部历史记录';
+  String get allHistoryLoaded => 'All history loaded';
 
   @override
-  String get historyLoadFailed => '历史记录加载失败';
+  String get historyLoadFailed => 'Failed to load history';
 
   @override
-  String get noWatchHistory => '还没有观看记录';
+  String get noWatchHistory => 'No watch history yet';
 
   @override
   String durationLabel(String p1) {
-    return '时长 $p1';
+    return 'Duration $p1';
   }
 
   @override
   String watchedAt(String p1) {
-    return '观看于 $p1';
+    return 'Watched $p1';
   }
 
   @override
-  String get finishedWatching => '已看完';
+  String get finishedWatching => 'Finished';
 
   @override
   String watchedDuration(String p1) {
-    return '已观看 $p1';
+    return 'Watched $p1';
   }
 
   @override
@@ -4003,17 +4001,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String minutesAgo(String p1) {
-    return '$p1 分钟前';
+    return '$p1 min ago';
   }
 
   @override
   String hoursAgo(String p1) {
-    return '$p1 小时前';
+    return '$p1 hr ago';
   }
 
   @override
   String daysAgo(String p1) {
-    return '$p1 天前';
+    return '$p1 days ago';
   }
 
   @override
@@ -4021,32 +4019,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String addToNamedPlaylist(String p1) {
-    return '添加到 $p1';
+    return 'Add to $p1';
   }
 
   @override
   String addToNamedPlaylistLong(String p1) {
-    return '添加到播放列表 $p1';
+    return 'Add to playlist $p1';
   }
 
   @override
   String addFailed(String p1) {
-    return '添加失败：$p1';
+    return 'Failed to add: $p1';
   }
 
   @override
   String createOrAddFailed(String p1) {
-    return '创建或添加失败：$p1';
+    return 'Failed to create or add: $p1';
   }
 
   @override
-  String get playlistNameRequired => '请输入播放列表名称';
+  String get playlistNameRequired => 'Enter a playlist name';
 
   @override
-  String get infoAndRelated => '简介与相关';
+  String get infoAndRelated => 'Info & related';
 
   @override
-  String get commentsCountTab => '评论区 (1,429)';
+  String get commentsCountTab => 'Comments (1,429)';
 
   @override
   String get likeFailed => '点赞失败';
@@ -4058,53 +4056,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followFailed => '关注失败';
 
   @override
-  String get danmakuSettingsTitle => '弹幕设置';
+  String get danmakuSettingsTitle => 'Danmaku settings';
 
   @override
-  String get showDanmaku => '显示弹幕';
+  String get showDanmaku => 'Show danmaku';
 
   @override
-  String get showTimelineDanmakuOnVideo => '在视频画面上显示时间轴弹幕';
+  String get showTimelineDanmakuOnVideo =>
+      'Show timeline danmaku over the video';
 
   @override
-  String get regularDanmakuDuration => '普通弹幕时长';
+  String get regularDanmakuDuration => 'Regular danmaku duration';
 
   @override
   String secondsValue(String p1) {
-    return '$p1 秒';
+    return '$p1 s';
   }
 
   @override
-  String get topBottomDanmakuDuration => '顶/底弹幕时长';
+  String get topBottomDanmakuDuration => 'Top/bottom danmaku duration';
 
   @override
   String secondsValueTopBottom(String p1) {
-    return '$p1 秒';
+    return '$p1 s';
   }
 
   @override
-  String get opacity => '不透明度';
+  String get opacity => 'Opacity';
 
   @override
-  String get fontSize => '字号';
+  String get fontSize => 'Font size';
 
   @override
-  String get strokeRadius => '描边半径';
+  String get strokeRadius => 'Stroke radius';
 
   @override
-  String get topMaxRows => '顶部最大行数';
+  String get topMaxRows => 'Max top rows';
 
   @override
   String topRowsValue(String p1) {
-    return '$p1 行';
+    return '$p1 rows';
   }
 
   @override
-  String get bottomMaxRows => '底部最大行数';
+  String get bottomMaxRows => 'Max bottom rows';
 
   @override
   String bottomRowsValue(String p1) {
-    return '$p1 行';
+    return '$p1 rows';
   }
 
   @override
@@ -4114,10 +4113,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auto => 'Auto';
 
   @override
-  String get qualitySelect => '画质选择';
+  String get qualitySelect => 'Select quality';
 
   @override
-  String get singleQualityOnly => '当前源只提供一个档位';
+  String get singleQualityOnly => 'This source offers only one quality';
 
   @override
   String get afterCurrentItem => 'After current';
@@ -4168,62 +4167,63 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get commentsUnsupportedSource => '当前数据源暂不支持评论';
+  String get commentsUnsupportedSource =>
+      'This source doesn\'t support comments';
 
   @override
-  String get commentsLoadFailed => '评论加载失败，请稍后重试';
+  String get commentsLoadFailed => 'Failed to load comments. Try again later';
 
   @override
-  String get noComments => '暂无评论';
+  String get noComments => 'No comments yet';
 
   @override
   String likeCommentCount(String p1) {
-    return '点赞评论 $p1';
+    return 'Like comment $p1';
   }
 
   @override
-  String get unlikeComment => '取消点赞';
+  String get unlikeComment => 'Unlike comment';
 
   @override
-  String get likeComment => '点赞评论';
+  String get likeComment => 'Like comment';
 
   @override
-  String get collapseReplies => '收起回复';
+  String get collapseReplies => 'Collapse replies';
 
   @override
   String viewReplyCount(String p1) {
-    return '查看 $p1 条回复';
+    return 'View $p1 replies';
   }
 
   @override
-  String get repliesUnavailable => '评论回复暂不可用';
+  String get repliesUnavailable => 'Replies aren\'t available yet';
 
   @override
-  String get videoLoadFailed => '视频加载失败，请重试';
+  String get videoLoadFailed => 'Failed to load video. Try again';
 
   @override
-  String get noRecommendations => '暂无关联推荐';
+  String get noRecommendations => 'No related recommendations';
 
   @override
   String viewCountLabel(String p1) {
-    return '$p1 播放';
+    return '$p1 views';
   }
 
   @override
   String get dotSeparator => '·';
 
   @override
-  String get danmakuCountSample => '2.4万 弹幕';
+  String get danmakuCountSample => '24K danmaku';
 
   @override
-  String get oneDayAgoSample => '1天前';
+  String get oneDayAgoSample => '1 day ago';
 
   @override
-  String get originalTech => '原创技术';
+  String get originalTech => 'Original tech';
 
   @override
   String subscribersWeeklyTagline(String p1) {
-    return '$p1 关注者 · 每周硬核解析';
+    return '$p1 followers · Weekly deep dives';
   }
 
   @override
@@ -4233,90 +4233,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitCreatorHome => '跳转原源作者主页';
 
   @override
-  String get unfollowCreator => '取消关注创作者';
+  String get unfollowCreator => 'Unfollow creator';
 
   @override
-  String get followCreator => '关注创作者';
+  String get followCreator => 'Follow creator';
 
   @override
   String followingCreatorNamed(String p1) {
-    return '已关注创作者 $p1';
+    return 'Following creator $p1';
   }
 
   @override
   String followCreatorNamed(String p1) {
-    return '关注创作者 $p1';
+    return 'Follow creator $p1';
   }
 
   @override
-  String get following => '已关注';
+  String get following => 'Following';
 
   @override
-  String get follow => '关注';
+  String get follow => 'Follow';
 
   @override
   String get like => 'Like';
 
   @override
-  String get list => '列表';
+  String get list => 'List';
 
   @override
-  String get addToPlaylist => '加入播放列表';
+  String get addToPlaylist => 'Add to playlist';
 
   @override
-  String get addToLocalPlaylist => '加入本地播放列表';
+  String get addToLocalPlaylist => 'Add to local playlist';
 
   @override
-  String get switchSource => '多源换源';
+  String get switchSource => 'Switch source';
 
   @override
-  String get switchVideoSource => '切换视频数据源';
+  String get switchVideoSource => 'Switch video source';
 
   @override
-  String get autoSwitchBestRoute => '自动切换至最优可用的解析线路';
+  String get autoSwitchBestRoute =>
+      'Automatically switch to the best available route';
 
   @override
   String get share => 'Share';
 
   @override
-  String get shareVideo => '分享视频';
+  String get shareVideo => 'Share video';
 
   @override
-  String get shareMultiSourceLink => '分享多源视频链接';
+  String get shareMultiSourceLink => 'Share multi-source video link';
 
   @override
-  String get danmakuStateOn => '弹幕开';
+  String get danmakuStateOn => 'Danmaku on';
 
   @override
-  String get danmakuStateOff => '弹幕关';
+  String get danmakuStateOff => 'Danmaku off';
 
   @override
   String get danmaku => 'Danmaku';
 
   @override
-  String get danmakuActionOff => '关闭弹幕';
+  String get danmakuActionOff => 'Turn danmaku off';
 
   @override
-  String get danmakuActionOn => '开启弹幕';
+  String get danmakuActionOn => 'Turn danmaku on';
 
   @override
-  String get synopsisSectionTitle => '本期摘要 & 核心技术点';
+  String get synopsisSectionTitle => 'Summary & key takeaways';
 
   @override
-  String get collapseSynopsis => '收起摘要';
+  String get collapseSynopsis => 'Collapse summary';
 
   @override
-  String get expandSynopsis => '展开完整大纲';
+  String get expandSynopsis => 'Expand full outline';
 
   @override
   String get collapse => 'Collapse';
 
   @override
   String get sampleSynopsisFallback =>
-      '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。详尽拆解 Shader 预编译、RenderPass 复用机制、Metal / Vulkan 直接后端绑定以及移动平台掉帧消除实践方案。';
+      'An in-depth look at why Flutter moved from Skia to Impeller for rendering. Covers shader precompilation, RenderPass reuse, direct Metal / Vulkan backend binding, and techniques for eliminating frame drops on mobile.';
 
   @override
-  String get chapters => '章节';
+  String get chapters => 'Chapters';
 
   @override
   String followersCount(String p1) {
@@ -4324,42 +4325,42 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get multiSourceRecommendations => '多源关联推荐';
+  String get multiSourceRecommendations => 'Multi-source recommendations';
 
   @override
-  String get addingToQueue => '正在加入队列';
+  String get addingToQueue => 'Adding to queue';
 
   @override
-  String get addToPlayQueue => '加入播放队列';
+  String get addToPlayQueue => 'Add to play queue';
 
   @override
-  String get addedToPlayQueue => '已加入播放队列';
+  String get addedToPlayQueue => 'Added to play queue';
 
   @override
-  String get addToQueueFailed => '加入队列失败';
+  String get addToQueueFailed => 'Failed to add to queue';
 
   @override
   String cancelAction(String p1) {
-    return '取消$p1';
+    return 'Cancel $p1';
   }
 
   @override
-  String get previousItem => '上一首';
+  String get previousItem => 'Previous';
 
   @override
-  String get nextItem => '下一首';
+  String get nextItem => 'Next';
 
   @override
-  String get loopOff => '循环：关闭';
+  String get loopOff => 'Loop: off';
 
   @override
-  String get loopOne => '单首循环';
+  String get loopOne => 'Repeat one';
 
   @override
-  String get loopQueue => '队列循环';
+  String get loopQueue => 'Repeat queue';
 
   @override
-  String get minimize => '最小化';
+  String get minimize => 'Minimize';
 
   @override
   String playbackFailed(String p1) {
@@ -4388,13 +4389,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skip => 'Skip';
 
   @override
-  String get back => '返回';
+  String get back => 'Back';
 
   @override
   String get fullscreen => 'Fullscreen';
 
   @override
-  String get highBitrate1080 => '1080P 高码率';
+  String get highBitrate1080 => '1080P high bitrate';
 
   @override
   String get pause => 'Pause';
@@ -4403,13 +4404,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get play => 'Play';
 
   @override
-  String get fullscreenToggle => '全屏切换';
+  String get fullscreenToggle => 'Toggle fullscreen';
 
   @override
   String get noAvailableSource => '当前没有可用的数据源';
 
   @override
-  String get sourceUnavailable => '数据源不可用';
+  String get sourceUnavailable => 'Source unavailable';
 
   @override
   String get danmakuUnsupported => '当前数据源不支持弹幕';
@@ -4442,22 +4443,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String yearsAgoCompact(String p1) {
-    return '$p1 年前';
+    return '$p1 years ago';
   }
 
   @override
   String monthsAgoCompact(String p1) {
-    return '$p1 个月前';
+    return '$p1 months ago';
   }
 
   @override
   String viewsWithDate(String p1, String p2) {
-    return '$p1 观看 • $p2';
+    return '$p1 views • $p2';
   }
 
   @override
   String viewsCount(String p1) {
-    return '$p1 观看';
+    return '$p1 views';
   }
 
   @override
@@ -4465,16 +4466,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String creatorLabel(String p1) {
-    return '创作者: $p1';
+    return 'Creator: $p1';
   }
 
   @override
   String durationPrefix(String p1) {
-    return '时长 $p1';
+    return 'Duration $p1';
   }
 
   @override
-  String get unknownCreator => '未知创作者';
+  String get unknownCreator => 'Unknown creator';
 
   @override
   String creatorWithSubtitle(String p1, String p2) {
@@ -4482,20 +4483,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get moreOptions => '更多选项';
+  String get moreOptions => 'More options';
 
   @override
   String subscribersCount(String p1) {
-    return '$p1 关注';
+    return '$p1 followers';
   }
 
   @override
   String videosCount(String p1) {
-    return '$p1 视频';
+    return '$p1 videos';
   }
 
   @override
-  String get liveNow => '直播中';
+  String get liveNow => 'Live now';
 
   @override
   String get navHomeLabel => 'Home';
@@ -4504,22 +4505,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get liveSourceUnavailable => '直播所属的数据源不可用';
+  String get liveSourceUnavailable =>
+      'The live stream\'s source is unavailable';
 
   @override
-  String get creatorSourceUnavailable => '创作者所属的数据源不可用';
+  String get creatorSourceUnavailable => 'The creator\'s source is unavailable';
 
   @override
-  String get videoSourceUnavailable => '视频所属的数据源不可用';
+  String get videoSourceUnavailable => 'The video\'s source is unavailable';
 
   @override
-  String get videoDetailSourceUnsupported => '当前数据源暂不支持查看视频详情';
+  String get videoDetailSourceUnsupported =>
+      'This source doesn\'t support video details yet';
 
   @override
   String get progress => 'Progress';
 
   @override
-  String get switchAction => '切换';
+  String get switchAction => 'Switch';
 
   @override
   String get playbackQueue => 'Playback queue';
@@ -4613,6 +4616,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveRoomEnded => 'Stream ended';
+
+  @override
+  String get recentSearches => 'Recent searches';
 
   @override
   String get searchHistory => 'Search history';

@@ -3717,9 +3717,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoTab => '视频';
 
   @override
-  String get recentSearches => '最近搜索';
-
-  @override
   String get clearRecentSearchHistory => '清空最近搜索历史';
 
   @override
@@ -4597,6 +4594,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get liveRoomEnded => '直播已结束';
+
+  @override
+  String get recentSearches => '最近搜索';
 
   @override
   String get searchHistory => '搜索历史';

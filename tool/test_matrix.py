@@ -83,6 +83,7 @@ TEST_MATRIX = {
         'app/test/feature/app_search_anchor_test.dart',
         'app/test/feature/filter_bar_test.dart',
         'app/test/feature/history_settings_screen_test.dart',
+        'app/test/feature/l10n_locale_resolution_test.dart',
         'app/test/feature/feed/feed_screen_test.dart',
         'app/test/feature/notification/feed_notification_listener_test.dart',
         'app/test/feature/home/feed_status_view_test.dart',
