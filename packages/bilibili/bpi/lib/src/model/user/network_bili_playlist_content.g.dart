@@ -22,13 +22,7 @@ NetworkBiliPlaylistContentData _$NetworkBiliPlaylistContentDataFromJson(
     ),
     archives: $checkedConvert(
       'archives',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) => NetworkBiliPlaylistVideoItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
     ),
     meta: $checkedConvert(
       'meta',
@@ -111,13 +105,7 @@ NetworkBiliPlaylistSeason _$NetworkBiliPlaylistSeasonFromJson(
     ),
     archives: $checkedConvert(
       'archives',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) => NetworkBiliPlaylistVideoItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
     ),
     meta: $checkedConvert(
       'meta',
@@ -192,13 +180,7 @@ NetworkBiliPlaylistSeries _$NetworkBiliPlaylistSeriesFromJson(
   final val = NetworkBiliPlaylistSeries(
     archives: $checkedConvert(
       'archives',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) => NetworkBiliPlaylistVideoItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
     ),
     meta: $checkedConvert(
       'meta',

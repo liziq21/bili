@@ -169,6 +169,36 @@ void main() {
       expect(detail.items.single.id, 'BV1xx411x7vy');
     });
 
+    test('skips archives missing a core id instead of failing', () async {
+      final data = NetworkBiliPlaylistContentData.fromJson({
+        'archives': [
+          {
+            'aid': 1,
+            'bvid': 'BV1valid',
+            'title': 'Valid',
+            'duration': 60,
+            'stat': {'view': 5},
+          },
+          {'aid': 2, 'title': 'Missing bvid'},
+          {'bvid': 'BV1missingAid', 'title': 'Missing aid'},
+        ],
+        'meta': {'season_id': 777, 'name': 'Mixed', 'mid': 2, 'total': 3},
+        'page': {'page_num': 1, 'page_size': 30, 'total': 3},
+      });
+      final network = _FakeNetworkUserDataSource(response: data);
+      final source = BiliPlaylistContentRemoteDataSource(network: network);
+
+      final result = await source.fetchPlaylistContent(playlistId: '2:777');
+
+      final page = switch (result) {
+        Success(:final success) => success,
+        Error() => fail('expected a successful page'),
+      };
+      final detail = page.data.single;
+      expect(detail.items, hasLength(1));
+      expect(detail.items.single.id, 'BV1valid');
+    });
+
     test(
       'rejects a playlist id without an owner mid before any request',
       () async {
