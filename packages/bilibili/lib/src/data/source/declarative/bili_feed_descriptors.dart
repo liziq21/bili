@@ -21,6 +21,7 @@ const biliVideoFeedFields = <String, FieldMapping>{
 
 const biliPopularFeedDescriptor = FeedMappingDescriptor(
   itemsPath: r'$.data.list[*]',
+  schemaVersion: VideoModel.schemaVersion,
   successCodePath: r'$.code',
   successCode: 0,
   messagePath: r'$.message',
@@ -31,6 +32,7 @@ const biliPopularFeedDescriptor = FeedMappingDescriptor(
 
 const biliRankingFeedDescriptor = FeedMappingDescriptor(
   itemsPath: r'$.data.list[*]',
+  schemaVersion: VideoModel.schemaVersion,
   successCodePath: r'$.code',
   successCode: 0,
   messagePath: r'$.message',

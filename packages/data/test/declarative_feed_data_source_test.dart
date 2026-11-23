@@ -178,6 +178,18 @@ void main() {
     expect(result.isError(), isTrue);
   });
 
+  test('exposes the canonical schema version', () {
+    expect(descriptor.schemaVersion, VideoModel.schemaVersion);
+    expect(source(feedJson()).schemaVersion, VideoModel.schemaVersion);
+
+    const next = FeedMappingDescriptor(
+      itemsPath: r'$.data.list[*]',
+      schemaVersion: 2,
+      fields: {},
+    );
+    expect(next.schemaVersion, 2);
+  });
+
   test('reads JSON paths', () {
     final json = {
       'data': {

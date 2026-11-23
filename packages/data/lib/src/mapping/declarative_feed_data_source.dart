@@ -122,6 +122,9 @@ final class DeclarativeFeedDataSource<T>({
     transforms: transforms,
   );
 
+  /// The canonical model version this feed targets.
+  int get schemaVersion => descriptor.schemaVersion;
+
   @override
   Future<Result<Page<T>, Exception>> fetchFeed({int? pageKey}) async {
     final page = pageKey ?? 1;

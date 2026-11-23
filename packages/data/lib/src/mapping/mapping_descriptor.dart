@@ -17,13 +17,15 @@ final class const FieldMapping({
 /// A source-neutral description of one feed page.
 ///
 /// [itemsPath] must select a JSON list (for example `$.data.list[*]`).
-/// [fields] maps canonical field names to their extraction rules. The optional
+/// [fields] maps canonical field names to their extraction rules. [schemaVersion]
+/// declares which canonical model version the fields target. The optional
 /// envelope fields decide success from the source's business code, and the
 /// optional [hasMorePath] decides whether another page exists.
 @immutable
 final class const FeedMappingDescriptor({
   required final String itemsPath,
   required final Map<String, FieldMapping> fields,
+  final int schemaVersion = 1,
   final String? successCodePath,
   final int? successCode,
   final String? messagePath,

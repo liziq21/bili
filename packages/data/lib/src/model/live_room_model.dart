@@ -6,4 +6,7 @@ final class const LiveRoomModel({
   final String? thumbnailUrl,
   final String? creatorProfileName,
   final String? creatorProfileId,
-});
+}) {
+  /// Version of the canonical live-room shape described by [LiveRoomModel].
+  static const int schemaVersion = 1;
+}

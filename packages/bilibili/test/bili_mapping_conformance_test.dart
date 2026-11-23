@@ -23,6 +23,11 @@ void main() {
       goldenPath: 'test/fixtures/declarative/ranking.json',
     );
   });
+
+  test('declarative feeds target the canonical video schema version', () {
+    expect(biliPopularFeedDescriptor.schemaVersion, VideoModel.schemaVersion);
+    expect(biliRankingFeedDescriptor.schemaVersion, VideoModel.schemaVersion);
+  });
 }
 
 Future<void> _expectConforms({

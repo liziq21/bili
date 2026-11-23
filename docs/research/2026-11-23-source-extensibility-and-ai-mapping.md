@@ -11,7 +11,7 @@
 2. **把“任意源 → 通用模型”做成运行时 AI 模型，技术上可行，生产上不推荐**。确定性、精确值（ID/URL/时间/计数）、静默错误、离线 CI、成本/延迟、隐私与提示注入、跨平台端上推理、模型版本与评测都会成为新的维护面。
 3. **推荐把 AI 放在构建期/运维期**：用 LLM 从 fixture + 目标 schema 生成/修复声明式描述符或适配器代码，再用确定性的 fixture 契约测试验收；运行时零模型调用。
 4. **推荐数据是最适合确定性映射的场景**（结构化、字段少、量大），不是最需要 AI 的场景。当前 YouTube 源没有匿名推荐 Feed（`videoFeedDataSources` 为空），瓶颈是能力/端点，不是映射。
-5. **低风险 PoC 已验证声明式映射可行**：新增通用映射引擎与 B 站热门/排行描述符，用现有 fixture 对比旧 adapter，相关包共 150 个测试通过（data 18、bilibili 132，其中新增 16 个），并加入 fixture → canonical golden 的 conformance 门禁；workspace 严格分析和 test matrix 门禁均通过。
+5. **低风险 PoC 已验证声明式映射可行**：新增通用映射引擎与 B 站热门/排行描述符，用现有 fixture 对比旧 adapter，相关包共 152 个测试通过（data 19、bilibili 133，其中新增 18 个），并加入 fixture → canonical golden 的 conformance 门禁与 `schemaVersion`；workspace 严格分析和 test matrix 门禁均通过。
 
 ## 2. 现状与证据
 
@@ -132,6 +132,7 @@ LLM 只能覆盖其中“DTO → 通用模型”的一部分，其余部分不�
 ```yaml
 source: bilibili
 capability: videoFeed
+schemaVersion: 1
 feeds:
   - id: popular
     title: 热门视频
@@ -195,10 +196,12 @@ tool/capture 抓 fixture
 
 - `packages/data/lib/src/mapping/`
   - `json_path.dart`：最小 JSON path（`$`、点号、`[n]`、`[*]`）。
-  - `mapping_descriptor.dart`：`FieldMapping` / `FeedMappingDescriptor`。
+  - `mapping_descriptor.dart`：`FieldMapping` / `FeedMappingDescriptor`，后者带 `schemaVersion`。
   - `mapping_transform.dart`：确定性 transform 注册表（`string`、`int`、`parseCount`、`parseDuration`、`epochSeconds`、`httpsUrl`、`htmlText`、`pathSegment`）。
-  - `declarative_feed_data_source.dart`：`MappingEvaluator` + `DeclarativeFeedDataSource<T>`。
+  - `declarative_feed_data_source.dart`：`MappingEvaluator` + `DeclarativeFeedDataSource<T>`，暴露 `schemaVersion`。
   - `mapping_conformance.dart`：结构化 JSON 差异比较，供测试与 CLI 共用。
+- `packages/data/lib/src/model/video_model.dart` / `live_room_model.dart`
+  - 各自声明 `schemaVersion` 常量，描述符显式指向该版本。
 - `packages/bilibili/lib/src/data/source/declarative/bili_feed_descriptors.dart`
   - 共享的 B 站视频字段规则；
   - 热门 / 排行两个 `FeedMappingDescriptor`；
@@ -217,10 +220,10 @@ tool/capture 抓 fixture
 
 新增：
 
-- `packages/data/test/declarative_feed_data_source_test.dart`：6 个测试，覆盖 transform、envelope、分页、丢弃无效条目、未知 transform、JSON path。
+- `packages/data/test/declarative_feed_data_source_test.dart`：7 个测试，覆盖 transform、envelope、分页、丢弃无效条目、未知 transform、`schemaVersion`、JSON path。
 - `packages/data/test/mapping_conformance_test.dart`：3 个测试，覆盖结构化 JSON 差异比较的相等、嵌套值/缺失 key/列表长度、类型不匹配。
 - `packages/bilibili/test/bili_declarative_feed_test.dart`：5 个测试，使用真实 `popular.json` / `ranking.json` fixture，逐项对比声明式 Feed 与旧 adapter 的输出；覆盖 envelope 失败、`no_more`、缺少 `bvid` 的条目。
-- `packages/bilibili/test/bili_mapping_conformance_test.dart`：2 个测试，把声明式输出与由旧 adapter 生成的 canonical golden 做结构 diff。
+- `packages/bilibili/test/bili_mapping_conformance_test.dart`：3 个测试，把声明式输出与由旧 adapter 生成的 canonical golden 做结构 diff，并校验描述符指向的 canonical `schemaVersion`。
 
 实际执行（Flutter 3.50.0 / Dart 3.14.0，与 `.fvmrc` 一致）：
 
@@ -228,9 +231,9 @@ tool/capture 抓 fixture
 (cd packages/bilibili && dart run tool/mapping_conformance.dart --feed popular)  # 20 items conform
 (cd packages/bilibili && dart run tool/mapping_conformance.dart --feed ranking)  # 100 items conform
 (cd packages/data && dart analyze --fatal-infos --fatal-warnings)               # No issues found!
-(cd packages/data && dart test)                                                  # 18 tests passed
+(cd packages/data && dart test)                                                  # 19 tests passed
 (cd packages/bilibili && flutter analyze --fatal-infos --fatal-warnings)         # No issues found!
-(cd packages/bilibili && flutter test test/)                                     # 132 tests passed
+(cd packages/bilibili && flutter test test/)                                     # 133 tests passed
 flutter analyze --fatal-infos --fatal-warnings                                   # No issues found!
 python3 tool/test_matrix.py --check                                              # 176/176 classified
 ```
@@ -243,13 +246,13 @@ python3 tool/test_matrix.py --check                                             
 - `tool/mapping_conformance.dart` 已实现，但尚未接入独立的 CI job；当前由 `packages/bilibili` 的测试套件执行同一 conformance 检查。
 - LLM 生成描述符的流水线尚未实现；本次只验证“确定性端”可行。
 - 两个 feed 的 PoC 仍然引入了共享引擎代码；在 2 个源的规模上，代码量不一定下降。收益来自第 N 个简单源的边际成本。
-- 描述符没有 `schemaVersion` 字段；生产化时应补上，并与通用模型版本一起管理。
+- 跨源聚合的 `(sourceId, id)` 复合键尚未引入；`schemaVersion` 已加入 descriptor 与 canonical model，但还没有迁移/升级策略。
 
 ## 7. 未决问题
 
 - 是否把描述符从 Dart 常量迁移到 YAML/JSON 资产，以便非 Dart 工具和 LLM 直接生成？
 - 是否把 `tool/mapping_conformance.dart` 接入独立 CI job，还是继续由包测试套件承担？
-- 是否为跨源聚合引入 `(sourceId, id)` 复合键与 `schemaVersion`？
+- 是否为跨源聚合引入 `(sourceId, id)` 复合键？
 - 运行时 LLM 兜底是否需要，以及如何在“测试/CI 不联网”的约束下评测？
 - `app/AGENTS.md` 引用的 `docs/source-injection.md` 在当前 checkout 中不存在；源注入契约文档需要补回。
 

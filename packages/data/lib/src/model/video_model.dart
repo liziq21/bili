@@ -9,4 +9,10 @@ final class const VideoModel({
   final String? desc,
   final String? creatorProfileName,
   final String? creatorProfileId,
-});
+}) {
+  /// Version of the canonical video shape described by [VideoModel].
+  ///
+  /// Bump this when a field is removed or its meaning changes; declarative
+  /// mapping descriptors declare the version they target.
+  static const int schemaVersion = 1;
+}
