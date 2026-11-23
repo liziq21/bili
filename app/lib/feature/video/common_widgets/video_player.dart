@@ -14,6 +14,8 @@ import 'package:model/model.dart';
 import '../../../datastore/preferences_data_source.dart';
 import '../../../data/repository/video_detail_repository.dart';
 import '../../../design/design.dart';
+import '../../../domain/sleep_timer_action.dart';
+import '../../notification/sleep_timer_notifier.dart';
 import '../../setting/app_settings.dart';
 import 'playback_speed_chip.dart';
 import 'player_gesture_layer.dart';
@@ -68,6 +70,9 @@ class const VideoPlayer({
 
   /// 最小化：退出全屏并暂停播放，保留播放位置。
   final VoidCallback? onMinimize,
+
+  /// 睡眠定时器到点选择「关闭播放器」时调用，通常是页面的返回入口。
+  final VoidCallback? onExit,
 
   /// 画面构建器，缺省渲染原生 [Video]。
   ///
@@ -215,6 +220,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             keyboardSeekStepWithShift: widget.keyboardSeekStepWithShift,
             onToggleFullscreen: widget.onToggleFullscreen,
             onMinimize: widget.onMinimize,
+            onExit: widget.onExit,
             onTapSurface: _toggleControls,
             surfaceBuilder: widget.surfaceBuilder,
             queue: widget.queue,
@@ -267,6 +273,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                 stream: stream,
                 fullscreen: false,
                 onToggleFullscreen: widget.onToggleFullscreen,
+                onExit: widget.onExit,
               ),
             ],
           );
@@ -276,19 +283,120 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   @override
   Widget build(BuildContext context) {
     final surface = _surface();
-    if (widget.fullscreen || widget.controller == null) return surface;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 与内层画面同理：让页面给播放器设的高度上限能传到 16:9 画面。
-        // 外层 Column 若不把 surface 设为 Flexible，非弹性子项会拿到无界高度，
-        // 内层的 Flexible 就永远收不到这个上限。
-        Flexible(child: surface),
-        _QueueControlBar(controller: widget.controller!),
-      ],
+    final controller = widget.controller;
+    final player = widget.fullscreen || controller == null
+        ? surface
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 与内层画面同理：让页面给播放器设的高度上限能传到 16:9 画面。
+              // 外层 Column 若不把 surface 设为 Flexible，非弹性子项会拿到无界高度，
+              // 内层的 Flexible 就永远收不到这个上限。
+              Flexible(child: surface),
+              _QueueControlBar(controller: controller),
+            ],
+          );
+    // 倒计时状态挂在这里而不是控制栏里：全屏切换与自动隐藏都会重建控制栏。
+    if (controller == null) return player;
+    return _SleepTimerHost(
+      controller: controller,
+      onExit: widget.onExit,
+      child: player,
     );
   }
+}
+
+/// 在控制栏之外持有睡眠定时器，让倒计时跨全屏切换与自动隐藏存活。
+class const _SleepTimerHost({
+  required final MediaPlaybackController controller,
+  required final VoidCallback? onExit,
+  required final Widget child,
+}) extends StatefulWidget {
+  @override
+  State<_SleepTimerHost> createState() => _SleepTimerHostState();
+}
+
+class _SleepTimerHostState() extends State<_SleepTimerHost> {
+  late final SleepTimerController _timer;
+  SleepTimerNotifier? _notifier;
+  SleepTimerAction _defaultAction = SleepTimerAction.pauseNow;
+  bool _userStarted = false;
+  bool _permissionRequested = false;
+
+  /// 本播放器独占的提醒 id，叠加播放器时互不影响。
+  final int _notificationId = allocateSleepTimerNotificationId();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = SleepTimerController(
+      widget.controller,
+      onEndingSoon: _notifyEndingSoon,
+      onExitPlayer: widget.onExit,
+      onCanceled: _cancelNotification,
+    );
+    try {
+      _notifier = context.read<SleepTimerNotifier>();
+    } on Object catch (_) {}
+    unawaited(_restoreDefault());
+  }
+
+  Future<void> _notifyEndingSoon() async {
+    await _notifier?.notifyEndingSoon(id: _notificationId);
+  }
+
+  void _cancelNotification() {
+    unawaited(_notifier?.cancel(id: _notificationId));
+  }
+
+  Future<void> _restoreDefault() async {
+    final PreferencesDataSource preferences;
+    try {
+      preferences = context.read<PreferencesDataSource>();
+    } on Object catch (_) {
+      return;
+    }
+    final loaded = await PlayerSettings.load(preferences);
+    if (!mounted) return;
+    setState(() => _defaultAction = loaded.sleepTimerDefaultAction);
+    if (_userStarted ||
+        !isValidSleepTimerMinutes(loaded.sleepTimerDefaultMinutes)) {
+      return;
+    }
+    _timer.start(
+      loaded.sleepTimerDefaultMinutes,
+      action: loaded.sleepTimerDefaultAction,
+    );
+    _requestPermission(loaded.sleepTimerDefaultAction);
+  }
+
+  /// 只有会真正停播的行为才申请通知权限；`afterCurrent` 不发提醒。
+  void _requestPermission(SleepTimerAction action) {
+    if (_permissionRequested || action == SleepTimerAction.afterCurrent) {
+      return;
+    }
+    _permissionRequested = true;
+    unawaited(_notifier?.requestPermission());
+  }
+
+  void _handleTimerStarted(SleepTimerAction action) {
+    _userStarted = true;
+    _requestPermission(action);
+  }
+
+  @override
+  void dispose() {
+    _timer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SleepTimerScope(
+    controller: _timer,
+    defaultAction: _defaultAction,
+    onTimerStarted: _handleTimerStarted,
+    child: widget.child,
+  );
 }
 
 /// 播放队列控制条：下一首 / 上一首 / 循环播放模式切换。
@@ -464,6 +572,7 @@ class const _VideoSurface({
   required final Duration keyboardSeekStepWithShift,
   required final VoidCallback? onToggleFullscreen,
   required final VoidCallback? onMinimize,
+  final VoidCallback? onExit,
   required final VoidCallback onTapSurface,
   required final Widget Function(MediaPlaybackController controller)?
   surfaceBuilder,
@@ -698,16 +807,23 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
         ),
         if (videoId != null)
           DanmakuOverlay(controller: widget.controller, videoId: videoId),
-        if (widget.fullscreen && widget.controlsVisible)
+        if (widget.fullscreen)
           Positioned(
             top: $styles.insets.xs,
             right: $styles.insets.xs,
-            child: _PlayerControlBar(
-              controller: widget.controller,
-              stream: widget.stream,
-              fullscreen: true,
-              onToggleFullscreen: widget.onToggleFullscreen,
-              onMinimize: widget.onMinimize,
+            // 自动隐藏只把控制栏收起，不卸载：卸载会重建整条控制栏，
+            // 里面的倒计时状态随之丢失。
+            child: Visibility(
+              visible: widget.controlsVisible,
+              maintainState: true,
+              child: _PlayerControlBar(
+                controller: widget.controller,
+                stream: widget.stream,
+                fullscreen: true,
+                onToggleFullscreen: widget.onToggleFullscreen,
+                onMinimize: widget.onMinimize,
+                onExit: widget.onExit,
+              ),
             ),
           ),
         ListenableBuilder(
@@ -747,12 +863,13 @@ class const _PlayerControlBar({
   required final bool fullscreen,
   required final VoidCallback? onToggleFullscreen,
   final VoidCallback? onMinimize,
+  final VoidCallback? onExit,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = <Widget>[
-      SleepTimerChip(controller: controller),
+      SleepTimerChip(controller: controller, onExit: onExit),
       QualityPickerChip(controller: controller, stream: stream),
       PlaybackSpeedChip(controller: controller),
       _FullscreenButton(fullscreen: fullscreen, onPressed: onToggleFullscreen),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:model/model.dart';
@@ -7,6 +6,7 @@ import 'package:model/model.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import 'feed_update_notifier.dart';
+import 'notification_locale.dart';
 import 'notification_presenter.dart';
 
 /// Android implementation of [FeedUpdateNotifier] backed by
@@ -27,19 +27,9 @@ final class LocalFeedUpdateNotifier(
   final NotificationPresenter _presenter =
       presenter ?? AndroidNotificationPresenter();
 
-  /// 通知文案与界面同语言。
-  ///
-  /// 通知在 UI 之外发出，拿不到 `BuildContext`，所以按系统语言解析；解析
-  /// 规则与 `MaterialApp.localeResolutionCallback` 一致（只比语言码，不支持的
-  /// 语言回落到第一项，即英文）。测试可注入固定文案。
+  /// 通知文案与界面同语言；测试可注入固定文案。
   final AppLocalizations _l10n =
-      localizations ??
-      lookupAppLocalizations(
-        switch (PlatformDispatcher.instance.locale.languageCode) {
-          'zh' => const Locale('zh'),
-          _ => const Locale('en'),
-        },
-      );
+      localizations ?? resolveNotificationLocalizations();
 
   // broadcast: 应用生命周期内可能有多个监听者（shell 重建），而 `initialize`
   // 之前通常还没有人订阅。
@@ -77,11 +67,19 @@ final class LocalFeedUpdateNotifier(
 
     try {
       // 通道创建不弹框；权限由 [requestPermission] 在用户显式开启时申请。
-      await _presenter.initialize(onTap: (_) => _emitOpened());
+      //
+      // 同一个插件也投递睡眠定时器提醒，只有订阅更新的载荷才该跳去动态。
+      await _presenter.initialize(
+        onTap: (payload) {
+          if (payload == feedNotificationPayload) _emitOpened();
+        },
+      );
       _initialized = true;
 
       final launch = await _presenter.launchDetails();
-      if (launch.launched) _emitOpened();
+      if (launch.launched && launch.payload == feedNotificationPayload) {
+        _emitOpened();
+      }
 
       return const Result.success(null);
     } on Object catch (error, stackTrace) {
@@ -149,9 +147,8 @@ final class LocalFeedUpdateNotifier(
       await _presenter.show(
         title: _l10n.feedUpdateNotificationTitle,
         body: _l10n.feedUpdateNotificationBody(newItems),
-        // Payload 标记目的地；目前点击只关心「发生了点击」，保留载荷让将来
-        // 的深链（例如定位到具体频道）不必再改接口。
-        payload: 'feed',
+        // Payload 标记目的地；点击回调按它过滤，睡眠提醒不会误跳动态。
+        payload: feedNotificationPayload,
       );
       await _preferences.set(
         PreferencesKey.feedUpdateNotificationLastCount,

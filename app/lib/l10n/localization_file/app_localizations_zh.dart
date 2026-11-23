@@ -121,7 +121,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerSleepTimerAction => '睡眠定时结束行为';
 
   @override
-  String get playerSleepTimerActionSubtitle => '选择倒计时结束后立即暂停，还是播完当前视频再停';
+  String get playerSleepTimerActionSubtitle => '选择倒计时结束后立即暂停、播完当前视频再停，还是关闭播放器';
 
   @override
   String get playerQualityAuto => '自动';
@@ -4743,4 +4743,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channelVideosEmpty => '暂无视频';
+
+  @override
+  String get sleepTimerActionExitPlayerLabel => '关闭播放器';
+
+  @override
+  String get sleepTimerDuration => '时长';
+
+  @override
+  String get sleepTimerEndingSoonTitle => '睡眠定时器';
+
+  @override
+  String get sleepTimerEndingSoonBody => '1 分钟后将停止播放';
+
+  @override
+  String get sleepTimerChannelName => '睡眠定时器';
+
+  @override
+  String get sleepTimerChannelDescription => '播放停止前一分钟提示';
 }

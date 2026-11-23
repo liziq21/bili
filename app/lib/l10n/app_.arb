@@ -149,7 +149,7 @@
   "@playerSleepTimerAction": {
     "description": "Player setting - default sleep timer end action"
   },
-  "playerSleepTimerActionSubtitle": "Pause immediately or finish the current video before stopping",
+  "playerSleepTimerActionSubtitle": "Pause immediately, finish the current video, or close the player when the timer ends",
   "@playerSleepTimerActionSubtitle": {
     "description": "Subtitle for the default sleep timer end action setting"
   },
@@ -1344,7 +1344,7 @@
   "@sleepTimerLabel": {
     "description": "Sleep timer chip label when no timer is running"
   },
-  "sleepTimerTitle": "睡眠定时器",
+  "sleepTimerTitle": "Sleep timer",
   "@sleepTimerTitle": {
     "description": "Sleep timer picker title"
   },
@@ -1352,19 +1352,19 @@
   "@sleepTimerCancel": {
     "description": "Cancel the running sleep timer"
   },
-  "sleepTimerActionNowLabel": "到时暂停",
+  "sleepTimerActionNowLabel": "Pause now",
   "@sleepTimerActionNowLabel": {
     "description": "Sleep timer group heading for pausing as soon as the countdown ends"
   },
-  "sleepTimerAfterCurrentTitle": "播完本条即停",
+  "sleepTimerAfterCurrentTitle": "After current video",
   "@sleepTimerAfterCurrentTitle": {
     "description": "Sleep timer group heading for stopping after the current item finishes"
   },
-  "sleepTimerAfterCurrentOptionSuffix": "（播完本条）",
+  "sleepTimerAfterCurrentOptionSuffix": " (after current)",
   "@sleepTimerAfterCurrentOptionSuffix": {
     "description": "Suffix appended to sleep timer durations in the stop-after-current group so the two groups are not textually identical"
   },
-  "sleepTimerAfterCurrentPending": "播完本条",
+  "sleepTimerAfterCurrentPending": "After current",
   "@sleepTimerAfterCurrentPending": {
     "description": "Sleep timer chip label while the countdown has ended and the stop is waiting for the current item to finish"
   },
@@ -5472,7 +5472,7 @@
   "@singleQualityOnly": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "afterCurrentItem": "播完本条",
+  "afterCurrentItem": "After current",
   "@afterCurrentItem": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -5480,11 +5480,11 @@
   "@timer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "pauseWhenTimeUp": "到时暂停",
+  "pauseWhenTimeUp": "When time is up",
   "@pauseWhenTimeUp": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "minutesValue": "{p1} 分钟",
+  "minutesValue": "{p1} min",
   "@minutesValue": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
@@ -5493,11 +5493,11 @@
       }
     }
   },
-  "stopAfterCurrentItem": "播完本条即停",
+  "stopAfterCurrentItem": "Stop after current",
   "@stopAfterCurrentItem": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
-  "minutesWithSuffix": "{p1} 分钟",
+  "minutesWithSuffix": "{p1} min",
   "@minutesWithSuffix": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
     "placeholders": {
@@ -5506,7 +5506,7 @@
       }
     }
   },
-  "cancelTimer": "取消定时",
+  "cancelTimer": "Cancel timer",
   "@cancelTimer": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
   },
@@ -6412,5 +6412,29 @@
   "channelVideosEmpty": "No videos yet",
   "@channelVideosEmpty": {
     "description": "Shown on a creator page when the channel has no uploaded videos"
+  },
+  "sleepTimerActionExitPlayerLabel": "Close player",
+  "@sleepTimerActionExitPlayerLabel": {
+    "description": "Sleep timer action that pauses playback and closes the player when the countdown ends"
+  },
+  "sleepTimerDuration": "Duration",
+  "@sleepTimerDuration": {
+    "description": "Sleep timer picker section heading for the duration list"
+  },
+  "sleepTimerEndingSoonTitle": "Sleep timer",
+  "@sleepTimerEndingSoonTitle": {
+    "description": "Title of the system notification shown one minute before the sleep timer stops playback"
+  },
+  "sleepTimerEndingSoonBody": "Playback stops in 1 minute",
+  "@sleepTimerEndingSoonBody": {
+    "description": "Body of the system notification shown one minute before the sleep timer stops playback"
+  },
+  "sleepTimerChannelName": "Sleep timer",
+  "@sleepTimerChannelName": {
+    "description": "Android notification channel name for the sleep timer, shown in system settings"
+  },
+  "sleepTimerChannelDescription": "Warns one minute before playback stops",
+  "@sleepTimerChannelDescription": {
+    "description": "Android notification channel description for the sleep timer, shown in system settings"
   }
 }
