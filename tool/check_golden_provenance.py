@@ -159,7 +159,8 @@ def check_provenance(
                 GoldenProblem(
                     changed.path,
                     'no successful rerecord-goldens.yml run in the commit history '
-                    'uploaded these exact bytes',
+                    'uploaded these exact bytes; the run\'s artifact may have '
+                    'expired, in which case re-record the baseline',
                 )
             )
         else:
