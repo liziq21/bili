@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'mapping_fingerprint.dart';
+
 /// Describes how one canonical field is read from a source item.
 ///
 /// Exactly one of [path] or [template] is normally set. [fallbackPath] is read
@@ -34,4 +36,5 @@ final class const FeedMappingDescriptor({
   final bool hasMoreWhen = true,
   final String? totalCountPath,
   final int? pageSize,
+  final MappingProvenance? provenance,
 });

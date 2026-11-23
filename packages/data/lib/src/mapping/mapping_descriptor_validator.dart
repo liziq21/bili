@@ -1,4 +1,5 @@
 import 'mapping_descriptor.dart';
+import 'mapping_fingerprint.dart';
 
 /// Checks a descriptor before it is used by a feed.
 ///
@@ -9,6 +10,8 @@ import 'mapping_descriptor.dart';
 List<String> validateFeedMappingDescriptor(
   FeedMappingDescriptor descriptor, {
   required Set<String> requiredFields,
+  bool requireProvenance = false,
+  bool requireFingerprint = false,
 }) {
   final issues = <String>[];
 
@@ -20,6 +23,24 @@ List<String> validateFeedMappingDescriptor(
   }
   if (descriptor.fields.isEmpty) {
     issues.add('fields must not be empty');
+  }
+
+  final provenance = descriptor.provenance;
+  if (provenance == null) {
+    if (requireProvenance) {
+      issues.add('provenance is required');
+    }
+  } else {
+    _validateProvenance(provenance, issues);
+    if (requireFingerprint) {
+      if (provenance.fixtureHash == null || provenance.fixtureHash!.isEmpty) {
+        issues.add('provenance.fixtureHash is required');
+      }
+      if (provenance.sourceSchemaHash == null ||
+          provenance.sourceSchemaHash!.isEmpty) {
+        issues.add('provenance.sourceSchemaHash is required');
+      }
+    }
   }
 
   for (final field in requiredFields) {
@@ -62,4 +83,28 @@ List<String> validateFeedMappingDescriptor(
   }
 
   return issues;
+}
+
+void _validateProvenance(MappingProvenance provenance, List<String> issues) {
+  if (provenance.generatedBy.trim().isEmpty) {
+    issues.add('provenance.generatedBy must not be empty');
+  }
+  if (provenance.promptVersion.trim().isEmpty) {
+    issues.add('provenance.promptVersion must not be empty');
+  }
+  if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(provenance.generatedAt)) {
+    issues.add('provenance.generatedAt must be YYYY-MM-DD');
+  }
+  if (provenance.reviewer.trim().isEmpty) {
+    issues.add('provenance.reviewer must not be empty');
+  }
+  for (final entry in {
+    'fixtureHash': provenance.fixtureHash,
+    'sourceSchemaHash': provenance.sourceSchemaHash,
+  }.entries) {
+    final value = entry.value;
+    if (value != null && !RegExp(r'^[0-9a-f]{8}$').hasMatch(value)) {
+      issues.add('provenance.${entry.key} must be 8 lowercase hex chars');
+    }
+  }
 }

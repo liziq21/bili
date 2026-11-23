@@ -77,6 +77,7 @@ void main() {
     Map<String, dynamic> json, {
     FeedMappingDescriptor mapping = descriptor,
     MappingTransformRegistry? transforms,
+    String? Function(VideoModel item)? identityOf,
   }) => DeclarativeFeedDataSource<VideoModel>(
     sourceId: 'test',
     id: 'feed',
@@ -85,6 +86,7 @@ void main() {
     fetchJson: ({int? pageKey}) async => json,
     buildItem: build,
     transforms: transforms,
+    identityOf: identityOf,
   );
 
   test('maps a feed page with deterministic transforms', () async {
@@ -165,6 +167,28 @@ void main() {
     };
 
     expect(page.data.map((video) => video.id), ['ok']);
+  });
+
+  test('deduplicates items when an identity is supplied', () async {
+    final result = await source({
+      'code': 0,
+      'message': 'OK',
+      'data': {
+        'no_more': true,
+        'list': [
+          {'id': 'v1', 'title': 'first'},
+          {'id': 'v1', 'title': 'duplicate'},
+          {'id': 'v2', 'title': 'second'},
+        ],
+      },
+    }, identityOf: (video) => video.id).fetchFeed();
+    final page = switch (result) {
+      Success(:final success) => success,
+      Error(:final error) => fail('expected success: $error'),
+    };
+
+    expect(page.data.map((video) => video.id), ['v1', 'v2']);
+    expect(page.data.first.title, 'first');
   });
 
   test('returns Result.error for an unknown transform', () async {

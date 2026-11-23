@@ -135,6 +135,7 @@ final class DeclarativeFeedDataSource<T>({
   required final FeedJsonFetcher fetchJson,
   required final FeedItemBuilder<T> buildItem,
   final MappingTransformRegistry? transforms,
+  final String? Function(T item)? identityOf,
 }) extends FeedRemoteDataSource<T> {
   late final MappingEvaluator _evaluator = MappingEvaluator(
     descriptor: descriptor,
@@ -155,9 +156,13 @@ final class DeclarativeFeedDataSource<T>({
       }
 
       final data = <T>[];
+      final seenIdentities = <String>{};
       for (final item in _evaluator.evaluateItems(json)) {
         final built = buildItem(item);
-        if (built != null) data.add(built);
+        if (built == null) continue;
+        final identity = identityOf?.call(built);
+        if (identity != null && !seenIdentities.add(identity)) continue;
+        data.add(built);
       }
 
       return Result.success(

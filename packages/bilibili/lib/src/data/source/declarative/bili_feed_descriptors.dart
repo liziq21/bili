@@ -28,6 +28,15 @@ const biliPopularFeedDescriptor = FeedMappingDescriptor(
   hasMorePath: r'$.data.no_more',
   hasMoreWhen: false,
   fields: biliVideoFeedFields,
+  provenance: MappingProvenance(
+    generatedBy: 'hand-written',
+    promptVersion: 'poc-v1',
+    generatedAt: '2026-11-23',
+    reviewer: 'PoC',
+    fixtureHash: '676f7551',
+    sourceSchemaHash: '7fb4b425',
+    notes: 'Validated against the legacy popular adapter fixture.',
+  ),
 );
 
 const biliRankingFeedDescriptor = FeedMappingDescriptor(
@@ -37,6 +46,15 @@ const biliRankingFeedDescriptor = FeedMappingDescriptor(
   successCode: 0,
   messagePath: r'$.message',
   fields: biliVideoFeedFields,
+  provenance: MappingProvenance(
+    generatedBy: 'hand-written',
+    promptVersion: 'poc-v1',
+    generatedAt: '2026-11-23',
+    reviewer: 'PoC',
+    fixtureHash: '590f0408',
+    sourceSchemaHash: '518bde64',
+    notes: 'Validated against the legacy ranking adapter fixture.',
+  ),
 );
 
 /// Field rules for the space uploads feed.
@@ -65,6 +83,15 @@ const biliUserVideosDescriptor = FeedMappingDescriptor(
   totalCountPath: r'$.data.page.count',
   pageSize: 30,
   fields: biliUserVideoFeedFields,
+  provenance: MappingProvenance(
+    generatedBy: 'hand-written',
+    promptVersion: 'poc-v1',
+    generatedAt: '2026-11-23',
+    reviewer: 'PoC',
+    fixtureHash: 'ce81e5cb',
+    sourceSchemaHash: 'c83e8130',
+    notes: 'Validated against the legacy user-videos adapter fixture.',
+  ),
 );
 
 /// Bilibili-specific transforms layered on the neutral defaults.
@@ -105,6 +132,7 @@ DeclarativeFeedDataSource<VideoModel> createBiliPopularDeclarativeFeed({
   fetchJson: fetchJson,
   buildItem: buildBiliFeedVideoModel,
   transforms: MappingTransformRegistry(biliMappingTransforms),
+  identityOf: (video) => video.id,
 );
 
 DeclarativeFeedDataSource<VideoModel> createBiliRankingDeclarativeFeed({
@@ -117,6 +145,7 @@ DeclarativeFeedDataSource<VideoModel> createBiliRankingDeclarativeFeed({
   fetchJson: fetchJson,
   buildItem: buildBiliFeedVideoModel,
   transforms: MappingTransformRegistry(biliMappingTransforms),
+  identityOf: (video) => video.id,
 );
 
 DeclarativeFeedDataSource<VideoModel> createBiliUserVideosDeclarativeFeed({
@@ -129,4 +158,5 @@ DeclarativeFeedDataSource<VideoModel> createBiliUserVideosDeclarativeFeed({
   fetchJson: fetchJson,
   buildItem: buildBiliFeedVideoModel,
   transforms: MappingTransformRegistry(biliMappingTransforms),
+  identityOf: (video) => video.id,
 );

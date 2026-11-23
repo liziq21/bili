@@ -67,9 +67,25 @@ void main() {
     expect(declarativePage.totalPages, legacyPage.totalPages);
     expect(declarativePage.totalPages, 2);
     expect(declarativePage.data, hasLength(legacyPage.data.length));
+    expect(declarativePage.data, hasLength(30));
+    expect(
+      declarativePage.data.map((video) => video.id).toSet(),
+      hasLength(30),
+    );
     for (var index = 0; index < legacyPage.data.length; index++) {
       _expectSameVideo(declarativePage.data[index], legacyPage.data[index]);
     }
+
+    final first = declarativePage.data.first;
+    expect(first.id, 'BV1ujNV6qEXg');
+    expect(first.title, '帮不帮？');
+    expect(first.url, 'https://www.bilibili.com/video/BV1ujNV6qEXg');
+    expect(first.viewCount, 759866);
+    expect(first.uploadDate?.millisecondsSinceEpoch, 1783878096000);
+    expect(first.duration, 22);
+    expect(first.creatorProfileName, '碧诗');
+    expect(first.creatorProfileId, '2');
+    expect(first.desc, contains('征兵场景'));
   });
 
   test('declarative user videos descriptor targets the canonical version', () {
