@@ -22,6 +22,8 @@ OTHER_GOLDEN = 'app/test/golden/goldens/ci/dark_theme.png'
 RERECORD = provenance.RERECORD_WORKFLOW
 MATCHING_BLOB = 'a' * 40
 SWAPPED_BLOB = 'b' * 40
+TRUSTED_RECORDER = 'c' * 40
+MODIFIED_RECORDER = 'd' * 40
 
 
 class FakeApi:
@@ -35,6 +37,8 @@ class FakeApi:
         file_blobs: dict[tuple[str, str], str] | None = None,
         recent: list[provenance.WorkflowRun] | None = None,
         ancestor_pairs: set[tuple[str, str]] | None = None,
+        recorder_blobs: dict[str, str] | None = None,
+        recorder_history: list[str] | None = None,
     ) -> None:
         self.files = files or []
         self.commits = commits or {}
@@ -44,13 +48,23 @@ class FakeApi:
         self.file_blobs = file_blobs or {}
         self.recent = recent or []
         self.ancestor_pairs = ancestor_pairs or set()
+        self.recorder_blobs = recorder_blobs
+        self.recorder_history = recorder_history or ['recorder-commit']
         self.artifact_requests: list[int] = []
         self.run_requests: list[str] = []
 
     def pull_files(self, pr: int) -> list[provenance.PullFile]:
         return self.files
 
+    def pull_head(self, pr: int) -> str:
+        return 'head'
+
+    def pull_base(self, pr: int) -> str:
+        return 'base-sha'
+
     def commits_touching(self, path: str, ref: str) -> list[str]:
+        if path == RERECORD:
+            return self.recorder_history
         return self.commits.get(path, [])
 
     def parents(self, sha: str) -> list[str]:
@@ -69,6 +83,10 @@ class FakeApi:
         return (ancestor, descendant) in self.ancestor_pairs
 
     def file_blob(self, path: str, ref: str) -> str | None:
+        if path == RERECORD:
+            if self.recorder_blobs is not None:
+                return self.recorder_blobs.get(ref)
+            return TRUSTED_RECORDER
         return self.file_blobs.get((path, ref))
 
     def artifact_blobs(self, run_id: int) -> dict[str, str] | None:
@@ -132,6 +150,14 @@ class ArtifactEntryMatchTest(unittest.TestCase):
         self.assertFalse(
             provenance.artifact_entry_matches(
                 'goldens/ci/old_home_screen.png', GOLDEN
+            )
+        )
+
+    def test_failures_copy_is_rejected(self):
+        """The artifact also archives failures/; a planted copy there proves nothing."""
+        self.assertFalse(
+            provenance.artifact_entry_matches(
+                'failures/app/test/golden/goldens/ci/home_screen.png', GOLDEN
             )
         )
 
@@ -311,6 +337,34 @@ class FindUnprovenancedTest(unittest.TestCase):
             ancestor_pairs={('run-head', 'base-sha')},
         )
         self.assertEqual(len(_problems(api, base='base-sha')), 1)
+
+    def test_modified_recorder_does_not_prove(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7)]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            recorder_blobs={
+                'recorder-commit': TRUSTED_RECORDER,
+                'run-head': MODIFIED_RECORDER,
+            },
+        )
+        self.assertEqual(len(_problems(api, base='base-sha')), 1)
+
+    def test_recorder_version_from_the_base_history_still_proves(self):
+        api = FakeApi(
+            files=[_golden()],
+            commits={GOLDEN: ['record-commit']},
+            parents={'record-commit': ['run-head']},
+            runs={'run-head': [_run(7)]},
+            artifacts={7: {'goldens/ci/home_screen.png': MATCHING_BLOB}},
+            recorder_blobs={
+                'recorder-commit': TRUSTED_RECORDER,
+                'run-head': TRUSTED_RECORDER,
+            },
+        )
+        self.assertEqual(_problems(api, base='base-sha'), [])
 
     def test_run_must_be_in_the_commit_history(self):
         api = FakeApi(

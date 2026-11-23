@@ -91,6 +91,10 @@ class ProvenanceReport:
 class GitHubApi(Protocol):
     def pull_files(self, pr: int) -> list[PullFile]: ...
 
+    def pull_head(self, pr: int) -> str: ...
+
+    def pull_base(self, pr: int) -> str: ...
+
     def commits_touching(self, path: str, ref: str) -> list[str]: ...
 
     def parents(self, sha: str) -> list[str]: ...
@@ -120,22 +124,28 @@ def artifact_entry_matches(entry: str, path: str) -> bool:
     """Match an artifact entry against a repository path.
 
     ``actions/upload-artifact`` stores files relative to the least common
-    ancestor of the configured paths, so the archive holds
-    ``goldens/ci/<name>.png`` while the repository path is
-    ``app/test/golden/goldens/ci/<name>.png``.
+    ancestor of the configured paths. The re-record workflow uploads
+    ``app/test/golden/goldens/ci/`` together with ``app/test/golden/failures/``,
+    so the common root is ``app/test/golden`` and golden entries look like
+    ``goldens/ci/<name>.png``. Only the exact full path and that exact relative
+    path are accepted: a suffix match would also accept a byte-identical copy
+    planted under ``failures/``.
     """
     entry = entry.replace('\\', '/')
     while entry.startswith('./'):
         entry = entry[2:]
-    if entry == path:
-        return True
-    return entry.endswith('/' + path) or path.endswith('/' + entry)
+    name = (
+        path[len(GOLDEN_DIR) :]
+        if path.startswith(GOLDEN_DIR)
+        else path.rsplit('/', 1)[-1]
+    )
+    return entry in {path, f'goldens/ci/{name}', name}
 
 
 def check_provenance(
     api: GitHubApi,
     pr: int,
-    head_sha: str,
+    head_sha: str | None,
     base_sha: str | None = None,
     depth: int = ANCESTOR_DEPTH,
 ) -> ProvenanceReport:
@@ -151,7 +161,18 @@ def check_provenance(
                 )
             ],
         )
+    # The files list comes from the live pull request, so resolve history against
+    # the same head by default. Pinning history to the event SHA would compare a
+    # newer file list with an older history when the pull request advanced
+    # mid-run; ``head_sha`` exists for reproducing a check locally.
+    ref = head_sha or api.pull_head(pr)
+    if not ref:
+        return ProvenanceReport(
+            proven=[],
+            problems=[GoldenProblem(GOLDEN_DIR, 'the pull request head is unknown')],
+        )
 
+    trusted_recorders = _trusted_recorders(api, base_sha or api.pull_base(pr))
     proven: list[ProvenancedGolden] = []
     problems: list[GoldenProblem] = []
     for changed in files:
@@ -164,14 +185,15 @@ def check_provenance(
                 GoldenProblem(changed.path, 'the pull request API returned no blob id')
             )
             continue
-        run = _proving_run(api, changed, head_sha, base_sha, depth)
+        run = _proving_run(api, changed, ref, base_sha, trusted_recorders, depth)
         if run is None:
             problems.append(
                 GoldenProblem(
                     changed.path,
                     'no successful rerecord-goldens.yml run in the commit history '
                     'uploaded these exact bytes; the run\'s artifact may have '
-                    'expired, in which case re-record the baseline',
+                    'expired, or the branch has a modified recorder, in which case '
+                    're-record the baseline from an unmodified workflow',
                 )
             )
         else:
@@ -179,11 +201,30 @@ def check_provenance(
     return ProvenanceReport(proven=proven, problems=problems)
 
 
+def _trusted_recorders(api: GitHubApi, base_sha: str | None) -> set[str] | None:
+    """Return the recorder blobs that ever existed on the pull request base.
+
+    A pull request can edit ``rerecord-goldens.yml`` and dispatch it, which would
+    make any artifact trustworthy. Restricting accepted runs to recorder versions
+    that already landed on the base branch keeps a modified recorder from
+    certifying itself, while an older recorder on a feature branch stays valid.
+    """
+    if not base_sha:
+        return None
+    blobs = set()
+    for sha in api.commits_touching(RERECORD_WORKFLOW, base_sha):
+        blob = api.file_blob(RERECORD_WORKFLOW, sha)
+        if blob:
+            blobs.add(blob)
+    return blobs
+
+
 def _proving_run(
     api: GitHubApi,
     changed: PullFile,
     head_sha: str,
     base_sha: str | None,
+    trusted_recorders: set[str] | None,
     depth: int,
 ) -> WorkflowRun | None:
     commits = api.commits_touching(changed.path, head_sha)
@@ -192,7 +233,7 @@ def _proving_run(
     introducing = commits[0]
     for ancestor in _ancestors(api, introducing, depth):
         for run in api.runs_for_head(ancestor):
-            if _run_proves(api, run, changed):
+            if _run_proves(api, run, changed, trusted_recorders):
                 return run
 
     # The re-record workflow may be dispatched from another ref (for example
@@ -204,15 +245,24 @@ def _proving_run(
             if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
                 continue
             if api.is_ancestor(run.head_sha, base_sha) and _run_proves(
-                api, run, changed
+                api, run, changed, trusted_recorders
             ):
                 return run
     return None
 
 
-def _run_proves(api: GitHubApi, run: WorkflowRun, changed: PullFile) -> bool:
+def _run_proves(
+    api: GitHubApi,
+    run: WorkflowRun,
+    changed: PullFile,
+    trusted_recorders: set[str] | None,
+) -> bool:
     if run.path != RERECORD_WORKFLOW or run.conclusion != 'success':
         return False
+    if trusted_recorders is not None:
+        recorder = api.file_blob(RERECORD_WORKFLOW, run.head_sha)
+        if recorder not in trusted_recorders:
+            return False
     blobs = api.artifact_blobs(run.id)
     if blobs is None:
         return False
@@ -276,6 +326,7 @@ class HttpGitHubApi:
         self._recent_runs_cache: list[WorkflowRun] | None = None
         self._ancestor_cache: dict[tuple[str, str], bool] = {}
         self._parent_cache: dict[str, list[str]] = {}
+        self._file_blob_cache: dict[tuple[str, str], str | None] = {}
         self._artifact_cache: dict[int, dict[str, str] | None] = {}
 
     def _request(self, url: str) -> bytes:
@@ -320,6 +371,14 @@ class HttpGitHubApi:
             )
             for entry in entries
         ]
+
+    def pull_head(self, pr: int) -> str:
+        pull = self._json(f'/pulls/{pr}')
+        return (pull.get('head') or {}).get('sha', '')
+
+    def pull_base(self, pr: int) -> str:
+        pull = self._json(f'/pulls/{pr}')
+        return (pull.get('base') or {}).get('sha', '')
 
     def commits_touching(self, path: str, ref: str) -> list[str]:
         try:
@@ -420,16 +479,20 @@ class HttpGitHubApi:
         return result
 
     def file_blob(self, path: str, ref: str) -> str | None:
+        key = (path, ref)
+        if key in self._file_blob_cache:
+            return self._file_blob_cache[key]
         encoded = urllib.parse.quote(path, safe='/')
         try:
             entry = self._json(f'/contents/{encoded}', {'ref': ref})
         except urllib.error.HTTPError as error:
             if error.code == 404:
+                self._file_blob_cache[key] = None
                 return None
             raise
-        if not isinstance(entry, dict):
-            return None
-        return entry.get('sha')
+        blob = entry.get('sha') if isinstance(entry, dict) else None
+        self._file_blob_cache[key] = blob
+        return blob
 
     def artifact_blobs(self, run_id: int) -> dict[str, str] | None:
         if run_id in self._artifact_cache:
@@ -468,25 +531,28 @@ class HttpGitHubApi:
         return blobs
 
 
-def _event_context() -> tuple[int | None, str | None, str | None]:
+def _event_context() -> tuple[int | None, str | None]:
     path = os.environ.get('GITHUB_EVENT_PATH')
     if not path or not os.path.isfile(path):
-        return None, None, None
+        return None, None
     with open(path, encoding='utf-8') as event_file:
         event = json.load(event_file)
     pull_request = event.get('pull_request') or {}
     number = event.get('number') or pull_request.get('number')
-    head_sha = (pull_request.get('head') or {}).get('sha')
     base_sha = (pull_request.get('base') or {}).get('sha')
-    return number, head_sha, base_sha
+    return number, base_sha
 
 
 def main(argv: list[str] | None = None) -> int:
-    event_pr, event_sha, event_base = _event_context()
+    event_pr, event_base = _event_context()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', default=os.environ.get('GITHUB_REPOSITORY'))
     parser.add_argument('--pr', type=int, default=event_pr)
-    parser.add_argument('--head-sha', default=event_sha)
+    parser.add_argument(
+        '--head-sha',
+        default=None,
+        help='pin history lookups to this ref instead of the live pull request head',
+    )
     parser.add_argument('--base-sha', default=event_base)
     parser.add_argument(
         '--token',
@@ -499,9 +565,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--depth', type=int, default=ANCESTOR_DEPTH)
     args = parser.parse_args(argv)
 
-    if not args.repo or args.pr is None or not args.head_sha:
+    if not args.repo or args.pr is None:
         parser.error(
-            '--repo, --pr and --head-sha are required outside a pull_request event'
+            '--repo and --pr are required outside a pull_request event'
         )
     if not args.token:
         parser.error('no GitHub token in GITHUB_TOKEN or --token')
