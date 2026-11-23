@@ -38,6 +38,13 @@ final class _FakeNetworkUserDataSource({
   }) => throw UnimplementedError();
 
   @override
+  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+  }) => throw UnimplementedError();
+
+  @override
   Future<NetworkBiliUserVideosData> getUserVideos({
     required int mid,
     int page = 1,

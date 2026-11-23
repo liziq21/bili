@@ -8195,6 +8195,18 @@ abstract class AppLocalizations {
   /// **'No videos yet'**
   String get channelVideosEmpty;
 
+  /// Creator-page tab that lists the channel's playlists (seasons)
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get channelTabPlaylists;
+
+  /// Shown on a creator page when the channel has no playlists
+  ///
+  /// In en, this message translates to:
+  /// **'No playlists yet'**
+  String get channelPlaylistsEmpty;
+
   /// Sleep timer action that pauses playback and closes the player when the countdown ends
   ///
   /// In en, this message translates to:

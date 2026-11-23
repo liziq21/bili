@@ -4767,6 +4767,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channelVideosEmpty => 'No videos yet';
 
   @override
+  String get channelTabPlaylists => 'Playlists';
+
+  @override
+  String get channelPlaylistsEmpty => 'No playlists yet';
+
+  @override
   String get sleepTimerActionExitPlayerLabel => 'Close player';
 
   @override

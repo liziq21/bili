@@ -57,6 +57,7 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final videosVisible = _settings.isVisible(ChannelTabs.videos);
+    final playlistsVisible = _settings.isVisible(ChannelTabs.playlists);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsChannel)),
       body: _loading
@@ -72,6 +73,17 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
                     value: videosVisible,
                     onChanged: (value) {
                       unawaited(_setTabVisible(ChannelTabs.videos, value));
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message:
+                      '${l10n.channelTabPlaylists}: ${playlistsVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
+                  child: SwitchListTile(
+                    title: Text(l10n.channelTabPlaylists),
+                    value: playlistsVisible,
+                    onChanged: (value) {
+                      unawaited(_setTabVisible(ChannelTabs.playlists, value));
                     },
                   ),
                 ),

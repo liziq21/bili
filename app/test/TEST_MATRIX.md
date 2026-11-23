@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 86 |
+| unit | 89 |
 | widget | 60 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **169** |
+| **合计** | **172** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（86）
+## unit（89）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -53,6 +53,7 @@
 - `app/test/feature/search/search_result_bloc_test.dart`
 - `app/test/feature/search_state_test.dart`
 - `app/test/feature/setting/channel_tab_settings_test.dart`
+- `app/test/feature/space/channel_playlists_cubit_test.dart`
 - `app/test/feature/space/channel_videos_cubit_test.dart`
 - `app/test/feature/video/danmaku_lane_test.dart`
 - `app/test/feature/video/danmaku_painter_test.dart`
@@ -82,6 +83,7 @@
 - `packages/bilibili/bpi/test/play_url_test.dart`
 - `packages/bilibili/bpi/test/player_v2_test.dart`
 - `packages/bilibili/bpi/test/playlist_content_test.dart`
+- `packages/bilibili/bpi/test/playlist_list_test.dart`
 - `packages/bilibili/bpi/test/popular_feed_test.dart`
 - `packages/bilibili/bpi/test/ranking_feed_test.dart`
 - `packages/bilibili/bpi/test/reply_pagination_test.dart`
@@ -90,6 +92,7 @@
 - `packages/bilibili/bpi/test/user_card_test.dart`
 - `packages/bilibili/bpi/test/video_data_models_test.dart`
 - `packages/bilibili/bpi/test/wbi_utils_test.dart`
+- `packages/bilibili/test/bili_channel_playlists_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_danmaku_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_room_detail_remote_data_source_test.dart`
 - `packages/bilibili/test/bili_live_room_stream_test.dart`

@@ -212,6 +212,14 @@ abstract class BiliNetworkApi extends ChopperService {
     @tag String tag = 'WBI',
   });
 
+  @GET(path: WbiApiPath.userPlaylists)
+  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+    @query required int mid,
+    @Query('page_num') int pageNum = 1,
+    @Query('page_size') int pageSize = 30,
+    @tag String tag = 'WBI',
+  });
+
   static BiliNetworkApi create([ChopperClient? client]) =>
       _$BiliNetworkApi(client ?? .new());
 }
@@ -725,6 +733,33 @@ class BiliNetworkSearch
     } on Object catch (error) {
       throw BpiNetworkException(
         'Bilibili playlist content network request failed.',
+        cause: error,
+      );
+    }
+  }
+
+  @override
+  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+  }) async {
+    try {
+      return await _networkApi.getUserPlaylists(
+        mid: mid,
+        pageNum: pageNum,
+        pageSize: pageSize,
+      );
+    } on BpiException {
+      rethrow;
+    } on FormatException catch (error) {
+      throw BpiSerializationException(
+        'Bilibili user playlists response is not valid JSON.',
+        cause: error,
+      );
+    } on Object catch (error) {
+      throw BpiNetworkException(
+        'Bilibili user playlists network request failed.',
         cause: error,
       );
     }

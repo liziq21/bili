@@ -271,6 +271,7 @@ final class const LibrarySettings({
 /// Stable identifiers for the tabs a channel page can show.
 abstract final class ChannelTabs() {
   static const videos = 'videos';
+  static const playlists = 'playlists';
 }
 
 /// Per-tab visibility for the channel page.

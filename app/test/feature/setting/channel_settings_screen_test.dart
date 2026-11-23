@@ -2,6 +2,7 @@ import 'package:app/app_scaffold.dart';
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/setting/channel_settings_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -52,14 +53,15 @@ void main() {
       final context = tester.element(find.byType(ChannelSettingsScreen));
       final l10n = AppLocalizations.of(context)!;
 
-      // Then the page title and the only implemented channel tab are visible.
+      // Then the page title and both implemented channel tabs are visible.
       expect(find.widgetWithText(AppBar, l10n.settingsChannel), findsOneWidget);
-      expect(find.byType(SwitchListTile), findsOneWidget);
+      expect(find.byType(SwitchListTile), findsNWidgets(2));
       final switchTile = tester.widget<SwitchListTile>(
-        find.byType(SwitchListTile),
+        find.widgetWithText(SwitchListTile, l10n.videoTab),
       );
       expect(switchTile.value, isTrue);
       expect(find.text(l10n.videoTab), findsOneWidget);
+      expect(find.text(l10n.channelTabPlaylists), findsOneWidget);
     });
 
     testWidgets('hides the videos tab and persists the choice', (tester) async {
@@ -68,18 +70,51 @@ void main() {
       await tester.pumpAndSettle();
 
       // When turning the videos switch off.
-      await tester.tap(find.byType(SwitchListTile));
+      await tester.tap(
+        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
+      );
       await tester.pumpAndSettle();
 
       // Then the switch reflects the change and the preference is stored.
       final switchTile = tester.widget<SwitchListTile>(
-        find.byType(SwitchListTile),
+        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
       );
       expect(switchTile.value, isFalse);
       final result = await preferences.get(PreferencesKey.channelTabVisibility);
       expect(
         (result as Success<String, Exception>).success,
         '{"videos":false}',
+      );
+    });
+
+    testWidgets('hides the playlists tab and persists the choice', (
+      tester,
+    ) async {
+      // Given the channel settings page with the playlists tab visible.
+      await tester.pumpWidget(_buildScreen(preferences));
+      await tester.pumpAndSettle();
+
+      // When turning the playlists switch off.
+      await tester.tap(
+        find.widgetWithText(
+          SwitchListTile,
+          AppLocalizationsZh().channelTabPlaylists,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Then the switch reflects the change and the preference is stored.
+      final switchTile = tester.widget<SwitchListTile>(
+        find.widgetWithText(
+          SwitchListTile,
+          AppLocalizationsZh().channelTabPlaylists,
+        ),
+      );
+      expect(switchTile.value, isFalse);
+      final result = await preferences.get(PreferencesKey.channelTabVisibility);
+      expect(
+        (result as Success<String, Exception>).success,
+        '{"playlists":false}',
       );
     });
 
@@ -96,7 +131,7 @@ void main() {
 
       // Then the switch starts in the hidden state.
       final switchTile = tester.widget<SwitchListTile>(
-        find.byType(SwitchListTile),
+        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
       );
       expect(switchTile.value, isFalse);
     });
@@ -131,11 +166,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Then the page still renders with the default visible state.
-      expect(find.byType(SwitchListTile), findsOneWidget);
-      final switchTile = tester.widget<SwitchListTile>(
+      expect(find.byType(SwitchListTile), findsNWidgets(2));
+      for (final tile in tester.widgetList<SwitchListTile>(
         find.byType(SwitchListTile),
-      );
-      expect(switchTile.value, isTrue);
+      )) {
+        expect(tile.value, isTrue);
+      }
     });
   });
 }

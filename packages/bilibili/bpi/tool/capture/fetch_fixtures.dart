@@ -625,6 +625,22 @@ Future<void> main(List<String> args) async {
       print('Playlist content fixture fetched successfully.');
     }
 
+    // 17b. User channel playlists (WBI)
+    if (!shouldFetch('testing/playlist_list.json')) {
+      skipNote('testing/playlist_list.json');
+    } else {
+      // `seasons_series_list` 同时返回合集（seasons）与系列（series）。用一个
+      // 两类都有的 UP 主（罗翔说刑法 517327498）保证响应覆盖两种列表。
+      final playlistList = await getWbiJson(
+        'https://api.bilibili.com/x/polymer/web-space/seasons_series_list',
+        {'mid': '517327498', 'page_num': '1', 'page_size': '10'},
+        'playlist list',
+      );
+      _requirePlaylistList(playlistList.json, 'playlist list');
+      saveResponse('testing/playlist_list.json', playlistList);
+      print('Playlist list fixture fetched successfully.');
+    }
+
     // 18. User space videos (WBI)
     if (!shouldFetch('testing/space_videos.json')) {
       skipNote('testing/space_videos.json');
@@ -1005,6 +1021,34 @@ void _requireBangumiPlayUrl(Map<String, dynamic> json, String label) {
     }
   } on Object catch (error) {
     throw FormatException('$label is not a parsable bangumi play URL: $error');
+  }
+}
+
+void _requirePlaylistList(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final itemsLists = data['items_lists'];
+  if (itemsLists is! Map) {
+    throw FormatException('$label data.items_lists is not an object');
+  }
+  final page = itemsLists['page'];
+  if (page is! Map) {
+    throw FormatException('$label data.items_lists.page is not an object');
+  }
+  final seasons = itemsLists['seasons_list'];
+  if (seasons is! List || seasons.isEmpty) {
+    throw FormatException(
+      '$label data.items_lists.seasons_list is not a non-empty list',
+    );
+  }
+  final hasSeason = seasons.any((item) {
+    if (item is! Map) return false;
+    final meta = item['meta'];
+    if (meta is! Map) return false;
+    final seasonId = meta['season_id'];
+    return seasonId is num && seasonId > 0;
+  });
+  if (!hasSeason) {
+    throw FormatException('$label has no season with a valid season_id');
   }
 }
 

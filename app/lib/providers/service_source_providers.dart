@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../data/repository/app_search_suggest_repository.dart';
+import '../data/repository/channel_playlists_repository.dart';
 import '../data/repository/channel_videos_repository.dart';
 import '../data/repository/creator_profile_repository.dart';
 import '../data/repository/feed_repository.dart';
@@ -184,6 +185,12 @@ class _SourceScopeState() extends State<_SourceScope> {
         RepositoryProvider<PlaylistContentRepository>(
           create: (_) =>
               AppPlaylistContentRepository(playlistContentDataSource),
+        ),
+      if (source.channelPlaylistsDataSource
+          case final channelPlaylistsDataSource?)
+        RepositoryProvider<ChannelPlaylistsRepository>(
+          create: (_) =>
+              AppChannelPlaylistsRepository(channelPlaylistsDataSource),
         ),
       if (source.userVideosDataSource case final userVideosDataSource?) ...[
         RepositoryProvider<ChannelVideosRepository>(

@@ -4745,6 +4745,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channelVideosEmpty => '暂无视频';
 
   @override
+  String get channelTabPlaylists => '播放列表';
+
+  @override
+  String get channelPlaylistsEmpty => '暂无播放列表';
+
+  @override
   String get sleepTimerActionExitPlayerLabel => '关闭播放器';
 
   @override

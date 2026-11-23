@@ -20,6 +20,12 @@ abstract class NetworkUserDataSource {
     int? seasonId,
   });
 
+  Future<NetworkBiliPlaylistContentData> getUserPlaylists({
+    required int mid,
+    int pageNum = 1,
+    int pageSize = 30,
+  });
+
   Future<NetworkBiliUserVideosData> getUserVideos({
     required int mid,
     int page = 1,

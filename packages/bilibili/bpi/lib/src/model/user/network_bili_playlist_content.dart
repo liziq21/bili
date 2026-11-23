@@ -201,7 +201,9 @@ class NetworkBiliPlaylistSeriesConverter
     final items = <NetworkBiliPlaylistSeries>[];
     for (final entry in json) {
       if (entry is! Map) continue;
-      final seriesId = entry['series_id'];
+      final meta = entry['meta'];
+      if (meta is! Map) continue;
+      final seriesId = meta['series_id'];
       if (seriesId is! num) continue;
       items.add(
         NetworkBiliPlaylistSeries.fromJson(Map<String, dynamic>.from(entry)),

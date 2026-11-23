@@ -27,6 +27,8 @@ class const SpaceRouteData({required final String mid, final String? source})
         mid: mid,
         onBackClick: () => context.pop(),
         onVideo: context.defaultNavigateToVideo,
+        onPlaylist: (playlistId) =>
+            context.navigateToPlaylist(playlistId, source: effectiveSource.id),
       ),
     );
   }

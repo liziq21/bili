@@ -49,6 +49,8 @@ final class WbiApiPath {
   static const String playUrl = '/x/player/wbi/playurl';
   static const String playlistContent =
       '/x/polymer/web-space/seasons_archives_list';
+  static const String userPlaylists =
+      '/x/polymer/web-space/seasons_series_list';
   static const String userVideos = '/x/space/wbi/arc/search';
 }
 

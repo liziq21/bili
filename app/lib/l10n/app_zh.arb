@@ -6413,6 +6413,14 @@
   "@channelVideosEmpty": {
     "description": "Shown on a creator page when the channel has no uploaded videos"
   },
+  "channelTabPlaylists": "播放列表",
+  "@channelTabPlaylists": {
+    "description": "Creator-page tab that lists the channel's playlists (seasons)"
+  },
+  "channelPlaylistsEmpty": "暂无播放列表",
+  "@channelPlaylistsEmpty": {
+    "description": "Shown on a creator page when the channel has no playlists"
+  },
   "sleepTimerActionExitPlayerLabel": "关闭播放器",
   "@sleepTimerActionExitPlayerLabel": {
     "description": "Sleep timer action that pauses playback and closes the player when the countdown ends"
