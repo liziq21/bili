@@ -262,7 +262,7 @@ python3 tool/test_matrix.py --check                                             
 
 - **P0 已落地**（`ff365bc`）：`MappingProvenance` + `fingerprintJson` 记录 fixture/schema 哈希；validator 校验 provenance；Bili 三个描述符 pin 当前 fixture；conformance 增加精确 ID/URL/计数/日期/时长/分页/去重断言；声明式 feed 可按 identity 去重。
 - **P1 已落地**（`fce37fe`）：`SourceDescriptor` / auth / pagination / rate-limit 模型与 validator；`continuationTokenPath` + `Page.nextCursor` + `fetchFeedPage(cursor:)`；`FieldMapping.description/examples`；`docs/source-descriptors.md` 成为规范性作者指南。
-- **P2 已落地**：`MappingRepairRequest` 与 conformance `--repair-request`；`MappingEvalReport` 与 `tool/mapping_eval.dart`；`SemanticClassifier` port、`KeywordSemanticClassifier` fallback、`ValidatedSemanticClassifier` allowlist/异常 fallback。
+- **P2 已落地**（`b8d29a6`）：`MappingRepairRequest` 与 conformance `--repair-request`；`MappingEvalReport` 与 `tool/mapping_eval.dart`；`SemanticClassifier` port、`KeywordSemanticClassifier` fallback、`ValidatedSemanticClassifier` allowlist/异常 fallback。
 - 验证：data 48 tests、bilibili 139 tests、app 800 tests、tool 109 tests；`python3 tool/test_matrix.py --check` 182/182；根 `flutter analyze --fatal-infos --fatal-warnings` 通过；popular/ranking conformance 通过。
 
 ## 7. 未决问题
