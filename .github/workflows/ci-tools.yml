@@ -18,6 +18,9 @@ jobs:
       - name: Run tool unit tests
         run: python3 -m unittest discover -s tool -p 'test_*.py' --verbose
 
+      - name: Check ARB duplicate keys
+        run: python3 tool/check_arb_duplicate_keys.py
+
       - name: Check test matrix mapping
         run: python3 tool/test_matrix.py --check
 
