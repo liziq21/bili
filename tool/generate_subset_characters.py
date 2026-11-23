@@ -15,9 +15,14 @@ Usage:
   python3 tool/generate_subset_characters.py --write   # update the file
   python3 tool/generate_subset_characters.py --check   # exit 1 if stale
 
-CI step (in .github/workflows/ci-test.yml, after `flutter pub get`):
-  - name: Check font subset is up to date
-    run: python3 tool/generate_subset_characters.py --check
+No workflow runs --check, so a stale list is silent until someone regenerates
+the OTF from it. The automated gate is
+app/test/golden/golden_font_contract_test.dart: it asserts that every non-ASCII
+character below U+10000 in lib/ and test/ string literals has a glyph in the OTF
+(astral code points are skipped — Noto Sans CJK carries no emoji, so requiring
+them would be unsatisfiable), and that the list names no glyph the OTF lacks. It
+never asserts that the list matches source. Run --write after changing
+user-facing copy.
 """
 
 from __future__ import annotations
@@ -38,6 +43,43 @@ def _is_ascii_identifier_start(char: str) -> bool:
 
 def _is_ascii_identifier_part(char: str) -> bool:
     return char == "_" or (char.isascii() and char.isalnum())
+
+
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
+
+
+def _escape_character(digits: str) -> str | None:
+    if not digits or any(digit not in _HEX_DIGITS for digit in digits):
+        return None
+    try:
+        return chr(int(digits, 16))
+    except (ValueError, OverflowError):
+        return None
+
+
+def _decode_escape(source: str, start: int) -> tuple[str | None, int]:
+    """Decode the Dart escape sequence whose backslash is at *start*.
+
+    Returns the character the escape denotes — None for escapes that denote no
+    character worth tracking (`\\n`, `\\'`, malformed input) — and the index just
+    past it. `\\uXXXX`, `\\u{XXXXX}` and `\\xXX` are decoded, because the font
+    contract reads literal *values*: `\\u4e2d` needs the glyph for 中, not for
+    the letter `u`.
+    """
+    n = len(source)
+    if start + 1 >= n:
+        return None, n
+    kind = source[start + 1]
+    if kind == "u":
+        if start + 2 < n and source[start + 2] == "{":
+            end = source.find("}", start + 3)
+            if end < 0:
+                return None, n
+            return _escape_character(source[start + 3 : end]), end + 1
+        return _escape_character(source[start + 2 : start + 6]), start + 6
+    if kind == "x":
+        return _escape_character(source[start + 2 : start + 4]), start + 4
+    return None, start + 2
 
 
 def _scan_string_literals(source: str) -> str:
@@ -106,6 +148,11 @@ def _scan_string_literals(source: str) -> str:
                     i += 2
                     break
                 ch = source[i]
+                if ch == "\\":
+                    decoded, i = _decode_escape(source, i)
+                    if decoded is not None and ord(decoded) > 0x7F:
+                        body_parts.append(decoded)
+                    continue
                 if ch == "$":
                     # Interpolation hole in a non-raw triple-quote.
                     if i + 1 < n and source[i + 1] == "{":
@@ -139,20 +186,18 @@ def _scan_string_literals(source: str) -> str:
                 j += 1
             if j < n and source[j] in "'\"":
                 quote = source[j]
+                raw = any(prefix in "rR" for prefix in source[i:j])
                 i = j + 1
                 # Now scan the literal body.
                 body_parts: list[str] = []
                 while i < n:
                     ch = source[i]
-                    if ch == "\\":
-                        # Escape sequence: include the escaped char.
-                        if i + 1 < n:
-                            body_parts.append(source[i + 1])
-                            i += 2
-                        else:
-                            i += 1
+                    if ch == "\\" and not raw:
+                        decoded, i = _decode_escape(source, i)
+                        if decoded is not None and ord(decoded) > 0x7F:
+                            body_parts.append(decoded)
                         continue
-                    if ch == "$":
+                    if ch == "$" and not raw:
                         # Interpolation hole — skip it.
                         if i + 1 < n and source[i + 1] == "{":
                             depth = 1
@@ -188,6 +233,19 @@ def _scan_string_literals(source: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _is_tracked_code_point(code_point: int) -> bool:
+    """True for non-ASCII, non-astral characters that can live in the subset.
+
+    Astral code points are excluded because Noto Sans CJK has no glyph for them,
+    and surrogate halves (`\\uD83D`, the escaped spelling of an astral
+    character) are excluded because they are not characters at all — writing one
+    into the list raises UnicodeEncodeError.
+    """
+    if not 0x7F < code_point < 0x10000:
+        return False
+    return not 0xD800 <= code_point <= 0xDFFF
+
+
 def collect_non_ascii_codepoints(dart_dirs: list[Path]) -> set[int]:
     """Scan all .dart files under *dart_dirs* and return non-ASCII code points
     found inside string-literal text bodies."""
@@ -202,7 +260,7 @@ def collect_non_ascii_codepoints(dart_dirs: list[Path]) -> set[int]:
             bodies = _scan_string_literals(source)
             for ch in bodies:
                 cp = ord(ch)
-                if cp > 0x7F and cp < 0x10000:
+                if _is_tracked_code_point(cp):
                     code_points.add(cp)
     print(f"  scanned {total_files} .dart files", file=sys.stderr)
     return code_points
@@ -282,16 +340,25 @@ def main() -> int:
         print(
             "\n  To fix:\n"
             "    python3 tool/generate_subset_characters.py --write\n"
-            "    # then regenerate the OTF:\n"
-            "    pyftsubset /path/to/NotoSansCJK-Regular.ttc \\\n"
+            "    # then regenerate the OTF. The source font is not vendored:\n"
+            "    #   curl -LO https://raw.githubusercontent.com/notofonts/noto-cjk/"
+            "main/Sans/OTC/NotoSansCJK-Regular.ttc\n"
+            "    #   face 2 of that collection is Noto Sans CJK SC.\n"
+            "    pyftsubset NotoSansCJK-Regular.ttc \\\n"
             "      --font-number=2 \\\n"
             f"      --text-file={SUBSET_PATH} \\\n"
             "      --unicodes=U+0020-007E \\\n"
             "      --output-file=app/test/fonts/NotoSansSC-golden-subset.otf \\\n"
             "      --flavor=none --layout-features='*' --no-hinting --desubroutinize\n"
-            "    # then re-record goldens:\n"
-            "    cd app && flutter test --concurrency=1 --update-goldens test/golden/\n"
-            "    # then commit both files and push.",
+            "    # 1. commit and push the list and the OTF to the branch first:\n"
+            "    #    the workflow checks out target_ref, so an unpushed font is\n"
+            "    #    invisible to it and the baselines would record the old glyphs.\n"
+            "    # 2. then re-record goldens from the workflow, not locally:\n"
+            "    gh workflow run rerecord-goldens.yml \\\n"
+            "      -f target_ref=your-branch -f reason='why the glyph set changed'\n"
+            "    # a locally recorded PNG fails ci-golden-provenance.yml, which\n"
+            "    # only accepts blobs produced by a successful rerecord run.\n"
+            "    # 3. commit the re-recorded goldens with the list and the OTF.",
             file=sys.stderr,
         )
         return 1
