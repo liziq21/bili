@@ -16,6 +16,26 @@ NetworkBiliPlaylistContentData _$NetworkBiliPlaylistContentDataFromJson(
           ? null
           : NetworkBiliPlaylistItemsLists.fromJson(v as Map<String, dynamic>),
     ),
+    aids: $checkedConvert(
+      'aids',
+      (v) => (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList(),
+    ),
+    archives: $checkedConvert(
+      'archives',
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
+    ),
+    meta: $checkedConvert(
+      'meta',
+      (v) => v == null
+          ? null
+          : NetworkBiliPlaylistSeasonMeta.fromJson(v as Map<String, dynamic>),
+    ),
+    page: $checkedConvert(
+      'page',
+      (v) => v == null
+          ? null
+          : NetworkBiliPlaylistSeasonPage.fromJson(v as Map<String, dynamic>),
+    ),
   );
   return val;
 }, fieldKeyMap: const {'itemsLists': 'items_lists'});
@@ -85,13 +105,7 @@ NetworkBiliPlaylistSeason _$NetworkBiliPlaylistSeasonFromJson(
     ),
     archives: $checkedConvert(
       'archives',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) => NetworkBiliPlaylistVideoItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
     ),
     meta: $checkedConvert(
       'meta',
@@ -166,13 +180,7 @@ NetworkBiliPlaylistSeries _$NetworkBiliPlaylistSeriesFromJson(
   final val = NetworkBiliPlaylistSeries(
     archives: $checkedConvert(
       'archives',
-      (v) => (v as List<dynamic>?)
-          ?.map(
-            (e) => NetworkBiliPlaylistVideoItem.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList(),
+      (v) => const NetworkBiliPlaylistArchiveConverter().fromJson(v),
     ),
     meta: $checkedConvert(
       'meta',
@@ -355,6 +363,14 @@ NetworkBiliPlaylistVideoItem _$NetworkBiliPlaylistVideoItemFromJson(
       seasonId: $checkedConvert(
         'season_id',
         (v) => const NullableIntOrStringConverter().fromJson(v),
+      ),
+      stat: $checkedConvert(
+        'stat',
+        (v) => v == null
+            ? null
+            : NetworkBiliPlaylistVideoMetaStat.fromJson(
+                v as Map<String, dynamic>,
+              ),
       ),
       state: $checkedConvert(
         'state',

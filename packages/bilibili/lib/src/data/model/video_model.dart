@@ -69,12 +69,14 @@ extension NetworkBiliPlaylistVideoItemX on NetworkBiliPlaylistVideoItem {
     title: title ?? bvid,
     url: buildBiliWatchUrl(bvid),
     thumbnailUrl: normalizeBiliUrl(pic),
-    viewCount: play,
+    // 合集详情端点的条目把播放量放在顶层 `stat.view`，且用秒数 `duration`
+    // 而非 `mm:ss` 的 `length`；列表端点则可能给出 `play`/`length`。
+    viewCount: play ?? stat?.view ?? meta?.stat?.view,
     uploadDate: switch (pubdate ?? created) {
       final timestamp? => DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
       null => null,
     },
-    duration: _parseDuration(length),
+    duration: _parseDuration(length) ?? duration,
     desc: description,
     creatorProfileName: author,
     creatorProfileId: mid?.toString(),

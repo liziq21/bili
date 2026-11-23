@@ -545,7 +545,7 @@ final class _$BiliNetworkApi extends BiliNetworkApi {
     String tag = 'WBI',
   }) async {
     final Uri $url = Uri.parse(
-      'https://api.bilibili.com/x/polymer/space/seasons_archives_list',
+      'https://api.bilibili.com/x/polymer/web-space/seasons_archives_list',
     );
     final Map<String, dynamic> $params = <String, dynamic>{
       'mid': mid,

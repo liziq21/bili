@@ -6,9 +6,24 @@ part 'network_bili_playlist_content.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class NetworkBiliPlaylistContentData {
-  const NetworkBiliPlaylistContentData({this.itemsLists});
+  const NetworkBiliPlaylistContentData({
+    this.itemsLists,
+    this.aids,
+    this.archives,
+    this.meta,
+    this.page,
+  });
 
+  /// 列表端点（`seasons_series_list`）把合集/系列包在 `items_lists` 下。
   final NetworkBiliPlaylistItemsLists? itemsLists;
+
+  /// 详情端点（`seasons_archives_list`）直接返回合集自身的条目与信息，
+  /// 不再包一层 `items_lists`。
+  final List<int>? aids;
+  @NetworkBiliPlaylistArchiveConverter()
+  final List<NetworkBiliPlaylistVideoItem>? archives;
+  final NetworkBiliPlaylistSeasonMeta? meta;
+  final NetworkBiliPlaylistSeasonPage? page;
 
   factory NetworkBiliPlaylistContentData.fromJson(Map<String, dynamic> json) =>
       _$NetworkBiliPlaylistContentDataFromJson(json);
@@ -56,6 +71,7 @@ class NetworkBiliPlaylistSeason {
   });
 
   final List<int>? aids;
+  @NetworkBiliPlaylistArchiveConverter()
   final List<NetworkBiliPlaylistVideoItem>? archives;
   final NetworkBiliPlaylistSeasonMeta? meta;
   final NetworkBiliPlaylistSeasonPage? page;
@@ -118,6 +134,7 @@ class NetworkBiliPlaylistSeasonPage {
 class NetworkBiliPlaylistSeries {
   const NetworkBiliPlaylistSeries({this.archives, this.meta, this.recentAids});
 
+  @NetworkBiliPlaylistArchiveConverter()
   final List<NetworkBiliPlaylistVideoItem>? archives;
   final NetworkBiliPlaylistSeriesMeta? meta;
   final List<int>? recentAids;
@@ -197,6 +214,36 @@ class NetworkBiliPlaylistSeriesConverter
   Object? toJson(List<NetworkBiliPlaylistSeries>? object) => object;
 }
 
+/// 解析合集条目，跳过缺核心标识 `aid`/`bvid` 的条目。
+///
+/// B 站合集响应偶尔混入没有 `bvid`（或 `aid`）的占位条目；逐条跳过比让
+/// 整页解析失败更符合“缺少核心 ID 的 item 丢弃并继续”的解析策略。
+class NetworkBiliPlaylistArchiveConverter
+    implements JsonConverter<List<NetworkBiliPlaylistVideoItem>?, Object?> {
+  const NetworkBiliPlaylistArchiveConverter();
+
+  @override
+  List<NetworkBiliPlaylistVideoItem>? fromJson(Object? json) {
+    if (json is! List) return null;
+    final items = <NetworkBiliPlaylistVideoItem>[];
+    for (final entry in json) {
+      if (entry is! Map) continue;
+      final aid = entry['aid'];
+      final bvid = entry['bvid'];
+      final hasAid = aid is num && aid > 0;
+      final hasBvid = bvid is String && bvid.isNotEmpty;
+      if (!hasAid || !hasBvid) continue;
+      items.add(
+        NetworkBiliPlaylistVideoItem.fromJson(Map<String, dynamic>.from(entry)),
+      );
+    }
+    return items;
+  }
+
+  @override
+  Object? toJson(List<NetworkBiliPlaylistVideoItem>? object) => object;
+}
+
 @JsonSerializable(fieldRename: FieldRename.snake, createToJson: false)
 class NetworkBiliPlaylistVideoItem {
   const NetworkBiliPlaylistVideoItem({
@@ -235,6 +282,7 @@ class NetworkBiliPlaylistVideoItem {
     this.pubdate,
     this.review,
     this.seasonId,
+    this.stat,
     this.state,
     this.subtitle,
     this.title,
@@ -301,6 +349,7 @@ class NetworkBiliPlaylistVideoItem {
   final int? review;
   @NullableIntOrStringConverter()
   final int? seasonId;
+  final NetworkBiliPlaylistVideoMetaStat? stat;
   @NullableIntOrStringConverter()
   final int? state;
   final String? subtitle;
