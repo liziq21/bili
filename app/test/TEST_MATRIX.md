@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 89 |
+| unit | 90 |
 | widget | 64 |
 | golden | 8 |
 | contract | 13 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **176** |
+| **合计** | **177** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（89）
+## unit（90）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -68,6 +68,7 @@
 - `app/test/routing/search_focus_controller_test.dart`
 - `app/test/utils/command_test.dart`
 - `app/test/utils/platform_info_test.dart`
+- `app/test/utils/text_test.dart`
 - `packages/bilibili/bpi/test/api_interceptor_test.dart`
 - `packages/bilibili/bpi/test/api_result_test.dart`
 - `packages/bilibili/bpi/test/bangumi_play_url_test.dart`
