@@ -37,6 +37,7 @@
 | 前景 | `onSurfaceStrong`（主）/ `onSurface`（正文）/ `onSurfaceVariant`（弱化） |
 | 恒定承载面 | `scrim`（恒深）/ `onScrim`（恒浅） |
 | 强调 | `accentFill` / `accentText` / `onAccentFill` |
+| 语义 | `errorText`（错误文字；`ColorScheme.error` 只用于错误图形与容器） |
 | 次 / 三级强调 | `secondary` / `tertiary` |
 | 图形 | `outline` |
 
@@ -55,6 +56,8 @@
 
 **R2.2** 语义不得混用：`scrim` / `onScrim` 与 `onSurface` 系在暗色下方向相反，禁止共用常量，禁止前景 token 当背景用。
 
+**R2.3** 错误色同样按用途分档：`ColorScheme.error` 只承担错误图形与容器，错误**文字**取 `errorText`，门槛 `aaText`。两者同值时错误文字会停在非文本门槛上，因此 G2 断言必须覆盖 `errorText` 的亮 / 暗两套。
+
 **R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
 
 ### R3 —— 亮度单源
@@ -65,7 +68,7 @@
 
 Material 组件与 `$styles.colors.*` 读**同一个** `ColorScheme`，禁止两套独立色板并存 —— 两套并存时 Material 组件会算出与自研 widget 不同的对比度。
 
-`AppColors` 构造后不持有任何颜色字面量。`scrim` / `onScrim` / `onSurfaceStrong` 三个角色在 `ColorScheme` 里没有对应字段，由色板携带，且**只在 `brand_palette.dart` 取值**；其余角色一律从 `palette.scheme` 派生。
+`AppColors` 构造后不持有任何颜色字面量。`scrim` / `onScrim` / `onSurfaceStrong` / `accentText` / `errorText` 五个角色在 `ColorScheme` 里没有能表达其门槛的字段，由色板携带，且**只在 `brand_palette.dart` 取值**；其余角色一律从 `palette.scheme` 派生。
 
 ### R5 —— DynamicColor 优先，品牌色 fallback
 

@@ -3,6 +3,7 @@ import 'package:app/data/repository/video_comment_repository.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/video/bloc/video_comment_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_comments_view.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +45,30 @@ class _FakeVideoCommentRepository() implements VideoCommentRepository {
       ],
     ),
   );
+}
+
+/// Records every requested video id and always fails, so the error state and
+/// its retry path can be exercised through the real bloc.
+class _FailingVideoCommentRepository() implements VideoCommentRepository {
+  final List<String> requestedVideoIds = [];
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    requestedVideoIds.add(videoId);
+    return Result.error(Exception('offline'));
+  }
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async => Result.error(Exception('offline'));
 }
 
 void main() {
@@ -134,5 +159,54 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('load error shows a retry that refetches the same video', (
+    tester,
+  ) async {
+    final repository = _FailingVideoCommentRepository();
+    final bloc = VideoCommentBloc(repository: repository);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: AppScaffold(
+          child: Material(
+            child: SizedBox(
+              height: 600,
+              child: BlocProvider.value(
+                value: bloc,
+                child: const VideoCommentsView(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    bloc.add(const LoadVideoComments('video-1'));
+    await tester.pump();
+    await tester.pump();
+
+    // The copy tells the user to retry, so the control must exist.
+    expect(
+      find.text('Failed to load comments. Try again later'),
+      findsOneWidget,
+    );
+    final retry = find.widgetWithText(OutlinedButton, 'Retry');
+    expect(retry, findsOneWidget);
+
+    await tester.tap(retry);
+    await tester.pump();
+    await tester.pump();
+
+    expect(repository.requestedVideoIds, ['video-1', 'video-1']);
   });
 }

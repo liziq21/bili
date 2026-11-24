@@ -17,6 +17,10 @@ class VideoBloc({
   required final VideoDetailRepository _repository,
   final LocalLibraryRepository? _localLibraryRepository,
   final String? _sourceId,
+
+  /// 详情请求的上限时长。没有它，请求一直挂起时页面会永远停在转圈，
+  /// 连重试入口都不会出现。
+  final Duration detailTimeout = const Duration(seconds: 30),
 }) extends Bloc<VideoEvent, VideoState> {
   this : super(const VideoState()) {
     on<LoadVideoDetail>(_onLoadVideoDetail);
@@ -37,10 +41,14 @@ class VideoBloc({
     LoadVideoDetail event,
     Emitter<VideoState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, error: null));
+    emit(state.copyWith(isLoading: true, error: null, videoId: event.id));
     _log.info('Loading video detail for id: ${event.id}');
 
-    final result = await _repository.getVideoDetail(event.id);
+    final result = await _loadDetail(event.id);
+    // 只让最新一次请求写状态：重试与切换视频会重叠，旧请求晚到会覆盖新
+    // 结果，界面上就出现上一个视频的详情或错误。
+    if (emit.isDone || state.videoId != event.id) return;
+
     switch (result) {
       case Success(:final success):
         var detail = success;
@@ -59,10 +67,25 @@ class VideoBloc({
             isSubscribed: isSubscribed,
           );
         }
-        emit(state.copyWith(isLoading: false, videoDetail: detail));
+        if (emit.isDone || state.videoId != event.id) return;
+        emit(
+          state.copyWith(isLoading: false, error: null, videoDetail: detail),
+        );
       case Error(:final error):
         _log.warning('Failed to load video detail', error);
         emit(state.copyWith(isLoading: false, error: error.toString()));
+    }
+  }
+
+  /// 把挂起的请求转成超时错误，让界面回到可重试的错误态。
+  Future<Result<VideoDetail, Exception>> _loadDetail(String id) async {
+    try {
+      return await _repository.getVideoDetail(id).timeout(detailTimeout);
+    } on TimeoutException {
+      _log.warning('Timed out loading video detail for id: $id');
+      return Result.error(
+        TimeoutException('video detail request timed out', detailTimeout),
+      );
     }
   }
 
@@ -97,7 +120,7 @@ class VideoBloc({
       likeCount: newCount < 0 ? 0 : newCount,
     );
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final result = await _repository.toggleLike(
       detail.video.id,
@@ -130,7 +153,7 @@ class VideoBloc({
       favoriteCount: newCount < 0 ? 0 : newCount,
     );
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final local = _localLibraryRepository;
     final sourceId = _sourceId;
@@ -162,7 +185,7 @@ class VideoBloc({
     final newIsSubscribed = !detail.isSubscribed;
     final updatedDetail = detail.copyWith(isSubscribed: newIsSubscribed);
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final local = _localLibraryRepository;
     final sourceId = _sourceId;

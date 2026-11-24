@@ -125,7 +125,7 @@ class const _NewPageErrorIndicator<T>({super.key}) extends StatelessWidget {
                   Text(
                     l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
                     style: $styles.text.bodySmall.copyWith(
-                      color: colorScheme.error,
+                      color: $styles.colors.errorText,
                     ),
                   ),
                 ],

@@ -57,6 +57,9 @@ class _LocalPlaylistPickerDialogState()
 
   @override
   Widget build(BuildContext context) {
+    // `$styles` 是全局静态，不订阅主题；下面 StreamBuilder 里的错误文字要在
+    // 切主题后换色，这里显式建立依赖，否则它会留着旧色板。
+    Theme.of(context);
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.addToPlaylistTitle),
@@ -91,7 +94,7 @@ class _LocalPlaylistPickerDialogState()
                   Text(
                     error,
                     style: $styles.text.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.error,
+                      color: $styles.colors.errorText,
                     ),
                   ),
                   SizedBox(height: $styles.insets.xs),
@@ -278,6 +281,9 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // `$styles` 是全局静态，不订阅主题；下面 StreamBuilder 里的错误文字要在
+    // 切主题后换色，这里显式建立依赖，否则它会留着旧色板。
+    Theme.of(context);
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return AlertDialog(
       title: Text(l10n.newPlaylist),

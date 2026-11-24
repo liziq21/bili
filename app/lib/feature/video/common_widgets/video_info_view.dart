@@ -19,6 +19,7 @@ import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
 import 'video_description_text.dart';
+import 'video_failure_panel.dart';
 
 String _formatCount(int count, AppLocalizations l10n) {
   if (count >= 10000) {
@@ -75,12 +76,13 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
     return BlocSelector<
       VideoBloc,
       VideoState,
-      ({bool isLoading, Object? error, bool hasDetail})
+      ({bool isLoading, Object? error, bool hasDetail, String videoId})
     >(
       selector: (state) => (
         isLoading: state.isLoading,
         error: state.error,
         hasDetail: state.videoDetail != null,
+        videoId: state.videoId,
       ),
       builder: (context, status) {
         if (status.isLoading) {
@@ -95,16 +97,19 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
         }
 
         if (status.error != null) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.all($styles.insets.lg),
-              child: Text(
-                l10n.videoLoadFailed,
-                style: $styles.text.body.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            ),
+          // 文案写着「请重试」，就必须给出重试入口；videoId 由
+          // LoadVideoDetail 写入，缺失时不渲染一个点了也没用的按钮。
+          return VideoFailurePanel(
+            message: l10n.videoLoadFailed,
+            retryLabel: l10n.retry,
+            onRetry: status.videoId.isEmpty
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    context.read<VideoBloc>().add(
+                      LoadVideoDetail(status.videoId),
+                    );
+                  },
           );
         }
 

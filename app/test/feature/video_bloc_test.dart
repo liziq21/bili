@@ -12,12 +12,18 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
+  /// 置为 true 时 [getVideoDetail] 返回失败，用于覆盖加载失败态。
+  bool failDetail = false;
+
   final List<(String, bool)> likeCalls = [];
   final List<(String, bool)> favoriteCalls = [];
   final List<(String, bool)> subscribeCalls = [];
 
   @override
   Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
+    if (failDetail) {
+      return Result.error(Exception('offline'));
+    }
     final video = VideoModel(
       id: id,
       title: 'Test Video Title $id',
@@ -58,6 +64,51 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   ) async {
     subscribeCalls.add((creatorId, isSubscribed));
     return Result.success(isSubscribed);
+  }
+}
+
+class _FailingStreamDataSource() extends MediaStreamRemoteDataSource {
+  @override
+  String get sourceId => 'failing-stream';
+
+  @override
+  Future<Result<MediaStream, Exception>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  }) async => Result.error(Exception('stream offline'));
+}
+
+/// 按 id 分别挂起的详情数据源：让测试决定哪个请求先返回。
+class _PendingDetailDataSource() extends VideoDetailRemoteDataSource {
+  @override
+  String get sourceId => 'pending';
+
+  final pending = <String, Completer<Result<VideoDetail, Exception>>>{};
+
+  /// 永不完成的数据源，用于覆盖超时。
+  bool hang = false;
+
+  @override
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) {
+    if (hang) return Completer<Result<VideoDetail, Exception>>().future;
+    final completer = Completer<Result<VideoDetail, Exception>>();
+    pending[id] = completer;
+    return completer.future;
+  }
+
+  void complete(String id) {
+    pending[id]!.complete(
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: id,
+            title: 'Detail $id',
+            url: 'https://example.com/$id',
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -129,6 +180,20 @@ class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
       Page<VideoComment>(number: page, totalPages: 2, data: [comment]),
     );
   }
+}
+
+/// 首屏评论永不返回，用于覆盖超时。
+class _HangingVideoCommentRemoteDataSource()
+    extends VideoCommentRemoteDataSource {
+  @override
+  String get sourceId => 'hanging';
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  }) => Completer<Result<Page<VideoComment>, Exception>>().future;
 }
 
 class FakeVideoCommentRepliesRemoteDataSource()
@@ -227,11 +292,24 @@ void main() {
 
       expect(base, const VideoState());
       expect(base, isNot(const VideoState(actionError: '点赞失败')));
-      // copyWith 对 actionError 是「无条件赋值」而非「null 保留」：不传即清空。
-      // 这是既有 error 字段的同一形态，bloc 的回滚 emit 每次都显式带上消息，
-      // 所以这里记录下来，避免后来者以为它是保留语义。
+      // copyWith 对三个错误字段都是「不传即保留，传 null 才清空」：详情、
+      // 播放地址与写操作各自 emit，任何一次 emit 都不该顺手清掉别人的失败原因。
       expect(base.copyWith(isLoading: true).actionError, isNull);
       expect(base.copyWith(actionError: '点赞失败').actionError, '点赞失败');
+      expect(
+        base
+            .copyWith(actionError: '点赞失败')
+            .copyWith(isLoading: true)
+            .actionError,
+        '点赞失败',
+      );
+      expect(
+        base
+            .copyWith(actionError: '点赞失败')
+            .copyWith(actionError: null)
+            .actionError,
+        isNull,
+      );
     });
 
     test('LoadVideoDetail loads video detail successfully', () async {
@@ -240,7 +318,7 @@ void main() {
       await expectLater(
         videoBloc.stream,
         emitsInOrder([
-          const VideoState(isLoading: true),
+          const VideoState(isLoading: true, videoId: 'test_id'),
           predicate<VideoState>((state) {
             return !state.isLoading &&
                 state.videoDetail != null &&
@@ -249,6 +327,99 @@ void main() {
         ]),
       );
     });
+
+    test(
+      'a detail retry keeps the stream error so the player keeps its retry',
+      () async {
+        // 详情与播放地址是两个独立请求。详情重试若把 streamError 清掉，
+        // 播放器既没有地址也没有错误，只会一直转圈且没有重试入口。
+        final bloc = VideoBloc(
+          repository: AppVideoDetailRepository(
+            fakeDataSource,
+            _FailingStreamDataSource(),
+          ),
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadMediaStream('BV1stream'));
+        await bloc.stream.firstWhere((s) => s.streamError != null);
+
+        fakeDataSource.failDetail = true;
+        bloc.add(const LoadVideoDetail('BV1stream'));
+        await bloc.stream.firstWhere((s) => s.error != null);
+
+        fakeDataSource.failDetail = false;
+        bloc.add(const LoadVideoDetail('BV1stream'));
+        final recovered = await bloc.stream.firstWhere(
+          (s) => s.videoDetail != null,
+        );
+
+        expect(recovered.error, isNull);
+        expect(recovered.streamError, isNotNull);
+      },
+    );
+
+    test(
+      'a failed load keeps the video id so the error state can retry',
+      () async {
+        fakeDataSource.failDetail = true;
+
+        videoBloc.add(const LoadVideoDetail('BV1retry'));
+
+        await expectLater(
+          videoBloc.stream,
+          emitsInOrder([
+            const VideoState(isLoading: true, videoId: 'BV1retry'),
+            predicate<VideoState>(
+              (state) =>
+                  !state.isLoading &&
+                  state.error != null &&
+                  state.videoId == 'BV1retry',
+            ),
+          ]),
+        );
+      },
+    );
+
+    test('an older detail response never overwrites a newer one', () async {
+      final source = _PendingDetailDataSource();
+      final bloc = VideoBloc(repository: AppVideoDetailRepository(source));
+      addTearDown(bloc.close);
+
+      bloc.add(const LoadVideoDetail('BV1old'));
+      await pumpEventQueue();
+      bloc.add(const LoadVideoDetail('BV1new'));
+      await pumpEventQueue();
+
+      // 新请求先返回，旧请求后返回：旧结果必须被丢弃。
+      source.complete('BV1new');
+      await pumpEventQueue();
+      source.complete('BV1old');
+      await pumpEventQueue();
+
+      expect(bloc.state.videoId, 'BV1new');
+      expect(bloc.state.videoDetail?.video.id, 'BV1new');
+      expect(bloc.state.error, isNull);
+    });
+
+    test(
+      'a detail request that never completes ends in a retryable error',
+      () async {
+        final source = _PendingDetailDataSource()..hang = true;
+        final bloc = VideoBloc(
+          repository: AppVideoDetailRepository(source),
+          detailTimeout: const Duration(milliseconds: 20),
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('BV1hang'));
+
+        final failed = await bloc.stream.firstWhere((s) => s.error != null);
+        expect(failed.isLoading, isFalse);
+        // 保留 videoId，错误态才有可用的重试目标。
+        expect(failed.videoId, 'BV1hang');
+      },
+    );
 
     test(
       'ToggleVideoLike passes updated isLiked value to repository',
@@ -530,6 +701,22 @@ void main() {
         () => state.copyWith(error: const Object()),
         throwsA(isA<TypeError>()),
       );
+    });
+
+    test('a comment request that never completes ends in an error', () async {
+      final bloc = VideoCommentBloc(
+        repository: AppVideoCommentRepository(
+          _HangingVideoCommentRemoteDataSource(),
+        ),
+        loadTimeout: const Duration(milliseconds: 20),
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const LoadVideoComments('BV1hang'));
+
+      final failed = await bloc.stream.firstWhere((s) => s.error != null);
+      expect(failed.isLoading, isFalse);
+      expect(failed.videoId, 'BV1hang');
     });
 
     test('LoadVideoComments fetches first page of comments', () async {

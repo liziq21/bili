@@ -11,6 +11,9 @@ class _MockVideoBloc(super.initialState)
     extends Cubit<VideoState>
     implements VideoBloc {
   @override
+  final Duration detailTimeout = const Duration(seconds: 30);
+
+  @override
   void add(VideoEvent event) {}
 
   @override

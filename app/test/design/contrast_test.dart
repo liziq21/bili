@@ -20,6 +20,7 @@ void main() {
         'onAccentFill 压 accentFill',
         Contrast.ratio(light.onAccentFill, light.accentFill),
       ),
+      ('errorText 压 surface', Contrast.ratio(light.errorText, surface)),
       ('onSurface 压 surface', Contrast.ratio(scheme.onSurface, surface)),
       (
         'onSurfaceVariant 压 surface',
@@ -80,6 +81,7 @@ void main() {
         'onAccentFill 压 accentFill',
         Contrast.ratio(dark.onAccentFill, dark.accentFill),
       ),
+      ('errorText 压 surface', Contrast.ratio(dark.errorText, surface)),
       ('onSurface 压 surface', Contrast.ratio(scheme.onSurface, surface)),
       (
         'onSurfaceVariant 压 surface',
@@ -136,13 +138,23 @@ void main() {
     // accentText 本就够（暗色 #EFA97C 压深底 8.68:1、亮色 #9D4E1A 压近白底
     // 5.94:1），重算是防御性的；本条钉的是那条防御确实生效。
     final base = BrandPalette.of(Brightness.light);
-    final mismatched = base.scheme.copyWith(surface: const Color(0xFF141218));
+    // error 也要换成压不住这块底色的暗红：沿用品牌 error（亮红）时它在新
+    // 底色上已有 5.33:1，断言会在「根本没重算」的情况下照样通过。
+    final mismatched = base.scheme.copyWith(
+      surface: const Color(0xFF141218),
+      error: const Color(0xFF5B1F1A),
+    );
 
     // 前提：不匹配时品牌值确实不达标，否则本测试证明不了任何东西。
     expect(
       Contrast.ratio(base.accentText, mismatched.surface),
       lessThan(Contrast.aaText),
       reason: '探针前提：品牌 accentText 压该底色应不达标',
+    );
+    expect(
+      Contrast.ratio(mismatched.error, mismatched.surface),
+      lessThan(Contrast.aaText),
+      reason: '探针前提：原始 error 压该底色应不达标',
     );
 
     final derived = BrandPalette.fromScheme(mismatched, base: base);
@@ -152,6 +164,14 @@ void main() {
       reason:
           '重算后实际 '
           '${Contrast.ratio(derived.accentText, mismatched.surface).toStringAsFixed(2)}:1',
+    );
+    // errorText 走同一条重算路径，同样必须压住新底色。
+    expect(
+      Contrast.ratio(derived.errorText, mismatched.surface),
+      greaterThanOrEqualTo(Contrast.aaText),
+      reason:
+          '重算后实际 '
+          '${Contrast.ratio(derived.errorText, mismatched.surface).toStringAsFixed(2)}:1',
     );
     // 其余角色照旧跟随/沿用：色板角色取新的，承载面角色取品牌的。
     expect(derived.scheme.primary, mismatched.primary);

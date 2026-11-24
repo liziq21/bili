@@ -1,7 +1,21 @@
 part of 'video_bloc.dart';
 
+/// 区分「不传」与「显式置空」：详情、播放地址与写操作各自 emit，
+/// 任何一次 emit 都不该顺手清掉另一方刚记下的失败原因。
+class const _VideoErrorSentinel();
+
+const _keepError = _VideoErrorSentinel();
+const _keepActionError = _VideoErrorSentinel();
+const _keepStreamError = _VideoErrorSentinel();
+
 class const VideoState({
   final bool isLoading = false,
+
+  /// 当前请求的视频 id。
+  ///
+  /// 失败态里 [videoDetail] 仍是 null，重试按钮只能靠它重新发起
+  /// [LoadVideoDetail]；没有它，错误态就是一个无法自救的死角。
+  final String videoId = '',
 
   /// 加载视频详情失败的原因。渲染侧据此把整页换成「加载失败，请重试」
   final String? error,
@@ -31,25 +45,32 @@ class const VideoState({
 }) extends Equatable {
   VideoState copyWith({
     bool? isLoading,
-    String? error,
-    String? actionError,
+    String? videoId,
+    Object? error = _keepError,
+    Object? actionError = _keepActionError,
     VideoDetail? videoDetail,
     MediaStream? mediaStream,
-    String? streamError,
+    Object? streamError = _keepStreamError,
   }) {
     return VideoState(
       isLoading: isLoading ?? this.isLoading,
-      error: error,
-      actionError: actionError,
+      videoId: videoId ?? this.videoId,
+      error: identical(error, _keepError) ? this.error : error as String?,
+      actionError: identical(actionError, _keepActionError)
+          ? this.actionError
+          : actionError as String?,
       videoDetail: videoDetail ?? this.videoDetail,
       mediaStream: mediaStream ?? this.mediaStream,
-      streamError: streamError,
+      streamError: identical(streamError, _keepStreamError)
+          ? this.streamError
+          : streamError as String?,
     );
   }
 
   @override
   List<Object?> get props => [
     isLoading,
+    videoId,
     error,
     actionError,
     videoDetail,

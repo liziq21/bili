@@ -12,8 +12,12 @@ import '../../../data/repository/video_comment_repository.dart';
 part 'video_comment_event.dart';
 part 'video_comment_state.dart';
 
-class VideoCommentBloc({required final VideoCommentRepository _repository})
-    extends Bloc<VideoCommentEvent, VideoCommentState> {
+class VideoCommentBloc({
+  required final VideoCommentRepository _repository,
+
+  /// 首屏评论请求的上限时长；挂起的请求否则会让评论区永远停在转圈。
+  final Duration loadTimeout = const Duration(seconds: 30),
+}) extends Bloc<VideoCommentEvent, VideoCommentState> {
   this : super(const VideoCommentState()) {
     on<LoadVideoComments>(_onLoadVideoComments);
     on<FetchNextCommentPage>(_onFetchNextCommentPage);
@@ -42,7 +46,17 @@ class VideoCommentBloc({required final VideoCommentRepository _repository})
     );
 
     _log.info('Loading comments for videoId: ${event.videoId}');
-    final result = await _repository.getVideoComments(event.videoId, page: 1);
+    Result<Page<VideoComment>, Exception> result;
+    try {
+      result = await _repository
+          .getVideoComments(event.videoId, page: 1)
+          .timeout(loadTimeout);
+    } on TimeoutException {
+      _log.warning('Timed out loading comments for videoId: ${event.videoId}');
+      result = Result.error(
+        TimeoutException('comment request timed out', loadTimeout),
+      );
+    }
 
     if (generation != _loadGeneration || state.videoId != event.videoId) {
       return;
