@@ -200,6 +200,7 @@ TEST_MATRIX = {
         'packages/bilibili/bpi/test/danmaku_test.dart',
         'packages/bilibili/bpi/test/danmaku_ws/danmaku_message_test.dart',
         'packages/bilibili/bpi/test/danmaku_ws/packet_test.dart',
+        'packages/bilibili/bpi/test/error_interceptor_test.dart',
         'packages/bilibili/bpi/test/from_json_test.dart',
         'packages/bilibili/bpi/test/live_danmaku_test.dart',
         'packages/bilibili/bpi/test/live_room_detail_test.dart',
