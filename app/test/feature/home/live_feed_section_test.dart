@@ -66,6 +66,46 @@ void main() {
     },
   );
 
+  testWidgets('does not repeat the active feed title above the cards', (
+    WidgetTester tester,
+  ) async {
+    final room = LiveRoomModel(
+      id: 1001,
+      title: '直播',
+      url: 'https://live.bilibili.com/1001',
+      creatorProfileName: '未知主播',
+      isLive: true,
+    );
+    final section = FeedSectionState<LiveRoomModel>(
+      id: 'live_section',
+      title: '推荐直播',
+      status: FeedStatus.success,
+      items: [room],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [Locale('en')],
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              LiveFeedSection(
+                section: section,
+                onLiveTap: (_) {},
+                onRetry: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // The filter bar already names the active feed.
+    expect(find.text('推荐直播'), findsNothing);
+  });
+
   group('card layout budget', () {
     // 回归：文字高度曾按 fontSize * 1.5 估算，而 bodySmall 的真实行高是
     // 23/14 ≈ 1.643，每行少算 2px。放大字号后两行文字被 Flexible 挤进不足

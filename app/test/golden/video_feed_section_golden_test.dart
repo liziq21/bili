@@ -42,7 +42,6 @@ Widget _sectionUnder({
       VideoFeedSection(
         section: section,
         homeConfig: homeConfig ?? HomeConfig.defaults(),
-        sourceName: '哔哩哔哩',
         onVideoTap: (_) {},
         onRetry: () {},
         onLoadMore: () {},
