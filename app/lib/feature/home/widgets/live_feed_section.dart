@@ -8,10 +8,9 @@ import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../bloc/home_bloc.dart';
-import 'feed_section_header.dart';
 import 'feed_status_view.dart';
 
-/// 单个直播 Feed 区块（标题 + 横向卡片列表）
+/// 单个直播 Feed 区块（横向卡片列表）
 class const LiveFeedSection({
   super.key,
   required final FeedSectionState<LiveRoomModel> section,
@@ -45,60 +44,46 @@ class const LiveFeedSection({
 
   @override
   Widget build(BuildContext context) {
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverToBoxAdapter(
-          child: FeedSectionHeader(
-            title: section.title,
-            icon: AppIcons.liveFeed,
-            iconColor: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        if (section.isFailure)
-          SliverToBoxAdapter(
-            child: FeedStatusView.failure(
-              title: section.title,
-              onRetry: onRetry,
-            ),
-          )
-        else if (section.isEmpty)
-          SliverToBoxAdapter(child: FeedStatusView.empty(title: section.title))
-        else
-          SliverLayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.crossAxisExtent;
-              final cardWidth = LayoutSize.fromWidth(width)
-                  .liveCardWidth(width);
-              final itemCount = section.isInitialLoading
-                  ? 3
-                  : section.items.length;
+    // 筛选栏的 chip 已经标出当前 Feed，区块头再写一次同一个标题属于重复
+    // 信息；视频区块同样不挂区块头，两种 Feed 保持一致。
+    if (section.isFailure) {
+      return SliverToBoxAdapter(
+        child: FeedStatusView.failure(title: section.title, onRetry: onRetry),
+      );
+    }
+    if (section.isEmpty) {
+      return SliverToBoxAdapter(
+        child: FeedStatusView.empty(title: section.title),
+      );
+    }
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.crossAxisExtent;
+        final cardWidth = LayoutSize.fromWidth(width).liveCardWidth(width);
+        final itemCount = section.isInitialLoading ? 3 : section.items.length;
 
-              return SliverToBoxAdapter(
-                child: SizedBox(
-                  height: cardExtent(context, cardWidth),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: $styles.insets.sm,
-                    ),
-                    itemCount: itemCount,
-                    separatorBuilder: (context, index) =>
-                        SizedBox(width: $styles.insets.sm),
-                    itemBuilder: (context, index) => SizedBox(
-                      width: cardWidth,
-                      child: section.isInitialLoading
-                          ? const FeedSkeletonCard()
-                          : _LiveRoomCard(
-                              liveRoom: section.items[index],
-                              onTap: () => onLiveTap(section.items[index]),
-                            ),
-                    ),
-                  ),
-                ),
-              );
-            },
+        return SliverToBoxAdapter(
+          child: SizedBox(
+            height: cardExtent(context, cardWidth),
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: $styles.insets.sm),
+              itemCount: itemCount,
+              separatorBuilder: (context, index) =>
+                  SizedBox(width: $styles.insets.sm),
+              itemBuilder: (context, index) => SizedBox(
+                width: cardWidth,
+                child: section.isInitialLoading
+                    ? const FeedSkeletonCard()
+                    : _LiveRoomCard(
+                        liveRoom: section.items[index],
+                        onTap: () => onLiveTap(section.items[index]),
+                      ),
+              ),
+            ),
           ),
-      ],
+        );
+      },
     );
   }
 }

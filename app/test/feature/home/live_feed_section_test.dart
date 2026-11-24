@@ -46,6 +46,9 @@ void main() {
       );
       await tester.pump();
 
+      // 筛选栏已经显示当前 Feed，区块头不应再重复同一个标题。
+      expect(find.text('推荐直播'), findsNothing);
+
       // Check tooltip
       expect(find.byTooltip('直播'), findsOneWidget);
 

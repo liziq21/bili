@@ -9,12 +9,11 @@ import '../bloc/home_bloc.dart';
 import '../home_config.dart';
 import 'feed_status_view.dart';
 
-/// 单个视频 Feed 区块（标题 + 响应式网格 + 加载更多）
+/// 单个视频 Feed 区块（响应式网格 + 加载更多）
 class const VideoFeedSection({
   super.key,
   required final FeedSectionState<VideoModel> section,
   required final HomeConfig homeConfig,
-  required final String sourceName,
   required final ValueChanged<VideoModel> onVideoTap,
   required final VoidCallback onRetry,
   required final VoidCallback onLoadMore,
@@ -94,7 +93,6 @@ class const VideoFeedSection({
                     final video = section.items[index];
                     return VideoCard(
                       variant: VideoCardVariant.feed,
-                      sourceBadge: sourceName,
                       videoInfoBase: video,
                       onTap: () => onVideoTap(video),
                     );
