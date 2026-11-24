@@ -1,6 +1,6 @@
 import 'package:bpi/src/model/token_model.dart';
-import 'package:bpi/src/retrofit/token_manager.dart';
-import 'package:bpi/src/retrofit/token_storage.dart';
+import 'package:bpi/src/chopper/token_manager.dart';
+import 'package:bpi/src/chopper/token_storage.dart';
 import 'package:test/test.dart';
 
 final class MemoryTokenStorage implements TokenStorage {

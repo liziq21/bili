@@ -93,7 +93,7 @@ class MockNetworkVideoDataSource({
     playerInfoCalls.add((bvid, cid));
     final error = playerInfoError;
     if (error != null) throw error;
-    // retrofit 层已经把响应体的 data 拆出来，模型直接对应 data。
+    // Chopper 层已经把响应体的 data 拆出来，模型直接对应 data。
     return NetworkBiliPlayerInfo.fromJson(
       playerInfoJson ?? const <String, dynamic>{'aid': 0, 'bvid': '', 'cid': 0},
     );

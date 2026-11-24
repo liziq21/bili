@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bpi/src/retrofit/api_interceptor.dart';
+import 'package:bpi/src/chopper/api_interceptor.dart';
 import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';

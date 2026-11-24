@@ -1,7 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format width=80
 
-part of 'retrofit_network.dart';
+part of 'bili_api.dart';
 
 // **************************************************************************
 // ChopperGenerator

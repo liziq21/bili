@@ -63,7 +63,7 @@
 2. 在 `tool/capture/fetch_fixtures.dart` 增加抓取分支与结构校验函数，响应通过校验后才写盘。
 3. 在本文件「已确认的来源与端点」表格加一行：Endpoint、Method/Path、鉴权/签名、来源、Fixture、实测日期。
 4. 在 `testing/README.md` 的 Fixture 记录表加一行，补齐非敏感请求参数、HTTP status、来源与抓取日期。
-5. 实现 service 与 DTO，一个 endpoint 对应一个 service 方法；DTO 用 `Network` 前缀加平台或域标识加端点语义命名（`NetworkBili*` / `NetworkLive*` / `NetworkReply*`）。service 按域拆分为 `NetworkSearchDataSource`、`NetworkVideoDataSource`、`NetworkLiveDataSource`、`NetworkFeedDataSource`。
+5. 实现 service 与 DTO，一个 endpoint 对应一个 service 方法；DTO 用 `Network` 前缀加平台或域标识加端点语义命名（`NetworkBili*` / `NetworkLive*` / `NetworkReply*`）。service 按域拆分为 `NetworkSearchDataSource`、`NetworkVideoDataSource`、`NetworkLiveDataSource`、`NetworkFeedDataSource`。方法签名必须先加在 `lib/src/network_*_data_source.dart` 的接口里：`doc_guardrail_test` 只扫描这些文件，只写在 mixin 里的方法不会进入它的清单。@GET 注解集中在 `lib/src/chopper/bili_api.dart`，实现按域放在 `lib/src/chopper/*_endpoints.dart` 的 mixin，失败统一由 `error_interceptor.dart` 转成包级异常，不要在每个方法里重复 try/catch。
 6. 写四项测试：fixture 解析、MockClient 请求形状、失败路径，加 fixture 本身。
 7. 在 `test/doc_guardrail_test.dart` 的 `endpointSpecs` 登记新方法：填 `method`、`fixtures`（它的 fixture 文件名）、`docCell`（它在上面两张表里的 Fixture 单元格文本，去反引号与 `testing/` 前缀，通配行写通配）与 `parse`（闭包：把 fixture 解码后用对应 DTO 的 `fromJson` 解析并断言关键字段非空；错误 envelope fixture 断言其 `code`）。该测试强制八条检查：七个一致性（每个公开方法都在表内、每个 fixture 文件都存在、每个 fixture 只被一个方法声明、`AGENTS.md` 端点表与 `testing/README.md` fixture 表逐行记录 spec 表声明的单元格且不多不少、每张表覆盖 `testing/` 下全部 fixture、每个 fixture 都由 `tool/capture/fetch_fixtures.dart` 真正写出、抓取脚本的 map 键确有循环写盘）加一个解析校验（每个 fixture 都能被其 `parse` 闭包解析成该方法的 DTO 且关键字段非空）。漏登记任何一处该测试失败，所以本步必须在第 8 步之前完成。
 8. 从包目录跑 `dart test` 与 `dart analyze --fatal-infos --fatal-warnings`，两者全绿。

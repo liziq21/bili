@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io' show HttpStatus;
 
 import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 
+import '../error/bpi_exception.dart';
 import '../utils/wbi_utils.dart';
 import 'token_manager.dart';
 
@@ -20,9 +22,13 @@ class BiliWbiInterceptor implements Interceptor {
       return chain.proceed(originalRequest);
     }
 
-    final firstResponse = await chain.proceed(await _sign(originalRequest));
-    if (firstResponse.statusCode != 401) {
-      return firstResponse;
+    try {
+      return await chain.proceed(await _sign(originalRequest));
+    } on BpiHttpException catch (error) {
+      // The response converter turns every non-2xx answer into an error before
+      // it reaches this interceptor, so a rejected key arrives as a typed error
+      // instead of a 401 response.
+      if (error.statusCode != HttpStatus.unauthorized) rethrow;
     }
 
     await tokenManager.deleteToken(wbiStorageKey);
@@ -39,6 +45,3 @@ class BiliWbiInterceptor implements Interceptor {
     );
   }
 }
-
-/// Deprecated spelling kept as a source-compatible alias.
-typedef ChooperWbiInterceptor = BiliWbiInterceptor;
