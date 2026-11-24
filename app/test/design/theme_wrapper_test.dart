@@ -6,6 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
+Widget _shell(ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) =>
+    MaterialApp(
+      theme: theme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      supportedLocales: const [Locale('en')],
+      home: const SizedBox.shrink(),
+    );
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -34,10 +44,10 @@ void main() {
       ThemeWrapper(
         useDynamicColor: true,
         themeConfig: ThemeConfig.followSystem,
-        builder: (theme, darkTheme, _) {
+        builder: (theme, darkTheme, themeMode) {
           light = theme;
           dark = darkTheme;
-          return const SizedBox();
+          return _shell(theme, darkTheme, themeMode);
         },
       ),
     );
@@ -67,10 +77,10 @@ void main() {
       ThemeWrapper(
         useDynamicColor: true,
         themeConfig: ThemeConfig.followSystem,
-        builder: (theme, darkTheme, _) {
+        builder: (theme, darkTheme, themeMode) {
           light = theme;
           dark = darkTheme;
-          return const SizedBox();
+          return _shell(theme, darkTheme, themeMode);
         },
       ),
     );
@@ -103,9 +113,9 @@ void main() {
           light: lightScheme,
           dark: darkScheme,
         ),
-        builder: (theme, darkTheme, _) {
+        builder: (theme, darkTheme, themeMode) {
           captured.add(theme);
-          return const SizedBox();
+          return _shell(theme, darkTheme, themeMode);
         },
       ),
     );
@@ -129,10 +139,10 @@ void main() {
         useDynamicColor: true,
         themeConfig: ThemeConfig.followSystem,
         dynamicSchemes: const DynamicColorSchemes(),
-        builder: (theme, darkTheme, _) {
+        builder: (theme, darkTheme, themeMode) {
           light = theme;
           dark = darkTheme;
-          return const SizedBox();
+          return _shell(theme, darkTheme, themeMode);
         },
       ),
     );
