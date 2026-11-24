@@ -765,11 +765,11 @@
   },
   "loadingHistory": "Loading history...",
   "@loadingHistory": {
-    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+    "description": "Media library - header tooltip while the watch history is loading"
   },
   "loadMoreHistory": "Load more history",
   "@loadMoreHistory": {
-    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+    "description": "Media library - header tooltip that loads the next page of watch history"
   },
   "historyLoadFailed": "Failed to load history",
   "@historyLoadFailed": {
@@ -1463,8 +1463,8 @@
       },
       "p2": {
         "type": "String",
-        "example": "3 days ago",
-        "description": "Relative publish date"
+        "example": "1.2K views • 3 days ago",
+        "description": "Subtitle built from the view count and/or the publish date"
       }
     }
   },

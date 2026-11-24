@@ -1094,13 +1094,13 @@ abstract class AppLocalizations {
   /// **'Load more'**
   String get loadMore;
 
-  /// Migrated from hardcoded literal (PR #345 tooltip)
+  /// Media library - header tooltip while the watch history is loading
   ///
   /// In en, this message translates to:
   /// **'Loading history...'**
   String get loadingHistory;
 
-  /// Migrated from hardcoded literal (PR #345 tooltip)
+  /// Media library - header tooltip that loads the next page of watch history
   ///
   /// In en, this message translates to:
   /// **'Load more history'**

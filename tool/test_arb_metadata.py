@@ -21,9 +21,10 @@ ARB_DIR = REPO_ROOT / 'app' / 'lib' / 'l10n'
 TEMPLATE = ARB_DIR / 'app_.arb'
 LOCALES = {'zh': ARB_DIR / 'app_zh.arb'}
 
-# Written by the LIZ-51 migration: it records where a string came from, not
-# what it means, so it carries no information for a translator.
-LEGACY_SENTINEL = 'Migrated from hardcoded literal (LIZ-51 batch base)'
+# Written by the LIZ-51 migration and its follow-ups: they record where a
+# string came from, not what it means, so they carry no information for a
+# translator. Match the prefix so a new variant cannot slip through.
+_LEGACY_DESCRIPTION = re.compile(r'^Migrated from hardcoded literal\b')
 
 # `{p1}` and `{count, plural, ...}`; the `=1{...}` branches of an ICU plural
 # start with a non-word character and are not matched.
@@ -61,7 +62,7 @@ class ArbMetadataContractTest(unittest.TestCase):
             for key in _message_keys(data):
                 meta = data.get(f'@{key}') or {}
                 description = (meta.get('description') or '').strip()
-                if not description or description == LEGACY_SENTINEL:
+                if not description or _LEGACY_DESCRIPTION.search(description):
                     offenders.append(key)
             self.assertEqual(
                 offenders,
