@@ -1,5 +1,6 @@
 import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 import '../device/bili_device_fingerprint.dart';
 import '../model/feed/network_bili_popular_response.dart';
@@ -65,36 +66,50 @@ class BiliNetworkClient {
         NetworkBiliRankingResponse: NetworkBiliRankingResponse.fromJson,
       },
     );
-    _chopperClient = ChopperClient(
-      client: httpClient,
-      converter: converter,
-      errorConverter: converter,
-      interceptors: [
-        // Outermost on purpose: it has to cover the interceptors below and
-        // Chopper's response converter, where JSON decoding happens.
-        const BpiErrorInterceptor(),
-        const ApiInterceptor(),
-        BiliWbiInterceptor(
-          tokenManager: TokenManager(storage: storage),
-          client: httpClient,
-        ),
-      ],
+    api = BiliNetworkApi.create(
+      ChopperClient(
+        client: httpClient,
+        converter: converter,
+        errorConverter: converter,
+        interceptors: [
+          // Outermost on purpose: it has to cover the interceptors below and
+          // Chopper's response converter, where JSON decoding happens.
+          const BpiErrorInterceptor(),
+          const ApiInterceptor(),
+          BiliWbiInterceptor(
+            tokenManager: TokenManager(storage: storage),
+            client: httpClient,
+          ),
+        ],
+      ),
     );
-    api = BiliNetworkApi.create(_chopperClient);
   }
 
+  @protected
   final http.Client httpClient;
-  final bool _ownsHttpClient;
+
+  @protected
   final BiliDeviceFingerprint device;
 
   /// Client for the XML danmaku endpoint, which is not JSON.
+  @protected
   late final BiliDanmakuClient danmaku = BiliDanmakuClient(httpClient);
 
-  late final ChopperClient _chopperClient;
+  /// Endpoints used by the domain mixins.
+  @protected
   late final BiliNetworkApi api;
 
+  final bool _ownsHttpClient;
+  bool _closed = false;
+
   Future<void> close() async {
-    _chopperClient.dispose();
+    if (_closed) return;
+    _closed = true;
+    // Chopper pushes each response into its own stream controller after the
+    // interceptor chain returns, so disposing the client while a request is in
+    // flight turns that push into a StateError that no interceptor can map.
+    // Nothing in this package listens to those controllers, so closing the HTTP
+    // client we own is enough.
     if (_ownsHttpClient) {
       httpClient.close();
     }

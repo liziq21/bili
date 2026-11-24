@@ -23,8 +23,9 @@ final class BpiErrorInterceptor implements Interceptor {
     final uri = chain.request.url;
     try {
       return await chain.proceed(chain.request);
-    } on BpiException {
-      rethrow;
+    } on BpiException catch (error, stack) {
+      if (error.uri != null) rethrow;
+      Error.throwWithStackTrace(error.withUri(uri), stack);
     } on FormatException catch (error) {
       // Chopper decodes JSON bodies with utf8.decode before the converter's
       // tolerant parsing, so invalid bytes surface as a FormatException here.

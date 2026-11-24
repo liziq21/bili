@@ -13,6 +13,57 @@ sealed class BpiException implements Exception {
   final int? biliCode;
   final Object? cause;
 
+  /// This error bound to [uri], keeping the current URI when it has one.
+  ///
+  /// Converters raise errors without any request context, so the network layer
+  /// completes them once, at the only place that still holds the request.
+  BpiException withUri(Uri uri) {
+    if (this.uri != null) return this;
+    return switch (this) {
+      BiliApiException e => BiliApiException(
+        e.message,
+        biliCode: e.biliCode,
+        uri: uri,
+        statusCode: e.statusCode,
+        cause: e.cause,
+      ),
+      BiliRiskControlException e => BiliRiskControlException(
+        e.message,
+        uri: uri,
+        statusCode: e.statusCode,
+        biliCode: e.biliCode,
+        cause: e.cause,
+      ),
+      BpiHttpException e => BpiHttpException(
+        e.message,
+        statusCode: e.statusCode,
+        uri: uri,
+        cause: e.cause,
+      ),
+      BpiNetworkException e => BpiNetworkException(
+        e.message,
+        uri: uri,
+        cause: e.cause,
+      ),
+      BpiSerializationException e => BpiSerializationException(
+        e.message,
+        uri: uri,
+        statusCode: e.statusCode,
+        biliCode: e.biliCode,
+        cause: e.cause,
+      ),
+      WbiException e => WbiException(
+        e.message,
+        uri: uri,
+        statusCode: e.statusCode,
+        biliCode: e.biliCode,
+        cause: e.cause,
+      ),
+      // Token failures happen before any request exists.
+      TokenException() => this,
+    };
+  }
+
   @override
   String toString() {
     final details = <String>[

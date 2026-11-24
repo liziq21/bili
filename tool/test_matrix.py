@@ -216,6 +216,7 @@ TEST_MATRIX = {
         'packages/bilibili/bpi/test/user_articles_test.dart',
         'packages/bilibili/bpi/test/user_card_test.dart',
         'packages/bilibili/bpi/test/video_data_models_test.dart',
+        'packages/bilibili/bpi/test/wbi_interceptor_test.dart',
         'packages/bilibili/bpi/test/wbi_utils_test.dart',
         'packages/bilibili/test/bili_channel_playlists_remote_data_source_test.dart',
         'packages/bilibili/test/bili_live_danmaku_remote_data_source_test.dart',

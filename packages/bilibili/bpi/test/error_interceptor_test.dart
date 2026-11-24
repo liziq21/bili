@@ -27,41 +27,70 @@ final class ThrowingChain<BodyType> implements Chain<BodyType> {
 }
 
 final class RecordingChain<BodyType> implements Chain<BodyType> {
-  RecordingChain(this.request);
+  RecordingChain(this.request, this.response);
 
   @override
   final Request request;
+
+  final Response<BodyType> response;
 
   Request? forwarded;
 
   @override
   FutureOr<Response<BodyType>> proceed(Request request) {
     forwarded = request;
-    return Response<BodyType>(http.Response('', 200), null);
+    return response;
   }
 }
 
 void main() {
   group('BpiErrorInterceptor', () {
-    test('passes a successful response through untouched', () async {
+    test('returns the successful response it received', () async {
       const interceptor = BpiErrorInterceptor();
-      final chain = RecordingChain<Object?>(_request);
+      final body = <String, dynamic>{'code': 0, 'data': 'payload'};
+      final response = Response<Map<String, dynamic>>(
+        http.Response('{"code":0,"data":"payload"}', 200),
+        body,
+      );
+      final chain = RecordingChain<Map<String, dynamic>>(_request, response);
 
-      final response = await interceptor.intercept(chain);
+      final actual = await interceptor.intercept(chain);
 
       expect(chain.forwarded, same(_request));
-      expect(response.statusCode, equals(200));
+      expect(actual, same(response));
+      expect(actual.body, same(body));
     });
 
-    test('rethrows a BpiException unchanged', () async {
+    test('rethrows a BpiException that carries a URI unchanged', () async {
       const interceptor = BpiErrorInterceptor();
-      const error = BpiHttpException(
+      final error = BpiHttpException(
         'Bilibili request failed.',
         statusCode: 502,
+        uri: _request.url,
       );
       final chain = ThrowingChain<Object?>(_request, error);
 
       await expectLater(interceptor.intercept(chain), throwsA(same(error)));
+    });
+
+    test('attaches the request URI to a BpiException that has none', () async {
+      const interceptor = BpiErrorInterceptor();
+      final cause = const FormatException('bad json');
+      final error = BpiSerializationException(
+        'Bilibili response is missing the data object.',
+        cause: cause,
+      );
+      final chain = ThrowingChain<Object?>(_request, error);
+
+      await expectLater(
+        interceptor.intercept(chain),
+        throwsA(
+          isA<BpiSerializationException>()
+              .having((e) => e.uri, 'uri', _request.url)
+              .having((e) => e.message, 'message', error.message)
+              .having((e) => e.cause, 'cause', same(cause)),
+        ),
+      );
     });
 
     test('maps a FormatException to BpiSerializationException', () async {
@@ -94,11 +123,9 @@ void main() {
         await expectLater(
           interceptor.intercept(chain),
           throwsA(
-            isA<BpiSerializationException>().having(
-              (e) => e.cause,
-              'cause',
-              same(error),
-            ),
+            isA<BpiSerializationException>()
+                .having((e) => e.cause, 'cause', same(error))
+                .having((e) => e.uri, 'uri', _request.url),
           ),
         );
       },
