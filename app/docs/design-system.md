@@ -55,7 +55,7 @@
 
 **R2.2** 语义不得混用：`scrim` / `onScrim` 与 `onSurface` 系在暗色下方向相反，禁止共用常量，禁止前景 token 当背景用。
 
-**R2.4** 与 Material 组件内部固定内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`ListTile` 的 `contentPadding` 默认 16dp 且不随 `$styles.scale` 变化，而 `$styles.insets.sm` 是 `16 * scale`；用令牌在平板（scale 1.1）会把标题与行文字错开。`SettingSectionHeader` 的左侧 16 即此例：它对的是 Material 的固定值，不是布局尺度。
+**R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
 
 ### R3 —— 亮度单源
 
