@@ -16,7 +16,10 @@ class const SettingSectionHeader({super.key, required final String title})
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(
-      left: $styles.insets.sm,
+      // Fixed rather than `$styles.insets.sm`: ListTile's content padding does
+      // not scale with the layout breakpoint, so a scaled inset would drift off
+      // the row text on tablets.
+      left: 16,
       top: $styles.insets.sm,
       bottom: $styles.insets.xs,
     ),
