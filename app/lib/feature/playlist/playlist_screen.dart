@@ -233,6 +233,7 @@ class const _PlaylistHeader({
                   aspectRatio: 16 / 9,
                   child: CachedNetworkImage(
                     imageUrl: cover,
+                    memCacheWidth: 720,
                     fit: BoxFit.cover,
                     errorBuilder: (context, url, error) => Container(
                       color: colorScheme.surfaceContainerHighest,
