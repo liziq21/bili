@@ -4,8 +4,9 @@
 Maps every ``*_test.dart`` file to one of six categories and powers the
 workflows around it:
 
-  --check                  Fail if any discovered test file is unclassified
-                           or any mapping entry points at a missing file.
+  --check                  Fail if any discovered test file is unclassified,
+                           any mapping entry points at a missing file, or the
+                           generated report is stale.
   --report [PATH]          Write the human-readable matrix document
                            (default: app/test/TEST_MATRIX.md).
   --files CATEGORY --area A --rel BASE
@@ -43,6 +44,9 @@ from pathlib import Path
 
 CATEGORIES = ['unit', 'widget', 'golden', 'contract', 'integration',
               'performance']
+
+# Generated document that must match the mapping; --check verifies it.
+REPORT_REL = 'app/test/TEST_MATRIX.md'
 
 # Repo-relative test file paths, grouped by category. Single source of
 # truth: TEST_MATRIX.md and the CI per-category file lists are generated
@@ -281,6 +285,11 @@ def check_mapping(root: Path) -> int:
         problems.append(f'  unclassified: {path}')
     for path in sorted(mapped - discovered):
         problems.append(f'  stale entry (file missing): {path}')
+
+    report = root / REPORT_REL
+    current = report.read_text() if report.exists() else ''
+    if current != render_report():
+        problems.append(f'  stale report: {REPORT_REL} (run --report)')
 
     counts = {c: len(TEST_MATRIX[c]) for c in CATEGORIES}
     print('Test matrix check')
@@ -550,7 +559,7 @@ def main() -> int:
     if args.check:
         return check_mapping(root)
     if args.report is not None:
-        path = (root / 'app/test/TEST_MATRIX.md'
+        path = (root / REPORT_REL
                 if args.report == '__default__' else Path(args.report))
         return write_report(root, path)
     if args.files:

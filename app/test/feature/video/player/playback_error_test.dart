@@ -41,6 +41,36 @@ void main() {
       expect(error.category, PlaybackErrorCategory.authorization);
     });
 
+    test('gives network indicators precedence over the open phrase', () {
+      // media-kit prefixes connection failures with "Failed to open".
+      final error = MediaPlaybackException.fromMessage(
+        'Failed to open <url>: Connection timed out',
+      );
+
+      expect(error.category, PlaybackErrorCategory.network);
+      expect(PlaybackRetryPolicy().shouldAutomaticallyRetry(error), isTrue);
+    });
+
+    test('does not read a signed URL as an authorization failure', () {
+      // The live HLS URL carries expires= and an "401" path segment.
+      final error = MediaPlaybackException.fromMessage(
+        'Failed to open '
+        'https://cdn.example.com/401/live.m3u8?expires=1700000000&sign=abc',
+      );
+
+      expect(error.category, PlaybackErrorCategory.open);
+    });
+
+    test('redacts media URLs before the message reaches the UI or the log', () {
+      final error = MediaPlaybackException.fromMessage(
+        'Failed to open '
+        'https://cdn.example.com/live.m3u8?expires=1700000000&sign=abc&trid=x',
+      );
+
+      expect(error.message, 'Failed to open <url>');
+      expect(error.message, isNot(contains('sign=')));
+    });
+
     test('keeps unmatched failures in the unknown category', () {
       final error = MediaPlaybackException.fromMessage(
         'unexpected player stop',

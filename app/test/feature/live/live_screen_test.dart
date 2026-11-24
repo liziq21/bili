@@ -78,6 +78,18 @@ void main() {
     expect(find.text('Live'), findsNothing);
   });
 
+  testWidgets('the app bar title is English under the English locale', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildScreen(_FakeLiveDataSource(), locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Live'), findsOneWidget);
+    expect(find.text('直播间'), findsNothing);
+  });
+
   testWidgets('a detail failure shows the category copy, never the exception', (
     tester,
   ) async {

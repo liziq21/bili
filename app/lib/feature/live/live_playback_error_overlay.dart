@@ -20,6 +20,8 @@ class const LivePlaybackErrorOverlay({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // `$styles` 是全局静态，不订阅主题；没有这行，切主题后覆盖层会留着旧色板。
+    Theme.of(context);
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
     return ColoredBox(
       color: $styles.colors.scrim.withValues(alpha: 0.72),
