@@ -1049,11 +1049,20 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
     required List<LocalPlaylistItemEntity> allItems,
     required List<LocalPlaylistItemEntity> items,
   }) {
+    // 每行都要用它在完整列表里的下标来算上移/下移目标，逐行 indexWhere 会让
+    // 构建一次列表变成 O(N²)；这里先算一次 {internalId: 下标}。
+    final indexById = {
+      for (var i = 0; i < allItems.length; i++) allItems[i].internalId: i,
+    };
     if (!_canReorder) {
       return Column(
         children: [
           for (var index = 0; index < items.length; index++)
-            _row(allItems: allItems, items: items, index: index),
+            _row(
+              items: items,
+              index: index,
+              actualIndex: indexById[items[index].internalId] ?? -1,
+            ),
         ],
       );
     }
@@ -1069,24 +1078,21 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
         newIndex: newIndex,
       ),
       itemBuilder: (context, index) => _row(
-        allItems: allItems,
         items: items,
         index: index,
+        actualIndex: indexById[items[index].internalId] ?? -1,
         dragIndex: index,
       ),
     );
   }
 
   Widget _row({
-    required List<LocalPlaylistItemEntity> allItems,
     required List<LocalPlaylistItemEntity> items,
     required int index,
+    required int actualIndex,
     int? dragIndex,
   }) {
     final item = items[index];
-    final actualIndex = allItems.indexWhere(
-      (entry) => entry.internalId == item.internalId,
-    );
     return _PlaylistItemRow(
       key: ValueKey(item.internalId),
       item: item,
