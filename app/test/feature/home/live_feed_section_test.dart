@@ -46,9 +46,6 @@ void main() {
       );
       await tester.pump();
 
-      // 筛选栏已经显示当前 Feed，区块头不应再重复同一个标题。
-      expect(find.text('推荐直播'), findsNothing);
-
       // Check tooltip
       expect(find.byTooltip('直播'), findsOneWidget);
 
@@ -68,6 +65,44 @@ void main() {
       semantics.dispose();
     },
   );
+
+  testWidgets('does not repeat the active feed title above the cards', (
+    WidgetTester tester,
+  ) async {
+    final room = LiveRoomModel(
+      id: 1001,
+      title: '直播',
+      url: 'https://live.bilibili.com/1001',
+      creatorProfileName: '未知主播',
+      isLive: true,
+    );
+    final section = FeedSectionState<LiveRoomModel>(
+      id: 'live_section',
+      title: '推荐直播',
+      status: FeedStatus.success,
+      items: [room],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              LiveFeedSection(
+                section: section,
+                onLiveTap: (_) {},
+                onRetry: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // The filter bar already names the active feed.
+    expect(find.text('推荐直播'), findsNothing);
+  });
 
   group('card layout budget', () {
     // 回归：文字高度曾按 fontSize * 1.5 估算，而 bodySmall 的真实行高是
