@@ -196,7 +196,7 @@ void main() {
   });
 
   testWidgets(
-    'header load button exposes semantics and disabled tooltip when no more items',
+    'no end-of-list marker in the header when there is nothing more to load',
     (tester) async {
       final cubit = MediaHistoryCubit(
         mediaHistoryDao: db.mediaHistoryDao,
@@ -209,9 +209,35 @@ void main() {
       expect(cubit.state.items, isEmpty);
       expect(cubit.state.hasMore, isFalse);
 
-      expect(find.byTooltip('All history loaded'), findsOneWidget);
+      // The header toolbar sits above the list, so an end-of-list marker there
+      // would be read before the rows it is supposed to follow. With no rows at
+      // all the empty state already explains the list, so no footer either.
+      expect(find.byTooltip('All history loaded'), findsNothing);
+      expect(find.text('No more items'), findsNothing);
     },
   );
+
+  testWidgets('end-of-list marker follows the last history row', (
+    tester,
+  ) async {
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    expect(cubit.state.items, hasLength(1));
+    expect(cubit.state.hasMore, isFalse);
+
+    final row = tester.getRect(find.textContaining('Video v1'));
+    final footer = tester.getRect(find.text('No more items'));
+    expect(footer.top, greaterThanOrEqualTo(row.bottom));
+    expect(find.byTooltip('All history loaded'), findsNothing);
+  });
 
   testWidgets('labels each row with its source and when it was watched', (
     tester,
