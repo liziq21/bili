@@ -1247,18 +1247,6 @@ abstract class AppLocalizations {
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:
-  /// **'Top/bottom danmaku duration'**
-  String get topBottomDanmakuDuration;
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
-  /// **'{p1} s'**
-  String secondsValueTopBottom(String p1);
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
   /// **'Opacity'**
   String get opacity;
 
@@ -1273,30 +1261,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stroke radius'**
   String get strokeRadius;
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
-  /// **'Max top rows'**
-  String get topMaxRows;
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
-  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
-  String topRowsValue(int p1);
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
-  /// **'Max bottom rows'**
-  String get bottomMaxRows;
-
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
-  ///
-  /// In en, this message translates to:
-  /// **'{p1, plural, =1{1 row} other{{p1} rows}}'**
-  String bottomRowsValue(int p1);
 
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///

@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../design/design.dart';
 import '../../../main.dart';
 import '../bloc/home_bloc.dart';
 
@@ -22,21 +21,6 @@ class const HomeFilterBar({
         $styles.insets.sm +
         $styles.insets.xs * 2;
   }
-
-  static IconData iconFor(HomeFilter filter) => switch (filter.rawId) {
-    'all' => AppIcons.sparkle,
-    'top100' => AppIcons.fire,
-    'hot' || 'trending' => AppIcons.hot,
-    'recommend' => AppIcons.recommend,
-    'sub' => AppIcons.feed,
-    'bookmarks' => AppIcons.bookmark,
-    'downloaded' => AppIcons.downloaded,
-    'history' => AppIcons.history,
-    _ => switch (filter.kind) {
-      HomeFilterKind.liveFeed => AppIcons.liveFeed,
-      _ => AppIcons.videoLibrary,
-    },
-  };
 
   @override
   Widget build(
@@ -69,14 +53,7 @@ class const HomeFilterBar({
                 selected: isSelected,
                 showCheckmark: false,
                 tooltip: filter.label,
-                avatar: Icon(
-                  iconFor(filter),
-                  size: $styles.insets.sm,
-                  color: isSelected
-                      ? colorScheme.onPrimary
-                      : colorScheme.onSurfaceVariant,
-                ),
-                label: Text(filter.label),
+                label: Text(filter.label, textAlign: TextAlign.center),
                 labelStyle: $styles.text.bodySmall.copyWith(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected

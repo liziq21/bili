@@ -202,10 +202,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     'DANMAKU_REGULAR_DURATION',
     8,
   );
-  static const danmakuTopBottomDuration = PreferencesKey<double>._(
-    'DANMAKU_TOP_BOTTOM_DURATION',
-    6,
-  );
   static const danmakuOpacity = PreferencesKey<double>._('DANMAKU_OPACITY', .9);
   static const danmakuFontSize = PreferencesKey<double>._(
     'DANMAKU_FONT_SIZE',
@@ -213,14 +209,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
   );
   static const danmakuOutlineRadius = PreferencesKey<double>._(
     'DANMAKU_OUTLINE_RADIUS',
-    2,
-  );
-  static const danmakuTopMaxRows = PreferencesKey<int>._(
-    'DANMAKU_TOP_MAX_ROWS',
-    2,
-  );
-  static const danmakuBottomMaxRows = PreferencesKey<int>._(
-    'DANMAKU_BOTTOM_MAX_ROWS',
     2,
   );
 

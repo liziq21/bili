@@ -9,13 +9,7 @@ import 'package:material_ui/material_ui.dart';
 const _size = Size(800, 600);
 const _lineHeight = 27.0;
 
-const _colors = (
-  onScrim: Color(0xFFFFFFFF),
-  accentText: Color(0xFF00A1D6),
-  secondary: Color(0xFF00B5E5),
-  tertiary: Color(0xFFFF6699),
-  outline: Color(0xFF000000),
-);
+const _colors = (onScrim: Color(0xFFFFFFFF), outline: Color(0xFF000000));
 
 DanmakuComment _comment(
   DanmakuMode mode, {
@@ -90,7 +84,6 @@ void main() {
       final enter = danmakuTextOffset(
         size: _size,
         textWidth: textWidth,
-        mode: DanmakuMode.scrolling,
         lane: 0,
         lineHeight: _lineHeight,
         progress: 0,
@@ -98,7 +91,6 @@ void main() {
       final leave = danmakuTextOffset(
         size: _size,
         textWidth: textWidth,
-        mode: DanmakuMode.scrolling,
         lane: 0,
         lineHeight: _lineHeight,
         progress: 1,
@@ -110,98 +102,35 @@ void main() {
       expect(enter.dy, 0);
     });
 
-    test('reverse enters at the left edge and leaves on the right', () {
-      // Given a reverse comment of known width.
-      const textWidth = 120.0;
-
-      // When computing the offsets at the start and end of its life.
-      final enter = danmakuTextOffset(
-        size: _size,
-        textWidth: textWidth,
-        mode: DanmakuMode.reverse,
-        lane: 0,
-        lineHeight: _lineHeight,
-        progress: 0,
-      );
-      final leave = danmakuTextOffset(
-        size: _size,
-        textWidth: textWidth,
-        mode: DanmakuMode.reverse,
-        lane: 0,
-        lineHeight: _lineHeight,
-        progress: 1,
-      );
-
-      // Then it starts just off the left edge and ends just off the right.
-      expect(enter.dx, -textWidth);
-      expect(leave.dx, _size.width);
-    });
-
-    test('top comments stay centred on their lane', () {
-      // Given a top comment on the second lane.
+    test('every mode moves along the scrolling path', () {
+      // Given a comment on the second lane.
       const textWidth = 200.0;
 
       // When computing its offset at two different moments.
       final first = danmakuTextOffset(
         size: _size,
         textWidth: textWidth,
-        mode: DanmakuMode.top,
-        lane: 1,
+        lane: 2,
         lineHeight: _lineHeight,
-        progress: 0,
+        progress: .2,
       );
       final later = danmakuTextOffset(
         size: _size,
         textWidth: textWidth,
-        mode: DanmakuMode.top,
-        lane: 1,
+        lane: 2,
         lineHeight: _lineHeight,
         progress: .8,
       );
 
-      // Then it does not move and sits horizontally centred.
-      expect(first, later);
-      expect(first.dx, (_size.width - textWidth) / 2);
-      expect(first.dy, _lineHeight);
-    });
-
-    test('bottom comments stack upward from the bottom edge', () {
-      // Given a bottom comment on the first lane.
-      const textWidth = 200.0;
-
-      // When computing its offset.
-      final offset = danmakuTextOffset(
-        size: _size,
-        textWidth: textWidth,
-        mode: DanmakuMode.bottom,
-        lane: 0,
-        lineHeight: _lineHeight,
-        progress: .5,
-      );
-
-      // Then it is centred and sits one line above the bottom edge.
-      expect(offset.dx, (_size.width - textWidth) / 2);
-      expect(offset.dy, _size.height - _lineHeight);
-    });
-
-    test('special comments move like scrolling comments', () {
-      // Given the same geometry for both modes.
-      Offset offsetFor(DanmakuMode mode) => danmakuTextOffset(
-        size: _size,
-        textWidth: 90,
-        mode: mode,
-        lane: 2,
-        lineHeight: _lineHeight,
-        progress: .3,
-      );
-
-      // Then special shares the scrolling path.
-      expect(offsetFor(DanmakuMode.special), offsetFor(DanmakuMode.scrolling));
+      // Then it moves left and keeps its lane.
+      expect(later.dx, lessThan(first.dx));
+      expect(first.dy, 2 * _lineHeight);
+      expect(later.dy, first.dy);
     });
   });
 
   group('DanmakuPainter.paint', () {
-    test('paints every placement mode without throwing', () {
+    test('paints every source mode as a scrolling comment', () {
       // Given one comment per mode, all on screen at the same moment.
       final comments = [
         _comment(DanmakuMode.scrolling, rowId: 0),

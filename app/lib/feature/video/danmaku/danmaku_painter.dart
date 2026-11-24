@@ -6,27 +6,29 @@ import 'package:flutter/widgets.dart';
 import 'danmaku_settings.dart';
 
 /// 弹幕浮层颜色配置（从主题角色取值，不构造任意颜色）。
-typedef DanmakuColors = ({
-  Color onScrim,
-  Color accentText,
-  Color secondary,
-  Color tertiary,
-  Color outline,
-});
+typedef DanmakuColors = ({Color onScrim, Color outline});
 
 /// 同一轨道上两条弹幕之间的空档（秒），避免文字首尾相接看不出分界。
 const double _laneGap = .25;
+
+/// 画面最多容纳的滚动轨道数，避免一屏塞入过多弹幕。
+const int _maxLanes = 8;
 
 /// 一条待绘制的弹幕及其轨道号。
 typedef DanmakuSlot = ({DanmakuComment comment, int lane});
 
 /// 给当前时间点仍在画面上的弹幕分配轨道，按开始时间升序返回。
 ///
-/// 分配规则：同一轨道的后一条必须等前一条让出画面才能进入，否则同一行会
-/// 叠字。分配只依赖比它更早的弹幕，因此播放推进时已上屏的弹幕不会换行；
+/// 所有弹幕一律按滚动处理：来源里的顶/底/逆向标记只保留在数据层，不再影响
+/// 排版。同一轨道的后一条必须等前一条让出画面才能进入，否则同一行会叠字。
 /// 所有轨道都被占满时该条直接丢弃——少一条弹幕比叠字好读。
 ///
-/// 纯函数：只读输入，不碰 canvas，便于单测「同轨道不重叠」这条规则。
+/// 轨道分配必须从第一条已开始的弹幕算起，不能只算当前可见窗口。一条弹幕的
+/// 轨道取决于它开始时刻更早的弹幕是否还占着轨道；把已经滚出画面的前序弹幕
+/// 从输入里剔掉，会让还在画面上的弹幕在下一帧换到别的轨道，看起来就是突然
+/// 跳行。
+///
+/// 纯函数：只读输入，不碰 canvas，便于单测「同轨道不重叠」与「轨道不跳变」。
 List<DanmakuSlot> planDanmakuSlots({
   required Iterable<DanmakuComment> comments,
   required double positionSeconds,
@@ -36,66 +38,48 @@ List<DanmakuSlot> planDanmakuSlots({
   if (size.isEmpty) return const [];
 
   final lineHeight = settings.fontSize * 1.5;
-  final scrollingRows = math.max(
+  final laneCount = math.max(
     1,
-    math.min(8, (size.height / lineHeight).floor()),
-  );
-  final longestDuration = math.max(
-    settings.regularDuration,
-    settings.topBottomDuration,
+    math.min(_maxLanes, (size.height / lineHeight).floor()),
   );
 
-  // 只规划「已经开始」的弹幕。窗口比最长停留时长再多一个空档：更早的
-  // 弹幕此刻早已让出轨道，把它们排除在外不会影响窗口内的分配结果。
-  final windowStart = positionSeconds - longestDuration - _laneGap;
-  final started = comments.where((comment) {
-    final start = _startSeconds(comment);
-    return start >= windowStart && start <= positionSeconds;
-  }).toList()..sort((a, b) => a.startTime.compareTo(b.startTime));
+  final started = comments
+      .where((comment) => _startSeconds(comment) <= positionSeconds)
+      .toList();
+  if (!_isSortedByStart(started)) {
+    started.sort((a, b) => a.startTime.compareTo(b.startTime));
+  }
 
-  // 顶/底弹幕与滚动弹幕共用同一片画面：顶部弹幕停在原地，滚动弹幕会经过
-  // 这些行，所以顶部弹幕必须和滚动弹幕抢同一组轨道，否则两行字会叠在一起。
-  // 底部弹幕贴底排列，单独一组。
-  final scrollingFreeAt = List<double>.filled(
-    scrollingRows,
-    double.negativeInfinity,
-  );
-  final bottomFreeAt = List<double>.filled(
-    math.max(1, settings.bottomMaxRows),
-    double.negativeInfinity,
-  );
-  final topLaneCount = math.min(
-    scrollingRows,
-    math.max(1, settings.topMaxRows),
-  );
-
+  final freeAt = List<double>.filled(laneCount, double.negativeInfinity);
   final slots = <DanmakuSlot>[];
   for (final comment in started) {
     final start = _startSeconds(comment);
-    final duration = _durationOf(comment, settings);
-    final (lanes, laneCount) = switch (comment.mode) {
-      DanmakuMode.top => (scrollingFreeAt, topLaneCount),
-      DanmakuMode.bottom => (bottomFreeAt, bottomFreeAt.length),
-      _ => (scrollingFreeAt, scrollingFreeAt.length),
-    };
-    final lane = _claimLane(lanes, laneCount, comment, start);
+    final lane = _claimLane(freeAt, laneCount, comment, start);
     if (lane == null) continue;
 
     final width = _estimatedWidth(
       comment.content,
       _fontSizeOf(comment, settings),
     );
-    lanes[lane] = switch (comment.mode) {
-      // 顶/底弹幕停在原地，占满整段停留时长才让出轨道。
-      DanmakuMode.top || DanmakuMode.bottom => start + duration + _laneGap,
-      // 滚动弹幕的尾巴越过右边缘后轨道就可以给下一条。
-      _ => start + duration * width / (size.width + width) + _laneGap,
-    };
+    // 滚动弹幕的尾巴越过右边缘后轨道就可以给下一条。
+    freeAt[lane] =
+        start +
+        settings.regularDuration * width / (size.width + width) +
+        _laneGap;
 
-    if (positionSeconds - start > duration) continue;
+    if (positionSeconds - start > settings.regularDuration) continue;
     slots.add((comment: comment, lane: lane));
   }
   return slots;
+}
+
+bool _isSortedByStart(List<DanmakuComment> comments) {
+  for (var i = 1; i < comments.length; i++) {
+    if (comments[i].startTime.compareTo(comments[i - 1].startTime) < 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 double _startSeconds(DanmakuComment comment) =>
@@ -106,12 +90,6 @@ double _fontSizeOf(DanmakuComment comment, DanmakuSettings settings) =>
       settings.fontSize * .75,
       settings.fontSize * 1.4,
     );
-
-double _durationOf(DanmakuComment comment, DanmakuSettings settings) =>
-    switch (comment.mode) {
-      DanmakuMode.top || DanmakuMode.bottom => settings.topBottomDuration,
-      _ => settings.regularDuration,
-    };
 
 /// 估算单行文字宽度：按最宽的中日韩全角字（1em/字）算。
 ///
@@ -141,35 +119,16 @@ int? _claimLane(
 
 /// 单条弹幕在画面上的落点。
 ///
-/// 顶部/底部弹幕水平居中并停在自己的轨道上；滚动弹幕从右向左穿过画面，
-/// 逆向弹幕从左向右。`progress` 为 0 时在入场边缘，1 时在出场边缘。
-///
-/// 抽成纯函数是为了让四种模式的落点可以被直接断言，不必截图比对像素。
+/// 所有弹幕都从右向左穿过画面；`progress` 为 0 时在右边缘外，1 时在左边缘外。
 @visibleForTesting
 Offset danmakuTextOffset({
   required Size size,
   required double textWidth,
-  required DanmakuMode mode,
   required int lane,
   required double lineHeight,
   required double progress,
-}) {
-  return switch (mode) {
-    DanmakuMode.top => Offset((size.width - textWidth) / 2, lane * lineHeight),
-    DanmakuMode.bottom => Offset(
-      (size.width - textWidth) / 2,
-      size.height - (lane + 1) * lineHeight,
-    ),
-    DanmakuMode.reverse => Offset(
-      progress * (size.width + textWidth) - textWidth,
-      lane * lineHeight,
-    ),
-    DanmakuMode.scrolling || DanmakuMode.special => Offset(
-      size.width - progress * (size.width + textWidth),
-      lane * lineHeight,
-    ),
-  };
-}
+}) =>
+    Offset(size.width - progress * (size.width + textWidth), lane * lineHeight);
 
 /// 共享弹幕画家：视频弹幕浮层与直播弹幕浮层复用。
 ///
@@ -221,7 +180,7 @@ final class DanmakuPainter({
       text: TextSpan(
         text: comment.content,
         style: TextStyle(
-          color: _colorFor(comment).withValues(alpha: settings.opacity),
+          color: colors.onScrim.withValues(alpha: settings.opacity),
           fontSize: fontSize,
           fontWeight: FontWeight.w500,
           shadows: [
@@ -236,37 +195,17 @@ final class DanmakuPainter({
       maxLines: 1,
     )..layout(maxWidth: size.width * 1.5);
 
-    final elapsed =
-        currentSeconds -
-        comment.startTime.inMicroseconds / Duration.microsecondsPerSecond;
-    final duration = _durationOf(comment, settings);
-    final progress = (elapsed / duration).clamp(0.0, 1.0);
+    final elapsed = currentSeconds - _startSeconds(comment);
+    final progress = (elapsed / settings.regularDuration).clamp(0.0, 1.0);
     final offset = danmakuTextOffset(
       size: size,
       textWidth: painter.width,
-      mode: comment.mode,
       lane: lane,
       lineHeight: lineHeight,
       progress: progress,
     );
 
     painter.paint(canvas, offset);
-  }
-
-  Color _colorFor(DanmakuComment comment) {
-    // Content colors are quantized to the active theme roles rather than
-    // constructing arbitrary colors in app/lib. This keeps the overlay
-    // readable with DynamicColor while retaining light/dark and warm/cool
-    // intent from the source XML.
-    final rgb = comment.colorArgb & 0x00FFFFFF;
-    final red = (rgb >> 16) & 0xFF;
-    final green = (rgb >> 8) & 0xFF;
-    final blue = rgb & 0xFF;
-    final luminance = (red * .2126 + green * .7152 + blue * .0722) / 255;
-    if (luminance >= .78) return colors.onScrim;
-    if (red >= green && red >= blue) return colors.tertiary;
-    if (green >= blue) return colors.secondary;
-    return colors.accentText;
   }
 
   @override

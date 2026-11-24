@@ -671,14 +671,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get topBottomDanmakuDuration => 'Top/bottom danmaku duration';
-
-  @override
-  String secondsValueTopBottom(String p1) {
-    return '$p1 s';
-  }
-
-  @override
   String get opacity => 'Opacity';
 
   @override
@@ -686,34 +678,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get strokeRadius => 'Stroke radius';
-
-  @override
-  String get topMaxRows => 'Max top rows';
-
-  @override
-  String topRowsValue(int p1) {
-    String _temp0 = intl.Intl.pluralLogic(
-      p1,
-      locale: localeName,
-      other: '$p1 rows',
-      one: '1 row',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get bottomMaxRows => 'Max bottom rows';
-
-  @override
-  String bottomRowsValue(int p1) {
-    String _temp0 = intl.Intl.pluralLogic(
-      p1,
-      locale: localeName,
-      other: '$p1 rows',
-      one: '1 row',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get playbackSpeed => 'Speed';
