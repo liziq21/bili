@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/design/design.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -167,4 +169,30 @@ void main() {
       expect(schemes.dark, isNull);
     },
   );
+
+  test('a stalled core-palette lookup does not restart the budget', () async {
+    var accentCalls = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(DynamicColorPlugin.channel, (call) async {
+          if (call.method == DynamicColorPlugin.accentColorMethodName) {
+            accentCalls++;
+            return const Color(0xFF6750A4).toARGB32();
+          }
+          return Completer<int?>().future;
+        });
+
+    final stopwatch = Stopwatch()..start();
+    final schemes = await resolveDynamicColorSchemes(
+      budget: const Duration(milliseconds: 100),
+    );
+    stopwatch.stop();
+
+    expect(schemes.light, isNull);
+    expect(
+      accentCalls,
+      0,
+      reason: 'no budget is left, so the blocking accent lookup must not start',
+    );
+    expect(stopwatch.elapsed, lessThan(const Duration(milliseconds: 400)));
+  });
 }

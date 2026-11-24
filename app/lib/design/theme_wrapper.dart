@@ -27,7 +27,7 @@ class const DynamicColorSchemes({
 /// The wait bounds the first-frame delay on platforms that never answer. A
 /// timeout keeps the brand palette for the whole session, which is the stable
 /// outcome the theme contract asks for.
-const Duration _dynamicColorTimeout = Duration(milliseconds: 500);
+const Duration dynamicColorBudget = Duration(milliseconds: 500);
 
 /// Resolves the platform dynamic palette once so the first frame already uses
 /// the final theme.
@@ -37,10 +37,21 @@ const Duration _dynamicColorTimeout = Duration(milliseconds: 500);
 /// fallback, then visibly repaints the whole app with the system palette once
 /// the platform answers (typically after the first input event on GTK). Reading
 /// the same plugin API before `runApp` removes that mid-session switch.
-Future<DynamicColorSchemes> resolveDynamicColorSchemes() async {
+///
+/// [budget] bounds the whole lookup, including the accent fallback. Callers
+/// that already spent part of the budget on startup work can pass what is left.
+Future<DynamicColorSchemes> resolveDynamicColorSchemes({
+  Duration budget = dynamicColorBudget,
+}) async {
+  final stopwatch = Stopwatch()..start();
+  Duration remaining() {
+    final left = budget - stopwatch.elapsed;
+    return left.isNegative ? Duration.zero : left;
+  }
+
   try {
     final palette = await DynamicColorPlugin.getCorePalette().timeout(
-      _dynamicColorTimeout,
+      remaining(),
     );
     if (palette != null) {
       return DynamicColorSchemes(
@@ -52,9 +63,15 @@ Future<DynamicColorSchemes> resolveDynamicColorSchemes() async {
     // Fall through to the accent-color path used by desktop platforms.
   }
 
+  if (remaining() == Duration.zero) {
+    // Starting the native lookup without a budget would still block the
+    // platform thread, even though Dart would stop waiting for the result.
+    return const DynamicColorSchemes();
+  }
+
   try {
     final accent = await DynamicColorPlugin.getAccentColor().timeout(
-      _dynamicColorTimeout,
+      remaining(),
     );
     if (accent != null) {
       return DynamicColorSchemes(

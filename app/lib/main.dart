@@ -6,8 +6,10 @@ import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:http/io_client.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'datastore/preferences_data_source.dart';
 import 'design/design.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/media_sources_provider.dart';
@@ -22,7 +24,7 @@ Future<void> main() async {
   // Resolve the platform palette before the first frame. Letting
   // `DynamicColorBuilder` fetch it later repaints the whole app from the brand
   // palette to the system palette after the user's first interaction.
-  final dynamicSchemes = await resolveDynamicColorSchemes();
+  final dynamicSchemes = await _resolveStartupSchemes();
 
   // Security Hardening: Mask detailed exception payloads and stack traces in release
   // builds to prevent exposing sensitive internal state or credentials to end users.
@@ -52,6 +54,28 @@ Future<void> main() async {
   if (kIsWeb) {
     SemanticsBinding.instance.ensureSemantics();
   }
+}
+
+/// Skips the platform palette lookup when the user turned dynamic color off.
+///
+/// Reading the preference first avoids a startup wait whose result
+/// [ThemeWrapper] would discard, and the lookup shares the remaining budget.
+Future<DynamicColorSchemes> _resolveStartupSchemes() async {
+  final stopwatch = Stopwatch()..start();
+  try {
+    final enabled = await SharedPreferencesAsync()
+        .getBool(PreferencesKey.useDynamicColor.name)
+        .timeout(dynamicColorBudget);
+    if (enabled == false) {
+      return const DynamicColorSchemes();
+    }
+  } on Object {
+    // Unreadable preferences keep the default: dynamic color on.
+  }
+  final left = dynamicColorBudget - stopwatch.elapsed;
+  return resolveDynamicColorSchemes(
+    budget: left.isNegative ? Duration.zero : left,
+  );
 }
 
 void initDebugOverlayBridge() {
