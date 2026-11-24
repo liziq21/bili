@@ -58,6 +58,7 @@ class const FeedEntryTile({
         imageUrl: url,
         width: 72,
         height: 40,
+        memCacheWidth: 240,
         fit: BoxFit.cover,
         errorBuilder: (context, url, error) => fallback,
       ),
