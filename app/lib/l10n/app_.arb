@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "@@last_modified": "2026-10-23",
+  "@@last_modified": "2026-11-24",
   "searchResultTypeAll": "All",
   "@searchResultTypeAll": {
     "description": "Search result category - all results"
@@ -130,7 +130,9 @@
     "description": "Video quality height shown in player settings",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "720",
+        "description": "Quality height in pixels"
       }
     }
   },
@@ -191,9 +193,21 @@
     "description": "Retention option - keep forever"
   },
   "danmakuSettingsSubtitle": "Opacity, font size, duration and how many rows pinned at the top and bottom",
+  "@danmakuSettingsSubtitle": {
+    "description": "Settings - subtitle of the danmaku settings entry"
+  },
   "clearImageCache": "Clear image cache",
+  "@clearImageCache": {
+    "description": "Settings - action that drops decoded images from memory"
+  },
   "clearImageCacheSubtitle": "Frees decoded images held in memory; covers reload when shown again",
+  "@clearImageCacheSubtitle": {
+    "description": "Settings - subtitle explaining what clearing the image cache does"
+  },
   "imageCacheCleared": "Image cache cleared",
+  "@imageCacheCleared": {
+    "description": "SnackBar - confirmation that the image cache was cleared"
+  },
   "settingsAdvanced": "Advanced",
   "@settingsAdvanced": {
     "description": "Settings group and subpage title - advanced options"
@@ -270,7 +284,9 @@
     "description": "Selection count indicator",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "3",
+        "description": "Number of selected items"
       }
     }
   },
@@ -287,118 +303,131 @@
     "description": "Sleep timer group heading for stopping after the current item finishes"
   },
   "copyCreatorLink": "Copy creator page link",
+  "@copyCreatorLink": {
+    "description": "Video info - action that copies the creator page link"
+  },
   "trackCopiedToClipboard": "Copied to clipboard",
   "@trackCopiedToClipboard": {
     "description": "Snackbar - content copied"
   },
   "settings": "Settings",
   "@settings": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Settings entry label and settings page title"
   },
   "sourceNoRecommendations": "No recommendations available from {p1}",
   "@sourceNoRecommendations": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Home recommendations section - empty state; {p1} is the source name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Bilibili",
+        "description": "Data source name"
       }
     }
   },
   "sourceNoHomeFeed": "This source doesn't provide a home feed",
   "@sourceNoHomeFeed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Home - empty state when the selected source provides no home feed"
   },
   "sectionLoadFailed": "Failed to load {p1}",
   "@sectionLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Home feed section - error state; {p1} is the section title",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Recommendations",
+        "description": "Feed section title"
       }
     }
   },
   "checkNetworkRetry": "Check your network connection and try again",
   "@checkNetworkRetry": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Home feed - hint shown under a failed section"
   },
   "sectionEmpty": "No content in {p1}",
   "@sectionEmpty": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Home feed section - empty state; {p1} is the section title",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Recommendations",
+        "description": "Feed section title"
       }
     }
   },
   "retry": "Retry",
   "@retry": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Generic retry action used by error states and player overlays"
   },
   "switchDataSource": "Switch source",
   "@switchDataSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Home app bar - tooltip of the source picker button"
   },
   "switchVideoMediaSource": "Switch video and media source",
   "@switchVideoMediaSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Home app bar - tooltip of the source picker when a video source can be switched"
   },
   "unknownStreamer": "Unknown streamer",
   "@unknownStreamer": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Live card and search result - fallback name when the streamer is unknown"
   },
   "streamerLabel": "Streamer: {p1}",
   "@streamerLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Live card - line naming the streamer; {p1} is the streamer name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "streamer-1",
+        "description": "Streamer name"
       }
     }
   },
   "commaSeparator": ", ",
   "@commaSeparator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Metadata separator between two short values; punctuation only"
   },
   "continueLoading": "Load more",
   "@continueLoading": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video feed - button that loads the next page"
   },
   "noMoreItems": "No more items",
   "@noMoreItems": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Feed and media library - end-of-list marker"
   },
   "searchHint": "Search...",
   "@searchHint": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Home app bar - search field placeholder"
   },
   "putIntoSearchBox": "Put {p1} in the search box",
   "@putIntoSearchBox": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Search suggestion - action that fills the query into the search box; {p1} is the suggestion",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "flutter",
+        "description": "Suggested query text"
       }
     }
   },
   "loadFailedRetryLater": "Failed to load. Try again later",
   "@loadFailedRetryLater": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "List or detail page - error state of a failed first load"
   },
   "loadFailedRetry": "Failed to load. Retry",
   "@loadFailedRetry": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search results - error state with a retry action"
   },
   "moreLoadFailedRetry": "Failed to load more. Retry",
   "@moreLoadFailedRetry": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Paginated list - footer shown when loading the next page failed"
   },
   "nothingFound": "Nothing found",
   "@nothingFound": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search - empty state when the query returns no results"
   },
   "creatorTab": "Creators",
   "@creatorTab": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Creator space - app bar title"
   },
   "spaceDescriptionUnavailable": "No description available",
   "@spaceDescriptionUnavailable": {
@@ -406,118 +435,124 @@
   },
   "videoTab": "Video",
   "@videoTab": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Creator space and channel settings - tab label for videos"
   },
   "clearRecentSearchHistory": "Clear recent search history",
   "@clearRecentSearchHistory": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search - action that clears the recent query list"
   },
   "clear": "Clear",
   "@clear": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search - button that clears the recent search history"
   },
   "searchQueryLabel": "Search \"{p1}\"",
   "@searchQueryLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Search - accessibility label of a recent query chip; {p1} is the query",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "flutter",
+        "description": "Query text"
       }
     }
   },
   "filters": "Filters",
   "@filters": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search - button that opens the filter sheet"
   },
   "reset": "Reset",
   "@reset": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search filter sheet - button that clears the selected filters"
   },
   "confirm": "OK",
   "@confirm": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Dialog - affirmative button label"
   },
   "selectDateRange": "Select date range",
   "@selectDateRange": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Search filter sheet - label of the upload date range filter"
   },
   "localLibrary": "Local library",
   "@localLibrary": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Bottom navigation entry and library page title"
   },
   "history": "History",
   "@history": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - history section title"
   },
   "favorite": "Favorites",
   "@favorite": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Library tab and video action - favorites"
   },
   "playlists": "Playlist",
   "@playlists": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - playlists tab label"
   },
   "subscribe": "Subscribe",
   "@subscribe": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Creator subscribe button and library action"
   },
   "allSources": "All sources",
   "@allSources": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library filter - option that disables the source filter"
   },
   "sourceLabel": "Source: {p1}",
   "@sourceLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Local library item - metadata naming the source; {p1} is the source name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Bilibili",
+        "description": "Data source name"
       }
     }
   },
   "filter": "Filter",
   "@filter": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - filter button label"
   },
   "selectSource": "Select source",
   "@selectSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library filter sheet - title for choosing a source"
   },
   "deletePlaylistConfirm": "Delete playlist?",
   "@deletePlaylistConfirm": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Dialog title that asks to confirm deleting a playlist"
   },
   "deletePlaylistNote": "Local entries in this list will also be deleted.",
   "@deletePlaylistNote": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Dialog body warning that local entries in the playlist are deleted too"
   },
   "cancel": "Cancel",
   "@cancel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Dialog and sheet - dismiss button label"
   },
   "delete": "Delete",
   "@delete": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Destructive action label"
   },
   "noFavoritesFromSource": "No favorites to add from this source",
   "@noFavoritesFromSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Playlist picker - empty state when the source has no favorites to add"
   },
   "operationFailed": "Operation failed: {p1}",
   "@operationFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "SnackBar - failure prefix; {p1} is the underlying error message",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Network error",
+        "description": "Error message"
       }
     }
   },
   "loadingFavorites": "Loading favorites",
   "@loadingFavorites": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - loading state of the favorites list"
   },
   "favoritesLoadFailed": "Failed to load favorites",
   "@favoritesLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - error state of the favorites list"
   },
   "exportFavorites": "Export",
   "@exportFavorites": {
@@ -529,75 +564,75 @@
   },
   "noFavoritesYet": "No favorites yet",
   "@noFavoritesYet": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - empty state of the favorites list"
   },
   "spacedDot": " · ",
   "@spacedDot": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Metadata separator between creator and date; punctuation only"
   },
   "favoriteActions": "Favorite actions",
   "@favoriteActions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library favorite row - more-actions tooltip"
   },
   "openCreator": "Open creator",
   "@openCreator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - action that opens the creator page"
   },
   "unfavorite": "Remove from favorites",
   "@unfavorite": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video action and library - removes the item from favorites"
   },
   "loadingPlaylists": "Loading playlists",
   "@loadingPlaylists": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - loading state of the playlists list"
   },
   "playlistLoadFailed": "Failed to load playlists",
   "@playlistLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Playlist picker and library - error state of the playlists list"
   },
   "noPlaylistsYet": "No playlists yet",
   "@noPlaylistsYet": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Playlist picker and library - empty state of the playlists list"
   },
   "newPlaylist": "New playlist",
   "@newPlaylist": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Playlist picker - action that opens the create-playlist dialog"
   },
   "playlistActions": "Playlist actions",
   "@playlistActions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist row - more-actions tooltip"
   },
   "addFavorite": "Add to favorites",
   "@addFavorite": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - action that adds the item to favorites"
   },
   "deletePlaylist": "Delete playlist",
   "@deletePlaylist": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - action that deletes a playlist"
   },
   "itemsLoadFailed": "Failed to load items",
   "@itemsLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist - error state of its entries"
   },
   "listEmpty": "The list is empty",
   "@listEmpty": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist - empty state"
   },
   "itemActions": "Item actions",
   "@itemActions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist entry - more-actions tooltip"
   },
   "moveUp": "Move up",
   "@moveUp": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist - moves the entry up"
   },
   "moveDown": "Move down",
   "@moveDown": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist - moves the entry down"
   },
   "removeThisEntry": "Remove this entry",
   "@removeThisEntry": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library playlist - removes the video from the playlist"
   },
   "renamePlaylist": "Rename playlist",
   "@renamePlaylist": {
@@ -616,7 +651,9 @@
     "description": "Dialog content for batch delete confirmation",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "3",
+        "description": "Number of selected items"
       }
     }
   },
@@ -638,293 +675,321 @@
   },
   "loadingSubscriptions": "Loading subscriptions",
   "@loadingSubscriptions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - loading state of the subscriptions list"
   },
   "subscriptionsLoadFailed": "Failed to load subscriptions",
   "@subscriptionsLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - error state of the subscriptions list"
   },
   "noSubscriptionsYet": "No subscriptions yet",
   "@noSubscriptionsYet": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library - empty state of the subscriptions list"
   },
   "ungrouped": "Ungrouped",
   "@ungrouped": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library subscriptions - group name for entries without a group"
   },
   "subscriptionActions": "Subscription actions",
   "@subscriptionActions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library subscription row - more-actions tooltip"
   },
   "setGroup": "Set group",
   "@setGroup": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library subscription - opens the group editor"
   },
   "unsubscribe": "Unsubscribe",
   "@unsubscribe": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Creator subscribe button and library action"
   },
   "add": "Add",
   "@add": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Generic add action"
   },
   "source": "Source",
   "@source": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Local library item - metadata label for the data source"
   },
   "name": "Name",
   "@name": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Create playlist dialog - name field label"
   },
   "create": "Create",
   "@create": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Create playlist dialog - submit button"
   },
   "groupName": "Group name",
   "@groupName": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Group editor dialog - field label"
   },
   "groupNameHint": "Leave empty for ungrouped",
   "@groupNameHint": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Group editor dialog - hint that an empty name means ungrouped"
   },
   "save": "Save",
   "@save": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Dialog and sheet - save button"
   },
   "mine": "Me",
   "@mine": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Bottom navigation - personal library entry"
   },
   "watchHistory": "Watch history",
   "@watchHistory": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Media library - watch history page title"
   },
   "watchHistoryLoadedCount": "Watch history · {p1} loaded",
   "@watchHistoryLoadedCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Watch history header - how many entries are loaded; {p1} is the count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "120",
+        "description": "Number of loaded entries"
       }
     }
   },
   "tabLoadFailed": "{p1} · Failed to load",
   "@tabLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Media library tab - error state; {p1} is the tab name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Favorites",
+        "description": "Tab name"
       }
     }
   },
   "loadMore": "Load more",
   "@loadMore": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Media library - loads the next page of history"
   },
   "loadingHistory": "Loading history...",
   "@loadingHistory": {
-    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+    "description": "Media library - header tooltip while the watch history is loading"
   },
   "loadMoreHistory": "Load more history",
   "@loadMoreHistory": {
-    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
+    "description": "Media library - header tooltip that loads the next page of watch history"
   },
   "historyLoadFailed": "Failed to load history",
   "@historyLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Media library - error state of the watch history list"
   },
   "noWatchHistory": "No watch history yet",
   "@noWatchHistory": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Media library - empty state of the watch history list"
   },
   "durationLabel": "Duration {p1}",
   "@durationLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Watch history entry - total duration; {p1} is a formatted duration",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "12:34",
+        "description": "Formatted duration"
       }
     }
   },
   "watchedAt": "Watched {p1}",
   "@watchedAt": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Watch history entry - when the video was watched; {p1} is a relative time",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "2 hours ago",
+        "description": "Relative watch time"
       }
     }
   },
   "finishedWatching": "Finished",
   "@finishedWatching": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Watch history entry - badge for a video watched to the end"
   },
   "watchedDuration": "Watched {p1}",
   "@watchedDuration": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Watch history entry - watched progress; {p1} is a formatted duration",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "05:20",
+        "description": "Formatted watched duration"
       }
     }
   },
   "justNow": "Just Now",
   "@justNow": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Relative time - within the last minute"
   },
   "minutesAgo": "{p1, plural, =1{1 minute ago} other{{p1} minutes ago}}",
   "@minutesAgo": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Relative time - minutes ago; {p1} is the number of minutes",
     "placeholders": {
       "p1": {
-        "type": "int"
+        "type": "int",
+        "example": "5",
+        "description": "Minutes since the event"
       }
     }
   },
   "hoursAgo": "{p1, plural, =1{1 hour ago} other{{p1} hours ago}}",
   "@hoursAgo": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Relative time - hours ago; {p1} is the number of hours",
     "placeholders": {
       "p1": {
-        "type": "int"
+        "type": "int",
+        "example": "3",
+        "description": "Hours since the event"
       }
     }
   },
   "daysAgo": "{p1, plural, =1{1 day ago} other{{p1} days ago}}",
   "@daysAgo": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Relative time - days ago; {p1} is the number of days",
     "placeholders": {
       "p1": {
-        "type": "int"
+        "type": "int",
+        "example": "2",
+        "description": "Days since the event"
       }
     }
   },
   "addToPlaylistTitle": "Add to Playlist",
   "@addToPlaylistTitle": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Playlist picker sheet - title"
   },
   "addToNamedPlaylist": "Add to {p1}",
   "@addToNamedPlaylist": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Playlist picker - adds the video to the named playlist; {p1} is the playlist name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Watch later",
+        "description": "Playlist name"
       }
     }
   },
   "addToNamedPlaylistLong": "Add to playlist {p1}",
   "@addToNamedPlaylistLong": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Playlist picker - accessibility label of the same action; {p1} is the playlist name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Watch later",
+        "description": "Playlist name"
       }
     }
   },
   "addFailed": "Failed to add: {p1}",
   "@addFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "SnackBar - adding to a playlist failed; {p1} is the error message",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Database error",
+        "description": "Error message"
       }
     }
   },
   "createOrAddFailed": "Failed to create or add: {p1}",
   "@createOrAddFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "SnackBar - creating the playlist or adding failed; {p1} is the error message",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Database error",
+        "description": "Error message"
       }
     }
   },
   "playlistNameRequired": "Enter a playlist name",
   "@playlistNameRequired": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Create playlist dialog - validation error for an empty name"
   },
   "infoAndRelated": "Info & related",
   "@infoAndRelated": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video screen - tab label for the info and related section"
   },
   "commentsCountTab": "Comments (1,429)",
   "@commentsCountTab": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven"
   },
   "danmakuSettingsTitle": "Danmaku settings",
   "@danmakuSettingsTitle": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings screen and section title"
   },
   "showDanmaku": "Show danmaku",
   "@showDanmaku": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - switch that renders danmaku"
   },
   "showTimelineDanmakuOnVideo": "Show timeline danmaku over the video",
   "@showTimelineDanmakuOnVideo": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - switch that draws timeline danmaku over the video"
   },
   "regularDanmakuDuration": "Regular danmaku duration",
   "@regularDanmakuDuration": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - how long a scrolling comment stays on screen"
   },
   "secondsValue": "{p1} s",
   "@secondsValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Duration picker - value in seconds; {p1} is the number of seconds",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "6",
+        "description": "Number of seconds"
       }
     }
   },
   "opacity": "Opacity",
   "@opacity": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - opacity slider label"
   },
   "fontSize": "Font size",
   "@fontSize": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - font size slider label"
   },
   "strokeRadius": "Stroke radius",
   "@strokeRadius": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Danmaku settings - text stroke slider label"
   },
   "playbackSpeed": "Speed",
   "@playbackSpeed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - playback speed chip label"
   },
   "auto": "Auto",
   "@auto": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Quality picker - lets the player choose the bitrate"
   },
   "qualitySelect": "Select quality",
   "@qualitySelect": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player and live - quality picker title"
   },
   "singleQualityOnly": "This source offers only one quality",
   "@singleQualityOnly": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Quality picker - message when the source exposes a single quality"
   },
   "afterCurrentItem": "After current",
   "@afterCurrentItem": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Sleep timer - stops playback when the current video ends"
   },
   "timer": "Timer",
   "@timer": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - sleep timer chip label"
   },
   "minutesValue": "{p1} min",
   "@minutesValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Sleep timer and player settings - value in minutes; {p1} is the number of minutes",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "30",
+        "description": "Number of minutes"
       }
     }
   },
   "cancelTimer": "Cancel timer",
   "@cancelTimer": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Sleep timer - cancels the running timer"
   },
   "sleepTimerCustom": "Custom",
   "@sleepTimerCustom": {
@@ -939,7 +1004,9 @@
     "description": "Selected custom sleep timer duration",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "45",
+        "description": "Number of minutes"
       }
     }
   },
@@ -956,268 +1023,284 @@
     "description": "Compact count unit for values >= 10,000. Kept as the Chinese 万 unit because call sites divide by 10,000 before formatting; an English K/M unit would need a different divisor (tracked separately).",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "12.3",
+        "description": "Count already divided by 10000"
       }
     }
   },
   "commentsUnsupportedSource": "This source doesn't support comments",
   "@commentsUnsupportedSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comments section - empty state when the source cannot return comments"
   },
   "commentsLoadFailed": "Failed to load comments. Try again later",
   "@commentsLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comments section - error state"
   },
   "noComments": "No comments yet",
   "@noComments": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comments section - empty state"
   },
   "likeCommentCount": "Like comment {p1}",
   "@likeCommentCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Comment row - like action carrying the like count; {p1} is the count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "12",
+        "description": "Number of likes"
       }
     }
   },
   "unlikeComment": "Unlike comment",
   "@unlikeComment": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comment row - removes the like"
   },
   "likeComment": "Like comment",
   "@likeComment": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comment row - likes the comment"
   },
   "collapseReplies": "Collapse replies",
   "@collapseReplies": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comment thread - hides the replies"
   },
   "viewReplyCount": "View {p1} replies",
   "@viewReplyCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Comment thread - expands the replies; {p1} is the reply count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "3",
+        "description": "Number of replies"
       }
     }
   },
   "repliesUnavailable": "Replies aren't available yet",
   "@repliesUnavailable": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Comment thread - message when replies cannot be loaded"
   },
   "videoLoadFailed": "Failed to load video. Try again",
   "@videoLoadFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - error text when the stream fails to load"
   },
   "noRecommendations": "No related recommendations",
   "@noRecommendations": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - empty state for related videos"
   },
   "viewCountLabel": "{p1} views",
   "@viewCountLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video info - view count metadata; {p1} is a formatted count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "24K",
+        "description": "Formatted view count"
       }
     }
   },
   "dotSeparator": "·",
   "@dotSeparator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Metadata separator between view count and date; punctuation only"
   },
   "danmakuCountSample": "24K danmaku",
   "@danmakuCountSample": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet"
   },
   "oneDayAgoSample": "1 day ago",
   "@oneDayAgoSample": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Demo value for the relative publish date in the video info header"
   },
   "originalTech": "Original tech",
   "@originalTech": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Demo tag shown in the video info header"
   },
   "subscribersWeeklyTagline": "{p1} followers · Weekly deep dives",
   "@subscribersWeeklyTagline": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Demo tagline under the creator name in the video info header; {p1} is the follower count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "1.2K",
+        "description": "Formatted follower count"
       }
     }
   },
   "unfollowCreator": "Unfollow creator",
   "@unfollowCreator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - accessibility label that unfollows the creator"
   },
   "followCreator": "Follow creator",
   "@followCreator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - accessibility label that follows the creator"
   },
   "followingCreatorNamed": "Following creator {p1}",
   "@followingCreatorNamed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video info - follow button accessibility label with the creator name; {p1} is the name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "creator-1",
+        "description": "Creator name"
       }
     }
   },
   "followCreatorNamed": "Follow creator {p1}",
   "@followCreatorNamed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video info - follow button accessibility label with the creator name; {p1} is the name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "creator-1",
+        "description": "Creator name"
       }
     }
   },
   "following": "Following",
   "@following": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - follow button state when already following"
   },
   "follow": "Follow",
   "@follow": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - follow button state when not following"
   },
   "like": "Like",
   "@like": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - like action"
   },
   "list": "List",
   "@list": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - short label of the add-to-playlist button"
   },
   "addToPlaylist": "Add to playlist",
   "@addToPlaylist": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - action name of the add-to-playlist button, used in its accessibility label"
   },
   "addToLocalPlaylist": "Add to local playlist",
   "@addToLocalPlaylist": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - tooltip of the add-to-playlist button"
   },
   "switchSource": "Switch source",
   "@switchSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - label of the switch-source action button"
   },
   "switchVideoSource": "Switch video source",
   "@switchVideoSource": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - tooltip of the switch-source action button"
   },
   "autoSwitchBestRoute": "Automatically switch to the best available route",
   "@autoSwitchBestRoute": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - snackbar shown when the switch-source action is tapped"
   },
   "share": "Share",
   "@share": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - action name of the share button"
   },
   "shareVideo": "Share video",
   "@shareVideo": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - tooltip of the share button"
   },
   "shareMultiSourceLink": "Share multi-source video link",
   "@shareMultiSourceLink": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - snackbar shown when the share action is tapped"
   },
   "danmakuStateOn": "Danmaku on",
   "@danmakuStateOn": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - danmaku switch label when danmaku are on"
   },
   "danmakuStateOff": "Danmaku off",
   "@danmakuStateOff": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - danmaku switch label when danmaku are off"
   },
   "danmaku": "Danmaku",
   "@danmaku": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - danmaku switch label"
   },
   "danmakuActionOff": "Turn danmaku off",
   "@danmakuActionOff": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - accessibility label that turns danmaku off"
   },
   "danmakuActionOn": "Turn danmaku on",
   "@danmakuActionOn": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - accessibility label that turns danmaku on"
   },
   "synopsisSectionTitle": "Summary & key takeaways",
   "@synopsisSectionTitle": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - summary section title"
   },
   "collapseSynopsis": "Collapse summary",
   "@collapseSynopsis": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - hides the summary"
   },
   "expandSynopsis": "Expand full outline",
   "@expandSynopsis": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - shows the full summary"
   },
   "collapse": "Collapse",
   "@collapse": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Generic collapse action"
   },
   "sampleSynopsisFallback": "An in-depth look at why Flutter moved from Skia to Impeller for rendering. Covers shader precompilation, RenderPass reuse, direct Metal / Vulkan backend binding, and techniques for eliminating frame drops on mobile.",
   "@sampleSynopsisFallback": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Demo summary text shown when the source provides none"
   },
   "chapters": "Chapters",
   "@chapters": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - chapters section title"
   },
   "multiSourceRecommendations": "Multi-source recommendations",
   "@multiSourceRecommendations": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - related videos section title"
   },
   "addingToQueue": "Adding to queue",
   "@addingToQueue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - transient label while the video is added to the queue"
   },
   "addToPlayQueue": "Add to play queue",
   "@addToPlayQueue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - adds the video to the play queue"
   },
   "addedToPlayQueue": "Added to play queue",
   "@addedToPlayQueue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - confirmation after adding to the queue"
   },
   "addToQueueFailed": "Failed to add to queue",
   "@addToQueueFailed": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video info - adding to the queue failed"
   },
   "cancelAction": "Cancel {p1}",
   "@cancelAction": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video info - tooltip of an active action button that cancels it; {p1} is the action name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Follow",
+        "description": "Name of the pending action"
       }
     }
   },
   "previousItem": "Previous",
   "@previousItem": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - plays the previous queue item"
   },
   "nextItem": "Next",
   "@nextItem": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - plays the next queue item"
   },
   "loopOff": "Loop: off",
   "@loopOff": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player and queue sheet - loop mode off"
   },
   "loopOne": "Repeat one",
   "@loopOne": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player and queue sheet - repeat the current item"
   },
   "loopQueue": "Repeat queue",
   "@loopQueue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player and queue sheet - repeat the whole queue"
   },
   "minimize": "Minimize",
   "@minimize": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - shrinks the player"
   },
   "playbackErrorNetwork": "Network error",
   "@playbackErrorNetwork": {
@@ -1253,167 +1336,191 @@
   },
   "back": "Back",
   "@back": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "App bar and player - navigate back"
   },
   "fullscreen": "Fullscreen",
   "@fullscreen": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - enters fullscreen"
   },
   "highBitrate1080": "1080P high bitrate",
   "@highBitrate1080": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player placeholder - 1080P high bitrate quality badge"
   },
   "pause": "Pause",
   "@pause": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - pause playback"
   },
   "play": "Play",
   "@play": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player - start playback"
   },
   "fullscreenToggle": "Toggle fullscreen",
   "@fullscreenToggle": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Live player - toggles fullscreen"
   },
   "sourceUnavailable": "Source unavailable",
   "@sourceUnavailable": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Not-found screen - no usable data source"
   },
   "countCompactYi": "{p1}亿",
   "@countCompactYi": {
     "description": "Compact count unit for values >= 100,000,000. Kept as the Chinese 亿 unit because call sites divide by 100,000,000 before formatting; an English K/M unit would need a different divisor (tracked separately).",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "1.5",
+        "description": "Count already divided by 100000000"
       }
     }
   },
   "yearsAgoCompact": "{p1, plural, =1{1 year ago} other{{p1} years ago}}",
   "@yearsAgoCompact": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Relative time - years ago; {p1} is the number of years",
     "placeholders": {
       "p1": {
-        "type": "int"
+        "type": "int",
+        "example": "2",
+        "description": "Years since the publish date"
       }
     }
   },
   "monthsAgoCompact": "{p1, plural, =1{1 month ago} other{{p1} months ago}}",
   "@monthsAgoCompact": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Relative time - months ago; {p1} is the number of months",
     "placeholders": {
       "p1": {
-        "type": "int"
+        "type": "int",
+        "example": "5",
+        "description": "Months since the publish date"
       }
     }
   },
   "viewsWithDate": "{p1} views • {p2}",
   "@viewsWithDate": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video card - view count and relative date; {p1} is the count, {p2} is the date",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "1.2K",
+        "description": "Formatted view count"
       },
       "p2": {
-        "type": "String"
+        "type": "String",
+        "example": "3 days ago",
+        "description": "Relative publish date"
       }
     }
   },
   "viewsCount": "{p1} views",
   "@viewsCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video card - view count; {p1} is a formatted count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "1.2K",
+        "description": "Formatted view count"
       }
     }
   },
   "spacedBullet": " • ",
   "@spacedBullet": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Metadata separator between two short values; punctuation only"
   },
   "creatorLabel": "Creator: {p1}",
   "@creatorLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video card and list row - creator line; {p1} is the creator name",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "creator-1",
+        "description": "Creator name"
       }
     }
   },
   "durationPrefix": "Duration {p1}",
   "@durationPrefix": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video card - duration metadata; {p1} is a formatted duration",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "12:34",
+        "description": "Formatted duration"
       }
     }
   },
   "unknownCreator": "Unknown creator",
   "@unknownCreator": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video card - fallback name when the creator is unknown"
   },
   "creatorWithSubtitle": "{p1} • {p2}",
   "@creatorWithSubtitle": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "creator-1",
+        "description": "Creator name"
       },
       "p2": {
-        "type": "String"
+        "type": "String",
+        "example": "1.2K views • 3 days ago",
+        "description": "Subtitle built from the view count and/or the publish date"
       }
     }
   },
   "moreOptions": "More options",
   "@moreOptions": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Card and row - more-actions tooltip"
   },
   "subscribersCount": "{p1} followers",
   "@subscribersCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Creator row - follower count; {p1} is a formatted count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "1.2K",
+        "description": "Formatted follower count"
       }
     }
   },
   "videosCount": "{p1} videos",
   "@videosCount": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Creator row - video count; {p1} is a formatted count",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "128",
+        "description": "Formatted video count"
       }
     }
   },
   "liveNow": "Live now",
   "@liveNow": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Live card - badge for a running stream"
   },
   "navHomeLabel": "Home",
   "@navHomeLabel": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Bottom navigation - home entry"
   },
   "search": "Search",
   "@search": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Bottom navigation and search entry label"
   },
   "liveSourceUnavailable": "The live stream's source is unavailable",
   "@liveSourceUnavailable": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Live route - the live room's source is unavailable"
   },
   "creatorSourceUnavailable": "The creator's source is unavailable",
   "@creatorSourceUnavailable": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Creator route - the creator's source is unavailable"
   },
   "videoSourceUnavailable": "The video's source is unavailable",
   "@videoSourceUnavailable": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video route - the video's source is unavailable"
   },
   "videoDetailSourceUnsupported": "This source doesn't support video details yet",
   "@videoDetailSourceUnsupported": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Video detail - empty state when the source cannot return details"
   },
   "progress": "Progress",
   "@progress": {
@@ -1421,7 +1528,7 @@
   },
   "switchAction": "Switch",
   "@switchAction": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
+    "description": "Player placeholder - switch action label"
   },
   "playbackQueue": "Playback queue",
   "@playbackQueue": {
@@ -1432,7 +1539,9 @@
     "description": "Number of items shown in the playback queue",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "12",
+        "description": "Number of items in the queue"
       }
     }
   },
@@ -1441,7 +1550,9 @@
     "description": "Fallback title for a queue item without video metadata",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "3",
+        "description": "Position of the item in the queue"
       }
     }
   },
@@ -1578,7 +1689,9 @@
     "description": "Dialog title for confirming deletion of a single history item",
     "placeholders": {
       "p1": {
-        "type": "String"
+        "type": "String",
+        "example": "Flutter render pipeline",
+        "description": "Video title"
       }
     }
   },
@@ -1603,7 +1716,9 @@
     "description": "LIZ-77 number of videos advertised by the playlist",
     "placeholders": {
       "count": {
-        "type": "String"
+        "type": "String",
+        "example": "12",
+        "description": "Formatted video count"
       }
     }
   },
@@ -1616,7 +1731,9 @@
     "description": "LIZ-77 progress shown while fetching all playlist pages",
     "placeholders": {
       "count": {
-        "type": "String"
+        "type": "String",
+        "example": "12",
+        "description": "Number of fetched videos"
       }
     }
   },
@@ -1625,7 +1742,9 @@
     "description": "LIZ-77 progress shown after every playlist page was fetched",
     "placeholders": {
       "count": {
-        "type": "String"
+        "type": "String",
+        "example": "12",
+        "description": "Number of fetched videos"
       }
     }
   },
@@ -1634,7 +1753,9 @@
     "description": "LIZ-77 progress shown when fetching all pages was interrupted",
     "placeholders": {
       "count": {
-        "type": "String"
+        "type": "String",
+        "example": "7",
+        "description": "Number of fetched videos before the fetch stopped"
       }
     }
   },
@@ -1663,7 +1784,9 @@
     "description": "Threshold option with count",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "10",
+        "description": "Threshold of new items"
       }
     }
   },
@@ -1680,7 +1803,9 @@
     "description": "Unread entry count badge of a channel group",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "5",
+        "description": "Number of unread items"
       }
     }
   },
@@ -1693,7 +1818,9 @@
     "description": "Tooltip that expands a collapsed channel group",
     "placeholders": {
       "channel": {
-        "type": "String"
+        "type": "String",
+        "example": "Subscriptions",
+        "description": "Channel name"
       }
     }
   },
@@ -1702,7 +1829,9 @@
     "description": "Tooltip that collapses an expanded channel group",
     "placeholders": {
       "channel": {
-        "type": "String"
+        "type": "String",
+        "example": "Subscriptions",
+        "description": "Channel name"
       }
     }
   },
@@ -1727,7 +1856,9 @@
     "description": "Body of the feed update notification; {count} is the number of new unread entries",
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "example": "3",
+        "description": "Number of new feed items"
       }
     }
   },

@@ -374,25 +374,25 @@ abstract class AppLocalizations {
   /// **'Forever'**
   String get librarySearchHistoryRetentionForever;
 
-  /// No description provided for @danmakuSettingsSubtitle.
+  /// Settings - subtitle of the danmaku settings entry
   ///
   /// In en, this message translates to:
   /// **'Opacity, font size, duration and how many rows pinned at the top and bottom'**
   String get danmakuSettingsSubtitle;
 
-  /// No description provided for @clearImageCache.
+  /// Settings - action that drops decoded images from memory
   ///
   /// In en, this message translates to:
   /// **'Clear image cache'**
   String get clearImageCache;
 
-  /// No description provided for @clearImageCacheSubtitle.
+  /// Settings - subtitle explaining what clearing the image cache does
   ///
   /// In en, this message translates to:
   /// **'Frees decoded images held in memory; covers reload when shown again'**
   String get clearImageCacheSubtitle;
 
-  /// No description provided for @imageCacheCleared.
+  /// SnackBar - confirmation that the image cache was cleared
   ///
   /// In en, this message translates to:
   /// **'Image cache cleared'**
@@ -518,7 +518,7 @@ abstract class AppLocalizations {
   /// **'After current video'**
   String get sleepTimerAfterCurrentTitle;
 
-  /// No description provided for @copyCreatorLink.
+  /// Video info - action that copies the creator page link
   ///
   /// In en, this message translates to:
   /// **'Copy creator page link'**
@@ -530,127 +530,127 @@ abstract class AppLocalizations {
   /// **'Copied to clipboard'**
   String get trackCopiedToClipboard;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Settings entry label and settings page title
   ///
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home recommendations section - empty state; {p1} is the source name
   ///
   /// In en, this message translates to:
   /// **'No recommendations available from {p1}'**
   String sourceNoRecommendations(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home - empty state when the selected source provides no home feed
   ///
   /// In en, this message translates to:
   /// **'This source doesn\'t provide a home feed'**
   String get sourceNoHomeFeed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home feed section - error state; {p1} is the section title
   ///
   /// In en, this message translates to:
   /// **'Failed to load {p1}'**
   String sectionLoadFailed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home feed - hint shown under a failed section
   ///
   /// In en, this message translates to:
   /// **'Check your network connection and try again'**
   String get checkNetworkRetry;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home feed section - empty state; {p1} is the section title
   ///
   /// In en, this message translates to:
   /// **'No content in {p1}'**
   String sectionEmpty(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Generic retry action used by error states and player overlays
   ///
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home app bar - tooltip of the source picker button
   ///
   /// In en, this message translates to:
   /// **'Switch source'**
   String get switchDataSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home app bar - tooltip of the source picker when a video source can be switched
   ///
   /// In en, this message translates to:
   /// **'Switch video and media source'**
   String get switchVideoMediaSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Live card and search result - fallback name when the streamer is unknown
   ///
   /// In en, this message translates to:
   /// **'Unknown streamer'**
   String get unknownStreamer;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Live card - line naming the streamer; {p1} is the streamer name
   ///
   /// In en, this message translates to:
   /// **'Streamer: {p1}'**
   String streamerLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Metadata separator between two short values; punctuation only
   ///
   /// In en, this message translates to:
   /// **', '**
   String get commaSeparator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video feed - button that loads the next page
   ///
   /// In en, this message translates to:
   /// **'Load more'**
   String get continueLoading;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Feed and media library - end-of-list marker
   ///
   /// In en, this message translates to:
   /// **'No more items'**
   String get noMoreItems;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Home app bar - search field placeholder
   ///
   /// In en, this message translates to:
   /// **'Search...'**
   String get searchHint;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search suggestion - action that fills the query into the search box; {p1} is the suggestion
   ///
   /// In en, this message translates to:
   /// **'Put {p1} in the search box'**
   String putIntoSearchBox(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// List or detail page - error state of a failed first load
   ///
   /// In en, this message translates to:
   /// **'Failed to load. Try again later'**
   String get loadFailedRetryLater;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search results - error state with a retry action
   ///
   /// In en, this message translates to:
   /// **'Failed to load. Retry'**
   String get loadFailedRetry;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Paginated list - footer shown when loading the next page failed
   ///
   /// In en, this message translates to:
   /// **'Failed to load more. Retry'**
   String get moreLoadFailedRetry;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search - empty state when the query returns no results
   ///
   /// In en, this message translates to:
   /// **'Nothing found'**
   String get nothingFound;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator space - app bar title
   ///
   /// In en, this message translates to:
   /// **'Creators'**
@@ -662,151 +662,151 @@ abstract class AppLocalizations {
   /// **'No description available'**
   String get spaceDescriptionUnavailable;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator space and channel settings - tab label for videos
   ///
   /// In en, this message translates to:
   /// **'Video'**
   String get videoTab;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search - action that clears the recent query list
   ///
   /// In en, this message translates to:
   /// **'Clear recent search history'**
   String get clearRecentSearchHistory;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search - button that clears the recent search history
   ///
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search - accessibility label of a recent query chip; {p1} is the query
   ///
   /// In en, this message translates to:
   /// **'Search \"{p1}\"'**
   String searchQueryLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search - button that opens the filter sheet
   ///
   /// In en, this message translates to:
   /// **'Filters'**
   String get filters;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search filter sheet - button that clears the selected filters
   ///
   /// In en, this message translates to:
   /// **'Reset'**
   String get reset;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Dialog - affirmative button label
   ///
   /// In en, this message translates to:
   /// **'OK'**
   String get confirm;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Search filter sheet - label of the upload date range filter
   ///
   /// In en, this message translates to:
   /// **'Select date range'**
   String get selectDateRange;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Bottom navigation entry and library page title
   ///
   /// In en, this message translates to:
   /// **'Local library'**
   String get localLibrary;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - history section title
   ///
   /// In en, this message translates to:
   /// **'History'**
   String get history;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Library tab and video action - favorites
   ///
   /// In en, this message translates to:
   /// **'Favorites'**
   String get favorite;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - playlists tab label
   ///
   /// In en, this message translates to:
   /// **'Playlist'**
   String get playlists;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator subscribe button and library action
   ///
   /// In en, this message translates to:
   /// **'Subscribe'**
   String get subscribe;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library filter - option that disables the source filter
   ///
   /// In en, this message translates to:
   /// **'All sources'**
   String get allSources;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library item - metadata naming the source; {p1} is the source name
   ///
   /// In en, this message translates to:
   /// **'Source: {p1}'**
   String sourceLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - filter button label
   ///
   /// In en, this message translates to:
   /// **'Filter'**
   String get filter;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library filter sheet - title for choosing a source
   ///
   /// In en, this message translates to:
   /// **'Select source'**
   String get selectSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Dialog title that asks to confirm deleting a playlist
   ///
   /// In en, this message translates to:
   /// **'Delete playlist?'**
   String get deletePlaylistConfirm;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Dialog body warning that local entries in the playlist are deleted too
   ///
   /// In en, this message translates to:
   /// **'Local entries in this list will also be deleted.'**
   String get deletePlaylistNote;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Dialog and sheet - dismiss button label
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Destructive action label
   ///
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker - empty state when the source has no favorites to add
   ///
   /// In en, this message translates to:
   /// **'No favorites to add from this source'**
   String get noFavoritesFromSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// SnackBar - failure prefix; {p1} is the underlying error message
   ///
   /// In en, this message translates to:
   /// **'Operation failed: {p1}'**
   String operationFailed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - loading state of the favorites list
   ///
   /// In en, this message translates to:
   /// **'Loading favorites'**
   String get loadingFavorites;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - error state of the favorites list
   ///
   /// In en, this message translates to:
   /// **'Failed to load favorites'**
@@ -824,109 +824,109 @@ abstract class AppLocalizations {
   /// **'Export failed'**
   String get favoritesExportFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - empty state of the favorites list
   ///
   /// In en, this message translates to:
   /// **'No favorites yet'**
   String get noFavoritesYet;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Metadata separator between creator and date; punctuation only
   ///
   /// In en, this message translates to:
   /// **' · '**
   String get spacedDot;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library favorite row - more-actions tooltip
   ///
   /// In en, this message translates to:
   /// **'Favorite actions'**
   String get favoriteActions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - action that opens the creator page
   ///
   /// In en, this message translates to:
   /// **'Open creator'**
   String get openCreator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video action and library - removes the item from favorites
   ///
   /// In en, this message translates to:
   /// **'Remove from favorites'**
   String get unfavorite;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - loading state of the playlists list
   ///
   /// In en, this message translates to:
   /// **'Loading playlists'**
   String get loadingPlaylists;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker and library - error state of the playlists list
   ///
   /// In en, this message translates to:
   /// **'Failed to load playlists'**
   String get playlistLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker and library - empty state of the playlists list
   ///
   /// In en, this message translates to:
   /// **'No playlists yet'**
   String get noPlaylistsYet;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker - action that opens the create-playlist dialog
   ///
   /// In en, this message translates to:
   /// **'New playlist'**
   String get newPlaylist;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist row - more-actions tooltip
   ///
   /// In en, this message translates to:
   /// **'Playlist actions'**
   String get playlistActions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - action that adds the item to favorites
   ///
   /// In en, this message translates to:
   /// **'Add to favorites'**
   String get addFavorite;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - action that deletes a playlist
   ///
   /// In en, this message translates to:
   /// **'Delete playlist'**
   String get deletePlaylist;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist - error state of its entries
   ///
   /// In en, this message translates to:
   /// **'Failed to load items'**
   String get itemsLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist - empty state
   ///
   /// In en, this message translates to:
   /// **'The list is empty'**
   String get listEmpty;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist entry - more-actions tooltip
   ///
   /// In en, this message translates to:
   /// **'Item actions'**
   String get itemActions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist - moves the entry up
   ///
   /// In en, this message translates to:
   /// **'Move up'**
   String get moveUp;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist - moves the entry down
   ///
   /// In en, this message translates to:
   /// **'Move down'**
   String get moveDown;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library playlist - removes the video from the playlist
   ///
   /// In en, this message translates to:
   /// **'Remove this entry'**
@@ -980,331 +980,331 @@ abstract class AppLocalizations {
   /// **'Search items...'**
   String get itemsSearchHint;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - loading state of the subscriptions list
   ///
   /// In en, this message translates to:
   /// **'Loading subscriptions'**
   String get loadingSubscriptions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - error state of the subscriptions list
   ///
   /// In en, this message translates to:
   /// **'Failed to load subscriptions'**
   String get subscriptionsLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library - empty state of the subscriptions list
   ///
   /// In en, this message translates to:
   /// **'No subscriptions yet'**
   String get noSubscriptionsYet;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library subscriptions - group name for entries without a group
   ///
   /// In en, this message translates to:
   /// **'Ungrouped'**
   String get ungrouped;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library subscription row - more-actions tooltip
   ///
   /// In en, this message translates to:
   /// **'Subscription actions'**
   String get subscriptionActions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library subscription - opens the group editor
   ///
   /// In en, this message translates to:
   /// **'Set group'**
   String get setGroup;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator subscribe button and library action
   ///
   /// In en, this message translates to:
   /// **'Unsubscribe'**
   String get unsubscribe;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Generic add action
   ///
   /// In en, this message translates to:
   /// **'Add'**
   String get add;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Local library item - metadata label for the data source
   ///
   /// In en, this message translates to:
   /// **'Source'**
   String get source;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Create playlist dialog - name field label
   ///
   /// In en, this message translates to:
   /// **'Name'**
   String get name;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Create playlist dialog - submit button
   ///
   /// In en, this message translates to:
   /// **'Create'**
   String get create;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Group editor dialog - field label
   ///
   /// In en, this message translates to:
   /// **'Group name'**
   String get groupName;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Group editor dialog - hint that an empty name means ungrouped
   ///
   /// In en, this message translates to:
   /// **'Leave empty for ungrouped'**
   String get groupNameHint;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Dialog and sheet - save button
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Bottom navigation - personal library entry
   ///
   /// In en, this message translates to:
   /// **'Me'**
   String get mine;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Media library - watch history page title
   ///
   /// In en, this message translates to:
   /// **'Watch history'**
   String get watchHistory;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Watch history header - how many entries are loaded; {p1} is the count
   ///
   /// In en, this message translates to:
   /// **'Watch history · {p1} loaded'**
   String watchHistoryLoadedCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Media library tab - error state; {p1} is the tab name
   ///
   /// In en, this message translates to:
   /// **'{p1} · Failed to load'**
   String tabLoadFailed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Media library - loads the next page of history
   ///
   /// In en, this message translates to:
   /// **'Load more'**
   String get loadMore;
 
-  /// Migrated from hardcoded literal (PR #345 tooltip)
+  /// Media library - header tooltip while the watch history is loading
   ///
   /// In en, this message translates to:
   /// **'Loading history...'**
   String get loadingHistory;
 
-  /// Migrated from hardcoded literal (PR #345 tooltip)
+  /// Media library - header tooltip that loads the next page of watch history
   ///
   /// In en, this message translates to:
   /// **'Load more history'**
   String get loadMoreHistory;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Media library - error state of the watch history list
   ///
   /// In en, this message translates to:
   /// **'Failed to load history'**
   String get historyLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Media library - empty state of the watch history list
   ///
   /// In en, this message translates to:
   /// **'No watch history yet'**
   String get noWatchHistory;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Watch history entry - total duration; {p1} is a formatted duration
   ///
   /// In en, this message translates to:
   /// **'Duration {p1}'**
   String durationLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Watch history entry - when the video was watched; {p1} is a relative time
   ///
   /// In en, this message translates to:
   /// **'Watched {p1}'**
   String watchedAt(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Watch history entry - badge for a video watched to the end
   ///
   /// In en, this message translates to:
   /// **'Finished'**
   String get finishedWatching;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Watch history entry - watched progress; {p1} is a formatted duration
   ///
   /// In en, this message translates to:
   /// **'Watched {p1}'**
   String watchedDuration(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - within the last minute
   ///
   /// In en, this message translates to:
   /// **'Just Now'**
   String get justNow;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - minutes ago; {p1} is the number of minutes
   ///
   /// In en, this message translates to:
   /// **'{p1, plural, =1{1 minute ago} other{{p1} minutes ago}}'**
   String minutesAgo(int p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - hours ago; {p1} is the number of hours
   ///
   /// In en, this message translates to:
   /// **'{p1, plural, =1{1 hour ago} other{{p1} hours ago}}'**
   String hoursAgo(int p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - days ago; {p1} is the number of days
   ///
   /// In en, this message translates to:
   /// **'{p1, plural, =1{1 day ago} other{{p1} days ago}}'**
   String daysAgo(int p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker sheet - title
   ///
   /// In en, this message translates to:
   /// **'Add to Playlist'**
   String get addToPlaylistTitle;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker - adds the video to the named playlist; {p1} is the playlist name
   ///
   /// In en, this message translates to:
   /// **'Add to {p1}'**
   String addToNamedPlaylist(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Playlist picker - accessibility label of the same action; {p1} is the playlist name
   ///
   /// In en, this message translates to:
   /// **'Add to playlist {p1}'**
   String addToNamedPlaylistLong(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// SnackBar - adding to a playlist failed; {p1} is the error message
   ///
   /// In en, this message translates to:
   /// **'Failed to add: {p1}'**
   String addFailed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// SnackBar - creating the playlist or adding failed; {p1} is the error message
   ///
   /// In en, this message translates to:
   /// **'Failed to create or add: {p1}'**
   String createOrAddFailed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Create playlist dialog - validation error for an empty name
   ///
   /// In en, this message translates to:
   /// **'Enter a playlist name'**
   String get playlistNameRequired;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video screen - tab label for the info and related section
   ///
   /// In en, this message translates to:
   /// **'Info & related'**
   String get infoAndRelated;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven
   ///
   /// In en, this message translates to:
   /// **'Comments (1,429)'**
   String get commentsCountTab;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings screen and section title
   ///
   /// In en, this message translates to:
   /// **'Danmaku settings'**
   String get danmakuSettingsTitle;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - switch that renders danmaku
   ///
   /// In en, this message translates to:
   /// **'Show danmaku'**
   String get showDanmaku;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - switch that draws timeline danmaku over the video
   ///
   /// In en, this message translates to:
   /// **'Show timeline danmaku over the video'**
   String get showTimelineDanmakuOnVideo;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - how long a scrolling comment stays on screen
   ///
   /// In en, this message translates to:
   /// **'Regular danmaku duration'**
   String get regularDanmakuDuration;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Duration picker - value in seconds; {p1} is the number of seconds
   ///
   /// In en, this message translates to:
   /// **'{p1} s'**
   String secondsValue(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - opacity slider label
   ///
   /// In en, this message translates to:
   /// **'Opacity'**
   String get opacity;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - font size slider label
   ///
   /// In en, this message translates to:
   /// **'Font size'**
   String get fontSize;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Danmaku settings - text stroke slider label
   ///
   /// In en, this message translates to:
   /// **'Stroke radius'**
   String get strokeRadius;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - playback speed chip label
   ///
   /// In en, this message translates to:
   /// **'Speed'**
   String get playbackSpeed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Quality picker - lets the player choose the bitrate
   ///
   /// In en, this message translates to:
   /// **'Auto'**
   String get auto;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player and live - quality picker title
   ///
   /// In en, this message translates to:
   /// **'Select quality'**
   String get qualitySelect;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Quality picker - message when the source exposes a single quality
   ///
   /// In en, this message translates to:
   /// **'This source offers only one quality'**
   String get singleQualityOnly;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Sleep timer - stops playback when the current video ends
   ///
   /// In en, this message translates to:
   /// **'After current'**
   String get afterCurrentItem;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - sleep timer chip label
   ///
   /// In en, this message translates to:
   /// **'Timer'**
   String get timer;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Sleep timer and player settings - value in minutes; {p1} is the number of minutes
   ///
   /// In en, this message translates to:
   /// **'{p1} min'**
   String minutesValue(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Sleep timer - cancels the running timer
   ///
   /// In en, this message translates to:
   /// **'Cancel timer'**
@@ -1346,337 +1346,337 @@ abstract class AppLocalizations {
   /// **'{p1}万'**
   String countCompactWan(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comments section - empty state when the source cannot return comments
   ///
   /// In en, this message translates to:
   /// **'This source doesn\'t support comments'**
   String get commentsUnsupportedSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comments section - error state
   ///
   /// In en, this message translates to:
   /// **'Failed to load comments. Try again later'**
   String get commentsLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comments section - empty state
   ///
   /// In en, this message translates to:
   /// **'No comments yet'**
   String get noComments;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment row - like action carrying the like count; {p1} is the count
   ///
   /// In en, this message translates to:
   /// **'Like comment {p1}'**
   String likeCommentCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment row - removes the like
   ///
   /// In en, this message translates to:
   /// **'Unlike comment'**
   String get unlikeComment;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment row - likes the comment
   ///
   /// In en, this message translates to:
   /// **'Like comment'**
   String get likeComment;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment thread - hides the replies
   ///
   /// In en, this message translates to:
   /// **'Collapse replies'**
   String get collapseReplies;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment thread - expands the replies; {p1} is the reply count
   ///
   /// In en, this message translates to:
   /// **'View {p1} replies'**
   String viewReplyCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Comment thread - message when replies cannot be loaded
   ///
   /// In en, this message translates to:
   /// **'Replies aren\'t available yet'**
   String get repliesUnavailable;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - error text when the stream fails to load
   ///
   /// In en, this message translates to:
   /// **'Failed to load video. Try again'**
   String get videoLoadFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - empty state for related videos
   ///
   /// In en, this message translates to:
   /// **'No related recommendations'**
   String get noRecommendations;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - view count metadata; {p1} is a formatted count
   ///
   /// In en, this message translates to:
   /// **'{p1} views'**
   String viewCountLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Metadata separator between view count and date; punctuation only
   ///
   /// In en, this message translates to:
   /// **'·'**
   String get dotSeparator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet
   ///
   /// In en, this message translates to:
   /// **'24K danmaku'**
   String get danmakuCountSample;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Demo value for the relative publish date in the video info header
   ///
   /// In en, this message translates to:
   /// **'1 day ago'**
   String get oneDayAgoSample;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Demo tag shown in the video info header
   ///
   /// In en, this message translates to:
   /// **'Original tech'**
   String get originalTech;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Demo tagline under the creator name in the video info header; {p1} is the follower count
   ///
   /// In en, this message translates to:
   /// **'{p1} followers · Weekly deep dives'**
   String subscribersWeeklyTagline(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - accessibility label that unfollows the creator
   ///
   /// In en, this message translates to:
   /// **'Unfollow creator'**
   String get unfollowCreator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - accessibility label that follows the creator
   ///
   /// In en, this message translates to:
   /// **'Follow creator'**
   String get followCreator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - follow button accessibility label with the creator name; {p1} is the name
   ///
   /// In en, this message translates to:
   /// **'Following creator {p1}'**
   String followingCreatorNamed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - follow button accessibility label with the creator name; {p1} is the name
   ///
   /// In en, this message translates to:
   /// **'Follow creator {p1}'**
   String followCreatorNamed(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - follow button state when already following
   ///
   /// In en, this message translates to:
   /// **'Following'**
   String get following;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - follow button state when not following
   ///
   /// In en, this message translates to:
   /// **'Follow'**
   String get follow;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - like action
   ///
   /// In en, this message translates to:
   /// **'Like'**
   String get like;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - short label of the add-to-playlist button
   ///
   /// In en, this message translates to:
   /// **'List'**
   String get list;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - action name of the add-to-playlist button, used in its accessibility label
   ///
   /// In en, this message translates to:
   /// **'Add to playlist'**
   String get addToPlaylist;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - tooltip of the add-to-playlist button
   ///
   /// In en, this message translates to:
   /// **'Add to local playlist'**
   String get addToLocalPlaylist;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - label of the switch-source action button
   ///
   /// In en, this message translates to:
   /// **'Switch source'**
   String get switchSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - tooltip of the switch-source action button
   ///
   /// In en, this message translates to:
   /// **'Switch video source'**
   String get switchVideoSource;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - snackbar shown when the switch-source action is tapped
   ///
   /// In en, this message translates to:
   /// **'Automatically switch to the best available route'**
   String get autoSwitchBestRoute;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - action name of the share button
   ///
   /// In en, this message translates to:
   /// **'Share'**
   String get share;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - tooltip of the share button
   ///
   /// In en, this message translates to:
   /// **'Share video'**
   String get shareVideo;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - snackbar shown when the share action is tapped
   ///
   /// In en, this message translates to:
   /// **'Share multi-source video link'**
   String get shareMultiSourceLink;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - danmaku switch label when danmaku are on
   ///
   /// In en, this message translates to:
   /// **'Danmaku on'**
   String get danmakuStateOn;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - danmaku switch label when danmaku are off
   ///
   /// In en, this message translates to:
   /// **'Danmaku off'**
   String get danmakuStateOff;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - danmaku switch label
   ///
   /// In en, this message translates to:
   /// **'Danmaku'**
   String get danmaku;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - accessibility label that turns danmaku off
   ///
   /// In en, this message translates to:
   /// **'Turn danmaku off'**
   String get danmakuActionOff;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - accessibility label that turns danmaku on
   ///
   /// In en, this message translates to:
   /// **'Turn danmaku on'**
   String get danmakuActionOn;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - summary section title
   ///
   /// In en, this message translates to:
   /// **'Summary & key takeaways'**
   String get synopsisSectionTitle;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - hides the summary
   ///
   /// In en, this message translates to:
   /// **'Collapse summary'**
   String get collapseSynopsis;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - shows the full summary
   ///
   /// In en, this message translates to:
   /// **'Expand full outline'**
   String get expandSynopsis;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Generic collapse action
   ///
   /// In en, this message translates to:
   /// **'Collapse'**
   String get collapse;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Demo summary text shown when the source provides none
   ///
   /// In en, this message translates to:
   /// **'An in-depth look at why Flutter moved from Skia to Impeller for rendering. Covers shader precompilation, RenderPass reuse, direct Metal / Vulkan backend binding, and techniques for eliminating frame drops on mobile.'**
   String get sampleSynopsisFallback;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - chapters section title
   ///
   /// In en, this message translates to:
   /// **'Chapters'**
   String get chapters;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - related videos section title
   ///
   /// In en, this message translates to:
   /// **'Multi-source recommendations'**
   String get multiSourceRecommendations;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - transient label while the video is added to the queue
   ///
   /// In en, this message translates to:
   /// **'Adding to queue'**
   String get addingToQueue;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - adds the video to the play queue
   ///
   /// In en, this message translates to:
   /// **'Add to play queue'**
   String get addToPlayQueue;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - confirmation after adding to the queue
   ///
   /// In en, this message translates to:
   /// **'Added to play queue'**
   String get addedToPlayQueue;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - adding to the queue failed
   ///
   /// In en, this message translates to:
   /// **'Failed to add to queue'**
   String get addToQueueFailed;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video info - tooltip of an active action button that cancels it; {p1} is the action name
   ///
   /// In en, this message translates to:
   /// **'Cancel {p1}'**
   String cancelAction(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - plays the previous queue item
   ///
   /// In en, this message translates to:
   /// **'Previous'**
   String get previousItem;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - plays the next queue item
   ///
   /// In en, this message translates to:
   /// **'Next'**
   String get nextItem;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player and queue sheet - loop mode off
   ///
   /// In en, this message translates to:
   /// **'Loop: off'**
   String get loopOff;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player and queue sheet - repeat the current item
   ///
   /// In en, this message translates to:
   /// **'Repeat one'**
   String get loopOne;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player and queue sheet - repeat the whole queue
   ///
   /// In en, this message translates to:
   /// **'Repeat queue'**
   String get loopQueue;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - shrinks the player
   ///
   /// In en, this message translates to:
   /// **'Minimize'**
@@ -1730,43 +1730,43 @@ abstract class AppLocalizations {
   /// **'Skip'**
   String get skip;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// App bar and player - navigate back
   ///
   /// In en, this message translates to:
   /// **'Back'**
   String get back;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - enters fullscreen
   ///
   /// In en, this message translates to:
   /// **'Fullscreen'**
   String get fullscreen;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player placeholder - 1080P high bitrate quality badge
   ///
   /// In en, this message translates to:
   /// **'1080P high bitrate'**
   String get highBitrate1080;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - pause playback
   ///
   /// In en, this message translates to:
   /// **'Pause'**
   String get pause;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player - start playback
   ///
   /// In en, this message translates to:
   /// **'Play'**
   String get play;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Live player - toggles fullscreen
   ///
   /// In en, this message translates to:
   /// **'Toggle fullscreen'**
   String get fullscreenToggle;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Not-found screen - no usable data source
   ///
   /// In en, this message translates to:
   /// **'Source unavailable'**
@@ -1778,115 +1778,115 @@ abstract class AppLocalizations {
   /// **'{p1}亿'**
   String countCompactYi(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - years ago; {p1} is the number of years
   ///
   /// In en, this message translates to:
   /// **'{p1, plural, =1{1 year ago} other{{p1} years ago}}'**
   String yearsAgoCompact(int p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Relative time - months ago; {p1} is the number of months
   ///
   /// In en, this message translates to:
   /// **'{p1, plural, =1{1 month ago} other{{p1} months ago}}'**
   String monthsAgoCompact(int p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card - view count and relative date; {p1} is the count, {p2} is the date
   ///
   /// In en, this message translates to:
   /// **'{p1} views • {p2}'**
   String viewsWithDate(String p1, String p2);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card - view count; {p1} is a formatted count
   ///
   /// In en, this message translates to:
   /// **'{p1} views'**
   String viewsCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Metadata separator between two short values; punctuation only
   ///
   /// In en, this message translates to:
   /// **' • '**
   String get spacedBullet;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card and list row - creator line; {p1} is the creator name
   ///
   /// In en, this message translates to:
   /// **'Creator: {p1}'**
   String creatorLabel(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card - duration metadata; {p1} is a formatted duration
   ///
   /// In en, this message translates to:
   /// **'Duration {p1}'**
   String durationPrefix(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card - fallback name when the creator is unknown
   ///
   /// In en, this message translates to:
   /// **'Unknown creator'**
   String get unknownCreator;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date
   ///
   /// In en, this message translates to:
   /// **'{p1} • {p2}'**
   String creatorWithSubtitle(String p1, String p2);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Card and row - more-actions tooltip
   ///
   /// In en, this message translates to:
   /// **'More options'**
   String get moreOptions;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator row - follower count; {p1} is a formatted count
   ///
   /// In en, this message translates to:
   /// **'{p1} followers'**
   String subscribersCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator row - video count; {p1} is a formatted count
   ///
   /// In en, this message translates to:
   /// **'{p1} videos'**
   String videosCount(String p1);
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Live card - badge for a running stream
   ///
   /// In en, this message translates to:
   /// **'Live now'**
   String get liveNow;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Bottom navigation - home entry
   ///
   /// In en, this message translates to:
   /// **'Home'**
   String get navHomeLabel;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Bottom navigation and search entry label
   ///
   /// In en, this message translates to:
   /// **'Search'**
   String get search;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Live route - the live room's source is unavailable
   ///
   /// In en, this message translates to:
   /// **'The live stream\'s source is unavailable'**
   String get liveSourceUnavailable;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Creator route - the creator's source is unavailable
   ///
   /// In en, this message translates to:
   /// **'The creator\'s source is unavailable'**
   String get creatorSourceUnavailable;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video route - the video's source is unavailable
   ///
   /// In en, this message translates to:
   /// **'The video\'s source is unavailable'**
   String get videoSourceUnavailable;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Video detail - empty state when the source cannot return details
   ///
   /// In en, this message translates to:
   /// **'This source doesn\'t support video details yet'**
@@ -1898,7 +1898,7 @@ abstract class AppLocalizations {
   /// **'Progress'**
   String get progress;
 
-  /// Migrated from hardcoded literal (LIZ-51 batch base)
+  /// Player placeholder - switch action label
   ///
   /// In en, this message translates to:
   /// **'Switch'**
