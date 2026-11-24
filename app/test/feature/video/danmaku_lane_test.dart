@@ -10,24 +10,15 @@ DanmakuComment scrolling(
   double start, {
   String content = 'hello world',
   int? rowId,
+  DanmakuMode mode = DanmakuMode.scrolling,
 }) => DanmakuComment(
   startTime: Duration(milliseconds: (start * 1000).round()),
-  mode: DanmakuMode.scrolling,
+  mode: mode,
   fontSize: 25,
   colorArgb: 0xFFFFFF,
   content: content,
   rowId: rowId,
 );
-
-DanmakuComment top(double start, {String content = 'top', int? rowId}) =>
-    DanmakuComment(
-      startTime: Duration(milliseconds: (start * 1000).round()),
-      mode: DanmakuMode.top,
-      fontSize: 25,
-      colorArgb: 0xFFFFFF,
-      content: content,
-      rowId: rowId,
-    );
 
 List<DanmakuSlot> plan(
   List<DanmakuComment> comments,
@@ -39,6 +30,9 @@ List<DanmakuSlot> plan(
   size: _size,
   settings: settings,
 );
+
+int laneOf(List<DanmakuSlot> slots, String content) =>
+    slots.singleWhere((slot) => slot.comment.content == content).lane;
 
 void main() {
   group('planDanmakuSlots', () {
@@ -59,10 +53,10 @@ void main() {
     });
 
     test('reuses a lane only after the previous comment left the screen', () {
-      // Given 同一轨道上前后两条弹幕，间隔远小于滚动时长。
+      // Given 同一轨道偏好上前后两条弹幕，间隔远小于滚动时长。
       final comments = [
-        scrolling(0, content: 'leading'),
-        scrolling(0.2, content: 'following'),
+        scrolling(0, content: 'leading', rowId: 0),
+        scrolling(0.2, content: 'following', rowId: 0),
       ];
 
       // When 两条都还在画面上。
@@ -88,21 +82,6 @@ void main() {
       expect(slots.map((slot) => slot.lane).toSet(), hasLength(8));
     });
 
-    test('keeps a top comment from sharing a lane with a scrolling one', () {
-      // Given 一条顶部弹幕和一条滚动弹幕同时出现。
-      final comments = [
-        top(3, content: 'pinned', rowId: 0),
-        scrolling(3, content: 'moving', rowId: 0),
-      ];
-
-      // When 两者都在画面上。
-      final slots = plan(comments, 3.5);
-
-      // Then 顶部弹幕会一直停在那儿，滚动弹幕必须避开它。
-      expect(slots, hasLength(2));
-      expect(slots.first.lane, isNot(slots.last.lane));
-    });
-
     test('ignores comments that have not started yet', () {
       // Given 一条已经开始、一条还没开始。
       final comments = [scrolling(1), scrolling(9)];
@@ -114,7 +93,7 @@ void main() {
       expect(slots, hasLength(1));
     });
 
-    test('ignores comments older than the longest stay', () {
+    test('ignores comments older than the scrolling duration', () {
       // Given 一条早已滚出画面的弹幕。
       final comments = [scrolling(0)];
 
@@ -123,6 +102,40 @@ void main() {
 
       // Then 不再绘制它。
       expect(slots, isEmpty);
+    });
+
+    test('keeps a comment on its lane as the playback advances', () {
+      // Given 后一条弹幕的偏好轨道被前一条占着，只能顺延。
+      final comments = [
+        scrolling(0, content: 'leading', rowId: 0),
+        scrolling(0.5, content: 'following', rowId: 0),
+      ];
+
+      // When 先看它刚出现时的轨道，再看前一条已经滚出画面后的轨道。
+      final early = plan(comments, 1);
+      final late = plan(comments, 8.3);
+
+      // Then 后一条仍在同一条轨道上，不会因为前一条被移出规划窗口而跳行。
+      expect(laneOf(early, 'following'), isNot(0));
+      expect(laneOf(late, 'following'), laneOf(early, 'following'));
+    });
+
+    test('renders every source mode as a scrolling comment', () {
+      // Given 五种来源模式在同一秒出现。
+      final comments = [
+        for (final (index, mode) in DanmakuMode.values.indexed)
+          scrolling(0, content: 'mode $index', rowId: index, mode: mode),
+      ];
+
+      // When 规划 0.5 秒这一帧。
+      final slots = plan(comments, 0.5);
+
+      // Then 五种模式都参与滚动排版，没有为顶/底弹幕单独保留轨道。
+      expect(slots, hasLength(DanmakuMode.values.length));
+      expect(
+        slots.map((slot) => slot.lane).toSet(),
+        hasLength(DanmakuMode.values.length),
+      );
     });
   });
 }

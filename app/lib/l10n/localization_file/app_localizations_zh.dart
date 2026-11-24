@@ -631,14 +631,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get topBottomDanmakuDuration => '顶/底弹幕时长';
-
-  @override
-  String secondsValueTopBottom(String p1) {
-    return '$p1 秒';
-  }
-
-  @override
   String get opacity => '不透明度';
 
   @override
@@ -646,22 +638,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get strokeRadius => '描边半径';
-
-  @override
-  String get topMaxRows => '顶部最大行数';
-
-  @override
-  String topRowsValue(int p1) {
-    return '$p1 行';
-  }
-
-  @override
-  String get bottomMaxRows => '底部最大行数';
-
-  @override
-  String bottomRowsValue(int p1) {
-    return '$p1 行';
-  }
 
   @override
   String get playbackSpeed => '倍速';

@@ -94,22 +94,6 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                       _update(_settings.copyWith(regularDuration: value)),
                 ),
                 _SliderSetting(
-                  title:
-                      l10n?.topBottomDanmakuDuration ??
-                      'Top/bottom danmaku duration',
-                  value: _settings.topBottomDuration,
-                  min: 3,
-                  max: 12,
-                  divisions: 9,
-                  valueLabel:
-                      l10n?.secondsValueTopBottom(
-                        _settings.topBottomDuration.toStringAsFixed(1),
-                      ) ??
-                      '',
-                  onChanged: (value) =>
-                      _update(_settings.copyWith(topBottomDuration: value)),
-                ),
-                _SliderSetting(
                   title: l10n?.opacity ?? 'Opacity',
                   value: _settings.opacity,
                   min: .2,
@@ -138,27 +122,6 @@ class _DanmakuSettingsScreenState() extends State<DanmakuSettingsScreen> {
                   valueLabel: _settings.outlineRadius.toStringAsFixed(1),
                   onChanged: (value) =>
                       _update(_settings.copyWith(outlineRadius: value)),
-                ),
-                _SliderSetting(
-                  title: l10n?.topMaxRows ?? 'Top max rows',
-                  value: _settings.topMaxRows.toDouble(),
-                  min: 1,
-                  max: 6,
-                  divisions: 5,
-                  valueLabel: l10n?.topRowsValue(_settings.topMaxRows) ?? '',
-                  onChanged: (value) =>
-                      _update(_settings.copyWith(topMaxRows: value.round())),
-                ),
-                _SliderSetting(
-                  title: l10n?.bottomMaxRows ?? 'Bottom max rows',
-                  value: _settings.bottomMaxRows.toDouble(),
-                  min: 1,
-                  max: 6,
-                  divisions: 5,
-                  valueLabel:
-                      l10n?.bottomRowsValue(_settings.bottomMaxRows) ?? '',
-                  onChanged: (value) =>
-                      _update(_settings.copyWith(bottomMaxRows: value.round())),
                 ),
               ],
             ),

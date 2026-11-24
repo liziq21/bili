@@ -877,19 +877,6 @@
       }
     }
   },
-  "topBottomDanmakuDuration": "顶/底弹幕时长",
-  "@topBottomDanmakuDuration": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "secondsValueTopBottom": "{p1} 秒",
-  "@secondsValueTopBottom": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "String"
-      }
-    }
-  },
   "opacity": "不透明度",
   "@opacity": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
@@ -901,32 +888,6 @@
   "strokeRadius": "描边半径",
   "@strokeRadius": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "topMaxRows": "顶部最大行数",
-  "@topMaxRows": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "topRowsValue": "{p1} 行",
-  "@topRowsValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "int"
-      }
-    }
-  },
-  "bottomMaxRows": "底部最大行数",
-  "@bottomMaxRows": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "bottomRowsValue": "{p1} 行",
-  "@bottomRowsValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "int"
-      }
-    }
   },
   "playbackSpeed": "倍速",
   "@playbackSpeed": {

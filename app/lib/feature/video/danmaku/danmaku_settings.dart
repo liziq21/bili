@@ -7,31 +7,22 @@ import '../../../datastore/preferences_data_source.dart';
 final class const DanmakuSettings({
   final bool enabled = true,
   final double regularDuration = 8,
-  final double topBottomDuration = 6,
   final double opacity = .9,
   final double fontSize = 18,
   final double outlineRadius = 2,
-  final int topMaxRows = 2,
-  final int bottomMaxRows = 2,
 }) {
   DanmakuSettings copyWith({
     bool? enabled,
     double? regularDuration,
-    double? topBottomDuration,
     double? opacity,
     double? fontSize,
     double? outlineRadius,
-    int? topMaxRows,
-    int? bottomMaxRows,
   }) => DanmakuSettings(
     enabled: enabled ?? this.enabled,
     regularDuration: regularDuration ?? this.regularDuration,
-    topBottomDuration: topBottomDuration ?? this.topBottomDuration,
     opacity: opacity ?? this.opacity,
     fontSize: fontSize ?? this.fontSize,
     outlineRadius: outlineRadius ?? this.outlineRadius,
-    topMaxRows: topMaxRows ?? this.topMaxRows,
-    bottomMaxRows: bottomMaxRows ?? this.bottomMaxRows,
   );
 
   static Future<DanmakuSettings> load(
@@ -49,11 +40,6 @@ final class const DanmakuSettings({
         PreferencesKey.danmakuRegularDuration,
         fallback.regularDuration,
       ),
-      topBottomDuration: await _read(
-        preferences,
-        PreferencesKey.danmakuTopBottomDuration,
-        fallback.topBottomDuration,
-      ),
       opacity: await _read(
         preferences,
         PreferencesKey.danmakuOpacity,
@@ -69,16 +55,6 @@ final class const DanmakuSettings({
         PreferencesKey.danmakuOutlineRadius,
         fallback.outlineRadius,
       ),
-      topMaxRows: await _read(
-        preferences,
-        PreferencesKey.danmakuTopMaxRows,
-        fallback.topMaxRows,
-      ),
-      bottomMaxRows: await _read(
-        preferences,
-        PreferencesKey.danmakuBottomMaxRows,
-        fallback.bottomMaxRows,
-      ),
     );
   }
 
@@ -86,16 +62,9 @@ final class const DanmakuSettings({
     await Future.wait([
       _set(preferences, PreferencesKey.danmakuEnabled, enabled),
       _set(preferences, PreferencesKey.danmakuRegularDuration, regularDuration),
-      _set(
-        preferences,
-        PreferencesKey.danmakuTopBottomDuration,
-        topBottomDuration,
-      ),
       _set(preferences, PreferencesKey.danmakuOpacity, opacity),
       _set(preferences, PreferencesKey.danmakuFontSize, fontSize),
       _set(preferences, PreferencesKey.danmakuOutlineRadius, outlineRadius),
-      _set(preferences, PreferencesKey.danmakuTopMaxRows, topMaxRows),
-      _set(preferences, PreferencesKey.danmakuBottomMaxRows, bottomMaxRows),
     ]);
   }
 

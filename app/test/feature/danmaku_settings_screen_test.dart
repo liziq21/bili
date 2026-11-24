@@ -66,7 +66,7 @@ void main() {
     expect(find.text(l10n.opacity), findsOneWidget);
     expect(find.text(l10n.fontSize), findsOneWidget);
     expect(find.byType(SwitchListTile), findsOneWidget);
-    expect(find.byType(Slider), findsNWidgets(7));
+    expect(find.byType(Slider), findsNWidgets(4));
   });
 
   testWidgets('toggles danmaku switch and persists preference', (tester) async {

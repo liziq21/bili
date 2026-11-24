@@ -56,8 +56,8 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   /// 弹幕开关、字号等设置由设置页修改后立即生效，不必等切换视频。
   void _subscribeSettings(PreferencesDataSource preferences) {
     if (_settingSubscriptions != null) return;
-    // `DanmakuSettings.save` writes all eight keys, so one adjustment emits
-    // eight events. Coalesce them into a single snapshot read.
+    // `DanmakuSettings.save` writes all five keys, so one adjustment emits
+    // five events. Coalesce them into a single snapshot read.
     void onChange(Object? _) => _scheduleSettingsReload();
     void onError(Object _, StackTrace _) {}
     _settingSubscriptions = [
@@ -68,9 +68,6 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
           .streamOf(PreferencesKey.danmakuRegularDuration)
           .listen(onChange, onError: onError),
       preferences
-          .streamOf(PreferencesKey.danmakuTopBottomDuration)
-          .listen(onChange, onError: onError),
-      preferences
           .streamOf(PreferencesKey.danmakuOpacity)
           .listen(onChange, onError: onError),
       preferences
@@ -78,12 +75,6 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
           .listen(onChange, onError: onError),
       preferences
           .streamOf(PreferencesKey.danmakuOutlineRadius)
-          .listen(onChange, onError: onError),
-      preferences
-          .streamOf(PreferencesKey.danmakuTopMaxRows)
-          .listen(onChange, onError: onError),
-      preferences
-          .streamOf(PreferencesKey.danmakuBottomMaxRows)
           .listen(onChange, onError: onError),
     ];
   }
@@ -151,9 +142,6 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     final state = _playbackState ?? widget.controller.state;
     final colors = (
       onScrim: $styles.colors.onScrim,
-      accentText: $styles.colors.accentText,
-      secondary: $styles.colors.secondary,
-      tertiary: $styles.colors.tertiary,
       outline: $styles.colors.outline,
     );
     return Positioned.fill(

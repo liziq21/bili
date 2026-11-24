@@ -877,19 +877,6 @@
       }
     }
   },
-  "topBottomDanmakuDuration": "Top/bottom danmaku duration",
-  "@topBottomDanmakuDuration": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "secondsValueTopBottom": "{p1} s",
-  "@secondsValueTopBottom": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "String"
-      }
-    }
-  },
   "opacity": "Opacity",
   "@opacity": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
@@ -901,32 +888,6 @@
   "strokeRadius": "Stroke radius",
   "@strokeRadius": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "topMaxRows": "Max top rows",
-  "@topMaxRows": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "topRowsValue": "{p1, plural, =1{1 row} other{{p1} rows}}",
-  "@topRowsValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "int"
-      }
-    }
-  },
-  "bottomMaxRows": "Max bottom rows",
-  "@bottomMaxRows": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)"
-  },
-  "bottomRowsValue": "{p1, plural, =1{1 row} other{{p1} rows}}",
-  "@bottomRowsValue": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
-    "placeholders": {
-      "p1": {
-        "type": "int"
-      }
-    }
   },
   "playbackSpeed": "Speed",
   "@playbackSpeed": {

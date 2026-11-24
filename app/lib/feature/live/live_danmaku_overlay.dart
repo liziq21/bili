@@ -64,9 +64,6 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
           .streamOf(PreferencesKey.danmakuRegularDuration)
           .listen((_) => _reloadSettings()),
       preferences
-          .streamOf(PreferencesKey.danmakuTopBottomDuration)
-          .listen((_) => _reloadSettings()),
-      preferences
           .streamOf(PreferencesKey.danmakuOpacity)
           .listen((_) => _reloadSettings()),
       preferences
@@ -74,12 +71,6 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
           .listen((_) => _reloadSettings()),
       preferences
           .streamOf(PreferencesKey.danmakuOutlineRadius)
-          .listen((_) => _reloadSettings()),
-      preferences
-          .streamOf(PreferencesKey.danmakuTopMaxRows)
-          .listen((_) => _reloadSettings()),
-      preferences
-          .streamOf(PreferencesKey.danmakuBottomMaxRows)
           .listen((_) => _reloadSettings()),
     ];
   }
@@ -161,9 +152,6 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
     final position = DateTime.now().difference(_streamStart);
     final colors = (
       onScrim: $styles.colors.onScrim,
-      accentText: $styles.colors.accentText,
-      secondary: $styles.colors.secondary,
-      tertiary: $styles.colors.tertiary,
       outline: $styles.colors.outline,
     );
     return Positioned.fill(
