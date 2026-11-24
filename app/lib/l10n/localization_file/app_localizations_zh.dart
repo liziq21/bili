@@ -31,6 +31,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTitle => '设置';
 
   @override
+  String get settingsGroupPlayback => '播放与外观';
+
+  @override
+  String get settingsGroupLibrary => '媒体库与通知';
+
+  @override
+  String get settingsGroupDiscovery => '发现与频道';
+
+  @override
+  String get settingsGroupOther => '更多';
+
+  @override
   String get settingsPlayer => '播放器';
 
   @override

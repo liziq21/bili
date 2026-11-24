@@ -29,6 +29,22 @@
   "@settingsTitle": {
     "description": "Settings screen title"
   },
+  "settingsGroupPlayback": "播放与外观",
+  "@settingsGroupPlayback": {
+    "description": "Settings index group - playback and appearance sections"
+  },
+  "settingsGroupLibrary": "媒体库与通知",
+  "@settingsGroupLibrary": {
+    "description": "Settings index group - library and notification sections"
+  },
+  "settingsGroupDiscovery": "发现与频道",
+  "@settingsGroupDiscovery": {
+    "description": "Settings index group - discovery and channel sections"
+  },
+  "settingsGroupOther": "更多",
+  "@settingsGroupOther": {
+    "description": "Settings index group - miscellaneous sections"
+  },
   "settingsPlayer": "播放器",
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"

@@ -18,58 +18,62 @@ Widget _buildScreen(Widget child) => MaterialApp(
   home: AppScaffold(child: child),
 );
 
+/// 索引页的 ListView 按需构建子项，默认 800×600 视口放不下四个展开的分组，
+/// 靠后的分组不会进入 widget 树。放大视口让所有分组一次性建出来。
+Future<void> _useTallSurface(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(1000, 2000));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+}
+
 void main() {
-  const sections = [
-    (SettingsSection.player, 'Player'),
-    (SettingsSection.appearance, 'Appearance'),
-    (SettingsSection.history, 'History'),
-    (SettingsSection.library, 'Library'),
-    (SettingsSection.advanced, 'Advanced'),
-  ];
+  // 每个分节的 zh 标签；分组导航改版后仍要保证 8 个分节都能被选中。
+  const sectionLabels = <SettingsSection, String Function(AppLocalizations)>{
+    SettingsSection.player: _settingsPlayer,
+    SettingsSection.appearance: _settingsAppearance,
+    SettingsSection.history: _settingsHistory,
+    SettingsSection.library: _settingsLibrary,
+    SettingsSection.notifications: _settingsNotifications,
+    SettingsSection.discovery: _settingsDiscovery,
+    SettingsSection.channel: _settingsChannel,
+    SettingsSection.advanced: _settingsAdvanced,
+  };
 
   group('SettingScreen', () {
-    testWidgets('shows the settings title and exactly eight groups in order', (
+    testWidgets('shows the title, four expandable groups and eight sections', (
       tester,
     ) async {
-      // Given the app's zh locale and both material localization delegates.
+      // Given an index with a recording selection callback.
       final selections = <SettingsSection>[];
 
       try {
+        await _useTallSurface(tester);
         // When the settings index is rendered.
         await tester.pumpWidget(
           _buildScreen(SettingScreen(onSectionSelected: selections.add)),
         );
         await tester.pump();
 
-        // Then its localized title and ordered groups match the skeleton.
+        // Then the localized title and four expandable groups are present.
         final context = tester.element(find.byType(SettingScreen));
         final l10n = AppLocalizations.of(context)!;
         expect(Localizations.localeOf(context), const Locale('zh'));
         expect(MaterialLocalizations.of(context), isNotNull);
         expect(find.widgetWithText(AppBar, l10n.settingsTitle), findsOneWidget);
+        expect(find.byType(ExpansionTile), findsNWidgets(4));
 
-        final tiles = find.byType(ListTile);
-        expect(tiles, findsNWidgets(8));
-        final orderedLabels = [
-          l10n.settingsPlayer,
-          l10n.settingsAppearance,
-          l10n.settingsHistory,
-          l10n.settingsLibrary,
-          l10n.settingsNotifications,
-          l10n.settingsAdvanced,
-          l10n.settingsDiscovery,
-          l10n.settingsChannel,
+        final groupTitles = [
+          l10n.settingsGroupPlayback,
+          l10n.settingsGroupLibrary,
+          l10n.settingsGroupDiscovery,
+          l10n.settingsGroupOther,
         ];
-        for (final (index, label) in orderedLabels.indexed) {
-          final tile = tiles.at(index);
-          expect(
-            find.descendant(of: tile, matching: find.text(label)),
-            findsOneWidget,
-          );
-          expect(
-            find.ancestor(of: tile, matching: find.byType(Tooltip)),
-            findsOneWidget,
-          );
+        for (final title in groupTitles) {
+          expect(find.text(title), findsOneWidget);
+        }
+
+        // And every section is visible because each group starts expanded.
+        for (final labelOf in sectionLabels.values) {
+          expect(find.text(labelOf(l10n)), findsOneWidget);
         }
         expect(selections, isEmpty);
         expect(tester.takeException(), isNull);
@@ -79,35 +83,95 @@ void main() {
       }
     });
 
-    for (final (section, label) in sections) {
-      testWidgets('selecting $label reports only its section', (tester) async {
+    testWidgets('wraps each section tile in a tooltip', (tester) async {
+      // Given the rendered index.
+      try {
+        await tester.pumpWidget(
+          _buildScreen(SettingScreen(onSectionSelected: (_) {})),
+        );
+        await tester.pump();
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(SettingScreen)),
+        )!;
+
+        // When a section tile is located.
+        final tile = find.widgetWithText(ListTile, l10n.settingsPlayer);
+
+        // Then it is wrapped in a tooltip carrying the same label.
+        expect(tile, findsOneWidget);
+        expect(
+          find.ancestor(of: tile, matching: find.byType(Tooltip)),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    testWidgets('collapses and re-expands a group when its header is tapped', (
+      tester,
+    ) async {
+      // Given the rendered index with the playback group expanded.
+      try {
+        await _useTallSurface(tester);
+        await tester.pumpWidget(
+          _buildScreen(SettingScreen(onSectionSelected: (_) {})),
+        );
+        await tester.pump();
+        final l10n = AppLocalizations.of(
+          tester.element(find.byType(SettingScreen)),
+        )!;
+        expect(find.text(l10n.settingsPlayer), findsOneWidget);
+
+        // When the playback group header is tapped.
+        await tester.tap(find.text(l10n.settingsGroupPlayback));
+        await tester.pumpAndSettle();
+
+        // Then its sections are gone but the other groups stay expanded.
+        expect(find.text(l10n.settingsPlayer), findsNothing);
+        expect(find.text(l10n.settingsAppearance), findsNothing);
+        expect(find.text(l10n.settingsLibrary), findsOneWidget);
+
+        // When the header is tapped again.
+        await tester.tap(find.text(l10n.settingsGroupPlayback));
+        await tester.pumpAndSettle();
+
+        // Then the sections return.
+        expect(find.text(l10n.settingsPlayer), findsOneWidget);
+        expect(find.text(l10n.settingsAppearance), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+
+    for (final MapEntry(key: section, value: labelOf)
+        in sectionLabels.entries) {
+      testWidgets('selecting $section reports only its section', (
+        tester,
+      ) async {
         // Given an index with a recording selection callback.
         final selections = <SettingsSection>[];
 
         try {
+          await _useTallSurface(tester);
           await tester.pumpWidget(
             _buildScreen(SettingScreen(onSectionSelected: selections.add)),
           );
           await tester.pump();
           expect(selections, isEmpty);
 
-          // When this group's actual tile is tapped. 界面语言是 zh，标签要用
-          // l10n 取，不能用测试名里的英文名去匹配。
+          // When this section's tile is tapped (the label is localized).
           final l10n = AppLocalizations.of(
             tester.element(find.byType(SettingScreen)),
           )!;
-          final localizedLabel = switch (section) {
-            SettingsSection.player => l10n.settingsPlayer,
-            SettingsSection.appearance => l10n.settingsAppearance,
-            SettingsSection.history => l10n.settingsHistory,
-            SettingsSection.library => l10n.settingsLibrary,
-            SettingsSection.advanced => l10n.settingsAdvanced,
-            _ => label,
-          };
-          await tester.tap(find.widgetWithText(ListTile, localizedLabel));
+          await tester.tap(find.widgetWithText(ListTile, labelOf(l10n)));
           await tester.pump();
 
-          // Then exactly one callback identifies that group.
+          // Then exactly one callback identifies that section.
           expect(selections, [section]);
           expect(tester.takeException(), isNull);
         } finally {
@@ -116,63 +180,6 @@ void main() {
         }
       });
     }
-
-    testWidgets('selecting Notifications reports only its section', (
-      tester,
-    ) async {
-      // Given an index with a recording selection callback.
-      final selections = <SettingsSection>[];
-
-      try {
-        await tester.pumpWidget(
-          _buildScreen(SettingScreen(onSectionSelected: selections.add)),
-        );
-        await tester.pump();
-        expect(selections, isEmpty);
-
-        // When the notifications tile is tapped (label is localized).
-        final l10n = AppLocalizations.of(
-          tester.element(find.byType(SettingScreen)),
-        )!;
-        await tester.tap(
-          find.widgetWithText(ListTile, l10n.settingsNotifications),
-        );
-        await tester.pump();
-
-        // Then exactly one callback identifies that group.
-        expect(selections, [SettingsSection.notifications]);
-        expect(tester.takeException(), isNull);
-      } finally {
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
-      }
-    });
-
-    testWidgets('selecting Channel reports only its section', (tester) async {
-      // Given an index with a recording selection callback.
-      final selections = <SettingsSection>[];
-
-      try {
-        await tester.pumpWidget(
-          _buildScreen(SettingScreen(onSectionSelected: selections.add)),
-        );
-        await tester.pump();
-
-        // When the channel tile is tapped (label is localized).
-        final l10n = AppLocalizations.of(
-          tester.element(find.byType(SettingScreen)),
-        )!;
-        await tester.tap(find.widgetWithText(ListTile, l10n.settingsChannel));
-        await tester.pump();
-
-        // Then exactly one callback identifies the channel group.
-        expect(selections, [SettingsSection.channel]);
-        expect(tester.takeException(), isNull);
-      } finally {
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
-      }
-    });
   });
 
   group('Settings subpages', () {
@@ -349,3 +356,13 @@ void main() {
     });
   });
 }
+
+String _settingsPlayer(AppLocalizations l10n) => l10n.settingsPlayer;
+String _settingsAppearance(AppLocalizations l10n) => l10n.settingsAppearance;
+String _settingsHistory(AppLocalizations l10n) => l10n.settingsHistory;
+String _settingsLibrary(AppLocalizations l10n) => l10n.settingsLibrary;
+String _settingsNotifications(AppLocalizations l10n) =>
+    l10n.settingsNotifications;
+String _settingsDiscovery(AppLocalizations l10n) => l10n.settingsDiscovery;
+String _settingsChannel(AppLocalizations l10n) => l10n.settingsChannel;
+String _settingsAdvanced(AppLocalizations l10n) => l10n.settingsAdvanced;

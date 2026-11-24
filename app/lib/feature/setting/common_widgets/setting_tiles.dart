@@ -139,3 +139,195 @@ class const SettingActionTile({
     );
   }
 }
+
+/// One choice of a [SettingMultiSelectTile].
+@immutable
+class const SettingMultiSelectOption<T>(final T value, final String label);
+
+/// Setting row that edits free text. Tapping opens a dialog pre-filled with
+/// [value]; confirming reports the trimmed input.
+class const SettingTextTile({
+  super.key,
+  required final String title,
+  final String? subtitle,
+  required final String value,
+  required final ValueChanged<String> onChanged,
+  final String? hintText,
+  final int? maxLength,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final subtitleText = subtitle;
+    return ListTile(
+      title: Text(title),
+      subtitle: subtitleText == null ? null : Text(subtitleText),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 160),
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: $styles.text.bodySmall.copyWith(
+                color: $styles.colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
+        ],
+      ),
+      onTap: () => _edit(context),
+    );
+  }
+
+  Future<void> _edit(BuildContext context) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (_) => _TextInputDialog(
+        title: title,
+        initialValue: value,
+        hintText: hintText,
+        maxLength: maxLength,
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    onChanged(result.trim());
+  }
+}
+
+/// 自由文本编辑对话框。自己持有 [TextEditingController]，随对话框一起销毁，
+/// 避免调用方在退场动画还在用 controller 时提前 dispose。
+class const _TextInputDialog({
+  required final String title,
+  required final String initialValue,
+  final String? hintText,
+  final int? maxLength,
+}) extends StatefulWidget {
+  @override
+  State<_TextInputDialog> createState() => _TextInputDialogState();
+}
+
+class _TextInputDialogState() extends State<_TextInputDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialValue,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = MaterialLocalizations.of(context);
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: widget.maxLength,
+        decoration: InputDecoration(hintText: widget.hintText),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancelButtonLabel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text),
+          child: Text(l10n.okButtonLabel),
+        ),
+      ],
+    );
+  }
+}
+
+/// Setting row that edits a set of choices. The selected labels are shown
+/// inline; tapping opens a checkbox sheet and reports the new selection.
+class const SettingMultiSelectTile<T extends Object>({
+  super.key,
+  required final String title,
+  final String? subtitle,
+  required final List<SettingMultiSelectOption<T>> options,
+  required final Set<T> selected,
+  required final ValueChanged<Set<T>> onChanged,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final subtitleText = subtitle;
+    final selectedLabels = [
+      for (final option in options)
+        if (selected.contains(option.value)) option.label,
+    ];
+    return ListTile(
+      title: Text(title),
+      subtitle: subtitleText == null ? null : Text(subtitleText),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (selectedLabels.isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 160),
+              child: Text(
+                selectedLabels.join(', '),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
+        ],
+      ),
+      onTap: () => _pick(context),
+    );
+  }
+
+  Future<void> _pick(BuildContext context) async {
+    final okLabel = MaterialLocalizations.of(context).okButtonLabel;
+    final result = await showModalBottomSheet<Set<T>>(
+      context: context,
+      builder: (sheetContext) {
+        final working = <T>{...selected};
+        return StatefulBuilder(
+          builder: (_, setState) => SafeArea(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                SettingPickerTitle(title: title),
+                for (final option in options)
+                  CheckboxListTile(
+                    value: working.contains(option.value),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text(option.label),
+                    onChanged: (checked) => setState(() {
+                      if (checked == true) {
+                        working.add(option.value);
+                      } else {
+                        working.remove(option.value);
+                      }
+                    }),
+                  ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
+                  child: Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(working),
+                      child: Text(okLabel),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (result == null || !context.mounted) return;
+    onChanged(result);
+  }
+}
