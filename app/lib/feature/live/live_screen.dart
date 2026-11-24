@@ -9,7 +9,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../video/player/media_playback_controller.dart';
 import '../video/danmaku/danmaku_settings_screen.dart';
@@ -90,7 +89,7 @@ class _LiveScreenState() extends State<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final roomIdNum = int.tryParse(widget.roomId) ?? 0;
 
     return MultiBlocProvider(
@@ -223,7 +222,7 @@ class _LiveScreenState() extends State<LiveScreen> {
 class const _LiveBadge({required final bool isLive}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -332,7 +331,7 @@ class _PlayerAreaState() extends State<_PlayerArea> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final stream = widget.stream;
 
     // 流地址错误 → 播放器区域显示错误态 + 重试。

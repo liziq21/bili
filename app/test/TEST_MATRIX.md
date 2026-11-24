@@ -9,10 +9,10 @@
 | unit | 90 |
 | widget | 64 |
 | golden | 8 |
-| contract | 13 |
+| contract | 14 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **177** |
+| **合计** | **178** |
 
 ## 分类定义
 
@@ -195,10 +195,11 @@
 - `app/test/golden/video_feed_section_golden_test.dart`
 - `app/test/golden/video_info_view_golden_test.dart`
 
-## contract（13）
+## contract（14）
 
 - `app/test/golden/golden_font_contract_test.dart`
 - `app/test/golden/hardcoded_copy_test.dart`
+- `app/test/l10n/localization_contract_test.dart`
 - `app/test/design/app_style_test.dart`
 - `app/test/design/contrast_test.dart`
 - `app/test/design/hardcoded_color_test.dart`

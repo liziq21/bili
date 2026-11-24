@@ -15,7 +15,6 @@ import '../../data/repository/local_library_repository.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../../ui/creator_subscribe_button.dart';
@@ -114,7 +113,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
       if (widget.mid == requestedMid) {
         setState(() => _isSubscribed = !target);
       }
-      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.operationFailed('$error'))));
@@ -167,7 +166,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     // Keep the route subtree subscribed to brightness changes because `$styles`
     // is a mutable singleton refreshed by AppScaffold.
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final toggleSubscription = _localLibrary != null && _sourceId != null
         ? _toggleSubscription
         : null;
@@ -245,7 +244,7 @@ class const _SpaceContent({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final videosRepository = context.read<ChannelVideosRepository?>();
     final playlistsRepository = context.read<ChannelPlaylistsRepository?>();
 
@@ -394,7 +393,7 @@ class const _ChannelSectionError({required final VoidCallback onRetry})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -426,7 +425,7 @@ class const _ChannelSectionPageError({required final VoidCallback onRetry})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
@@ -446,7 +445,7 @@ class const _ChannelSectionPageError({required final VoidCallback onRetry})
 class const _ChannelVideosEmpty() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -468,7 +467,7 @@ class const _ChannelVideosEmpty() extends StatelessWidget {
 class const _ChannelVideosUnsupported() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: EdgeInsets.all($styles.insets.lg),
@@ -536,7 +535,7 @@ class const _ChannelPlaylistTile({
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final total = playlist.totalCount;
 
     return ListTile(
@@ -585,7 +584,7 @@ class const _ChannelPlaylistTile({
 class const _ChannelPlaylistsEmpty() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -608,7 +607,7 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: EdgeInsets.all($styles.insets.lg),
@@ -647,7 +646,7 @@ class const _CreatorProfileHeader({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final description = profile.description?.trim();
     final stats = <String>[
       if (profile.subscribers case final subscribers?)

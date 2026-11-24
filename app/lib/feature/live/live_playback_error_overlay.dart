@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../video/player/playback_error.dart';
 import '../video/player/playback_error_label.dart';
@@ -22,7 +21,7 @@ class const LivePlaybackErrorOverlay({
   Widget build(BuildContext context) {
     // `$styles` 是全局静态，不订阅主题；没有这行，切主题后覆盖层会留着旧色板。
     Theme.of(context);
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: $styles.colors.scrim.withValues(alpha: 0.72),
       child: Center(

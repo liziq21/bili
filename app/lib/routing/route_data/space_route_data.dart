@@ -15,9 +15,7 @@ class const SpaceRouteData({required final String mid, final String? source})
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
       return NoMediaSourceScreen(
-        message:
-            AppLocalizations.of(context)?.creatorSourceUnavailable ??
-            'Creator source unavailable',
+        message: AppLocalizations.of(context)!.creatorSourceUnavailable,
       );
     }
 

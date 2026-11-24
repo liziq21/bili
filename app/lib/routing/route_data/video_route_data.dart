@@ -5,10 +5,7 @@ extension BuildContextVideo on BuildContext {
     if (source != null && read<MediaSourceCatalog>().find(source) == null) {
       ScaffoldMessenger.of(this).showSnackBar(
         SnackBar(
-          content: Text(
-            AppLocalizations.of(this)?.videoSourceUnavailable ??
-                'Video source unavailable',
-          ),
+          content: Text(AppLocalizations.of(this)!.videoSourceUnavailable),
         ),
       );
       return;
@@ -35,10 +32,7 @@ extension BuildContextVideo on BuildContext {
     if (read<MediaSourceCatalog>().find(source) == null) {
       ScaffoldMessenger.of(this).showSnackBar(
         SnackBar(
-          content: Text(
-            AppLocalizations.of(this)?.videoSourceUnavailable ??
-                'Video source unavailable',
-          ),
+          content: Text(AppLocalizations.of(this)!.videoSourceUnavailable),
         ),
       );
       return;
@@ -76,9 +70,7 @@ class const VideoRouteData({
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
       return NoMediaSourceScreen(
-        message:
-            AppLocalizations.of(context)?.videoSourceUnavailable ??
-            'Video source unavailable',
+        message: AppLocalizations.of(context)!.videoSourceUnavailable,
       );
     }
 
@@ -97,9 +89,8 @@ class const VideoRouteData({
         builder: (context) {
           if (context.read<VideoDetailRepository?>() == null) {
             return NoMediaSourceScreen(
-              message:
-                  AppLocalizations.of(context)?.videoDetailSourceUnsupported ??
-                  'Source does not support video details',
+              message: AppLocalizations.of(context)!
+                  .videoDetailSourceUnsupported,
             );
           }
           return VideoScreen(

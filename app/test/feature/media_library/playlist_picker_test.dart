@@ -1,6 +1,7 @@
 import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/playlist_picker.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -75,8 +76,12 @@ void main() {
   }
 
   Widget app(LocalLibraryRepository value) => MaterialApp(
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    supportedLocales: const [Locale('en')],
+    localizationsDelegates: const [
+      ...AppLocalizations.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
     home: RepositoryProvider<LocalLibraryRepository>.value(
       value: value,
       child: Builder(

@@ -5,6 +5,7 @@ import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/space/space_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
@@ -134,7 +135,15 @@ void main() {
     await tester.pumpWidget(
       RepositoryProvider<CreatorProfileRepository>.value(
         value: repository,
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -182,6 +191,12 @@ void main() {
       RepositoryProvider<CreatorProfileRepository>.value(
         value: repository,
         child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: SpaceScreen(
             mid: 'creator-1',
             onBackClick: () => backPressed = true,
@@ -211,7 +226,15 @@ void main() {
     await tester.pumpWidget(
       RepositoryProvider<CreatorProfileRepository>.value(
         value: repository,
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -254,6 +277,12 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: SpaceScreen(mid: 'creator-1', onVideo: opened.add),
         ),
       ),
@@ -293,7 +322,15 @@ void main() {
             value: videosRepository,
           ),
         ],
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -315,7 +352,15 @@ void main() {
     await tester.pumpWidget(
       RepositoryProvider<CreatorProfileRepository>.value(
         value: profileRepository,
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -360,7 +405,15 @@ void main() {
               value: videosRepository,
             ),
           ],
-          child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+          child: const MaterialApp(
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
+            home: SpaceScreen(mid: 'creator-1'),
+          ),
         ),
       ),
     );
@@ -406,6 +459,12 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: SpaceScreen(mid: 'creator-1', onPlaylist: opened.add),
         ),
       ),
@@ -440,7 +499,15 @@ void main() {
     await tester.pumpWidget(
       RepositoryProvider<CreatorProfileRepository>.value(
         value: profileRepository,
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -489,7 +556,15 @@ void main() {
               value: playlistsRepository,
             ),
           ],
-          child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+          child: const MaterialApp(
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
+            home: SpaceScreen(mid: 'creator-1'),
+          ),
         ),
       ),
     );
@@ -526,6 +601,12 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: StatefulBuilder(
             builder: (context, setState) {
               rebuild = setState;
@@ -578,30 +659,29 @@ void main() {
             value: const _TestMediaSource(),
           ),
         ],
-        child: const MaterialApp(home: SpaceScreen(mid: 'creator-1')),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
       ),
     );
     await tester.pump();
-    await _pumpUntil(
-      tester,
-      () => find.text('Subscribe').evaluate().isNotEmpty,
-    );
+    await _pumpUntil(tester, () => find.text('订阅').evaluate().isNotEmpty);
 
-    await tester.tap(find.text('Subscribe'));
+    await tester.tap(find.text('订阅'));
     await _waitForSubscription(tester, library, subscribed: true);
-    await _pumpUntil(
-      tester,
-      () => find.text('Unsubscribe').evaluate().isNotEmpty,
-    );
-    expect(find.text('Unsubscribe'), findsOneWidget);
+    await _pumpUntil(tester, () => find.text('取消订阅').evaluate().isNotEmpty);
+    expect(find.text('取消订阅'), findsOneWidget);
 
-    await tester.tap(find.text('Unsubscribe'));
+    await tester.tap(find.text('取消订阅'));
     await _waitForSubscription(tester, library, subscribed: false);
-    await _pumpUntil(
-      tester,
-      () => find.text('Subscribe').evaluate().isNotEmpty,
-    );
-    expect(find.text('Subscribe'), findsOneWidget);
+    await _pumpUntil(tester, () => find.text('订阅').evaluate().isNotEmpty);
+    expect(find.text('订阅'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

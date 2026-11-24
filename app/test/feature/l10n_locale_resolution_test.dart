@@ -15,7 +15,15 @@ Widget _app(Locale locale) => MaterialApp(
   home: Builder(
     builder: (context) {
       final l10n = AppLocalizations.of(context)!;
-      return Text('${l10n.nothingFound}|${l10n.newPlaylist}');
+      return Column(
+        children: [
+          Text('${l10n.nothingFound}|${l10n.newPlaylist}'),
+          Text(
+            '${l10n.actionSelectAll}|${l10n.actionDeselect}|'
+            '${l10n.selectionSelected(3)}',
+          ),
+        ],
+      );
     },
   ),
 );
@@ -28,6 +36,7 @@ void main() {
 
       // Then the template ARB (English) values are rendered, not Chinese.
       expect(find.text('Nothing found|New playlist'), findsOneWidget);
+      expect(find.text('Select All|Deselect|3 selected'), findsOneWidget);
     });
 
     testWidgets('zh locale renders the Chinese translations', (tester) async {
@@ -36,6 +45,7 @@ void main() {
 
       // Then the Chinese ARB values are rendered.
       expect(find.text('未找到内容|新建播放列表'), findsOneWidget);
+      expect(find.text('全选|取消全选|已选择 3 项'), findsOneWidget);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,8 +12,11 @@ Widget _shell(ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) =>
       theme: theme,
       darkTheme: darkTheme,
       themeMode: themeMode,
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      supportedLocales: const [Locale('en')],
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const SizedBox.shrink(),
     );
 

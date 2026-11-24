@@ -10,6 +10,7 @@ import 'package:app/feature/video/common_widgets/video_info_view.dart';
 import 'package:app/feature/video/common_widgets/video_player.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'package:app/feature/video/video_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,6 +42,12 @@ void main() {
         child: RepositoryProvider<VideoDetailRepository>.value(
           value: const _FailingVideoDetailRepository(),
           child: MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('zh'),
             home: VideoScreen(onBackClick: () => backPressed = true),
           ),
         ),
@@ -78,7 +85,15 @@ void main() {
           value: const _TestMediaSource(),
           child: RepositoryProvider<VideoDetailRepository>.value(
             value: const _FailingVideoDetailRepository(),
-            child: MaterialApp(home: VideoScreen(onBackClick: onBack ?? () {})),
+            child: MaterialApp(
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('zh'),
+              home: VideoScreen(onBackClick: onBack ?? () {}),
+            ),
           ),
         ),
       );
@@ -199,6 +214,12 @@ void main() {
                 child: RepositoryProvider<PreferencesDataSource>.value(
                   value: preferences,
                   child: MaterialApp(
+                    localizationsDelegates: const [
+                      ...AppLocalizations.localizationsDelegates,
+                      ...GlobalMaterialLocalizations.delegates,
+                    ],
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    locale: const Locale('zh'),
                     home: VideoScreen(
                       videoId: videoId,
                       playbackController: controller,

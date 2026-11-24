@@ -12,6 +12,7 @@ import 'package:app/domain/get_recent_search_queries_use_case.dart';
 import 'package:app/feature/not_found/no_media_source_screen.dart';
 import 'package:app/feature/search/bloc/search_bloc.dart';
 import 'package:app/feature/search/search_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/providers/service_source_providers.dart';
 import 'package:app/routing/router.dart';
@@ -318,7 +319,15 @@ class _TestWrapperState() extends State<_TestWrapper> {
           Provider<MediaSourceCatalog>.value(value: widget.catalog),
           ...widget.extraProviders,
         ],
-        child: MaterialApp(home: widget.child),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: widget.child,
+        ),
       ),
     );
   }
@@ -348,7 +357,15 @@ class _RouterTestWrapperState() extends State<_RouterTestWrapper> {
       providers: [BlocProvider<AppBloc>.value(value: widget.appBloc)],
       child: MultiProvider(
         providers: [Provider<MediaSourceCatalog>.value(value: widget.catalog)],
-        child: MaterialApp.router(routerConfig: widget.router),
+        child: MaterialApp.router(
+          routerConfig: widget.router,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+        ),
       ),
     );
   }

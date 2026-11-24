@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -130,6 +131,12 @@ void main() {
         await mockNetworkImagesFor(() async {
           await tester.pumpWidget(
             MaterialApp(
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('zh'),
               theme: goldenTestTheme(),
               home: Scaffold(body: Center(child: widget)),
             ),

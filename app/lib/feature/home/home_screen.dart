@@ -64,8 +64,7 @@ class const HomeScreen({
                     AppIcons.settings,
                     color: colorScheme.onSurfaceVariant,
                   ),
-                  tooltip:
-                      AppLocalizations.of(context)?.navSettings ?? 'Settings',
+                  tooltip: AppLocalizations.of(context)!.navSettings,
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     onSettings?.call();
@@ -118,13 +117,9 @@ class const HomeScreen({
           hasScrollBody: false,
           child: FeedStatusView(
             icon: AppIcons.inbox,
-            message:
-                AppLocalizations.of(context)
-                    ?.sourceNoRecommendations(sourceName) ??
-                'No recommendations from $sourceName',
-            description:
-                AppLocalizations.of(context)?.sourceNoHomeFeed ??
-                'This source has no home feed',
+            message: AppLocalizations.of(context)!
+                .sourceNoRecommendations(sourceName),
+            description: AppLocalizations.of(context)!.sourceNoHomeFeed,
             onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           ),
         ),
@@ -140,13 +135,9 @@ class const HomeScreen({
           hasScrollBody: false,
           child: FeedStatusView(
             icon: AppIcons.inbox,
-            message:
-                AppLocalizations.of(context)
-                    ?.sourceNoRecommendations(sourceName) ??
-                'No recommendations from $sourceName',
-            description:
-                AppLocalizations.of(context)?.sourceNoHomeFeed ??
-                'This source has no home feed',
+            message: AppLocalizations.of(context)!
+                .sourceNoRecommendations(sourceName),
+            description: AppLocalizations.of(context)!.sourceNoHomeFeed,
             onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           ),
         ),

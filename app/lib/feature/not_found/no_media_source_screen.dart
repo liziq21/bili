@@ -11,10 +11,7 @@ class const NoMediaSourceScreen({
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)?.sourceUnavailable ??
-              'Source unavailable',
-        ),
+        title: Text(AppLocalizations.of(context)!.sourceUnavailable),
       ),
       body: Center(child: Text(message)),
     );

@@ -9,6 +9,7 @@ import 'package:app/feature/video/player/media_playback_controller.dart';
 import 'fake_platform_player.dart';
 
 import 'package:app/feature/video/video_queue_request.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,12 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: BlocProvider<VideoBloc>.value(
             value: bloc,
@@ -65,7 +72,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.textContaining('Playback failed'), findsOneWidget);
+    expect(
+      find.textContaining('Failed to load video. Try again'),
+      findsOneWidget,
+    );
     expect(find.byType(CircularProgressIndicator), findsNothing);
 
     addTearDown(bloc.close);
@@ -119,19 +129,19 @@ void main() {
       ]);
       await tester.pump();
 
-      expect(find.byTooltip('Loop off'), findsOneWidget);
+      expect(find.byTooltip('Loop: off'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Loop off'));
+      await tester.tap(find.byTooltip('Loop: off'));
       await tester.pump();
-      expect(find.byTooltip('Loop one'), findsOneWidget);
+      expect(find.byTooltip('Repeat one'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Loop one'));
+      await tester.tap(find.byTooltip('Repeat one'));
       await tester.pump();
-      expect(find.byTooltip('Loop queue'), findsOneWidget);
+      expect(find.byTooltip('Repeat queue'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Loop queue'));
+      await tester.tap(find.byTooltip('Repeat queue'));
       await tester.pump();
-      expect(find.byTooltip('Loop off'), findsOneWidget);
+      expect(find.byTooltip('Loop: off'), findsOneWidget);
 
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
@@ -311,6 +321,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: BlocProvider<VideoBloc>.value(
               value: bloc,
@@ -350,6 +366,12 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: BlocProvider<VideoBloc>.value(
               value: bloc,

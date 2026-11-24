@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../data/repository/video_detail_repository.dart';
 import '../../database/dao/media_history_dao.dart';
@@ -151,8 +150,7 @@ class VideoScreenState() extends State<VideoScreen> {
     }
     if (!mounted) return;
     final error = items.isEmpty
-        ? (AppLocalizations.of(context) ?? AppLocalizationsZh())
-              .playlistPlaybackFailed
+        ? AppLocalizations.of(context)!.playlistPlaybackFailed
         : null;
     _setQueueResult(
       VideoQueueResult(
@@ -531,7 +529,7 @@ class _VideoContentState() extends State<_VideoContent> {
   }
 
   Widget _buildBody(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
 
     // ⚡ Bolt Optimization: Replace broad BlocBuilder with localized BlocSelector around VideoPlayer.
     // Prevents state updates (e.g. like, favorite, subscribe toggles) from rebuilding the entire lower

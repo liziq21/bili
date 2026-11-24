@@ -6,7 +6,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
-import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
 import '../player/media_playback_controller.dart';
 
@@ -85,7 +84,7 @@ class _PlaybackQueueSheetState() extends State<PlaybackQueueSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.sizeOf(context);
     final maxHeight = size.height * .82;
 
@@ -200,7 +199,7 @@ class const _QueueHeader({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -275,7 +274,7 @@ class const _QueueItemTile({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final title = item.title ?? l10n.queueItemFallback(index + 1);
     final creator = item.creatorName;
     final semanticLabel = isCurrent

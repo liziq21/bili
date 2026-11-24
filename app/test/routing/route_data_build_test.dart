@@ -1,5 +1,6 @@
 // ignore_for_file: use_primary_constructors, unnecessary_type_name_in_constructor
 
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/router.dart';
 import 'package:app/routing/routes.dart';
@@ -55,6 +56,12 @@ void main() {
             child: Provider<MediaSourceCatalog>.value(
               value: defaultMediaSourceCatalog,
               child: MaterialApp(
+                localizationsDelegates: const [
+                  ...AppLocalizations.localizationsDelegates,
+                  ...GlobalMaterialLocalizations.delegates,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
+                locale: const Locale('en'),
                 home: Builder(
                   builder: (context) {
                     built = route.build(
@@ -86,6 +93,12 @@ void main() {
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
             child: MaterialApp(
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('en'),
               home: Builder(
                 builder: (context) {
                   built = route.build(
@@ -122,6 +135,12 @@ void main() {
         Provider<MediaSourceCatalog>.value(
           value: defaultMediaSourceCatalog,
           child: MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: Builder(
               builder: (context) {
                 built = route.build(
@@ -168,6 +187,12 @@ void main() {
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
             child: MaterialApp(
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('en'),
               home: Scaffold(
                 body: Builder(
                   builder: (context) => ElevatedButton(
@@ -183,7 +208,7 @@ void main() {
         await tester.tap(find.text('go'));
         await tester.pump();
 
-        expect(find.text('Video source unavailable'), findsOneWidget);
+        expect(find.text("The video's source is unavailable"), findsOneWidget);
       },
     );
 
@@ -194,6 +219,12 @@ void main() {
           Provider<MediaSourceCatalog>.value(
             value: defaultMediaSourceCatalog,
             child: MaterialApp(
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('en'),
               home: Scaffold(
                 body: Builder(
                   builder: (context) => ElevatedButton(
@@ -217,7 +248,7 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('go')));
         await tester.pump();
 
-        expect(find.text('Video source unavailable'), findsNothing);
+        expect(find.text("The video's source is unavailable"), findsNothing);
       },
     );
   });

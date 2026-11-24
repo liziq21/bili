@@ -55,6 +55,7 @@ TEST_MATRIX = {
     'contract': [
         'app/test/golden/golden_font_contract_test.dart',
         'app/test/golden/hardcoded_copy_test.dart',
+        'app/test/l10n/localization_contract_test.dart',
         'app/test/design/app_style_test.dart',
         'app/test/design/contrast_test.dart',
         'app/test/design/hardcoded_color_test.dart',
