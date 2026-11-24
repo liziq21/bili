@@ -44,8 +44,3 @@ targets:
           checked: true
           # 序列化嵌套的 Freezed 对象
           # explicit_to_json: true
-
-      retrofit_generator:
-        generate_for:
-          include:
-            - lib/bilibili/network/retrofit/retrofit_network.dart

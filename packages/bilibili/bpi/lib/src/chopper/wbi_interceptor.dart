@@ -39,6 +39,3 @@ class BiliWbiInterceptor implements Interceptor {
     );
   }
 }
-
-/// Deprecated spelling kept as a source-compatible alias.
-typedef ChooperWbiInterceptor = BiliWbiInterceptor;
