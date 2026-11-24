@@ -136,27 +136,28 @@ class const MediaLibraryScreen({
                   ),
                   // 只看 hasMore：整页都是文章 / 动态时列表会短暂为空，而视频在下一页。
                   // 附加 items.isNotEmpty 会把唯一的翻页入口一起关掉，那批视频再也到不了。
-                  Tooltip(
-                    message: tooltipMessage(l10n, headerState: headerState),
-                    child: Semantics(
-                      button: true,
-                      enabled: buttonEnabled,
-                      label: tooltipMessage(l10n, headerState: headerState),
-                      child: TextButton(
-                        onPressed: buttonEnabled
-                            ? () {
-                                HapticFeedback.lightImpact();
-                                context.read<MediaHistoryCubit>().loadMore();
-                              }
-                            : null,
-                        child: Text(
-                          headerState.hasMore
-                              ? (l10n?.loadMore ?? 'Load more')
-                              : (l10n?.noMoreItems ?? 'No more items'),
+                  //
+                  // 没有下一页时这里不再放「没有更多了」：工具条在列表之前，
+                  // 读者会先读到结束标记再看到下面还有记录。结束标记改由列表
+                  // 末尾的 [_HistoryFooter] 承载。
+                  if (headerState.hasMore)
+                    Tooltip(
+                      message: tooltipMessage(l10n, headerState: headerState),
+                      child: Semantics(
+                        button: true,
+                        enabled: buttonEnabled,
+                        label: tooltipMessage(l10n, headerState: headerState),
+                        child: TextButton(
+                          onPressed: buttonEnabled
+                              ? () {
+                                  HapticFeedback.lightImpact();
+                                  context.read<MediaHistoryCubit>().loadMore();
+                                }
+                              : null,
+                          child: Text(l10n?.loadMore ?? 'Load more'),
                         ),
                       ),
                     ),
-                  ),
                 ],
               );
             },
@@ -264,9 +265,7 @@ String tooltipMessage(
   if (headerState.isLoading) {
     return l10n?.loadingHistory ?? 'Loading history...';
   }
-  return headerState.hasMore
-      ? (l10n?.loadMoreHistory ?? 'Load more history')
-      : (l10n?.allHistoryLoaded ?? 'All history loaded');
+  return l10n?.loadMoreHistory ?? 'Load more history';
 }
 
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
@@ -338,16 +337,19 @@ class const _HistoryRowsContent({
           ({
             List<MediaHistoryItem> items,
             Map<MediaHistoryProgressKey, MediaHistoryProgress> progressByMedia,
+            bool hasMore,
           })
         >(
           (cubit) => (
             items: cubit.state.items,
             progressByMedia: cubit.state.progressByMedia,
+            hasMore: cubit.state.hasMore,
           ),
         );
     return _HistoryRows(
       items: history.items,
       progressByMedia: history.progressByMedia,
+      hasMore: history.hasMore,
       onVideoTap: onVideoTap,
     );
   }
@@ -361,6 +363,7 @@ class const _HistoryRows({
   required final List<MediaHistoryItem> items,
   required final Map<MediaHistoryProgressKey, MediaHistoryProgress>
   progressByMedia,
+  required final bool hasMore,
   final MediaLibraryVideoNavCallback? onVideoTap,
 }) extends StatelessWidget {
   @override
@@ -373,42 +376,70 @@ class const _HistoryRows({
         source.id: source.name,
     };
 
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.crossAxisExtent;
-        final thumbWidth = (width * 0.32).clamp(96.0, 200.0);
-        final dividerThickness = MediaQuery.textScalerOf(context).scale(1);
-        final dividerIndent = thumbWidth + $styles.insets.sm;
-        final dividerColor = Theme.of(context).colorScheme.outlineVariant;
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverLayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.crossAxisExtent;
+            final thumbWidth = (width * 0.32).clamp(96.0, 200.0);
+            final dividerThickness = MediaQuery.textScalerOf(context).scale(1);
+            final dividerIndent = thumbWidth + $styles.insets.sm;
+            final dividerColor = Theme.of(context).colorScheme.outlineVariant;
 
-        return SliverList.separated(
-          itemCount: items.length,
-          separatorBuilder: (context, index) => Divider(
-            height: 1,
-            thickness: dividerThickness,
-            // 分隔线自标题左边缘起（缩略图宽度 + 间距），不贯穿整行：
-            // 贯穿会让每行读起来像表格，缩略图与文字之间的关系反而被切断。
-            indent: dividerIndent,
-            color: dividerColor,
-          ),
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return _HistoryRow(
-              item: item,
-              progress:
-                  progressByMedia[(
-                    sourceId: item.sourceId,
-                    originalId: item.video.id,
-                  )],
-              thumbWidth: thumbWidth,
-              sourceLabel: sourceNames[item.sourceId],
-              onTap: () => onVideoTap?.call(item.sourceId, item.video.id),
-              onLongPress: () =>
-                  unawaited(_confirmDeleteHistoryItem(context, item)),
+            return SliverList.separated(
+              itemCount: items.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                thickness: dividerThickness,
+                // 分隔线自标题左边缘起（缩略图宽度 + 间距），不贯穿整行：
+                // 贯穿会让每行读起来像表格，缩略图与文字之间的关系反而被切断。
+                indent: dividerIndent,
+                color: dividerColor,
+              ),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return _HistoryRow(
+                  item: item,
+                  progress:
+                      progressByMedia[(
+                        sourceId: item.sourceId,
+                        originalId: item.video.id,
+                      )],
+                  thumbWidth: thumbWidth,
+                  sourceLabel: sourceNames[item.sourceId],
+                  onTap: () => onVideoTap?.call(item.sourceId, item.video.id),
+                  onLongPress: () =>
+                      unawaited(_confirmDeleteHistoryItem(context, item)),
+                );
+              },
             );
           },
-        );
-      },
+        ),
+        // 结束标记必须跟最后一条记录之后，而不是列表之前的工具条里。
+        if (!hasMore) const SliverToBoxAdapter(child: _HistoryFooter()),
+      ],
+    );
+  }
+}
+
+/// 列表末尾的「没有更多了」：只在确实列出了一条以上记录时出现。
+///
+/// 空态已有自己的空列表提示，再补一条「没有更多了」等于告诉读者列表底部
+/// 还有内容可以看。
+class const _HistoryFooter() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
+      child: Center(
+        child: Text(
+          l10n.noMoreItems,
+          style: $styles.text.bodySmall.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
     );
   }
 }
