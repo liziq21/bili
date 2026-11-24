@@ -31,6 +31,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsGroupPlayback => 'Playback & appearance';
+
+  @override
+  String get settingsGroupLibrary => 'Library & notifications';
+
+  @override
+  String get settingsGroupDiscovery => 'Discovery & channel';
+
+  @override
+  String get settingsGroupOther => 'More';
+
+  @override
   String get settingsPlayer => 'Player';
 
   @override

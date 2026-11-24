@@ -70,7 +70,10 @@ void main() {
         }
         expect(router.state.uri.path, Routes.settings);
         expect(find.byType(SettingScreen), findsOneWidget);
-        expect(find.byType(ListTile), findsNWidgets(8));
+        // 索引页按分组渲染，ListView 惰性构建，靠后的分组不一定进树。这里只
+        // 确认至少渲染出一个可展开分组；索引页的具体布局由
+        // setting_screen_test.dart 覆盖。
+        expect(find.byType(ExpansionTile), findsWidgets);
         expect(tester.takeException(), isNull);
       } finally {
         await tester.pumpWidget(const SizedBox.shrink());

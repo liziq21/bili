@@ -140,6 +140,30 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// Settings index group - playback and appearance sections
+  ///
+  /// In en, this message translates to:
+  /// **'Playback & appearance'**
+  String get settingsGroupPlayback;
+
+  /// Settings index group - library and notification sections
+  ///
+  /// In en, this message translates to:
+  /// **'Library & notifications'**
+  String get settingsGroupLibrary;
+
+  /// Settings index group - discovery and channel sections
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery & channel'**
+  String get settingsGroupDiscovery;
+
+  /// Settings index group - miscellaneous sections
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get settingsGroupOther;
+
   /// Settings group and subpage title - player
   ///
   /// In en, this message translates to:

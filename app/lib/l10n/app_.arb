@@ -29,6 +29,22 @@
   "@settingsTitle": {
     "description": "Settings screen title"
   },
+  "settingsGroupPlayback": "Playback & appearance",
+  "@settingsGroupPlayback": {
+    "description": "Settings index group - playback and appearance sections"
+  },
+  "settingsGroupLibrary": "Library & notifications",
+  "@settingsGroupLibrary": {
+    "description": "Settings index group - library and notification sections"
+  },
+  "settingsGroupDiscovery": "Discovery & channel",
+  "@settingsGroupDiscovery": {
+    "description": "Settings index group - discovery and channel sections"
+  },
+  "settingsGroupOther": "More",
+  "@settingsGroupOther": {
+    "description": "Settings index group - miscellaneous sections"
+  },
   "settingsPlayer": "Player",
   "@settingsPlayer": {
     "description": "Settings group and subpage title - player"

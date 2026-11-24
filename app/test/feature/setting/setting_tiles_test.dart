@@ -185,4 +185,188 @@ void main() {
       expect(find.byIcon(AppIcons.chevronRight), findsNothing);
     });
   });
+
+  group('SettingTextTile', () {
+    testWidgets('shows the current value and reports trimmed input', (
+      tester,
+    ) async {
+      // Given a free-text tile showing its current value.
+      String? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingTextTile(
+            title: 'Channel name',
+            value: 'Old',
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+      expect(find.text('Channel name'), findsOneWidget);
+      expect(find.text('Old'), findsOneWidget);
+
+      // When the tile is tapped, the text edited, and the dialog confirmed.
+      await tester.tap(find.text('Channel name'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '  New name  ');
+      final okLabel = MaterialLocalizations.of(
+        tester.element(find.byType(AlertDialog)),
+      ).okButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, okLabel));
+      await tester.pumpAndSettle();
+
+      // Then the trimmed input is reported.
+      expect(changed, 'New name');
+    });
+
+    testWidgets('leaves the value unchanged when cancelled', (tester) async {
+      // Given a free-text tile.
+      var calls = 0;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingTextTile(
+            title: 'Channel name',
+            value: 'Old',
+            onChanged: (_) => calls++,
+          ),
+        ),
+      );
+
+      // When the dialog is opened and cancelled.
+      await tester.tap(find.text('Channel name'));
+      await tester.pumpAndSettle();
+      final cancelLabel = MaterialLocalizations.of(
+        tester.element(find.byType(AlertDialog)),
+      ).cancelButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, cancelLabel));
+      await tester.pumpAndSettle();
+
+      // Then nothing is reported.
+      expect(calls, 0);
+    });
+
+    testWidgets('reports input submitted from the keyboard', (tester) async {
+      // Given an open free-text dialog.
+      String? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingTextTile(
+            title: 'Channel name',
+            value: 'Old',
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+      await tester.tap(find.text('Channel name'));
+      await tester.pumpAndSettle();
+
+      // When the user submits from the keyboard instead of tapping OK.
+      await tester.enterText(find.byType(TextField), 'Typed');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      // Then the typed text is reported.
+      expect(changed, 'Typed');
+    });
+  });
+
+  group('SettingMultiSelectTile', () {
+    const options = <SettingMultiSelectOption<String>>[
+      SettingMultiSelectOption('a', 'Alpha'),
+      SettingMultiSelectOption('b', 'Beta'),
+      SettingMultiSelectOption('c', 'Gamma'),
+    ];
+
+    testWidgets('shows selected labels and reports the new selection', (
+      tester,
+    ) async {
+      // Given a multi-select tile with one selected option.
+      Set<String>? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingMultiSelectTile<String>(
+            title: 'Tabs',
+            options: options,
+            selected: const {'a'},
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+      expect(find.text('Tabs'), findsOneWidget);
+      expect(find.text('Alpha'), findsOneWidget);
+
+      // When another option is checked and the sheet confirmed.
+      await tester.tap(find.text('Tabs'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Gamma'));
+      await tester.pump();
+      final okLabel = MaterialLocalizations.of(
+        tester.element(find.byType(CheckboxListTile).first),
+      ).okButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, okLabel));
+      await tester.pumpAndSettle();
+
+      // Then the new selection is reported.
+      expect(changed, {'a', 'c'});
+    });
+
+    testWidgets('unselecting an option removes it from the result', (
+      tester,
+    ) async {
+      // Given a multi-select tile with two selected options.
+      Set<String>? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingMultiSelectTile<String>(
+            title: 'Tabs',
+            options: options,
+            selected: const {'a', 'b'},
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+
+      // When one of them is unchecked and the sheet confirmed.
+      await tester.tap(find.text('Tabs'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Alpha'));
+      await tester.pump();
+      final okLabel = MaterialLocalizations.of(
+        tester.element(find.byType(CheckboxListTile).first),
+      ).okButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, okLabel));
+      await tester.pumpAndSettle();
+
+      // Then only the remaining option is reported.
+      expect(changed, {'b'});
+    });
+
+    testWidgets('drops selected values that are not in the options', (
+      tester,
+    ) async {
+      // Given a selection that includes a value absent from the options.
+      Set<String>? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingMultiSelectTile<String>(
+            title: 'Tabs',
+            options: options,
+            selected: const {'a', 'z'},
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+
+      // When the sheet is confirmed without any change.
+      await tester.tap(find.text('Tabs'));
+      await tester.pumpAndSettle();
+      final okLabel = MaterialLocalizations.of(
+        tester.element(find.byType(CheckboxListTile).first),
+      ).okButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, okLabel));
+      await tester.pumpAndSettle();
+
+      // Then the unknown value is dropped.
+      expect(changed, {'a'});
+    });
+  });
 }

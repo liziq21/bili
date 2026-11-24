@@ -259,6 +259,10 @@ void main() {
   testWidgets(
     'App start smoke test: initializes core assembly and displays home screen',
     (tester) async {
+      // 设置索引页按分组渲染，默认 800×600 视口放不下全部展开的分组；放大视口
+      // 保证循环里每个分节都已被构建、可点击。
+      await tester.binding.setSurfaceSize(const Size(1000, 2000));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
       // Given the real app assembly with network-free source/repository fakes.
       final mediaSourceCatalog = MediaSourceCatalog([
         MediaSourceDefinition(
@@ -340,7 +344,7 @@ void main() {
           await tester.tap(find.byType(BackButton));
           await tester.pumpAndSettle();
           expect(find.byType(SettingScreen), findsOneWidget);
-          expect(find.byType(ListTile), findsNWidgets(8));
+          expect(find.byType(ExpansionTile), findsNWidgets(4));
         }
         // 通知子页的标题已本地化，zh locale 下用中文标签匹配。
         final l10n = AppLocalizations.of(
