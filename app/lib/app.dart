@@ -34,7 +34,15 @@ void setupWindow() {
   }
 }
 
-class const App({super.key}) extends StatelessWidget {
+class const App({
+  super.key,
+
+  /// Platform dynamic palette resolved before the first frame.
+  ///
+  /// Passing it in keeps the theme stable for the whole session; when null the
+  /// theme wrapper subscribes to [DynamicColorBuilder] instead.
+  final DynamicColorSchemes? dynamicSchemes,
+}) extends StatelessWidget {
   static final LogBucket logBucket = LogBucket();
   static final HttpBucket httpBucket = HttpBucket();
 
@@ -47,6 +55,7 @@ class const App({super.key}) extends StatelessWidget {
         LoadSuccess(:final userData) => ThemeWrapper(
           useDynamicColor: userData.useDynamicColor,
           themeConfig: userData.themeConfig,
+          dynamicSchemes: dynamicSchemes,
           builder: (ThemeData theme, ThemeData darkTheme, ThemeMode themeMode) {
             return MaterialApp.router(
               builder: (context, child) => MediaQuery(
