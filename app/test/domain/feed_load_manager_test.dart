@@ -120,7 +120,7 @@ void main() {
     repository: FeedRepository(
       feedDao: db.feedDao,
       libraryDao: db.localLibraryDao,
-      remoteDataSource: remote,
+      videoDataSource: remote,
     ),
     notifier: notifier,
     preferences: preferences,

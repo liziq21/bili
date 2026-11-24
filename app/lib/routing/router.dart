@@ -359,7 +359,9 @@ Widget _buildFeed(BuildContext context) {
         ),
         child: FeedScreen(
           onVideo: context.defaultNavigateToVideo,
-          sourceSupportsFeed: source.userVideosDataSource != null,
+          sourceSupportsFeed:
+              source.userVideosDataSource != null ||
+              source.userArticlesDataSource != null,
         ),
       );
     },

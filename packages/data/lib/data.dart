@@ -1,6 +1,7 @@
 library;
 
 export 'src/media_source.dart';
+export 'src/model/article_model.dart';
 export 'src/model/creator_profile_model.dart';
 export 'src/model/danmaku.dart';
 export 'src/model/filter_group.dart';

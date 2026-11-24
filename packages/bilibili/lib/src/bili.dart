@@ -11,6 +11,7 @@ import 'data/source/bili_media_stream_remote_data_source.dart';
 import 'data/source/bili_playlist_content_remote_data_source.dart';
 import 'data/source/bili_popular_video_feed_remote_data_source.dart';
 import 'data/source/bili_ranking_video_feed_remote_data_source.dart';
+import 'data/source/bili_user_articles_remote_data_source.dart';
 import 'data/source/bili_user_videos_remote_data_source.dart';
 import 'data/source/bili_video_comment_remote_data_source.dart';
 import 'data/source/bili_video_detail_remote_data_source.dart';
@@ -134,6 +135,10 @@ class Bili() implements MediaSource {
   @override
   UserVideosRemoteDataSource? get userVideosDataSource =>
       BiliUserVideosRemoteDataSource(network: _userApi);
+
+  @override
+  UserArticlesRemoteDataSource? get userArticlesDataSource =>
+      BiliUserArticlesRemoteDataSource(network: _userApi);
 
   @override
   PlaylistContentRemoteDataSource? get playlistContentDataSource =>

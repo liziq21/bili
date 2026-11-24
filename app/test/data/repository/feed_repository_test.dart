@@ -49,6 +49,48 @@ final class _FakeUserVideosDataSource({
   }
 }
 
+/// 按频道返回固定分页的 fake 专栏数据源，记录每次请求的页号。
+final class _FakeUserArticlesDataSource({
+  required final Map<String, List<List<String>>> pagesByChannel,
+  final Set<String> failingChannels = const {},
+}) implements UserArticlesRemoteDataSource {
+  final requestedPages = <String, List<int>>{};
+
+  @override
+  String get sourceId => 'bilibili';
+
+  @override
+  Future<Result<data.Page<ArticleModel>, Exception>> fetchUserArticles({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  }) async {
+    requestedPages.putIfAbsent(channelId, () => []).add(page);
+    if (failingChannels.contains(channelId)) {
+      return Result.error(Exception('channel $channelId failed'));
+    }
+    final pages = pagesByChannel[channelId] ?? const [];
+    if (page < 1 || page > pages.length) {
+      return Result.error(Exception('page $page out of range'));
+    }
+    return Result.success(
+      data.Page<ArticleModel>(
+        number: page,
+        totalPages: pages.length,
+        data: [
+          for (final id in pages[page - 1])
+            ArticleModel(
+              id: id,
+              title: 'Article $id',
+              url: 'https://www.bilibili.com/read/$id',
+              publishedAt: DateTime.utc(2026, 11, 1),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 void main() {
   late AppDatabase db;
   late FeedRepository repository;
@@ -68,12 +110,15 @@ void main() {
         ),
       );
 
-  FeedRepository buildRepository(UserVideosRemoteDataSource remote) =>
-      FeedRepository(
-        feedDao: db.feedDao,
-        libraryDao: db.localLibraryDao,
-        remoteDataSource: remote,
-      );
+  FeedRepository buildRepository(
+    UserVideosRemoteDataSource remote, {
+    UserArticlesRemoteDataSource? articles,
+  }) => FeedRepository(
+    feedDao: db.feedDao,
+    libraryDao: db.localLibraryDao,
+    videoDataSource: remote,
+    articleDataSource: articles,
+  );
 
   test('appends only unseen entries and stops at the known boundary', () async {
     // Given one subscription whose second page overlaps the first.
@@ -306,5 +351,129 @@ void main() {
     expect(entry.creatorProfileName, 'Channel One');
     expect(entry.entryType, FeedEntry.typeVideo);
     expect(entry.publishedAt, DateTime.utc(2026, 11, 1));
+  });
+
+  test('stores articles alongside videos for the same channel', () async {
+    // Given a channel that publishes both videos and articles.
+    await subscribe('creator-1', name: 'Channel One');
+    repository = buildRepository(
+      _FakeUserVideosDataSource(
+        pagesByChannel: {
+          'creator-1': [
+            ['v1'],
+          ],
+        },
+      ),
+      articles: _FakeUserArticlesDataSource(
+        pagesByChannel: {
+          'creator-1': [
+            ['cv1', 'cv2'],
+          ],
+        },
+      ),
+    );
+
+    // When the feed is loaded.
+    final result = await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then both kinds are stored and counted, each with its own type and url.
+    expect(result.newEntryCount, 3);
+    expect(result.unreadCount, 3);
+    final entries = {
+      for (final entry in await db.feedDao.getEntries(sourceId: 'bilibili'))
+        entry.entryId: entry,
+    };
+    expect(entries.keys.toSet(), {'v1', 'cv1', 'cv2'});
+    expect(entries['v1']!.entryType, FeedEntry.typeVideo);
+    expect(entries['cv1']!.entryType, FeedEntry.typeArticle);
+    expect(entries['cv1']!.url, 'https://www.bilibili.com/read/cv1');
+    expect(entries['cv1']!.title, 'Article cv1');
+    expect(entries['cv1']!.creatorProfileName, 'Channel One');
+    expect(entries['cv1']!.publishedAt, DateTime.utc(2026, 11, 1));
+  });
+
+  test('an article failure still stores the videos of that channel', () async {
+    // Given a channel whose article endpoint fails.
+    await subscribe('creator-1');
+    repository = buildRepository(
+      _FakeUserVideosDataSource(
+        pagesByChannel: {
+          'creator-1': [
+            ['v1'],
+          ],
+        },
+      ),
+      articles: _FakeUserArticlesDataSource(
+        pagesByChannel: const {},
+        failingChannels: const {'creator-1'},
+      ),
+    );
+
+    // When the feed is loaded.
+    final result = await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then the videos land and the channel is reported as partially failed.
+    expect(result.newEntryCount, 1);
+    expect(result.failedChannelIds, ['creator-1']);
+    expect(result.isComplete, isFalse);
+    expect(
+      (await db.feedDao.getEntries(sourceId: 'bilibili')).map((e) => e.entryId),
+      ['v1'],
+    );
+  });
+
+  test('a video failure still stores the articles of that channel', () async {
+    // Given a channel whose video endpoint fails.
+    await subscribe('creator-1');
+    repository = buildRepository(
+      _FakeUserVideosDataSource(
+        pagesByChannel: const {},
+        failingChannels: const {'creator-1'},
+      ),
+      articles: _FakeUserArticlesDataSource(
+        pagesByChannel: {
+          'creator-1': [
+            ['cv1'],
+          ],
+        },
+      ),
+    );
+
+    // When the feed is loaded.
+    final result = await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then the articles land and the channel is reported as partially failed.
+    expect(result.newEntryCount, 1);
+    expect(result.failedChannelIds, ['creator-1']);
+    expect(
+      (await db.feedDao.getEntries(sourceId: 'bilibili')).map((e) => e.entryId),
+      ['cv1'],
+    );
+  });
+
+  test('loads articles when the source has no video capability', () async {
+    // Given a source that only exposes the article endpoint.
+    await subscribe('creator-1');
+    repository = FeedRepository(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      articleDataSource: _FakeUserArticlesDataSource(
+        pagesByChannel: {
+          'creator-1': [
+            ['cv1'],
+          ],
+        },
+      ),
+    );
+
+    // When the feed is loaded.
+    final result = await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then the article is stored and no video request is attempted.
+    expect(result.newEntryCount, 1);
+    expect(
+      (await db.feedDao.getEntries(sourceId: 'bilibili')).single.entryType,
+      FeedEntry.typeArticle,
+    );
   });
 }

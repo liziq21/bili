@@ -87,6 +87,9 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
       YouTubeUserVideosRemoteDataSource(_youtubeService);
 
   @override
+  UserArticlesRemoteDataSource? get userArticlesDataSource => null;
+
+  @override
   YouTubePlaylistContentRemoteDataSource get playlistContentDataSource =>
       YouTubePlaylistContentRemoteDataSource(_youtubeService);
 

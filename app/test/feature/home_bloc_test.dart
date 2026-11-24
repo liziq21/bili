@@ -263,6 +263,8 @@ class FakeMediaSource({
   @override
   UserVideosRemoteDataSource? get userVideosDataSource => null;
   @override
+  UserArticlesRemoteDataSource? get userArticlesDataSource => null;
+  @override
   PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
   @override
   ChannelPlaylistsRemoteDataSource? get channelPlaylistsDataSource => null;

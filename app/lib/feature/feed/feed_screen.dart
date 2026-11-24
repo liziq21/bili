@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../database/app_database.dart';
+import '../../database/table/local_library.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
@@ -14,7 +15,7 @@ import 'feed_cubit.dart';
 import 'widgets/feed_channel_header.dart';
 import 'widgets/feed_entry_tile.dart';
 
-/// 订阅动态页：已落库的订阅投稿按频道分组，组可展开/收起。
+/// 订阅动态页：已落库的订阅条目（投稿视频与专栏文章）按频道分组，组可展开/收起。
 ///
 /// 页面只读本地数据（[FeedCubit] 订阅两个 Drift 查询流），远端拉取由
 /// [FeedLoadManager] 在启动与下拉刷新时完成，因此这里没有「加载更多」：
@@ -34,7 +35,21 @@ class const FeedScreen({
     if (!entry.isRead) {
       unawaited(cubit.markEntryRead(entry.channelId, entry.entryId));
     }
-    onVideo?.call(entry.entryId);
+    if (entry.entryType == FeedEntry.typeVideo) {
+      onVideo?.call(entry.entryId);
+      return;
+    }
+
+    // 专栏/动态没有应用内阅读页；与简介里的站外链接一致，复制链接交给用户，
+    // 不在只读客户端里拉外部浏览器。
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    unawaited(Clipboard.setData(ClipboardData(text: entry.url)));
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.trackCopiedToClipboard),
+        duration: $styles.times.fast,
+      ),
+    );
   }
 
   @override

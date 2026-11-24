@@ -2,6 +2,7 @@ import 'package:model/model.dart';
 
 import 'search_query.dart';
 
+import 'model/article_model.dart';
 import 'model/creator_profile_model.dart';
 import 'model/danmaku.dart';
 import 'model/live_room_detail.dart';
@@ -212,6 +213,19 @@ abstract class const LiveRoomFeedRemoteDataSource()
 abstract class const UserVideosRemoteDataSource() extends RemoteDataSource {
   /// 按频道拉取投稿视频分页（新到旧）。
   Future<Result<Page<VideoModel>, Exception>> fetchUserVideos({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  });
+}
+
+/// 频道专栏文章分页数据源（订阅 Feed 消费封装用）。
+///
+/// 与 [UserVideosRemoteDataSource] 分开：一个来源可能只提供投稿视频，
+/// 也可能两者都有。订阅 Feed 分别检查这两种能力，不因缺一种就放弃另一种。
+abstract class const UserArticlesRemoteDataSource() extends RemoteDataSource {
+  /// 按频道拉取专栏文章分页（新到旧）。
+  Future<Result<Page<ArticleModel>, Exception>> fetchUserArticles({
     required String channelId,
     int page = 1,
     int pageSize = 30,

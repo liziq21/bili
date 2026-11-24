@@ -247,6 +247,8 @@ class FakeMediaSource(@override final String id, @override final String name)
   @override
   UserVideosRemoteDataSource? get userVideosDataSource => null;
   @override
+  UserArticlesRemoteDataSource? get userArticlesDataSource => null;
+  @override
   PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
   @override
   ChannelPlaylistsRemoteDataSource? get channelPlaylistsDataSource => null;

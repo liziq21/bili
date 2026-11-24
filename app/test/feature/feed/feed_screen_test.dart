@@ -7,6 +7,7 @@ import 'package:app/feature/feed/widgets/feed_entry_tile.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -59,6 +60,7 @@ void main() {
     required String title,
     required DateTime publishedAt,
     bool isRead = false,
+    String entryType = FeedEntry.typeVideo,
   }) => io(
     tester,
     () => db.feedDao.upsertEntries([
@@ -66,7 +68,7 @@ void main() {
         sourceId: 'bilibili',
         channelId: channelId,
         entryId: entryId,
-        entryType: FeedEntry.typeVideo,
+        entryType: entryType,
         title: title,
         url: 'https://example.com/$entryId',
         publishedAt: Value(publishedAt),
@@ -238,6 +240,57 @@ void main() {
     expect(opened, ['v1']);
     await settleUntil(tester, () => cubit.state.groups.single.unreadCount == 0);
     expect(cubit.state.groups.single.unreadCount, 0);
+  });
+
+  testWidgets('tapping an article copies its link instead of navigating', (
+    tester,
+  ) async {
+    final opened = <String>[];
+    await addSubscription(tester, 'c1', 'Channel One');
+    await addEntry(
+      tester,
+      'c1',
+      'cv1',
+      title: 'Article entry',
+      publishedAt: DateTime(2026, 5, 1),
+      entryType: FeedEntry.typeArticle,
+    );
+
+    final clipboardCalls = <MethodCall>[];
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') clipboardCalls.add(call);
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    await tester.pumpWidget(
+      BlocProvider<FeedCubit>.value(
+        value: cubit,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: FeedScreen(onVideo: opened.add),
+        ),
+      ),
+    );
+    await settleUntil(tester, () => cubit.state.groups.isNotEmpty);
+
+    await tester.tap(find.text('Article entry'));
+    await tester.pump();
+
+    // 没有应用内文章页：只复制链接，不把 cv 号当视频 id 打开。
+    expect(opened, isEmpty);
+    expect(clipboardCalls, hasLength(1));
+    expect(
+      (clipboardCalls.single.arguments as Map<Object?, Object?>)['text'],
+      'https://example.com/cv1',
+    );
+    await settleUntil(tester, () => cubit.state.groups.single.unreadCount == 0);
+    await tester.pump(const Duration(seconds: 5));
   });
 
   testWidgets('shows the unread badge and drops it once the channel is read', (
