@@ -464,9 +464,10 @@ void main() {
 
     await tester.tap(find.text('编辑'));
     await pumpLibrary(tester);
-    await tester.tap(find.text('Select All'));
+    await tester.tap(find.text('全选'));
     await pumpLibrary(tester);
-    expect(find.text('3 selected'), findsOneWidget);
+    expect(find.text('已选择 3 项'), findsOneWidget);
+    expect(find.text('取消全选'), findsOneWidget);
 
     await tester.tap(find.text('删除选中'));
     await pumpRoute(tester);

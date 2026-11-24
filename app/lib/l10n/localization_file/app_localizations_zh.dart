@@ -204,14 +204,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dialogCancel => '取消';
 
   @override
-  String get actionSelectAll => 'Select All';
+  String get actionSelectAll => '全选';
 
   @override
-  String get actionDeselect => 'Deselect';
+  String get actionDeselect => '取消全选';
 
   @override
   String selectionSelected(int count) {
-    return '$count selected';
+    return '已选择 $count 项';
   }
 
   @override
