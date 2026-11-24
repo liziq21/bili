@@ -35,10 +35,16 @@ final String _breakOpportunity = String.fromCharCode(0x200B);
 /// prefix a place to break.
 ///
 /// Unbalanced brackets are left untouched: protecting the rest of the string
-/// after a stray `[` would make the text unable to wrap at all. A group longer
-/// than [maxGroupLength] is also left wrappable, because forcing it onto one
-/// line would overflow a narrow viewport.
-String keepBracketGroupsUnbroken(String text, {int maxGroupLength = 8}) {
+/// after a stray `[` would make the text unable to wrap at all.
+///
+/// [protectGroup] decides whether a matched group is narrow enough for the
+/// current layout. A group that does not fit is left wrappable, because forcing
+/// it onto one line would overflow the viewport. When omitted, every balanced
+/// group is protected.
+String keepBracketGroupsUnbroken(
+  String text, {
+  bool Function(String group)? protectGroup,
+}) {
   final clusters = text.characters.toList();
   final protected = List<bool>.filled(clusters.length, false);
   final matchedOpeners = <int>{};
@@ -63,7 +69,8 @@ String keepBracketGroupsUnbroken(String text, {int maxGroupLength = 8}) {
 
     final opener = stack[match];
     matchedOpeners.add(opener.index);
-    if (i - opener.index <= maxGroupLength) {
+    final group = clusters.sublist(opener.index, i + 1).join();
+    if (protectGroup == null || protectGroup(group)) {
       for (var j = opener.index + 1; j <= i; j++) {
         protected[j] = true;
       }

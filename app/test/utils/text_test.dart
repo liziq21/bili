@@ -98,14 +98,29 @@ void main() {
       expect(result.contains('$_joiner$heart'), isTrue);
     });
 
-    test('leaves a group longer than the limit wrappable', () {
-      // Given a group wider than the protection budget.
-      // When preparing it with a small limit.
-      final result = keepBracketGroupsUnbroken('[abcd]', maxGroupLength: 3);
+    test('leaves a group the caller rejects wrappable', () {
+      // Given a group the layout says is too wide.
+      // When preparing it with a rejecting predicate.
+      final result = keepBracketGroupsUnbroken(
+        '[abcd]',
+        protectGroup: (_) => false,
+      );
 
       // Then the group is not protected, but the prefix can still break
       // before the opening bracket.
       expect(result, '$_break[abcd]');
+    });
+
+    test('protects only the groups the caller accepts', () {
+      // Given two groups, one accepted and one rejected by the layout.
+      // When preparing the title.
+      final result = keepBracketGroupsUnbroken(
+        'a[bc]d[efgh]',
+        protectGroup: (group) => group.length <= 4,
+      );
+
+      // Then the accepted group is joined and the rejected one is left alone.
+      expect(result, 'a$_break[${_joiner}b${_joiner}c$_joiner]d$_break[efgh]');
     });
 
     test('joins every character inside the reported title group', () {

@@ -254,17 +254,38 @@ class const _VideoHeaderSection() extends StatelessWidget {
       ],
     );
 
+    final titleStyle = $styles.text.h3.copyWith(
+      color: $styles.colors.onSurfaceStrong,
+      fontWeight: FontWeight.bold,
+      height: 1.3,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Video Title
-        Text(
-          keepBracketGroupsUnbroken(video.title),
-          style: $styles.text.h3.copyWith(
-            color: $styles.colors.onSurfaceStrong,
-            fontWeight: FontWeight.bold,
-            height: 1.3,
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final textScaler = MediaQuery.textScalerOf(context);
+            final textDirection = Directionality.of(context);
+            bool fits(String group) {
+              if (!constraints.hasBoundedWidth) return true;
+              final painter = TextPainter(
+                text: TextSpan(text: group, style: titleStyle),
+                textDirection: textDirection,
+                textScaler: textScaler,
+                maxLines: 1,
+              )..layout();
+              final width = painter.width;
+              painter.dispose();
+              return width <= constraints.maxWidth;
+            }
+
+            return Text(
+              keepBracketGroupsUnbroken(video.title, protectGroup: fits),
+              style: titleStyle,
+            );
+          },
         ),
         Gap($styles.insets.xs),
 
