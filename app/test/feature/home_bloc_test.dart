@@ -451,6 +451,24 @@ void main() {
       expect(find.text('继续加载'), findsNothing);
     });
 
+    testWidgets('selecting the live feed names it once, in the filter bar', (
+      tester,
+    ) async {
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      bloc.add(FilterSelected(HomeState.liveFilterId('recommend_live')));
+      await tester.pumpAndSettle();
+
+      // The chip is the only place the active live feed is named; the section
+      // header used to repeat it directly above the card.
+      expect(find.text('推荐直播'), findsOneWidget);
+      expect(find.text('测试直播间'), findsOneWidget);
+    });
+
     test('keeps the route source when persisted user data changes', () async {
       final bloc = buildBloc();
       addTearDown(bloc.close);
