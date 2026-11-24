@@ -257,15 +257,15 @@
   "@dialogCancel": {
     "description": "Dialog button - cancel action"
   },
-  "actionSelectAll": "Select All",
+  "actionSelectAll": "全选",
   "@actionSelectAll": {
     "description": "Action button - select all items"
   },
-  "actionDeselect": "Deselect",
+  "actionDeselect": "取消全选",
   "@actionDeselect": {
     "description": "Action button - deselect all"
   },
-  "selectionSelected": "{count} selected",
+  "selectionSelected": "已选择 {count} 项",
   "@selectionSelected": {
     "description": "Selection count indicator",
     "placeholders": {
