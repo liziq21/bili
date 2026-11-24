@@ -574,7 +574,7 @@ class const _ChannelPlaylistTile({
         imageUrl: url,
         width: 96,
         height: 56,
-        memCacheWidth: 240,
+        memCacheWidth: 320,
         fit: BoxFit.cover,
         errorBuilder: (context, url, error) => fallback,
       ),
