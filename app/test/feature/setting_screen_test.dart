@@ -359,6 +359,9 @@ void main() {
           findsOneWidget,
         );
         expect(find.byType(ListTile), findsNWidgets(2));
+        // 两种开关形态都要断言：只看 SwitchListTile 时，用裸 Switch + Text
+        // 拼出来的无操作行仍能通过。
+        expect(find.byType(Switch), findsNothing);
         expect(find.byType(SwitchListTile), findsNothing);
         // Use descendant of ListTile to avoid matching anything else.
         expect(

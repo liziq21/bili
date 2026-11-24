@@ -1,3 +1,4 @@
+import 'package:app/app_scaffold.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/setting/common_widgets/setting_tiles.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
@@ -41,6 +42,43 @@ void main() {
       );
 
       // Then both texts start at the same x (ListTile's contentPadding).
+      expect(
+        tester.getTopLeft(find.text('Playback gestures')).dx,
+        tester.getTopLeft(find.text('Seek')).dx,
+      );
+    });
+
+    testWidgets('keeps that alignment when the layout scale changes', (
+      tester,
+    ) async {
+      // Given a tablet-sized viewport, where `$styles.insets.sm` no longer
+      // equals ListTile's fixed 16dp.
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(1400, 900)),
+            child: AppScaffold(
+              child: Scaffold(
+                body: ListView(
+                  children: const [
+                    SettingSectionHeader(title: 'Playback gestures'),
+                    ListTile(title: Text('Seek')),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Then the header still lines up with the row: it must follow the
+      // component's fixed padding, not the scaled token (R2.4).
+      expect($styles.scale, greaterThan(1));
       expect(
         tester.getTopLeft(find.text('Playback gestures')).dx,
         tester.getTopLeft(find.text('Seek')).dx,

@@ -18,7 +18,7 @@ class const SettingSectionHeader({super.key, required final String title})
     padding: EdgeInsets.only(
       // Fixed rather than `$styles.insets.sm`: ListTile's content padding does
       // not scale with the layout breakpoint, so a scaled inset would drift off
-      // the row text on tablets.
+      // the row text on tablets (design-system R2.4).
       left: 16,
       top: $styles.insets.sm,
       bottom: $styles.insets.xs,
