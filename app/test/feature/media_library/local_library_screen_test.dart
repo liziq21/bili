@@ -226,6 +226,48 @@ void main() {
     expect(items.map((item) => item.originalId), ['b', 'a']);
   });
 
+  testLibraryWidgets(
+    'moves a filtered playlist item by its index in the full list',
+    (tester) async {
+      final playlistId = await repository.createPlaylist('bilibili', 'Queue');
+      for (final video in const [
+        VideoModel(id: 'a', title: 'Alpha apple', url: 'https://example.com/a'),
+        VideoModel(id: 'b', title: 'Beta banana', url: 'https://example.com/b'),
+        VideoModel(id: 'c', title: 'Gamma apple', url: 'https://example.com/c'),
+        VideoModel(
+          id: 'd',
+          title: 'Delta banana',
+          url: 'https://example.com/d',
+        ),
+      ]) {
+        await repository.addToPlaylist(
+          playlistId: playlistId,
+          sourceId: 'bilibili',
+          video: video,
+        );
+      }
+
+      await tester.pumpWidget(app(screen()));
+      await pumpLibrary(tester);
+      await openTab(tester, '播放列表');
+
+      await tester.enterText(find.byType(TextField), 'apple');
+      await pumpLibrary(tester);
+      expect(find.text('Alpha apple'), findsOneWidget);
+      expect(find.text('Gamma apple'), findsOneWidget);
+      expect(find.text('Beta banana'), findsNothing);
+
+      // 过滤后 Gamma 是第 2 行（行号 1），但在完整列表里下标是 2。上移必须
+      // 按完整列表下标把它插到 Beta 之前，而不是按行号与 Alpha 交换。
+      await openPlaylistItemMenu(tester, 1);
+      await tester.tap(find.text('上移'));
+      await pumpLibrary(tester);
+
+      final items = await repository.getPlaylistItems(playlistId);
+      expect(items.map((item) => item.originalId), ['a', 'c', 'b', 'd']);
+    },
+  );
+
   testLibraryWidgets('batch-adds only same-source bookmarks to a playlist', (
     tester,
   ) async {
