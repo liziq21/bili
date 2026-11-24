@@ -50,6 +50,11 @@ class const AppColors(final BrandPalette _palette) {
   /// 压在 [accentFill] 之上的前景。
   Color get onAccentFill => _palette.scheme.onPrimary;
 
+  /// 错误**文字**。与 [scheme] 的 `error`（错误图形 / 容器）分档：文字按
+  /// 4.5:1 取值，图形按 3:1。压 [surface] 的实际对比度见
+  /// `test/design/contrast_test.dart`。
+  Color get errorText => _palette.errorText;
+
   /// 次级强调。
   Color get secondary => _palette.scheme.secondary;
 

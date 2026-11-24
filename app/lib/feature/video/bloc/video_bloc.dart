@@ -37,7 +37,7 @@ class VideoBloc({
     LoadVideoDetail event,
     Emitter<VideoState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, error: null));
+    emit(state.copyWith(isLoading: true, error: null, videoId: event.id));
     _log.info('Loading video detail for id: ${event.id}');
 
     final result = await _repository.getVideoDetail(event.id);

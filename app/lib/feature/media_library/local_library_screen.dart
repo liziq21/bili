@@ -1218,7 +1218,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
                       child: Text(
                         l10n.itemsLoadFailed,
                         style: $styles.text.bodySmall.copyWith(
-                          color: Theme.of(context).colorScheme.error,
+                          color: $styles.colors.errorText,
                         ),
                       ),
                     ),

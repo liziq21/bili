@@ -46,6 +46,30 @@ class _FakeVideoCommentRepository() implements VideoCommentRepository {
   );
 }
 
+/// Records every requested video id and always fails, so the error state and
+/// its retry path can be exercised through the real bloc.
+class _FailingVideoCommentRepository() implements VideoCommentRepository {
+  final List<String> requestedVideoIds = [];
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    requestedVideoIds.add(videoId);
+    return Result.error(Exception('offline'));
+  }
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoCommentReplies(
+    String videoId,
+    String rootCommentId, {
+    int page = 1,
+    int pageSize = 20,
+  }) async => Result.error(Exception('offline'));
+}
+
 void main() {
   testWidgets('expands replies through an explicit control and keeps preview', (
     tester,
@@ -134,5 +158,45 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('load error shows a retry that refetches the same video', (
+    tester,
+  ) async {
+    final repository = _FailingVideoCommentRepository();
+    final bloc = VideoCommentBloc(repository: repository);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
+        home: AppScaffold(
+          child: Material(
+            child: SizedBox(
+              height: 600,
+              child: BlocProvider.value(
+                value: bloc,
+                child: const VideoCommentsView(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    bloc.add(const LoadVideoComments('video-1'));
+    await tester.pump();
+    await tester.pump();
+
+    // The copy tells the user to retry, so the control must exist.
+    expect(find.text('Failed to load comments'), findsOneWidget);
+    final retry = find.widgetWithText(OutlinedButton, 'Retry');
+    expect(retry, findsOneWidget);
+
+    await tester.tap(retry);
+    await tester.pump();
+    await tester.pump();
+
+    expect(repository.requestedVideoIds, ['video-1', 'video-1']);
   });
 }

@@ -97,7 +97,7 @@ class const MediaLibraryScreen({
                       child: Text(
                         l10n?.tabLoadFailed(label) ?? label,
                         style: $styles.text.bodySmall.copyWith(
-                          color: colorScheme.error,
+                          color: $styles.colors.errorText,
                         ),
                       ),
                     ),

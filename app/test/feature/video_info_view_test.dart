@@ -12,8 +12,11 @@ import 'package:material_ui/material_ui.dart';
 class MockVideoBloc(super.initialState)
     extends Cubit<VideoState>
     implements VideoBloc {
+  /// Events the UI dispatched, so retry buttons can be asserted end to end.
+  final List<VideoEvent> dispatched = [];
+
   @override
-  void add(VideoEvent event) {}
+  void add(VideoEvent event) => dispatched.add(event);
 
   @override
   void on<E extends VideoEvent>(
@@ -410,6 +413,27 @@ void main() {
 
       expect(find.text('视频加载失败，请重试'), findsOneWidget);
       expect(likeButton(), findsNothing);
+      // Without a video id there is nothing to retry, so no dead button.
+      expect(find.byType(OutlinedButton), findsNothing);
+    });
+
+    testWidgets('load error retry reloads the same video', (tester) async {
+      final bloc = MockVideoBloc(
+        const VideoState(error: 'boom', videoId: 'BV1retry'),
+      );
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(mountWith(bloc));
+      await tester.pumpAndSettle();
+
+      // The copy says "try again", so a retry control must exist.
+      final retry = find.widgetWithText(OutlinedButton, '重试');
+      expect(retry, findsOneWidget);
+
+      await tester.tap(retry);
+      await tester.pump();
+
+      expect(bloc.dispatched, [const LoadVideoDetail('BV1retry')]);
     });
   });
 

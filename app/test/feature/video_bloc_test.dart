@@ -12,12 +12,18 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
+  /// 置为 true 时 [getVideoDetail] 返回失败，用于覆盖加载失败态。
+  bool failDetail = false;
+
   final List<(String, bool)> likeCalls = [];
   final List<(String, bool)> favoriteCalls = [];
   final List<(String, bool)> subscribeCalls = [];
 
   @override
   Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
+    if (failDetail) {
+      return Result.error(Exception('offline'));
+    }
     final video = VideoModel(
       id: id,
       title: 'Test Video Title $id',
@@ -240,7 +246,7 @@ void main() {
       await expectLater(
         videoBloc.stream,
         emitsInOrder([
-          const VideoState(isLoading: true),
+          const VideoState(isLoading: true, videoId: 'test_id'),
           predicate<VideoState>((state) {
             return !state.isLoading &&
                 state.videoDetail != null &&
@@ -249,6 +255,28 @@ void main() {
         ]),
       );
     });
+
+    test(
+      'a failed load keeps the video id so the error state can retry',
+      () async {
+        fakeDataSource.failDetail = true;
+
+        videoBloc.add(const LoadVideoDetail('BV1retry'));
+
+        await expectLater(
+          videoBloc.stream,
+          emitsInOrder([
+            const VideoState(isLoading: true, videoId: 'BV1retry'),
+            predicate<VideoState>(
+              (state) =>
+                  !state.isLoading &&
+                  state.error != null &&
+                  state.videoId == 'BV1retry',
+            ),
+          ]),
+        );
+      },
+    );
 
     test(
       'ToggleVideoLike passes updated isLiked value to repository',

@@ -91,7 +91,7 @@ class _LocalPlaylistPickerDialogState()
                   Text(
                     error,
                     style: $styles.text.bodySmall.copyWith(
-                      color: Theme.of(context).colorScheme.error,
+                      color: $styles.colors.errorText,
                     ),
                   ),
                   SizedBox(height: $styles.insets.xs),

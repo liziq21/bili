@@ -47,6 +47,13 @@ class const BrandPalette({
   /// 亮色下 `primary` 只有 4.00:1，够图形不够文字。`ColorScheme` 无对应
   /// 角色（同 [onSurfaceStrong] 的理由），由本类直接携带。
   required final Color accentText,
+
+  /// 错误**文字**色，直接压在 [surface] 上。
+  ///
+  /// 与 [scheme] 的 `error` 分档，理由同 [accentText]：`ColorScheme.error`
+  /// 只保证非文本对比度，亮色 `#EF5350` 压品牌 surface 仅 3.01:1，做正文
+  /// 不达 4.5:1。错误图形与容器仍用 `error`，文字用本角色。
+  required final Color errorText,
 }) {
   /// 按亮度取对应的一套色板。
   static BrandPalette of(Brightness brightness) => switch (brightness) {
@@ -76,21 +83,26 @@ class const BrandPalette({
       onScrim: base.onScrim,
       onSurfaceStrong: base.onSurfaceStrong,
       accentText: _readableAccent(scheme),
+      errorText: _readable(scheme.error, scheme.surface),
     );
   }
 
   /// 取 [scheme] 的 `primary` 色相与饱和度，只调亮度直到压 `surface` 达到
   /// [Contrast.aaText] 为止。系统给的 `primary` 未必压得住系统给的
   /// `surface`，沿用品牌强调色配动态底色可能直接不过 4.5:1。
+  static Color _readableAccent(ColorScheme scheme) =>
+      _readable(scheme.primary, scheme.surface);
+
+  /// 保留 [seed] 的色相与饱和度，只调亮度直到压 [surface] 达到
+  /// [Contrast.aaText]。[seed] 本身已达标时原样返回。
   ///
-  /// **两个方向都试**。`primary` 可能已经贴在亮度的某一端，此时沿单一方向
+  /// **两个方向都试**。`seed` 可能已经贴在亮度的某一端，此时沿单一方向
   /// 走只会撞上界并返回撞上的那个颜色：白色 `primary` 配中灰 `#999999`
   /// `surface`，按"底色不算浅"判断会走提亮方向，白色提不亮 → 返回白色
   /// 2.85:1，而黑色压同一底色有 7.37:1。两个方向都到不了亮度边界时，取纯黑
-  /// / 纯白中对 [scheme] 的 `surface` 对比度更高的那个。
-  static Color _readableAccent(ColorScheme scheme) {
-    final hsl = HSLColor.fromColor(scheme.primary);
-    final surface = scheme.surface;
+  /// / 纯白中对 [surface] 对比度更高的那个。
+  static Color _readable(Color seed, Color surface) {
+    final hsl = HSLColor.fromColor(seed);
     // 先试远离 surface 亮度的方向（浅底压暗、深底提亮），再试反方向。
     final preferred = surface.computeLuminance() > 0.5 ? -1 : 1;
     for (final direction in [preferred, -preferred]) {
@@ -125,6 +137,8 @@ class const BrandPalette({
   // 文字必须比做图形更深，压到 4.5:1 需要的就是这点亮度差。
   static const Color _accentTextLight = Color(0xFF9D4E1A);
   static const Color _accentLight = Color(0xFFB75B1E);
+  // 错误文字 5.64:1 压 #F8ECE5；比 scheme.error（#EF5350，3.01:1）深两档。
+  static const Color _errorTextLight = Color(0xFFB3261E);
   static const Color _accent2Light = Color(0xFF947666);
   static const Color _accent3Light = Color(0xFFC47642);
   static const Color _surfaceLight = Color(0xFFF8ECE5);
@@ -138,6 +152,8 @@ class const BrandPalette({
   // 相对暗色背景 #1E1B18 的对比度按 WCAG AA（正文 4.5:1）选取：
   // body ≈ 13:1，caption ≈ 6.9:1，accent ≈ 6.5:1。
   static const Color _accentDark = Color(0xFFEFA97C);
+  // 错误文字 10.04:1 压 #1E1B18；暗色下错误色需提亮而不是沿用 #EF5350。
+  static const Color _errorTextDark = Color(0xFFF2B8B5);
   static const Color _accent2Dark = Color(0xFFC9BCB4);
   static const Color _accent3Dark = Color(0xFFD08A55);
   static const Color _surfaceDark = Color(0xFF1E1B18);
@@ -174,6 +190,7 @@ class const BrandPalette({
     onScrim: Colors.white,
     onSurfaceStrong: _scrimLight,
     accentText: _accentTextLight,
+    errorText: _errorTextLight,
   );
 
   static final BrandPalette _dark = BrandPalette(
@@ -203,5 +220,6 @@ class const BrandPalette({
     onSurfaceStrong: _surfaceLight,
     // 暗色 accent 压暗色 surface 已有 8.68:1，两档都过门槛，无需分色。
     accentText: _accentDark,
+    errorText: _errorTextDark,
   );
 }

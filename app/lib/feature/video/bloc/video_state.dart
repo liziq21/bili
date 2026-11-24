@@ -3,6 +3,12 @@ part of 'video_bloc.dart';
 class const VideoState({
   final bool isLoading = false,
 
+  /// 当前请求的视频 id。
+  ///
+  /// 失败态里 [videoDetail] 仍是 null，重试按钮只能靠它重新发起
+  /// [LoadVideoDetail]；没有它，错误态就是一个无法自救的死角。
+  final String videoId = '',
+
   /// 加载视频详情失败的原因。渲染侧据此把整页换成「加载失败，请重试」
   final String? error,
 
@@ -31,6 +37,7 @@ class const VideoState({
 }) extends Equatable {
   VideoState copyWith({
     bool? isLoading,
+    String? videoId,
     String? error,
     String? actionError,
     VideoDetail? videoDetail,
@@ -39,6 +46,7 @@ class const VideoState({
   }) {
     return VideoState(
       isLoading: isLoading ?? this.isLoading,
+      videoId: videoId ?? this.videoId,
       error: error,
       actionError: actionError,
       videoDetail: videoDetail ?? this.videoDetail,
@@ -50,6 +58,7 @@ class const VideoState({
   @override
   List<Object?> get props => [
     isLoading,
+    videoId,
     error,
     actionError,
     videoDetail,

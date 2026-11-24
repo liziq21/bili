@@ -37,13 +37,20 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
     return BlocSelector<
       VideoCommentBloc,
       VideoCommentState,
-      ({bool isLoading, Object? error, int commentCount, bool hasMore})
+      ({
+        bool isLoading,
+        Object? error,
+        int commentCount,
+        bool hasMore,
+        String videoId,
+      })
     >(
       selector: (state) => (
         isLoading: state.isLoading,
         error: state.error,
         commentCount: state.comments.length,
         hasMore: state.hasMore,
+        videoId: state.videoId,
       ),
       builder: (context, status) {
         if (status.isLoading) {
@@ -61,11 +68,37 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
           return Center(
             child: Padding(
               padding: EdgeInsets.all($styles.insets.lg),
-              child: Text(
-                l10n?.commentsLoadFailed ?? 'Failed to load comments',
-                style: $styles.text.body.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    AppIcons.cloudOff,
+                    size: $styles.insets.lg,
+                    color: $styles.colors.onSurfaceVariant,
+                  ),
+                  Gap($styles.insets.xs),
+                  Text(
+                    l10n?.commentsLoadFailed ?? 'Failed to load comments',
+                    textAlign: TextAlign.center,
+                    style: $styles.text.body.copyWith(
+                      color: $styles.colors.errorText,
+                    ),
+                  ),
+                  // 文案要求「稍后重试」，重试入口必须真的在页面上。
+                  if (status.videoId.isNotEmpty) ...[
+                    Gap($styles.insets.sm),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.read<VideoCommentBloc>().add(
+                          LoadVideoComments(status.videoId),
+                        );
+                      },
+                      icon: const Icon(AppIcons.refresh),
+                      label: Text(l10n?.retry ?? 'Retry'),
+                    ),
+                  ],
+                ],
               ),
             ),
           );

@@ -37,6 +37,7 @@
 | 前景 | `onSurfaceStrong`（主）/ `onSurface`（正文）/ `onSurfaceVariant`（弱化） |
 | 恒定承载面 | `scrim`（恒深）/ `onScrim`（恒浅） |
 | 强调 | `accentFill` / `accentText` / `onAccentFill` |
+| 语义 | `errorText`（错误文字；`ColorScheme.error` 只用于错误图形与容器） |
 | 次 / 三级强调 | `secondary` / `tertiary` |
 | 图形 | `outline` |
 
@@ -54,6 +55,8 @@
 `accentFill` 与 `accentText` 允许同值起步，但 R2.1 是**终态要求**：G2 断言未达标即缺陷，不得以「当前同值」为由长期豁免。
 
 **R2.2** 语义不得混用：`scrim` / `onScrim` 与 `onSurface` 系在暗色下方向相反，禁止共用常量，禁止前景 token 当背景用。
+
+**R2.3** 错误色同样按用途分档：`ColorScheme.error` 只承担错误图形与容器，错误**文字**取 `errorText`，门槛 `aaText`。两者同值时亮色错误文字停在非文本门槛上（`#EF5350` 压品牌 surface 仅 3.01:1），G2 断言必须覆盖 `errorText` 的亮 / 暗两套。
 
 **R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
 
