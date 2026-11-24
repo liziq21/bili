@@ -148,6 +148,26 @@ class FeedDao(super.db)
         .then((rows) => rows.length);
   }
 
+  /// 删除指定频道下给定 id 的条目。
+  ///
+  /// 仅供增量加载在失败时回滚本次新写入的条目：这些 id 可能来自尚未完成
+  /// 的整页遍历，留下就会成为下次加载的假边界。
+  Future<void> deleteEntries({
+    required String sourceId,
+    required String channelId,
+    required Iterable<String> entryIds,
+  }) async {
+    final ids = entryIds.toSet();
+    if (ids.isEmpty) return;
+    await (delete(feedEntry)..where(
+          (e) =>
+              e.sourceId.equals(sourceId) &
+              e.channelId.equals(channelId) &
+              e.entryId.isIn(ids),
+        ))
+        .go();
+  }
+
   Future<void> deleteOldEntries(
     String sourceId,
     String channelId, {

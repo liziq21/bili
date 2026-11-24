@@ -192,15 +192,20 @@ class _SourceScopeState() extends State<_SourceScope> {
           create: (_) =>
               AppChannelPlaylistsRepository(channelPlaylistsDataSource),
         ),
-      if (source.userVideosDataSource case final userVideosDataSource?) ...[
+      if (source.userVideosDataSource case final userVideosDataSource?)
         RepositoryProvider<ChannelVideosRepository>(
           create: (_) => AppChannelVideosRepository(userVideosDataSource),
         ),
+      // Feed 只要求两种频道分页能力之一：只提供视频或只提供专栏的来源都能
+      // 建出自己的订阅流；两者都没有时不注册 Feed provider，页面走不支持分支。
+      if (source.userVideosDataSource != null ||
+          source.userArticlesDataSource != null) ...[
         RepositoryProvider<FeedRepository>(
           create: (context) => FeedRepository(
             feedDao: context.read<FeedDao>(),
             libraryDao: context.read<LocalLibraryDao>(),
-            remoteDataSource: userVideosDataSource,
+            videoDataSource: source.userVideosDataSource,
+            articleDataSource: source.userArticlesDataSource,
           ),
         ),
         RepositoryProvider<FeedLoadManager>(

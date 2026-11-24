@@ -25,6 +25,9 @@ abstract class const MediaSource() {
   /// 频道投稿视频分页能力（订阅 Feed 消费用，可选）。
   UserVideosRemoteDataSource? get userVideosDataSource => null;
 
+  /// 频道专栏文章分页能力（订阅 Feed 消费用，可选）。
+  UserArticlesRemoteDataSource? get userArticlesDataSource => null;
+
   /// 远端播放列表内容能力（可选）。
   PlaylistContentRemoteDataSource? get playlistContentDataSource => null;
 

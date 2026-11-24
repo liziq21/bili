@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../database/app_database.dart';
+import '../../database/table/local_library.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
@@ -14,7 +15,7 @@ import 'feed_cubit.dart';
 import 'widgets/feed_channel_header.dart';
 import 'widgets/feed_entry_tile.dart';
 
-/// 订阅动态页：已落库的订阅投稿按频道分组，组可展开/收起。
+/// 订阅动态页：已落库的订阅条目（投稿视频与专栏文章）按频道分组，组可展开/收起。
 ///
 /// 页面只读本地数据（[FeedCubit] 订阅两个 Drift 查询流），远端拉取由
 /// [FeedLoadManager] 在启动与下拉刷新时完成，因此这里没有「加载更多」：
@@ -27,14 +28,31 @@ class const FeedScreen({
   Future<void> _onRefresh(BuildContext context) =>
       context.read<FeedCubit>().refresh();
 
-  void _onEntryTap(BuildContext context, FeedEntryEntity entry) {
+  Future<void> _onEntryTap(BuildContext context, FeedEntryEntity entry) async {
     // 先标记已读再跳转：跳转会卸载页面，await 之后再取 messenger / cubit
     // 就晚了。标记失败不影响播放。
     final cubit = context.read<FeedCubit>();
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final copied = AppLocalizations.of(context)!.trackCopiedToClipboard;
     if (!entry.isRead) {
       unawaited(cubit.markEntryRead(entry.channelId, entry.entryId));
     }
-    onVideo?.call(entry.entryId);
+    if (entry.entryType == FeedEntry.typeVideo) {
+      onVideo?.call(entry.entryId);
+      return;
+    }
+
+    // 专栏/动态没有应用内阅读页；与简介里的站外链接一致，复制链接交给用户，
+    // 不在只读客户端里拉外部浏览器。写入失败时不提示成功。
+    try {
+      await Clipboard.setData(ClipboardData(text: entry.url));
+    } on Object {
+      return;
+    }
+    if (!context.mounted) return;
+    messenger?.showSnackBar(
+      SnackBar(content: Text(copied), duration: $styles.times.fast),
+    );
   }
 
   @override
@@ -109,7 +127,7 @@ class const FeedScreen({
                 _EntryRow(:final group, :final entry) => FeedEntryTile(
                   key: ValueKey('${group.channelId}/${entry.entryId}'),
                   entry: entry,
-                  onTap: () => _onEntryTap(context, entry),
+                  onTap: () => unawaited(_onEntryTap(context, entry)),
                 ),
               },
             ),
