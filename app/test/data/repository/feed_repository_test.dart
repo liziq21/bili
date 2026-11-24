@@ -5,6 +5,7 @@ import 'package:data/data.dart' hide Page;
 import 'package:data/data.dart' as data show Page;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:model/model.dart';
 
 /// 按频道返回固定分页的 fake 数据源，记录每次请求的页号。
@@ -521,6 +522,32 @@ void main() {
       );
     },
   );
+
+  test('logs a failed capability with the channel id', () async {
+    // Given a channel whose video endpoint fails.
+    await subscribe('creator-1');
+    repository = buildRepository(
+      _FakeUserVideosDataSource(
+        pagesByChannel: const {},
+        failingChannels: const {'creator-1'},
+      ),
+    );
+    final records = <LogRecord>[];
+    final previousLevel = Logger.root.level;
+    Logger.root.level = Level.ALL;
+    addTearDown(() => Logger.root.level = previousLevel);
+    final subscription = Logger.root.onRecord.listen(records.add);
+    addTearDown(subscription.cancel);
+
+    // When the feed is loaded.
+    await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then the failure is observable instead of only reflected in the result.
+    expect(
+      records.map((record) => record.message),
+      contains(contains('creator-1')),
+    );
+  });
 
   test('shares the per-channel page budget across both capabilities', () async {
     // Given a channel with several pages of videos and articles.

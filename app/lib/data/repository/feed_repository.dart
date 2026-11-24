@@ -1,5 +1,6 @@
 import 'package:data/data.dart';
 import 'package:drift/drift.dart';
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
@@ -41,6 +42,7 @@ class FeedRepository({
 }) {
   final UserVideosRemoteDataSource? _videoDataSource = videoDataSource;
   final UserArticlesRemoteDataSource? _articleDataSource = articleDataSource;
+  final _log = Logger('FeedRepository');
 
   /// 逐频道增量加载 [sourceId] 下的订阅投稿与专栏文章。
   ///
@@ -69,8 +71,13 @@ class FeedRepository({
         );
         newEntryCount += result.added;
         if (result.failed) failedChannelIds.add(subscription.originalId);
-      } on Object {
+      } on Object catch (error, stackTrace) {
         // 渠道级读写失败（例如本地库异常）只标记该频道，不拖停后续订阅。
+        _log.warning(
+          'Failed to load feed channel ${subscription.originalId}',
+          error,
+          stackTrace,
+        );
         failedChannelIds.add(subscription.originalId);
       }
     }
@@ -118,6 +125,7 @@ class FeedRepository({
     }
 
     Future<void> load<T>({
+      required String capability,
       required Future<Result<Page<T>, Exception>> Function(int page) fetch,
       required String Function(T item) idOf,
       required FeedEntryCompanion Function(T item) companionOf,
@@ -133,13 +141,19 @@ class FeedRepository({
           companionOf: companionOf,
           maxPages: maxPages,
         );
-      } on Object {
+      } on Object catch (error, stackTrace) {
         failed = true;
+        _log.warning(
+          'Failed to load $capability for channel $channelId',
+          error,
+          stackTrace,
+        );
       }
     }
 
     if (videos case final videos? when videoPageBudget > 0) {
       await load<VideoModel>(
+        capability: 'videos',
         fetch: (page) => videos.fetchUserVideos(
           channelId: channelId,
           page: page,
@@ -153,6 +167,7 @@ class FeedRepository({
     }
     if (articles case final articles? when articlePageBudget > 0) {
       await load<ArticleModel>(
+        capability: 'articles',
         fetch: (page) => articles.fetchUserArticles(
           channelId: channelId,
           page: page,
