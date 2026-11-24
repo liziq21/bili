@@ -1,5 +1,12 @@
 part of 'live_bloc.dart';
 
+/// 区分「不传」与「显式置空」：详情与流地址两个请求并发发出，任何一次
+/// emit 都不该顺手清掉另一个请求刚记下的失败原因。
+class const _LiveErrorSentinel();
+
+const _keepRoomError = _LiveErrorSentinel();
+const _keepStreamError = _LiveErrorSentinel();
+
 class const LiveState({
   final bool isLoading = false,
 
@@ -23,16 +30,20 @@ class const LiveState({
   LiveState copyWith({
     bool? isLoading,
     bool? isSwitchingQuality,
-    String? roomError,
-    String? streamError,
+    Object? roomError = _keepRoomError,
+    Object? streamError = _keepStreamError,
     LiveRoomDetail? roomDetail,
     MediaStream? mediaStream,
   }) {
     return LiveState(
       isLoading: isLoading ?? this.isLoading,
       isSwitchingQuality: isSwitchingQuality ?? this.isSwitchingQuality,
-      roomError: roomError,
-      streamError: streamError,
+      roomError: identical(roomError, _keepRoomError)
+          ? this.roomError
+          : roomError as String?,
+      streamError: identical(streamError, _keepStreamError)
+          ? this.streamError
+          : streamError as String?,
       roomDetail: roomDetail ?? this.roomDetail,
       mediaStream: mediaStream ?? this.mediaStream,
     );

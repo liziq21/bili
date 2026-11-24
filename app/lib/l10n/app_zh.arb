@@ -1275,6 +1275,10 @@
   "@playbackErrorNetwork": {
     "description": "Playback error category - network failure"
   },
+  "playbackErrorOpen": "无法打开播放地址",
+  "@playbackErrorOpen": {
+    "description": "Playback error category - the stream could not be opened"
+  },
   "playbackErrorDecoder": "解码错误",
   "@playbackErrorDecoder": {
     "description": "Playback error category - media decoding failure"
@@ -1568,6 +1572,10 @@
   "liveRoomLoading": "直播间加载中",
   "@liveRoomLoading": {
     "description": "LIZ-84 live room detail and stream"
+  },
+  "liveScreenTitle": "直播间",
+  "@liveScreenTitle": {
+    "description": "Live room screen app bar title"
   },
   "liveRoomError": "直播间加载失败",
   "@liveRoomError": {

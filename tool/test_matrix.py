@@ -95,6 +95,7 @@ TEST_MATRIX = {
         'app/test/feature/live/live_danmaku_overlay_test.dart',
         'app/test/feature/video/danmaku_overlay_test.dart',
         'app/test/feature/live/live_quality_chip_test.dart',
+        'app/test/feature/live/live_playback_error_overlay_test.dart',
         'app/test/feature/live/live_screen_test.dart',
         'app/test/feature/library_settings_screen_test.dart',
         'app/test/feature/live_bloc_test.dart',

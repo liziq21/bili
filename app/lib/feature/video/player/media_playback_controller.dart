@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:data/data.dart';
 import 'package:equatable/equatable.dart';
+import 'package:logging/logging.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:meta/meta.dart';
@@ -186,6 +187,9 @@ class MediaPlaybackController([
 
   /// 自动重试配置。网络错误才会使用该策略，其他错误保留给用户手动处理。
   final PlaybackRetryPolicy _retryPolicy = retryPolicy;
+
+  /// 原始播放器异常只写日志：它可能带签名 CDN 地址与时效参数，不能上屏。
+  final _log = Logger('MediaPlaybackController');
 
   /// 惰性建 Player：原生库须先初始化，故由 [_createPlayer] 承担。
   late final Player _player = _createPlayer(_platformPlayer);
@@ -673,6 +677,10 @@ class MediaPlaybackController([
     final playbackError = error is MediaPlaybackException
         ? error
         : MediaPlaybackException.fromMessage(error.toString());
+    _log.warning(
+      'Player reported a ${playbackError.category.name} error',
+      playbackError,
+    );
     final stream = _currentStream;
     final canRetry =
         stream != null &&

@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 
 /// The user-facing class of a failure reported by the media player.
 enum PlaybackErrorCategory() {
+  /// The stream could not be opened at all, e.g. the media URL is rejected or
+  /// unreachable before decoding starts.
+  open,
+
   /// The stream could not be reached or the connection was interrupted.
   network,
 
@@ -61,6 +65,20 @@ class const MediaPlaybackException({
     ])) {
       return MediaPlaybackException(
         category: PlaybackErrorCategory.authorization,
+        message: message,
+      );
+    }
+
+    if (_containsAny(normalized, <String>[
+      'failed to open',
+      'could not open',
+      'cannot open',
+      'unable to open',
+      'error opening',
+      'failed to start',
+    ])) {
+      return MediaPlaybackException(
+        category: PlaybackErrorCategory.open,
         message: message,
       );
     }

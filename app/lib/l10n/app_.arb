@@ -1275,6 +1275,10 @@
   "@playbackErrorNetwork": {
     "description": "Playback error category - network failure"
   },
+  "playbackErrorOpen": "Stream failed to open",
+  "@playbackErrorOpen": {
+    "description": "Playback error category - the stream could not be opened"
+  },
   "playbackErrorDecoder": "Decoder error",
   "@playbackErrorDecoder": {
     "description": "Playback error category - media decoding failure"
@@ -1568,6 +1572,10 @@
   "liveRoomLoading": "Loading live room",
   "@liveRoomLoading": {
     "description": "LIZ-84 live room detail and stream"
+  },
+  "liveScreenTitle": "Live",
+  "@liveScreenTitle": {
+    "description": "Live room screen app bar title"
   },
   "liveRoomError": "Failed to load live room",
   "@liveRoomError": {

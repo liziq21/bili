@@ -19,6 +19,14 @@ void main() {
       expect(error.category, PlaybackErrorCategory.decoder);
     });
 
+    test('classifies a stream that never opened as an open failure', () {
+      final error = MediaPlaybackException.fromMessage(
+        'Failed to open https://example.com/live.m3u8?expires=1&sign=abc',
+      );
+
+      expect(error.category, PlaybackErrorCategory.open);
+    });
+
     test('classifies DRM license failures as DRM errors', () {
       final error = MediaPlaybackException.fromMessage(
         'Widevine license request failed',
