@@ -1496,7 +1496,7 @@ abstract class AppLocalizations {
   /// **'List'**
   String get list;
 
-  /// Video info - action name of the add-to-playlist button, used in its cancel tooltip
+  /// Video info - action name of the add-to-playlist button, used in its accessibility label
   ///
   /// In en, this message translates to:
   /// **'Add to playlist'**

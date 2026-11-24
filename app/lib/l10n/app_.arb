@@ -1173,7 +1173,7 @@
   },
   "addToPlaylist": "Add to playlist",
   "@addToPlaylist": {
-    "description": "Video info - action name of the add-to-playlist button, used in its cancel tooltip"
+    "description": "Video info - action name of the add-to-playlist button, used in its accessibility label"
   },
   "addToLocalPlaylist": "Add to local playlist",
   "@addToLocalPlaylist": {

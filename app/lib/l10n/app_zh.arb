@@ -1173,7 +1173,7 @@
   },
   "addToPlaylist": "加入播放列表",
   "@addToPlaylist": {
-    "description": "Video info - action name of the add-to-playlist button, used in its cancel tooltip"
+    "description": "Video info - action name of the add-to-playlist button, used in its accessibility label"
   },
   "addToLocalPlaylist": "加入本地播放列表",
   "@addToLocalPlaylist": {
