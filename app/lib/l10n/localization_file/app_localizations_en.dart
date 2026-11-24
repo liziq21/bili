@@ -561,9 +561,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadMoreHistory => 'Load more history';
 
   @override
-  String get allHistoryLoaded => 'All history loaded';
-
-  @override
   String get historyLoadFailed => 'Failed to load history';
 
   @override

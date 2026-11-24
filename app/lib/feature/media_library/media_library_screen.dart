@@ -265,9 +265,7 @@ String tooltipMessage(
   if (headerState.isLoading) {
     return l10n?.loadingHistory ?? 'Loading history...';
   }
-  return headerState.hasMore
-      ? (l10n?.loadMoreHistory ?? 'Load more history')
-      : (l10n?.allHistoryLoaded ?? 'All history loaded');
+  return l10n?.loadMoreHistory ?? 'Load more history';
 }
 
 /// 历史列表：加载中 / 出错 / 空 / 有内容 四态
@@ -431,12 +429,12 @@ class const _HistoryRows({
 class const _HistoryFooter() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
       child: Center(
         child: Text(
-          l10n?.noMoreItems ?? 'No more items',
+          l10n.noMoreItems,
           style: $styles.text.bodySmall.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

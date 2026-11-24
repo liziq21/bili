@@ -1106,12 +1106,6 @@ abstract class AppLocalizations {
   /// **'Load more history'**
   String get loadMoreHistory;
 
-  /// Migrated from hardcoded literal (PR #345 tooltip)
-  ///
-  /// In en, this message translates to:
-  /// **'All history loaded'**
-  String get allHistoryLoaded;
-
   /// Migrated from hardcoded literal (LIZ-51 batch base)
   ///
   /// In en, this message translates to:

@@ -730,10 +730,6 @@
   "@loadMoreHistory": {
     "description": "Migrated from hardcoded literal (PR #345 tooltip)"
   },
-  "allHistoryLoaded": "All history loaded",
-  "@allHistoryLoaded": {
-    "description": "Migrated from hardcoded literal (PR #345 tooltip)"
-  },
   "historyLoadFailed": "Failed to load history",
   "@historyLoadFailed": {
     "description": "Migrated from hardcoded literal (LIZ-51 batch base)"

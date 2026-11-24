@@ -5,6 +5,7 @@ import 'package:app/database/dao/media_history_dao.dart';
 import 'package:app/database/table/media.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:app/feature/media_library/media_library_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
@@ -117,6 +118,9 @@ void main() {
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: MediaLibraryScreen(
               onVideoTap: (sourceId, videoId) => tapped.add((
                 video: VideoModel(
@@ -212,7 +216,6 @@ void main() {
       // The header toolbar sits above the list, so an end-of-list marker there
       // would be read before the rows it is supposed to follow. With no rows at
       // all the empty state already explains the list, so no footer either.
-      expect(find.byTooltip('All history loaded'), findsNothing);
       expect(find.text('No more items'), findsNothing);
     },
   );
@@ -233,10 +236,13 @@ void main() {
     expect(cubit.state.items, hasLength(1));
     expect(cubit.state.hasMore, isFalse);
 
-    final row = tester.getRect(find.textContaining('Video v1'));
+    final row = tester.getRect(
+      find
+          .ancestor(of: find.text('Video v1'), matching: find.byType(InkWell))
+          .first,
+    );
     final footer = tester.getRect(find.text('No more items'));
     expect(footer.top, greaterThanOrEqualTo(row.bottom));
-    expect(find.byTooltip('All history loaded'), findsNothing);
   });
 
   testWidgets('labels each row with its source and when it was watched', (
@@ -276,9 +282,9 @@ void main() {
 
     // The row subtitle leads with the source display name rather than the raw
     // id: the id is an internal identifier and would mean nothing to a reader.
-    expect(find.text('Bilibili - Just now'), findsOneWidget);
-    expect(find.text('Bilibili - Earlier today'), findsOneWidget);
-    expect(find.text('Bilibili - This week'), findsOneWidget);
+    expect(find.text('Bilibili · 5 minutes ago'), findsOneWidget);
+    expect(find.text('Bilibili · 5 hours ago'), findsOneWidget);
+    expect(find.text('Bilibili · 1 day ago'), findsOneWidget);
     expect(find.textContaining('bilibili'), findsNothing);
   });
 
@@ -307,7 +313,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Text &&
-            RegExp(r'^Bilibili - (\d{4}-)?\d{2}-\d{2}$')
+            RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$')
                 .hasMatch(widget.data ?? ''),
       ),
       findsOneWidget,
@@ -333,7 +339,7 @@ void main() {
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
-    expect(find.text('Bilibili - Just now'), findsOneWidget);
+    expect(find.textContaining('Bilibili · Watched 01:01 · '), findsOneWidget);
   });
 
   testWidgets('long-press deletes the row after confirmation', (tester) async {
@@ -493,6 +499,9 @@ void main() {
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: MediaLibraryScreen(
               onVideoTap: (sourceId, videoId) => tapped.add((
                 video: VideoModel(
