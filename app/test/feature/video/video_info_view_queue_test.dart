@@ -1,6 +1,7 @@
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
@@ -94,6 +95,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: MultiProvider(
             providers: [
@@ -203,6 +210,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: BlocProvider<VideoBloc>.value(
             value: mockBloc,
@@ -248,7 +261,17 @@ void main() {
       ],
     );
 
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpWidget(
+      MaterialApp.router(
+        routerConfig: router,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('关联视频'), findsOneWidget);

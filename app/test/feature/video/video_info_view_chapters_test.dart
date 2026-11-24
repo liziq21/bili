@@ -1,6 +1,7 @@
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,6 +80,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: MultiProvider(
             providers: [
@@ -117,6 +124,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: MultiProvider(
             providers: [

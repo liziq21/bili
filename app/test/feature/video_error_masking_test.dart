@@ -74,6 +74,12 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('zh'),
             home: Scaffold(
               body: BlocProvider<VideoBloc>.value(
                 value: mockBloc,

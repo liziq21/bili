@@ -7,7 +7,6 @@ import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 
 /// Shows the local playlists that belong to [sourceId] and appends [video] to
@@ -60,7 +59,7 @@ class _LocalPlaylistPickerDialogState()
     // `$styles` 是全局静态，不订阅主题；下面 StreamBuilder 里的错误文字要在
     // 切主题后换色，这里显式建立依赖，否则它会留着旧色板。
     Theme.of(context);
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.addToPlaylistTitle),
       content: SizedBox(
@@ -180,7 +179,7 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _isSaving = false;
         _error = l10n.addFailed(error.toString());
@@ -214,7 +213,7 @@ class _LocalPlaylistPickerDialogState()
       Navigator.of(context).pop();
     } on Object catch (error) {
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
         _isSaving = false;
         _error = l10n.createOrAddFailed(error.toString());
@@ -284,7 +283,7 @@ class _PlaylistNameDialogState() extends State<_PlaylistNameDialog> {
     // `$styles` 是全局静态，不订阅主题；下面 StreamBuilder 里的错误文字要在
     // 切主题后换色，这里显式建立依赖，否则它会留着旧色板。
     Theme.of(context);
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.newPlaylist),
       content: TextField(

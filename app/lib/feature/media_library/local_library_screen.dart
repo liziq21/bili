@@ -7,7 +7,6 @@ import '../../data/repository/local_library_repository.dart';
 import '../../database/app_database.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 import '../../routing/navigation_callbacks.dart';
@@ -49,7 +48,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final catalog = context.read<MediaSourceCatalog>();
     return DefaultTabController(
       length: 4,
@@ -152,7 +151,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
   }
 
   Widget _scopeBar(MediaSourceCatalog catalog) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final sourceName = _sourceName(_sourceId);
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -197,7 +196,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final selected = await showDialog<({String? sourceId})>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
           title: Text(l10n.selectSource),
           content: ConstrainedBox(
@@ -253,7 +252,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
           title: Text(l10n.deletePlaylistConfirm),
           content: Text(l10n.deletePlaylistNote),
@@ -277,7 +276,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
 
   Future<void> _addBookmarks(LocalPlaylistEntity playlist) =>
       _runOperation(() async {
-        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        final l10n = AppLocalizations.of(context)!;
         final bookmarks = (await _repository.getBookmarks())
             .where((bookmark) => bookmark.sourceId == playlist.sourceId)
             .toList(growable: false);
@@ -334,7 +333,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
       await operation();
     } on Object catch (error) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        final l10n = AppLocalizations.of(context)!;
         _reportError(l10n.operationFailed(error.toString()));
       }
     } finally {
@@ -433,7 +432,7 @@ class _BookmarksTabState() extends State<_BookmarksTab> {
         .where((bookmark) => _selected.contains(bookmark.internalId))
         .toList(growable: false);
     if (selected.isEmpty) return;
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -464,7 +463,7 @@ class _BookmarksTabState() extends State<_BookmarksTab> {
               .toList(growable: false)
         : bookmarks;
     if (selected.isEmpty) return;
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final text = selected
         .map((bookmark) => '${bookmark.title}\n${bookmark.url}')
@@ -486,7 +485,7 @@ class _BookmarksTabState() extends State<_BookmarksTab> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<List<LocalBookmarkEntity>>(
       stream: widget.stream,
       builder: (context, snapshot) {
@@ -740,7 +739,7 @@ class const _PlaylistsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<List<LocalPlaylistEntity>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -840,7 +839,7 @@ class const _PlaylistCard({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -1011,7 +1010,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
-        final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+        final l10n = AppLocalizations.of(context)!;
         return AlertDialog(
           title: Text(l10n.batchDeleteConfirm),
           content: Text(l10n.batchDeleteNote(count)),
@@ -1156,7 +1155,7 @@ class _PlaylistItemsViewState() extends State<_PlaylistItemsView> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -1307,7 +1306,7 @@ class const _PlaylistItemRow({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = onToggleSelect != null;
     return ListTile(
       dense: true,
@@ -1391,7 +1390,7 @@ class const _SubscriptionsTab({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<List<LocalSubscriptionEntity>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -1483,7 +1482,7 @@ class const _SubscriptionGroup({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: EdgeInsets.fromLTRB(
         $styles.insets.sm,
@@ -1622,7 +1621,7 @@ class _BookmarkSelectionDialogState() extends State<_BookmarkSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final viewport = MediaQuery.sizeOf(context);
     final dialogWidth = (viewport.width - 80).clamp(160.0, 460.0).toDouble();
     final dialogHeight = (viewport.height - 240).clamp(120.0, 360.0).toDouble();
@@ -1708,7 +1707,7 @@ class _CreatePlaylistDialogState() extends State<_CreatePlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.newPlaylist),
       content: Column(
@@ -1792,7 +1791,7 @@ class _RenamePlaylistDialogState() extends State<_RenamePlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.renamePlaylistConfirm),
       content: TextField(
@@ -1850,7 +1849,7 @@ class _GroupDialogState() extends State<_GroupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(l10n.setGroup),
       content: TextField(

@@ -5,6 +5,7 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_config.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart' hide Page;
 import 'package:data/data.dart' as data show Page;
@@ -296,6 +297,12 @@ void main() {
     child: Provider<MediaSource>.value(
       value: mediaSources.first,
       child: MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: BlocProvider<HomeBloc>.value(
           value: bloc,
           child: HomeScreen(onLive: (_) {}, onVideo: (_) {}, onSettings: () {}),
@@ -713,7 +720,7 @@ void main() {
       await tester.pumpWidget(buildScreen(bloc));
       await tester.pumpAndSettle();
       expect(find.text('Bilibili'), findsWidgets);
-      expect(find.byTooltip('Settings'), findsOneWidget);
+      expect(find.byTooltip('设置'), findsOneWidget);
       // The by-ID entries (live room, creator space) and the search icon are
       // gone from the app bar, so neither the source having live support nor
       // not having it may bring them back.
@@ -721,7 +728,7 @@ void main() {
       expect(find.byTooltip('访问创作者空间'), findsNothing);
       expect(find.byTooltip('搜索'), findsNothing);
 
-      expect(find.byTooltip('Settings'), findsOneWidget);
+      expect(find.byTooltip('设置'), findsOneWidget);
     });
 
     testWidgets('Never offers filters the source does not implement', (

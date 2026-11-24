@@ -8,7 +8,6 @@ import 'package:model/model.dart';
 import '../../data/repository/playlist_content_repository.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
-import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../../ui/video_card.dart';
 
@@ -95,7 +94,7 @@ class _PlaylistScreenState() extends State<PlaylistScreen> {
     // Keep the route subtree subscribed to brightness changes because `$styles`
     // is a mutable singleton refreshed by AppScaffold.
     Theme.of(context);
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -207,7 +206,7 @@ class const _PlaylistHeader({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final description = detail.description?.trim();
     final shownCount = fetchedCount ?? detail.items.length;
@@ -332,7 +331,7 @@ class const _PlaylistLoadError({required final VoidCallback onRetry})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsZh();
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: EdgeInsets.all($styles.insets.lg),

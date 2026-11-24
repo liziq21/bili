@@ -5,6 +5,7 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/search/bloc/search_result_bloc.dart';
 import 'package:app/feature/search/search_result_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:bilibili/bilibili.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,7 +68,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Live'));
+    await tester.tap(find.text('直播'));
     await tester.pumpAndSettle();
 
     expect(find.text('Live room title'), findsOneWidget);
@@ -103,7 +104,7 @@ void main() {
     await tester.tap(find.byIcon(AppIcons.filter));
     await tester.pumpAndSettle();
     await tester.tap(find.text('10-30分钟'));
-    await tester.tap(find.text('Confirm'));
+    await tester.tap(find.text('确定'));
     await tester.pumpAndSettle();
 
     expect(
@@ -131,10 +132,12 @@ void main() {
 
 Widget _testApp(Widget child) => MaterialApp(
   localizationsDelegates: const [
+    ...AppLocalizations.localizationsDelegates,
     ...GlobalMaterialLocalizations.delegates,
     YoutubeLocalizations.delegate,
   ],
-  supportedLocales: const [Locale('en')],
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('zh'),
   home: child,
 );
 

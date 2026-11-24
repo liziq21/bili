@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart' hide Page;
 import 'package:data/data.dart' as data show Page;
@@ -204,6 +205,12 @@ void main() {
       await mockNetworkImagesFor(() async {
         await tester.pumpWidget(
           MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('zh'),
             theme: goldenTestTheme(),
             home: Scaffold(body: Center(child: widget)),
           ),

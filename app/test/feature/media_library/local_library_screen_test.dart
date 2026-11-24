@@ -4,6 +4,7 @@ import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/media_library/local_library_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/navigation_callbacks.dart';
 import 'package:data/data.dart';
@@ -81,8 +82,12 @@ void main() {
   }
 
   Widget app(Widget child, {LocalLibraryRepository? value}) => MaterialApp(
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    supportedLocales: const [Locale('en')],
+    localizationsDelegates: const [
+      ...AppLocalizations.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('zh'),
     // Keep both providers below Navigator. The source picker must capture its
     // catalog before showDialog creates a route above this subtree.
     home: RepositoryProvider<LocalLibraryRepository>.value(

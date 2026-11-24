@@ -16,9 +16,7 @@ class const PlaylistRouteData({
     final effectiveSource = _resolveSource(context, explicitSource: source);
     if (effectiveSource == null) {
       return NoMediaSourceScreen(
-        message:
-            AppLocalizations.of(context)?.playlistSourceUnavailable ??
-            'Playlist source unavailable',
+        message: AppLocalizations.of(context)!.playlistSourceUnavailable,
       );
     }
 
