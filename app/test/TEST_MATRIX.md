@@ -164,6 +164,7 @@
 - `app/test/feature/video/video_info_view_queue_test.dart`
 - `app/test/feature/video/video_player_placeholder_test.dart`
 - `app/test/feature/video/video_player_test.dart`
+- `app/test/feature/video/video_failure_panel_test.dart`
 - `app/test/feature/video/video_screen_test.dart`
 - `app/test/feature/video_comments_view_test.dart`
 - `app/test/feature/video_error_masking_test.dart`
