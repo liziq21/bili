@@ -7,8 +7,10 @@ import 'package:gap/gap.dart';
 
 import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
+import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
+import 'video_failure_panel.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
   static String _formatCount(int count, AppLocalizations? l10n) {
@@ -65,42 +67,19 @@ class const VideoCommentsView({super.key}) extends StatelessWidget {
         }
 
         if (status.error != null) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.all($styles.insets.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    AppIcons.cloudOff,
-                    size: $styles.insets.lg,
-                    color: $styles.colors.onSurfaceVariant,
-                  ),
-                  Gap($styles.insets.xs),
-                  Text(
-                    l10n?.commentsLoadFailed ?? 'Failed to load comments',
-                    textAlign: TextAlign.center,
-                    style: $styles.text.body.copyWith(
-                      color: $styles.colors.errorText,
-                    ),
-                  ),
-                  // 文案要求「稍后重试」，重试入口必须真的在页面上。
-                  if (status.videoId.isNotEmpty) ...[
-                    Gap($styles.insets.sm),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.read<VideoCommentBloc>().add(
-                          LoadVideoComments(status.videoId),
-                        );
-                      },
-                      icon: const Icon(AppIcons.refresh),
-                      label: Text(l10n?.retry ?? 'Retry'),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+          final copy = AppLocalizations.of(context) ?? AppLocalizationsZh();
+          // 文案要求「稍后重试」，重试入口必须真的在页面上。
+          return VideoFailurePanel(
+            message: copy.commentsLoadFailed,
+            retryLabel: copy.retry,
+            onRetry: status.videoId.isEmpty
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    context.read<VideoCommentBloc>().add(
+                      LoadVideoComments(status.videoId),
+                    );
+                  },
           );
         }
 

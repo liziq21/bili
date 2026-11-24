@@ -1,5 +1,13 @@
 part of 'video_bloc.dart';
 
+/// 区分「不传」与「显式置空」：详情、播放地址与写操作各自 emit，
+/// 任何一次 emit 都不该顺手清掉另一方刚记下的失败原因。
+class const _VideoErrorSentinel();
+
+const _keepError = _VideoErrorSentinel();
+const _keepActionError = _VideoErrorSentinel();
+const _keepStreamError = _VideoErrorSentinel();
+
 class const VideoState({
   final bool isLoading = false,
 
@@ -38,20 +46,24 @@ class const VideoState({
   VideoState copyWith({
     bool? isLoading,
     String? videoId,
-    String? error,
-    String? actionError,
+    Object? error = _keepError,
+    Object? actionError = _keepActionError,
     VideoDetail? videoDetail,
     MediaStream? mediaStream,
-    String? streamError,
+    Object? streamError = _keepStreamError,
   }) {
     return VideoState(
       isLoading: isLoading ?? this.isLoading,
       videoId: videoId ?? this.videoId,
-      error: error,
-      actionError: actionError,
+      error: identical(error, _keepError) ? this.error : error as String?,
+      actionError: identical(actionError, _keepActionError)
+          ? this.actionError
+          : actionError as String?,
       videoDetail: videoDetail ?? this.videoDetail,
       mediaStream: mediaStream ?? this.mediaStream,
-      streamError: streamError,
+      streamError: identical(streamError, _keepStreamError)
+          ? this.streamError
+          : streamError as String?,
     );
   }
 

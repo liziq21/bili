@@ -128,9 +128,17 @@ void main() {
 
       expect(base, isNot(const VideoState(streamError: '签名过期')));
       expect(base.copyWith(mediaStream: null).mediaStream, isNull);
-      // copyWith 对 streamError 是无条件赋值，不传即清空。
+      // copyWith 对 streamError 是不传即保留、传 null 才清空：详情重试
+      // 不该顺手清掉地址失败的原因。
       expect(base.copyWith(streamError: '签名过期').streamError, '签名过期');
-      expect(base.copyWith(streamError: '签名过期').copyWith().streamError, isNull);
+      expect(base.copyWith(streamError: '签名过期').copyWith().streamError, '签名过期');
+      expect(
+        base
+            .copyWith(streamError: '签名过期')
+            .copyWith(streamError: null)
+            .streamError,
+        isNull,
+      );
     });
   });
 

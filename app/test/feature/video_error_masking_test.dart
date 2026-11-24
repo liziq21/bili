@@ -2,6 +2,7 @@ import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/bloc/video_comment_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_comments_view.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,6 +98,12 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: BlocProvider<VideoCommentBloc>.value(
                 value: mockCommentBloc,
@@ -108,7 +115,10 @@ void main() {
 
         await tester.pump();
 
-        expect(find.text('Failed to load comments'), findsOneWidget);
+        expect(
+          find.text('Failed to load comments. Try again later'),
+          findsOneWidget,
+        );
         expect(find.textContaining('CRITICAL_SERVER_EXCEPTION'), findsNothing);
         expect(find.textContaining('Bearer eyJ'), findsNothing);
 

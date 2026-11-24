@@ -67,6 +67,18 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   }
 }
 
+class _FailingStreamDataSource() extends MediaStreamRemoteDataSource {
+  @override
+  String get sourceId => 'failing-stream';
+
+  @override
+  Future<Result<MediaStream, Exception>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  }) async => Result.error(Exception('stream offline'));
+}
+
 /// Loads a normal detail but reports every write as rejected, which is the
 /// case the toggle handlers currently swallow.
 class _RejectingVideoDetailRemoteDataSource()
@@ -233,11 +245,24 @@ void main() {
 
       expect(base, const VideoState());
       expect(base, isNot(const VideoState(actionError: '点赞失败')));
-      // copyWith 对 actionError 是「无条件赋值」而非「null 保留」：不传即清空。
-      // 这是既有 error 字段的同一形态，bloc 的回滚 emit 每次都显式带上消息，
-      // 所以这里记录下来，避免后来者以为它是保留语义。
+      // copyWith 对三个错误字段都是「不传即保留，传 null 才清空」：详情、
+      // 播放地址与写操作各自 emit，任何一次 emit 都不该顺手清掉别人的失败原因。
       expect(base.copyWith(isLoading: true).actionError, isNull);
       expect(base.copyWith(actionError: '点赞失败').actionError, '点赞失败');
+      expect(
+        base
+            .copyWith(actionError: '点赞失败')
+            .copyWith(isLoading: true)
+            .actionError,
+        '点赞失败',
+      );
+      expect(
+        base
+            .copyWith(actionError: '点赞失败')
+            .copyWith(actionError: null)
+            .actionError,
+        isNull,
+      );
     });
 
     test('LoadVideoDetail loads video detail successfully', () async {
@@ -255,6 +280,37 @@ void main() {
         ]),
       );
     });
+
+    test(
+      'a detail retry keeps the stream error so the player keeps its retry',
+      () async {
+        // 详情与播放地址是两个独立请求。详情重试若把 streamError 清掉，
+        // 播放器既没有地址也没有错误，只会一直转圈且没有重试入口。
+        final bloc = VideoBloc(
+          repository: AppVideoDetailRepository(
+            fakeDataSource,
+            _FailingStreamDataSource(),
+          ),
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadMediaStream('BV1stream'));
+        await bloc.stream.firstWhere((s) => s.streamError != null);
+
+        fakeDataSource.failDetail = true;
+        bloc.add(const LoadVideoDetail('BV1stream'));
+        await bloc.stream.firstWhere((s) => s.error != null);
+
+        fakeDataSource.failDetail = false;
+        bloc.add(const LoadVideoDetail('BV1stream'));
+        final recovered = await bloc.stream.firstWhere(
+          (s) => s.videoDetail != null,
+        );
+
+        expect(recovered.error, isNull);
+        expect(recovered.streamError, isNotNull);
+      },
+    );
 
     test(
       'a failed load keeps the video id so the error state can retry',

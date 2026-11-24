@@ -19,6 +19,7 @@ import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
 import 'video_description_text.dart';
+import 'video_failure_panel.dart';
 
 String _formatCount(int count, AppLocalizations l10n) {
   if (count >= 10000) {
@@ -96,43 +97,19 @@ class const VideoInfoView({super.key}) extends StatelessWidget {
         }
 
         if (status.error != null) {
-          return Center(
-            child: Padding(
-              padding: EdgeInsets.all($styles.insets.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    AppIcons.cloudOff,
-                    size: $styles.insets.lg,
-                    color: $styles.colors.onSurfaceVariant,
-                  ),
-                  Gap($styles.insets.xs),
-                  Text(
-                    l10n.videoLoadFailed,
-                    textAlign: TextAlign.center,
-                    style: $styles.text.body.copyWith(
-                      color: $styles.colors.errorText,
-                    ),
-                  ),
-                  // 文案写着「请重试」，就必须给出重试入口；videoId 由
-                  // LoadVideoDetail 写入，缺失时不渲染一个点了也没用的按钮。
-                  if (status.videoId.isNotEmpty) ...[
-                    Gap($styles.insets.sm),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.read<VideoBloc>().add(
-                          LoadVideoDetail(status.videoId),
-                        );
-                      },
-                      icon: const Icon(AppIcons.refresh),
-                      label: Text(l10n.retry),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+          // 文案写着「请重试」，就必须给出重试入口；videoId 由
+          // LoadVideoDetail 写入，缺失时不渲染一个点了也没用的按钮。
+          return VideoFailurePanel(
+            message: l10n.videoLoadFailed,
+            retryLabel: l10n.retry,
+            onRetry: status.videoId.isEmpty
+                ? null
+                : () {
+                    HapticFeedback.lightImpact();
+                    context.read<VideoBloc>().add(
+                      LoadVideoDetail(status.videoId),
+                    );
+                  },
           );
         }
 

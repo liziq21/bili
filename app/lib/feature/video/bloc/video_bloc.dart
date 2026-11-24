@@ -97,7 +97,7 @@ class VideoBloc({
       likeCount: newCount < 0 ? 0 : newCount,
     );
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final result = await _repository.toggleLike(
       detail.video.id,
@@ -130,7 +130,7 @@ class VideoBloc({
       favoriteCount: newCount < 0 ? 0 : newCount,
     );
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final local = _localLibraryRepository;
     final sourceId = _sourceId;
@@ -162,7 +162,7 @@ class VideoBloc({
     final newIsSubscribed = !detail.isSubscribed;
     final updatedDetail = detail.copyWith(isSubscribed: newIsSubscribed);
 
-    emit(state.copyWith(videoDetail: updatedDetail));
+    emit(state.copyWith(videoDetail: updatedDetail, actionError: null));
 
     final local = _localLibraryRepository;
     final sourceId = _sourceId;

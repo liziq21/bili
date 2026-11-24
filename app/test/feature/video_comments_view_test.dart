@@ -3,6 +3,7 @@ import 'package:app/data/repository/video_comment_repository.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/video/bloc/video_comment_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_comments_view.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -170,6 +171,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         home: AppScaffold(
           child: Material(
             child: SizedBox(
@@ -189,7 +196,10 @@ void main() {
     await tester.pump();
 
     // The copy tells the user to retry, so the control must exist.
-    expect(find.text('Failed to load comments'), findsOneWidget);
+    expect(
+      find.text('Failed to load comments. Try again later'),
+      findsOneWidget,
+    );
     final retry = find.widgetWithText(OutlinedButton, 'Retry');
     expect(retry, findsOneWidget);
 

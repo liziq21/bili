@@ -68,7 +68,7 @@
 
 Material 组件与 `$styles.colors.*` 读**同一个** `ColorScheme`，禁止两套独立色板并存 —— 两套并存时 Material 组件会算出与自研 widget 不同的对比度。
 
-`AppColors` 构造后不持有任何颜色字面量。`scrim` / `onScrim` / `onSurfaceStrong` 三个角色在 `ColorScheme` 里没有对应字段，由色板携带，且**只在 `brand_palette.dart` 取值**；其余角色一律从 `palette.scheme` 派生。
+`AppColors` 构造后不持有任何颜色字面量。`scrim` / `onScrim` / `onSurfaceStrong` / `accentText` / `errorText` 五个角色在 `ColorScheme` 里没有能表达其门槛的字段，由色板携带，且**只在 `brand_palette.dart` 取值**；其余角色一律从 `palette.scheme` 派生。
 
 ### R5 —— DynamicColor 优先，品牌色 fallback
 
