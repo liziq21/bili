@@ -52,6 +52,8 @@ void main() {
 
       final filterChip = tester.widget<FilterChip>(chipFinder);
       expect(filterChip.tooltip, '直播');
+      // 标签本身要居中；带前置图标时文字会被推到右侧。
+      expect(filterChip.avatar, isNull);
 
       await tester.tap(chipFinder);
       await tester.pump();
