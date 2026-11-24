@@ -180,9 +180,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appearanceTheme => '主题';
 
   @override
-  String get appearanceEyeComfort => '护眼模式';
-
-  @override
   String get appearanceThemeSubtitle => '应用的主题模式';
 
   @override
@@ -190,9 +187,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appearanceFontSizeSubtitle => '调整应用内文字大小';
-
-  @override
-  String get appearanceEyeComfortSubtitle => '在暗环境下减轻视觉疲劳';
 
   @override
   String get appearanceFontSizeSmall => '小';

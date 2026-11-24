@@ -320,7 +320,6 @@ void main() {
           // SwitchListTile is a subtype of ListTile, so use descendant matchers to
           // distinguish them instead of bare find.byType(ListTile).
           expect(find.byType(SwitchListTile), findsOneWidget);
-          // Use descendant of SwitchListTile to avoid matching section header.
           expect(
             find.descendant(
               of: find.byType(SwitchListTile),
@@ -328,7 +327,6 @@ void main() {
             ),
             findsOneWidget,
           );
-          // Use descendant of ListTile to avoid matching section header.
           expect(
             find.descendant(
               of: find.byType(ListTile),
@@ -344,24 +342,25 @@ void main() {
       },
     );
 
-    testWidgets('appearance page shows theme, font size and eye comfort', (
-      tester,
-    ) async {
+    testWidgets('appearance page shows theme and font size', (tester) async {
       // Given the localized appearance settings page.
       try {
         // When the page is rendered.
         await tester.pumpWidget(_buildScreen(const AppearanceSettingsScreen()));
         await tester.pump();
 
-        // Then the three entries are visible.
+        // Then both entries are visible, and the no-op eye comfort switch is
+        // gone (issue #611): the page must not expose a control that cannot
+        // change anything.
         final context = tester.element(find.byType(AppearanceSettingsScreen));
         final l10n = AppLocalizations.of(context)!;
         expect(
           find.widgetWithText(AppBar, l10n.settingsAppearance),
           findsOneWidget,
         );
-        expect(find.byType(ListTile), findsNWidgets(3));
-        // Use descendant of ListTile to avoid matching section headers.
+        expect(find.byType(ListTile), findsNWidgets(2));
+        expect(find.byType(SwitchListTile), findsNothing);
+        // Use descendant of ListTile to avoid matching anything else.
         expect(
           find.descendant(
             of: find.byType(ListTile).at(0),
@@ -373,14 +372,6 @@ void main() {
           find.descendant(
             of: find.byType(ListTile).at(1),
             matching: find.text(l10n.appearanceFontSize),
-          ),
-          findsOneWidget,
-        );
-        // Use descendant of SwitchListTile to avoid matching section header.
-        expect(
-          find.descendant(
-            of: find.byType(SwitchListTile),
-            matching: find.text(l10n.appearanceEyeComfort),
           ),
           findsOneWidget,
         );

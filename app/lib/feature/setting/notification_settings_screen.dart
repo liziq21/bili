@@ -130,7 +130,6 @@ class _NotificationSettingsScreenState()
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                SettingSectionHeader(title: l10n.settingsNotifications),
                 SettingSwitchTile(
                   title: l10n.feedUpdateNotifications,
                   subtitle: l10n.feedUpdateNotificationsSubtitle,
@@ -138,7 +137,6 @@ class _NotificationSettingsScreenState()
                   onChanged: (enabled) => unawaited(_updateEnabled(enabled)),
                 ),
                 if (_feedUpdateEnabled) ...[
-                  SettingSectionHeader(title: l10n.feedUpdateThreshold),
                   ListTile(
                     title: Text(l10n.feedUpdateThreshold),
                     subtitle: Text(l10n.feedUpdateThresholdSubtitle),

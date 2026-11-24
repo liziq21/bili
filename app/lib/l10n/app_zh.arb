@@ -218,10 +218,6 @@
   "@appearanceTheme": {
     "description": "Appearance settings placeholder entry for theme"
   },
-  "appearanceEyeComfort": "护眼模式",
-  "@appearanceEyeComfort": {
-    "description": "Appearance settings placeholder entry for eye comfort"
-  },
   "appearanceThemeSubtitle": "应用的主题模式",
   "@appearanceThemeSubtitle": {
     "description": "Subtitle for theme setting",
@@ -235,11 +231,6 @@
   "appearanceFontSizeSubtitle": "调整应用内文字大小",
   "@appearanceFontSizeSubtitle": {
     "description": "Subtitle for font size setting",
-    "type": "String"
-  },
-  "appearanceEyeComfortSubtitle": "在暗环境下减轻视觉疲劳",
-  "@appearanceEyeComfortSubtitle": {
-    "description": "Subtitle for eye comfort setting",
     "type": "String"
   },
   "appearanceFontSizeSmall": "小",

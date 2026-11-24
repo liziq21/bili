@@ -434,12 +434,6 @@ abstract class AppLocalizations {
   /// **'Theme'**
   String get appearanceTheme;
 
-  /// Appearance settings placeholder entry for eye comfort
-  ///
-  /// In en, this message translates to:
-  /// **'Eye Comfort'**
-  String get appearanceEyeComfort;
-
   /// Subtitle for theme setting
   ///
   /// In en, this message translates to:
@@ -457,12 +451,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjust text size across the app'**
   String get appearanceFontSizeSubtitle;
-
-  /// Subtitle for eye comfort setting
-  ///
-  /// In en, this message translates to:
-  /// **'Reduce eye strain in dark environments'**
-  String get appearanceEyeComfortSubtitle;
 
   /// Font size option: Small
   ///

@@ -87,28 +87,17 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                SettingSectionHeader(title: l10n.appearanceTheme),
                 SettingValueTile(
                   title: l10n.appearanceTheme,
                   subtitle: l10n.appearanceThemeSubtitle,
                   value: _themeLabel(l10n),
                   onTap: () => _showThemePicker(context),
                 ),
-                SettingSectionHeader(title: l10n.appearanceFontSize),
                 SettingValueTile(
                   title: l10n.appearanceFontSize,
                   subtitle: l10n.appearanceFontSizeSubtitle,
                   value: _fontScaleLabel(l10n),
                   onTap: () => _showFontScalePicker(context),
-                ),
-                SettingSectionHeader(title: l10n.appearanceEyeComfort),
-                SettingSwitchTile(
-                  title: l10n.appearanceEyeComfort,
-                  subtitle: l10n.appearanceEyeComfortSubtitle,
-                  value: false,
-                  onChanged: (_) {
-                    // L2 实现：此处仅占位，具体护眼逻辑后续迭代。
-                  },
                 ),
               ],
             ),

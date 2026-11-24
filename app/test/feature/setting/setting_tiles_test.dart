@@ -24,6 +24,28 @@ void main() {
 
       expect(find.text('Playback'), findsOneWidget);
     });
+
+    testWidgets('aligns its left edge with the row it introduces', (
+      tester,
+    ) async {
+      // Given a header above a setting row.
+      await tester.pumpWidget(
+        _buildWidget(
+          ListView(
+            children: const [
+              SettingSectionHeader(title: 'Playback gestures'),
+              ListTile(title: Text('Seek')),
+            ],
+          ),
+        ),
+      );
+
+      // Then both texts start at the same x (ListTile's contentPadding).
+      expect(
+        tester.getTopLeft(find.text('Playback gestures')).dx,
+        tester.getTopLeft(find.text('Seek')).dx,
+      );
+    });
   });
 
   group('SettingSwitchTile', () {

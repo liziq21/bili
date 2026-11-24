@@ -55,7 +55,7 @@ void main() {
       );
       expect(find.text(l10n.appearanceThemeSystem), findsOneWidget);
       expect(find.text(l10n.appearanceFontSizeStandard), findsOneWidget);
-      expect(find.byType(SwitchListTile), findsOneWidget);
+      expect(find.byType(ListTile), findsNWidgets(2));
     });
 
     testWidgets('changes theme and persists to preferences', (tester) async {

@@ -107,7 +107,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                SettingSectionHeader(title: l10n.libraryBookmarkSync),
                 SettingSwitchTile(
                   title: l10n.libraryBookmarkSync,
                   subtitle: l10n.libraryBookmarkSyncSubtitle,
@@ -117,7 +116,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
                   onChanged: (enabled) =>
                       unawaited(_updateBookmarkSync(enabled)),
                 ),
-                SettingSectionHeader(title: l10n.librarySearchHistoryRetention),
                 Tooltip(
                   message:
                       '${l10n.librarySearchHistoryRetention}: $retentionText',
