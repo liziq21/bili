@@ -28,6 +28,7 @@ import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_bloc.dart';
 import '../video_queue_request.dart';
+import '../player/playback_error_label.dart';
 import '../player/brightness_service.dart';
 import '../player/media_playback_controller.dart';
 import '../player/playback_error.dart';
@@ -931,7 +932,7 @@ class const _ErrorView({
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final category = _categoryLabel(l10n, error.category);
+    final category = playbackErrorCategoryLabel(l10n, error.category);
     return Container(
       color: $styles.colors.scrim,
       child: LayoutBuilder(
@@ -1019,19 +1020,6 @@ class const _ErrorView({
     );
   }
 }
-
-String _categoryLabel(AppLocalizations? l10n, PlaybackErrorCategory category) =>
-    switch (category) {
-      PlaybackErrorCategory.network =>
-        l10n?.playbackErrorNetwork ?? 'Network error',
-      PlaybackErrorCategory.decoder =>
-        l10n?.playbackErrorDecoder ?? 'Decoder error',
-      PlaybackErrorCategory.drm => l10n?.playbackErrorDrm ?? 'DRM error',
-      PlaybackErrorCategory.authorization =>
-        l10n?.playbackErrorAuthorization ?? 'Authorization error',
-      PlaybackErrorCategory.unknown =>
-        l10n?.playbackErrorUnknown ?? 'Unknown error',
-    };
 
 /// 长按 2x 期间的临时标记。
 class const _BoostBadge() extends StatelessWidget {

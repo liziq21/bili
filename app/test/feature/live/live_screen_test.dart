@@ -11,10 +11,16 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   @override
   String get sourceId => 'fake';
 
+  /// 置为 true 时详情接口失败，页面进入整页错误态。
+  bool failDetail = false;
+
   @override
   Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(
     int roomId,
   ) async {
+    if (failDetail) {
+      return Result.error(Exception('room detail offline'));
+    }
     return Result.success(
       const LiveRoomDetail(
         roomId: 12345,
@@ -35,28 +41,66 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   }
 }
 
+Widget _buildScreen(_FakeLiveDataSource source, {Locale? locale}) {
+  return Provider<AppLiveRoomRepository>.value(
+    value: AppLiveRoomRepository(source),
+    child: MaterialApp(
+      locale: locale,
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const LiveScreen(roomId: '12345'),
+    ),
+  );
+}
+
 void main() {
   testWidgets('LiveScreen displays stream error and retry button', (
     tester,
   ) async {
-    final repo = AppLiveRoomRepository(_FakeLiveDataSource());
-
-    await tester.pumpWidget(
-      Provider<AppLiveRoomRepository>.value(
-        value: repo,
-        child: MaterialApp(
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const LiveScreen(roomId: '12345'),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_buildScreen(_FakeLiveDataSource()));
     await tester.pumpAndSettle();
 
     expect(find.text('Failed to load live stream'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);
+  });
+
+  testWidgets('the app bar title follows the active locale', (tester) async {
+    await tester.pumpWidget(
+      _buildScreen(_FakeLiveDataSource(), locale: const Locale('zh')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('直播间'), findsOneWidget);
+    expect(find.text('Live'), findsNothing);
+  });
+
+  testWidgets('the app bar title is English under the English locale', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildScreen(_FakeLiveDataSource(), locale: const Locale('en')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Live'), findsOneWidget);
+    expect(find.text('直播间'), findsNothing);
+  });
+
+  testWidgets('a detail failure shows the category copy, never the exception', (
+    tester,
+  ) async {
+    final source = _FakeLiveDataSource()..failDetail = true;
+
+    await tester.pumpWidget(_buildScreen(source));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Failed to load live room'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
+    expect(find.textContaining('room detail offline'), findsNothing);
+    expect(find.textContaining('Exception'), findsNothing);
   });
 }

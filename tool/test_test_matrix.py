@@ -54,6 +54,29 @@ class MappingCheckTest(unittest.TestCase):
             code = test_matrix.check_mapping(REPO_ROOT)
         self.assertEqual(code, 0, 'mapping does not match the test tree')
 
+    def test_stale_report_fails_the_check(self):
+        """A report that no longer matches the mapping must fail --check."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for category, files in test_matrix.TEST_MATRIX.items():
+                for rel in files:
+                    _write(root / rel, 'void main() {}\n')
+            _write(root / test_matrix.REPORT_REL, 'stale\n')
+            with redirect_stdout(io.StringIO()):
+                code = test_matrix.check_mapping(root)
+            self.assertEqual(code, 1)
+
+    def test_fresh_report_passes_the_check(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for category, files in test_matrix.TEST_MATRIX.items():
+                for rel in files:
+                    _write(root / rel, 'void main() {}\n')
+            _write(root / test_matrix.REPORT_REL, test_matrix.render_report())
+            with redirect_stdout(io.StringIO()):
+                code = test_matrix.check_mapping(root)
+            self.assertEqual(code, 0)
+
     def test_report_lists_every_mapped_file(self):
         report = test_matrix.render_report()
         for category, files in test_matrix.TEST_MATRIX.items():

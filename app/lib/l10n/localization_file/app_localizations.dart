@@ -1730,6 +1730,12 @@ abstract class AppLocalizations {
   /// **'Network error'**
   String get playbackErrorNetwork;
 
+  /// Playback error category - the stream could not be opened
+  ///
+  /// In en, this message translates to:
+  /// **'Stream failed to open'**
+  String get playbackErrorOpen;
+
   /// Playback error category - media decoding failure
   ///
   /// In en, this message translates to:
@@ -2071,6 +2077,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading live room'**
   String get liveRoomLoading;
+
+  /// Live room screen app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get liveScreenTitle;
 
   /// LIZ-84 live room detail and stream
   ///

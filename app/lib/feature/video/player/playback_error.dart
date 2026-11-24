@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 
 /// The user-facing class of a failure reported by the media player.
 enum PlaybackErrorCategory() {
+  /// The stream could not be opened at all, e.g. the media URL is rejected or
+  /// unreachable before decoding starts.
+  open,
+
   /// The stream could not be reached or the connection was interrupted.
   network,
 
@@ -26,8 +30,14 @@ class const MediaPlaybackException({
   required final String message,
 }) extends Equatable implements Exception {
   /// Converts a media-kit error string into a stable application category.
+  ///
+  /// The stored [message] has media URLs removed: a stream URL carries
+  /// `sign` / `expires` / `trid` parameters, and the message reaches the UI
+  /// state, the log and the debug overlay. Classification runs on the redacted
+  /// text too, so URL contents cannot decide the category.
   factory fromMessage(String message) {
-    final normalized = message.toLowerCase();
+    final redacted = _redactUrls(message);
+    final normalized = redacted.toLowerCase();
 
     if (_containsAny(normalized, <String>[
       'drm',
@@ -41,7 +51,7 @@ class const MediaPlaybackException({
     ])) {
       return MediaPlaybackException(
         category: PlaybackErrorCategory.drm,
-        message: message,
+        message: redacted,
       );
     }
 
@@ -61,7 +71,7 @@ class const MediaPlaybackException({
     ])) {
       return MediaPlaybackException(
         category: PlaybackErrorCategory.authorization,
-        message: message,
+        message: redacted,
       );
     }
 
@@ -82,7 +92,21 @@ class const MediaPlaybackException({
     ])) {
       return MediaPlaybackException(
         category: PlaybackErrorCategory.network,
-        message: message,
+        message: redacted,
+      );
+    }
+
+    if (_containsAny(normalized, <String>[
+      'failed to open',
+      'could not open',
+      'cannot open',
+      'unable to open',
+      'error opening',
+      'failed to start',
+    ])) {
+      return MediaPlaybackException(
+        category: PlaybackErrorCategory.open,
+        message: redacted,
       );
     }
 
@@ -98,13 +122,13 @@ class const MediaPlaybackException({
     ])) {
       return MediaPlaybackException(
         category: PlaybackErrorCategory.decoder,
-        message: message,
+        message: redacted,
       );
     }
 
     return MediaPlaybackException(
       category: PlaybackErrorCategory.unknown,
-      message: message,
+      message: redacted,
     );
   }
 
@@ -117,6 +141,13 @@ class const MediaPlaybackException({
 
 bool _containsAny(String value, List<String> candidates) =>
     candidates.any(value.contains);
+
+/// Replaces every media URL with a placeholder so signed parameters never
+/// reach the UI, the log or the debug overlay.
+String _redactUrls(String message) => message.replaceAll(
+  RegExp(r'[a-z][a-z0-9+.-]*://\S+', caseSensitive: false),
+  '<url>',
+);
 
 /// Controls automatic retries for transient playback failures.
 @immutable

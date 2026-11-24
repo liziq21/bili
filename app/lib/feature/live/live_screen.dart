@@ -12,11 +12,11 @@ import '../../l10n/localization_file/app_localizations.dart';
 import '../../l10n/localization_file/app_localizations_zh.dart';
 import '../../main.dart';
 import '../video/player/media_playback_controller.dart';
-import '../video/player/playback_error.dart';
 import '../video/danmaku/danmaku_settings_screen.dart';
 import 'bloc/live_bloc.dart';
 import 'bloc/providers.dart';
 import 'live_danmaku_overlay.dart';
+import 'live_playback_error_overlay.dart';
 import 'live_quality_picker.dart';
 
 /// 直播页：房间信息头 + media_kit 播放器。
@@ -104,7 +104,7 @@ class _LiveScreenState() extends State<LiveScreen> {
             tooltip: l10n.back,
             icon: const Icon(AppIcons.back, size: 18),
           ),
-          title: const Text('Live'),
+          title: Text(l10n.liveScreenTitle),
         ),
         body: BlocConsumer<LiveBloc, LiveState>(
           listener: (context, state) {
@@ -121,7 +121,6 @@ class _LiveScreenState() extends State<LiveScreen> {
             // 详情加载失败 → 整页换错误态（无房间信息可显示）。
             if (state.roomError != null) {
               return _ErrorView(
-                message: state.roomError!,
                 l10n: l10n,
                 onRetry: () =>
                     context.read<LiveBloc>().add(LoadLiveRoomDetail(roomIdNum)),
@@ -390,42 +389,9 @@ class _PlayerAreaState() extends State<_PlayerArea> {
     final Widget? playbackErrorOverlay = playbackError == null
         ? null
         : Positioned.fill(
-            child: ColoredBox(
-              color: $styles.colors.scrim.withValues(alpha: 0.72),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      AppIcons.error,
-                      size: 32,
-                      color: $styles.colors.onSurfaceVariant,
-                    ),
-                    const Gap(8),
-                    Text(
-                      _categoryLabel(l10n, playbackError.category),
-                      style: $styles.text.body,
-                      textAlign: TextAlign.center,
-                    ),
-                    const Gap(4),
-                    Text(
-                      playbackError.message,
-                      style: $styles.text.bodySmall.copyWith(
-                        color: $styles.colors.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const Gap(12),
-                    FilledButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.onRetry();
-                      },
-                      child: Text(l10n.retry),
-                    ),
-                  ],
-                ),
-              ),
+            child: LivePlaybackErrorOverlay(
+              category: playbackError.category,
+              onRetry: widget.onRetry,
             ),
           );
 
@@ -516,23 +482,10 @@ class _PlayerAreaState() extends State<_PlayerArea> {
   }
 }
 
-/// 播放器错误类别 → 本地化标签。
-String _categoryLabel(AppLocalizations? l10n, PlaybackErrorCategory category) =>
-    switch (category) {
-      PlaybackErrorCategory.network =>
-        l10n?.playbackErrorNetwork ?? 'Network error',
-      PlaybackErrorCategory.decoder =>
-        l10n?.playbackErrorDecoder ?? 'Decoder error',
-      PlaybackErrorCategory.drm => l10n?.playbackErrorDrm ?? 'DRM error',
-      PlaybackErrorCategory.authorization =>
-        l10n?.playbackErrorAuthorization ?? 'Authorization error',
-      PlaybackErrorCategory.unknown =>
-        l10n?.playbackErrorUnknown ?? 'Unknown error',
-    };
-
 /// 整页错误态：详情加载失败时显示。
+///
+/// 原始异常不上屏（可能带签名参数），只显示本地化分类与重试。
 class const _ErrorView({
-  required final String message,
   required final AppLocalizations l10n,
   required final VoidCallback onRetry,
 }) extends StatelessWidget {
@@ -549,8 +502,6 @@ class const _ErrorView({
           ),
           const Gap(16),
           Text(l10n.liveRoomError, style: $styles.text.h3),
-          const Gap(8),
-          Text(message, style: $styles.text.bodySmall),
           const Gap(16),
           FilledButton(
             onPressed: () {

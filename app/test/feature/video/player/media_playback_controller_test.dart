@@ -322,6 +322,25 @@ void main() {
       expect(recorder.last.error, isNull);
     });
 
+    test('strips the signed stream URL from the reported error', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitError(
+        'Failed to open '
+        'https://cdn.example.com/live.m3u8?sign=abc&expires=1700&trid=x: '
+        'Connection timed out',
+      );
+      await pumpEventQueue();
+
+      // The UI reads this message, so it must not carry the signature.
+      final message = recorder.last.error!.message;
+      expect(message, isNot(contains('sign=')));
+      expect(message, isNot(contains('cdn.example.com')));
+      // Connection failures stay retryable even with media-kit's prefix.
+      expect(recorder.last.error!.category, PlaybackErrorCategory.network);
+    });
+
     test('ignores an error emitted while switching media', () async {
       await controller.open(
         MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),

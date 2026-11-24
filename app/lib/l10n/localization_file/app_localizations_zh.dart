@@ -901,6 +901,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playbackErrorNetwork => '网络错误';
 
   @override
+  String get playbackErrorOpen => '无法打开播放地址';
+
+  @override
   String get playbackErrorDecoder => '解码错误';
 
   @override
@@ -1094,6 +1097,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get liveRoomLoading => '直播间加载中';
+
+  @override
+  String get liveScreenTitle => '直播间';
 
   @override
   String get liveRoomError => '直播间加载失败';

@@ -956,6 +956,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playbackErrorNetwork => 'Network error';
 
   @override
+  String get playbackErrorOpen => 'Stream failed to open';
+
+  @override
   String get playbackErrorDecoder => 'Decoder error';
 
   @override
@@ -1163,6 +1166,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveRoomLoading => 'Loading live room';
+
+  @override
+  String get liveScreenTitle => 'Live';
 
   @override
   String get liveRoomError => 'Failed to load live room';
