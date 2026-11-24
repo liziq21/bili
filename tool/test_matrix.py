@@ -190,6 +190,7 @@ TEST_MATRIX = {
         'app/test/routing/search_focus_controller_test.dart',
         'app/test/utils/command_test.dart',
         'app/test/utils/platform_info_test.dart',
+        'app/test/utils/text_test.dart',
         'packages/bilibili/bpi/test/api_interceptor_test.dart',
         'packages/bilibili/bpi/test/api_result_test.dart',
         'packages/bilibili/bpi/test/bangumi_play_url_test.dart',

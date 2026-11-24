@@ -15,6 +15,7 @@ import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../l10n/localization_file/app_localizations_zh.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
+import '../../../utils/text.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
 import '../../media_library/playlist_picker.dart';
@@ -215,7 +216,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
       children: [
         // Video Title
         Text(
-          video.title,
+          keepBracketGroupsUnbroken(video.title),
           style: $styles.text.h3.copyWith(
             color: $styles.colors.onSurfaceStrong,
             fontWeight: FontWeight.bold,
@@ -238,7 +239,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
                   size: 14,
                   color: $styles.colors.accentFill,
                 ),
-                const Gap(2),
+                const Gap(4),
                 Text(
                   l10n.viewCountLabel(
                     _formatCount(video.viewCount ?? 386000, l10n),
@@ -262,7 +263,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
                   size: 14,
                   color: $styles.colors.secondary,
                 ),
-                const Gap(2),
+                const Gap(4),
                 Text(
                   l10n.danmakuCountSample,
                   style: $styles.text.bodySmall.copyWith(
@@ -303,6 +304,10 @@ class const _VideoHeaderSection() extends StatelessWidget {
                 ),
               ),
             ),
+            Text(
+              l10n.dotSeparator,
+              style: TextStyle(color: $styles.colors.outline),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
@@ -314,7 +319,7 @@ class const _VideoHeaderSection() extends StatelessWidget {
               child: Text(
                 video.id.isNotEmpty ? video.id : 'BV1m44y1G7rk',
                 style: $styles.text.btn.copyWith(
-                  color: $styles.colors.accentText,
+                  color: $styles.colors.onSurfaceVariant,
                   fontSize: 11,
                 ),
               ),
