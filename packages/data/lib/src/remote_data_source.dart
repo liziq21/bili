@@ -210,6 +210,10 @@ abstract class const LiveRoomFeedRemoteDataSource()
     extends FeedRemoteDataSource<LiveRoomModel>;
 
 /// 频道投稿视频分页数据源（订阅 Feed 消费封装用）。
+///
+/// [fetchUserVideos] 与 [UserArticlesRemoteDataSource.fetchUserArticles] 的
+/// id 在同一频道内必须互不重复：落库后 `feed_entry` 以
+/// `(sourceId, channelId, entryId)` 去重，撞 id 会让后写入的条目覆盖前一条。
 abstract class const UserVideosRemoteDataSource() extends RemoteDataSource {
   /// 按频道拉取投稿视频分页（新到旧）。
   Future<Result<Page<VideoModel>, Exception>> fetchUserVideos({
@@ -223,6 +227,8 @@ abstract class const UserVideosRemoteDataSource() extends RemoteDataSource {
 ///
 /// 与 [UserVideosRemoteDataSource] 分开：一个来源可能只提供投稿视频，
 /// 也可能两者都有。订阅 Feed 分别检查这两种能力，不因缺一种就放弃另一种。
+/// 两种能力返回的 id 必须在同一频道内互不重复（见
+/// [UserVideosRemoteDataSource] 的去重说明）。
 abstract class const UserArticlesRemoteDataSource() extends RemoteDataSource {
   /// 按频道拉取专栏文章分页（新到旧）。
   Future<Result<Page<ArticleModel>, Exception>> fetchUserArticles({

@@ -11,6 +11,7 @@ import 'package:model/model.dart';
 final class _FakeUserVideosDataSource({
   required final Map<String, List<List<String>>> pagesByChannel,
   final Set<String> failingChannels = const {},
+  final Set<int> failingPages = const {},
 }) implements UserVideosRemoteDataSource {
   final requestedPages = <String, List<int>>{};
 
@@ -28,7 +29,7 @@ final class _FakeUserVideosDataSource({
       return Result.error(Exception('channel $channelId failed'));
     }
     final pages = pagesByChannel[channelId] ?? const [];
-    if (page < 1 || page > pages.length) {
+    if (failingPages.contains(page) || page < 1 || page > pages.length) {
       return Result.error(Exception('page $page out of range'));
     }
     return Result.success(
@@ -475,5 +476,82 @@ void main() {
       (await db.feedDao.getEntries(sourceId: 'bilibili')).single.entryType,
       FeedEntry.typeArticle,
     );
+  });
+
+  test(
+    'rolls back a partially synced capability so the failed page is retried',
+    () async {
+      // Given a channel whose second page fails after the first page is stored.
+      await subscribe('creator-1');
+      final pages = {
+        'creator-1': [
+          ['v1'],
+          ['v2'],
+          ['v3'],
+        ],
+      };
+      repository = buildRepository(
+        _FakeUserVideosDataSource(
+          pagesByChannel: pages,
+          failingPages: const {2},
+        ),
+      );
+
+      // When the feed is loaded.
+      final failed = await repository.loadIncremental(sourceId: 'bilibili');
+
+      // Then nothing from the half-finished walk stays behind as a boundary.
+      expect(failed.failedChannelIds, ['creator-1']);
+      expect(failed.newEntryCount, 0);
+      expect(await db.feedDao.getEntries(sourceId: 'bilibili'), isEmpty);
+
+      // When the page recovers and the channel is loaded again.
+      repository = buildRepository(
+        _FakeUserVideosDataSource(pagesByChannel: pages),
+      );
+      final retried = await repository.loadIncremental(sourceId: 'bilibili');
+
+      // Then the failed page and everything after it are fetched.
+      expect(retried.newEntryCount, 3);
+      expect(
+        (await db.feedDao.getEntries(sourceId: 'bilibili'))
+            .map((entry) => entry.entryId)
+            .toSet(),
+        {'v1', 'v2', 'v3'},
+      );
+    },
+  );
+
+  test('shares the per-channel page budget across both capabilities', () async {
+    // Given a channel with several pages of videos and articles.
+    await subscribe('creator-1');
+    final videos = _FakeUserVideosDataSource(
+      pagesByChannel: {
+        'creator-1': [
+          ['v1'],
+          ['v2'],
+          ['v3'],
+          ['v4'],
+        ],
+      },
+    );
+    final articles = _FakeUserArticlesDataSource(
+      pagesByChannel: {
+        'creator-1': [
+          ['cv1'],
+          ['cv2'],
+          ['cv3'],
+          ['cv4'],
+        ],
+      },
+    );
+    repository = buildRepository(videos, articles: articles);
+
+    // When the feed is loaded with the default budget of three pages.
+    await repository.loadIncremental(sourceId: 'bilibili');
+
+    // Then both capabilities get a page and the total stays within the budget.
+    expect(videos.requestedPages['creator-1'], [1, 2]);
+    expect(articles.requestedPages['creator-1'], [1]);
   });
 }

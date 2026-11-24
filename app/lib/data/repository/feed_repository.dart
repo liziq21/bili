@@ -28,6 +28,10 @@ final class const FeedLoadResult({
 /// 逐订阅频道拉第一页投稿与专栏文章，遇到已落库的条目即停止翻页，只把新
 /// 条目追加落库。两种能力都是可选的：来源只提供其中一种时照常加载，两种都
 /// 没有时加载为空。单种能力失败只影响该频道的该种条目，另一种仍会落库。
+///
+/// 单频道请求数受 [loadIncremental] 的 `maxPagesPerChannel` 约束：两种能力
+/// 都存在时按各自至少一页、总数不超过预算分配。一次加载中途失败时，已为
+/// 该能力写入的条目会回滚，避免半页数据被下次加载误当成同步边界。
 class FeedRepository({
   required final FeedDao _feedDao,
   required final LocalLibraryDao _libraryDao,
@@ -55,15 +59,20 @@ class FeedRepository({
     final failedChannelIds = <String>{};
     for (final subscription in subscriptions) {
       if (subscription.sourceId != sourceId) continue;
-      final result = await _loadChannel(
-        sourceId: sourceId,
-        subscription: subscription,
-        videos: videos,
-        articles: articles,
-        maxPagesPerChannel: maxPagesPerChannel,
-      );
-      newEntryCount += result.added;
-      if (result.failed) failedChannelIds.add(subscription.originalId);
+      try {
+        final result = await _loadChannel(
+          sourceId: sourceId,
+          subscription: subscription,
+          videos: videos,
+          articles: articles,
+          maxPagesPerChannel: maxPagesPerChannel,
+        );
+        newEntryCount += result.added;
+        if (result.failed) failedChannelIds.add(subscription.originalId);
+      } on Object {
+        // 渠道级读写失败（例如本地库异常）只标记该频道，不拖停后续订阅。
+        failedChannelIds.add(subscription.originalId);
+      }
     }
 
     return FeedLoadResult(
@@ -89,25 +98,47 @@ class FeedRepository({
     var added = 0;
     var failed = false;
 
+    // One shared request budget per channel; when both capabilities exist each
+    // keeps at least one page. Videos take the odd page because they are the
+    // primary feed content.
+    final capabilityCount =
+        (videos == null ? 0 : 1) + (articles == null ? 0 : 1);
+    final totalPageBudget = maxPagesPerChannel < capabilityCount
+        ? capabilityCount
+        : maxPagesPerChannel;
+    var videoPageBudget = 0;
+    var articlePageBudget = 0;
+    if (videos != null && articles != null) {
+      videoPageBudget = totalPageBudget - totalPageBudget ~/ 2;
+      articlePageBudget = totalPageBudget ~/ 2;
+    } else if (videos != null) {
+      videoPageBudget = totalPageBudget;
+    } else if (articles != null) {
+      articlePageBudget = totalPageBudget;
+    }
+
     Future<void> load<T>({
       required Future<Result<Page<T>, Exception>> Function(int page) fetch,
       required String Function(T item) idOf,
       required FeedEntryCompanion Function(T item) companionOf,
+      required int maxPages,
     }) async {
       try {
         added += await _loadPaged<T>(
+          sourceId: sourceId,
+          channelId: channelId,
           known: known,
           fetch: fetch,
           idOf: idOf,
           companionOf: companionOf,
-          maxPagesPerChannel: maxPagesPerChannel,
+          maxPages: maxPages,
         );
       } on Object {
         failed = true;
       }
     }
 
-    if (videos case final videos?) {
+    if (videos case final videos? when videoPageBudget > 0) {
       await load<VideoModel>(
         fetch: (page) => videos.fetchUserVideos(
           channelId: channelId,
@@ -117,9 +148,10 @@ class FeedRepository({
         idOf: (video) => video.id,
         companionOf: (video) =>
             _videoCompanion(sourceId, channelId, subscription.name, video),
+        maxPages: videoPageBudget,
       );
     }
-    if (articles case final articles?) {
+    if (articles case final articles? when articlePageBudget > 0) {
       await load<ArticleModel>(
         fetch: (page) => articles.fetchUserArticles(
           channelId: channelId,
@@ -129,48 +161,63 @@ class FeedRepository({
         idOf: (article) => article.id,
         companionOf: (article) =>
             _articleCompanion(sourceId, channelId, subscription.name, article),
+        maxPages: articlePageBudget,
       );
     }
 
     return (added: added, failed: failed);
   }
 
-  /// 翻页直到追上 [known] 里的边界或达到 [maxPagesPerChannel]。
+  /// 翻页直到追上 [known] 里的边界或达到 [maxPages]。
+  ///
+  /// 失败时回滚本次已写入的条目：半截数据一旦留下，下次加载会把整页都
+  /// 已知误判成「已追平」，失败的后续页就再也不会被重试。
   Future<int> _loadPaged<T>({
+    required String sourceId,
+    required String channelId,
     required Set<String> known,
     required Future<Result<Page<T>, Exception>> Function(int page) fetch,
     required String Function(T item) idOf,
     required FeedEntryCompanion Function(T item) companionOf,
-    required int maxPagesPerChannel,
+    required int maxPages,
   }) async {
-    var added = 0;
+    final insertedIds = <String>[];
+    try {
+      for (var page = 1; page <= maxPages; page++) {
+        final result = await fetch(page);
+        final (items, totalPages) = switch (result) {
+          Success(:final success) => (success.data, success.totalPages),
+          Error(:final error) => throw error,
+        };
+        if (items.isEmpty) break;
 
-    for (var page = 1; page <= maxPagesPerChannel; page++) {
-      final result = await fetch(page);
-      final (items, totalPages) = switch (result) {
-        Success(:final success) => (success.data, success.totalPages),
-        Error(:final error) => throw error,
-      };
-      if (items.isEmpty) break;
+        final fresh = [
+          for (final item in items)
+            if (!known.contains(idOf(item))) item,
+        ];
+        // 整页都已在库里：说明已经追上上次加载的边界，停止翻页。
+        if (fresh.isEmpty) break;
 
-      final fresh = [
-        for (final item in items)
-          if (!known.contains(idOf(item))) item,
-      ];
-      // 整页都已在库里：说明已经追上上次加载的边界，停止翻页。
-      if (fresh.isEmpty) break;
+        await _feedDao.upsertEntries([
+          for (final item in fresh) companionOf(item),
+        ]);
+        final freshIds = [for (final item in fresh) idOf(item)];
+        insertedIds.addAll(freshIds);
+        known.addAll(freshIds);
 
-      await _feedDao.upsertEntries([
-        for (final item in fresh) companionOf(item),
-      ]);
-      added += fresh.length;
-      known.addAll([for (final item in fresh) idOf(item)]);
-
-      // 本页与库内已有条目相交，说明边界已到，后面的页只会更旧。
-      if (fresh.length < items.length) break;
-      if (page >= totalPages) break;
+        // 本页与库内已有条目相交，说明边界已到，后面的页只会更旧。
+        if (fresh.length < items.length) break;
+        if (page >= totalPages) break;
+      }
+    } on Object {
+      await _feedDao.deleteEntries(
+        sourceId: sourceId,
+        channelId: channelId,
+        entryIds: insertedIds,
+      );
+      rethrow;
     }
-    return added;
+    return insertedIds.length;
   }
 
   FeedEntryCompanion _videoCompanion(

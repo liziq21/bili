@@ -28,10 +28,12 @@ class const FeedScreen({
   Future<void> _onRefresh(BuildContext context) =>
       context.read<FeedCubit>().refresh();
 
-  void _onEntryTap(BuildContext context, FeedEntryEntity entry) {
+  Future<void> _onEntryTap(BuildContext context, FeedEntryEntity entry) async {
     // 先标记已读再跳转：跳转会卸载页面，await 之后再取 messenger / cubit
     // 就晚了。标记失败不影响播放。
     final cubit = context.read<FeedCubit>();
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final copied = AppLocalizations.of(context)!.trackCopiedToClipboard;
     if (!entry.isRead) {
       unawaited(cubit.markEntryRead(entry.channelId, entry.entryId));
     }
@@ -41,14 +43,15 @@ class const FeedScreen({
     }
 
     // 专栏/动态没有应用内阅读页；与简介里的站外链接一致，复制链接交给用户，
-    // 不在只读客户端里拉外部浏览器。
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    unawaited(Clipboard.setData(ClipboardData(text: entry.url)));
+    // 不在只读客户端里拉外部浏览器。写入失败时不提示成功。
+    try {
+      await Clipboard.setData(ClipboardData(text: entry.url));
+    } on Object {
+      return;
+    }
+    if (!context.mounted) return;
     messenger?.showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.trackCopiedToClipboard),
-        duration: $styles.times.fast,
-      ),
+      SnackBar(content: Text(copied), duration: $styles.times.fast),
     );
   }
 
@@ -124,7 +127,7 @@ class const FeedScreen({
                 _EntryRow(:final group, :final entry) => FeedEntryTile(
                   key: ValueKey('${group.channelId}/${entry.entryId}'),
                   entry: entry,
-                  onTap: () => _onEntryTap(context, entry),
+                  onTap: () => unawaited(_onEntryTap(context, entry)),
                 ),
               },
             ),
