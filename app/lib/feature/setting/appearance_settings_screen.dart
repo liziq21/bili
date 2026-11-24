@@ -1,13 +1,12 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 
 import '../../datastore/preferences_data_source.dart';
-import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
+import 'common_widgets/setting_tiles.dart';
 
 /// 字体缩放可选档位。
 const List<double> kFontScaleOptions = [0.85, 1.0, 1.15, 1.3];
@@ -88,27 +87,26 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                _sectionHeader(l10n.appearanceTheme),
-                _valueTile(
+                SettingSectionHeader(title: l10n.appearanceTheme),
+                SettingValueTile(
                   title: l10n.appearanceTheme,
                   subtitle: l10n.appearanceThemeSubtitle,
                   value: _themeLabel(l10n),
                   onTap: () => _showThemePicker(context),
                 ),
-                _sectionHeader(l10n.appearanceFontSize),
-                _valueTile(
+                SettingSectionHeader(title: l10n.appearanceFontSize),
+                SettingValueTile(
                   title: l10n.appearanceFontSize,
                   subtitle: l10n.appearanceFontSizeSubtitle,
                   value: _fontScaleLabel(l10n),
                   onTap: () => _showFontScalePicker(context),
                 ),
-                _sectionHeader(l10n.appearanceEyeComfort),
-                SwitchListTile(
-                  title: Text(l10n.appearanceEyeComfort),
-                  subtitle: Text(l10n.appearanceEyeComfortSubtitle),
+                SettingSectionHeader(title: l10n.appearanceEyeComfort),
+                SettingSwitchTile(
+                  title: l10n.appearanceEyeComfort,
+                  subtitle: l10n.appearanceEyeComfortSubtitle,
                   value: false,
                   onChanged: (_) {
-                    HapticFeedback.selectionClick();
                     // L2 实现：此处仅占位，具体护眼逻辑后续迭代。
                   },
                 ),
@@ -139,9 +137,9 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.appearanceTheme),
+            SettingPickerTitle(title: l10n.appearanceTheme),
             for (final config in ThemeConfig.values)
-              _pickerOption(
+              SettingPickerOption(
                 title: switch (config) {
                   .followSystem => l10n.appearanceThemeSystem,
                   .light => l10n.appearanceThemeLight,
@@ -167,9 +165,9 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.appearanceFontSize),
+            SettingPickerTitle(title: l10n.appearanceFontSize),
             for (final scale in kFontScaleOptions)
-              _pickerOption(
+              SettingPickerOption(
                 title: switch (scale) {
                   0.85 => l10n.appearanceFontSizeSmall,
                   1.0 => l10n.appearanceFontSizeStandard,
@@ -188,68 +186,4 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
       ),
     );
   }
-
-  Widget _valueTile({
-    required String title,
-    required String subtitle,
-    required String value,
-    required VoidCallback onTap,
-  }) => Tooltip(
-    message: '$title: $value',
-    child: ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onSurfaceVariant,
-            ),
-          ),
-          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
-        ],
-      ),
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-    ),
-  );
-
-  Widget _sectionHeader(String title) => Padding(
-    padding: EdgeInsets.only(
-      left: $styles.insets.md,
-      top: $styles.insets.sm,
-      bottom: $styles.insets.xs,
-    ),
-    child: Text(
-      title,
-      style: $styles.text.bodySmall.copyWith(
-        color: $styles.colors.onSurfaceVariant,
-      ),
-    ),
-  );
-
-  Widget _pickerTitle(String title) => Padding(
-    padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
-    child: Text(title, style: $styles.text.bodySmallBold),
-  );
-
-  Widget _pickerOption({
-    required String title,
-    required bool selected,
-    required VoidCallback onTap,
-  }) => ListTile(
-    title: Text(title),
-    selected: selected,
-    trailing: selected
-        ? Icon(AppIcons.check, color: $styles.colors.accentText)
-        : null,
-    onTap: () {
-      HapticFeedback.selectionClick();
-      onTap();
-    },
-  );
 }

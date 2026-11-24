@@ -8,6 +8,7 @@ import 'package:model/model.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import 'common_widgets/setting_tiles.dart';
 
 class const LibrarySettingsScreen({super.key}) extends StatefulWidget {
   @override
@@ -64,7 +65,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
   }
 
   Future<void> _updateBookmarkSync(bool enabled) async {
-    unawaited(HapticFeedback.selectionClick());
     setState(() => _bookmarkSyncEnabled = enabled);
     final preferences = _preferences;
     if (preferences != null) {
@@ -107,20 +107,17 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                _sectionHeader(l10n.libraryBookmarkSync),
-                Tooltip(
-                  message:
+                SettingSectionHeader(title: l10n.libraryBookmarkSync),
+                SettingSwitchTile(
+                  title: l10n.libraryBookmarkSync,
+                  subtitle: l10n.libraryBookmarkSyncSubtitle,
+                  value: _bookmarkSyncEnabled,
+                  tooltip:
                       '${l10n.libraryBookmarkSync}: ${_bookmarkSyncEnabled ? l10n.confirm : l10n.dialogCancel}',
-                  child: SwitchListTile(
-                    title: Text(l10n.libraryBookmarkSync),
-                    subtitle: Text(l10n.libraryBookmarkSyncSubtitle),
-                    value: _bookmarkSyncEnabled,
-                    onChanged: (enabled) {
-                      unawaited(_updateBookmarkSync(enabled));
-                    },
-                  ),
+                  onChanged: (enabled) =>
+                      unawaited(_updateBookmarkSync(enabled)),
                 ),
-                _sectionHeader(l10n.librarySearchHistoryRetention),
+                SettingSectionHeader(title: l10n.librarySearchHistoryRetention),
                 Tooltip(
                   message:
                       '${l10n.librarySearchHistoryRetention}: $retentionText',
@@ -152,18 +149,4 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
             ),
     );
   }
-
-  Widget _sectionHeader(String title) => Padding(
-    padding: EdgeInsets.only(
-      left: $styles.insets.md,
-      top: $styles.insets.sm,
-      bottom: $styles.insets.xs,
-    ),
-    child: Text(
-      title,
-      style: $styles.text.bodySmall.copyWith(
-        color: $styles.colors.onSurfaceVariant,
-      ),
-    ),
-  );
 }

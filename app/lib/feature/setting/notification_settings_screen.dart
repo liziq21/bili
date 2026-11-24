@@ -8,6 +8,7 @@ import 'package:model/model.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import 'common_widgets/setting_tiles.dart';
 import '../notification/feed_update_notifier.dart';
 
 class const NotificationSettingsScreen({super.key}) extends StatefulWidget {
@@ -70,7 +71,6 @@ class _NotificationSettingsScreenState()
   }
 
   Future<void> _updateEnabled(bool enabled) async {
-    unawaited(HapticFeedback.selectionClick());
     final nextThreshold = enabled ? (_threshold > 0 ? _threshold : 3) : 0;
     setState(() {
       _feedUpdateEnabled = enabled;
@@ -130,17 +130,15 @@ class _NotificationSettingsScreenState()
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                _sectionHeader(l10n.settingsNotifications),
-                SwitchListTile(
-                  title: Text(l10n.feedUpdateNotifications),
-                  subtitle: Text(l10n.feedUpdateNotificationsSubtitle),
+                SettingSectionHeader(title: l10n.settingsNotifications),
+                SettingSwitchTile(
+                  title: l10n.feedUpdateNotifications,
+                  subtitle: l10n.feedUpdateNotificationsSubtitle,
                   value: _feedUpdateEnabled,
-                  onChanged: (enabled) {
-                    unawaited(_updateEnabled(enabled));
-                  },
+                  onChanged: (enabled) => unawaited(_updateEnabled(enabled)),
                 ),
                 if (_feedUpdateEnabled) ...[
-                  _sectionHeader(l10n.feedUpdateThreshold),
+                  SettingSectionHeader(title: l10n.feedUpdateThreshold),
                   ListTile(
                     title: Text(l10n.feedUpdateThreshold),
                     subtitle: Text(l10n.feedUpdateThresholdSubtitle),
@@ -164,18 +162,4 @@ class _NotificationSettingsScreenState()
             ),
     );
   }
-
-  Widget _sectionHeader(String title) => Padding(
-    padding: EdgeInsets.only(
-      left: $styles.insets.md,
-      top: $styles.insets.sm,
-      bottom: $styles.insets.xs,
-    ),
-    child: Text(
-      title,
-      style: $styles.text.bodySmall.copyWith(
-        color: $styles.colors.onSurfaceVariant,
-      ),
-    ),
-  );
 }

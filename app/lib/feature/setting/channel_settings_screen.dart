@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +8,7 @@ import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
+import 'common_widgets/setting_tiles.dart';
 
 /// Channel-page tab visibility settings.
 ///
@@ -47,7 +47,6 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
   }
 
   Future<void> _setTabVisible(String tabId, bool visible) async {
-    unawaited(HapticFeedback.selectionClick());
     final previous = _settings;
     final updated = _settings.withTabVisible(tabId, visible);
     setState(() => _settings = updated);
@@ -79,27 +78,21 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                Tooltip(
-                  message:
+                SettingSwitchTile(
+                  title: l10n.videoTab,
+                  value: videosVisible,
+                  tooltip:
                       '${l10n.videoTab}: ${videosVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
-                  child: SwitchListTile(
-                    title: Text(l10n.videoTab),
-                    value: videosVisible,
-                    onChanged: (value) {
-                      unawaited(_setTabVisible(ChannelTabs.videos, value));
-                    },
-                  ),
+                  onChanged: (value) =>
+                      unawaited(_setTabVisible(ChannelTabs.videos, value)),
                 ),
-                Tooltip(
-                  message:
+                SettingSwitchTile(
+                  title: l10n.channelTabPlaylists,
+                  value: playlistsVisible,
+                  tooltip:
                       '${l10n.channelTabPlaylists}: ${playlistsVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
-                  child: SwitchListTile(
-                    title: Text(l10n.channelTabPlaylists),
-                    value: playlistsVisible,
-                    onChanged: (value) {
-                      unawaited(_setTabVisible(ChannelTabs.playlists, value));
-                    },
-                  ),
+                  onChanged: (value) =>
+                      unawaited(_setTabVisible(ChannelTabs.playlists, value)),
                 ),
               ],
             ),

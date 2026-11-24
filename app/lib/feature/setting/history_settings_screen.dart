@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -6,6 +5,7 @@ import '../../datastore/media_history_settings.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import 'common_widgets/setting_tiles.dart';
 
 class const HistorySettingsScreen({super.key}) extends StatefulWidget {
   @override
@@ -62,23 +62,19 @@ class _HistorySettingsScreenState() extends State<HistorySettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                SwitchListTile(
-                  title: Text(l10n.historyRecording),
-                  subtitle: Text(l10n.historyRecordingSubtitle),
+                SettingSwitchTile(
+                  title: l10n.historyRecording,
+                  subtitle: l10n.historyRecordingSubtitle,
                   value: _settings.recordHistory,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _update(_settings.copyWith(recordHistory: enabled));
-                  },
+                  onChanged: (enabled) =>
+                      _update(_settings.copyWith(recordHistory: enabled)),
                 ),
-                SwitchListTile(
-                  title: Text(l10n.historyResumePlayback),
-                  subtitle: Text(l10n.historyResumePlaybackSubtitle),
+                SettingSwitchTile(
+                  title: l10n.historyResumePlayback,
+                  subtitle: l10n.historyResumePlaybackSubtitle,
                   value: _settings.resumePlayback,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _update(_settings.copyWith(resumePlayback: enabled));
-                  },
+                  onChanged: (enabled) =>
+                      _update(_settings.copyWith(resumePlayback: enabled)),
                 ),
               ],
             ),

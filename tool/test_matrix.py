@@ -110,6 +110,7 @@ TEST_MATRIX = {
         'app/test/feature/search_result_test.dart',
         'app/test/feature/search_screen_test.dart',
         'app/test/feature/setting/channel_settings_screen_test.dart',
+        'app/test/feature/setting/setting_tiles_test.dart',
         'app/test/feature/setting_screen_test.dart',
         'app/test/feature/space/space_screen_test.dart',
         'app/test/feature/video/playback_speed_chip_test.dart',
