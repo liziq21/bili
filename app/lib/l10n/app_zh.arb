@@ -427,7 +427,7 @@
   },
   "creatorTab": "创作者",
   "@creatorTab": {
-    "description": "Creator space - tab label for the creator's own uploads"
+    "description": "Creator space - app bar title"
   },
   "spaceDescriptionUnavailable": "暂无简介",
   "@spaceDescriptionUnavailable": {
@@ -443,7 +443,7 @@
   },
   "clear": "清空",
   "@clear": {
-    "description": "Search - button that empties the search field"
+    "description": "Search - button that clears the recent search history"
   },
   "searchQueryLabel": "搜索 \"{p1}\"",
   "@searchQueryLabel": {
@@ -632,7 +632,7 @@
   },
   "removeThisEntry": "移除这一次",
   "@removeThisEntry": {
-    "description": "Watch history - removes a single viewing record"
+    "description": "Local library playlist - removes the video from the playlist"
   },
   "renamePlaylist": "重命名播放列表",
   "@renamePlaylist": {
@@ -911,7 +911,7 @@
   },
   "commentsCountTab": "评论区 (1,429)",
   "@commentsCountTab": {
-    "description": "Video screen - comments tab label carrying the comment count"
+    "description": "Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven"
   },
   "danmakuSettingsTitle": "弹幕设置",
   "@danmakuSettingsTitle": {
@@ -1020,7 +1020,7 @@
   },
   "countCompactWan": "{p1}万",
   "@countCompactWan": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Compact count unit for values >= 10,000. Kept as the Chinese 万 unit because call sites divide by 10,000 before formatting; an English K/M unit would need a different divisor (tracked separately).",
     "placeholders": {
       "p1": {
         "type": "String",
@@ -1104,7 +1104,7 @@
   },
   "danmakuCountSample": "2.4万 弹幕",
   "@danmakuCountSample": {
-    "description": "Demo value for the danmaku count in the video info header; replaced by real data at runtime"
+    "description": "Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet"
   },
   "oneDayAgoSample": "1天前",
   "@oneDayAgoSample": {
@@ -1169,39 +1169,39 @@
   },
   "list": "列表",
   "@list": {
-    "description": "Video info - play queue action"
+    "description": "Video info - short label of the add-to-playlist button"
   },
   "addToPlaylist": "加入播放列表",
   "@addToPlaylist": {
-    "description": "Video info - opens the playlist picker"
+    "description": "Video info - action name of the add-to-playlist button, used in its cancel tooltip"
   },
   "addToLocalPlaylist": "加入本地播放列表",
   "@addToLocalPlaylist": {
-    "description": "Video info - adds the video to a local playlist"
+    "description": "Video info - tooltip of the add-to-playlist button"
   },
   "switchSource": "多源换源",
   "@switchSource": {
-    "description": "Video info - opens the source picker"
+    "description": "Video info - label of the switch-source action button"
   },
   "switchVideoSource": "切换视频数据源",
   "@switchVideoSource": {
-    "description": "Video info - source picker title for videos"
+    "description": "Video info - tooltip of the switch-source action button"
   },
   "autoSwitchBestRoute": "自动切换至最优可用的解析线路",
   "@autoSwitchBestRoute": {
-    "description": "Video info - switch that picks the best available route automatically"
+    "description": "Video info - snackbar shown when the switch-source action is tapped"
   },
   "share": "分享",
   "@share": {
-    "description": "Video info - share action"
+    "description": "Video info - action name of the share button"
   },
   "shareVideo": "分享视频",
   "@shareVideo": {
-    "description": "Video info - share action accessibility label"
+    "description": "Video info - tooltip of the share button"
   },
   "shareMultiSourceLink": "分享多源视频链接",
   "@shareMultiSourceLink": {
-    "description": "Video info - shares a link that keeps the source"
+    "description": "Video info - snackbar shown when the share action is tapped"
   },
   "danmakuStateOn": "弹幕开",
   "@danmakuStateOn": {
@@ -1269,7 +1269,7 @@
   },
   "cancelAction": "取消{p1}",
   "@cancelAction": {
-    "description": "Video info - accessibility label for cancelling the pending action; {p1} is the action name",
+    "description": "Video info - tooltip of an active action button that cancels it; {p1} is the action name",
     "placeholders": {
       "p1": {
         "type": "String",
@@ -1364,7 +1364,7 @@
   },
   "countCompactYi": "{p1}亿",
   "@countCompactYi": {
-    "description": "Migrated from hardcoded literal (LIZ-51 batch base)",
+    "description": "Compact count unit for values >= 100,000,000. Kept as the Chinese 亿 unit because call sites divide by 100,000,000 before formatting; an English K/M unit would need a different divisor (tracked separately).",
     "placeholders": {
       "p1": {
         "type": "String",
@@ -1454,7 +1454,7 @@
   },
   "creatorWithSubtitle": "{p1} • {p2}",
   "@creatorWithSubtitle": {
-    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the subtitle",
+    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date",
     "placeholders": {
       "p1": {
         "type": "String",

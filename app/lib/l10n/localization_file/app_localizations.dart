@@ -650,7 +650,7 @@ abstract class AppLocalizations {
   /// **'Nothing found'**
   String get nothingFound;
 
-  /// Creator space - tab label for the creator's own uploads
+  /// Creator space - app bar title
   ///
   /// In en, this message translates to:
   /// **'Creators'**
@@ -674,7 +674,7 @@ abstract class AppLocalizations {
   /// **'Clear recent search history'**
   String get clearRecentSearchHistory;
 
-  /// Search - button that empties the search field
+  /// Search - button that clears the recent search history
   ///
   /// In en, this message translates to:
   /// **'Clear'**
@@ -926,7 +926,7 @@ abstract class AppLocalizations {
   /// **'Move down'**
   String get moveDown;
 
-  /// Watch history - removes a single viewing record
+  /// Local library playlist - removes the video from the playlist
   ///
   /// In en, this message translates to:
   /// **'Remove this entry'**
@@ -1208,7 +1208,7 @@ abstract class AppLocalizations {
   /// **'Info & related'**
   String get infoAndRelated;
 
-  /// Video screen - comments tab label carrying the comment count
+  /// Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven
   ///
   /// In en, this message translates to:
   /// **'Comments (1,429)'**
@@ -1424,7 +1424,7 @@ abstract class AppLocalizations {
   /// **'·'**
   String get dotSeparator;
 
-  /// Demo value for the danmaku count in the video info header; replaced by real data at runtime
+  /// Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet
   ///
   /// In en, this message translates to:
   /// **'24K danmaku'**
@@ -1490,55 +1490,55 @@ abstract class AppLocalizations {
   /// **'Like'**
   String get like;
 
-  /// Video info - play queue action
+  /// Video info - short label of the add-to-playlist button
   ///
   /// In en, this message translates to:
   /// **'List'**
   String get list;
 
-  /// Video info - opens the playlist picker
+  /// Video info - action name of the add-to-playlist button, used in its cancel tooltip
   ///
   /// In en, this message translates to:
   /// **'Add to playlist'**
   String get addToPlaylist;
 
-  /// Video info - adds the video to a local playlist
+  /// Video info - tooltip of the add-to-playlist button
   ///
   /// In en, this message translates to:
   /// **'Add to local playlist'**
   String get addToLocalPlaylist;
 
-  /// Video info - opens the source picker
+  /// Video info - label of the switch-source action button
   ///
   /// In en, this message translates to:
   /// **'Switch source'**
   String get switchSource;
 
-  /// Video info - source picker title for videos
+  /// Video info - tooltip of the switch-source action button
   ///
   /// In en, this message translates to:
   /// **'Switch video source'**
   String get switchVideoSource;
 
-  /// Video info - switch that picks the best available route automatically
+  /// Video info - snackbar shown when the switch-source action is tapped
   ///
   /// In en, this message translates to:
   /// **'Automatically switch to the best available route'**
   String get autoSwitchBestRoute;
 
-  /// Video info - share action
+  /// Video info - action name of the share button
   ///
   /// In en, this message translates to:
   /// **'Share'**
   String get share;
 
-  /// Video info - share action accessibility label
+  /// Video info - tooltip of the share button
   ///
   /// In en, this message translates to:
   /// **'Share video'**
   String get shareVideo;
 
-  /// Video info - shares a link that keeps the source
+  /// Video info - snackbar shown when the share action is tapped
   ///
   /// In en, this message translates to:
   /// **'Share multi-source video link'**
@@ -1640,7 +1640,7 @@ abstract class AppLocalizations {
   /// **'Failed to add to queue'**
   String get addToQueueFailed;
 
-  /// Video info - accessibility label for cancelling the pending action; {p1} is the action name
+  /// Video info - tooltip of an active action button that cancels it; {p1} is the action name
   ///
   /// In en, this message translates to:
   /// **'Cancel {p1}'**
@@ -1826,7 +1826,7 @@ abstract class AppLocalizations {
   /// **'Unknown creator'**
   String get unknownCreator;
 
-  /// Video card - creator name and subtitle; {p1} is the creator, {p2} is the subtitle
+  /// Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date
   ///
   /// In en, this message translates to:
   /// **'{p1} • {p2}'**

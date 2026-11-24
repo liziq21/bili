@@ -427,7 +427,7 @@
   },
   "creatorTab": "Creators",
   "@creatorTab": {
-    "description": "Creator space - tab label for the creator's own uploads"
+    "description": "Creator space - app bar title"
   },
   "spaceDescriptionUnavailable": "No description available",
   "@spaceDescriptionUnavailable": {
@@ -443,7 +443,7 @@
   },
   "clear": "Clear",
   "@clear": {
-    "description": "Search - button that empties the search field"
+    "description": "Search - button that clears the recent search history"
   },
   "searchQueryLabel": "Search \"{p1}\"",
   "@searchQueryLabel": {
@@ -632,7 +632,7 @@
   },
   "removeThisEntry": "Remove this entry",
   "@removeThisEntry": {
-    "description": "Watch history - removes a single viewing record"
+    "description": "Local library playlist - removes the video from the playlist"
   },
   "renamePlaylist": "Rename playlist",
   "@renamePlaylist": {
@@ -911,7 +911,7 @@
   },
   "commentsCountTab": "Comments (1,429)",
   "@commentsCountTab": {
-    "description": "Video screen - comments tab label carrying the comment count"
+    "description": "Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven"
   },
   "danmakuSettingsTitle": "Danmaku settings",
   "@danmakuSettingsTitle": {
@@ -1104,7 +1104,7 @@
   },
   "danmakuCountSample": "24K danmaku",
   "@danmakuCountSample": {
-    "description": "Demo value for the danmaku count in the video info header; replaced by real data at runtime"
+    "description": "Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet"
   },
   "oneDayAgoSample": "1 day ago",
   "@oneDayAgoSample": {
@@ -1169,39 +1169,39 @@
   },
   "list": "List",
   "@list": {
-    "description": "Video info - play queue action"
+    "description": "Video info - short label of the add-to-playlist button"
   },
   "addToPlaylist": "Add to playlist",
   "@addToPlaylist": {
-    "description": "Video info - opens the playlist picker"
+    "description": "Video info - action name of the add-to-playlist button, used in its cancel tooltip"
   },
   "addToLocalPlaylist": "Add to local playlist",
   "@addToLocalPlaylist": {
-    "description": "Video info - adds the video to a local playlist"
+    "description": "Video info - tooltip of the add-to-playlist button"
   },
   "switchSource": "Switch source",
   "@switchSource": {
-    "description": "Video info - opens the source picker"
+    "description": "Video info - label of the switch-source action button"
   },
   "switchVideoSource": "Switch video source",
   "@switchVideoSource": {
-    "description": "Video info - source picker title for videos"
+    "description": "Video info - tooltip of the switch-source action button"
   },
   "autoSwitchBestRoute": "Automatically switch to the best available route",
   "@autoSwitchBestRoute": {
-    "description": "Video info - switch that picks the best available route automatically"
+    "description": "Video info - snackbar shown when the switch-source action is tapped"
   },
   "share": "Share",
   "@share": {
-    "description": "Video info - share action"
+    "description": "Video info - action name of the share button"
   },
   "shareVideo": "Share video",
   "@shareVideo": {
-    "description": "Video info - share action accessibility label"
+    "description": "Video info - tooltip of the share button"
   },
   "shareMultiSourceLink": "Share multi-source video link",
   "@shareMultiSourceLink": {
-    "description": "Video info - shares a link that keeps the source"
+    "description": "Video info - snackbar shown when the share action is tapped"
   },
   "danmakuStateOn": "Danmaku on",
   "@danmakuStateOn": {
@@ -1269,7 +1269,7 @@
   },
   "cancelAction": "Cancel {p1}",
   "@cancelAction": {
-    "description": "Video info - accessibility label for cancelling the pending action; {p1} is the action name",
+    "description": "Video info - tooltip of an active action button that cancels it; {p1} is the action name",
     "placeholders": {
       "p1": {
         "type": "String",
@@ -1454,7 +1454,7 @@
   },
   "creatorWithSubtitle": "{p1} • {p2}",
   "@creatorWithSubtitle": {
-    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the subtitle",
+    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date",
     "placeholders": {
       "p1": {
         "type": "String",
