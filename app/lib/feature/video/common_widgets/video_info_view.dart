@@ -211,6 +211,49 @@ class const _VideoHeaderSection() extends StatelessWidget {
     );
     if (video == null) return const SizedBox.shrink();
 
+    Widget statsText(String text) => Text(
+      text,
+      style: $styles.text.bodySmall.copyWith(
+        color: $styles.colors.onSurfaceVariant,
+        fontSize: 12,
+      ),
+    );
+
+    Widget statsRow(IconData icon, Color color, String text) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        Gap($styles.insets.xxs),
+        statsText(text),
+      ],
+    );
+
+    Widget chip(String text, Color color) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: $styles.colors.surfaceContainerHighest.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular($styles.corners.sm),
+      ),
+      child: Text(
+        text,
+        style: $styles.text.btn.copyWith(color: color, fontSize: 11),
+      ),
+    );
+
+    // Keep each separator with the item that follows it, otherwise Wrap can
+    // leave a dot at the end of a line while the item moves to the next run.
+    Widget withSeparator(Widget child) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          l10n.dotSeparator,
+          style: TextStyle(color: $styles.colors.outline),
+        ),
+        const Gap(6),
+        child,
+      ],
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,97 +274,26 @@ class const _VideoHeaderSection() extends StatelessWidget {
           spacing: 6,
           runSpacing: 4,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  AppIcons.visibility,
-                  size: 14,
-                  color: $styles.colors.accentFill,
-                ),
-                const Gap(4),
-                Text(
-                  l10n.viewCountLabel(
-                    _formatCount(video.viewCount ?? 386000, l10n),
-                  ),
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              l10n.dotSeparator,
-              style: TextStyle(color: $styles.colors.outline),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  AppIcons.comment,
-                  size: 14,
-                  color: $styles.colors.secondary,
-                ),
-                const Gap(4),
-                Text(
-                  l10n.danmakuCountSample,
-                  style: $styles.text.bodySmall.copyWith(
-                    color: $styles.colors.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              l10n.dotSeparator,
-              style: TextStyle(color: $styles.colors.outline),
-            ),
-            Text(
-              l10n.oneDayAgoSample,
-              style: $styles.text.bodySmall.copyWith(
-                color: $styles.colors.onSurfaceVariant,
-                fontSize: 12,
+            statsRow(
+              AppIcons.visibility,
+              $styles.colors.accentFill,
+              l10n.viewCountLabel(
+                _formatCount(video.viewCount ?? 386000, l10n),
               ),
             ),
-            Text(
-              l10n.dotSeparator,
-              style: TextStyle(color: $styles.colors.outline),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: $styles.colors.surfaceContainerHighest.withValues(
-                  alpha: 0.1,
-                ),
-                borderRadius: BorderRadius.circular($styles.corners.sm),
-              ),
-              child: Text(
-                l10n.originalTech,
-                style: $styles.text.btn.copyWith(
-                  color: $styles.colors.tertiary,
-                  fontSize: 11,
-                ),
+            withSeparator(
+              statsRow(
+                AppIcons.comment,
+                $styles.colors.secondary,
+                l10n.danmakuCountSample,
               ),
             ),
-            Text(
-              l10n.dotSeparator,
-              style: TextStyle(color: $styles.colors.outline),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: $styles.colors.surfaceContainerHighest.withValues(
-                  alpha: 0.1,
-                ),
-                borderRadius: BorderRadius.circular($styles.corners.sm),
-              ),
-              child: Text(
+            withSeparator(statsText(l10n.oneDayAgoSample)),
+            withSeparator(chip(l10n.originalTech, $styles.colors.tertiary)),
+            withSeparator(
+              chip(
                 video.id.isNotEmpty ? video.id : 'BV1m44y1G7rk',
-                style: $styles.text.btn.copyWith(
-                  color: $styles.colors.onSurfaceVariant,
-                  fontSize: 11,
-                ),
+                $styles.colors.onSurfaceVariant,
               ),
             ),
           ],

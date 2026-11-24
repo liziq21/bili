@@ -2,6 +2,7 @@ import 'package:app/utils/text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final _joiner = String.fromCharCode(0x2060);
+final _break = String.fromCharCode(0x200B);
 
 void main() {
   group('keepBracketGroupsUnbroken', () {
@@ -9,11 +10,11 @@ void main() {
       // Given a title whose bracket group currently breaks after its first two
       // characters.
       // When preparing it for rendering.
-      // Then every character after [ is joined to the one before it, so the
-      // closing bracket cannot start a new line.
+      // Then the prefix can break before [ and every character after [ is
+      // joined to the one before it.
       expect(
         keepBracketGroupsUnbroken('a[bc]d'),
-        'a[${_joiner}b${_joiner}c$_joiner]d',
+        'a$_break[${_joiner}b${_joiner}c$_joiner]d',
       );
     });
 
@@ -27,15 +28,19 @@ void main() {
         (0x3008, 0x3009),
         (0x201C, 0x201D),
       ]) {
+        // Given a bracket pair from the supported set.
         final open = String.fromCharCode(openCode);
         final close = String.fromCharCode(closeCode);
+
+        // When preparing text that uses it.
+        // Then the group is protected like the square-bracket case.
         expect(
           keepBracketGroupsUnbroken(
             'a$open'
             'bc$close'
             'd',
           ),
-          'a$open${_joiner}b${_joiner}c$_joiner$close'
+          'a$_break$open${_joiner}b${_joiner}c$_joiner$close'
           'd',
           reason: 'pair U+${openCode.toRadixString(16)}',
         );
@@ -43,20 +48,64 @@ void main() {
     });
 
     test('leaves text without brackets unchanged', () {
+      // Given plain text.
+      // When preparing it.
+      // Then nothing is inserted.
       expect(keepBracketGroupsUnbroken('plain title 123'), 'plain title 123');
     });
 
     test('does not protect an unbalanced opening bracket', () {
-      // A stray [ must not make the rest of the title unwrappable.
+      // Given a title with a stray [.
+      // When preparing it.
+      // Then the rest of the title can still wrap.
       expect(keepBracketGroupsUnbroken('a[bc'), 'a[bc');
     });
 
     test('protects nested groups and stops at the outer close', () {
+      // Given a group with a nested group.
+      // When preparing it.
+      // Then both groups are protected and no break is offered before the
+      // inner opening bracket.
       expect(
         keepBracketGroupsUnbroken('a[b[c]d]e'),
-        'a[${_joiner}b$_joiner[${_joiner}c$_joiner]'
+        'a$_break[${_joiner}b$_joiner[${_joiner}c$_joiner]'
         '${_joiner}d$_joiner]e',
       );
+    });
+
+    test('matches an outer close past an unmatched inner opener', () {
+      // Given a title where an unmatched ( sits inside a matched [ ].
+      // When preparing it.
+      // Then the outer group is still protected.
+      expect(
+        keepBracketGroupsUnbroken('a[b(c]d'),
+        'a$_break[${_joiner}b$_joiner('
+        '$_joiner'
+        'c$_joiner]d',
+      );
+    });
+
+    test('keeps an emoji grapheme cluster intact', () {
+      // Given a bracket group containing a two-code-point emoji.
+      final heart = String.fromCharCodes([0x2764, 0xFE0F]);
+
+      // When preparing it.
+      final result = keepBracketGroupsUnbroken('[$heart]');
+
+      // Then the joiner goes before the whole cluster, not between its code
+      // points.
+      expect(result, '$_break[$_joiner$heart$_joiner]');
+      expect(result.contains('$_joiner$heart'), isTrue);
+    });
+
+    test('leaves a group longer than the limit wrappable', () {
+      // Given a group wider than the protection budget.
+      // When preparing it with a small limit.
+      final result = keepBracketGroupsUnbroken('[abcd]', maxGroupLength: 3);
+
+      // Then the group is not protected, but the prefix can still break
+      // before the opening bracket.
+      expect(result, '$_break[abcd]');
     });
 
     test('joins every character inside the reported title group', () {
@@ -73,9 +122,9 @@ void main() {
       // When preparing it for rendering.
       final result = keepBracketGroupsUnbroken(title);
 
-      // Then the four characters after [ each carry a word joiner, including
-      // the closing bracket.
-      expect(result.runes.length, title.runes.length + 4);
+      // Then the prefix break plus the four characters after [ each carry a
+      // marker, including the closing bracket.
+      expect(result.runes.length, title.runes.length + 5);
       expect(result.contains('$_joiner]'), isTrue);
     });
   });
