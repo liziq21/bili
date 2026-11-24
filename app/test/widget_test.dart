@@ -344,7 +344,7 @@ void main() {
           await tester.tap(find.byType(BackButton));
           await tester.pumpAndSettle();
           expect(find.byType(SettingScreen), findsOneWidget);
-          expect(find.byType(ExpansionTile), findsWidgets);
+          expect(find.byType(ExpansionTile), findsNWidgets(4));
         }
         // 通知子页的标题已本地化，zh locale 下用中文标签匹配。
         final l10n = AppLocalizations.of(
