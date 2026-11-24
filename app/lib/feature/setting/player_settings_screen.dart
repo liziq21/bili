@@ -1,13 +1,12 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../datastore/preferences_data_source.dart';
-import '../../design/design.dart';
 import '../../domain/sleep_timer_action.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import 'app_settings.dart';
+import 'common_widgets/setting_tiles.dart';
 import 'sleep_timer_duration_dialog.dart';
 
 class const PlayerSettingsScreen({super.key}) extends StatefulWidget {
@@ -93,7 +92,7 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                _valueTile(
+                SettingValueTile(
                   title: l10n.playerDefaultQuality,
                   subtitle: l10n.playerDefaultQualitySubtitle,
                   value: _qualityLabel(
@@ -102,64 +101,52 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                   ),
                   onTap: () => _showQualityPicker(context),
                 ),
-                _valueTile(
+                SettingValueTile(
                   title: l10n.playerDefaultSpeed,
                   subtitle: l10n.playerDefaultSpeedSubtitle,
                   value: playbackRateLabel(_playerSettings.playbackRate),
                   onTap: () => _showSpeedPicker(context),
                 ),
-                _sectionHeader(l10n.playerGestures),
-                SwitchListTile(
-                  title: Text(l10n.playerGestureSeek),
-                  subtitle: Text(l10n.playerGestureSeekSubtitle),
+                SettingSectionHeader(title: l10n.playerGestures),
+                SettingSwitchTile(
+                  title: l10n.playerGestureSeek,
+                  subtitle: l10n.playerGestureSeekSubtitle,
                   value: _gestureSettings.seekEnabled,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _updateGestures(
-                      _gestureSettings.copyWith(seekEnabled: enabled),
-                    );
-                  },
+                  onChanged: (enabled) => _updateGestures(
+                    _gestureSettings.copyWith(seekEnabled: enabled),
+                  ),
                 ),
-                SwitchListTile(
-                  title: Text(l10n.playerGestureVolume),
-                  subtitle: Text(l10n.playerGestureVolumeSubtitle),
+                SettingSwitchTile(
+                  title: l10n.playerGestureVolume,
+                  subtitle: l10n.playerGestureVolumeSubtitle,
                   value: _gestureSettings.volumeEnabled,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _updateGestures(
-                      _gestureSettings.copyWith(volumeEnabled: enabled),
-                    );
-                  },
+                  onChanged: (enabled) => _updateGestures(
+                    _gestureSettings.copyWith(volumeEnabled: enabled),
+                  ),
                 ),
-                SwitchListTile(
-                  title: Text(l10n.playerGestureBrightness),
-                  subtitle: Text(l10n.playerGestureBrightnessSubtitle),
+                SettingSwitchTile(
+                  title: l10n.playerGestureBrightness,
+                  subtitle: l10n.playerGestureBrightnessSubtitle,
                   value: _gestureSettings.brightnessEnabled,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _updateGestures(
-                      _gestureSettings.copyWith(brightnessEnabled: enabled),
-                    );
-                  },
+                  onChanged: (enabled) => _updateGestures(
+                    _gestureSettings.copyWith(brightnessEnabled: enabled),
+                  ),
                 ),
-                SwitchListTile(
-                  title: Text(l10n.playerGestureBoost),
-                  subtitle: Text(l10n.playerGestureBoostSubtitle),
+                SettingSwitchTile(
+                  title: l10n.playerGestureBoost,
+                  subtitle: l10n.playerGestureBoostSubtitle,
                   value: _gestureSettings.boostEnabled,
-                  onChanged: (enabled) {
-                    HapticFeedback.selectionClick();
-                    _updateGestures(
-                      _gestureSettings.copyWith(boostEnabled: enabled),
-                    );
-                  },
+                  onChanged: (enabled) => _updateGestures(
+                    _gestureSettings.copyWith(boostEnabled: enabled),
+                  ),
                 ),
-                _valueTile(
+                SettingValueTile(
                   title: l10n.playerSleepTimerDefault,
                   subtitle: l10n.playerSleepTimerDefaultSubtitle,
                   value: _sleepTimerLabel(l10n),
                   onTap: () => _showSleepTimerPicker(context),
                 ),
-                _valueTile(
+                SettingValueTile(
                   title: l10n.playerSleepTimerAction,
                   subtitle: l10n.playerSleepTimerActionSubtitle,
                   value: _sleepTimerActionLabel(
@@ -172,49 +159,6 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
             ),
     );
   }
-
-  Widget _valueTile({
-    required String title,
-    required String subtitle,
-    required String value,
-    required VoidCallback onTap,
-  }) => Tooltip(
-    message: '$title: $value',
-    child: ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onSurfaceVariant,
-            ),
-          ),
-          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
-        ],
-      ),
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-    ),
-  );
-
-  Widget _sectionHeader(String title) => Padding(
-    padding: EdgeInsets.only(
-      left: $styles.insets.md,
-      top: $styles.insets.sm,
-      bottom: $styles.insets.xs,
-    ),
-    child: Text(
-      title,
-      style: $styles.text.bodySmall.copyWith(
-        color: $styles.colors.onSurfaceVariant,
-      ),
-    ),
-  );
 
   String _qualityLabel(AppLocalizations l10n, int? height) => height == null
       ? l10n.playerQualityAuto
@@ -243,9 +187,9 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.playerSleepTimerAction),
+            SettingPickerTitle(title: l10n.playerSleepTimerAction),
             for (final action in SleepTimerAction.values)
-              _pickerOption(
+              SettingPickerOption(
                 title: _sleepTimerActionLabel(l10n, action),
                 selected: action == _playerSettings.sleepTimerDefaultAction,
                 onTap: () {
@@ -269,9 +213,9 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.playerDefaultQuality),
+            SettingPickerTitle(title: l10n.playerDefaultQuality),
             for (final height in kPreferredQualityHeights)
-              _pickerOption(
+              SettingPickerOption(
                 title: _qualityLabel(l10n, height),
                 selected: height == _playerSettings.preferredQualityHeight,
                 onTap: () {
@@ -298,9 +242,9 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.playerDefaultSpeed),
+            SettingPickerTitle(title: l10n.playerDefaultSpeed),
             for (final rate in kPlaybackRates)
-              _pickerOption(
+              SettingPickerOption(
                 title: playbackRateLabel(rate),
                 selected: rate == _playerSettings.playbackRate,
                 onTap: () {
@@ -322,8 +266,8 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            _pickerTitle(l10n.playerSleepTimerDefault),
-            _pickerOption(
+            SettingPickerTitle(title: l10n.playerSleepTimerDefault),
+            SettingPickerOption(
               title: l10n.playerSleepTimerOff,
               selected: _playerSettings.sleepTimerDefaultMinutes == 0,
               onTap: () {
@@ -334,7 +278,7 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
               },
             ),
             for (final minutes in kSleepTimerMinutes)
-              _pickerOption(
+              SettingPickerOption(
                 title: l10n.minutesValue('$minutes'),
                 selected: minutes == _playerSettings.sleepTimerDefaultMinutes,
                 onTap: () {
@@ -344,7 +288,7 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
                   );
                 },
               ),
-            _pickerOption(
+            SettingPickerOption(
               title: _customSleepTimerLabel(l10n),
               selected: _isCustomSleepTimer,
               onTap: () async {
@@ -391,25 +335,4 @@ class _PlayerSettingsScreenState() extends State<PlayerSettingsScreen> {
       ),
     );
   }
-
-  Widget _pickerTitle(String title) => Padding(
-    padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
-    child: Text(title, style: $styles.text.bodySmallBold),
-  );
-
-  Widget _pickerOption({
-    required String title,
-    required bool selected,
-    required VoidCallback onTap,
-  }) => ListTile(
-    title: Text(title),
-    selected: selected,
-    trailing: selected
-        ? Icon(AppIcons.check, color: $styles.colors.accentText)
-        : null,
-    onTap: () {
-      HapticFeedback.selectionClick();
-      onTap();
-    },
-  );
 }
