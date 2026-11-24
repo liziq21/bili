@@ -55,6 +55,8 @@
 
 **R2.2** 语义不得混用：`scrim` / `onScrim` 与 `onSurface` 系在暗色下方向相反，禁止共用常量，禁止前景 token 当背景用。
 
+**R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
+
 ### R3 —— 亮度单源
 
 运行中的 `isDark` 只有一个来源：`Theme.of(context).brightness`，由 `AppScaffold` 注入 `AppStyle`。`AppScaffold` 第一次 build 前的静态 `$styles` 只允许使用亮色 bootstrap fallback，用于让构造期读取有安全值；第一次 build 必须用真实 Theme 亮度覆盖它，不能把 fallback 当作运行时主题。除该 bootstrap 初始化外，**禁止任何位置硬编码 `isDark = false`**。

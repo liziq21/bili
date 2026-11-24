@@ -218,10 +218,6 @@
   "@appearanceTheme": {
     "description": "Appearance settings placeholder entry for theme"
   },
-  "appearanceEyeComfort": "Eye Comfort",
-  "@appearanceEyeComfort": {
-    "description": "Appearance settings placeholder entry for eye comfort"
-  },
   "appearanceThemeSubtitle": "Theme mode for the app",
   "@appearanceThemeSubtitle": {
     "description": "Subtitle for theme setting",
@@ -235,11 +231,6 @@
   "appearanceFontSizeSubtitle": "Adjust text size across the app",
   "@appearanceFontSizeSubtitle": {
     "description": "Subtitle for font size setting",
-    "type": "String"
-  },
-  "appearanceEyeComfortSubtitle": "Reduce eye strain in dark environments",
-  "@appearanceEyeComfortSubtitle": {
-    "description": "Subtitle for eye comfort setting",
     "type": "String"
   },
   "appearanceFontSizeSmall": "Small",
