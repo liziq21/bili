@@ -8,14 +8,21 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
+import 'design/design.dart';
 import 'providers/bloc_providers.dart';
 import 'providers/media_sources_provider.dart';
 import 'providers/repo_providers.dart';
 
 export 'app_scaffold.dart' show $styles;
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   initDebugOverlayBridge();
+
+  // Resolve the platform palette before the first frame. Letting
+  // `DynamicColorBuilder` fetch it later repaints the whole app from the brand
+  // palette to the system palette after the user's first interaction.
+  final dynamicSchemes = await resolveDynamicColorSchemes();
 
   // Security Hardening: Mask detailed exception payloads and stack traces in release
   // builds to prevent exposing sensitive internal state or credentials to end users.
@@ -36,7 +43,7 @@ void main() {
         providers: blocProviders,
         child: Provider<MediaSourceCatalog>.value(
           value: defaultMediaSourceCatalog,
-          child: const App(),
+          child: App(dynamicSchemes: dynamicSchemes),
         ),
       ),
     ),
