@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -183,6 +185,7 @@ class const SettingTextTile({
   }
 
   Future<void> _edit(BuildContext context) async {
+    unawaited(HapticFeedback.selectionClick());
     final result = await showDialog<String>(
       context: context,
       builder: (_) => _TextInputDialog(
@@ -229,6 +232,8 @@ class _TextInputDialogState() extends State<_TextInputDialog> {
         controller: _controller,
         autofocus: true,
         maxLength: widget.maxLength,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (text) => Navigator.of(context).pop(text),
         decoration: InputDecoration(hintText: widget.hintText),
       ),
       actions: [
@@ -288,11 +293,15 @@ class const SettingMultiSelectTile<T extends Object>({
   }
 
   Future<void> _pick(BuildContext context) async {
+    unawaited(HapticFeedback.selectionClick());
     final okLabel = MaterialLocalizations.of(context).okButtonLabel;
     final result = await showModalBottomSheet<Set<T>>(
       context: context,
       builder: (sheetContext) {
-        final working = <T>{...selected};
+        // 只保留仍出现在 options 里的已选值：弹层无法渲染或清除未知值，
+        // 因此把它们从工作集里剔除以避免回传用户看不见的残留项。
+        final optionValues = {for (final option in options) option.value};
+        final working = <T>{...selected.where(optionValues.contains)};
         return StatefulBuilder(
           builder: (_, setState) => SafeArea(
             child: ListView(

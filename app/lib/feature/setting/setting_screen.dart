@@ -49,6 +49,9 @@ class const SettingScreen({
         children: [
           for (final (title, entries) in _groups(l10n))
             ExpansionTile(
+              // ListView 会回收离开缓存范围的分组；稳定的 PageStorageKey 让
+              // ExpansionTile 重建后仍能恢复用户折叠/展开的状态。
+              key: PageStorageKey<SettingsSection>(entries.first.$1),
               initiallyExpanded: true,
               title: Text(
                 title,

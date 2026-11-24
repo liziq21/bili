@@ -243,6 +243,30 @@ void main() {
       // Then nothing is reported.
       expect(calls, 0);
     });
+
+    testWidgets('reports input submitted from the keyboard', (tester) async {
+      // Given an open free-text dialog.
+      String? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingTextTile(
+            title: 'Channel name',
+            value: 'Old',
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+      await tester.tap(find.text('Channel name'));
+      await tester.pumpAndSettle();
+
+      // When the user submits from the keyboard instead of tapping OK.
+      await tester.enterText(find.byType(TextField), 'Typed');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      // Then the typed text is reported.
+      expect(changed, 'Typed');
+    });
   });
 
   group('SettingMultiSelectTile', () {
@@ -314,6 +338,35 @@ void main() {
 
       // Then only the remaining option is reported.
       expect(changed, {'b'});
+    });
+
+    testWidgets('drops selected values that are not in the options', (
+      tester,
+    ) async {
+      // Given a selection that includes a value absent from the options.
+      Set<String>? changed;
+      await tester.pumpWidget(
+        _buildWidget(
+          SettingMultiSelectTile<String>(
+            title: 'Tabs',
+            options: options,
+            selected: const {'a', 'z'},
+            onChanged: (value) => changed = value,
+          ),
+        ),
+      );
+
+      // When the sheet is confirmed without any change.
+      await tester.tap(find.text('Tabs'));
+      await tester.pumpAndSettle();
+      final okLabel = MaterialLocalizations.of(
+        tester.element(find.byType(CheckboxListTile).first),
+      ).okButtonLabel;
+      await tester.tap(find.widgetWithText(TextButton, okLabel));
+      await tester.pumpAndSettle();
+
+      // Then the unknown value is dropped.
+      expect(changed, {'a'});
     });
   });
 }

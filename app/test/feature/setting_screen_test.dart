@@ -148,6 +148,42 @@ void main() {
       }
     });
 
+    testWidgets(
+      'keeps a collapsed group collapsed after it leaves the viewport',
+      (tester) async {
+        // Given a short viewport where the lazy ListView recycles off-screen rows.
+        try {
+          await tester.binding.setSurfaceSize(const Size(400, 200));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          await tester.pumpWidget(
+            _buildScreen(SettingScreen(onSectionSelected: (_) {})),
+          );
+          await tester.pumpAndSettle();
+          final l10n = AppLocalizations.of(
+            tester.element(find.byType(SettingScreen)),
+          )!;
+
+          // When the playback group is collapsed and scrolled out of the cache.
+          await tester.tap(find.text(l10n.settingsGroupPlayback));
+          await tester.pumpAndSettle();
+          expect(find.text(l10n.settingsPlayer), findsNothing);
+          await tester.drag(find.byType(ListView), const Offset(0, -800));
+          await tester.pumpAndSettle();
+
+          // And scrolled back to the top so the group is rebuilt.
+          await tester.drag(find.byType(ListView), const Offset(0, 800));
+          await tester.pumpAndSettle();
+
+          // Then the collapsed state survived the rebuild.
+          expect(find.text(l10n.settingsPlayer), findsNothing);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+        }
+      },
+    );
+
     for (final MapEntry(key: section, value: labelOf)
         in sectionLabels.entries) {
       testWidgets('selecting $section reports only its section', (
