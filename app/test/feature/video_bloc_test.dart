@@ -79,6 +79,39 @@ class _FailingStreamDataSource() extends MediaStreamRemoteDataSource {
   }) async => Result.error(Exception('stream offline'));
 }
 
+/// 按 id 分别挂起的详情数据源：让测试决定哪个请求先返回。
+class _PendingDetailDataSource() extends VideoDetailRemoteDataSource {
+  @override
+  String get sourceId => 'pending';
+
+  final pending = <String, Completer<Result<VideoDetail, Exception>>>{};
+
+  /// 永不完成的数据源，用于覆盖超时。
+  bool hang = false;
+
+  @override
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) {
+    if (hang) return Completer<Result<VideoDetail, Exception>>().future;
+    final completer = Completer<Result<VideoDetail, Exception>>();
+    pending[id] = completer;
+    return completer.future;
+  }
+
+  void complete(String id) {
+    pending[id]!.complete(
+      Result.success(
+        VideoDetail(
+          video: VideoModel(
+            id: id,
+            title: 'Detail $id',
+            url: 'https://example.com/$id',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Loads a normal detail but reports every write as rejected, which is the
 /// case the toggle handlers currently swallow.
 class _RejectingVideoDetailRemoteDataSource()
@@ -147,6 +180,20 @@ class FakeVideoCommentRemoteDataSource() extends VideoCommentRemoteDataSource {
       Page<VideoComment>(number: page, totalPages: 2, data: [comment]),
     );
   }
+}
+
+/// 首屏评论永不返回，用于覆盖超时。
+class _HangingVideoCommentRemoteDataSource()
+    extends VideoCommentRemoteDataSource {
+  @override
+  String get sourceId => 'hanging';
+
+  @override
+  Future<Result<Page<VideoComment>, Exception>> getVideoComments(
+    String videoId, {
+    int page = 1,
+    int pageSize = 20,
+  }) => Completer<Result<Page<VideoComment>, Exception>>().future;
 }
 
 class FakeVideoCommentRepliesRemoteDataSource()
@@ -331,6 +378,46 @@ void main() {
             ),
           ]),
         );
+      },
+    );
+
+    test('an older detail response never overwrites a newer one', () async {
+      final source = _PendingDetailDataSource();
+      final bloc = VideoBloc(repository: AppVideoDetailRepository(source));
+      addTearDown(bloc.close);
+
+      bloc.add(const LoadVideoDetail('BV1old'));
+      await pumpEventQueue();
+      bloc.add(const LoadVideoDetail('BV1new'));
+      await pumpEventQueue();
+
+      // 新请求先返回，旧请求后返回：旧结果必须被丢弃。
+      source.complete('BV1new');
+      await pumpEventQueue();
+      source.complete('BV1old');
+      await pumpEventQueue();
+
+      expect(bloc.state.videoId, 'BV1new');
+      expect(bloc.state.videoDetail?.video.id, 'BV1new');
+      expect(bloc.state.error, isNull);
+    });
+
+    test(
+      'a detail request that never completes ends in a retryable error',
+      () async {
+        final source = _PendingDetailDataSource()..hang = true;
+        final bloc = VideoBloc(
+          repository: AppVideoDetailRepository(source),
+          detailTimeout: const Duration(milliseconds: 20),
+        );
+        addTearDown(bloc.close);
+
+        bloc.add(const LoadVideoDetail('BV1hang'));
+
+        final failed = await bloc.stream.firstWhere((s) => s.error != null);
+        expect(failed.isLoading, isFalse);
+        // 保留 videoId，错误态才有可用的重试目标。
+        expect(failed.videoId, 'BV1hang');
       },
     );
 
@@ -614,6 +701,22 @@ void main() {
         () => state.copyWith(error: const Object()),
         throwsA(isA<TypeError>()),
       );
+    });
+
+    test('a comment request that never completes ends in an error', () async {
+      final bloc = VideoCommentBloc(
+        repository: AppVideoCommentRepository(
+          _HangingVideoCommentRemoteDataSource(),
+        ),
+        loadTimeout: const Duration(milliseconds: 20),
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const LoadVideoComments('BV1hang'));
+
+      final failed = await bloc.stream.firstWhere((s) => s.error != null);
+      expect(failed.isLoading, isFalse);
+      expect(failed.videoId, 'BV1hang');
     });
 
     test('LoadVideoComments fetches first page of comments', () async {

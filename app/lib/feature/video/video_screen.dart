@@ -479,6 +479,17 @@ class _VideoContentState() extends State<_VideoContent> {
   }
 
   @override
+  void didUpdateWidget(covariant _VideoContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoId == widget.videoId) return;
+    // bloc 由上层 provider 持有，换视频时不会重建；不重新派发，详情与播放
+    // 地址仍指向上一个视频，重试也会打在上一个 id 上。
+    context.read<VideoBloc>()
+      ..add(LoadVideoDetail(widget.videoId))
+      ..add(LoadMediaStream(widget.videoId));
+  }
+
+  @override
   void dispose() {
     // 带着横屏设置离开会把整个应用留在横屏，离开时必须还原。
     if (_fullscreen) unawaited(_restorePortrait());

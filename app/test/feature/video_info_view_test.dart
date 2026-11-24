@@ -12,6 +12,9 @@ import 'package:material_ui/material_ui.dart';
 class MockVideoBloc(super.initialState)
     extends Cubit<VideoState>
     implements VideoBloc {
+  @override
+  final Duration detailTimeout = const Duration(seconds: 30);
+
   /// Events the UI dispatched, so retry buttons can be asserted end to end.
   final List<VideoEvent> dispatched = [];
 

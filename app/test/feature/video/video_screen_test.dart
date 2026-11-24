@@ -267,6 +267,36 @@ void main() {
       addTearDown(controller.dispose);
     });
 
+    testWidgets('a new video id loads that video, not the previous one', (
+      tester,
+    ) async {
+      final repository = _RecordingDetailRepository();
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+
+      await pumpPage(
+        tester,
+        controller: controller,
+        videoId: 'BV1first',
+        repository: repository,
+      );
+      // 同一个 bloc provider 仍在树上时换 id。
+      await pumpPage(
+        tester,
+        controller: controller,
+        videoId: 'BV1second',
+        repository: repository,
+      );
+      await tester.pump();
+
+      expect(repository.detailIds, contains('BV1second'));
+      expect(repository.streamIds, contains('BV1second'));
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      addTearDown(controller.dispose);
+    });
+
     testWidgets('starts from the beginning when nothing was saved', (
       tester,
     ) async {
@@ -391,6 +421,52 @@ class const _TitledVideoRepository() implements VideoDetailRepository {
   }) async => Result.success(
     MediaStream(videoUrl: 'https://example.com/$id.m4s', height: 1080),
   );
+}
+
+/// 记录详情与播放地址请求的 id，用于断言换视频后重新派发。
+class _RecordingDetailRepository() implements VideoDetailRepository {
+  final detailIds = <String>[];
+  final streamIds = <String>[];
+
+  @override
+  Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
+    detailIds.add(id);
+    return Result.success(
+      VideoDetail(
+        video: VideoModel(
+          id: id,
+          title: 'Title $id',
+          url: 'https://example.com/$id',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<Result<MediaStream, Exception>> getMediaStream(
+    String id, {
+    int? preferHeight,
+    int? preferStreamId,
+  }) async {
+    streamIds.add(id);
+    return Result.success(MediaStream(videoUrl: 'https://example.com/$id.m4s'));
+  }
+
+  @override
+  Future<Result<bool, Exception>> toggleLike(String id, bool isLiked) async =>
+      Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool, Exception>> toggleFavorite(
+    String id,
+    bool isFavorited,
+  ) async => Result.error(Exception('unused'));
+
+  @override
+  Future<Result<bool, Exception>> toggleSubscribe(
+    String creatorId,
+    bool isSubscribed,
+  ) async => Result.error(Exception('unused'));
 }
 
 class const _TestMediaSource() extends MediaSource {

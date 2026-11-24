@@ -11,6 +11,9 @@ class MockVideoBloc(super.initialState)
     extends Cubit<VideoState>
     implements VideoBloc {
   @override
+  final Duration detailTimeout = const Duration(seconds: 30);
+
+  @override
   void add(VideoEvent event) {}
 
   @override
@@ -32,6 +35,9 @@ class MockVideoBloc(super.initialState)
 class MockVideoCommentBloc(super.initialState)
     extends Cubit<VideoCommentState>
     implements VideoCommentBloc {
+  @override
+  final Duration loadTimeout = const Duration(seconds: 30);
+
   @override
   void add(VideoCommentEvent event) {}
 
