@@ -1102,28 +1102,24 @@
   "@dotSeparator": {
     "description": "Metadata separator between view count and date; punctuation only"
   },
-  "danmakuCountSample": "2.4万 弹幕",
-  "@danmakuCountSample": {
-    "description": "Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet"
-  },
-  "oneDayAgoSample": "1天前",
-  "@oneDayAgoSample": {
-    "description": "Demo value for the relative publish date in the video info header"
-  },
-  "originalTech": "原创技术",
-  "@originalTech": {
-    "description": "Demo tag shown in the video info header"
-  },
-  "subscribersWeeklyTagline": "{p1} 关注者 · 每周硬核解析",
-  "@subscribersWeeklyTagline": {
-    "description": "Demo tagline under the creator name in the video info header; {p1} is the follower count",
+  "danmakuCountLabel": "{p1} 弹幕",
+  "@danmakuCountLabel": {
+    "description": "Video info - danmaku (bullet comment) count; {p1} is a formatted count",
     "placeholders": {
       "p1": {
         "type": "String",
-        "example": "1.2K",
-        "description": "Formatted follower count"
+        "example": "24K",
+        "description": "Formatted danmaku count"
       }
     }
+  },
+  "copyrightOriginal": "原创",
+  "@copyrightOriginal": {
+    "description": "Video info - copyright tag for a self-made (original) upload"
+  },
+  "copyrightRepost": "转载",
+  "@copyrightRepost": {
+    "description": "Video info - copyright tag for a reposted upload"
   },
   "unfollowCreator": "取消关注创作者",
   "@unfollowCreator": {

@@ -1102,28 +1102,24 @@
   "@dotSeparator": {
     "description": "Metadata separator between view count and date; punctuation only"
   },
-  "danmakuCountSample": "24K danmaku",
-  "@danmakuCountSample": {
-    "description": "Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet"
-  },
-  "oneDayAgoSample": "1 day ago",
-  "@oneDayAgoSample": {
-    "description": "Demo value for the relative publish date in the video info header"
-  },
-  "originalTech": "Original tech",
-  "@originalTech": {
-    "description": "Demo tag shown in the video info header"
-  },
-  "subscribersWeeklyTagline": "{p1} followers · Weekly deep dives",
-  "@subscribersWeeklyTagline": {
-    "description": "Demo tagline under the creator name in the video info header; {p1} is the follower count",
+  "danmakuCountLabel": "{p1} danmaku",
+  "@danmakuCountLabel": {
+    "description": "Video info - danmaku (bullet comment) count; {p1} is a formatted count",
     "placeholders": {
       "p1": {
         "type": "String",
-        "example": "1.2K",
-        "description": "Formatted follower count"
+        "example": "24K",
+        "description": "Formatted danmaku count"
       }
     }
+  },
+  "copyrightOriginal": "Original",
+  "@copyrightOriginal": {
+    "description": "Video info - copyright tag for a self-made (original) upload"
+  },
+  "copyrightRepost": "Reposted",
+  "@copyrightRepost": {
+    "description": "Video info - copyright tag for a reposted upload"
   },
   "unfollowCreator": "Unfollow creator",
   "@unfollowCreator": {

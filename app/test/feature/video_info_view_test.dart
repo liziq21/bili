@@ -746,4 +746,98 @@ void main() {
       },
     );
   });
+
+  group('VideoInfoView header stats', () {
+    Future<void> pumpHeader(WidgetTester tester, VideoDetail detail) async {
+      final bloc = MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: detail),
+      );
+      addTearDown(bloc.close);
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: bloc,
+              child: const VideoInfoView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('renders the counts, date and copyright the API returned', (
+      tester,
+    ) async {
+      // given: a detail carrying every header field
+      await pumpHeader(
+        tester,
+        VideoDetail(
+          video: VideoModel(
+            id: 'BV1realStats',
+            url: 'https://example.com/video',
+            title: '统计行绑定真实数据',
+            viewCount: 123456,
+            danmakuCount: 24000,
+            uploadDate: DateTime.now().subtract(const Duration(days: 3)),
+          ),
+          creator: const CreatorProfile(
+            id: 'creator_real',
+            name: '真实UP主',
+            subscribers: 4940,
+          ),
+          copyright: VideoCopyright.original,
+        ),
+      );
+
+      // then: every segment shows the API value, not sample copy
+      expect(find.text('12.3万 播放'), findsOneWidget);
+      expect(find.text('2.4万 弹幕'), findsOneWidget);
+      expect(find.text('3 天前'), findsOneWidget);
+      expect(find.text('原创'), findsOneWidget);
+      expect(find.text('4940 关注'), findsOneWidget);
+    });
+
+    testWidgets('hides header segments the API did not provide', (
+      tester,
+    ) async {
+      // given: a detail with only a title, id and view count
+      await pumpHeader(
+        tester,
+        VideoDetail(
+          video: const VideoModel(
+            id: 'BV1sparse',
+            url: 'https://example.com/video',
+            title: '缺失字段的视频',
+            viewCount: 100,
+          ),
+          creator: const CreatorProfile(id: 'creator_sparse', name: '无关注数UP主'),
+        ),
+      );
+
+      // then: nothing is invented for the missing fields
+      expect(find.text('100 播放'), findsOneWidget);
+      expect(find.text('原创'), findsNothing);
+      expect(find.text('转载'), findsNothing);
+      expect(find.text('2.4万 弹幕'), findsNothing);
+      expect(find.text('1天前'), findsNothing);
+      expect(find.text('4940 关注'), findsNothing);
+      // the id chip still renders, and no separator is left dangling
+      expect(find.text('BV1sparse'), findsOneWidget);
+      // 两段之间恰好一个分隔符，且它位于两者之间：挂在最后一段之后的分隔符
+      // 数量相同，只数个数拦不住。
+      expect(find.text('·'), findsOneWidget);
+      final separator = tester.getRect(find.text('·'));
+      final viewLabel = tester.getRect(find.text('100 播放'));
+      final idChip = tester.getRect(find.text('BV1sparse'));
+      expect(separator.left, greaterThan(viewLabel.right));
+      expect(separator.right, lessThan(idChip.left));
+    });
+  });
 }

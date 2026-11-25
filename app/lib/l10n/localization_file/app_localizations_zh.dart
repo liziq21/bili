@@ -733,18 +733,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dotSeparator => '·';
 
   @override
-  String get danmakuCountSample => '2.4万 弹幕';
-
-  @override
-  String get oneDayAgoSample => '1天前';
-
-  @override
-  String get originalTech => '原创技术';
-
-  @override
-  String subscribersWeeklyTagline(String p1) {
-    return '$p1 关注者 · 每周硬核解析';
+  String danmakuCountLabel(String p1) {
+    return '$p1 弹幕';
   }
+
+  @override
+  String get copyrightOriginal => '原创';
+
+  @override
+  String get copyrightRepost => '转载';
 
   @override
   String get unfollowCreator => '取消关注创作者';

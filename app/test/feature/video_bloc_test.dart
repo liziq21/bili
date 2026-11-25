@@ -15,12 +15,17 @@ class FakeVideoDetailRemoteDataSource() extends VideoDetailRemoteDataSource {
   /// 置为 true 时 [getVideoDetail] 返回失败，用于覆盖加载失败态。
   bool failDetail = false;
 
+  /// 置为未完成的 Completer 时详情请求挂起，用于覆盖「新详情到达前」的中间态。
+  Completer<void>? detailGate;
+
   final List<(String, bool)> likeCalls = [];
   final List<(String, bool)> favoriteCalls = [];
   final List<(String, bool)> subscribeCalls = [];
 
   @override
   Future<Result<VideoDetail, Exception>> getVideoDetail(String id) async {
+    final gate = detailGate;
+    if (gate != null) await gate.future;
     if (failDetail) {
       return Result.error(Exception('offline'));
     }
@@ -327,6 +332,35 @@ void main() {
         ]),
       );
     });
+
+    test(
+      'switching videos drops the previous detail until the new one lands',
+      () async {
+        // 页头直接读 videoDetail。换视频时若保留旧详情，新请求回来之前页头会
+        // 继续显示上一个视频的标题、播放量与版权。
+        videoBloc.add(const LoadVideoDetail('first'));
+        await videoBloc.stream.firstWhere((s) => s.videoDetail != null);
+
+        final seen = <VideoState>[];
+        final subscription = videoBloc.stream.listen(seen.add);
+        addTearDown(subscription.cancel);
+
+        final gate = Completer<void>();
+        fakeDataSource.detailGate = gate;
+        videoBloc.add(const LoadVideoDetail('second'));
+        await pumpEventQueue();
+
+        expect(seen.last.videoId, 'second');
+        expect(seen.last.isLoading, isTrue);
+        expect(seen.last.videoDetail, isNull);
+
+        gate.complete();
+        await pumpEventQueue();
+        fakeDataSource.detailGate = null;
+
+        expect(seen.last.videoDetail?.video.id, 'second');
+      },
+    );
 
     test(
       'a detail retry keeps the stream error so the player keeps its retry',

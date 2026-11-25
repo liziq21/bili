@@ -775,18 +775,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dotSeparator => '·';
 
   @override
-  String get danmakuCountSample => '24K danmaku';
-
-  @override
-  String get oneDayAgoSample => '1 day ago';
-
-  @override
-  String get originalTech => 'Original tech';
-
-  @override
-  String subscribersWeeklyTagline(String p1) {
-    return '$p1 followers · Weekly deep dives';
+  String danmakuCountLabel(String p1) {
+    return '$p1 danmaku';
   }
+
+  @override
+  String get copyrightOriginal => 'Original';
+
+  @override
+  String get copyrightRepost => 'Reposted';
 
   @override
   String get unfollowCreator => 'Unfollow creator';

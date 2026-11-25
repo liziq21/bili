@@ -41,7 +41,18 @@ class VideoBloc({
     LoadVideoDetail event,
     Emitter<VideoState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, error: null, videoId: event.id));
+    // 换视频时先清掉上一条的详情与播放地址：新请求回来之前，页头否则会继续
+    // 显示上一个视频的标题、播放量与版权。同一 id 的重试保留已加载内容。
+    final switching = state.videoDetail?.video.id != event.id;
+    emit(
+      state.copyWith(
+        isLoading: true,
+        error: null,
+        videoId: event.id,
+        videoDetail: switching ? null : _keepVideoDetail,
+        mediaStream: switching ? null : _keepMediaStream,
+      ),
+    );
     _log.info('Loading video detail for id: ${event.id}');
 
     final result = await _loadDetail(event.id);

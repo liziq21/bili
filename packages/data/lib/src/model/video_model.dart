@@ -4,6 +4,7 @@ final class const VideoModel({
   required final String url,
   final String? thumbnailUrl,
   final int? viewCount,
+  final int? danmakuCount,
   final DateTime? uploadDate,
   final int? duration,
   final String? desc,
