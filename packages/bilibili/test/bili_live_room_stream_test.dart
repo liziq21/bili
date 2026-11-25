@@ -125,6 +125,8 @@ void main() {
       BiliLiveRoomDetailRemoteDataSource(
         network: network,
         browserUserAgent: 'test-agent',
+        // 探测不联网：默认全部可用，候选选择另由 fallback 组验证。
+        probe: (url, headers) async => true,
       );
 
   group('default stream', () {
@@ -141,8 +143,9 @@ void main() {
         // 默认请求走客户端默认档 10000。
         expect(network.lastQn, 10000);
         final stream = expectOk(result);
-        // 优先 HLS：ts avc codec 的流地址（fixture 捕获时 current_qn=150）。
-        expect(stream.videoUrl, contains('.m3u8'));
+        // FLV 优先：http_stream 的 flv avc 流地址（fixture 捕获时
+        // current_qn=150）。HLS-TS 对多数房间不响应，见 LIZ-161。
+        expect(stream.videoUrl, contains('.flv'));
         expect(stream.videoUrl, contains('qn=150'));
         expect(stream.streamId, 150);
         expect(stream.qualityLabel, '高清');
@@ -181,6 +184,218 @@ void main() {
           400,
           150,
         ]);
+      },
+    );
+  });
+
+  group('candidate fallback', () {
+    /// FLV 与 HLS 并存：两种协议各一路，url_info 可给多个 host。
+    Map<String, dynamic> playInfoWithBoth({List<String> flvHosts = const []}) =>
+        <String, dynamic>{
+          'room_id': 1918661467,
+          'playurl_info': <String, dynamic>{
+            'playurl': <String, dynamic>{
+              'cid': 1918661467,
+              'g_qn_desc': <dynamic>[
+                <String, dynamic>{'qn': 10000, 'desc': '原画'},
+                <String, dynamic>{'qn': 250, 'desc': '超清'},
+              ],
+              'stream': <dynamic>[
+                <String, dynamic>{
+                  'protocol_name': 'http_hls',
+                  'format': <dynamic>[
+                    <String, dynamic>{
+                      'format_name': 'ts',
+                      'codec': <dynamic>[
+                        <String, dynamic>{
+                          'codec_name': 'avc',
+                          'current_qn': 250,
+                          'accept_qn': [10000, 250],
+                          'base_url': '/live-bvc/hls/live.m3u8?',
+                          'url_info': <dynamic>[
+                            <String, dynamic>{
+                              'host': 'https://hls.example.com',
+                              'extra': 'qn=250',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                <String, dynamic>{
+                  'protocol_name': 'http_stream',
+                  'format': <dynamic>[
+                    <String, dynamic>{
+                      'format_name': 'flv',
+                      'codec': <dynamic>[
+                        <String, dynamic>{
+                          'codec_name': 'avc',
+                          'current_qn': 250,
+                          'accept_qn': [10000, 250],
+                          'base_url': '/live-bvc/flv/live.flv?',
+                          'url_info':
+                              (flvHosts.isEmpty
+                                      ? <String>['https://flv.example.com']
+                                      : flvHosts)
+                                  .map(
+                                    (host) => <String, dynamic>{
+                                      'host': host,
+                                      'extra': 'qn=250',
+                                    },
+                                  )
+                                  .toList(),
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+
+    test('probes FLV before HLS and returns the FLV address', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(playInfoJson: playInfoWithBoth()),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return true;
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(stream.videoUrl, contains('.flv'));
+      expect(stream.streamId, 250);
+      expect(stream.qualityLabel, '超清');
+      expect(probed, hasLength(1));
+    });
+
+    test('falls back to HLS when the FLV address never responds', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(playInfoJson: playInfoWithBoth()),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return url.contains('.m3u8');
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(stream.videoUrl, contains('.m3u8'));
+      expect(probed, hasLength(2));
+      expect(probed.first, contains('.flv'));
+      expect(probed.last, contains('.m3u8'));
+    });
+
+    test('tries the next CDN host when the first one is dead', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoWithBoth(
+            flvHosts: const [
+              'https://dead.example.com',
+              'https://live.example.com',
+            ],
+          ),
+        ),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return url.contains('live.example.com');
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(stream.videoUrl, contains('live.example.com'));
+      expect(probed, hasLength(2));
+      expect(probed.first, contains('dead.example.com'));
+    });
+
+    test(
+      'reports every candidate as unavailable when all probes fail',
+      () async {
+        final source = BiliLiveRoomDetailRemoteDataSource(
+          network: MockLiveRoomNetwork(playInfoJson: playInfoWithBoth()),
+          browserUserAgent: 'test-agent',
+          probe: (url, headers) async => false,
+        );
+
+        final result = await source.getLiveRoomStream(1918661467);
+
+        expect(result.isError(), isTrue);
+        expect(switch (result) {
+          Error(:final error) => error.toString(),
+          _ => '',
+        }, contains('所有候选地址均不可用'));
+      },
+    );
+
+    test(
+      'picks the codec matching the requested qn instead of the first',
+      () async {
+        final probed = <String>[];
+        final playInfo = <String, dynamic>{
+          'room_id': 21144080,
+          'playurl_info': <String, dynamic>{
+            'playurl': <String, dynamic>{
+              'cid': 21144080,
+              'g_qn_desc': <dynamic>[
+                <String, dynamic>{'qn': 10000, 'desc': '原画'},
+                <String, dynamic>{'qn': 400, 'desc': '蓝光'},
+                <String, dynamic>{'qn': 150, 'desc': '高清'},
+              ],
+              'stream': <dynamic>[
+                <String, dynamic>{
+                  'protocol_name': 'http_stream',
+                  'format': <dynamic>[
+                    <String, dynamic>{
+                      'format_name': 'flv',
+                      'codec': <dynamic>[
+                        for (final qn in [150, 400])
+                          <String, dynamic>{
+                            'codec_name': 'avc',
+                            'current_qn': qn,
+                            'accept_qn': [10000, 400, 150],
+                            'base_url': '/live-bvc/flv/live_$qn.flv?',
+                            'url_info': <dynamic>[
+                              <String, dynamic>{
+                                'host': 'https://flv.example.com',
+                                'extra': 'qn=$qn',
+                              },
+                            ],
+                          },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        final source = BiliLiveRoomDetailRemoteDataSource(
+          network: MockLiveRoomNetwork(playInfoJson: playInfo),
+          browserUserAgent: 'test-agent',
+          probe: (url, headers) async {
+            probed.add(url);
+            return true;
+          },
+        );
+
+        final stream = expectOk(
+          await source.getLiveRoomStream(21144080, preferQn: 400),
+        );
+
+        expect(stream.videoUrl, contains('qn=400'));
+        expect(stream.streamId, 400);
+        expect(stream.qualityLabel, '蓝光');
+        expect(probed.single, contains('qn=400'));
       },
     );
   });

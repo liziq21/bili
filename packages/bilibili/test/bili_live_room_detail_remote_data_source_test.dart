@@ -191,6 +191,7 @@ void main() {
         final schemeRelativeSource = BiliLiveRoomDetailRemoteDataSource(
           network: schemeRelativeNetwork,
           browserUserAgent: 'BiliTest/1.0',
+          probe: (url, headers) async => true,
         );
         final schemeRelativeRes = await schemeRelativeSource.getLiveRoomStream(
           1001,
@@ -207,6 +208,7 @@ void main() {
         final httpSource = BiliLiveRoomDetailRemoteDataSource(
           network: httpNetwork,
           browserUserAgent: 'BiliTest/1.0',
+          probe: (url, headers) async => true,
         );
         final httpRes = await httpSource.getLiveRoomStream(1001);
         expect(httpRes.isSuccess(), isTrue);
@@ -221,6 +223,7 @@ void main() {
         final httpsSource = BiliLiveRoomDetailRemoteDataSource(
           network: httpsNetwork,
           browserUserAgent: 'BiliTest/1.0',
+          probe: (url, headers) async => true,
         );
         final httpsRes = await httpsSource.getLiveRoomStream(1001);
         expect(httpsRes.isSuccess(), isTrue);
