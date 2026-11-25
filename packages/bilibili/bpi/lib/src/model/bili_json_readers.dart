@@ -56,23 +56,19 @@ List<T> biliReadObjectList<T>(
   if (value is! List) {
     return const [];
   }
-  return value
-      .whereType<Map>()
-      .map(parse)
-      .whereType<T>()
-      .toList(growable: false);
+  return List<T>.unmodifiable(value.whereType<Map>().map(parse).whereType<T>());
 }
 
 List<String> biliReadStringList(Object? value) {
   if (value is! List) {
     return const [];
   }
-  return value.whereType<String>().toList(growable: false);
+  return List<String>.unmodifiable(value.whereType<String>());
 }
 
 List<int> biliReadIntList(Object? value) {
   if (value is! List) {
     return const [];
   }
-  return value.map(biliReadInt).nonNulls.toList(growable: false);
+  return List<int>.unmodifiable(value.map(biliReadInt).nonNulls);
 }

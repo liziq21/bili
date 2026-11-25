@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 视频分P列表 (`/x/player/pagelist`)。
+@immutable
 final class NetworkBiliVideoParts {
   const NetworkBiliVideoParts({
     required this.code,
@@ -45,6 +48,7 @@ final class NetworkBiliVideoParts {
   final List<NetworkBiliVideoPart> parts;
 }
 
+@immutable
 final class NetworkBiliVideoPart {
   const NetworkBiliVideoPart({
     required this.cid,

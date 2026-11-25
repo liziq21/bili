@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 首页推荐 (`/x/web-interface/wbi/index/top/feed/rcmd`)。
+@immutable
 final class NetworkBiliHomeFeed {
   const NetworkBiliHomeFeed({
     required this.code,
@@ -50,6 +53,7 @@ final class NetworkBiliHomeFeed {
 
 /// 首页条目。`goto` 区分视频 (`av`)、直播 (`live`) 和广告等类型；只有视频条目
 /// 带 `bvid`，因此缺少标识的条目被丢弃。
+@immutable
 final class NetworkBiliHomeFeedItem {
   const NetworkBiliHomeFeedItem({
     required this.goto,
@@ -102,6 +106,7 @@ final class NetworkBiliHomeFeedItem {
   final NetworkBiliHomeFeedStat? stat;
 }
 
+@immutable
 final class NetworkBiliHomeFeedOwner {
   const NetworkBiliHomeFeedOwner({this.mid, this.name, this.face});
 
@@ -120,6 +125,7 @@ final class NetworkBiliHomeFeedOwner {
   final String? face;
 }
 
+@immutable
 final class NetworkBiliHomeFeedStat {
   const NetworkBiliHomeFeedStat({this.view, this.like, this.danmaku});
 

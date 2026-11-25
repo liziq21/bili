@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 视频进度条预览图 (`/x/player/videoshot`)。
+@immutable
 final class NetworkBiliVideoSnapshot {
   const NetworkBiliVideoSnapshot({
     required this.code,

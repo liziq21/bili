@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 批量直播间基础信息 (`/xlive/web-room/v1/index/getRoomBaseInfo`)。
+@immutable
 final class NetworkLiveRoomBaseInfo {
   const NetworkLiveRoomBaseInfo({
     required this.code,
@@ -58,6 +61,7 @@ final class NetworkLiveRoomBaseInfo {
   final Map<int, NetworkLiveRoomBase> rooms;
 }
 
+@immutable
 final class NetworkLiveRoomBase {
   const NetworkLiveRoomBase({
     required this.roomId,

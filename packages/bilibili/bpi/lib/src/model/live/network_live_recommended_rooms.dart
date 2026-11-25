@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 推荐直播间列表 (`/room/v1/room/get_user_recommend`)。
+@immutable
 final class NetworkLiveRecommendedRooms {
   const NetworkLiveRecommendedRooms({
     required this.code,
@@ -48,6 +51,7 @@ final class NetworkLiveRecommendedRooms {
   final List<NetworkLiveRecommendedRoom> rooms;
 }
 
+@immutable
 final class NetworkLiveRecommendedRoom {
   const NetworkLiveRecommendedRoom({
     required this.roomId,

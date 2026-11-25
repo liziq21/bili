@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 视频标签 (`/x/web-interface/view/detail/tag`)。
+@immutable
 final class NetworkBiliVideoTags {
   const NetworkBiliVideoTags({
     required this.code,
@@ -45,6 +48,7 @@ final class NetworkBiliVideoTags {
   final List<NetworkBiliVideoTag> tags;
 }
 
+@immutable
 final class NetworkBiliVideoTag {
   const NetworkBiliVideoTag({
     required this.tagId,

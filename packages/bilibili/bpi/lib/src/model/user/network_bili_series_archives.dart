@@ -1,9 +1,12 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 用户系列（series）视频列表 (`/x/series/archives`)。
 ///
 /// 合集使用 `seasons_archives_list`，系列使用本端点；两者分页字段不同。
+@immutable
 final class NetworkBiliSeriesArchives {
   const NetworkBiliSeriesArchives({
     required this.code,
@@ -57,6 +60,7 @@ final class NetworkBiliSeriesArchives {
   final NetworkBiliSeriesPage? page;
 }
 
+@immutable
 final class NetworkBiliSeriesArchive {
   const NetworkBiliSeriesArchive({
     required this.aid,
@@ -100,6 +104,7 @@ final class NetworkBiliSeriesArchive {
   final NetworkBiliSeriesArchiveStat? stat;
 }
 
+@immutable
 final class NetworkBiliSeriesArchiveStat {
   const NetworkBiliSeriesArchiveStat({this.view});
 
@@ -114,6 +119,7 @@ final class NetworkBiliSeriesArchiveStat {
   final int? view;
 }
 
+@immutable
 final class NetworkBiliSeriesPage {
   const NetworkBiliSeriesPage({this.num, this.size, this.total});
 
