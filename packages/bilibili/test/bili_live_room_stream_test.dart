@@ -146,24 +146,20 @@ void main() {
         // 默认请求走客户端默认档 10000。
         expect(network.lastQn, 10000);
         final stream = expectOk(result);
-        // FLV 优先：http_stream 的 flv avc 流地址（fixture 捕获时
-        // current_qn=150）。HLS-TS 对多数房间不响应，见 LIZ-161。
+        // fixture 里房间没给原画：最高可用档是 250（超清），它在 FLV 上是
+        // hevc，150（高清）才是 avc。档位高低先于封装与编码，所以选 250 的
+        // FLV 流——请求的档没给时退回最高可用档，而不是协议排序第一的档。
         expect(stream.videoUrl, contains('.flv'));
-        expect(stream.videoUrl, contains('qn=150'));
-        expect(stream.streamId, 150);
-        expect(stream.qualityLabel, '高清');
-        // acceptQn [10000,400,250,150] ∩ gQnDesc 去掉当前档，保持 gQnDesc 顺序。
-        expect(stream.alternatives, hasLength(3));
+        expect(stream.videoUrl, contains('qn=250'));
+        expect(stream.streamId, 250);
+        expect(stream.qualityLabel, '超清');
+        // acceptQn [10000,400,250] ∩ gQnDesc 去掉当前档，保持 gQnDesc 顺序。
+        expect(stream.alternatives, hasLength(2));
         expect(stream.alternatives.map((option) => option.streamId), [
           10000,
           400,
-          250,
         ]);
-        expect(stream.alternatives.map((option) => option.label), [
-          '原画',
-          '蓝光',
-          '超清',
-        ]);
+        expect(stream.alternatives.map((option) => option.label), ['原画', '蓝光']);
       },
     );
   });
@@ -552,6 +548,37 @@ void main() {
       expect(stream.videoUrl, contains('.m3u8'));
       expect(stream.streamId, 10000);
     });
+
+    test(
+      'falls back to the highest available quality, not the first codec',
+      () async {
+        final probed = <String>[];
+        final source = BiliLiveRoomDetailRemoteDataSource(
+          network: MockLiveRoomNetwork(
+            playInfoJson: playInfoJson([
+              // FLV 排在协议前面，但只有 150；请求的原画只在 HLS 上给到 250。
+              streamJson('http_stream', 'flv', [
+                codecJson('avc', 150, baseUrl: '/live/flv/live.flv?'),
+              ]),
+              streamJson('http_hls', 'ts', [
+                codecJson('avc', 250, baseUrl: '/live/hls/live.m3u8?'),
+              ]),
+            ]),
+          ),
+          browserUserAgent: 'test-agent',
+          probe: (url, headers) async {
+            probed.add(url);
+            return true;
+          },
+        );
+
+        final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+        // 请求的 10000 房间没提供：退回最高可用档 250，而不是协议排序第一的 150。
+        expect(probed, hasLength(1));
+        expect(stream.streamId, 250);
+      },
+    );
 
     test('probes HLS before FLV when the player runs in a browser', () async {
       final probed = <String>[];

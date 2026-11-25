@@ -204,10 +204,12 @@ final class BiliLiveRoomDetailRemoteDataSource({
   ///
   /// 1. 命中请求档位的 codec 优先——切清晰度时不能因为 FLV 先探测成功就停
   ///    在别的档，哪怕 HLS 上有用户选的那一档。
-  /// 2. 然后按「FLV → HLS(fmp4) → HLS(ts) → 其他」：实测同一房间的 FLV 全部
+  /// 2. 然后档位高的优先：请求的档房间没提供时（源侧只给得出别的档），退回
+  ///    最高可用档，而不是退回「协议排序第一」那一档。
+  /// 3. 然后按「FLV → HLS(fmp4) → HLS(ts) → 其他」：实测同一房间的 FLV 全部
   ///    可播，而 HLS-TS 对多数房间 20 秒无响应，FLV 排在前面让探测通常一次
   ///    命中。
-  /// 3. 同格式内 avc 先于 hevc：HEVC 在部分设备上解不出来，选档不该顺带把
+  /// 4. 同格式内 avc 先于 hevc：HEVC 在部分设备上解不出来，选档不该顺带把
   ///    编码格式也换掉。
   ///
   /// 同一格式的每一路 codec 都会展开：只试选中的那一路时，它挂了就只剩别的
@@ -217,7 +219,14 @@ final class BiliLiveRoomDetailRemoteDataSource({
     int? preferQn,
   }) {
     final ranked =
-        <({NetworkLiveStreamCodec codec, int transport, int target})>[];
+        <
+          ({
+            NetworkLiveStreamCodec codec,
+            int transport,
+            int target,
+            int quality,
+          })
+        >[];
     for (final stream in playurl.stream) {
       final protocol = _protocolRank(stream.protocolName) * 10;
       for (final format in stream.format) {
@@ -228,17 +237,21 @@ final class BiliLiveRoomDetailRemoteDataSource({
             codec: codec,
             transport: transport,
             target: _targetRank(codec, preferQn),
+            // 升序排序，所以取负号让高档排在前面。
+            quality: -(codec.currentQn ?? 0),
           ));
         }
       }
     }
 
     // 排序稳定（List.sort 不保证稳定，所以并列时用 codec 的原始位置兜底）：
-    // 档位命中 → 封装 → avc 先于 hevc → 源侧顺序。
+    // 档位命中 → 档位高低 → 封装 → avc 先于 hevc → 源侧顺序。
     final positions = {for (final (i, e) in ranked.indexed) e: i};
     ranked.sort((a, b) {
       final byTarget = a.target.compareTo(b.target);
       if (byTarget != 0) return byTarget;
+      final byQuality = a.quality.compareTo(b.quality);
+      if (byQuality != 0) return byQuality;
       final byTransport = a.transport.compareTo(b.transport);
       if (byTransport != 0) return byTransport;
       final byCodec = (a.codec.codecName == 'avc' ? 0 : 1).compareTo(
@@ -263,9 +276,9 @@ final class BiliLiveRoomDetailRemoteDataSource({
     return candidates;
   }
 
-  /// 请求的档位命中为 0，其余为 1；没请求档位时全部并列。
+  /// 请求的档位命中为 0，其余为 1；没请求档位时全部并列，由档位高低决定。
   int _targetRank(NetworkLiveStreamCodec codec, int? preferQn) =>
-      preferQn == null || codec.currentQn == preferQn ? 0 : 1;
+      preferQn != null && codec.currentQn == preferQn ? 0 : 1;
 
   int _protocolRank(String? protocol) => switch (protocol) {
     // 浏览器播放器解不了 FLV：Web 上把 FLV 压到未知协议同一档，让 HLS 先探测。
