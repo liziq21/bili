@@ -1220,11 +1220,11 @@ abstract class AppLocalizations {
   /// **'Info & related'**
   String get infoAndRelated;
 
-  /// Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven
+  /// Video screen - comments tab label
   ///
   /// In en, this message translates to:
-  /// **'Comments (1,429)'**
-  String get commentsCountTab;
+  /// **'Comments'**
+  String get commentsTab;
 
   /// Danmaku settings screen and section title
   ///

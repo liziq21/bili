@@ -57,11 +57,10 @@ class const MediaLibraryScreen({
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n?.mine ?? 'Mine',
-            style: $styles.text.h3.copyWith(color: colorScheme.onSurface),
-          ),
-          SizedBox(height: $styles.insets.sm),
+          // 页面的一级标题由 LocalLibraryScreen 的 AppBar 提供（「我的」）。
+          // 这里原先还有一个「我的」H3，和 AppBar 的「本地库」同屏并存两个
+          // 不同的页名，且只有历史 Tab 多出这一段（#666）。分组信息已经在
+          // 下一行的「观看历史 · 已载入 N 条」里，不再重复。
           // ⚡ Bolt Optimization: Isolate header bar status text and load button rebuilds using BlocSelector.
           // Extracting (itemCount, hasError, isLoading, hasMore) into fine-grained selectors ensures
           // header UI only rebuilds when status flags change, saving unnecessary layout passes.

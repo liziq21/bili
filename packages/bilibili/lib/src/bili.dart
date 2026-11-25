@@ -24,6 +24,15 @@ import 'data/source/search/bili_video_search_remote_data_source.dart';
 class Bili() implements MediaSource {
   static Client? client;
 
+  /// 直播流地址探测所用的客户端工厂。
+  ///
+  /// 刻意不复用 [client]：debug 构建把 [client] 包成 `HttpLogClient`，它在
+  /// `send()` 里先 `response.stream.toBytes()` 把整个响应读完。直播流是无限
+  /// 响应，`toBytes()` 永不结束，于是每个候选都在探测超时后被判为不可用，
+  /// 直播间在 debug 下 100% 加载失败且重试不可能成功（#664）。探测只需要
+  /// 首批字节，用不带缓冲的裸客户端即可。
+  static Client Function() probeClientFactory = Client.new;
+
   /// 播放地址请求时携带的浏览器标识。
   ///
   /// B站 CDN 对裸 `Mozilla/5.0` 的请求会拒绝，故此处用带完整平台与版本
@@ -121,8 +130,7 @@ class Bili() implements MediaSource {
   BiliLiveRoomDetailRemoteDataSource get liveRoomDetailDataSource => .new(
     network: _liveApi,
     browserUserAgent: browserUserAgent,
-    // 候选探测走应用配置的客户端，与其他 B 站请求同一条通道。
-    clientFactory: () => client ?? Client(),
+    clientFactory: probeClientFactory,
   );
 
   @override

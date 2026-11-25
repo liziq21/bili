@@ -121,6 +121,12 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   /// 与评论挤出屏幕。
   static const double _portraitHeightFraction = 0.6;
 
+  /// 内嵌播放器可用高度低于此值时不显示进度条。
+  ///
+  /// 控制栏不参与压缩，进度行约占 40，按钮行约占 56；再留约 100 给画面，
+  /// 低于 200 时加上进度行就会把画面压到 0 高。
+  static const double _minHeightForProgressBar = 200;
+
   /// 是否由本组件创建（进而由本组件释放），区别于外部注入的会话。
   bool _ownsPlayback = false;
 
@@ -261,61 +267,73 @@ class _VideoPlayerState() extends State<VideoPlayer> {
 
           if (widget.fullscreen) return surface;
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Flexible 让页面在横屏 / 折叠屏等矮视口里给播放器设高度上限时，
-              // 画面按 16:9 等比收缩，而不是把下方内容挤成零高。
-              //
-              // 收缩后左右多出的区域用 scrim 填满：视频页的留边应是深色，
-              // 而不是页面 surface 色，否则画面看起来像浮在白色背景上。
-              Flexible(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final aspectRatio = _aspectRatio;
-                    // 竖屏/方形内容在无高度约束时按视口高度设上限，
-                    // 避免画面把下方内容顶出屏幕。正方形（比例 1）也算在内：
-                    // 它按宽度撑出的高度同样会顶掉下方内容。
-                    final heightCap = constraints.hasBoundedHeight
-                        ? constraints.maxHeight
-                        : (aspectRatio <= 1
-                              ? MediaQuery.sizeOf(context).height *
-                                    _portraitHeightFraction
-                              : double.infinity);
-                    if (!constraints.hasBoundedWidth) {
-                      return AspectRatio(
-                        aspectRatio: aspectRatio,
-                        child: surface,
-                      );
-                    }
-                    // 只有一条布局路径：尺寸到达前后树结构不变，`_VideoSurface`
-                    // 不会被重建（重建会重新 open 一次媒体）。
-                    final naturalHeight = constraints.maxWidth / aspectRatio;
-                    final height = math.min(naturalHeight, heightCap);
-                    return SizedBox(
-                      width: constraints.maxWidth,
-                      height: height,
-                      child: ColoredBox(
-                        color: $styles.colors.scrim,
-                        child: Center(
-                          child: AspectRatio(
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // 进度条要占一整行。窗口矮到放不下「画面 + 两行控制」时优先保住
+              // 画面：控制栏不参与压缩，Flexible 只能把画面压到 0 高，看起来
+              // 就是画面消失。
+              final showProgressBar =
+                  !constraints.hasBoundedHeight ||
+                  constraints.maxHeight >= _minHeightForProgressBar;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Flexible 让页面在横屏 / 折叠屏等矮视口里给播放器设高度上限时，
+                  // 画面按 16:9 等比收缩，而不是把下方内容挤成零高。
+                  //
+                  // 收缩后左右多出的区域用 scrim 填满：视频页的留边应是深色，
+                  // 而不是页面 surface 色，否则画面看起来像浮在白色背景上。
+                  Flexible(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final aspectRatio = _aspectRatio;
+                        // 竖屏/方形内容在无高度约束时按视口高度设上限，
+                        // 避免画面把下方内容顶出屏幕。正方形（比例 1）也算在内：
+                        // 它按宽度撑出的高度同样会顶掉下方内容。
+                        final heightCap = constraints.hasBoundedHeight
+                            ? constraints.maxHeight
+                            : (aspectRatio <= 1
+                                  ? MediaQuery.sizeOf(context).height *
+                                        _portraitHeightFraction
+                                  : double.infinity);
+                        if (!constraints.hasBoundedWidth) {
+                          return AspectRatio(
                             aspectRatio: aspectRatio,
                             child: surface,
+                          );
+                        }
+                        // 只有一条布局路径：尺寸到达前后树结构不变，`_VideoSurface`
+                        // 不会被重建（重建会重新 open 一次媒体）。
+                        final naturalHeight =
+                            constraints.maxWidth / aspectRatio;
+                        final height = math.min(naturalHeight, heightCap);
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          height: height,
+                          child: ColoredBox(
+                            color: $styles.colors.scrim,
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: aspectRatio,
+                                child: surface,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              _PlayerControlBar(
-                controller: _playback!,
-                stream: stream,
-                fullscreen: false,
-                onToggleFullscreen: widget.onToggleFullscreen,
-                onExit: widget.onExit,
-              ),
-            ],
+                        );
+                      },
+                    ),
+                  ),
+                  _PlayerControlBar(
+                    controller: _playback!,
+                    stream: stream,
+                    fullscreen: false,
+                    showProgressBar: showProgressBar,
+                    onToggleFullscreen: widget.onToggleFullscreen,
+                    onExit: widget.onExit,
+                  ),
+                ],
+              );
+            },
           );
         },
       );
@@ -909,6 +927,10 @@ class const _PlayerControlBar({
   required final VoidCallback? onToggleFullscreen,
   final VoidCallback? onMinimize,
   final VoidCallback? onExit,
+
+  /// 内嵌模式下是否给进度条留一行。窗口矮到放不下「画面 + 两行控制」时由
+  /// 调用方关掉，优先保住画面。
+  final bool showProgressBar = true,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -939,9 +961,17 @@ class const _PlayerControlBar({
         horizontal: $styles.insets.sm,
         vertical: $styles.insets.xs,
       ),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: Wrap(spacing: 6, runSpacing: 6, children: items),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 内嵌播放器没有浮层控制区可挂进度条，所以进度条占控制栏的一行，
+          // 与右侧的清晰度 / 倍速 / 全屏按钮分开（#665）。
+          if (showProgressBar) _PlaybackProgressBar(controller: controller),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(spacing: 6, runSpacing: 6, children: items),
+          ),
+        ],
       ),
     );
   }
@@ -954,6 +984,149 @@ class const _PlayerControlBar({
     }
     return result;
   }
+}
+
+/// 内嵌播放器底部的进度条：当前时间 / 可拖动进度 / 总时长（#665）。
+///
+/// 自己订阅 [MediaPlaybackController.states]，让位置更新只重建这一行，不牵动
+/// 整条控制栏。
+///
+/// 拖动期间由 [_dragMilliseconds] 接管显示，松手后继续由
+/// [_pendingSeekMilliseconds] 接管，直到播放器回报的位置追到目标附近：seek
+/// 是异步的，立刻放开会让滑块先跳回旧位置再跳回来。换片（时长变化）时旧目标
+/// 直接丢弃，避免把上一段的目标 seek 到新媒体上。
+class const _PlaybackProgressBar({
+  required final MediaPlaybackController controller,
+}) extends StatefulWidget {
+  @override
+  State<_PlaybackProgressBar> createState() => _PlaybackProgressBarState();
+}
+
+class _PlaybackProgressBarState() extends State<_PlaybackProgressBar> {
+  /// seek 后位置回报与目标的允许偏差；播放器按关键帧对齐，不会精确落在目标上。
+  static const _seekSettleTolerance = Duration(seconds: 1);
+
+  /// seek 迟迟没有回报时放弃保持目标位置，回到播放器的真实位置。
+  static const _seekSettleTimeout = Duration(seconds: 3);
+
+  late PlaybackState _state = widget.controller.state;
+  StreamSubscription<PlaybackState>? _subscription;
+  Timer? _settleTimer;
+  double? _dragMilliseconds;
+  double? _pendingSeekMilliseconds;
+  Duration? _dragDuration;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.controller.states.listen(_onState);
+  }
+
+  @override
+  void dispose() {
+    _settleTimer?.cancel();
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  void _onState(PlaybackState state) {
+    if (!mounted) return;
+    setState(() {
+      _state = state;
+      if (_pendingSeekMilliseconds == null) return;
+      // 时长变了说明换了媒体：旧拖动目标对新媒体没有意义。
+      if (_dragDuration != null && state.duration != _dragDuration) {
+        _clearSeek();
+        return;
+      }
+      final drift = (state.position.inMilliseconds - _pendingSeekMilliseconds!)
+          .abs();
+      if (drift <= _seekSettleTolerance.inMilliseconds) _clearSeek();
+    });
+  }
+
+  void _clearSeek() {
+    _dragMilliseconds = null;
+    _pendingSeekMilliseconds = null;
+    _dragDuration = null;
+    _settleTimer?.cancel();
+    _settleTimer = null;
+  }
+
+  void _onDragStart(double value) {
+    setState(() {
+      _dragMilliseconds = value;
+      _dragDuration = _state.duration;
+    });
+  }
+
+  void _onDragEnd(double value) {
+    if (_dragDuration != null && _state.duration != _dragDuration) {
+      setState(_clearSeek);
+      return;
+    }
+    setState(() => _pendingSeekMilliseconds = value);
+    _settleTimer?.cancel();
+    _settleTimer = Timer(
+      _seekSettleTimeout,
+      () => mounted ? setState(_clearSeek) : null,
+    );
+    unawaited(widget.controller.seek(Duration(milliseconds: value.round())));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _state.duration.inMilliseconds.toDouble();
+    final playable = total > 0;
+    final position =
+        (_dragMilliseconds ??
+                _pendingSeekMilliseconds ??
+                _state.position.inMilliseconds.toDouble())
+            .clamp(0.0, playable ? total : 0.0);
+    // 等宽数字：时间从 0:09 走到 0:10 时标签宽度不变，滑块不会被挤动。
+    // bodySmall 自带的 fontFeatures 要保留（copyWith 是替换而不是追加）。
+    final labelStyle = $styles.text.bodySmall.copyWith(
+      color: $styles.colors.onSurfaceVariant,
+      fontFeatures: [
+        ...?$styles.text.bodySmall.fontFeatures,
+        const FontFeature.tabularFigures(),
+      ],
+    );
+    return Row(
+      children: [
+        Text(_formatPosition(position), style: labelStyle),
+        Expanded(
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 2,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+            ),
+            child: Slider(
+              value: position,
+              max: playable ? total : 1,
+              onChanged: playable ? _onDragStart : null,
+              onChangeEnd: playable ? _onDragEnd : null,
+              semanticFormatterCallback: _formatPosition,
+            ),
+          ),
+        ),
+        Text(_formatPosition(total), style: labelStyle),
+      ],
+    );
+  }
+}
+
+/// `m:ss`（不足一小时）或 `h:mm:ss`。
+String _formatPosition(double milliseconds) {
+  final seconds = math.max(0, (milliseconds / 1000).floor());
+  final hours = seconds ~/ 3600;
+  final minutes = (seconds % 3600) ~/ 60;
+  final twoDigitSeconds = (seconds % 60).toString().padLeft(2, '0');
+  if (hours > 0) {
+    return '$hours:${minutes.toString().padLeft(2, '0')}:$twoDigitSeconds';
+  }
+  return '$minutes:$twoDigitSeconds';
 }
 
 class const _LoadingView() extends StatelessWidget {

@@ -24,8 +24,8 @@ class const LiveFeedSection({
   /// 文字高度必须取字体令牌的真实行高（`fontSize * height`）。早先按
   /// `fontSize * 1.5` 估算，而 `bodySmall` / `bodySmallBold` 的实际行高是
   /// 23/14 ≈ 1.643，每行少算 2px；两行文字靠 `Flexible` 挤进不足的高度里，
-  /// 放大字号时下半截字形被裁掉。末尾 `ceilToDouble` 与
-  /// [VideoFeedSection.cardExtent] 一致，避免亚像素误差再次挤掉文字。
+  /// 放大字号时下半截字形被裁掉。末尾 `ceilToDouble` 与视频卡片的
+  /// `videoCardExtent` 一致，避免亚像素误差再次挤掉文字。
   static double cardExtent(BuildContext context, double cardWidth) {
     final textScaler = MediaQuery.textScalerOf(context);
     // 两行文字都是单行（maxLines: 1），行高由令牌的 height 比例决定。

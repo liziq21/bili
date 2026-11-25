@@ -94,6 +94,7 @@ TEST_MATRIX = {
         'app/test/feature/home/feed_status_view_test.dart',
         'app/test/feature/home/home_config_editor_screen_test.dart',
         'app/test/feature/home/live_feed_section_test.dart',
+        'app/test/feature/home/video_feed_section_test.dart',
         'app/test/feature/home_bloc_test.dart',
         'app/test/feature/home_filter_bar_test.dart',
         'app/test/feature/home_source_selector_test.dart',

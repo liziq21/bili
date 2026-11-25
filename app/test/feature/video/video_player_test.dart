@@ -353,6 +353,246 @@ void main() {
     },
   );
 
+  testWidgets(
+    'embedded control bar shows current/total time and seeks on drag',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: bloc,
+              child: VideoPlayer(
+                controller: controller,
+                surfaceBuilder: (_) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+      );
+      bloc.add(const LoadMediaStream('BV123'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.pump();
+
+      fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+      fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+      await tester.pump();
+
+      // #665：竖屏内嵌播放器此前只有清晰度 / 倍速 / 全屏按钮，看不到播放
+      // 进度，也看不到当前时间和总时长。
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('1:05'), findsOneWidget);
+      expect(find.text('3:20'), findsOneWidget);
+
+      await tester.drag(find.byType(Slider), const Offset(60, 0));
+      await tester.pump();
+
+      // 断言 seek 到的是拖到的位置，而不是随便一个位置（比如 0）。
+      final slider = tester.widget<Slider>(find.byType(Slider));
+      expect(
+        slider.value,
+        greaterThan(const Duration(minutes: 1, seconds: 5).inMilliseconds),
+      );
+      expect(fake.seekCalls, hasLength(1));
+      expect(
+        fake.seekCalls.single,
+        Duration(milliseconds: slider.value.round()),
+      );
+    },
+  );
+
+  testWidgets('the thumb holds the seek target until the player reports it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final fake = FakePlatformPlayer();
+    final controller = MediaPlaybackController(fake);
+    final bloc = VideoBloc(repository: _ReadyStreamRepository());
+    addTearDown(controller.dispose);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: BlocProvider<VideoBloc>.value(
+            value: bloc,
+            child: VideoPlayer(
+              controller: controller,
+              surfaceBuilder: (_) => const SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    bloc.add(const LoadMediaStream('BV123'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+
+    fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+    fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+    await tester.pump();
+
+    await tester.drag(find.byType(Slider), const Offset(60, 0));
+    await tester.pump();
+    final target = tester.widget<Slider>(find.byType(Slider)).value;
+
+    // seek 是异步的：播放器还没回报新位置时，滑块必须停在拖到的位置，
+    // 否则松手瞬间会跳回旧位置再跳回来。
+    fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+    await tester.pump();
+    expect(tester.widget<Slider>(find.byType(Slider)).value, target);
+
+    // 位置追上目标后交还给播放器状态。
+    fake.emitPosition(Duration(milliseconds: target.round()));
+    await tester.pump();
+    expect(
+      tester.widget<Slider>(find.byType(Slider)).value,
+      closeTo(target, 1),
+    );
+  });
+
+  testWidgets('a drag that started before the media changed is not seeked', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final fake = FakePlatformPlayer();
+    final controller = MediaPlaybackController(fake);
+    final bloc = VideoBloc(repository: _ReadyStreamRepository());
+    addTearDown(controller.dispose);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: BlocProvider<VideoBloc>.value(
+            value: bloc,
+            child: VideoPlayer(
+              controller: controller,
+              surfaceBuilder: (_) => const SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    bloc.add(const LoadMediaStream('BV123'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+
+    fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+    fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+    await tester.pump();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Slider)),
+    );
+    await gesture.moveBy(const Offset(60, 0));
+    await tester.pump();
+
+    // 拖动途中换了媒体：旧目标对新媒体没有意义，松手不能 seek。
+    fake.emitDuration(const Duration(minutes: 5));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(fake.seekCalls, isEmpty);
+  });
+
+  testWidgets(
+    'short embedded player keeps the picture and drops the progress row',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      Future<void> pumpInHeight(double height) async {
+        final fake = FakePlatformPlayer();
+        final controller = MediaPlaybackController(fake);
+        final bloc = VideoBloc(repository: _ReadyStreamRepository());
+        addTearDown(controller.dispose);
+        addTearDown(bloc.close);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: Scaffold(
+              body: SizedBox(
+                height: height,
+                child: BlocProvider<VideoBloc>.value(
+                  value: bloc,
+                  child: VideoPlayer(
+                    controller: controller,
+                    surfaceBuilder: (_) =>
+                        const SizedBox.expand(key: ValueKey('surface')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        bloc.add(const LoadMediaStream('BV123'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 10));
+        await tester.pump();
+        fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+        fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+        await tester.pump();
+      }
+
+      // 矮窗口：控制栏放不下两行，进度行让位给画面，画面不能被压成 0 高。
+      await pumpInHeight(180);
+      expect(find.byType(Slider), findsNothing);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('surface'))).height,
+        greaterThan(0),
+      );
+
+      // 高度够时进度条回来。
+      await pumpInHeight(600);
+      expect(find.byType(Slider), findsOneWidget);
+    },
+  );
+
   group('video aspect ratio', () {
     /// 把播放器放进固定尺寸的盒子并让流就绪，用于断言画面比例。
     Future<void> pumpSized(

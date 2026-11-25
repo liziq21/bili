@@ -4,7 +4,8 @@ import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
-import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
+import 'package:flutter/rendering.dart'
+    show RenderParagraph, RenderRepaintBoundary;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -514,5 +515,54 @@ void main() {
     expect(tester.takeException(), isNull);
     final title = tester.widget<Text>(find.text('中文标题中文标题中文标题中文标题中文标题中文标题'));
     expect(title.maxLines, 2);
+  });
+
+  testWidgets('a grid cell sized by videoCardExtent fits both title lines', (
+    WidgetTester tester,
+  ) async {
+    // 网格项高度来自 [videoCardExtent]，而标题继承 `Material` 的 bodyMedium
+    // （行高 1.43）。预算若按裸 TextStyle 量，每行会少算约 4px，第二行就被
+    // 卡片圆角裁掉——`takeException` 发现不了，因为 Flexible 让列不溢出。
+    const title = '中文标题中文标题中文标题中文标题中文标题中文标题';
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (context) => SizedBox(
+                width: 160,
+                height: videoCardExtent(context, 160),
+                child: VideoCard(
+                  videoInfoBase: VideoModel(
+                    id: 'BV1extent',
+                    title: title,
+                    url: 'https://example.com/video/extent',
+                    viewCount: 12345,
+                    uploadDate: DateTime(2026, 11, 20),
+                    duration: 600,
+                    creatorProfileName: '中文标题中文标题UP主名字',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final paragraph = tester.renderObject<RenderParagraph>(find.text(title));
+    final boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: title.length),
+    );
+    final lineTops = {for (final box in boxes) box.top.round()};
+    expect(lineTops, hasLength(2));
+    for (final box in boxes) {
+      expect(box.bottom, lessThanOrEqualTo(paragraph.size.height + 0.5));
+    }
   });
 }
