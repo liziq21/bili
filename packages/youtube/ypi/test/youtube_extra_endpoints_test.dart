@@ -43,6 +43,24 @@ void main() {
       expect(response.videoId, isNull);
     });
 
+    test('parses a Shorts reel endpoint response', () {
+      final response = NetworkYouTubeResolveUrlResponse.fromJson({
+        'endpoint': {
+          'commandMetadata': {
+            'webCommandMetadata': {
+              'url': '/shorts/abc123',
+              'webPageType': 'WEB_PAGE_TYPE_SHORTS',
+            },
+          },
+          'reelWatchEndpoint': {'videoId': 'abc123'},
+        },
+      });
+
+      expect(response.videoId, 'abc123');
+      expect(response.browseId, isNull);
+      expect(response.webPageType, 'WEB_PAGE_TYPE_SHORTS');
+    });
+
     test('rejects an endpoint without any id', () {
       expect(
         () => NetworkYouTubeResolveUrlResponse.fromJson({

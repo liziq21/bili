@@ -4,6 +4,9 @@ import '../exception/ypi_exception.dart';
 
 /// Response of `navigation/resolve_url`, which turns a YouTube URL into the
 /// InnerTube endpoint that serves it.
+///
+/// Regular videos resolve to `watchEndpoint`; Shorts resolve to
+/// `reelWatchEndpoint`.
 @immutable
 final class NetworkYouTubeResolveUrlResponse {
   const NetworkYouTubeResolveUrlResponse({
@@ -35,11 +38,12 @@ final class NetworkYouTubeResolveUrlResponse {
     final webCommandMetadata = _map(commandMetadata?['webCommandMetadata']);
     final browse = _map(endpoint['browseEndpoint']);
     final watch = _map(endpoint['watchEndpoint']);
+    final reelWatch = _map(endpoint['reelWatchEndpoint']);
     final playlist = _map(endpoint['watchPlaylistEndpoint']);
 
     final response = NetworkYouTubeResolveUrlResponse(
       browseId: _string(browse?['browseId']),
-      videoId: _string(watch?['videoId']),
+      videoId: _string(watch?['videoId']) ?? _string(reelWatch?['videoId']),
       playlistId:
           _string(playlist?['playlistId']) ??
           _string(browse?['playlistId']) ??

@@ -387,6 +387,11 @@ final class YoutubeService {
 
   /// Searches YouTube Music.
   ///
+  /// [params] is forwarded verbatim as the InnerTube filter token. Only tokens
+  /// YouTube Music itself issues select the song/album/playlist filters; an
+  /// unrecognised token returns an empty catalogue rather than an error, so
+  /// callers must treat an empty result as "no match for this filter".
+  ///
   /// Music results only come back for the `WEB_REMIX` client context, which
   /// this method sends through its own client rather than [config].
   Future<NetworkYouTubeMusicSearchResponse> searchMusic(
