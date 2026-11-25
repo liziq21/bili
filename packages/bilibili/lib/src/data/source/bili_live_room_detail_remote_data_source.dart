@@ -17,19 +17,35 @@ typedef LiveStreamUrlProbe = Future<bool> Function(
 /// 只等第一批字节就断开：HLS 是 m3u8 文本，FLV 是流首部，两者都会在毫秒级
 /// 给出数据；迟迟没有字节的地址正是「HTTP 000、20 秒无响应」那一类，只发
 /// HEAD 或只看状态码都区分不出来。
-Future<bool> probeLiveStreamUrl(String url, Map<String, String> headers) async {
-  final client = http.Client();
-  final send = client.send(
-    http.Request('GET', Uri.parse(url))..headers.addAll(headers),
-  );
-  // 超时之后原请求仍会以错误收尾；先挂监听，免得变成未处理异常。
-  send.ignore();
+Future<bool> probeLiveStreamUrl(
+  String url,
+  Map<String, String> headers, {
+  http.Client Function() clientFactory = http.Client.new,
+  Duration timeout = _probeTimeout,
+}) async {
+  // 相对地址或非 http(s) 的候选在 `Client.send` 里会抛 ArgumentError；
+  // 提前判掉，免得它看起来像「请求构造失败」而掩盖真正的原因。
+  final uri = Uri.tryParse(url);
+  if (uri == null ||
+      !uri.hasAuthority ||
+      (uri.scheme != 'http' && uri.scheme != 'https')) {
+    return false;
+  }
+  final client = clientFactory();
   try {
-    final response = await send.timeout(_probeTimeout);
+    // 响应头与首批字节共用同一个预算：两段各自计时会让一个候选最多等
+    // 8 秒，串行回退时后面的候选全被拖住。
+    final deadline = Stopwatch()..start();
+    final send = client.send(http.Request('GET', uri)..headers.addAll(headers));
+    // 超时之后原请求仍会以错误收尾；先挂监听，免得变成未处理异常。
+    send.ignore();
+    final response = await send.timeout(timeout);
     if (response.statusCode < 200 || response.statusCode >= 400) return false;
+    final remaining = timeout - deadline.elapsed;
+    if (remaining <= Duration.zero) return false;
     final firstByte = response.stream.first;
     firstByte.ignore();
-    await firstByte.timeout(_probeTimeout);
+    await firstByte.timeout(remaining);
     return true;
   } on Object {
     return false;
@@ -122,7 +138,7 @@ final class BiliLiveRoomDetailRemoteDataSource({
       // 会撞上「地址在但连接无响应」的那类候选，而播放器对这种情况不报错，
       // 只会一直停在首帧。
       for (final candidate in candidates) {
-        if (!await probe(candidate.url, _headers)) continue;
+        if (!await _probe(candidate.url)) continue;
         final currentQn = candidate.codec.currentQn;
         return Result.success(
           MediaStream(
@@ -146,64 +162,82 @@ final class BiliLiveRoomDetailRemoteDataSource({
     }
   }
 
-  /// 展开全部候选地址，按「FLV → HLS(fmp4) → HLS(ts) → 其他」排序。
+  /// 探测一路候选；探测自身出错（URL 非法、请求构造失败）只说明这一路不可
+  /// 用，不能让整个候选循环中断。
+  Future<bool> _probe(String url) async {
+    try {
+      return await probe(url, _headers);
+    } on Object {
+      return false;
+    }
+  }
+
+  /// 展开全部候选地址，顺序为：
   ///
-  /// 实测同一房间的 FLV 全部可播，而 HLS-TS 对多数房间 20 秒无响应，所以
-  /// FLV 排在前面让探测通常一次命中；HLS 与多个 url_info host 仍作为后续
-  /// 候选保留，单路失效不至于让整个直播间打不开。
+  /// 1. 命中请求档位的 codec 优先——切清晰度时不能因为 FLV 先探测成功就停
+  ///    在别的档，哪怕 HLS 上有用户选的那一档。
+  /// 2. 然后按「FLV → HLS(fmp4) → HLS(ts) → 其他」：实测同一房间的 FLV 全部
+  ///    可播，而 HLS-TS 对多数房间 20 秒无响应，FLV 排在前面让探测通常一次
+  ///    命中。
+  /// 3. 同格式内 avc 先于 hevc：HEVC 在部分设备上解不出来，选档不该顺带把
+  ///    编码格式也换掉。
+  ///
+  /// 同一格式的每一路 codec 都会展开：只试选中的那一路时，它挂了就只剩别的
+  /// 封装，用户看到的是「换了个格式」而不是同一档的另一个编码。
   List<_StreamCandidate> _streamCandidates(
     NetworkLivePlayurlData playurl, {
     int? preferQn,
   }) {
+    final ranked =
+        <({NetworkLiveStreamCodec codec, int transport, int target})>[];
+    for (final stream in playurl.stream) {
+      final protocol = _protocolRank(stream.protocolName) * 10;
+      for (final format in stream.format) {
+        final transport = protocol + _formatRank(format.formatName);
+        for (final codec in format.codec) {
+          if (codec.baseUrl == null || codec.urlInfo.isEmpty) continue;
+          ranked.add((
+            codec: codec,
+            transport: transport,
+            target: _targetRank(codec, preferQn),
+          ));
+        }
+      }
+    }
+
+    // 排序稳定（List.sort 不保证稳定，所以并列时用 codec 的原始位置兜底）：
+    // 档位命中 → 封装 → avc 先于 hevc → 源侧顺序。
+    final positions = {for (final (i, e) in ranked.indexed) e: i};
+    ranked.sort((a, b) {
+      final byTarget = a.target.compareTo(b.target);
+      if (byTarget != 0) return byTarget;
+      final byTransport = a.transport.compareTo(b.transport);
+      if (byTransport != 0) return byTransport;
+      final byCodec = (a.codec.codecName == 'avc' ? 0 : 1).compareTo(
+        b.codec.codecName == 'avc' ? 0 : 1,
+      );
+      if (byCodec != 0) return byCodec;
+      return positions[a]!.compareTo(positions[b]!);
+    });
+
     final candidates = <_StreamCandidate>[];
     final seen = <String>{};
-    for (final stream in _stableSortBy(
-      playurl.stream,
-      (s) => _protocolRank(s.protocolName),
-    )) {
-      for (final format in _stableSortBy(
-        stream.format,
-        (f) => _formatRank(f.formatName),
-      )) {
-        final codec = _selectCodec(format.codec, preferQn);
-        if (codec == null) continue;
-        for (final urlInfo in codec.urlInfo) {
-          final raw =
-              '${urlInfo.host ?? ''}${codec.baseUrl ?? ''}${urlInfo.extra ?? ''}';
-          final url = normalizeBiliUrl(raw);
-          if (url == null || url.isEmpty || !seen.add(url)) continue;
-          candidates.add((url: url, codec: codec));
-        }
+    for (final entry in ranked) {
+      for (final urlInfo in entry.codec.urlInfo) {
+        final raw =
+            '${urlInfo.host ?? ''}${entry.codec.baseUrl ?? ''}'
+            '${urlInfo.extra ?? ''}';
+        final url = normalizeBiliUrl(raw);
+        if (url == null || url.isEmpty || !seen.add(url)) continue;
+        candidates.add((url: url, codec: entry.codec));
       }
     }
     return candidates;
   }
 
-  /// 选一路 codec：优先命中请求的档，否则取当前档最高的一路。
-  ///
-  /// 源侧同一格式可能同时下发 avc 与 hevc，两路的 currentQn 不同（hevc 档
-  /// 通常更高）。没有精确命中时优先 avc：HEVC 在部分设备上解不出来，选档
-  /// 不该顺带把编码格式也换掉。
-  NetworkLiveStreamCodec? _selectCodec(
-    List<NetworkLiveStreamCodec> codecs,
-    int? preferQn,
-  ) {
-    final playable = codecs
-        .where((codec) => codec.baseUrl != null && codec.urlInfo.isNotEmpty)
-        .toList();
-    if (playable.isEmpty) return null;
-    if (preferQn != null) {
-      final exact = playable
-          .where((codec) => codec.currentQn == preferQn)
-          .toList();
-      if (exact.isNotEmpty) return _highestQn(exact);
-    }
-    final avc = playable.where((codec) => codec.codecName == 'avc').toList();
-    return _highestQn(avc.isEmpty ? playable : avc);
-  }
-
-  NetworkLiveStreamCodec _highestQn(List<NetworkLiveStreamCodec> codecs) =>
-      codecs.reduce((a, b) => (b.currentQn ?? 0) > (a.currentQn ?? 0) ? b : a);
+  /// 请求的档位命中为 0，其余为 1；没请求档位时全部并列。
+  int _targetRank(NetworkLiveStreamCodec codec, int? preferQn) =>
+      preferQn == null || codec.currentQn == preferQn ? 0 : 1;
 
   int _protocolRank(String? protocol) => switch (protocol) {
     'http_stream' => 0,
@@ -216,16 +250,6 @@ final class BiliLiveRoomDetailRemoteDataSource({
     'ts' => 1,
     _ => 2,
   };
-
-  /// 按 rank 稳定排序：rank 相同时保持源侧顺序。
-  List<T> _stableSortBy<T>(List<T> items, int Function(T) rank) {
-    final indexed = items.indexed.toList()
-      ..sort((a, b) {
-        final byRank = rank(a.$2).compareTo(rank(b.$2));
-        return byRank != 0 ? byRank : a.$1.compareTo(b.$1);
-      });
-    return [for (final (_, item) in indexed) item];
-  }
 
   /// gQnDesc 里 qn → 可读描述。找不到时退回 `{qn}`，保证标签非空。
   String _qualityLabel(List<NetworkLiveQualityDescription> gQnDesc, int? qn) {

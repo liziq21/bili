@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,6 +6,8 @@ import 'package:bilibili/bilibili.dart';
 import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:model/model.dart';
 
 /// 只实现直播流解析所需方法的桩，其余方法直接抛。
@@ -447,6 +450,208 @@ void main() {
       final result = await source.getLiveRoomStream(21144080);
 
       expect(result.isError(), isTrue);
+    });
+  });
+
+  group('candidate ordering', () {
+    Map<String, dynamic> codecJson(
+      String name,
+      int qn, {
+      required String baseUrl,
+      List<String> hosts = const ['https://cdn.example.com'],
+    }) => <String, dynamic>{
+      'codec_name': name,
+      'current_qn': qn,
+      'accept_qn': [10000, qn],
+      'base_url': baseUrl,
+      'url_info': hosts
+          .map((host) => <String, dynamic>{'host': host, 'extra': 'qn=$qn'})
+          .toList(),
+    };
+
+    Map<String, dynamic> streamJson(
+      String protocol,
+      String formatName,
+      List<Map<String, dynamic>> codecs,
+    ) => <String, dynamic>{
+      'protocol_name': protocol,
+      'format': <dynamic>[
+        <String, dynamic>{'format_name': formatName, 'codec': codecs},
+      ],
+    };
+
+    Map<String, dynamic> playInfoJson(List<Map<String, dynamic>> streams) =>
+        <String, dynamic>{
+          'room_id': 1918661467,
+          'playurl_info': <String, dynamic>{
+            'playurl': <String, dynamic>{
+              'cid': 1918661467,
+              'g_qn_desc': <dynamic>[
+                <String, dynamic>{'qn': 10000, 'desc': '原画'},
+                <String, dynamic>{'qn': 250, 'desc': '超清'},
+              ],
+              'stream': streams,
+            },
+          },
+        };
+
+    test('probes the requested quality before the FLV default', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson('avc', 250, baseUrl: '/live/flv/live.flv?'),
+            ]),
+            streamJson('http_hls', 'ts', [
+              codecJson('avc', 10000, baseUrl: '/live/hls/live.m3u8?'),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return true;
+        },
+      );
+
+      final stream = expectOk(
+        await source.getLiveRoomStream(1918661467, preferQn: 10000),
+      );
+
+      expect(probed, hasLength(1));
+      expect(probed.single, contains('.m3u8'));
+      expect(stream.streamId, 10000);
+      expect(stream.qualityLabel, '原画');
+    });
+
+    test('falls back to another codec of the same format', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson(
+                'avc',
+                250,
+                baseUrl: '/live/flv/avc.flv?',
+                hosts: const ['https://dead.example.com'],
+              ),
+              codecJson(
+                'hevc',
+                10000,
+                baseUrl: '/live/flv/hevc.flv?',
+                hosts: const ['https://live.example.com'],
+              ),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return url.contains('live.example.com');
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(probed, hasLength(2));
+      expect(probed.first, contains('dead.example.com'));
+      expect(stream.videoUrl, contains('hevc.flv'));
+      expect(stream.streamId, 10000);
+    });
+
+    test('keeps probing when a probe itself throws', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson('avc', 250, baseUrl: '/live/flv/live.flv?'),
+            ]),
+            streamJson('http_hls', 'ts', [
+              codecJson('avc', 250, baseUrl: '/live/hls/live.m3u8?'),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          if (probed.length == 1) throw const FormatException('bad url');
+          return true;
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(probed, hasLength(2));
+      expect(stream.videoUrl, contains('.m3u8'));
+    });
+  });
+
+  group('probeLiveStreamUrl', () {
+    const headers = <String, String>{'User-Agent': 'test-agent'};
+
+    http.Client Function() clientReturning(
+      http.StreamedResponse Function(http.BaseRequest request) respond,
+    ) =>
+        () => MockClient.streaming(
+          (request, bodyStream) async => respond(request),
+        );
+
+    test('treats a response that yields bytes as reachable', () async {
+      final reachable = await probeLiveStreamUrl(
+        'https://cdn.example.com/live.m3u8',
+        headers,
+        clientFactory: clientReturning(
+          (_) => http.StreamedResponse(Stream.value(<int>[35]), 200),
+        ),
+      );
+
+      expect(reachable, isTrue);
+    });
+
+    test('gives up when the body never yields a byte', () async {
+      final silent = StreamController<List<int>>();
+      addTearDown(silent.close);
+      final stopwatch = Stopwatch()..start();
+
+      final reachable = await probeLiveStreamUrl(
+        'https://cdn.example.com/live.flv',
+        headers,
+        clientFactory: clientReturning(
+          (_) => http.StreamedResponse(silent.stream, 200),
+        ),
+        timeout: const Duration(milliseconds: 50),
+      );
+
+      expect(reachable, isFalse);
+      // 响应头与首字节共用同一个预算：两段各自计时会等满两倍超时。
+      expect(stopwatch.elapsed, lessThan(const Duration(seconds: 1)));
+    });
+
+    test('rejects an error status even with a body', () async {
+      final reachable = await probeLiveStreamUrl(
+        'https://cdn.example.com/live.flv',
+        headers,
+        clientFactory: clientReturning(
+          (_) => http.StreamedResponse(Stream.value(<int>[35]), 404),
+        ),
+      );
+
+      expect(reachable, isFalse);
+    });
+
+    test('returns false instead of throwing on a malformed URL', () async {
+      final reachable = await probeLiveStreamUrl(
+        'not a url',
+        headers,
+        clientFactory: clientReturning(
+          (_) => http.StreamedResponse(Stream.value(<int>[35]), 200),
+        ),
+      );
+
+      expect(reachable, isFalse);
     });
   });
 }
