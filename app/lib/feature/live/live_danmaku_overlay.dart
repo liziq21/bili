@@ -31,6 +31,7 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
   static const _maxWindow = Duration(seconds: 10);
 
   List<DanmakuComment> _comments = const [];
+  final DanmakuRenderCache _renderCache = DanmakuRenderCache();
   DanmakuSettings _settings = const DanmakuSettings();
   StreamSubscription<DanmakuComment>? _danmakuSubscription;
   List<StreamSubscription>? _settingSubscriptions;
@@ -142,6 +143,7 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
     _danmakuSubscription?.cancel();
     _settingSubscriptions?.forEach((s) => s.cancel());
     _stopTicker();
+    _renderCache.dispose();
     super.dispose();
   }
 
@@ -162,6 +164,7 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
             position: position,
             settings: _settings,
             colors: colors,
+            cache: _renderCache,
           ),
         ),
       ),

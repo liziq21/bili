@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:model/model.dart';
 
@@ -10,7 +11,16 @@ final class const DanmakuSettings({
   final double opacity = .9,
   final double fontSize = 18,
   final double outlineRadius = 2,
-}) {
+}) with Equatable {
+  @override
+  List<Object?> get props => [
+    enabled,
+    regularDuration,
+    opacity,
+    fontSize,
+    outlineRadius,
+  ];
+
   DanmakuSettings copyWith({
     bool? enabled,
     double? regularDuration,
