@@ -167,6 +167,23 @@ void main() {
     return jsonDecode(file.readAsStringSync());
   }
 
+  /// 只替换详情响应，其余接口沿用录制 fixture。
+  MockNetworkVideoDataSource networkWithDetail(Map<String, dynamic> data) =>
+      MockNetworkVideoDataSource(
+        videoDetailJson: {'data': data},
+        videoRelationJson:
+            loadJson('video_relation.json') as Map<String, dynamic>,
+        relatedVideosJson:
+            (loadJson('related_videos.json') as Map<String, dynamic>)['data']
+                as List<dynamic>,
+        replyListJson: {
+          'data': {'replies': <dynamic>[]},
+        },
+        replyReplyListJson: {
+          'data': {'replies': <dynamic>[]},
+        },
+      );
+
   group('BiliVideoDetailRemoteDataSource & BiliVideoCommentRemoteDataSource', () {
     late MockNetworkVideoDataSource mockNetwork;
     late BiliVideoDetailRemoteDataSource detailDataSource;
@@ -233,14 +250,48 @@ void main() {
     );
 
     test('getVideoDetail maps danmaku count and copyright', () async {
-      final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
-      expect(result.isSuccess(), isTrue);
+      // 用非零的 stat.danmaku：fixture 原值是 0，恒返回 0 的映射器也能通过。
+      final detailJson = loadJson('video_detail.json') as Map<String, dynamic>;
+      final data =
+          Map<String, dynamic>.from(detailJson['data'] as Map<String, dynamic>)
+            ..['stat'] = {
+              ...(detailJson['data'] as Map<String, dynamic>)['stat']
+                  as Map<String, dynamic>,
+              'danmaku': 4242,
+              'view': 777,
+            };
 
+      final result = await BiliVideoDetailRemoteDataSource(
+        network: networkWithDetail(data),
+      ).getVideoDetail('BV1GJ411x7vy');
+
+      expect(result.isSuccess(), isTrue);
       final detail = (result as dynamic).success;
-      // fixture 的 stat.danmaku = 0、copyright = 1（自制）
-      expect(detail.video.danmakuCount, 0);
+      expect(detail.video.danmakuCount, 4242);
+      expect(detail.video.viewCount, 777);
       expect(detail.copyright, VideoCopyright.original);
     });
+
+    test(
+      'getVideoDetail keeps stats null when the response omits stat',
+      () async {
+        final detailJson =
+            loadJson('video_detail.json') as Map<String, dynamic>;
+        final data = Map<String, dynamic>.from(
+          detailJson['data'] as Map<String, dynamic>,
+        )..remove('stat');
+
+        final result = await BiliVideoDetailRemoteDataSource(
+          network: networkWithDetail(data),
+        ).getVideoDetail('BV1GJ411x7vy');
+
+        expect(result.isSuccess(), isTrue);
+        final detail = (result as dynamic).success;
+        // 「接口没给」不能折成 0，否则页头会显示编造的播放量。
+        expect(detail.video.viewCount, isNull);
+        expect(detail.video.danmakuCount, isNull);
+      },
+    );
 
     test('getVideoDetail leaves copyright null for an unknown code', () async {
       final detailJson = loadJson('video_detail.json') as Map<String, dynamic>;

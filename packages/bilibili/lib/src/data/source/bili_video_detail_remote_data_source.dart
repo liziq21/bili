@@ -42,7 +42,9 @@ final class BiliVideoDetailRemoteDataSource({
         title: detailData.title,
         url: buildBiliWatchUrl(detailData.bvid),
         thumbnailUrl: normalizeBiliUrl(detailData.pic),
-        viewCount: detailData.stat?.view ?? 0,
+        // 缺 stat 与播放量为 0 是两件事：前者是「接口没给」，页头该整段隐藏，
+        // 折成 0 会显示一个编造的播放量。
+        viewCount: detailData.stat?.view,
         danmakuCount: detailData.stat?.danmaku,
         uploadDate: DateTime.fromMillisecondsSinceEpoch(
           detailData.pubdate * 1000,

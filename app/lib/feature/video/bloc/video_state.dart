@@ -5,6 +5,8 @@ part of 'video_bloc.dart';
 class const _VideoErrorSentinel();
 
 const _keepError = _VideoErrorSentinel();
+const _keepVideoDetail = _VideoErrorSentinel();
+const _keepMediaStream = _VideoErrorSentinel();
 const _keepActionError = _VideoErrorSentinel();
 const _keepStreamError = _VideoErrorSentinel();
 
@@ -48,8 +50,8 @@ class const VideoState({
     String? videoId,
     Object? error = _keepError,
     Object? actionError = _keepActionError,
-    VideoDetail? videoDetail,
-    MediaStream? mediaStream,
+    Object? videoDetail = _keepVideoDetail,
+    Object? mediaStream = _keepMediaStream,
     Object? streamError = _keepStreamError,
   }) {
     return VideoState(
@@ -59,8 +61,12 @@ class const VideoState({
       actionError: identical(actionError, _keepActionError)
           ? this.actionError
           : actionError as String?,
-      videoDetail: videoDetail ?? this.videoDetail,
-      mediaStream: mediaStream ?? this.mediaStream,
+      videoDetail: identical(videoDetail, _keepVideoDetail)
+          ? this.videoDetail
+          : videoDetail as VideoDetail?,
+      mediaStream: identical(mediaStream, _keepMediaStream)
+          ? this.mediaStream
+          : mediaStream as MediaStream?,
       streamError: identical(streamError, _keepStreamError)
           ? this.streamError
           : streamError as String?,
