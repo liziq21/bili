@@ -477,6 +477,62 @@ void main() {
     );
   });
 
+  testWidgets('a drag that started before the media changed is not seeked', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final fake = FakePlatformPlayer();
+    final controller = MediaPlaybackController(fake);
+    final bloc = VideoBloc(repository: _ReadyStreamRepository());
+    addTearDown(controller.dispose);
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: BlocProvider<VideoBloc>.value(
+            value: bloc,
+            child: VideoPlayer(
+              controller: controller,
+              surfaceBuilder: (_) => const SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+    bloc.add(const LoadMediaStream('BV123'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+
+    fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+    fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+    await tester.pump();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Slider)),
+    );
+    await gesture.moveBy(const Offset(60, 0));
+    await tester.pump();
+
+    // 拖动途中换了媒体：旧目标对新媒体没有意义，松手不能 seek。
+    fake.emitDuration(const Duration(minutes: 5));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(fake.seekCalls, isEmpty);
+  });
+
   testWidgets(
     'short embedded player keeps the picture and drops the progress row',
     (tester) async {
