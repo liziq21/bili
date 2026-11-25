@@ -20,6 +20,12 @@ class const VideoCard({
   final String? sourceBadge,
   final String? creatorAvatarUrl,
   final VoidCallback? onMorePressed,
+
+  /// 标题最多显示几行。
+  ///
+  /// 默认两行。格子高度由 [videoCardExtent] 按两行算出来，只有调用方自己压
+  /// 低了格子（例如固定高度更矮的网格）时才需要降到一行。
+  final int titleMaxLines = 2,
 }) extends StatelessWidget {
   static String formatDuration(int? seconds) {
     if (seconds == null || seconds <= 0) return '';
@@ -199,14 +205,13 @@ class const VideoCard({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // 网格给的高度是固定的，标题占满两行时文字块可能比可用
-                        // 高度还高。Flexible 让标题让出缺少的那几像素（省略号收
-                        // 尾），而不是整列溢出后被卡片圆角裁掉；空间足够时它仍
-                        // 按自然高度布局，排版不变。
+                        // 网格给的高度由 [videoCardExtent] 按两行标题算出来，
+                        // 正常不会挤到标题；Flexible 只是兜底，让极端字号下
+                        // 缺的几像素由标题让出，而不是整列溢出被圆角裁掉。
                         Flexible(
                           child: Text(
                             videoInfoBase.title,
-                            maxLines: 2,
+                            maxLines: titleMaxLines,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 13,
@@ -466,4 +471,21 @@ class const VideoCard({
       ),
     );
   }
+}
+
+/// 网格卡片在给定宽度下需要的高度：16:9 封面 + 两行标题 + 一行元信息。
+///
+/// 网格的 `mainAxisExtent` 与卡片文字块用的是同一份预算，写死像素会在窄屏或
+/// 放大字号时把标题挤到半行被裁掉（#645）。
+double videoCardExtent(BuildContext context, double cardWidth) {
+  final textScaler = MediaQuery.textScalerOf(context);
+  // 标题两行，行高 1.25 由卡片里的 TextStyle 与 theme 决定。
+  final titleHeight = textScaler.scale(13) * 1.25 * 2;
+  final metaHeight = textScaler.scale(11) * 1.4;
+  return (cardWidth * 9 / 16 +
+          titleHeight +
+          metaHeight +
+          8 * 2 + // 文字区的 Padding
+          2) // Material 内层 1px 边框的上下各 1px
+      .ceilToDouble();
 }
