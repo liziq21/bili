@@ -43,6 +43,7 @@ final class BiliVideoDetailRemoteDataSource({
         url: buildBiliWatchUrl(detailData.bvid),
         thumbnailUrl: normalizeBiliUrl(detailData.pic),
         viewCount: detailData.stat?.view ?? 0,
+        danmakuCount: detailData.stat?.danmaku,
         uploadDate: DateTime.fromMillisecondsSinceEpoch(
           detailData.pubdate * 1000,
         ),
@@ -85,6 +86,7 @@ final class BiliVideoDetailRemoteDataSource({
       final detail = VideoDetail(
         video: video,
         creator: creator,
+        copyright: _copyrightOf(detailData.copyright),
         likeCount: detailData.stat?.like ?? 0,
         favoriteCount: detailData.stat?.favorite ?? 0,
         shareCount: detailData.stat?.share ?? 0,
@@ -101,6 +103,14 @@ final class BiliVideoDetailRemoteDataSource({
       return Result.error(e is Exception ? e : Exception(e.toString()));
     }
   }
+
+  /// 投稿类型来自 `/x/web-interface/view` 的 `copyright`：1 自制、2 转载。
+  /// 其余取值接口未定义，返回 null 让界面隐藏该段，不猜。
+  static VideoCopyright? _copyrightOf(int copyright) => switch (copyright) {
+    1 => VideoCopyright.original,
+    2 => VideoCopyright.repost,
+    _ => null,
+  };
 
   /// 合集来自 `/x/web-interface/view` 的 `ugc_season`。列表标识按
   /// [NetworkBiliPlaylistRef] 的 `<mid>:<seasonId>` 格式编码，因为播放列表

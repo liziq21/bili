@@ -1424,29 +1424,23 @@ abstract class AppLocalizations {
   /// **'·'**
   String get dotSeparator;
 
-  /// Video info stats row - demo danmaku count; the copy carries a fixed number and is not data-driven yet
+  /// Video info - danmaku (bullet comment) count; {p1} is a formatted count
   ///
   /// In en, this message translates to:
-  /// **'24K danmaku'**
-  String get danmakuCountSample;
+  /// **'{p1} danmaku'**
+  String danmakuCountLabel(String p1);
 
-  /// Demo value for the relative publish date in the video info header
+  /// Video info - copyright tag for a self-made (original) upload
   ///
   /// In en, this message translates to:
-  /// **'1 day ago'**
-  String get oneDayAgoSample;
+  /// **'Original'**
+  String get copyrightOriginal;
 
-  /// Demo tag shown in the video info header
+  /// Video info - copyright tag for a reposted upload
   ///
   /// In en, this message translates to:
-  /// **'Original tech'**
-  String get originalTech;
-
-  /// Demo tagline under the creator name in the video info header; {p1} is the follower count
-  ///
-  /// In en, this message translates to:
-  /// **'{p1} followers · Weekly deep dives'**
-  String subscribersWeeklyTagline(String p1);
+  /// **'Reposted'**
+  String get copyrightRepost;
 
   /// Video info - accessibility label that unfollows the creator
   ///

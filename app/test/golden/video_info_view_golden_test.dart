@@ -48,6 +48,7 @@ final VideoDetail _detail = VideoDetail(
     url: 'https://www.bilibili.com/video/BV1m44y1G7rk',
     thumbnailUrl: 'https://example.com/thumb.jpg',
     viewCount: 386000,
+    danmakuCount: 24000,
     duration: 754,
     desc: '探讨 Flutter 从 Skia 全面转向 Impeller 的底层渲染考量。',
     creatorProfileName: '技术宅小陈',
@@ -59,6 +60,9 @@ final VideoDetail _detail = VideoDetail(
     thumbnailUrl: 'https://example.com/avatar.jpg',
     subscribers: 128000,
   ),
+  // 发布时间保持 null：相对时间依赖 DateTime.now()，写进 golden 会让基线
+  // 随日历漂移。时间段的渲染由 video_info_view_test.dart 的 widget 测试覆盖。
+  copyright: VideoCopyright.original,
   likeCount: 28600,
   favoriteCount: 9400,
   shareCount: 3100,

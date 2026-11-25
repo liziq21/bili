@@ -14,6 +14,7 @@ import '../../../data/repository/video_detail_repository.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
+import '../../../ui/video_card.dart';
 import '../../../utils/text.dart';
 import '../bloc/video_bloc.dart';
 import '../player/media_playback_controller.dart';
@@ -203,11 +204,17 @@ class const _VideoHeaderSection() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // ⚡ Bolt Optimization: Scoped selector for VideoModel fields (title, viewCount, id).
-    // Prevents header from rebuilding when user likes, favorites, or subscribes.
-    final video = context.select<VideoBloc, VideoModel?>(
-      (bloc) => bloc.state.videoDetail?.video,
-    );
+    // ⚡ Bolt Optimization: Scoped selector for the header-only fields (title,
+    // stats, id, copyright). Prevents the header from rebuilding when the user
+    // likes, favorites, or subscribes.
+    final header = context
+        .select<VideoBloc, ({VideoModel? video, VideoCopyright? copyright})>((
+          bloc,
+        ) {
+          final detail = bloc.state.videoDetail;
+          return (video: detail?.video, copyright: detail?.copyright);
+        });
+    final video = header.video;
     if (video == null) return const SizedBox.shrink();
 
     Widget statsText(String text) => Text(
@@ -289,37 +296,65 @@ class const _VideoHeaderSection() extends StatelessWidget {
         Gap($styles.insets.xs),
 
         // Video Stats Chips Row
+        //
+        // 只渲染接口真实给出的字段：缺失的段直接隐藏，而不是填一个看起来
+        // 像真数据的示例值——用户无法分辨哪个数字是假的。
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 6,
           runSpacing: 4,
           children: [
-            statsRow(
-              AppIcons.visibility,
-              $styles.colors.accentFill,
-              l10n.viewCountLabel(
-                _formatCount(video.viewCount ?? 386000, l10n),
-              ),
-            ),
-            withSeparator(
-              statsRow(
-                AppIcons.comment,
-                $styles.colors.secondary,
-                l10n.danmakuCountSample,
-              ),
-            ),
-            withSeparator(statsText(l10n.oneDayAgoSample)),
-            withSeparator(chip(l10n.originalTech, $styles.colors.tertiary)),
-            withSeparator(
-              chip(
-                video.id.isNotEmpty ? video.id : 'BV1m44y1G7rk',
-                $styles.colors.onSurfaceVariant,
-              ),
-            ),
+            for (final (index, item) in _statsOf(
+              l10n,
+              video,
+              header.copyright,
+              statsRow,
+              statsText,
+              chip,
+            ).indexed)
+              if (index == 0) item else withSeparator(item),
           ],
         ),
       ],
     );
+  }
+
+  /// 统计行里实际可渲染的段，按「播放 · 弹幕 · 发布时间 · 投稿类型 · BV 号」
+  /// 排序。缺失的段整段不出现，调用方按位置插入分隔点，不会留下孤立的分隔符。
+  List<Widget> _statsOf(
+    AppLocalizations l10n,
+    VideoModel video,
+    VideoCopyright? copyright,
+    Widget Function(IconData icon, Color color, String text) statsRow,
+    Widget Function(String text) statsText,
+    Widget Function(String text, Color color) chip,
+  ) {
+    final viewCount = video.viewCount;
+    final danmakuCount = video.danmakuCount;
+    final uploadedAt = VideoCard.formatRelativeDate(video.uploadDate, l10n);
+    final copyrightLabel = switch (copyright) {
+      VideoCopyright.original => l10n.copyrightOriginal,
+      VideoCopyright.repost => l10n.copyrightRepost,
+      null => null,
+    };
+
+    return [
+      if (viewCount != null)
+        statsRow(
+          AppIcons.visibility,
+          $styles.colors.accentFill,
+          l10n.viewCountLabel(_formatCount(viewCount, l10n)),
+        ),
+      if (danmakuCount != null)
+        statsRow(
+          AppIcons.comment,
+          $styles.colors.secondary,
+          l10n.danmakuCountLabel(_formatCount(danmakuCount, l10n)),
+        ),
+      if (uploadedAt.isNotEmpty) statsText(uploadedAt),
+      if (copyrightLabel != null) chip(copyrightLabel, $styles.colors.tertiary),
+      if (video.id.isNotEmpty) chip(video.id, $styles.colors.onSurfaceVariant),
+    ];
   }
 }
 
@@ -420,6 +455,7 @@ class const _CreatorProfileSection() extends StatelessWidget {
   }
 
   Widget _creatorNames(CreatorProfile creator, AppLocalizations l10n) {
+    final subscribers = creator.subscribers;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -440,17 +476,18 @@ class const _CreatorProfileSection() extends StatelessWidget {
             Icon(AppIcons.verified, size: 14, color: $styles.colors.secondary),
           ],
         ),
-        Text(
-          l10n.subscribersWeeklyTagline(
-            _formatCount(creator.subscribers ?? 528000, l10n),
+        // 关注数只有接口给了才显示；详情端点不带这个字段时整行省略，
+        // 不用示例数字冒充。
+        if (subscribers != null)
+          Text(
+            l10n.subscribersCount(_formatCount(subscribers, l10n)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: $styles.text.bodySmall.copyWith(
+              color: $styles.colors.onSurfaceVariant,
+              fontSize: 11,
+            ),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: $styles.text.bodySmall.copyWith(
-            color: $styles.colors.onSurfaceVariant,
-            fontSize: 11,
-          ),
-        ),
       ],
     );
   }

@@ -2,6 +2,15 @@ import 'creator_profile_model.dart';
 import 'video_model.dart';
 import 'video_playlist_ref.dart';
 
+/// 投稿类型：接口 `copyright` 字段的语义化取值。
+enum VideoCopyright() {
+  /// 自制（`copyright = 1`）。
+  original,
+
+  /// 转载（`copyright = 2`）。
+  repost,
+}
+
 /// 视频章节：源给出的时间轴点（不是分 P）。
 ///
 /// 分 P 是独立可播的媒体单元，其起点不能当作当前这一路的播放偏移，所以章节
@@ -17,6 +26,7 @@ final class const VideoChapter({
 final class const VideoDetail({
   required final VideoModel video,
   final CreatorProfile? creator,
+  final VideoCopyright? copyright,
   final int likeCount = 0,
   final int favoriteCount = 0,
   final int shareCount = 0,
@@ -32,6 +42,7 @@ final class const VideoDetail({
   VideoDetail copyWith({
     VideoModel? video,
     CreatorProfile? creator,
+    VideoCopyright? copyright,
     int? likeCount,
     int? favoriteCount,
     int? shareCount,
@@ -45,6 +56,7 @@ final class const VideoDetail({
     return VideoDetail(
       video: video ?? this.video,
       creator: creator ?? this.creator,
+      copyright: copyright ?? this.copyright,
       likeCount: likeCount ?? this.likeCount,
       favoriteCount: favoriteCount ?? this.favoriteCount,
       shareCount: shareCount ?? this.shareCount,

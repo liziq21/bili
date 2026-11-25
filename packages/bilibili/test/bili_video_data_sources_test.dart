@@ -232,6 +232,39 @@ void main() {
       },
     );
 
+    test('getVideoDetail maps danmaku count and copyright', () async {
+      final result = await detailDataSource.getVideoDetail('BV1GJ411x7vy');
+      expect(result.isSuccess(), isTrue);
+
+      final detail = (result as dynamic).success;
+      // fixture 的 stat.danmaku = 0、copyright = 1（自制）
+      expect(detail.video.danmakuCount, 0);
+      expect(detail.copyright, VideoCopyright.original);
+    });
+
+    test('getVideoDetail leaves copyright null for an unknown code', () async {
+      final detailJson = loadJson('video_detail.json') as Map<String, dynamic>;
+      final data = Map<String, dynamic>.from(
+        detailJson['data'] as Map<String, dynamic>,
+      )..['copyright'] = 3;
+      final network = MockNetworkVideoDataSource(
+        videoDetailJson: {'data': data},
+        videoRelationJson:
+            loadJson('video_relation.json') as Map<String, dynamic>,
+        relatedVideosJson:
+            (loadJson('related_videos.json') as Map<String, dynamic>)['data']
+                as List<dynamic>,
+        replyListJson: loadJson('reply_list.json') as Map<String, dynamic>,
+        replyReplyListJson:
+            loadJson('reply_reply_list.json') as Map<String, dynamic>,
+      );
+
+      final result = await BiliVideoDetailRemoteDataSource(network: network)
+          .getVideoDetail('BV1GJ411x7vy');
+
+      expect((result as dynamic).success.copyright, isNull);
+    });
+
     test(
       'getVideoDetail maps player view_points into sorted chapters',
       () async {
