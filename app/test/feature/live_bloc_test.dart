@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:app/data/repository/app_live_room_repository.dart';
@@ -54,12 +55,19 @@ class FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
     );
   }
 
+  /// getLiveRoomStream 的可控返回：给了它就不用 [streamResult]，
+  /// 用来让两次切档的返回顺序反过来。
+  Future<Result<MediaStream, Exception>> Function(int roomId, int? preferQn)?
+  streamHandler;
+
   @override
   Future<Result<MediaStream, Exception>> getLiveRoomStream(
     int roomId, {
     int? preferQn,
   }) async {
     lastPreferQn = preferQn;
+    final handler = streamHandler;
+    if (handler != null) return handler(roomId, preferQn);
     return streamResult;
   }
 }
@@ -124,7 +132,14 @@ void main() {
         InMemorySharedPreferencesAsync.empty();
     final pref = SharedPreferencesAsync();
     final preferences = PreferencesDataSource(sharedPreferences: pref);
-    final dataSource = FakeLiveRoomDataSource();
+    final dataSource = FakeLiveRoomDataSource()
+      ..streamResult = Result.success(
+        MediaStream(
+          videoUrl: 'https://example.com/live_400.m3u8',
+          streamId: 400,
+          qualityLabel: 'BD',
+        ),
+      );
     final bloc = LiveBloc(
       repository: AppLiveRoomRepository(dataSource),
       preferences: preferences,
@@ -143,6 +158,98 @@ void main() {
       _ => throw StateError('unreachable'),
     };
     expect(jsonDecode(stored), {'21144080': 400});
+  });
+
+  testWidgets('A switch that finishes late cannot override a newer one', (
+    tester,
+  ) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    final preferences = PreferencesDataSource(
+      sharedPreferences: SharedPreferencesAsync(),
+    );
+    final pending = <int, Completer<Result<MediaStream, Exception>>>{};
+    final dataSource = FakeLiveRoomDataSource()
+      ..streamHandler = (roomId, preferQn) =>
+          (pending[preferQn!] = Completer()).future;
+    final bloc = LiveBloc(
+      repository: AppLiveRoomRepository(dataSource),
+      preferences: preferences,
+    );
+    addTearDown(bloc.close);
+
+    final stream250 = MediaStream(
+      videoUrl: 'https://example.com/live_250.m3u8',
+      streamId: 250,
+      qualityLabel: 'FHD',
+    );
+    final stream400 = MediaStream(
+      videoUrl: 'https://example.com/live_400.m3u8',
+      streamId: 400,
+      qualityLabel: 'BD',
+    );
+
+    bloc.add(SwitchLiveQuality(21144080, 250));
+    await _pumpEventQueue(tester);
+    bloc.add(SwitchLiveQuality(21144080, 400));
+    await _pumpEventQueue(tester);
+
+    // 新请求先回来，旧请求随后才回来。
+    pending[400]!.complete(Result.success(stream400));
+    await _pumpEventQueue(tester);
+    pending[250]!.complete(Result.success(stream250));
+    await _pumpEventQueue(tester);
+
+    expect(bloc.state.mediaStream, stream400);
+    expect(bloc.state.isSwitchingQuality, isFalse);
+    final stored = await preferences.get<String>(
+      PreferencesKey.liveQualityByRoom,
+    );
+    expect(
+      switch (stored) {
+        Success(:final success) => jsonDecode(success),
+        _ => null,
+      },
+      {'21144080': 400},
+    );
+  });
+
+  testWidgets('The remembered quality is the one that actually plays', (
+    tester,
+  ) async {
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+    final preferences = PreferencesDataSource(
+      sharedPreferences: SharedPreferencesAsync(),
+    );
+    final dataSource = FakeLiveRoomDataSource()
+      // 源侧没有请求的 400 档，回退到 150：记忆要跟着实际流走。
+      ..streamResult = Result.success(
+        MediaStream(
+          videoUrl: 'https://example.com/live_150.m3u8',
+          streamId: 150,
+          qualityLabel: 'HD',
+        ),
+      );
+    final bloc = LiveBloc(
+      repository: AppLiveRoomRepository(dataSource),
+      preferences: preferences,
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(SwitchLiveQuality(21144080, 400));
+    await _pumpEventQueue(tester);
+
+    final stored = await preferences.get<String>(
+      PreferencesKey.liveQualityByRoom,
+    );
+    expect(
+      switch (stored) {
+        Success(:final success) => jsonDecode(success),
+        _ => null,
+      },
+      {'21144080': 150},
+    );
   });
 
   testWidgets('A failed switch keeps the old stream without an error state', (
