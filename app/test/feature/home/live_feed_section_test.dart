@@ -165,7 +165,11 @@ void main() {
       for (final element in cards) {
         final box = element.renderObject! as RenderBox;
         final right = box.localToGlobal(Offset.zero).dx + box.size.width;
-        expect(right, lessThanOrEqualTo(1189), reason: '卡片右边缘越出窗口');
+        expect(
+          right,
+          lessThanOrEqualTo(1189),
+          reason: 'the card right edge must stay inside the viewport',
+        );
       }
     },
   );
