@@ -63,6 +63,9 @@ Future<bool> probeLiveStreamUrl(
 
 const _probeTimeout = Duration(seconds: 4);
 
+/// 没指定档位时请求的默认档（原画）。
+const _defaultLiveQn = 10000;
+
 /// 一条可尝试的直播流地址，连同解析出它的 codec（档位与 acceptQn 在 codec 上）。
 typedef _StreamCandidate = ({String url, NetworkLiveStreamCodec codec});
 
@@ -134,17 +137,19 @@ final class BiliLiveRoomDetailRemoteDataSource({
         return Result.error(Exception('Live room ID must be positive'));
       }
       // 切清晰度 = 带 qn 重新请求：响应里对应档的 codec 条目带着该档的
-      // 流地址（其 currentQn 即目标档）。preferQn 为 null 时沿用默认档。
+      // 流地址（其 currentQn 即目标档）。preferQn 为 null 时沿用默认档，
+      // 且排序也用同一个档：请求要的是它，就不该把更低的档排在前面。
+      final requestedQn = preferQn ?? _defaultLiveQn;
       final playInfo = await network.getLiveRoomPlayInfo(
         roomId: roomId,
-        qn: preferQn ?? 10000,
+        qn: requestedQn,
       );
       final playurl = playInfo.playurlInfo?.playurl;
       if (playurl == null || playurl.stream.isEmpty) {
         return Result.error(Exception('直播间 $roomId 未返回可用流'));
       }
 
-      final candidates = _streamCandidates(playurl, preferQn: preferQn);
+      final candidates = _streamCandidates(playurl, preferQn: requestedQn);
       if (candidates.isEmpty) {
         return Result.error(Exception('直播间 $roomId 未返回流地址'));
       }

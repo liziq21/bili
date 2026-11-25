@@ -525,6 +525,34 @@ void main() {
       expect(stream.qualityLabel, '原画');
     });
 
+    test('honours the default quality when no qn is requested', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson('avc', 150, baseUrl: '/live/flv/live.flv?'),
+            ]),
+            streamJson('http_hls', 'ts', [
+              codecJson('avc', 10000, baseUrl: '/live/hls/live.m3u8?'),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        probe: (url, headers) async {
+          probed.add(url);
+          return true;
+        },
+      );
+
+      // 默认请求的是原画（qn 10000）：即使 FLV 排在协议前面，也不能选 150。
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(probed, hasLength(1));
+      expect(stream.videoUrl, contains('.m3u8'));
+      expect(stream.streamId, 10000);
+    });
+
     test('probes HLS before FLV when the player runs in a browser', () async {
       final probed = <String>[];
       final source = BiliLiveRoomDetailRemoteDataSource(
@@ -567,7 +595,7 @@ void main() {
               ),
               codecJson(
                 'hevc',
-                10000,
+                250,
                 baseUrl: '/live/flv/hevc.flv?',
                 hosts: const ['https://live.example.com'],
               ),
@@ -586,7 +614,7 @@ void main() {
       expect(probed, hasLength(2));
       expect(probed.first, contains('dead.example.com'));
       expect(stream.videoUrl, contains('hevc.flv'));
-      expect(stream.streamId, 10000);
+      expect(stream.streamId, 250);
     });
 
     test('probes through the injected HTTP client', () async {
