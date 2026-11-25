@@ -199,13 +199,19 @@ class const VideoCard({
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          videoInfoBase.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                        // 网格给的高度是固定的，标题占满两行时文字块可能比可用
+                        // 高度还高。Flexible 让标题让出缺少的那几像素（省略号收
+                        // 尾），而不是整列溢出后被卡片圆角裁掉；空间足够时它仍
+                        // 按自然高度布局，排版不变。
+                        Flexible(
+                          child: Text(
+                            videoInfoBase.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         if (subtitleText.isNotEmpty)

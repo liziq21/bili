@@ -399,4 +399,38 @@ void main() {
       });
     }
   });
+
+  testWidgets('a two-line title never overflows a short grid cell', (
+    WidgetTester tester,
+  ) async {
+    // 网格按 childAspectRatio 给出固定高度。单卡 160px 宽、比例 1.0 时，封面
+    // 之后只剩约 50px 给两行标题与元信息，标题满行曾让列溢出 3.5px，底部被
+    // 卡片圆角裁掉（#645）。
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 160,
+              height: 160,
+              child: VideoCard(
+                videoInfoBase: VideoModel(
+                  id: 'BV1overflow',
+                  title: '【原神/热肉】木偶日配声优本多真梨子发布官方公告与后续活动安排说明合集',
+                  url: 'https://example.com/video/overflow',
+                  viewCount: 12345,
+                  uploadDate: DateTime(2026, 11, 20),
+                  duration: 600,
+                  creatorProfileName: '一个很长很长的UP主名字',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.textContaining('木偶日配声优'), findsOneWidget);
+  });
 }
