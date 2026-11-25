@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../exception/ypi_exception.dart';
 
 /// Response of `navigation/resolve_url`, which turns a YouTube URL into the
 /// InnerTube endpoint that serves it.
+@immutable
 final class NetworkYouTubeResolveUrlResponse {
   const NetworkYouTubeResolveUrlResponse({
     this.browseId,

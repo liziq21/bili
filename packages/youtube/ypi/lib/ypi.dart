@@ -6,7 +6,7 @@ export 'src/models/network_youtube_player.dart';
 export 'src/models/network_youtube_playlist_browse.dart';
 export 'src/models/network_youtube_resolve_url.dart';
 export 'src/models/network_youtube_search.dart';
-export 'src/models/network_youtube_trending.dart';
+export 'src/models/network_youtube_live_directory.dart';
 export 'src/models/network_youtube_watch_next.dart';
 export 'src/models/network_youtube_music.dart';
 export 'src/params/search_params.dart';

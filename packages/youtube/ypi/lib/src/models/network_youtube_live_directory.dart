@@ -1,18 +1,26 @@
+import 'package:meta/meta.dart';
+
 import '../exception/ypi_exception.dart';
 import 'network_youtube_search.dart';
 
-/// Response of a trending browse (`browseId=UC4R8DWoMoI7CAwX8_LjQHig`).
+/// Response of the YouTube Live directory browse
+/// (`browseId=UC4R8DWoMoI7CAwX8_LjQHig`).
 ///
-/// The trending page uses `richGridRenderer` entries whose content is a plain
-/// `videoRenderer`, not the `lockupViewModel` a channel grid returns, so it
-/// needs its own collector.
-final class NetworkYouTubeTrendingResponse {
-  const NetworkYouTubeTrendingResponse({
+/// YouTube's general Trending page is not reachable by anonymous clients
+/// (`FEtrending` answers `INVALID_ARGUMENT`), so this is the Live tab: sections
+/// such as "live now", "recent live" and "upcoming". Its entries are plain
+/// `videoRenderer`s inside `richGridRenderer`, not the `lockupViewModel` a
+/// channel grid returns, so it needs its own collector.
+@immutable
+final class NetworkYouTubeLiveDirectoryResponse {
+  const NetworkYouTubeLiveDirectoryResponse({
     required this.videos,
     this.continuationToken,
   });
 
-  factory NetworkYouTubeTrendingResponse.fromJson(Map<String, dynamic> json) {
+  factory NetworkYouTubeLiveDirectoryResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
     final error = _map(json['error']);
     if (error != null) {
       throw YpiInnerTubeException(
@@ -28,11 +36,11 @@ final class NetworkYouTubeTrendingResponse {
 
     if (videos.isEmpty) {
       throw const FormatException(
-        'trending browse response carries no videoRenderer entries',
+        'live directory response carries no videoRenderer entries',
       );
     }
 
-    return NetworkYouTubeTrendingResponse(
+    return NetworkYouTubeLiveDirectoryResponse(
       videos: List.unmodifiable(videos),
       continuationToken: _findContinuation(json),
     );

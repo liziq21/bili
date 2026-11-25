@@ -13,7 +13,7 @@ import '../models/network_youtube_player.dart';
 import '../models/network_youtube_playlist_browse.dart';
 import '../models/network_youtube_resolve_url.dart';
 import '../models/network_youtube_search.dart';
-import '../models/network_youtube_trending.dart';
+import '../models/network_youtube_live_directory.dart';
 import '../models/network_youtube_watch_next.dart';
 import '../models/network_youtube_music.dart';
 
@@ -349,11 +349,12 @@ final class YoutubeService {
     return _parseResponse(response, NetworkYouTubeResolveUrlResponse.fromJson);
   }
 
-  /// Fetches the trending page, or the next page of it.
+  /// Fetches the YouTube Live directory, or the next page of it.
   ///
-  /// Trending is a browse of `browseId=UC4R8DWoMoI7CAwX8_LjQHig`; its entries
-  /// are `videoRenderer` items, unlike a channel grid's `lockupViewModel`.
-  Future<NetworkYouTubeTrendingResponse> browseTrending({
+  /// The general Trending page is not available to anonymous clients, so this
+  /// browses `browseId=UC4R8DWoMoI7CAwX8_LjQHig` instead. Its entries are
+  /// `videoRenderer` items, unlike a channel grid's `lockupViewModel`.
+  Future<NetworkYouTubeLiveDirectoryResponse> browseLiveDirectory({
     String? continuation,
   }) async {
     final body = <String, dynamic>{};
@@ -364,7 +365,10 @@ final class YoutubeService {
       body['browseId'] = 'UC4R8DWoMoI7CAwX8_LjQHig';
     }
     final response = await _send(_api.browse, body);
-    return _parseResponse(response, NetworkYouTubeTrendingResponse.fromJson);
+    return _parseResponse(
+      response,
+      NetworkYouTubeLiveDirectoryResponse.fromJson,
+    );
   }
 
   /// Fetches YouTube Music search suggestions for [query].

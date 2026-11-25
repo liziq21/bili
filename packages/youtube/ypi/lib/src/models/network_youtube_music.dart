@@ -1,6 +1,9 @@
+import 'package:meta/meta.dart';
+
 import '../exception/ypi_exception.dart';
 
 /// Response of `music/get_search_suggestions`.
+@immutable
 final class NetworkYouTubeMusicSearchSuggestions {
   const NetworkYouTubeMusicSearchSuggestions({
     required this.query,
@@ -41,6 +44,7 @@ final class NetworkYouTubeMusicSearchSuggestions {
   final List<NetworkYouTubeMusicSuggestion> suggestions;
 }
 
+@immutable
 final class NetworkYouTubeMusicSuggestion {
   const NetworkYouTubeMusicSuggestion({required this.text, this.searchQuery});
 
@@ -53,6 +57,7 @@ final class NetworkYouTubeMusicSuggestion {
 /// Entries are `musicResponsiveListItemRenderer` items nested in item
 /// sections. The top result can be a `musicCardShelfRenderer`, which is not a
 /// list item and is intentionally skipped.
+@immutable
 final class NetworkYouTubeMusicSearchResponse {
   const NetworkYouTubeMusicSearchResponse({
     required this.items,
@@ -75,6 +80,7 @@ final class NetworkYouTubeMusicSearchResponse {
   final String? continuationToken;
 }
 
+@immutable
 final class NetworkYouTubeMusicItem {
   const NetworkYouTubeMusicItem({
     this.title,

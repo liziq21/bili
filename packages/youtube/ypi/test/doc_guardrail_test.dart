@@ -73,9 +73,9 @@ const endpointSpecs = <EndpointSpec>[
     docCell: 'resolve_url.json',
   ),
   EndpointSpec(
-    method: 'browseTrending',
-    fixtures: ['trending.json'],
-    docCell: 'trending.json',
+    method: 'browseLiveDirectory',
+    fixtures: ['live_directory.json'],
+    docCell: 'live_directory.json',
   ),
   EndpointSpec(
     method: 'getMusicSearchSuggestions',

@@ -130,13 +130,20 @@ void main() {
     });
   });
 
-  group('NetworkYouTubeTrendingResponse', () {
-    test('parses the captured trending fixture', () {
-      final response = NetworkYouTubeTrendingResponse.fromJson(
-        _loadFixture('trending.json'),
+  group('NetworkYouTubeLiveDirectoryResponse', () {
+    test('parses the captured live directory fixture', () {
+      final response = NetworkYouTubeLiveDirectoryResponse.fromJson(
+        _loadFixture('live_directory.json'),
       );
 
       expect(response.videos, hasLength(64));
+      expect(
+        response.continuationToken,
+        isNull,
+        reason:
+            'the captured page has no continuation item; token extraction '
+            'is covered by the synthetic test below',
+      );
       expect(response.videos.first.videoId, isNotEmpty);
       expect(response.videos.first.title?.value, isNotNull);
       expect(
@@ -148,7 +155,7 @@ void main() {
 
     test('rejects a browse response without videoRenderer entries', () {
       expect(
-        () => NetworkYouTubeTrendingResponse.fromJson({
+        () => NetworkYouTubeLiveDirectoryResponse.fromJson({
           'contents': {
             'twoColumnBrowseResultsRenderer': {
               'tabs': [
@@ -174,15 +181,31 @@ void main() {
         throwsA(isA<FormatException>()),
       );
     });
+
+    test('extracts a continuation token from a continuation item', () {
+      final response = NetworkYouTubeLiveDirectoryResponse.fromJson({
+        'contents': {
+          'videoRenderer': {'videoId': 'abc123'},
+          'continuationItemRenderer': {
+            'continuationEndpoint': {
+              'continuationCommand': {'token': 'NEXT_PAGE'},
+            },
+          },
+        },
+      });
+
+      expect(response.videos.single.videoId, 'abc123');
+      expect(response.continuationToken, 'NEXT_PAGE');
+    });
   });
 
-  group('YoutubeService.browseTrending', () {
-    test('browses the trending channel id', () async {
+  group('YoutubeService.browseLiveDirectory', () {
+    test('browses the live directory browse id', () async {
       final requests = <http.Request>[];
       final client = MockClient((request) async {
         requests.add(request);
         return http.Response(
-          jsonEncode(_loadFixture('trending.json')),
+          jsonEncode(_loadFixture('live_directory.json')),
           200,
           headers: {'content-type': 'application/json'},
         );
@@ -190,7 +213,7 @@ void main() {
       final service = YoutubeService(httpClient: client);
       addTearDown(service.close);
 
-      final response = await service.browseTrending();
+      final response = await service.browseLiveDirectory();
 
       expect(requests.single.url.path, '/youtubei/v1/browse');
       final body = jsonDecode(requests.single.body) as Map<String, dynamic>;
@@ -199,12 +222,12 @@ void main() {
       expect(response.videos, hasLength(64));
     });
 
-    test('pages with a continuation token', () async {
+    test('sends a continuation token instead of browseId', () async {
       final requests = <http.Request>[];
       final client = MockClient((request) async {
         requests.add(request);
         return http.Response(
-          jsonEncode(_loadFixture('trending.json')),
+          jsonEncode(_loadFixture('live_directory.json')),
           200,
           headers: {'content-type': 'application/json'},
         );
@@ -212,10 +235,10 @@ void main() {
       final service = YoutubeService(httpClient: client);
       addTearDown(service.close);
 
-      await service.browseTrending(continuation: 'TRENDING_TOKEN');
+      await service.browseLiveDirectory(continuation: 'LIVE_DIRECTORY_TOKEN');
 
       final body = jsonDecode(requests.single.body) as Map<String, dynamic>;
-      expect(body['continuation'], 'TRENDING_TOKEN');
+      expect(body['continuation'], 'LIVE_DIRECTORY_TOKEN');
       expect(body['browseId'], isNull);
     });
 
@@ -226,7 +249,7 @@ void main() {
       addTearDown(service.close);
 
       expect(
-        service.browseTrending(),
+        service.browseLiveDirectory(),
         throwsA(
           isA<YpiHttpException>().having(
             (error) => error.statusCode,
@@ -309,6 +332,13 @@ void main() {
       );
 
       expect(response.items, hasLength(18));
+      expect(
+        response.continuationToken,
+        isNull,
+        reason:
+            'the captured page has no continuation item; token extraction '
+            'is covered by the synthetic test below',
+      );
       final video = response.items.firstWhere((item) => item.videoId != null);
       expect(video.title, isNotEmpty);
       expect(video.subtitle, isNotEmpty);
@@ -352,6 +382,38 @@ void main() {
       expect(item.pageType, 'MUSIC_PAGE_TYPE_ARTIST');
       expect(item.videoId, isNull);
     });
+
+    test('extracts a continuation token from a continuation item', () {
+      final response = NetworkYouTubeMusicSearchResponse.fromJson({
+        'contents': [
+          {
+            'musicResponsiveListItemRenderer': {
+              'flexColumns': [
+                {
+                  'musicResponsiveListItemFlexColumnRenderer': {
+                    'text': {
+                      'runs': [
+                        {'text': 'Song'},
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            'continuationItemRenderer': {
+              'continuationEndpoint': {
+                'continuationCommand': {'token': 'NEXT_PAGE'},
+              },
+            },
+          },
+        ],
+      });
+
+      expect(response.items.single.title, 'Song');
+      expect(response.continuationToken, 'NEXT_PAGE');
+    });
   });
 
   group('YoutubeService.searchMusic', () {
@@ -380,7 +442,7 @@ void main() {
       expect(response.items, hasLength(18));
     });
 
-    test('sends params and pages with a continuation', () async {
+    test('sends params and a continuation token when provided', () async {
       final bodies = <Map<String, dynamic>>[];
       final client = MockClient((request) async {
         bodies.add(jsonDecode(request.body) as Map<String, dynamic>);

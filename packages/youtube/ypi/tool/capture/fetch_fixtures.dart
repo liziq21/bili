@@ -370,11 +370,11 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/resolve_url.json', resolveUrl);
     }
 
-    print('13. Fetching trending JSON...');
-    if (!shouldFetch('testing/trending.json')) {
-      skipNote('testing/trending.json');
+    print('13. Fetching live directory JSON...');
+    if (!shouldFetch('testing/live_directory.json')) {
+      skipNote('testing/live_directory.json');
     } else {
-      final trendingResponse = await client
+      final liveDirectoryResponse = await client
           .post(
             Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
             headers: _headers,
@@ -384,12 +384,12 @@ Future<void> main(List<String> args) async {
             }),
           )
           .timeout(requestTimeout);
-      final trending = _captureJson(
-        trendingResponse,
-        'trending',
-        _validateTrendingResponse,
+      final liveDirectory = _captureJson(
+        liveDirectoryResponse,
+        'live_directory',
+        _validateLiveDirectoryResponse,
       );
-      saveResponse('testing/trending.json', trending);
+      saveResponse('testing/live_directory.json', liveDirectory);
     }
 
     print('14. Fetching music search suggestions JSON...');
@@ -682,13 +682,13 @@ void _validateResolveUrlResponse(dynamic json) {
   }
 }
 
-void _validateTrendingResponse(dynamic json) {
+void _validateLiveDirectoryResponse(dynamic json) {
   if (json is! Map<String, dynamic>) {
-    throw const FormatException('trending response is not an object');
+    throw const FormatException('live directory response is not an object');
   }
-  final response = NetworkYouTubeTrendingResponse.fromJson(json);
+  final response = NetworkYouTubeLiveDirectoryResponse.fromJson(json);
   if (response.videos.isEmpty) {
-    throw const FormatException('trending response yields no videos');
+    throw const FormatException('live directory response yields no videos');
   }
 }
 
