@@ -106,22 +106,17 @@ class const _NewPageErrorIndicator<T>({required final Object? error})
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
-        child: rateLimited
-            ? Text(
-                l10n.rateLimitedRetryLater,
-                textAlign: TextAlign.center,
-                style: $styles.text.bodySmall.copyWith(
-                  color: $styles.colors.onSurfaceVariant,
-                ),
-              )
-            : RetryCooldownInlineButton(
-                rateLimited: false,
-                scope: 'search.next',
-                onRetry: () => context.read<SearchResultBloc<T>>().add(
-                  const FetchNextPage(),
-                ),
-                label: l10n.moreLoadFailedRetry,
-              ),
+        // 限流时也保留入口，只是先走冷却倒计时：分页失败后用户仍然要能接着
+        // 往下翻，只是不能立刻重发同一个被拒的请求。
+        child: RetryCooldownInlineButton(
+          rateLimited: rateLimited,
+          scope: 'search.next',
+          onRetry: () =>
+              context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
+          label: rateLimited
+              ? l10n.rateLimitedRetryLater
+              : l10n.moreLoadFailedRetry,
+        ),
       ),
     );
   }

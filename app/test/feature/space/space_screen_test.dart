@@ -388,6 +388,57 @@ void main() {
     expect(find.text('Video v2'), findsOneWidget);
   });
 
+  testWidgets('keeps the pagination retry behind the rate-limit cooldown', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.success(Page(number: 1, totalPages: 2, data: [_video('v1')])),
+      2: Result.error(const _RateLimited()),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelVideosRepository>.value(
+            value: videosRepository,
+          ),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Given the second page was rejected by rate limiting.
+    expect(videosRepository.requestedPages, [1, 2]);
+    // Then the entry is there but counting down, and tapping it changes nothing.
+    final countdown = find.text(l10n.retryInSeconds(15));
+    expect(countdown, findsOneWidget);
+    final button = tester.widget<TextButton>(
+      find.ancestor(of: countdown, matching: find.byType(TextButton)),
+    );
+    expect(button.onPressed, null);
+    await tester.tap(countdown, warnIfMissed: false);
+    await tester.pump();
+
+    expect(videosRepository.requestedPages, [1, 2]);
+  });
+
   testWidgets('shows an unsupported message without a videos capability', (
     tester,
   ) async {
