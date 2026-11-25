@@ -128,6 +128,11 @@ void main() {
       _painterOf(tester).comments.map((comment) => comment.content),
       contains('hello video'),
     );
+    // The painter caches by list identity, so the overlay must pass a snapshot.
+    expect(
+      () => _painterOf(tester).comments.add(_comment('mutated')),
+      throwsUnsupportedError,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -232,6 +237,7 @@ void main() {
     repository.result = Result.success([_comment('moving')]);
     await tester.pumpWidget(appFor('BV1'));
     await tester.pumpAndSettle();
+    final cache = _painterOf(tester).cache;
 
     // When playback advances to three seconds.
     controller.emit(
@@ -245,8 +251,35 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // Then the painter renders at the new position.
+    // Then the painter renders at the new position and keeps its cache.
     expect(_painterOf(tester).position, const Duration(seconds: 3));
+    expect(_painterOf(tester).cache, same(cache));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('skips rebuilds when only non-position fields change', (
+    tester,
+  ) async {
+    // Given an overlay showing one comment at position zero.
+    repository.result = Result.success([_comment('steady')]);
+    await tester.pumpWidget(appFor('BV1'));
+    await tester.pumpAndSettle();
+    final painter = _painterOf(tester);
+
+    // When playback reports a new state without moving the position.
+    controller.emit(
+      const PlaybackState(
+        isPlaying: true,
+        isBuffering: false,
+        position: Duration.zero,
+        duration: Duration(minutes: 1),
+      ),
+    );
+    await tester.pump();
+
+    // Then the overlay does not rebuild the painter for nothing.
+    expect(identical(_painterOf(tester), painter), isTrue);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

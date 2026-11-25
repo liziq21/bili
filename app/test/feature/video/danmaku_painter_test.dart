@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:app/feature/video/danmaku/danmaku_painter.dart';
@@ -10,6 +11,27 @@ const _size = Size(800, 600);
 const _lineHeight = 27.0;
 
 const _colors = (onScrim: Color(0xFFFFFFFF), outline: Color(0xFF000000));
+
+final class _CountingComments(final List<DanmakuComment> _comments)
+    extends ListBase<DanmakuComment> {
+  int reads = 0;
+
+  @override
+  int get length => _comments.length;
+
+  @override
+  set length(int value) => throw UnsupportedError('read only');
+
+  @override
+  DanmakuComment operator [](int index) {
+    reads++;
+    return _comments[index];
+  }
+
+  @override
+  void operator []=(int index, DanmakuComment value) =>
+      throw UnsupportedError('read only');
+}
 
 DanmakuComment _comment(
   DanmakuMode mode, {
@@ -31,14 +53,17 @@ void _paint(
   List<DanmakuComment> comments, {
   Duration position = const Duration(seconds: 1),
   Size size = _size,
+  DanmakuSettings settings = const DanmakuSettings(),
+  DanmakuRenderCache? cache,
 }) {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   DanmakuPainter(
     comments: comments,
     position: position,
-    settings: const DanmakuSettings(),
+    settings: settings,
     colors: _colors,
+    cache: cache,
   ).paint(canvas, size);
   recorder.endRecording().dispose();
 }
@@ -214,5 +239,268 @@ void main() {
       // Then the overlay keeps animating between frames.
       expect(second.shouldRepaint(first), isTrue);
     });
+
+    test('skips repaint when nothing it renders changed', () {
+      // Given two painters built from the same inputs.
+      final comments = [_comment(DanmakuMode.scrolling)];
+      final cache = DanmakuRenderCache();
+      addTearDown(cache.dispose);
+
+      DanmakuPainter painter({
+        Duration position = const Duration(seconds: 1),
+        DanmakuSettings settings = const DanmakuSettings(),
+        List<DanmakuComment>? list,
+      }) => DanmakuPainter(
+        comments: list ?? comments,
+        position: position,
+        settings: settings,
+        colors: _colors,
+        cache: cache,
+      );
+
+      // Then identical state does not schedule another frame.
+      expect(painter().shouldRepaint(painter()), isFalse);
+
+      // And any input the painter reads does.
+      expect(
+        painter(position: const Duration(seconds: 2)).shouldRepaint(painter()),
+        isTrue,
+      );
+      expect(
+        painter(settings: const DanmakuSettings(fontSize: 30))
+            .shouldRepaint(painter()),
+        isTrue,
+      );
+      expect(painter(list: [...comments]).shouldRepaint(painter()), isTrue);
+    });
+  });
+
+  group('DanmakuTimeline', () {
+    test('slices the visible window from a precomputed timeline', () {
+      // Given comments at 0, 5 and 10 seconds with an 8 second scroll.
+      final comments = [
+        _comment(DanmakuMode.scrolling, startSeconds: 0, content: 'a'),
+        _comment(DanmakuMode.scrolling, startSeconds: 5, content: 'b'),
+        _comment(DanmakuMode.scrolling, startSeconds: 10, content: 'c'),
+      ];
+      final timeline = DanmakuTimeline.build(
+        comments: comments,
+        size: _size,
+        settings: const DanmakuSettings(),
+      );
+
+      // Then each position sees only the comments still on screen.
+      expect(timeline.slotsAt(3).map((slot) => slot.comment.content), ['a']);
+      expect(timeline.slotsAt(10).map((slot) => slot.comment.content), [
+        'b',
+        'c',
+      ]);
+      expect(timeline.slotsAt(18).map((slot) => slot.comment.content), ['c']);
+      expect(timeline.slotsAt(18.1), isEmpty);
+    });
+
+    test('keeps lane assignments stable across the whole timeline', () {
+      // Given a comment forced off its preferred lane by the one before it.
+      final comments = [
+        _comment(
+          DanmakuMode.scrolling,
+          startSeconds: 0,
+          content: 'leading',
+          rowId: 0,
+        ),
+        _comment(
+          DanmakuMode.scrolling,
+          startSeconds: .5,
+          content: 'following',
+          rowId: 0,
+        ),
+      ];
+      final timeline = DanmakuTimeline.build(
+        comments: comments,
+        size: _size,
+        settings: const DanmakuSettings(),
+      );
+
+      // When sampling the same comment early and late in its life.
+      final early = timeline
+          .slotsAt(1)
+          .singleWhere((slot) => slot.comment.content == 'following');
+      final late = timeline
+          .slotsAt(8.3)
+          .singleWhere((slot) => slot.comment.content == 'following');
+
+      // Then its lane never changes.
+      expect(early.lane, isNot(0));
+      expect(late.lane, early.lane);
+    });
+
+    test(
+      'keeps source order for simultaneous comments in an unsorted list',
+      () {
+        // Given 13 comments at the same instant, followed by later comments in
+        // reverse order so the whole list is not sorted.
+        final comments = [
+          for (var i = 0; i < 13; i++)
+            _comment(
+              DanmakuMode.scrolling,
+              startSeconds: 0,
+              content: 'burst $i',
+              rowId: i,
+            ),
+          for (var i = 0; i < 100; i++)
+            _comment(
+              DanmakuMode.scrolling,
+              startSeconds: 100.0 - i,
+              content: 'later $i',
+              rowId: i,
+            ),
+        ];
+
+        // When planning the first frame.
+        final slots = planDanmakuSlots(
+          comments: comments,
+          positionSeconds: .3,
+          size: _size,
+          settings: const DanmakuSettings(),
+        );
+
+        // Then the eight source-order leaders keep the lanes, as before.
+        expect(slots.map((slot) => slot.comment.content), [
+          for (var i = 0; i < 8; i++) 'burst $i',
+        ]);
+      },
+    );
+  });
+
+  group('DanmakuRenderCache', () {
+    test(
+      'reuses one timeline across playback frames instead of rescanning',
+      () {
+        // Given 200 comments wrapped in a list that counts every read.
+        final comments = _CountingComments([
+          for (var i = 0; i < 200; i++)
+            _comment(
+              DanmakuMode.scrolling,
+              startSeconds: i * .25,
+              content: 'cached $i',
+              rowId: i,
+            ),
+        ]);
+        final cache = DanmakuRenderCache();
+        addTearDown(cache.dispose);
+
+        // When painting 100 frames across the timeline.
+        for (var frame = 0; frame < 100; frame++) {
+          _paint(
+            comments,
+            position: Duration(milliseconds: frame * 120),
+            cache: cache,
+          );
+        }
+
+        // Then the comments were scanned once, not once per frame.
+        expect(cache.layout.buildCount, 1);
+        expect(comments.reads, lessThan(comments.length * 3));
+      },
+    );
+
+    test('reuses a laid-out text painter on the next frame', () {
+      // Given one comment that stays visible across two frames.
+      final comments = [
+        _comment(DanmakuMode.scrolling, content: 'reused layout'),
+      ];
+      final cache = DanmakuRenderCache();
+      addTearDown(cache.dispose);
+
+      // When painting two positions.
+      _paint(comments, position: const Duration(seconds: 1), cache: cache);
+      _paint(comments, position: const Duration(seconds: 2), cache: cache);
+
+      // Then only the first frame paid for text layout.
+      expect(cache.textPainters.missCount, 1);
+      expect(cache.textPainters.hitCount, 1);
+    });
+
+    test('invalidates the timeline when any input changes', () {
+      // Given a cached timeline for one set of inputs.
+      final comments = [_comment(DanmakuMode.scrolling)];
+      final cache = DanmakuRenderCache();
+      addTearDown(cache.dispose);
+      final first = cache.layout.timelineFor(
+        comments: comments,
+        size: _size,
+        settings: const DanmakuSettings(),
+      );
+      final same = cache.layout.timelineFor(
+        comments: comments,
+        size: _size,
+        settings: const DanmakuSettings(),
+      );
+      expect(identical(first, same), isTrue);
+      expect(cache.layout.buildCount, 1);
+
+      // When the viewport, settings, or comment list instance changes.
+      final resized = cache.layout.timelineFor(
+        comments: comments,
+        size: const Size(640, 480),
+        settings: const DanmakuSettings(),
+      );
+      final restyled = cache.layout.timelineFor(
+        comments: comments,
+        size: const Size(640, 480),
+        settings: const DanmakuSettings(fontSize: 30),
+      );
+      final reloaded = cache.layout.timelineFor(
+        comments: [...comments],
+        size: const Size(640, 480),
+        settings: const DanmakuSettings(fontSize: 30),
+      );
+
+      // Then each change produced a fresh timeline.
+      expect(identical(first, resized), isFalse);
+      expect(identical(resized, restyled), isFalse);
+      expect(identical(restyled, reloaded), isFalse);
+      expect(cache.layout.buildCount, 4);
+    });
+
+    test(
+      'bounds the text painter cache and evicts the least recently used',
+      () {
+        // Given a cache that can hold two layouts.
+        final cache = DanmakuTextPainterCache(maxEntries: 2);
+        addTearDown(cache.dispose);
+        TextPainter obtain(String content) => cache.obtain(
+          content: content,
+          fontSize: 18,
+          opacity: .9,
+          outlineRadius: 2,
+          onScrim: _colors.onScrim,
+          outline: _colors.outline,
+          maxWidth: _size.width * 1.5,
+        );
+
+        // When obtaining two entries and then the first one again.
+        final first = obtain('a');
+        final second = obtain('b');
+        final again = obtain('a');
+
+        // Then each content has its own layout, and the repeat is a hit.
+        expect(first.text!.toPlainText(), 'a');
+        expect(second.text!.toPlainText(), 'b');
+        expect(cache.missCount, 2);
+        expect(cache.hitCount, 1);
+        expect(identical(again, first), isTrue);
+        expect(again.text!.toPlainText(), 'a');
+
+        // And a third distinct entry evicts the least recently used one.
+        obtain('c');
+        expect(cache.length, 2);
+        expect(cache.missCount, 3);
+        expect(identical(obtain('a'), first), isTrue);
+        expect(cache.hitCount, 2);
+        expect(identical(obtain('b'), second), isFalse);
+        expect(cache.missCount, 4);
+      },
+    );
   });
 }

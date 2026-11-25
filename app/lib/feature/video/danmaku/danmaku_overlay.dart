@@ -28,6 +28,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
   PlaybackState? _playbackState;
   DanmakuSettings _settings = const DanmakuSettings();
   List<DanmakuComment> _comments = const [];
+  final DanmakuRenderCache _renderCache = DanmakuRenderCache();
   int _loadGeneration = 0;
   int _settingsGeneration = 0;
 
@@ -37,6 +38,8 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     _playbackState = widget.controller.state;
     _subscription = widget.controller.states.listen((state) {
       if (!mounted) return;
+      // 浮层只消费位置；其他字段变化不会改变画面，跳过可省掉一次重建。
+      if (_playbackState?.position == state.position) return;
       setState(() => _playbackState = state);
     });
     unawaited(_initialize());
@@ -113,7 +116,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     if (!mounted || generation != _loadGeneration) return;
     setState(() {
       _comments = switch (result) {
-        Success(:final success) => success,
+        Success(:final success) => List.unmodifiable(success),
         _ => const [],
       };
     });
@@ -132,6 +135,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     _subscription?.cancel();
     _settingSubscriptions?.forEach((subscription) => subscription.cancel());
     _settingsReloadTimer?.cancel();
+    _renderCache.dispose();
     super.dispose();
   }
 
@@ -152,6 +156,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
             position: state.position,
             settings: _settings,
             colors: colors,
+            cache: _renderCache,
           ),
         ),
       ),
