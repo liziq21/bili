@@ -122,10 +122,10 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
                   child: ListTile(
                     title: Text(l10n.librarySearchHistoryRetention),
                     subtitle: Text(l10n.librarySearchHistoryRetentionSubtitle),
+                    // 不排除子语义：打开菜单的动作属于 `DropdownButton`，
+                    // 排除掉之后读屏用户只能听到当前值、无法改值。
                     trailing: Semantics(
                       label: l10n.librarySearchHistoryRetention,
-                      value: retentionText,
-                      excludeSemantics: true,
                       child: DropdownButton<int>(
                         value: _searchHistoryRetentionDays,
                         onChanged: (value) {

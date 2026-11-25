@@ -257,6 +257,29 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('opens the column picker from the screen-reader tap', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final portraitPicker = find.byType(DropdownButton<int>).at(0);
+    final node = tester.getSemantics(portraitPicker);
+    final data = node.getSemanticsData();
+    expect(data.label, contains('竖屏'));
+    expect(data.label, contains('2'));
+    expect(data.hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('4').last);
+    await tester.pumpAndSettle();
+
+    final config = await persistedConfig();
+    expect(config.gridColumnsPortrait, equals(4));
+    semantics.dispose();
+  });
+
   testWidgets('exposes accessible semantics for screen readers', (
     tester,
   ) async {
@@ -266,27 +289,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Dropdown semantics with excludeSemantics and orientation label
-    expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is Semantics &&
-            w.properties.label == '竖屏' &&
-            w.properties.value == '2' &&
-            w.excludeSemantics == true,
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is Semantics &&
-            w.properties.label == '横屏' &&
-            w.properties.value == '3' &&
-            w.excludeSemantics == true,
-      ),
-      findsOneWidget,
-    );
+    // Dropdown semantics keep the picker's own value and tap action, and the
+    // wrapper only adds the orientation as context.
+    for (final (index, label, value) in [(0, '竖屏', '2'), (1, '横屏', '3')]) {
+      final data = tester
+          .getSemantics(find.byType(DropdownButton<int>).at(index))
+          .getSemanticsData();
+      expect(data.label, contains(label));
+      expect(data.label, contains(value));
+      expect(data.hasAction(SemanticsAction.tap), isTrue);
+    }
 
     // Tab visibility switches with state semantics
     expect(
