@@ -26,6 +26,10 @@ void main() {
         'onSurfaceVariant 压 surface',
         Contrast.ratio(scheme.onSurfaceVariant, surface),
       ),
+      (
+        'onPrimaryContainer 压 primaryContainer',
+        Contrast.ratio(scheme.onPrimaryContainer, scheme.primaryContainer),
+      ),
     ];
     for (final (label, r) in pairs) {
       expect(
@@ -87,6 +91,10 @@ void main() {
         'onSurfaceVariant 压 surface',
         Contrast.ratio(scheme.onSurfaceVariant, surface),
       ),
+      (
+        'onPrimaryContainer 压 primaryContainer',
+        Contrast.ratio(scheme.onPrimaryContainer, scheme.primaryContainer),
+      ),
     ];
     for (final (label, r) in pairs) {
       expect(
@@ -127,6 +135,53 @@ void main() {
       }
     },
   );
+
+  test('pressed state layer keeps card text at WCAG AA', () {
+    // 卡片（VideoCard / 直播卡片 / 搜索结果）的按压反馈来自 `InkWell`：
+    // highlightColor 在按住期间铺满表面，splashColor 的波纹同时在同一表面上
+    // 展开，两者会重叠。状态层必须**叠加**在卡片底色之上（R2.5），单层与
+    // 叠加两种情形都要满足文本门槛。
+    for (final (name, colors) in [('light', light), ('dark', dark)]) {
+      final theme = appThemeData(colors);
+      final scheme = theme.colorScheme;
+      final surface = scheme.surfaceContainerLow;
+      final pressed = Color.alphaBlend(theme.highlightColor, surface);
+      final rippled = Color.alphaBlend(theme.splashColor, pressed);
+
+      expect(
+        theme.highlightColor.a,
+        lessThan(1),
+        reason: '$name highlight must be translucent, not replace the surface',
+      );
+      expect(
+        theme.splashColor,
+        theme.highlightColor,
+        reason: '$name splash and highlight share one state layer',
+      );
+      expect(
+        pressed,
+        isNot(surface),
+        reason: '$name pressed state must tint the surface',
+      );
+
+      for (final (label, foreground) in [
+        ('onSurface', scheme.onSurface),
+        ('onSurfaceVariant', scheme.onSurfaceVariant),
+      ]) {
+        for (final (state, background) in [
+          ('pressed', pressed),
+          ('pressed under splash', rippled),
+        ]) {
+          final ratio = Contrast.ratio(foreground, background);
+          expect(
+            ratio,
+            greaterThanOrEqualTo(Contrast.aaText),
+            reason: '$name $state $label actual ${ratio.toStringAsFixed(2)}:1',
+          );
+        }
+      }
+    }
+  });
 
   test('accentText is recomputed for a surface the brand value cannot carry', () {
     // `BrandPalette.fromScheme` 的保证：accentText 压**它将要用的那个** surface

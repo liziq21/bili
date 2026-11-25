@@ -2,24 +2,30 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app_colors.dart';
 
+/// 按压 / 水波纹状态层的透明度。
+///
+/// 状态层叠加在表面之上、不替换表面（R2.5）：不透明的 [AppColors.accentFill]
+/// 会把整张卡片刷成实心强调色，卡片副标题（`onSurfaceVariant`）随之失去对比度。
+/// 高亮与波纹会重叠，取值以叠加后的结果为准，见
+/// `test/design/contrast_test.dart`。
+const double _stateLayerOpacity = 0.08;
+
 /// 由 [AppColors] 构造 `ThemeData`。
 ///
-/// **本文件在 P2 阶段不接线**：`App`/`ThemeWrapper` 仍走 `ThemeData.light()`
-/// / `ThemeData.dark()`，Material 组件因此拿到的还是默认配色。接线属于 P3，
-/// 目的是让「改变像素」只发生在那一个提交里。
-///
 /// 接线时必须复用 [AppColors] 背后的同一个 `ColorScheme`，否则会出现两套
-/// 独立色板（R4 想消除的正是这个）。
+/// 独立色板（R4 想消除的正是这种）。
 ThemeData appThemeData(AppColors colors) {
   final scheme = colors.scheme;
   final textTheme = switch (scheme.brightness) {
     Brightness.light => ThemeData.light().textTheme,
     Brightness.dark => ThemeData.dark().textTheme,
   };
+  final stateLayer = colors.accentFill.withValues(alpha: _stateLayerOpacity);
 
   return ThemeData.from(textTheme: textTheme, colorScheme: scheme).copyWith(
     textSelectionTheme: TextSelectionThemeData(cursorColor: colors.accentFill),
-    highlightColor: colors.accentFill,
+    highlightColor: stateLayer,
+    splashColor: stateLayer,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),

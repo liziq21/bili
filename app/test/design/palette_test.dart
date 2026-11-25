@@ -26,7 +26,7 @@ void main() {
       expect(light.surface, const Color(0xFFF8ECE5));
       expect(light.onSurfaceStrong, const Color(0xFF1E1B18));
       expect(light.onSurface, const Color(0xFF514F4D));
-      expect(light.onSurfaceVariant, const Color(0xFF696561));
+      expect(light.onSurfaceVariant, const Color(0xFF605C58));
       expect(light.accentText, const Color(0xFF9D4E1A));
       expect(light.accentFill, const Color(0xFFB75B1E));
       expect(light.secondary, const Color(0xFF947666));

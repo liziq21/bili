@@ -1,7 +1,10 @@
-import 'dart:ui' show SemanticsAction;
+import 'dart:ui' show ImageByteFormat, SemanticsAction;
 
+import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
+import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -270,4 +273,130 @@ void main() {
       await clearImageCacheDuringTest(tester);
     },
   );
+
+  group('pressed state', () {
+    // 按住卡片时 `InkWell` 把主题的状态层画在卡片底色之上。这里读取真实渲染
+    // 像素，确认状态层只是薄薄一层：按压态下的标题与副标题仍达 `aaText`，
+    // 并且与主题算出的叠加结果一致。用的是渲染后的像素而不是 golden，因为
+    // 「半透明」不是 golden 能表达的属性。
+    for (final brightness in Brightness.values) {
+      testWidgets('feed card keeps its text legible while pressed '
+          '(${brightness.name})', (WidgetTester tester) async {
+        final colors = AppColors(BrandPalette.of(brightness));
+        final theme = appThemeData(colors);
+        final scheme = theme.colorScheme;
+        final stateLayer = theme.highlightColor;
+        final boundaryKey = GlobalKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: Center(
+              child: RepaintBoundary(
+                key: boundaryKey,
+                child: SizedBox(
+                  width: 320,
+                  height: 260,
+                  child: VideoCard(
+                    variant: VideoCardVariant.feed,
+                    videoInfoBase: VideoModel(
+                      id: 'BV1pressed',
+                      title: 'Pressed state',
+                      url: 'https://example.com/video/pressed',
+                      viewCount: 1280000,
+                      duration: 754,
+                      creatorProfileName: 'UP',
+                    ),
+                    onTap: () {},
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 采样点取封面下沿的留白：那里只有卡片底色，没有文字、头像或角标。
+        final thumbnail = tester.getRect(find.byType(AspectRatio));
+        final boundaryRect = tester.getRect(find.byKey(boundaryKey));
+        final sample = Offset(
+          thumbnail.center.dx - boundaryRect.left,
+          thumbnail.bottom + 4 - boundaryRect.top,
+        );
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(VideoCard)),
+        );
+        await tester.pump();
+        // 高亮淡入结束、波纹也已淡出后再取像素：此时表面只剩高亮一层。
+        await tester.pump(const Duration(seconds: 1));
+
+        final boundary =
+            boundaryKey.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await tester.runAsync(boundary.toImage);
+        final data = await tester.runAsync(
+          () => image!.toByteData(format: ImageByteFormat.rawRgba),
+        );
+        final bytes = data!.buffer.asUint8List();
+        final index =
+            (sample.dy.round() * image!.width + sample.dx.round()) * 4;
+        final pressed = Color.fromARGB(
+          255,
+          bytes[index],
+          bytes[index + 1],
+          bytes[index + 2],
+        );
+        image.dispose();
+
+        await gesture.up();
+        await tester.pump();
+
+        final surface = scheme.surfaceContainerLow;
+        final expected = Color.alphaBlend(stateLayer, surface);
+
+        expect(
+          stateLayer.a,
+          lessThan(1),
+          reason: 'the state layer must not replace the surface',
+        );
+        expect(
+          pressed,
+          isNot(surface),
+          reason: 'the pressed state layer must be visible',
+        );
+        // 门槛断言不依赖主题里的具体取值：若状态层退回不透明强调色，
+        // 这里的对比度会掉到 1.3:1 以下并失败。
+        for (final (label, foreground) in [
+          ('title', scheme.onSurface),
+          ('subtitle', scheme.onSurfaceVariant),
+        ]) {
+          final ratio = Contrast.ratio(foreground, pressed);
+          expect(
+            ratio,
+            greaterThanOrEqualTo(Contrast.aaText),
+            reason:
+                '$label on pressed card actual '
+                '${ratio.toStringAsFixed(2)}:1',
+          );
+        }
+        for (final (channel, actual, want) in [
+          ('r', pressed.r, expected.r),
+          ('g', pressed.g, expected.g),
+          ('b', pressed.b, expected.b),
+        ]) {
+          expect(
+            (actual - want).abs(),
+            lessThan(0.02),
+            reason: '$channel channel differs from the theme state layer',
+          );
+        }
+      });
+    }
+  });
 }

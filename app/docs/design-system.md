@@ -60,6 +60,10 @@
 
 **R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
 
+**R2.5** 交互状态层（`InkWell` 的按压高亮与波纹，即主题的 `highlightColor` / `splashColor`）必须**叠加**在表面之上，且两者取同一个值；不得用不透明色替换表面。高亮与波纹在同一表面重叠时，叠加结果仍须满足 G2 的文本门槛。
+
+`primaryContainer` / `onPrimaryContainer` 受 G2 约束：暗色下强调容器是浅色，其前景必须取深色。头像首字母与来源角标取这一对角色。
+
 ### R3 —— 亮度单源
 
 运行中的 `isDark` 只有一个来源：`Theme.of(context).brightness`，由 `AppScaffold` 注入 `AppStyle`。`AppScaffold` 第一次 build 前的静态 `$styles` 只允许使用亮色 bootstrap fallback，用于让构造期读取有安全值；第一次 build 必须用真实 Theme 亮度覆盖它，不能把 fallback 当作运行时主题。除该 bootstrap 初始化外，**禁止任何位置硬编码 `isDark = false`**。
@@ -157,6 +161,8 @@ app/lib/design/
 ### G2 —— 对比度测试
 
 `app/test/design/contrast_test.dart` 枚举**受支持的**前景/背景组合（不做笛卡尔积），在亮 / 暗两种亮度下各断言一次，门槛取 `contrast.dart` 的 `aaText` / `aaNonText`。
+
+覆盖范围包含**交互状态**：按压高亮与波纹叠加后的表面仍要承载 `onSurface` / `onSurfaceVariant`（R2.5），`onPrimaryContainer` 压 `primaryContainer` 按 `aaText` 断言。
 
 **G2 必须先于 G1 满额通过。** G1 拦住的是「新增硬编码色」，G2 拦住的是「改了色板但没算对比度」。反序上线会出现门禁全绿而界面仍不可访问。
 

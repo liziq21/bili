@@ -66,8 +66,16 @@ void main() {
     expect(dark!.colorScheme, darkScheme);
     expect(light!.textSelectionTheme.cursorColor, lightScheme.primary);
     expect(dark!.textSelectionTheme.cursorColor, darkScheme.primary);
-    expect(light!.highlightColor, lightScheme.primary);
-    expect(dark!.highlightColor, darkScheme.primary);
+    // 按压 / 水波纹状态层是强调色的半透明叠加：不透明的 primary 会替换
+    // 卡片底色，把副标题的对比度压到 1.3:1 以下（见 contrast_test.dart）。
+    for (final (theme, scheme) in [
+      (light!, lightScheme),
+      (dark!, darkScheme),
+    ]) {
+      expect(theme.highlightColor.withValues(alpha: 1), scheme.primary);
+      expect(theme.highlightColor.a, lessThan(1));
+      expect(theme.splashColor, theme.highlightColor);
+    }
   });
 
   testWidgets('keeps the brand themes when dynamic colors are unavailable', (
