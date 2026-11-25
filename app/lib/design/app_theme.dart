@@ -4,11 +4,10 @@ import 'app_colors.dart';
 
 /// 按压 / 水波纹状态层的透明度。
 ///
-/// 状态层是**叠加**在表面之上的半透明色，不能替换表面：不透明的
-/// [AppColors.accentFill] 会把整张卡片刷成实心强调色，压在卡片副标题
-/// （`onSurfaceVariant`）上只剩 1.25:1（亮）/ 1.28:1（暗），文字无法辨认。
-/// 8% 下表面仍然透出，卡片上的 `onSurface` / `onSurfaceVariant` 都保持
-/// WCAG AA（≥ 4.5:1），实测值见 `test/design/contrast_test.dart`。
+/// 状态层叠加在表面之上、不替换表面（R2.5）：不透明的 [AppColors.accentFill]
+/// 会把整张卡片刷成实心强调色，卡片副标题（`onSurfaceVariant`）随之失去对比度。
+/// 高亮与波纹会重叠，取值以叠加后的结果为准，见
+/// `test/design/contrast_test.dart`。
 const double _stateLayerOpacity = 0.08;
 
 /// 由 [AppColors] 构造 `ThemeData`。

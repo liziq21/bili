@@ -129,7 +129,7 @@ class const BrandPalette({
   // design/contrast.dart 与 test/design/contrast_test.dart 的门禁）：
   //   accentText  5.12:1  正文 4.5:1 门槛，留 0.62 余量
   //   onSurface   7.04:1  正文
-  //   onSurfaceVariant 4.99:1  正文，留 0.49 余量
+  //   onSurfaceVariant 5.72:1  正文，留 1.22 余量（容纳 R2.5 状态层）
   //   accentFill  4.00:1  图形 3.0:1 门槛（accentText 的浅一档，见下）
   //   secondary   3.59:1  图形
   //   outline     3.20:1  分隔线/弱图形
@@ -142,7 +142,7 @@ class const BrandPalette({
   static const Color _accent2Light = Color(0xFF947666);
   static const Color _accent3Light = Color(0xFFC47642);
   static const Color _surfaceLight = Color(0xFFF8ECE5);
-  static const Color _captionLight = Color(0xFF696561);
+  static const Color _captionLight = Color(0xFF605C58);
   static const Color _bodyLight = Color(0xFF514F4D);
   static const Color _greyStrongLight = Color(0xFF272625);
   static const Color _greyMediumLight = Color(0xFF89847F);

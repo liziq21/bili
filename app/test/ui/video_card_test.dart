@@ -1,6 +1,7 @@
 import 'dart:ui' show ImageByteFormat, SemanticsAction;
 
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
@@ -274,19 +275,28 @@ void main() {
   );
 
   group('pressed state', () {
-    // 按住卡片时，`InkWell` 把主题的状态层画在卡片底色之上。状态层一旦不透明
-    // （旧实现直接取 accentFill），副标题与头像文字就只剩 1.3:1 左右。这里读取
-    // 真实渲染像素，确认叠加层只是薄薄一层，并且与主题算出的叠加结果一致。
+    // 按住卡片时 `InkWell` 把主题的状态层画在卡片底色之上。这里读取真实渲染
+    // 像素，确认状态层只是薄薄一层：按压态下的标题与副标题仍达 `aaText`，
+    // 并且与主题算出的叠加结果一致。用的是渲染后的像素而不是 golden，因为
+    // 「半透明」不是 golden 能表达的属性。
     for (final brightness in Brightness.values) {
-      testWidgets('feed card paints a translucent state layer when pressed '
+      testWidgets('feed card keeps its text legible while pressed '
           '(${brightness.name})', (WidgetTester tester) async {
         final colors = AppColors(BrandPalette.of(brightness));
         final theme = appThemeData(colors);
+        final scheme = theme.colorScheme;
+        final stateLayer = theme.highlightColor;
         final boundaryKey = GlobalKey();
 
         await tester.pumpWidget(
           MaterialApp(
             theme: theme,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
             home: Center(
               child: RepaintBoundary(
                 key: boundaryKey,
@@ -323,8 +333,8 @@ void main() {
           tester.getCenter(find.byType(VideoCard)),
         );
         await tester.pump();
-        // 高亮淡入与波纹展开都跑完后再取像素。
-        await tester.pump(const Duration(milliseconds: 600));
+        // 高亮淡入结束、波纹也已淡出后再取像素：此时表面只剩高亮一层。
+        await tester.pump(const Duration(seconds: 1));
 
         final boundary =
             boundaryKey.currentContext!.findRenderObject()!
@@ -347,22 +357,34 @@ void main() {
         await gesture.up();
         await tester.pump();
 
-        final surface = theme.colorScheme.surfaceContainerLow;
-        final expected = Color.alphaBlend(theme.highlightColor, surface);
+        final surface = scheme.surfaceContainerLow;
+        final expected = Color.alphaBlend(stateLayer, surface);
 
+        expect(
+          stateLayer.a,
+          lessThan(1),
+          reason: 'the state layer must not replace the surface',
+        );
         expect(
           pressed,
           isNot(surface),
           reason: 'the pressed state layer must be visible',
         );
-        expect(
-          Contrast.ratio(pressed, surface),
-          lessThan(1.3),
-          reason:
-              'pressed ${pressed.toARGB32()} vs resting '
-              '${surface.toARGB32()}: the state layer replaced the surface '
-              'instead of tinting it',
-        );
+        // 门槛断言不依赖主题里的具体取值：若状态层退回不透明强调色，
+        // 这里的对比度会掉到 1.3:1 以下并失败。
+        for (final (label, foreground) in [
+          ('title', scheme.onSurface),
+          ('subtitle', scheme.onSurfaceVariant),
+        ]) {
+          final ratio = Contrast.ratio(foreground, pressed);
+          expect(
+            ratio,
+            greaterThanOrEqualTo(Contrast.aaText),
+            reason:
+                '$label on pressed card actual '
+                '${ratio.toStringAsFixed(2)}:1',
+          );
+        }
         for (final (channel, actual, want) in [
           ('r', pressed.r, expected.r),
           ('g', pressed.g, expected.g),

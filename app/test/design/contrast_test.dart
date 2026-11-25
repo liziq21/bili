@@ -137,15 +137,16 @@ void main() {
   );
 
   test('pressed state layer keeps card text at WCAG AA', () {
-    // 卡片（VideoCard / 直播卡片 / 搜索结果）的按压反馈来自 `InkWell`，其
-    // highlightColor / splashColor 取自主题的同一个状态层。状态层必须**叠加**
-    // 在卡片底色之上：不透明的 accentFill 会把整张卡片刷成实心强调色，压在
-    // 副标题（onSurfaceVariant）上只剩 1.25:1（亮）/ 1.28:1（暗）。
+    // 卡片（VideoCard / 直播卡片 / 搜索结果）的按压反馈来自 `InkWell`：
+    // highlightColor 在按住期间铺满表面，splashColor 的波纹同时在同一表面上
+    // 展开，两者会重叠。状态层必须**叠加**在卡片底色之上（R2.5），单层与
+    // 叠加两种情形都要满足文本门槛。
     for (final (name, colors) in [('light', light), ('dark', dark)]) {
       final theme = appThemeData(colors);
       final scheme = theme.colorScheme;
       final surface = scheme.surfaceContainerLow;
       final pressed = Color.alphaBlend(theme.highlightColor, surface);
+      final rippled = Color.alphaBlend(theme.splashColor, pressed);
 
       expect(
         theme.highlightColor.a,
@@ -167,12 +168,17 @@ void main() {
         ('onSurface', scheme.onSurface),
         ('onSurfaceVariant', scheme.onSurfaceVariant),
       ]) {
-        final ratio = Contrast.ratio(foreground, pressed);
-        expect(
-          ratio,
-          greaterThanOrEqualTo(Contrast.aaText),
-          reason: '$name pressed $label actual ${ratio.toStringAsFixed(2)}:1',
-        );
+        for (final (state, background) in [
+          ('pressed', pressed),
+          ('pressed under splash', rippled),
+        ]) {
+          final ratio = Contrast.ratio(foreground, background);
+          expect(
+            ratio,
+            greaterThanOrEqualTo(Contrast.aaText),
+            reason: '$name $state $label actual ${ratio.toStringAsFixed(2)}:1',
+          );
+        }
       }
     }
   });
