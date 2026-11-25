@@ -485,6 +485,122 @@ final endpointSpecs = <EndpointSpec>[
     },
   ),
   EndpointSpec(
+    method: 'getVideoParts',
+    fixtures: ['video_parts.json'],
+    docCell: 'video_parts.json',
+    parse: (decoded) {
+      final response = NetworkBiliVideoParts.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.parts, isNotEmpty);
+      expect(response.parts.first.cid, greaterThan(0));
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getVideoSnapshot',
+    fixtures: ['video_snapshot.json'],
+    docCell: 'video_snapshot.json',
+    parse: (decoded) {
+      final response = NetworkBiliVideoSnapshot.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.images, isNotEmpty);
+      expect(response.index, isNotEmpty);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getVideoTags',
+    fixtures: ['video_tags.json'],
+    docCell: 'video_tags.json',
+    parse: (decoded) {
+      final response = NetworkBiliVideoTags.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.tags, isNotEmpty);
+      expect(response.tags.first.tagName, isNotEmpty);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getHomeFeed',
+    fixtures: ['home_feed.json'],
+    docCell: 'home_feed.json',
+    parse: (decoded) {
+      final response = NetworkBiliHomeFeed.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.items, isNotEmpty);
+      expect(response.items.first.bvid, isNotNull);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getSeriesArchives',
+    fixtures: ['series_archives.json'],
+    docCell: 'series_archives.json',
+    parse: (decoded) {
+      final response = NetworkBiliSeriesArchives.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.archives, isNotEmpty);
+      expect(response.page, isNotNull);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getBangumiPlayUrlV2',
+    fixtures: ['bangumi_play_url_v2.json'],
+    docCell: 'bangumi_play_url_v2.json',
+    parse: (decoded) {
+      final json = decoded as Map<String, dynamic>;
+      final response = NetworkBangumiPlayUrlV2.fromJson(
+        json['result'] as Map<String, dynamic>,
+      );
+      expect(response.videoInfo.quality, isNotNull);
+      expect(response.episodeInfo, isNotNull);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getLiveRoomBaseInfo',
+    fixtures: ['live_room_base_info.json'],
+    docCell: 'live_room_base_info.json',
+    parse: (decoded) {
+      final response = NetworkLiveRoomBaseInfo.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.rooms, isNotEmpty);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getLiveStatusByUids',
+    fixtures: ['live_status_by_uids.json'],
+    docCell: 'live_status_by_uids.json',
+    parse: (decoded) {
+      final response = NetworkLiveStatusByUids.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.statuses, isNotEmpty);
+      return response;
+    },
+  ),
+  EndpointSpec(
+    method: 'getRecommendedLiveRooms',
+    fixtures: ['live_recommended_rooms.json'],
+    docCell: 'live_recommended_rooms.json',
+    parse: (decoded) {
+      final response = NetworkLiveRecommendedRooms.fromJson(
+        decoded as Map<String, dynamic>,
+      );
+      expect(response.rooms, isNotEmpty);
+      expect(response.rooms.first.roomId, greaterThan(0));
+      return response;
+    },
+  ),
+  EndpointSpec(
     method: 'parseFrames',
     fixtures: ['live_danmaku_frames.json'],
     docCell: 'live_danmaku_frames.json',

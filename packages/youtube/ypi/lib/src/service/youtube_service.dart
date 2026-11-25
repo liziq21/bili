@@ -11,19 +11,24 @@ import '../models/network_youtube_browse.dart';
 import '../models/network_youtube_comments.dart';
 import '../models/network_youtube_player.dart';
 import '../models/network_youtube_playlist_browse.dart';
+import '../models/network_youtube_resolve_url.dart';
 import '../models/network_youtube_search.dart';
+import '../models/network_youtube_trending.dart';
 import '../models/network_youtube_watch_next.dart';
+import '../models/network_youtube_music.dart';
 
 final class YoutubeService {
   YoutubeService({
     http.Client? httpClient,
     YoutubeClientConfig config = const YoutubeClientConfig(),
     YoutubeClientConfig playerConfig = const YoutubeClientConfig.ios(),
+    YoutubeClientConfig musicConfig = const YoutubeClientConfig.music(),
   }) : _httpClient = httpClient ?? http.Client(),
        _ownsHttpClient = httpClient == null,
        _playerConfig = playerConfig {
     _validateConfig(config);
     _validateConfig(playerConfig);
+    _validateConfig(musicConfig);
     _chopperClient = ChopperClient(
       client: _httpClient,
       converter: YoutubeRequestConverter(config),
@@ -36,6 +41,12 @@ final class YoutubeService {
       interceptors: [YoutubeInnerTubeInterceptor(playerConfig)],
     );
     _playerApi = YoutubeApi.create(_playerChopperClient);
+    _musicChopperClient = ChopperClient(
+      client: _httpClient,
+      converter: YoutubeRequestConverter(musicConfig),
+      interceptors: [YoutubeInnerTubeInterceptor(musicConfig)],
+    );
+    _musicApi = YoutubeApi.create(_musicChopperClient);
   }
 
   final http.Client _httpClient;
@@ -43,8 +54,10 @@ final class YoutubeService {
   final YoutubeClientConfig _playerConfig;
   late final ChopperClient _chopperClient;
   late final ChopperClient _playerChopperClient;
+  late final ChopperClient _musicChopperClient;
   late final YoutubeApi _api;
   late final YoutubeApi _playerApi;
+  late final YoutubeApi _musicApi;
 
   /// The user agent used for player requests.
   ///
@@ -56,6 +69,7 @@ final class YoutubeService {
   void close() {
     _chopperClient.dispose();
     _playerChopperClient.dispose();
+    _musicChopperClient.dispose();
     if (_ownsHttpClient) {
       _httpClient.close();
     }
@@ -318,6 +332,77 @@ final class YoutubeService {
 
     final response = await _send(_api.browse, body);
     return _parseResponse(response, NetworkYouTubeBrowseResponse.fromJson);
+  }
+
+  /// Resolves a YouTube URL to the InnerTube endpoint that serves it.
+  ///
+  /// This is the supported way to classify a shared link without matching URL
+  /// patterns locally: the response names a `videoId`, `playlistId`, or
+  /// `browseId` (channel, handle, or music page).
+  Future<NetworkYouTubeResolveUrlResponse> resolveUrl(String url) async {
+    final sanitized = url.replaceAll(_controlChars, '').trim();
+    if (sanitized.isEmpty) {
+      throw const YpiJsonException('resolveUrl requires url');
+    }
+    final body = <String, dynamic>{'url': sanitized};
+    final response = await _send(_api.resolveUrl, body);
+    return _parseResponse(response, NetworkYouTubeResolveUrlResponse.fromJson);
+  }
+
+  /// Fetches the trending page, or the next page of it.
+  ///
+  /// Trending is a browse of `browseId=UC4R8DWoMoI7CAwX8_LjQHig`; its entries
+  /// are `videoRenderer` items, unlike a channel grid's `lockupViewModel`.
+  Future<NetworkYouTubeTrendingResponse> browseTrending({
+    String? continuation,
+  }) async {
+    final body = <String, dynamic>{};
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
+    } else {
+      body['browseId'] = 'UC4R8DWoMoI7CAwX8_LjQHig';
+    }
+    final response = await _send(_api.browse, body);
+    return _parseResponse(response, NetworkYouTubeTrendingResponse.fromJson);
+  }
+
+  /// Fetches YouTube Music search suggestions for [query].
+  Future<NetworkYouTubeMusicSearchSuggestions> getMusicSearchSuggestions(
+    String query,
+  ) async {
+    final sanitized = query.replaceAll(_controlChars, '');
+    final body = <String, dynamic>{'input': sanitized};
+    final response = await _send(_musicApi.getMusicSearchSuggestions, body);
+    return _parseResponse(
+      response,
+      (json) =>
+          NetworkYouTubeMusicSearchSuggestions.fromJson(json, query: sanitized),
+    );
+  }
+
+  /// Searches YouTube Music.
+  ///
+  /// Music results only come back for the `WEB_REMIX` client context, which
+  /// this method sends through its own client rather than [config].
+  Future<NetworkYouTubeMusicSearchResponse> searchMusic(
+    String query, {
+    String? params,
+    String? continuation,
+  }) async {
+    final body = <String, dynamic>{};
+    final sanitizedContinuation = continuation?.replaceAll(_controlChars, '');
+    if (sanitizedContinuation != null && sanitizedContinuation.isNotEmpty) {
+      body['continuation'] = sanitizedContinuation;
+    } else {
+      body['query'] = query.replaceAll(_controlChars, '');
+      final sanitizedParams = params?.replaceAll(_controlChars, '');
+      if (sanitizedParams != null && sanitizedParams.isNotEmpty) {
+        body['params'] = sanitizedParams;
+      }
+    }
+    final response = await _send(_musicApi.musicSearch, body);
+    return _parseResponse(response, NetworkYouTubeMusicSearchResponse.fromJson);
   }
 
   /// Runs an InnerTube POST against a path that takes the shared client body.

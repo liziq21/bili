@@ -10,6 +10,21 @@ import 'package:model/model.dart';
 /// 只实现直播流解析所需方法的桩，其余方法直接抛。
 class MockLiveRoomNetwork({required final Map<String, dynamic> playInfoJson})
     implements NetworkLiveDataSource {
+  @override
+  Future<NetworkLiveRoomBaseInfo> getLiveRoomBaseInfo({
+    required List<int> roomIds,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveStatusByUids> getLiveStatusByUids({
+    required List<int> uids,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveRecommendedRooms> getRecommendedLiveRooms({
+    int pageSize = 30,
+  }) => throw UnimplementedError();
+
   /// 记录最近一次 getLiveRoomPlayInfo 收到的 qn，用于验证切清晰度走 qn 参数。
   int? lastQn;
 

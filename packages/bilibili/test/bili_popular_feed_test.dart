@@ -11,6 +11,10 @@ final class const MockNetworkBiliFeedDataSource(
   final NetworkBiliRankingResponse? rankingResponse,
 }) implements NetworkBiliFeedDataSource {
   @override
+  Future<NetworkBiliHomeFeed> getHomeFeed({int pageSize = 12}) =>
+      throw UnimplementedError();
+
+  @override
   Future<NetworkBiliPopularResponse> getPopular({
     int page = 1,
     int pageSize = 20,
@@ -25,6 +29,10 @@ final class const MockNetworkBiliFeedDataSource(
 
 final class const ThrowingNetworkBiliFeedDataSource()
     implements NetworkBiliFeedDataSource {
+  @override
+  Future<NetworkBiliHomeFeed> getHomeFeed({int pageSize = 12}) =>
+      throw UnimplementedError();
+
   @override
   Future<NetworkBiliPopularResponse> getPopular({
     int page = 1,

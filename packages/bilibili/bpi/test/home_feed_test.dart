@@ -1,0 +1,126 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:bpi/bpi.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:test/test.dart';
+
+void main() {
+  Map<String, dynamic> loadFixture() {
+    final file = File('testing/home_feed.json');
+    expect(file.existsSync(), isTrue);
+    return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+  }
+
+  test('parses the captured home feed response', () {
+    final response = NetworkBiliHomeFeed.fromJson(loadFixture());
+
+    expect(response.code, 0);
+    expect(response.message, 'OK');
+    expect(response.items, hasLength(12));
+
+    final item = response.items.first;
+    expect(item.goto, 'av');
+    expect(item.bvid, 'BV1vtyDzwE7s');
+    expect(item.cid, 43857150849);
+    expect(item.title, isNotEmpty);
+    expect(item.owner?.mid, 401800534);
+    expect(item.stat?.view, isNotNull);
+  });
+
+  test('drops feed entries without an id or bvid', () {
+    final response = NetworkBiliHomeFeed.fromJson({
+      'code': 0,
+      'message': 'OK',
+      'ttl': 1,
+      'data': {
+        'item': [
+          {'goto': 'av', 'title': 'no identity'},
+          {'goto': 'av', 'bvid': 'BVok', 'owner': {}, 'stat': {}},
+        ],
+      },
+    });
+
+    expect(response.items, hasLength(1));
+    expect(response.items.single.bvid, 'BVok');
+    expect(response.items.single.owner, isNull);
+    expect(response.items.single.stat, isNull);
+  });
+
+  group('BiliNetworkSearch.getHomeFeed', () {
+    test('signs the WBI request and sends the feed parameters', () async {
+      final requests = <http.BaseRequest>[];
+      final client = MockClient((request) async {
+        requests.add(request);
+        if (request.url.path == '/x/web-interface/nav') {
+          return http.Response(
+            jsonEncode(_navResponse()),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        return http.Response(
+          jsonEncode(loadFixture()),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final network = BiliNetworkSearch(client: client);
+      addTearDown(network.close);
+
+      final response = await network.getHomeFeed();
+
+      expect(response.items, hasLength(12));
+      expect(requests, hasLength(2));
+
+      final feedRequest = requests.last;
+      expect(feedRequest.method, 'GET');
+      expect(feedRequest.url.path, '/x/web-interface/wbi/index/top/feed/rcmd');
+
+      final query = feedRequest.url.queryParameters;
+      expect(query['fresh_type'], '3');
+      expect(query['ps'], '12');
+      expect(query['version'], '1');
+      expect(query['feed_version'], 'V8');
+      expect(query['w_rid'], isNotEmpty);
+      expect(query['wts'], isNotEmpty);
+    });
+
+    test('maps a non-zero Bilibili code to BiliApiException', () async {
+      final network = BiliNetworkSearch(
+        client: MockClient((request) async {
+          if (request.url.path == '/x/web-interface/nav') {
+            return http.Response(jsonEncode(_navResponse()), 200);
+          }
+          return http.Response(
+            jsonEncode({'code': -412, 'message': 'request blocked'}),
+            200,
+          );
+        }),
+      );
+      addTearDown(network.close);
+
+      expect(
+        network.getHomeFeed(),
+        throwsA(
+          isA<BiliApiException>().having(
+            (error) => error.biliCode,
+            'biliCode',
+            -412,
+          ),
+        ),
+      );
+    });
+  });
+}
+
+Map<String, dynamic> _navResponse() => <String, dynamic>{
+  'code': 0,
+  'data': <String, dynamic>{
+    'wbi_img': <String, dynamic>{
+      'img_url': 'https://i0.hdslb.com/bfs/wbi/${'a' * 32}.png',
+      'sub_url': 'https://i0.hdslb.com/bfs/wbi/${'b' * 32}.png',
+    },
+  },
+};

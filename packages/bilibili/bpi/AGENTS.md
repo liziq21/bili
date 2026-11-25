@@ -36,8 +36,43 @@
 | 直播弹幕 WebSocket 连接 | `WSS /sub` (broadcastlv.chat.bilibili.com) | 公共请求 | Bilibili 实际 WebSocket 协议 / PipePipe | `testing/live_danmaku_frames.json` | 2026-11-04 |
 | 播放列表内容 | `GET /x/polymer/web-space/seasons_archives_list?mid&season_id&page_num&page_size&sort_reverse` | WBI | [Bilibili 实际公开 Web API](https://api.bilibili.com/x/polymer/web-space/seasons_archives_list) | `testing/playlist_content.json` | 2026-11-23 |
 | 用户合集/系列列表 | `GET /x/polymer/web-space/seasons_series_list?mid&page_num&page_size` | WBI | [Bilibili 实际公开 Web API](https://api.bilibili.com/x/polymer/web-space/seasons_series_list) | `testing/playlist_list.json` | 2026-11-23 |
+| 视频分P列表 | `GET /x/player/pagelist?bvid` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/video_parts.json` | 2026-11-25 |
+| 视频进度条预览图 | `GET /x/player/videoshot?bvid&index` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/video_snapshot.json` | 2026-11-25 |
+| 视频标签 | `GET /x/web-interface/view/detail/tag?bvid` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/video_tags.json` | 2026-11-25 |
+| 首页推荐 | `GET /x/web-interface/wbi/index/top/feed/rcmd` | WBI | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/home_feed.json` | 2026-11-25 |
+| 用户系列视频列表 | `GET /x/series/archives?mid&series_id&pn&ps` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/series_archives.json` | 2026-11-25 |
+| 番剧播放地址 v2 | `GET /pgc/player/web/v2/playurl?ep_id&qn&fnval&fourk` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/bangumi_play_url_v2.json` | 2026-11-25 |
+| 批量直播间基础信息 | `GET /xlive/web-room/v1/index/getRoomBaseInfo?room_ids[]&req_biz` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_room_base_info.json` | 2026-11-25 |
+| 按 UP 主批量直播状态 | `GET /room/v1/Room/get_status_info_by_uids?uids[]` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_status_by_uids.json` | 2026-11-25 |
+| 推荐直播间列表 | `GET /room/v1/room/get_user_recommend?page_size&platform` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_recommended_rooms.json` | 2026-11-25 |
 
 `getH5InfoByRoom` 和 `getRoomPlayInfo` 已完成真实请求、fixture 保存和来源记录；实现与测试必须以对应的 fixture 为准。
+
+### 未移植端点
+
+以下 PipePipe 使用的端点不进入本包。它们要么需要登录 Cookie，要么属于写操作，与「只读匿名客户端」的产品边界冲突；不是抓取失败，也不是待办缺口。
+
+| Endpoint | 不移植原因 |
+|---|---|
+| `GET /x/polymer/web-dynamic/v1/feed/all`（关注动态） | 需要登录 Cookie |
+| `GET /x/web-interface/history/cursor`（观看历史） | 需要登录 Cookie |
+| `GET /x/v2/history/toview`（稍后观看） | 需要登录 Cookie |
+| `GET /x/v3/fav/folder/created/list-all`、`GET /x/v3/fav/resource/list`（个人收藏夹） | 需要登录 Cookie；公开收藏夹读取尚未接入 |
+| `GET /x/relation/followings`（关注列表） | 需要登录 Cookie |
+| `GET /x/msgfeed/*`（消息中心） | 需要登录 Cookie |
+| `POST /x/v2/reply/add`、`/x/web-interface/archive/like`、`/x/web-interface/archive/coins`、`/x/v3/fav/resource/deal` | 写操作，产品边界禁止 |
+
+PipePipe 中其余公开端点不移植的原因是重复覆盖或属于请求基础设施，而不是 Cookie 依赖：
+
+| Endpoint | 不移植原因 |
+|---|---|
+| `GET /x/series/recArchivesByKeywords` | WBI + `dm_img_*` 签名的频道视频回退接口；与已接入的 `/x/space/wbi/arc/search` 数据等价 |
+| `GET https://app.bilibili.com/x/v2/space/archive/cursor` | App 端 `appkey` 签名接口，PipePipe 用作第三种回退；与 Web 端频道视频接口数据等价 |
+| `GET /x/frontend/finger/spi` | 仅用于生成 `buvid3` / `buvid4`；内容请求不依赖它 |
+| `POST /bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket` | 反爬 ticket，需要 buvid 与签名上下文；不是内容接口 |
+| `GET /x/v1/dm/list.so?oid=` | 弹幕内容与已接入的 `GET /{cid}.xml` 等价 |
+| `GET /x/player/wbi/v2`、`GET /x/web-interface/wbi/view` | 已接入非 WBI 的同名端点，返回数据一致 |
+| `GET https://api.live.bilibili.com/live/getRoundPlayVideo` | 仅直播间处于轮播状态时可用，需要 `room_id` + 时间戳，不是稳定的列表/详情接口 |
 
 ## Bili DTO 与异常
 

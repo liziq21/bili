@@ -346,6 +346,99 @@ Future<void> main(List<String> args) async {
       saveResponse('testing/browse_playlist.json', browsePlaylist);
     }
 
+    print('12. Fetching resolve_url JSON...');
+    if (!shouldFetch('testing/resolve_url.json')) {
+      skipNote('testing/resolve_url.json');
+    } else {
+      final resolveUrlResponse = await client
+          .post(
+            Uri.parse(
+              'https://www.youtube.com/youtubei/v1/navigation/resolve_url',
+            ),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            }),
+          )
+          .timeout(requestTimeout);
+      final resolveUrl = _captureJson(
+        resolveUrlResponse,
+        'resolve url',
+        _validateResolveUrlResponse,
+      );
+      saveResponse('testing/resolve_url.json', resolveUrl);
+    }
+
+    print('13. Fetching trending JSON...');
+    if (!shouldFetch('testing/trending.json')) {
+      skipNote('testing/trending.json');
+    } else {
+      final trendingResponse = await client
+          .post(
+            Uri.parse('https://www.youtube.com/youtubei/v1/browse'),
+            headers: _headers,
+            body: jsonEncode(<String, dynamic>{
+              'context': _clientContext,
+              'browseId': 'UC4R8DWoMoI7CAwX8_LjQHig',
+            }),
+          )
+          .timeout(requestTimeout);
+      final trending = _captureJson(
+        trendingResponse,
+        'trending',
+        _validateTrendingResponse,
+      );
+      saveResponse('testing/trending.json', trending);
+    }
+
+    print('14. Fetching music search suggestions JSON...');
+    if (!shouldFetch('testing/music_suggest.json')) {
+      skipNote('testing/music_suggest.json');
+    } else {
+      final musicSuggestResponse = await client
+          .post(
+            Uri.parse(
+              'https://music.youtube.com/youtubei/v1/music/'
+              'get_search_suggestions',
+            ),
+            headers: _musicHeaders,
+            body: jsonEncode(<String, dynamic>{
+              'context': _musicContext,
+              'input': 'flut',
+            }),
+          )
+          .timeout(requestTimeout);
+      final musicSuggest = _captureJson(
+        musicSuggestResponse,
+        'music search suggestions',
+        _validateMusicSuggestResponse,
+      );
+      saveResponse('testing/music_suggest.json', musicSuggest);
+    }
+
+    print('15. Fetching music search JSON...');
+    if (!shouldFetch('testing/music_search.json')) {
+      skipNote('testing/music_search.json');
+    } else {
+      final musicSearchResponse = await client
+          .post(
+            Uri.parse('https://music.youtube.com/youtubei/v1/search'),
+            headers: _musicHeaders,
+            body: jsonEncode(<String, dynamic>{
+              'context': _musicContext,
+              'query': 'Taylor Swift',
+            }),
+          )
+          .timeout(requestTimeout);
+      final musicSearch = _captureJson(
+        musicSearchResponse,
+        'music search',
+        _validateMusicSearchResponse,
+      );
+      saveResponse('testing/music_search.json', musicSearch);
+    }
+
     print('All YouTube fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching YouTube fixtures: ${error.message}');
@@ -558,6 +651,69 @@ const _playerContext = <String, dynamic>{
     'gl': 'US',
   },
 };
+
+const _musicHeaders = <String, String>{
+  'Content-Type': 'application/json',
+  'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+      '(KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+  'X-YouTube-Client-Name': '67',
+  'X-YouTube-Client-Version': '1.20230818.01.00',
+};
+
+const _musicContext = <String, dynamic>{
+  'client': {
+    'clientName': 'WEB_REMIX',
+    'clientVersion': '1.20230818.01.00',
+    'hl': 'zh-CN',
+    'gl': 'US',
+  },
+};
+
+void _validateResolveUrlResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('resolve_url response is not an object');
+  }
+  final response = NetworkYouTubeResolveUrlResponse.fromJson(json);
+  if (response.videoId != 'dQw4w9WgXcQ') {
+    throw const FormatException(
+      'resolve_url did not resolve the watch URL to its videoId',
+    );
+  }
+}
+
+void _validateTrendingResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('trending response is not an object');
+  }
+  final response = NetworkYouTubeTrendingResponse.fromJson(json);
+  if (response.videos.isEmpty) {
+    throw const FormatException('trending response yields no videos');
+  }
+}
+
+void _validateMusicSuggestResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('music suggest response is not an object');
+  }
+  final response = NetworkYouTubeMusicSearchSuggestions.fromJson(
+    json,
+    query: 'flut',
+  );
+  if (response.suggestions.isEmpty) {
+    throw const FormatException('music suggest response yields no suggestions');
+  }
+}
+
+void _validateMusicSearchResponse(dynamic json) {
+  if (json is! Map<String, dynamic>) {
+    throw const FormatException('music search response is not an object');
+  }
+  final response = NetworkYouTubeMusicSearchResponse.fromJson(json);
+  if (response.items.isEmpty) {
+    throw const FormatException('music search response yields no items');
+  }
+}
 
 _CapturedResponse _captureJson(
   http.Response response,

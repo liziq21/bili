@@ -3,9 +3,13 @@ import 'dart:convert';
 import '../device/bili_device_fingerprint.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
+import '../model/video/network_bangumi_play_url_v2.dart';
 import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_bili_danmaku.dart';
 import '../model/video/network_bili_player_info.dart';
+import '../model/video/network_bili_video_parts.dart';
+import '../model/video/network_bili_video_snapshot.dart';
+import '../model/video/network_bili_video_tags.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_related_video.dart';
 import '../model/video/network_video_relation.dart';
@@ -14,6 +18,33 @@ import '../network_video_data_source.dart';
 import 'bili_network_client.dart';
 
 mixin VideoEndpoints on BiliNetworkClient implements NetworkVideoDataSource {
+  @override
+  Future<NetworkBiliVideoParts> getVideoParts({required String bvid}) =>
+      api.getVideoParts(bvid: bvid);
+
+  @override
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({required String bvid}) =>
+      api.getVideoSnapshot(bvid: bvid);
+
+  @override
+  Future<NetworkBiliVideoTags> getVideoTags({required String bvid}) =>
+      api.getVideoTags(bvid: bvid);
+
+  @override
+  Future<NetworkBangumiPlayUrlV2> getBangumiPlayUrlV2({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) => api.getBangumiPlayUrlV2(
+    epId: epId,
+    cid: cid,
+    qn: qn,
+    fnval: fnval,
+    fourk: fourk,
+  );
+
   @override
   Future<NetworkBangumiSeasonData> getBangumiSeason({
     int? seasonId,
