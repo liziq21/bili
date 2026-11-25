@@ -380,7 +380,8 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
               maxCrossAxisExtent: 200,
               mainAxisSpacing: $styles.insets.sm,
               crossAxisSpacing: $styles.insets.sm,
-              childAspectRatio: 0.8,
+              // 高度按卡片文字块的预算算，比例写死会随字号变化把标题挤掉。
+              mainAxisExtent: videoCardExtent(context, 200),
             ),
           ),
         ],

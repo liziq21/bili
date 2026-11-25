@@ -399,4 +399,120 @@ void main() {
       });
     }
   });
+
+  testWidgets('a two-line title never overflows a short grid cell', (
+    WidgetTester tester,
+  ) async {
+    // 网格按 childAspectRatio 给出固定高度。单卡 160px 宽、比例 1.0 时，封面
+    // 之后只剩约 50px 给两行标题与元信息，标题满行曾让列溢出 3.5px，底部被
+    // 卡片圆角裁掉（#645）。
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 160,
+              height: 160,
+              child: VideoCard(
+                videoInfoBase: VideoModel(
+                  id: 'BV1overflow',
+                  // 只用字体子集覆盖的字：测试里的字面量同样受 golden 字体契约约束。
+                  title: '中文标题中文标题中文标题中文标题中文标题中文标题',
+                  url: 'https://example.com/video/overflow',
+                  viewCount: 12345,
+                  uploadDate: DateTime(2026, 11, 20),
+                  duration: 600,
+                  creatorProfileName: '中文标题中文标题UP主名字',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.textContaining('中文标题'), findsWidgets);
+  });
+
+  testWidgets('a one-line card keeps its title readable in a short cell', (
+    WidgetTester tester,
+  ) async {
+    // 比 [videoCardExtent] 的预算更矮的格子：调用方把标题降到一行，第二行
+    // 不会只剩半截（#645）。
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 160,
+              height: 145,
+              child: VideoCard(
+                titleMaxLines: 1,
+                videoInfoBase: VideoModel(
+                  id: 'BV1tight',
+                  title: '中文标题中文标题中文标题中文标题中文标题中文标题',
+                  url: 'https://example.com/video/tight',
+                  viewCount: 12345,
+                  uploadDate: DateTime(2026, 11, 20),
+                  duration: 600,
+                  creatorProfileName: '中文标题中文标题UP主名字',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    final title = tester.widget<Text>(find.text('中文标题中文标题中文标题中文标题中文标题中文标题'));
+    expect(title.maxLines, 1);
+  });
+
+  testWidgets('a roomy cell keeps both title lines', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 160,
+              height: 260,
+              child: VideoCard(
+                videoInfoBase: VideoModel(
+                  id: 'BV1roomy',
+                  title: '中文标题中文标题中文标题中文标题中文标题中文标题',
+                  url: 'https://example.com/video/roomy',
+                  viewCount: 12345,
+                  uploadDate: DateTime(2026, 11, 20),
+                  duration: 600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    final title = tester.widget<Text>(find.text('中文标题中文标题中文标题中文标题中文标题中文标题'));
+    expect(title.maxLines, 2);
+  });
 }

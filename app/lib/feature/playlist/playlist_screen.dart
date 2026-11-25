@@ -172,10 +172,11 @@ class _PlaylistScreenState() extends State<PlaylistScreen> {
             padding: EdgeInsets.symmetric(horizontal: spacing),
             sliver: SliverGrid.builder(
               // 卡片高度按 16:9 封面再加两行标题与一行副标题推算，不写死像素：
-              // 写死高度在窄屏上会让 [VideoCard] 的垂直 Column 溢出。
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              // 写死高度在窄屏上会让 [VideoCard] 的垂直 Column 溢出，标题的
+              // 第二行还会被垂直裁掉半截（#645）。
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 240,
-                mainAxisExtent: 200,
+                mainAxisExtent: videoCardExtent(context, 240),
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8,
               ),
