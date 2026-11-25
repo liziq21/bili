@@ -417,7 +417,11 @@ class const _ChannelSectionError({
             ),
           ),
           SizedBox(height: $styles.insets.xs),
-          RetryCooldownButton(rateLimited: rateLimited, onRetry: onRetry),
+          RetryCooldownButton(
+            rateLimited: rateLimited,
+            scope: 'space.first',
+            onRetry: onRetry,
+          ),
         ],
       ),
     );
@@ -445,6 +449,7 @@ class const _ChannelSectionPageError({
               )
             : RetryCooldownInlineButton(
                 rateLimited: false,
+                scope: 'space.next',
                 onRetry: onRetry,
                 label: l10n.moreLoadFailedRetry,
               ),

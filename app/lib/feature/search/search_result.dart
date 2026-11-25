@@ -86,6 +86,7 @@ class const _SearchErrorView<T>({required final Object? error})
           RetryCooldownButton(
             style: TextButton.styleFrom(),
             rateLimited: rateLimited,
+            scope: 'search.first',
             onRetry: () =>
                 context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
           ),
@@ -115,6 +116,7 @@ class const _NewPageErrorIndicator<T>({required final Object? error})
               )
             : RetryCooldownInlineButton(
                 rateLimited: false,
+                scope: 'search.next',
                 onRetry: () => context.read<SearchResultBloc<T>>().add(
                   const FetchNextPage(),
                 ),

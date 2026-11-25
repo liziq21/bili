@@ -8,6 +8,24 @@ import 'package:material_ui/material_ui.dart';
 class const _RateLimited() implements RateLimitedFailure;
 
 void main() {
+  test('escalates the cooldown for consecutive rejections and caps it', () {
+    // Given a scope that keeps getting rejected.
+    const scope = 'test.escalation';
+
+    // Then the cooldown doubles from the base value and never exceeds the cap.
+    expect(rateLimitCooldownFor(scope), rateLimitRetryBaseCooldown);
+    expect(rateLimitCooldownFor(scope), const Duration(seconds: 30));
+    expect(rateLimitCooldownFor(scope), const Duration(minutes: 1));
+    for (var i = 0; i < 8; i++) {
+      rateLimitCooldownFor(scope);
+    }
+    expect(rateLimitCooldownFor(scope), rateLimitRetryMaxCooldown);
+
+    // When the next attempt succeeds, the streak is forgotten.
+    resetRateLimitCooldown(scope);
+    expect(rateLimitCooldownFor(scope), rateLimitRetryBaseCooldown);
+  });
+
   test('isRateLimited only accepts the neutral rate-limit failure', () {
     expect(isRateLimited(const _RateLimited()), isTrue);
     expect(isRateLimited(Exception('boom')), isFalse);
