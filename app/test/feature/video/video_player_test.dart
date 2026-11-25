@@ -360,7 +360,17 @@ void main() {
       required VideoBloc bloc,
       required MediaPlaybackController controller,
       required Size size,
+      bool boundedHeight = true,
     }) async {
+      if (!boundedHeight) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+      }
+      final player = VideoPlayer(
+        controller: controller,
+        surfaceBuilder: (_) => const ColoredBox(color: Color(0xFF000000)),
+      );
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [
@@ -372,15 +382,16 @@ void main() {
           home: Scaffold(
             body: BlocProvider<VideoBloc>.value(
               value: bloc,
-              child: SizedBox(
-                width: size.width,
-                height: size.height,
-                child: VideoPlayer(
-                  controller: controller,
-                  surfaceBuilder: (_) =>
-                      const ColoredBox(color: Color(0xFF000000)),
-                ),
-              ),
+              // 无高度上限时放进滚动容器：页面就是这种「高度不设限」的上下文。
+              child: boundedHeight
+                  ? SizedBox(
+                      width: size.width,
+                      height: size.height,
+                      child: player,
+                    )
+                  : SingleChildScrollView(
+                      child: SizedBox(width: size.width, child: player),
+                    ),
             ),
           ),
         ),
@@ -486,6 +497,57 @@ void main() {
       expect(surfaceAspectRatio(tester), closeTo(1920 / 1080, 0.01));
       final rect = tester.getRect(find.byType(AspectRatio));
       expect(rect.width, greaterThan(rect.height));
+    });
+
+    testWidgets('a square video is capped by the viewport height too', (
+      tester,
+    ) async {
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      // 高度无界的页面里，正方形视频按宽度撑出的高度同样会顶掉下方内容。
+      await pumpSized(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        size: const Size(980, 720),
+        boundedHeight: false,
+      );
+
+      fake.emitVideoParams(const VideoParams(dw: 1080, dh: 1080));
+      await tester.pump();
+
+      final rect = tester.getRect(find.byType(AspectRatio));
+      expect(rect.width / rect.height, closeTo(1, 0.01));
+      expect(rect.height, lessThanOrEqualTo(720 * 0.6 + 0.5));
+    });
+
+    testWidgets('the surface is not rebuilt when the shape arrives', (
+      tester,
+    ) async {
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await pumpSized(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        size: const Size(980, 720),
+        boundedHeight: false,
+      );
+      final before = tester.element(find.byType(AspectRatio));
+
+      fake.emitVideoParams(const VideoParams(dw: 1080, dh: 1920));
+      await tester.pump();
+
+      // 尺寸到达时只改尺寸，不换布局结构：换结构会重建画面并重新打开媒体。
+      expect(tester.element(find.byType(AspectRatio)), same(before));
     });
 
     testWidgets('explicit aspectRatio wins over the video size', (

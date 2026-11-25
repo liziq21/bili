@@ -233,6 +233,9 @@ class MediaPlaybackController([
   bool _isPlaying = false;
   bool _isBuffering = false;
 
+  /// 是否接受播放器上报的视频尺寸；换源期间关闭，见 `_updateVideoAspectRatio`。
+  bool _acceptVideoParams = true;
+
   /// 播放器选项只设置一次；重复 open 不必再发一遍。
   Future<void>? _audioFallbackFuture;
 
@@ -250,19 +253,33 @@ class MediaPlaybackController([
   /// 以 1920×1080 编码 + `rotate: 90` 到达时，画面实际是竖的，容器比例得
   /// 跟着换向，否则播放器会把竖画面塞进横容器。
   void _updateVideoAspectRatio(VideoParams params) {
+    // 换源期间播放器仍可能把上一条媒体解出的尺寸发过来；那些事件不带媒体
+    // 身份，只能在装载窗口内一律丢掉，否则上一条的形状会盖住这一条。
+    if (!_acceptVideoParams) return;
     final width = params.dw ?? params.w;
     final height = params.dh ?? params.h;
+    final quarterTurn = (params.rotate ?? 0).abs() % 180 == 90;
     final double? ratio;
     if (width != null && height != null && width > 0 && height > 0) {
-      final quarterTurn = (params.rotate ?? 0).abs() % 180 == 90;
       ratio = quarterTurn ? height / width : width / height;
     } else {
       final declared = params.aspect;
-      ratio = declared != null && declared > 0 ? declared : null;
+      // 只有比例没有尺寸时，旋转信息同样要生效：竖拍视频的声明比例是横的。
+      ratio = declared == null || declared <= 0
+          ? null
+          : (quarterTurn ? 1 / declared : declared);
     }
     if (ratio == null || ratio == _videoAspectRatio) return;
     _videoAspectRatio = ratio;
     if (!_aspectRatioController.isClosed) _aspectRatioController.add(ratio);
+  }
+
+  /// 换源时把显示比例清空：上一条视频的形状不能留给下一条，播放器解出新
+  /// 尺寸之前订阅者回落到 16:9。
+  void _resetVideoAspectRatio() {
+    if (_videoAspectRatio == null) return;
+    _videoAspectRatio = null;
+    if (!_aspectRatioController.isClosed) _aspectRatioController.add(null);
   }
 
   /// 让 mpv 在打不开音频设备时退回空音频输出。
@@ -368,6 +385,8 @@ class MediaPlaybackController([
     _subscribe();
     _isPlaying = false;
     _isBuffering = false;
+    _resetVideoAspectRatio();
+    _acceptVideoParams = false;
     _emit(
       PlaybackState(
         isPlaying: false,
@@ -587,6 +606,8 @@ class MediaPlaybackController([
     _subscribe();
     _isPlaying = false;
     _isBuffering = false;
+    _resetVideoAspectRatio();
+    _acceptVideoParams = false;
     final initialState = preserveQueue
         ? _state.copyWith(
             isPlaying: false,
@@ -614,6 +635,7 @@ class MediaPlaybackController([
       await _applyAudioFallback();
       await _player.open(playable);
       if (generation != _openGeneration) return;
+      _acceptVideoParams = true;
       _subscribeToPlayerErrors(generation);
       if (restorePositionSeconds > 0) {
         await _player.seek(Duration(seconds: restorePositionSeconds));
@@ -621,6 +643,7 @@ class MediaPlaybackController([
       }
     } on Object catch (error) {
       if (generation != _openGeneration) return;
+      _acceptVideoParams = true;
       _subscribeToPlayerErrors(generation);
       _handlePlayerError(error, generation: generation);
     }

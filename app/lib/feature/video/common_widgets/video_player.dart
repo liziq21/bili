@@ -62,7 +62,9 @@ class const VideoPlayer({
   /// 是否铺满所在区域（全屏）。
   ///
   /// 由页面持有而非本组件自持：铺满需要父级把本组件放进 [Expanded]，那是
-  /// 页面布局的决定。本组件只按该标志切换「16:9 内嵌」与「铺满」两种布局。
+  /// 页面布局的决定。本组件只按该标志切换「按视频比例内嵌」与「铺满」两种
+  /// 布局：内嵌时容器比例跟随视频（竖屏/方形不再被塞进 16:9），只有视频
+  /// 比例尚未解出时才按 16:9 占位。
   final bool fullscreen = false,
 
   /// 桌面端方向键的普通 / Shift 快进步长。
@@ -104,7 +106,14 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   StreamSubscription<double?>? _aspectRatioSubscription;
 
   /// 容器比例：显式指定优先，其次视频自身比例，最后退回 16:9。
-  double get _aspectRatio => widget.aspectRatio ?? _videoAspectRatio ?? 16 / 9;
+  ///
+  /// 播放器已经在解出尺寸时直接读它的当前值：组件晚于播放器挂载时（换页、
+  /// 重建）不会收到之前那次广播，只订阅变化流会一直停在 16:9。
+  double get _aspectRatio =>
+      widget.aspectRatio ??
+      _videoAspectRatio ??
+      _playback?.videoAspectRatio ??
+      16 / 9;
 
   /// 竖屏/方形内容在无高度约束时的高度上限（视口占比）。
   ///
@@ -265,22 +274,24 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                   builder: (context, constraints) {
                     final aspectRatio = _aspectRatio;
                     // 竖屏/方形内容在无高度约束时按视口高度设上限，
-                    // 避免画面把下方内容顶出屏幕。
-                    final availableHeight = constraints.hasBoundedHeight
+                    // 避免画面把下方内容顶出屏幕。正方形（比例 1）也算在内：
+                    // 它按宽度撑出的高度同样会顶掉下方内容。
+                    final heightCap = constraints.hasBoundedHeight
                         ? constraints.maxHeight
-                        : (aspectRatio < 1
+                        : (aspectRatio <= 1
                               ? MediaQuery.sizeOf(context).height *
                                     _portraitHeightFraction
                               : double.infinity);
-                    if (!constraints.hasBoundedWidth ||
-                        availableHeight.isInfinite) {
+                    if (!constraints.hasBoundedWidth) {
                       return AspectRatio(
                         aspectRatio: aspectRatio,
                         child: surface,
                       );
                     }
+                    // 只有一条布局路径：尺寸到达前后树结构不变，`_VideoSurface`
+                    // 不会被重建（重建会重新 open 一次媒体）。
                     final naturalHeight = constraints.maxWidth / aspectRatio;
-                    final height = math.min(naturalHeight, availableHeight);
+                    final height = math.min(naturalHeight, heightCap);
                     return SizedBox(
                       width: constraints.maxWidth,
                       height: height,
