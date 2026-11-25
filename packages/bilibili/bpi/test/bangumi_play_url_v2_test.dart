@@ -71,6 +71,15 @@ void main() {
       expect(response.episodeInfo?.epId, 326233);
     });
 
+    test('rejects a request without an episode selector', () {
+      final network = BiliNetworkSearch(
+        client: MockClient((_) async => http.Response('{}', 200)),
+      );
+      addTearDown(network.close);
+
+      expect(network.getBangumiPlayUrlV2, throwsArgumentError);
+    });
+
     test('maps a non-zero Bilibili code to BiliApiException', () async {
       final network = BiliNetworkSearch(
         client: MockClient(

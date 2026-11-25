@@ -64,6 +64,24 @@ void main() {
       expect(response.images, isNotEmpty);
     });
 
+    test('forwards a non-default snapshot index', () async {
+      final requests = <http.BaseRequest>[];
+      final client = MockClient((request) async {
+        requests.add(request);
+        return http.Response(
+          jsonEncode(loadFixture()),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final network = BiliNetworkSearch(client: client);
+      addTearDown(network.close);
+
+      await network.getVideoSnapshot(bvid: 'BV1GJ411x7vy', index: 3);
+
+      expect(requests.single.url.queryParameters['index'], '3');
+    });
+
     test('maps a non-zero Bilibili code to BiliApiException', () async {
       final network = BiliNetworkSearch(
         client: MockClient(

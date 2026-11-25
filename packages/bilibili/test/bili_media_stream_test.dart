@@ -29,8 +29,10 @@ class MockMediaStreamNetwork({
       throw UnimplementedError();
 
   @override
-  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({required String bvid}) =>
-      throw UnimplementedError();
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  }) => throw UnimplementedError();
 
   @override
   Future<NetworkBiliVideoTags> getVideoTags({required String bvid}) =>

@@ -23,8 +23,10 @@ mixin VideoEndpoints on BiliNetworkClient implements NetworkVideoDataSource {
       api.getVideoParts(bvid: bvid);
 
   @override
-  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({required String bvid}) =>
-      api.getVideoSnapshot(bvid: bvid);
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  }) => api.getVideoSnapshot(bvid: bvid, index: index);
 
   @override
   Future<NetworkBiliVideoTags> getVideoTags({required String bvid}) =>
@@ -37,13 +39,18 @@ mixin VideoEndpoints on BiliNetworkClient implements NetworkVideoDataSource {
     int qn = 80,
     int fnval = 4048,
     int fourk = 1,
-  }) => api.getBangumiPlayUrlV2(
-    epId: epId,
-    cid: cid,
-    qn: qn,
-    fnval: fnval,
-    fourk: fourk,
-  );
+  }) {
+    if (epId == null && cid == null) {
+      throw ArgumentError('getBangumiPlayUrlV2 requires epId or cid.');
+    }
+    return api.getBangumiPlayUrlV2(
+      epId: epId,
+      cid: cid,
+      qn: qn,
+      fnval: fnval,
+      fourk: fourk,
+    );
+  }
 
   @override
   Future<NetworkBangumiSeasonData> getBangumiSeason({

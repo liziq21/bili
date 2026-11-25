@@ -35,7 +35,10 @@ abstract interface class NetworkVideoDataSource {
 
   Future<NetworkBiliVideoParts> getVideoParts({required String bvid});
 
-  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({required String bvid});
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  });
 
   Future<NetworkBiliVideoTags> getVideoTags({required String bvid});
 
