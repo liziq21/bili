@@ -21,6 +21,29 @@ class MockNetworkVideoDataSource({
   var Object? playerInfoError,
   final NetworkBiliDanmakuDocument? danmakuDocument,
 }) implements NetworkVideoDataSource {
+  @override
+  Future<NetworkBangumiPlayUrlV2> getBangumiPlayUrlV2({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoParts> getVideoParts({required String bvid}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoTags> getVideoTags({required String bvid}) =>
+      throw UnimplementedError();
+
   final replyReplyCalls = <(int, int, int, int)>[];
 
   final playerInfoCalls = <(String, int)>[];

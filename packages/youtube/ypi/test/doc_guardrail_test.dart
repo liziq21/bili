@@ -67,6 +67,26 @@ const endpointSpecs = <EndpointSpec>[
     fixtures: ['home_feed.json'],
     docCell: 'home_feed.json',
   ),
+  EndpointSpec(
+    method: 'resolveUrl',
+    fixtures: ['resolve_url.json'],
+    docCell: 'resolve_url.json',
+  ),
+  EndpointSpec(
+    method: 'browseLiveDirectory',
+    fixtures: ['live_directory.json'],
+    docCell: 'live_directory.json',
+  ),
+  EndpointSpec(
+    method: 'getMusicSearchSuggestions',
+    fixtures: ['music_suggest.json'],
+    docCell: 'music_suggest.json',
+  ),
+  EndpointSpec(
+    method: 'searchMusic',
+    fixtures: ['music_search.json'],
+    docCell: 'music_search.json',
+  ),
 ];
 
 final RegExp _methodDeclaration = RegExp(

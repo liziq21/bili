@@ -1,7 +1,7 @@
 import '../error/bpi_exception.dart';
 
 /// `data` 只有 `v_voucher` 时是 GAIA 风控挑战，而不是业务数据。
-bool _isRiskControlChallenge(Map<String, dynamic> data) =>
+bool isBiliRiskControlChallenge(Map<String, dynamic> data) =>
     data.containsKey('v_voucher') && !data.containsKey('result');
 
 sealed class const ApiResult<T>() {
@@ -41,7 +41,7 @@ sealed class const ApiResult<T>() {
       );
     }
 
-    if (_isRiskControlChallenge(dataMap)) {
+    if (isBiliRiskControlChallenge(dataMap)) {
       throw BiliRiskControlException(
         'Bilibili answered with a risk-control challenge instead of data.',
         biliCode: code,

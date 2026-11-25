@@ -23,6 +23,16 @@ final class YoutubeClientConfig {
 
   const YoutubeClientConfig.web() : this();
 
+  /// YouTube Music (`music.youtube.com`) InnerTube client. Music search and
+  /// search suggestions only answer with list items for `WEB_REMIX`; the WEB
+  /// client returns an empty catalog for the same query.
+  const YoutubeClientConfig.music()
+    : this(
+        clientName: 'WEB_REMIX',
+        clientNameId: '67',
+        clientVersion: '1.20230818.01.00',
+      );
+
   /// Android InnerTube client. Current responses use SABR
   /// (`serverAbrStreamingUrl`) instead of per-format URLs, so this preset is
   /// exposed for callers that understand SABR, not as the default player.

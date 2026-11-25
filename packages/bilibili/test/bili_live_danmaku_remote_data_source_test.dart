@@ -6,6 +6,21 @@ import 'package:test/test.dart';
 // ignore_for_file: use_primary_constructors
 
 final class _TrackingLiveDataSource implements NetworkLiveDataSource {
+  @override
+  Future<NetworkLiveRoomBaseInfo> getLiveRoomBaseInfo({
+    required List<int> roomIds,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveStatusByUids> getLiveStatusByUids({
+    required List<int> uids,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveRecommendedRooms> getRecommendedLiveRooms({
+    int pageSize = 30,
+  }) => throw UnimplementedError();
+
   int getDanmuInfoCallCount = 0;
 
   @override

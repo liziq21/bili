@@ -15,6 +15,29 @@ class MockMediaStreamNetwork({
   /// 为 true 时 `getVideoDetail` 抛异常，用于验证异常收敛路径。
   final bool failDetailRequest = false,
 }) implements NetworkVideoDataSource {
+  @override
+  Future<NetworkBangumiPlayUrlV2> getBangumiPlayUrlV2({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoParts> getVideoParts({required String bvid}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkBiliVideoTags> getVideoTags({required String bvid}) =>
+      throw UnimplementedError();
+
   /// 记录最近一次 getPlayUrl 收到的 cid，用于验证接口按分P而非 bvid 取址。
   int? lastCid;
 

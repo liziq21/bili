@@ -7,6 +7,21 @@ final class _FakeLiveDataSource({
   final NetworkLiveRoomPlayInfo? playInfo,
 }) implements NetworkLiveDataSource {
   @override
+  Future<NetworkLiveRoomBaseInfo> getLiveRoomBaseInfo({
+    required List<int> roomIds,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveStatusByUids> getLiveStatusByUids({
+    required List<int> uids,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<NetworkLiveRecommendedRooms> getRecommendedLiveRooms({
+    int pageSize = 30,
+  }) => throw UnimplementedError();
+
+  @override
   Future<NetworkLiveRoomDetail> getLiveRoomDetail({required int roomId}) async {
     if (roomDetail != null) return roomDetail!;
     throw StateError('roomDetail not configured');

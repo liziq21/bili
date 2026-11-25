@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 93 |
+| unit | 103 |
 | widget | 64 |
 | golden | 8 |
 | contract | 14 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **181** |
+| **合计** | **191** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（93）
+## unit（103）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -72,6 +72,7 @@
 - `packages/bilibili/bpi/test/api_interceptor_test.dart`
 - `packages/bilibili/bpi/test/api_result_test.dart`
 - `packages/bilibili/bpi/test/bangumi_play_url_test.dart`
+- `packages/bilibili/bpi/test/bangumi_play_url_v2_test.dart`
 - `packages/bilibili/bpi/test/bangumi_season_test.dart`
 - `packages/bilibili/bpi/test/bili_device_fingerprint_test.dart`
 - `packages/bilibili/bpi/test/danmaku_test.dart`
@@ -79,9 +80,13 @@
 - `packages/bilibili/bpi/test/danmaku_ws/packet_test.dart`
 - `packages/bilibili/bpi/test/error_interceptor_test.dart`
 - `packages/bilibili/bpi/test/from_json_test.dart`
+- `packages/bilibili/bpi/test/home_feed_test.dart`
 - `packages/bilibili/bpi/test/live_danmaku_test.dart`
+- `packages/bilibili/bpi/test/live_recommended_rooms_test.dart`
+- `packages/bilibili/bpi/test/live_room_base_info_test.dart`
 - `packages/bilibili/bpi/test/live_room_detail_test.dart`
 - `packages/bilibili/bpi/test/live_room_play_info_test.dart`
+- `packages/bilibili/bpi/test/live_status_by_uids_test.dart`
 - `packages/bilibili/bpi/test/play_url_test.dart`
 - `packages/bilibili/bpi/test/player_v2_test.dart`
 - `packages/bilibili/bpi/test/playlist_content_test.dart`
@@ -89,10 +94,14 @@
 - `packages/bilibili/bpi/test/popular_feed_test.dart`
 - `packages/bilibili/bpi/test/ranking_feed_test.dart`
 - `packages/bilibili/bpi/test/reply_pagination_test.dart`
+- `packages/bilibili/bpi/test/series_archives_test.dart`
 - `packages/bilibili/bpi/test/token_manager_test.dart`
 - `packages/bilibili/bpi/test/user_articles_test.dart`
 - `packages/bilibili/bpi/test/user_card_test.dart`
 - `packages/bilibili/bpi/test/video_data_models_test.dart`
+- `packages/bilibili/bpi/test/video_parts_test.dart`
+- `packages/bilibili/bpi/test/video_snapshot_test.dart`
+- `packages/bilibili/bpi/test/video_tags_test.dart`
 - `packages/bilibili/bpi/test/wbi_interceptor_test.dart`
 - `packages/bilibili/bpi/test/wbi_utils_test.dart`
 - `packages/bilibili/test/bili_channel_playlists_remote_data_source_test.dart`
@@ -117,6 +126,7 @@
 - `packages/youtube/test/youtube_test.dart`
 - `packages/youtube/test/youtube_remote_data_sources_test.dart`
 - `packages/youtube/ypi/test/from_json_test.dart`
+- `packages/youtube/ypi/test/youtube_extra_endpoints_test.dart`
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 

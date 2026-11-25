@@ -3,21 +3,30 @@ import 'dart:io';
 import 'package:chopper/chopper.dart';
 
 import '../api.dart';
+import '../model/feed/network_bili_home_feed.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
 import '../model/live/network_live_danmaku_info.dart';
+import '../model/live/network_live_recommended_rooms.dart';
+import '../model/live/network_live_room_base_info.dart';
 import '../model/live/network_live_room_detail.dart';
 import '../model/live/network_live_room_play_info.dart';
+import '../model/live/network_live_status_by_uids.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_playlist_content.dart';
+import '../model/user/network_bili_series_archives.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/user/network_bili_user_videos.dart';
+import '../model/video/network_bangumi_play_url_v2.dart';
 import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_bili_player_info.dart';
+import '../model/video/network_bili_video_parts.dart';
+import '../model/video/network_bili_video_snapshot.dart';
+import '../model/video/network_bili_video_tags.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_related_video.dart';
 import '../model/video/network_video_relation.dart';
@@ -63,6 +72,46 @@ abstract class BiliNetworkApi extends ChopperService {
 
   @GET(path: ApiPath.videoIntro)
   Future<VideoDetailData> videoIntro({@query required String bvid});
+
+  @GET(path: ApiPath.videoParts)
+  Future<NetworkBiliVideoParts> getVideoParts({@query required String bvid});
+
+  @GET(path: ApiPath.videoSnapshot)
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    @query required String bvid,
+    @Query('index') int index = 1,
+  });
+
+  @GET(path: ApiPath.videoTags)
+  Future<NetworkBiliVideoTags> getVideoTags({@query required String bvid});
+
+  @GET(path: WbiApiPath.homeFeed)
+  Future<NetworkBiliHomeFeed> getHomeFeed({
+    @Query('fresh_type') int freshType = 3,
+    @Query('ps') int pageSize = 12,
+    @Query('version') int version = 1,
+    @Query('feed_version') String feedVersion = 'V8',
+    @tag String tag = 'WBI',
+  });
+
+  @GET(path: ApiPath.seriesArchives)
+  Future<NetworkBiliSeriesArchives> getSeriesArchives({
+    @query required int mid,
+    @Query('series_id') required int seriesId,
+    @Query('only_normal') bool onlyNormal = true,
+    @Query('sort') String sort = 'desc',
+    @Query('pn') int page = 1,
+    @Query('ps') int pageSize = 30,
+  });
+
+  @GET(path: ApiPath.bangumiPlayUrlV2)
+  Future<NetworkBangumiPlayUrlV2> getBangumiPlayUrlV2({
+    @Query('ep_id') int? epId,
+    @Query('cid') int? cid,
+    @Query('qn') int qn = 80,
+    @Query('fnval') int fnval = 4048,
+    @Query('fourk') int fourk = 1,
+  });
 
   @GET(path: ApiPath.videoRelation)
   Future<NetworkVideoRelation> getVideoRelation({@query required String bvid});
@@ -151,6 +200,23 @@ abstract class BiliNetworkApi extends ChopperService {
   @GET(path: LiveApi.danmuInfo)
   Future<NetworkLiveDanmakuInfo> getDanmuInfo({
     @Query('id') required int roomId,
+  });
+
+  @GET(path: LiveApi.roomBaseInfo)
+  Future<NetworkLiveRoomBaseInfo> getLiveRoomBaseInfo({
+    @Query('room_ids') required List<int> roomIds,
+    @Query('req_biz') String reqBiz = 'web',
+  });
+
+  @GET(path: LiveApi.statusByUids)
+  Future<NetworkLiveStatusByUids> getLiveStatusByUids({
+    @Query('uids[]') required List<int> uids,
+  });
+
+  @GET(path: LiveApi.recommendedRooms)
+  Future<NetworkLiveRecommendedRooms> getRecommendedLiveRooms({
+    @Query('page_size') int pageSize = 30,
+    @Query('platform') String platform = 'web',
   });
 
   @GET(path: ApiPath.userCard)

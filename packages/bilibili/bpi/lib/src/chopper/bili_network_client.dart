@@ -3,21 +3,30 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import '../device/bili_device_fingerprint.dart';
+import '../model/feed/network_bili_home_feed.dart';
 import '../model/feed/network_bili_popular_response.dart';
 import '../model/feed/network_bili_ranking_response.dart';
 import '../model/live/network_live_danmaku_info.dart';
+import '../model/live/network_live_recommended_rooms.dart';
+import '../model/live/network_live_room_base_info.dart';
 import '../model/live/network_live_room_detail.dart';
 import '../model/live/network_live_room_play_info.dart';
+import '../model/live/network_live_status_by_uids.dart';
 import '../model/reply/network_reply_data.dart';
 import '../model/reply/network_reply_reply_data.dart';
 import '../model/search/network_search_result.dart';
 import '../model/search_suggest/network_search_suggest.dart';
 import '../model/user/network_bili_playlist_content.dart';
+import '../model/user/network_bili_series_archives.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/user/network_bili_user_videos.dart';
+import '../model/video/network_bangumi_play_url_v2.dart';
 import '../model/video/network_bangumi_season.dart';
 import '../model/video/network_bili_player_info.dart';
+import '../model/video/network_bili_video_parts.dart';
+import '../model/video/network_bili_video_snapshot.dart';
+import '../model/video/network_bili_video_tags.dart';
 import '../model/video/network_play_url.dart';
 import '../model/video/network_related_video.dart';
 import '../model/video/network_video_relation.dart';
@@ -58,12 +67,21 @@ class BiliNetworkClient {
         NetworkBiliUserArticlesData: NetworkBiliUserArticlesData.fromJson,
         NetworkBiliUserVideosData: NetworkBiliUserVideosData.fromJson,
         NetworkBangumiSeasonData: NetworkBangumiSeasonData.fromJson,
+        NetworkBangumiPlayUrlV2: NetworkBangumiPlayUrlV2.fromJson,
         NetworkBiliPlaylistContentData: NetworkBiliPlaylistContentData.fromJson,
         NetworkBiliPlaylistListData: NetworkBiliPlaylistListData.fromJson,
       },
       envelopeFactories: {
         NetworkBiliPopularResponse: NetworkBiliPopularResponse.fromJson,
         NetworkBiliRankingResponse: NetworkBiliRankingResponse.fromJson,
+        NetworkBiliVideoParts: NetworkBiliVideoParts.fromJson,
+        NetworkBiliVideoSnapshot: NetworkBiliVideoSnapshot.fromJson,
+        NetworkBiliVideoTags: NetworkBiliVideoTags.fromJson,
+        NetworkBiliHomeFeed: NetworkBiliHomeFeed.fromJson,
+        NetworkBiliSeriesArchives: NetworkBiliSeriesArchives.fromJson,
+        NetworkLiveRoomBaseInfo: NetworkLiveRoomBaseInfo.fromJson,
+        NetworkLiveStatusByUids: NetworkLiveStatusByUids.fromJson,
+        NetworkLiveRecommendedRooms: NetworkLiveRecommendedRooms.fromJson,
       },
     );
     api = BiliNetworkApi.create(

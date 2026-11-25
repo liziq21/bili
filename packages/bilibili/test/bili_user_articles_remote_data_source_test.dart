@@ -10,6 +10,14 @@ final class _FakeNetworkUserDataSource({
   final NetworkBiliUserArticlesData? response,
   final Object? error,
 }) implements NetworkUserDataSource {
+  @override
+  Future<NetworkBiliSeriesArchives> getSeriesArchives({
+    required int mid,
+    required int seriesId,
+    int page = 1,
+    int pageSize = 30,
+  }) => throw UnimplementedError();
+
   int requestCount = 0;
   int? requestedMid;
   int? requestedPage;

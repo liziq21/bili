@@ -1,4 +1,5 @@
 import '../model/user/network_bili_playlist_content.dart';
+import '../model/user/network_bili_series_archives.dart';
 import '../model/user/network_bili_user_article.dart';
 import '../model/user/network_bili_user_card.dart';
 import '../model/user/network_bili_user_videos.dart';
@@ -7,6 +8,19 @@ import 'bili_network_client.dart';
 
 mixin UserEndpoints on BiliNetworkClient
     implements NetworkUserDataSource, NetworkUserPlaylistDataSource {
+  @override
+  Future<NetworkBiliSeriesArchives> getSeriesArchives({
+    required int mid,
+    required int seriesId,
+    int page = 1,
+    int pageSize = 30,
+  }) => api.getSeriesArchives(
+    mid: mid,
+    seriesId: seriesId,
+    page: page,
+    pageSize: pageSize,
+  );
+
   @override
   Future<NetworkBiliUserCardData> getUserCard({required int mid}) =>
       api.getUserCard(mid: mid);

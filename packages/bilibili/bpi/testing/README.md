@@ -29,6 +29,15 @@
 | `live_danmaku_frames.json` | `wss://broadcastlv.chat.bilibili.com/sub` | WSS | `room_id=21144080&token=xxx` | 101 | Bilibili 实际 WebSocket 协议 / PipePipe | 公共请求 | 2026-11-04 |
 | `playlist_content.json` | `/x/polymer/web-space/seasons_archives_list` | GET | `mid=946974&season_id=2046621&page_num=1&page_size=5&sort_reverse=false` | 200 | Bilibili 实际公开 Web API 响应 | WBI | 2026-11-23 |
 | `playlist_list.json` | `/x/polymer/web-space/seasons_series_list` | GET | `mid=517327498&page_num=1&page_size=10` | 200 | Bilibili 实际公开 Web API 响应 | WBI | 2026-11-23 |
+| `video_parts.json` | `/x/player/pagelist` | GET | `bvid=BV1GJ411x7vy` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `video_snapshot.json` | `/x/player/videoshot` | GET | `bvid=BV1GJ411x7vy&index=1` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `video_tags.json` | `/x/web-interface/view/detail/tag` | GET | `bvid=BV1GJ411x7vy` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `home_feed.json` | `/x/web-interface/wbi/index/top/feed/rcmd` | GET | `fresh_type=3&ps=12&version=1&feed_version=V8` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | WBI | 2026-11-25 |
+| `series_archives.json` | `/x/series/archives` | GET | `mid=517327498&series_id=2229877&only_normal=true&sort=desc&pn=1&ps=30` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `bangumi_play_url_v2.json` | `/pgc/player/web/v2/playurl` | GET | `ep_id=326233&qn=80&fnval=4048&fourk=1` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `live_room_base_info.json` | `/xlive/web-room/v1/index/getRoomBaseInfo` | GET | `room_ids=21144080&room_ids=21452505&req_biz=web` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `live_status_by_uids.json` | `/room/v1/Room/get_status_info_by_uids` | GET | `uids[]=8739477&uids[]=3546687211572101` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
+| `live_recommended_rooms.json` | `/room/v1/room/get_user_recommend` | GET | `page_size=30&platform=web` | 200 | Bilibili 实际公开 Web API 响应 / PipePipe | 公共请求 | 2026-11-25 |
 
 ## 抓取规则
 

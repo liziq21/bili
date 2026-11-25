@@ -1,7 +1,11 @@
 import 'model/reply/network_reply_data.dart';
 import 'model/reply/network_reply_reply_data.dart';
+import 'model/video/network_bangumi_play_url_v2.dart';
 import 'model/video/network_bangumi_season.dart';
 import 'model/video/network_bili_danmaku.dart';
+import 'model/video/network_bili_video_parts.dart';
+import 'model/video/network_bili_video_snapshot.dart';
+import 'model/video/network_bili_video_tags.dart';
 import 'model/video/network_play_url.dart';
 import 'model/video/network_bili_player_info.dart';
 import 'model/video/network_related_video.dart';
@@ -19,7 +23,24 @@ abstract interface class NetworkVideoDataSource {
     int fourk = 1,
   });
 
+  Future<NetworkBangumiPlayUrlV2> getBangumiPlayUrlV2({
+    int? epId,
+    int? cid,
+    int qn = 80,
+    int fnval = 4048,
+    int fourk = 1,
+  });
+
   Future<VideoDetailData> getVideoDetail({required String bvid});
+
+  Future<NetworkBiliVideoParts> getVideoParts({required String bvid});
+
+  Future<NetworkBiliVideoSnapshot> getVideoSnapshot({
+    required String bvid,
+    int index = 1,
+  });
+
+  Future<NetworkBiliVideoTags> getVideoTags({required String bvid});
 
   Future<NetworkVideoRelation> getVideoRelation({required String bvid});
 

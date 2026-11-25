@@ -15,17 +15,34 @@
 |---|---|---|---|---|---|
 | 视频搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_video.json` | 已有原始 fixture；抓取日期未记录 |
 | 频道搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；频道筛选结果也可能包含 `lockupViewModel` 播放列表条目 | [InnerTube 开源实现](https://github.com/LuanRT/YouTube.js) | `testing/search_channel.json` | 2026-10-11（WEB 2.20230818.00.00；探针与落盘响应统计见 testing/README.md） |
-| 播放列表搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；结果以 `lockupViewModel` 返回，`contentId` 为 `PL` 前缀 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/search_playlist.json` | 2026-09-30 |
-| 频道浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；视频 tab 的条目以 `richItemRenderer.content.lockupViewModel` 返回，channel ID 取自 `metadata.channelMetadataRenderer.externalId` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/browse.json` + `testing/browse_continuation.json` | 2026-10-01 |
-| 播放列表浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；使用 `browseId=VL<playlistId>` 请求播放列表页面 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/browse_playlist.json` | 2026-09-30 |
-| 视频 Watch Next | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；主信息在 `twoColumnWatchNextResults` 的 `videoPrimaryInfoRenderer` / `videoSecondaryInfoRenderer`，续页条目走 `onResponseReceivedActions[].appendContinuationItemsAction.continuationItems` | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/watch_next.json`（`videoId=dQw4w9WgXcQ`） | 2026-10-03 |
-| 视频评论 | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；使用 Watch Next 返回的 comment continuation token 请求，评论条目以 `commentThreadRenderer` / `commentViewModel` 返回 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/comments.json` | 2026-10-03 |
-| 视频 Player 播放器 | `POST https://www.youtube.com/youtubei/v1/player` | InnerTube client context；当前实现不要求登录；player 默认使用 IOS client（`X-YouTube-Client-Name: 5`），`adaptiveFormats` 直接携带 `url`，并返回 `hlsManifestUrl`；WEB client 现在只返回 SABR 元数据 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/player.json`（`videoId=dQw4w9WgXcQ`） | 2026-11-21（IOS 20.10.4；`status=OK`，27 条带 `url` 的 adaptive format，含 1080P/2160P） |
+| 播放列表搜索 | `POST https://www.youtube.com/youtubei/v1/search` | InnerTube client context；当前实现不要求登录；结果以 `lockupViewModel` 返回，`contentId` 为 `PL` 前缀 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/search_playlist.json` | 2026-09-30 |
+| 频道浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；视频 tab 的条目以 `richItemRenderer.content.lockupViewModel` 返回，channel ID 取自 `metadata.channelMetadataRenderer.externalId` | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/browse.json` + `testing/browse_continuation.json` | 2026-10-01 |
+| 播放列表浏览 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；当前实现不要求登录；使用 `browseId=VL<playlistId>` 请求播放列表页面 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/browse_playlist.json` | 2026-09-30 |
+| 视频 Watch Next | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；主信息在 `twoColumnWatchNextResults` 的 `videoPrimaryInfoRenderer` / `videoSecondaryInfoRenderer`，续页条目走 `onResponseReceivedActions[].appendContinuationItemsAction.continuationItems` | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/watch_next.json`（`videoId=dQw4w9WgXcQ`） | 2026-10-03 |
+| 视频评论 | `POST https://www.youtube.com/youtubei/v1/next` | InnerTube client context；当前实现不要求登录；使用 Watch Next 返回的 comment continuation token 请求，评论条目以 `commentThreadRenderer` / `commentViewModel` 返回 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/comments.json` | 2026-10-03 |
+| 视频 Player 播放器 | `POST https://www.youtube.com/youtubei/v1/player` | InnerTube client context；当前实现不要求登录；player 默认使用 IOS client（`X-YouTube-Client-Name: 5`），`adaptiveFormats` 直接携带 `url`，并返回 `hlsManifestUrl`；WEB client 现在只返回 SABR 元数据 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/player.json`（`videoId=dQw4w9WgXcQ`） | 2026-11-21（IOS 20.10.4；`status=OK`，27 条带 `url` 的 adaptive format，含 1080P/2160P） |
 | 搜索建议 | `GET https://suggestqueries.google.com/complete/search` | 公共请求 | [Google Suggest](https://suggestqueries.google.com/complete/search) | `testing/search_suggest.json` | 已有原始 fixture；抓取日期未记录 |
-| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；**登录门控**：匿名 session 返回 200 但只有 `feedNudgeRenderer`（提示先搜索/观看以生成推荐），无 `videoRenderer` / `gridVideoRenderer`；当前项目不实现登录，该端点实际不可用 | [PipePipe / InnerTube 开源实现](https://github.com/PipePipe-App/PipePipe) | `testing/home_feed.json`（negative：匿名空 feed） | 2026-10-04 |
-| 独立 Trending | 不作为实现依据 | 社区报告旧 `FEtrending` 不稳定/退役，尚未验证，不注册 | [InnerTube 使用说明](https://github.com/tombulled/innertube) | 不适用 | 未验证 |
+| 首页推荐 | `POST https://www.youtube.com/youtubei/v1/browse` | InnerTube client context；**登录门控**：匿名 session 返回 200 但只有 `feedNudgeRenderer`（提示先搜索/观看以生成推荐），无 `videoRenderer` / `gridVideoRenderer`；当前项目不实现登录，该端点实际不可用 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/home_feed.json`（negative：匿名空 feed） | 2026-10-04 |
+| 链接解析 | `POST https://www.youtube.com/youtubei/v1/navigation/resolve_url` | InnerTube client context；当前实现不要求登录；请求体 `url`（必填），Shorts 走 `reelWatchEndpoint` | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/resolve_url.json` | 2026-11-25 |
+| 直播目录（Live tab） | `POST https://www.youtube.com/youtubei/v1/browse`（`browseId=UC4R8DWoMoI7CAwX8_LjQHig`） | InnerTube client context；当前实现不要求登录；请求体 `browseId`（首页）或 `continuation`（续页）；条目为 `richGridRenderer` → `richItemRenderer` → `videoRenderer`。YouTube 综合 Trending（`FEtrending`）对匿名客户端返回 `INVALID_ARGUMENT`，因此本端点只覆盖直播目录，不冒充综合热门 | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/live_directory.json` | 2026-11-25 |
+| YouTube Music 搜索建议 | `POST https://music.youtube.com/youtubei/v1/music/get_search_suggestions` | WEB_REMIX（`X-YouTube-Client-Name: 67`）；公共请求；请求体 `input`（必填） | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/music_suggest.json` | 2026-11-25 |
+| YouTube Music 搜索 | `POST https://music.youtube.com/youtubei/v1/search` | WEB_REMIX（`X-YouTube-Client-Name: 67`）；公共请求；请求体 `query`（必填），可选 `params`（筛选 token）或 `continuation`；条目为 `musicResponsiveListItemRenderer` | [PipePipe / InnerTube 开源实现](https://github.com/InfinityLoop1308/PipePipe) | `testing/music_search.json` | 2026-11-25 |
 
 不得使用第三方聚合 API 或抓取服务作为运行时数据源；社区实现只能作为请求格式参考，不能替代本包的实测 fixture。
+
+### 未移植端点
+
+以下 PipePipe / NewPipe 使用的端点不进入本包，原因是需要登录 Cookie、OAuth 或属于写操作：
+
+| Endpoint | 不移植原因 |
+|---|---|
+| `POST /youtubei/v1/browse`（`browseId=FEsubscriptions`，订阅 feed） | 需要登录 Cookie |
+| `POST /youtubei/v1/browse`（`browseId=FEhistory` / `FEplaylist_aggregation`） | 需要登录 Cookie |
+| `POST /youtubei/v1/notification/get_notification_menu` | 需要登录 Cookie |
+| `POST /youtubei/v1/account/*`（订阅、点赞、稍后观看等写操作） | 写操作，产品边界禁止 |
+| 个人播放列表 / 频道自定义（OAuth） | 需要 OAuth |
+
+公开但仍未接入的候选端点（非 Cookie 依赖）：`/youtubei/v1/live_chat/get_live_chat`（直播聊天，需要 `watch_next` 的 continuation）、`/youtubei/v1/music/browse`（音乐首页/榜单，`FEmusic_*` browseId）。接入时按「新增 endpoint 流程」补齐 fixture、DTO、测试与文档。
 
 ## ypi DTO、解析与异常
 

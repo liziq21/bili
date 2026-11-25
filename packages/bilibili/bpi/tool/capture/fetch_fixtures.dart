@@ -702,6 +702,147 @@ Future<void> main(List<String> args) async {
       return;
     }
 
+    // 20. Video parts
+    if (!shouldFetch('testing/video_parts.json')) {
+      skipNote('testing/video_parts.json');
+    } else {
+      final videoParts = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/player/pagelist?bvid=$sampleBvid',
+        ),
+        'video parts',
+      );
+      _requireVideoParts(videoParts.json, 'video parts');
+      saveResponse('testing/video_parts.json', videoParts);
+    }
+
+    // 21. Video snapshot (progress-bar preview)
+    if (!shouldFetch('testing/video_snapshot.json')) {
+      skipNote('testing/video_snapshot.json');
+    } else {
+      final videoSnapshot = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/player/videoshot?bvid=$sampleBvid&index=1',
+        ),
+        'video snapshot',
+      );
+      _requireVideoSnapshot(videoSnapshot.json, 'video snapshot');
+      saveResponse('testing/video_snapshot.json', videoSnapshot);
+    }
+
+    // 22. Video tags
+    if (!shouldFetch('testing/video_tags.json')) {
+      skipNote('testing/video_tags.json');
+    } else {
+      final videoTags = await getJson(
+        Uri.parse(
+          'https://api.bilibili.com/x/web-interface/view/detail/tag'
+          '?bvid=$sampleBvid',
+        ),
+        'video tags',
+      );
+      _requireVideoTags(videoTags.json, 'video tags');
+      saveResponse('testing/video_tags.json', videoTags);
+    }
+
+    // 23. Home feed (WBI)
+    if (!shouldFetch('testing/home_feed.json')) {
+      skipNote('testing/home_feed.json');
+    } else {
+      final homeFeed = await getWbiJson(
+        'https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd',
+        {'fresh_type': '3', 'ps': '12', 'version': '1', 'feed_version': 'V8'},
+        'home feed',
+      );
+      _requireHomeFeed(homeFeed.json, 'home feed');
+      saveResponse('testing/home_feed.json', homeFeed);
+    }
+
+    // 24. User series archives
+    if (!shouldFetch('testing/series_archives.json')) {
+      skipNote('testing/series_archives.json');
+    } else {
+      // 罗翔说刑法（517327498）的「直播回放」系列。
+      final seriesArchives = await getJson(
+        Uri.https('api.bilibili.com', '/x/series/archives', {
+          'mid': '517327498',
+          'series_id': '2229877',
+          'only_normal': 'true',
+          'sort': 'desc',
+          'pn': '1',
+          'ps': '30',
+        }),
+        'series archives',
+      );
+      _requireSeriesArchives(seriesArchives.json, 'series archives');
+      saveResponse('testing/series_archives.json', seriesArchives);
+    }
+
+    // 25. Bangumi Play URL v2
+    if (!shouldFetch('testing/bangumi_play_url_v2.json')) {
+      skipNote('testing/bangumi_play_url_v2.json');
+    } else {
+      final bangumiPlayUrlV2 = await getJson(
+        Uri.https('api.bilibili.com', '/pgc/player/web/v2/playurl', {
+          'ep_id': '326233',
+          'qn': '80',
+          'fnval': '4048',
+          'fourk': '1',
+        }),
+        'bangumi play url v2',
+      );
+      _requireBangumiPlayUrlV2(bangumiPlayUrlV2.json, 'bangumi play url v2');
+      saveResponse('testing/bangumi_play_url_v2.json', bangumiPlayUrlV2);
+    }
+
+    // 26. Live room base info
+    if (!shouldFetch('testing/live_room_base_info.json')) {
+      skipNote('testing/live_room_base_info.json');
+    } else {
+      final liveRoomBaseInfo = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/xlive/web-room/v1/index/'
+          'getRoomBaseInfo?room_ids=21144080&room_ids=21452505&req_biz=web',
+        ),
+        'live room base info',
+      );
+      _requireLiveRoomBaseInfo(liveRoomBaseInfo.json, 'live room base info');
+      saveResponse('testing/live_room_base_info.json', liveRoomBaseInfo);
+    }
+
+    // 27. Live status by uids
+    if (!shouldFetch('testing/live_status_by_uids.json')) {
+      skipNote('testing/live_status_by_uids.json');
+    } else {
+      final liveStatus = await getJson(
+        Uri.parse(
+          'https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids'
+          '?uids%5B%5D=8739477&uids%5B%5D=3546687211572101',
+        ),
+        'live status by uids',
+      );
+      _requireLiveStatusByUids(liveStatus.json, 'live status by uids');
+      saveResponse('testing/live_status_by_uids.json', liveStatus);
+    }
+
+    // 28. Recommended live rooms
+    if (!shouldFetch('testing/live_recommended_rooms.json')) {
+      skipNote('testing/live_recommended_rooms.json');
+    } else {
+      final recommendedRooms = await getJson(
+        Uri.https('api.live.bilibili.com', '/room/v1/room/get_user_recommend', {
+          'page_size': '30',
+          'platform': 'web',
+        }),
+        'recommended live rooms',
+      );
+      _requireRecommendedLiveRooms(
+        recommendedRooms.json,
+        'recommended live rooms',
+      );
+      saveResponse('testing/live_recommended_rooms.json', recommendedRooms);
+    }
+
     print('All Bili fixtures fetched and saved successfully!');
   } on HttpException catch (error) {
     stderr.writeln('Error fetching Bili fixtures: ${error.message}');
@@ -1103,5 +1244,119 @@ void _requirePlaylistContent(Map<String, dynamic> json, String label) {
   });
   if (!hasValidVideo) {
     throw FormatException('$label has no valid video with aid or bvid');
+  }
+}
+
+void _requireVideoParts(Map<String, dynamic> json, String label) {
+  final data = json['data'];
+  if (data is! List || data.isEmpty) {
+    throw FormatException('$label data is not a non-empty list');
+  }
+  final hasCid = data.any((item) => item is Map && item['cid'] is int);
+  if (!hasCid) {
+    throw FormatException('$label has no part with a numeric cid');
+  }
+}
+
+void _requireVideoSnapshot(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final image = data['image'];
+  if (image is! List || image.isEmpty) {
+    throw FormatException('$label data.image is not a non-empty list');
+  }
+  final index = data['index'];
+  if (index is! List || index.isEmpty) {
+    throw FormatException('$label data.index is not a non-empty list');
+  }
+}
+
+void _requireVideoTags(Map<String, dynamic> json, String label) {
+  final data = json['data'];
+  if (data is! List || data.isEmpty) {
+    throw FormatException('$label data is not a non-empty list');
+  }
+  final hasName = data.any((item) => item is Map && item['tag_name'] is String);
+  if (!hasName) {
+    throw FormatException('$label has no tag with a tag_name');
+  }
+}
+
+void _requireHomeFeed(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final items = data['item'];
+  if (items is! List || items.isEmpty) {
+    throw FormatException('$label data.item is not a non-empty list');
+  }
+  final hasBvid = items.any((item) => item is Map && item['bvid'] is String);
+  if (!hasBvid) {
+    throw FormatException('$label has no video item with a bvid');
+  }
+}
+
+void _requireSeriesArchives(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final archives = data['archives'];
+  if (archives is! List || archives.isEmpty) {
+    throw FormatException('$label data.archives is not a non-empty list');
+  }
+  final hasBvid = archives.any((item) => item is Map && item['bvid'] is String);
+  if (!hasBvid) {
+    throw FormatException('$label has no archive with a bvid');
+  }
+}
+
+void _requireBangumiPlayUrlV2(Map<String, dynamic> json, String label) {
+  final result = json['result'];
+  if (result is! Map) {
+    throw FormatException('$label result is not an object');
+  }
+  final videoInfo = result['video_info'];
+  if (videoInfo is! Map) {
+    throw FormatException('$label result.video_info is not an object');
+  }
+  final dash = videoInfo['dash'];
+  final durl = videoInfo['durl'];
+  final hasDash = dash is Map && dash['video'] is List;
+  final hasDurl = durl is List && durl.isNotEmpty;
+  if (!hasDash && !hasDurl) {
+    throw FormatException('$label result.video_info has no playable streams');
+  }
+}
+
+void _requireLiveRoomBaseInfo(Map<String, dynamic> json, String label) {
+  final data = _requireDataObject(json, label);
+  final byRoomIds = data['by_room_ids'];
+  if (byRoomIds is! Map || byRoomIds.isEmpty) {
+    throw FormatException('$label data.by_room_ids is not a non-empty object');
+  }
+  final hasRoom = byRoomIds.values.any(
+    (room) => room is Map && room['room_id'] is int,
+  );
+  if (!hasRoom) {
+    throw FormatException('$label has no room with a numeric room_id');
+  }
+}
+
+void _requireLiveStatusByUids(Map<String, dynamic> json, String label) {
+  final data = json['data'];
+  if (data is! Map || data.isEmpty) {
+    throw FormatException('$label data is not a non-empty object');
+  }
+  final hasUid = data.values.any(
+    (status) => status is Map && status['uid'] is int,
+  );
+  if (!hasUid) {
+    throw FormatException('$label has no status with a numeric uid');
+  }
+}
+
+void _requireRecommendedLiveRooms(Map<String, dynamic> json, String label) {
+  final data = json['data'];
+  if (data is! List || data.isEmpty) {
+    throw FormatException('$label data is not a non-empty list');
+  }
+  final hasRoom = data.any((room) => room is Map && room['roomid'] is int);
+  if (!hasRoom) {
+    throw FormatException('$label has no room with a numeric roomid');
   }
 }
