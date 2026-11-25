@@ -234,58 +234,59 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
             ],
           ),
         ),
-        Semantics(
+        _semanticIconButton(
           label: '${l10n.homeConfigSetMain}: ${tab.label}',
-          button: true,
-          enabled: !isMain,
-          excludeSemantics: true,
-          child: IconButton(
-            icon: Icon(
-              isMain ? AppIcons.mainSectionSelected : AppIcons.mainSection,
-              size: 18.0,
-            ),
-            tooltip: l10n.homeConfigSetMain,
-            onPressed: isMain
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    _setMainTab(sourceId, tab.id);
-                  },
+          tooltip: l10n.homeConfigSetMain,
+          icon: Icon(
+            isMain ? AppIcons.mainSectionSelected : AppIcons.mainSection,
+            size: 18.0,
           ),
+          onPressed: isMain
+              ? null
+              : () {
+                  HapticFeedback.lightImpact();
+                  _setMainTab(sourceId, tab.id);
+                },
         ),
-        Semantics(
+        _semanticIconButton(
           label: '${l10n.homeConfigMoveUp}: ${tab.label}',
-          button: true,
-          enabled: !isFirst,
-          excludeSemantics: true,
-          child: IconButton(
-            icon: const Icon(AppIcons.moveUp, size: 18),
-            tooltip: l10n.homeConfigMoveUp,
-            onPressed: isFirst
-                ? null
-                : () {
-                    HapticFeedback.selectionClick();
-                    _moveTab(sourceId, tab.id, true);
-                  },
-          ),
+          tooltip: l10n.homeConfigMoveUp,
+          icon: const Icon(AppIcons.moveUp, size: 18),
+          onPressed: isFirst
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  _moveTab(sourceId, tab.id, true);
+                },
         ),
-        Semantics(
+        _semanticIconButton(
           label: '${l10n.homeConfigMoveDown}: ${tab.label}',
-          button: true,
-          enabled: !isLast,
-          excludeSemantics: true,
-          child: IconButton(
-            icon: const Icon(AppIcons.moveDown, size: 18),
-            tooltip: l10n.homeConfigMoveDown,
-            onPressed: isLast
-                ? null
-                : () {
-                    HapticFeedback.selectionClick();
-                    _moveTab(sourceId, tab.id, false);
-                  },
-          ),
+          tooltip: l10n.homeConfigMoveDown,
+          icon: const Icon(AppIcons.moveDown, size: 18),
+          onPressed: isLast
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  _moveTab(sourceId, tab.id, false);
+                },
         ),
       ],
     );
   }
+
+  /// `excludeSemantics` 会丢掉 `IconButton` 自己的 tap 动作，所以同一个回调要
+  /// 同时交给语义节点和按钮；禁用时两处都传 null，读屏才不会读出一个点不动的按钮。
+  Widget _semanticIconButton({
+    required String label,
+    required String tooltip,
+    required Widget icon,
+    required VoidCallback? onPressed,
+  }) => Semantics(
+    label: label,
+    button: true,
+    enabled: onPressed != null,
+    onTap: onPressed,
+    excludeSemantics: true,
+    child: IconButton(icon: icon, tooltip: tooltip, onPressed: onPressed),
+  );
 }
