@@ -24,6 +24,8 @@ void main() {
     expect(response.episodeInfo?.epId, 326233);
     expect(response.episodeInfo?.cid, 179393043);
     expect(response.episodeInfo?.bvid, 'BV12U4y1M7AS');
+    expect(response.playDetail, 'PLAY_PREVIEW');
+    expect(response.isPreview, isTrue);
   });
 
   test('tolerates a result without episode info', () {
@@ -38,6 +40,8 @@ void main() {
 
     expect(response.videoInfo.quality, 16);
     expect(response.episodeInfo, isNull);
+    expect(response.playDetail, isNull);
+    expect(response.isPreview, isNull);
   });
 
   group('BiliNetworkSearch.getBangumiPlayUrlV2', () {

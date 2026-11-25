@@ -25,7 +25,21 @@ void main() {
     expect(status?.liveStatus, 1);
     expect(status?.title, isNotEmpty);
     expect(status?.uname, isNotEmpty);
+    expect(status?.tags, contains('解说'));
+    expect(status?.tagName, contains('英雄联盟'));
+    expect(status?.tags, isNot(equals(status?.tagName)));
   });
+
+  test(
+    'keeps an empty room tags value empty instead of borrowing tag_name',
+    () {
+      final response = NetworkLiveStatusByUids.fromJson(loadFixture());
+
+      final status = response.statuses[8739477];
+      expect(status?.tags, isNull);
+      expect(status?.tagName, isNotEmpty);
+    },
+  );
 
   test('drops statuses without a numeric uid', () {
     final response = NetworkLiveStatusByUids.fromJson({

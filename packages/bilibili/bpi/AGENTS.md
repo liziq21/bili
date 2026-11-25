@@ -42,7 +42,7 @@
 | 首页推荐 | `GET /x/web-interface/wbi/index/top/feed/rcmd` | WBI | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/home_feed.json` | 2026-11-25 |
 | 用户系列视频列表 | `GET /x/series/archives?mid&series_id&pn&ps` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/series_archives.json` | 2026-11-25 |
 | 番剧播放地址 v2 | `GET /pgc/player/web/v2/playurl?ep_id&qn&fnval&fourk` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/bangumi_play_url_v2.json` | 2026-11-25 |
-| 批量直播间基础信息 | `GET /xlive/web-room/v1/index/getRoomBaseInfo?room_ids[]&req_biz` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_room_base_info.json` | 2026-11-25 |
+| 批量直播间基础信息 | `GET /xlive/web-room/v1/index/getRoomBaseInfo?room_ids&req_biz` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_room_base_info.json` | 2026-11-25 |
 | 按 UP 主批量直播状态 | `GET /room/v1/Room/get_status_info_by_uids?uids[]` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_status_by_uids.json` | 2026-11-25 |
 | 推荐直播间列表 | `GET /room/v1/room/get_user_recommend?page_size&platform` | 公共请求 | Bilibili 实际公开 Web API 响应 / PipePipe | `testing/live_recommended_rooms.json` | 2026-11-25 |
 

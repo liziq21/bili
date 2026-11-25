@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
+
 import '../../error/bpi_exception.dart';
 import '../bili_json_readers.dart';
 
 /// 按 UP 主批量查询直播状态 (`/room/v1/Room/get_status_info_by_uids`)。
+@immutable
 final class NetworkLiveStatusByUids {
   const NetworkLiveStatusByUids({
     required this.code,
@@ -50,6 +53,7 @@ final class NetworkLiveStatusByUids {
   final Map<int, NetworkLiveUserStatus> statuses;
 }
 
+@immutable
 final class NetworkLiveUserStatus {
   const NetworkLiveUserStatus({
     required this.uid,
@@ -64,6 +68,7 @@ final class NetworkLiveUserStatus {
     this.areaName,
     this.parentAreaName,
     this.tags,
+    this.tagName,
   });
 
   static NetworkLiveUserStatus? tryFromJson(Map<dynamic, dynamic> json) {
@@ -83,7 +88,8 @@ final class NetworkLiveUserStatus {
       liveTime: biliReadInt(json['live_time']),
       areaName: biliReadString(json['area_name']),
       parentAreaName: biliReadString(json['area_v2_parent_name']),
-      tags: biliReadString(json['tag_name']),
+      tags: biliReadString(json['tags']),
+      tagName: biliReadString(json['tag_name']),
     );
   }
 
@@ -98,5 +104,10 @@ final class NetworkLiveUserStatus {
   final int? liveTime;
   final String? areaName;
   final String? parentAreaName;
+
+  /// Room tags the streamer filled in; empty when none were set.
   final String? tags;
+
+  /// Category words from `tag_name`, shared by every room in the category.
+  final String? tagName;
 }
