@@ -135,6 +135,45 @@ void main() {
       );
     });
 
+    test('rejects HTTP 412 as risk control, not a plain HTTP error', () async {
+      // 创作者页投稿列表实测就是 412；归到普通 HTTP 错误后界面只能说「加载
+      // 失败」，而这条其实稍后重试就能恢复。
+      final response = Response<dynamic>(
+        http.Response('blocked', 412),
+        'blocked',
+      );
+
+      await expectLater(
+        converter.convertResponse<NetworkBiliHomeFeed, dynamic>(response),
+        throwsA(
+          isA<BiliRiskControlException>().having(
+            (error) => error.statusCode,
+            'statusCode',
+            412,
+          ),
+        ),
+      );
+    });
+
+    test('rejects the -352 envelope code as risk control', () async {
+      final response = _jsonResponse({
+        'code': -352,
+        'message': '风控校验失败',
+        'data': {'v_voucher': 'voucher-token'},
+      });
+
+      await expectLater(
+        converter.convertResponse<NetworkBiliHomeFeed, dynamic>(response),
+        throwsA(
+          isA<BiliRiskControlException>().having(
+            (error) => error.biliCode,
+            'biliCode',
+            -352,
+          ),
+        ),
+      );
+    });
+
     test('rejects a non-zero envelope code', () async {
       final response = _jsonResponse({
         'code': -412,

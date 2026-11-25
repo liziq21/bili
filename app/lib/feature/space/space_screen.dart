@@ -17,6 +17,7 @@ import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
+import '../../ui/common/rate_limit_retry.dart';
 import '../../ui/creator_subscribe_button.dart';
 import '../../ui/video_card.dart';
 import '../setting/app_settings.dart';
@@ -365,11 +366,13 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
                 ),
               ),
               firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
+                error: state.error,
                 onRetry: () =>
                     context.read<ChannelVideosCubit>().fetchNextPage(),
               ),
               newPageErrorIndicatorBuilder: (context) =>
                   _ChannelSectionPageError(
+                    error: state.error,
                     onRetry: () =>
                         context.read<ChannelVideosCubit>().fetchNextPage(),
                   ),
@@ -390,11 +393,14 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
   }
 }
 
-class const _ChannelSectionError({required final VoidCallback onRetry})
-    extends StatelessWidget {
+class const _ChannelSectionError({
+  required final Object? error,
+  required final VoidCallback onRetry,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final rateLimited = isRateLimited(error);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -402,31 +408,30 @@ class const _ChannelSectionError({required final VoidCallback onRetry})
           Icon(AppIcons.error, color: $styles.colors.outline),
           SizedBox(height: $styles.insets.xs),
           Text(
-            l10n.loadFailedRetryLater,
+            rateLimited
+                ? l10n.rateLimitedRetryLater
+                : l10n.loadFailedRetryLater,
             textAlign: TextAlign.center,
             style: $styles.text.body.copyWith(
               color: $styles.colors.onSurfaceVariant,
             ),
           ),
           SizedBox(height: $styles.insets.xs),
-          FilledButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              onRetry();
-            },
-            child: Text(l10n.retry),
-          ),
+          RetryCooldownButton(rateLimited: rateLimited, onRetry: onRetry),
         ],
       ),
     );
   }
 }
 
-class const _ChannelSectionPageError({required final VoidCallback onRetry})
-    extends StatelessWidget {
+class const _ChannelSectionPageError({
+  required final Object? error,
+  required final VoidCallback onRetry,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final rateLimited = isRateLimited(error);
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
@@ -436,7 +441,9 @@ class const _ChannelSectionPageError({required final VoidCallback onRetry})
             onRetry();
           },
           icon: const Icon(AppIcons.refresh, size: 18),
-          label: Text(l10n.moreLoadFailedRetry),
+          label: Text(
+            rateLimited ? l10n.rateLimitedRetryLater : l10n.moreLoadFailedRetry,
+          ),
         ),
       ),
     );
@@ -513,10 +520,12 @@ class const _ChannelPlaylistsList({
             child: CircularProgressIndicator(color: $styles.colors.accentFill),
           ),
           firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
+            error: state.error,
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),
           newPageErrorIndicatorBuilder: (context) => _ChannelSectionPageError(
+            error: state.error,
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),

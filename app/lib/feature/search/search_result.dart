@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import '../../ui/common/rate_limit_retry.dart';
 import 'bloc/search_result_bloc.dart';
 
 class const SearchResult<T>({
@@ -34,7 +35,7 @@ class const SearchResult<T>({
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
                 firstPageErrorIndicatorBuilder: (context) =>
-                    _SearchErrorView<T>(),
+                    _SearchErrorView<T>(error: state.error),
                 newPageErrorIndicatorBuilder: (context) =>
                     _NewPageErrorIndicator<T>(),
                 noItemsFoundIndicatorBuilder: (context) =>
@@ -56,11 +57,16 @@ class const SearchResult<T>({
 }
 
 /// 首页搜索失败视图：图标 + 提示文案 + 明确重试按钮 + 触觉反馈 + 屏幕阅读器语义
-class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
+///
+/// 搜索的风控窗口里接口会返回 `code: 0` 但只有 `v_voucher`，被 bpi 归类为
+/// 风控拒绝；此时换成「请求过于频繁」并让重试先冷静一段时间。
+class const _SearchErrorView<T>({required final Object? error})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final rateLimited = isRateLimited(error);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -68,8 +74,11 @@ class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
           Icon(AppIcons.error, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
-            l10n?.loadFailedRetryLater ??
-                'Load failed. Please try again later.',
+            rateLimited
+                ? l10n?.rateLimitedRetryLater ??
+                      'Too many requests. Please wait a moment and try again.'
+                : l10n?.loadFailedRetryLater ??
+                      'Load failed. Please try again later.',
             style: $styles.text.body.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -79,12 +88,12 @@ class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
             button: true,
             label: l10n?.loadFailedRetry ?? 'Load failed. Retry.',
             excludeSemantics: true,
-            child: TextButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                context.read<SearchResultBloc<T>>().add(const FetchNextPage());
-              },
-              child: Text(l10n?.retry ?? 'Retry'),
+            child: RetryCooldownButton(
+              style: TextButton.styleFrom(),
+              rateLimited: rateLimited,
+              onRetry: () => context.read<SearchResultBloc<T>>().add(
+                const FetchNextPage(),
+              ),
             ),
           ),
         ],

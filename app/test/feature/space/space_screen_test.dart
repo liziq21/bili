@@ -8,6 +8,7 @@ import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
+import 'package:bilibili/bilibili.dart' show BiliRiskControlException;
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:drift/native.dart';
@@ -298,6 +299,52 @@ void main() {
     await tester.pump();
 
     expect(opened, ['v1']);
+  });
+
+  testWidgets('names rate limiting and blocks retry while it cools down', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.error(const BiliRiskControlException('blocked')),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelVideosRepository>.value(
+            value: videosRepository,
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: const SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.rateLimitedRetryLater), findsOneWidget);
+    expect(find.text(l10n.loadFailedRetryLater), findsNothing);
+
+    final button = find.byType(FilledButton);
+    expect(tester.widget<FilledButton>(button).onPressed, null);
+    await tester.tap(button);
+    await tester.pump();
+
+    expect(videosRepository.requestedPages, [1]);
   });
 
   testWidgets('loads the next page when the grid reaches the end', (

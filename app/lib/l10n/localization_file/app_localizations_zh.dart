@@ -291,6 +291,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadFailedRetryLater => '加载失败，请稍后重试';
 
   @override
+  String get rateLimitedRetryLater => '操作过快，请稍后再试';
+
+  @override
+  String retryInSeconds(int seconds) {
+    return '$seconds 秒后可重试';
+  }
+
+  @override
   String get loadFailedRetry => '加载失败，重试';
 
   @override

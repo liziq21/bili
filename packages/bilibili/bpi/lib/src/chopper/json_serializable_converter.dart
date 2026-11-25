@@ -15,6 +15,12 @@ class const JsonSerializableConverter(
   FutureOr<Response<ResultType>> convertResponse<ResultType, Item>(
     Response response,
   ) async {
+    if (response.statusCode == biliRiskControlStatusCode) {
+      throw BiliRiskControlException(
+        'Bilibili rejected the request with a risk-control status.',
+        statusCode: response.statusCode,
+      );
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw BpiHttpException(
         'Bilibili request failed.',
@@ -63,6 +69,13 @@ class const JsonSerializableConverter(
       String value => int.tryParse(value),
       _ => null,
     };
+    if (isBiliRiskControlCode(code)) {
+      throw BiliRiskControlException(
+        json['message']?.toString() ?? 'Bilibili risk-control rejection.',
+        biliCode: code,
+        statusCode: statusCode,
+      );
+    }
     if (code != null && code != 0) {
       throw BiliApiException(
         json['message']?.toString() ?? 'Bilibili API request failed.',
@@ -82,6 +95,12 @@ class const JsonSerializableConverter(
 
   @override
   FutureOr<Response> convertError<ResultType, Item>(Response response) {
+    if (response.statusCode == biliRiskControlStatusCode) {
+      throw BiliRiskControlException(
+        'Bilibili rejected the request with a risk-control status.',
+        statusCode: response.statusCode,
+      );
+    }
     throw BpiHttpException(
       'Bilibili request failed.',
       statusCode: response.statusCode,

@@ -632,6 +632,18 @@ abstract class AppLocalizations {
   /// **'Failed to load. Try again later'**
   String get loadFailedRetryLater;
 
+  /// Error state when Bilibili rate-limits or risk-controls the request
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait a moment and try again'**
+  String get rateLimitedRetryLater;
+
+  /// Retry button label while a rate-limit cooldown is counting down
+  ///
+  /// In en, this message translates to:
+  /// **'Retry in {seconds}s'**
+  String retryInSeconds(int seconds);
+
   /// Search results - error state with a retry action
   ///
   /// In en, this message translates to:
