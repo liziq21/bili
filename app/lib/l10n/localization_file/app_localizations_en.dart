@@ -659,7 +659,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get infoAndRelated => 'Info & related';
 
   @override
-  String get commentsCountTab => 'Comments (1,429)';
+  String get commentsTab => 'Comments';
 
   @override
   String get danmakuSettingsTitle => 'Danmaku settings';

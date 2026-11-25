@@ -21,6 +21,19 @@ void main() {
     },
   );
 
+  test('live stream probing never reuses the buffering logging client', () {
+    initDebugOverlayBridge();
+
+    // #664：debug 构建的 Bili.client 是 HttpLogClient，它在 send() 里把整个
+    // 响应 body 缓冲完才返回。直播流是无限响应，探测必然超时，直播间在
+    // debug 下 100% 加载失败。探测必须走独立的、不带缓冲的客户端。
+    final probeClient = Bili.probeClientFactory();
+    addTearDown(probeClient.close);
+
+    expect(probeClient, isNot(isA<HttpLogClient>()));
+    expect(identical(probeClient, Bili.client), isFalse);
+  });
+
   testWidgets(
     'ErrorWidget.builder handles build errors securely based on build mode',
     (tester) async {

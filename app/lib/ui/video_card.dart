@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -473,19 +475,84 @@ class const VideoCard({
   }
 }
 
-/// 网格卡片在给定宽度下需要的高度：16:9 封面 + 两行标题 + 一行元信息。
+/// 网格卡片在给定宽度下需要的高度。
 ///
-/// 网格的 `mainAxisExtent` 与卡片文字块用的是同一份预算，写死像素会在窄屏或
-/// 放大字号时把标题挤到半行被裁掉（#645）。
-double videoCardExtent(BuildContext context, double cardWidth) {
+/// 两个变体的文字高度都用 [TextPainter] 按卡片真实的 [TextStyle] 量出来，
+/// 而不是用 `fontSize * height * 行数` 估算。估算会漏掉两件事：引擎把每行
+/// 行高向上取整到整数逻辑像素；CJK 回退字体的自然 ascent+descent 可能超过
+/// `fontSize * height`。任一遗漏都让预算比实际矮零点几到几像素，卡片底部的
+/// `Column` 就会触发 `RenderFlex overflow`（#662）。
+///
+/// 封面高度按卡片内层宽度（扣掉 `Material` 内层的 1px 边框）计算，与
+/// [VideoCard] 里 `AspectRatio` 实际拿到的约束一致；旧公式用卡片外宽，多算
+/// 出的那一点恰好掩盖了文字预算的缺口，掩盖多少又随宽度变化，所以同一个
+/// 偏差在某些宽度不溢出、某些宽度溢出。
+double videoCardExtent(
+  BuildContext context,
+  double cardWidth, {
+  VideoCardVariant variant = VideoCardVariant.defaultCard,
+  int titleMaxLines = 2,
+}) {
   final textScaler = MediaQuery.textScalerOf(context);
-  // 标题两行，行高 1.25 由卡片里的 TextStyle 与 theme 决定。
-  final titleHeight = textScaler.scale(13) * 1.25 * 2;
-  final metaHeight = textScaler.scale(11) * 1.4;
-  return (cardWidth * 9 / 16 +
-          titleHeight +
-          metaHeight +
-          8 * 2 + // 文字区的 Padding
-          2) // Material 内层 1px 边框的上下各 1px
+  final innerWidth = cardWidth - _cardBorder * 2;
+  final coverHeight = innerWidth * 9 / 16;
+
+  final (double textHeight, double padding) = switch (variant) {
+    VideoCardVariant.feed => (
+      math.max(
+        _lineHeight(
+                  $styles.text.title2.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.25,
+                  ),
+                  textScaler,
+                ) *
+                titleMaxLines +
+            $styles.insets.xxs +
+            _lineHeight(
+              $styles.text.bodySmall.copyWith(fontSize: 12),
+              textScaler,
+            ),
+        _feedAvatarDiameter,
+      ),
+      $styles.insets.sm,
+    ),
+    VideoCardVariant.defaultCard => (
+      _lineHeight(
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                textScaler,
+              ) *
+              titleMaxLines +
+          _lineHeight(const TextStyle(fontSize: 11), textScaler),
+      8.0,
+    ),
+  };
+
+  return (coverHeight + _cardBorder * 2 + padding * 2 + textHeight)
       .ceilToDouble();
+}
+
+/// `Material` 内层 `Padding(EdgeInsets.all(1))` 的边框宽度。
+const double _cardBorder = 1;
+
+/// 信息区头像直径：`CircleAvatar(radius: 18)`。
+const double _feedAvatarDiameter = 36;
+
+/// 一行文字在真实字体下的高度。
+///
+/// 样本同时含拉丁与 CJK 字形：行高由该行实际用到的字体决定，只量 `M` 会漏掉
+/// 更高的 CJK 回退字体。引擎会把行高向上取整，[TextPainter] 量到的就是最终
+/// 渲染高度。
+///
+/// CJK 字符用码点构造，避免在源码里写非 ASCII 字面量（硬编码文案护栏）。
+double _lineHeight(TextStyle style, TextScaler textScaler) {
+  final painter = TextPainter(
+    text: TextSpan(text: '${String.fromCharCode(0x4E2D)}M', style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: textScaler,
+    maxLines: 1,
+  )..layout();
+  final height = painter.height;
+  painter.dispose();
+  return height;
 }

@@ -619,7 +619,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get infoAndRelated => '简介与相关';
 
   @override
-  String get commentsCountTab => '评论区 (1,429)';
+  String get commentsTab => '评论区';
 
   @override
   String get danmakuSettingsTitle => '弹幕设置';

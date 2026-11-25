@@ -4,6 +4,8 @@ import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/media_library/local_library_screen.dart';
+import 'package:app/feature/media_library/media_history_cubit.dart';
+import 'package:app/feature/media_library/media_library_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:app/routing/navigation_callbacks.dart';
@@ -135,6 +137,35 @@ void main() {
     await tester.tap(find.byTooltip('条目操作').at(index));
     await pumpRoute(tester);
   }
+
+  testLibraryWidgets(
+    'renders a single page title instead of the old 本地库 + 我的 pair',
+    (tester) async {
+      final cubit = MediaHistoryCubit(
+        mediaHistoryDao: database.mediaHistoryDao,
+      );
+      addTearDown(() async {
+        if (!cubit.isClosed) await cubit.close();
+      });
+
+      await tester.pumpWidget(
+        app(
+          LocalLibraryScreen(
+            history: BlocProvider<MediaHistoryCubit>.value(
+              value: cubit,
+              child: MediaLibraryScreen(onVideoTap: (_, _) {}),
+            ),
+          ),
+        ),
+      );
+      await pumpLibrary(tester);
+
+      // #666：AppBar 的页名与底栏「我的」一致，历史 Tab 内不再多出第二个
+      // 一级标题「我的」，旧的「本地库」页名也不再出现。
+      expect(find.text('我的'), findsOneWidget);
+      expect(find.text('本地库'), findsNothing);
+    },
+  );
 
   testLibraryWidgets(
     'creates and deletes a playlist through the real database',

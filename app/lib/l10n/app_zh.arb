@@ -924,9 +924,9 @@
   "@infoAndRelated": {
     "description": "Video screen - tab label for the info and related section"
   },
-  "commentsCountTab": "评论区 (1,429)",
-  "@commentsCountTab": {
-    "description": "Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven"
+  "commentsTab": "评论区",
+  "@commentsTab": {
+    "description": "Video screen - comments tab label"
   },
   "danmakuSettingsTitle": "弹幕设置",
   "@danmakuSettingsTitle": {

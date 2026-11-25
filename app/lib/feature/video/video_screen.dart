@@ -669,7 +669,7 @@ class _VideoContentState() extends State<_VideoContent> {
               unselectedLabelStyle: $styles.text.btn,
               tabs: [
                 Tab(text: l10n.infoAndRelated),
-                Tab(text: l10n.commentsCountTab),
+                Tab(text: l10n.commentsTab),
                 Tab(text: l10n.playbackQueue),
               ],
             ),

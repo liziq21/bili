@@ -353,6 +353,60 @@ void main() {
     },
   );
 
+  testWidgets(
+    'embedded control bar shows current/total time and seeks on drag',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: bloc,
+              child: VideoPlayer(
+                controller: controller,
+                surfaceBuilder: (_) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+      );
+      bloc.add(const LoadMediaStream('BV123'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 10));
+      await tester.pump();
+
+      fake.emitDuration(const Duration(minutes: 3, seconds: 20));
+      fake.emitPosition(const Duration(minutes: 1, seconds: 5));
+      await tester.pump();
+
+      // #665：竖屏内嵌播放器此前只有清晰度 / 倍速 / 全屏按钮，看不到播放
+      // 进度，也看不到当前时间和总时长。
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('1:05'), findsOneWidget);
+      expect(find.text('3:20'), findsOneWidget);
+
+      await tester.drag(find.byType(Slider), const Offset(60, 0));
+      await tester.pump();
+
+      expect(fake.seekCalls, isNotEmpty);
+    },
+  );
+
   group('video aspect ratio', () {
     /// 把播放器放进固定尺寸的盒子并让流就绪，用于断言画面比例。
     Future<void> pumpSized(

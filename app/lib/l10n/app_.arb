@@ -924,9 +924,9 @@
   "@infoAndRelated": {
     "description": "Video screen - tab label for the info and related section"
   },
-  "commentsCountTab": "Comments (1,429)",
-  "@commentsCountTab": {
-    "description": "Video screen - comments tab label; the count in the copy is a fixed sample, not data-driven"
+  "commentsTab": "Comments",
+  "@commentsTab": {
+    "description": "Video screen - comments tab label"
   },
   "danmakuSettingsTitle": "Danmaku settings",
   "@danmakuSettingsTitle": {

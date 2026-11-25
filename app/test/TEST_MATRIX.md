@@ -7,12 +7,12 @@
 | 分类 | 文件数 |
 |------|--------|
 | unit | 103 |
-| widget | 65 |
+| widget | 66 |
 | golden | 8 |
 | contract | 14 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **192** |
+| **合计** | **193** |
 
 ## 分类定义
 
@@ -130,7 +130,7 @@
 - `packages/youtube/ypi/test/youtube_service_test.dart`
 - `packages/youtube/ypi/test/youtube_search_params_test.dart`
 
-## widget（65）
+## widget（66）
 
 - `app/test/feature/appearance_settings_screen_test.dart`
 - `app/test/feature/danmaku_settings_screen_test.dart`
@@ -143,6 +143,7 @@
 - `app/test/feature/home/feed_status_view_test.dart`
 - `app/test/feature/home/home_config_editor_screen_test.dart`
 - `app/test/feature/home/live_feed_section_test.dart`
+- `app/test/feature/home/video_feed_section_test.dart`
 - `app/test/feature/home_bloc_test.dart`
 - `app/test/feature/home_filter_bar_test.dart`
 - `app/test/feature/home_source_selector_test.dart`

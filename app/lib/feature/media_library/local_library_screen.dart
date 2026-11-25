@@ -53,7 +53,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.localLibrary)),
+        appBar: AppBar(title: Text(l10n.mine)),
         body: Column(
           children: [
             if (_tabIndex != 0) _scopeBar(catalog),

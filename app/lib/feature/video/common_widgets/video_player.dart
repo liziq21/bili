@@ -939,9 +939,17 @@ class const _PlayerControlBar({
         horizontal: $styles.insets.sm,
         vertical: $styles.insets.xs,
       ),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: Wrap(spacing: 6, runSpacing: 6, children: items),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 内嵌播放器没有浮层控制区可挂进度条，所以进度条占控制栏的一行，
+          // 与右侧的清晰度 / 倍速 / 全屏按钮分开（#665）。
+          _PlaybackProgressBar(controller: controller),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(spacing: 6, runSpacing: 6, children: items),
+          ),
+        ],
       ),
     );
   }
@@ -954,6 +962,100 @@ class const _PlayerControlBar({
     }
     return result;
   }
+}
+
+/// 内嵌播放器底部的进度条：当前时间 / 可拖动进度 / 总时长（#665）。
+///
+/// 自己订阅 [MediaPlaybackController.states]，让位置更新只重建这一行，不牵动
+/// 整条控制栏。拖动期间用 [_dragMilliseconds] 接管显示，松手才 seek：否则
+/// 每次位置事件都会把滑块拉回旧位置，手指拖不动。
+class const _PlaybackProgressBar({
+  required final MediaPlaybackController controller,
+}) extends StatefulWidget {
+  @override
+  State<_PlaybackProgressBar> createState() => _PlaybackProgressBarState();
+}
+
+class _PlaybackProgressBarState() extends State<_PlaybackProgressBar> {
+  late PlaybackState _state = widget.controller.state;
+  StreamSubscription<PlaybackState>? _subscription;
+  double? _dragMilliseconds;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.controller.states.listen((state) {
+      if (!mounted) return;
+      setState(() => _state = state);
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = _state.duration.inMilliseconds.toDouble();
+    final playable = total > 0;
+    final position =
+        (_dragMilliseconds ?? _state.position.inMilliseconds.toDouble()).clamp(
+          0.0,
+          playable ? total : 0.0,
+        );
+    // 等宽数字：时间从 0:09 走到 0:10 时标签宽度不变，滑块不会被挤动。
+    final labelStyle = $styles.text.bodySmall.copyWith(
+      color: $styles.colors.onSurfaceVariant,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    return Row(
+      children: [
+        Text(_formatPosition(position), style: labelStyle),
+        Expanded(
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 2,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+            ),
+            child: Slider(
+              value: position,
+              max: playable ? total : 1,
+              onChanged: playable
+                  ? (value) => setState(() => _dragMilliseconds = value)
+                  : null,
+              onChangeEnd: playable
+                  ? (value) {
+                      unawaited(
+                        widget.controller.seek(
+                          Duration(milliseconds: value.round()),
+                        ),
+                      );
+                      setState(() => _dragMilliseconds = null);
+                    }
+                  : null,
+              semanticFormatterCallback: _formatPosition,
+            ),
+          ),
+        ),
+        Text(_formatPosition(total), style: labelStyle),
+      ],
+    );
+  }
+}
+
+/// `m:ss`（不足一小时）或 `h:mm:ss`。
+String _formatPosition(double milliseconds) {
+  final seconds = (milliseconds / 1000).floor().clamp(0, 359999);
+  final hours = seconds ~/ 3600;
+  final minutes = (seconds % 3600) ~/ 60;
+  final twoDigitSeconds = (seconds % 60).toString().padLeft(2, '0');
+  if (hours > 0) {
+    return '$hours:${minutes.toString().padLeft(2, '0')}:$twoDigitSeconds';
+  }
+  return '$minutes:$twoDigitSeconds';
 }
 
 class const _LoadingView() extends StatelessWidget {

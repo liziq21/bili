@@ -82,8 +82,12 @@ final class BiliLiveRoomDetailRemoteDataSource({
   /// 候选地址探测；不传时用 [probeLiveStreamUrl] 配 [clientFactory]。
   final LiveStreamUrlProbe? probe,
 
-  /// 探测复用的 HTTP 传输。应用传入 `Bili.client`，让探测与其他 B 站请求走
-  /// 同一条通道（带日志、带同一套 TLS 配置），而不是另起一个裸客户端。
+  /// 候选探测所用的 HTTP 传输工厂。
+  ///
+  /// 每个候选探测结束都会关闭自己拿到的客户端（[probeLiveStreamUrl] 的
+  /// `finally`），所以这里必须交出可独占、可关闭的工厂，不能是应用共享的
+  /// 客户端；也不该是 debug 构建的 `HttpLogClient`——它把无限长的直播响应
+  /// 整个读进内存，探测必然超时（#664）。
   final http.Client Function()? clientFactory,
 
   /// 播放器跑在浏览器里。浏览器解不了 FLV，候选排序要把 HLS 提到前面；
@@ -157,8 +161,12 @@ final class BiliLiveRoomDetailRemoteDataSource({
       // 逐个探测，第一个真的能送出数据的候选就是可播地址。只按协议挑一路
       // 会撞上「地址在但连接无响应」的那类候选，而播放器对这种情况不报错，
       // 只会一直停在首帧。
+      final unreachable = <String>[];
       for (final candidate in candidates) {
-        if (!await _isReachable(candidate.url)) continue;
+        if (!await _isReachable(candidate.url)) {
+          unreachable.add(candidate.codec.codecName ?? 'unknown codec');
+          continue;
+        }
         final currentQn = candidate.codec.currentQn;
         return Result.success(
           MediaStream(
@@ -176,6 +184,13 @@ final class BiliLiveRoomDetailRemoteDataSource({
           ),
         );
       }
+      // 单条候选失败只说明这一路不可用，全部失败才是房间级故障：把它升到
+      // warning 并带上每个候选的 codec，生产日志才能直接看出「是地址都探测
+      // 不通」而不是靠猜。
+      _log.warning(
+        'Live room $roomId: no reachable stream among '
+        '${candidates.length} candidates (${unreachable.join(', ')})',
+      );
       return Result.error(Exception('直播间 $roomId 的所有候选地址均不可用'));
     } catch (e) {
       return Result.error(e is Exception ? e : Exception(e.toString()));

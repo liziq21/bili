@@ -116,6 +116,28 @@ void main() {
       await unmount(tester);
     });
 
+    testWidgets('comments tab label carries no hardcoded sample count', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(360, 640));
+
+      // #663：评论区 Tab 曾是写死的「评论区 (1,429)」，与真实评论数无关，
+      // 且在 360 宽被截成「评论区 (1,42」。标签不应带任何数字。
+      final tabLabels = tester
+          .widgetList<Tab>(find.byType(Tab))
+          .map((tab) => tab.text)
+          .toList();
+      expect(tabLabels, contains('评论区'));
+      expect(
+        tabLabels.every((label) => !(label ?? '').contains(RegExp(r'\d'))),
+        isTrue,
+        reason: 'tab labels must not embed a sample count: $tabLabels',
+      );
+      expect(tester.takeException(), isNull);
+
+      await unmount(tester);
+    });
+
     testWidgets('foldable landscape shows info and comments side by side', (
       tester,
     ) async {
