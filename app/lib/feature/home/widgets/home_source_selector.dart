@@ -20,22 +20,14 @@ class const HomeSourceSelector({
     final l10n = AppLocalizations.of(context);
 
     final semanticLabel = l10n?.switchDataSource ?? 'Switch source';
-    MediaSourceDefinition activeSource;
-    try {
-      activeSource = sources.firstWhere((s) => s.id == activeSourceId);
-    } on StateError {
-      activeSource = sources.first;
-    }
-    final activeSourceName = activeSource.name;
 
     return Tooltip(
       message: l10n?.switchDataSource ?? 'Switch source',
+      // 不排除子语义：`DropdownButton` 自己的选中值与 tap 动作必须保留，否则
+      // 读屏用户听得到当前来源却打不开菜单。这里只补 label/hint 作上下文。
       child: Semantics(
-        button: true,
         label: semanticLabel,
-        value: activeSourceName,
         hint: l10n?.switchVideoMediaSource ?? 'Switch video and media source',
-        excludeSemantics: true,
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: activeSourceId,

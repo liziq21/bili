@@ -143,11 +143,10 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
       child: Row(
         children: [
           Expanded(child: Text(label)),
+          // 不排除子语义：下拉菜单的打开动作来自 `DropdownButton` 自己，
+          // `excludeSemantics` 会连它一起丢掉，读屏用户就无法改列数。
           Semantics(
             label: label,
-            value: '$value',
-            button: true,
-            excludeSemantics: true,
             child: DropdownButton<int>(
               value: value,
               items: [

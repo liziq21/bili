@@ -2,6 +2,7 @@ import 'package:app/app_scaffold.dart';
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/setting/library_settings_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -121,18 +122,14 @@ void main() {
       final context = tester.element(find.byType(LibrarySettingsScreen));
       final l10n = AppLocalizations.of(context)!;
 
-      final semanticsFinder = find.ancestor(
-        of: find.byType(DropdownButton<int>),
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Semantics &&
-              widget.properties.label == l10n.librarySearchHistoryRetention &&
-              widget.properties.value ==
-                  l10n.librarySearchHistoryRetention30Days &&
-              widget.excludeSemantics == true,
-        ),
-      );
-      expect(semanticsFinder, findsOneWidget);
+      // The dropdown keeps its own value and tap action; the wrapper only adds
+      // the setting name as context.
+      final data = tester
+          .getSemantics(find.byType(DropdownButton<int>))
+          .getSemanticsData();
+      expect(data.label, contains(l10n.librarySearchHistoryRetention));
+      expect(data.label, contains(l10n.librarySearchHistoryRetention30Days));
+      expect(data.hasAction(SemanticsAction.tap), isTrue);
 
       expect(
         find.byWidgetPredicate(
@@ -152,6 +149,33 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('opens the retention menu from the screen-reader tap', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(_buildScreen(preferences));
+      await tester.pumpAndSettle();
+
+      final context = tester.element(find.byType(LibrarySettingsScreen));
+      final l10n = AppLocalizations.of(context)!;
+
+      final node = tester.getSemantics(find.byType(DropdownButton<int>));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.text(l10n.librarySearchHistoryRetention90Days).last,
+      );
+      await tester.pumpAndSettle();
+
+      final result = await preferences.get(
+        PreferencesKey.searchHistoryRetentionDays,
+      );
+      expect((result as Success<int, Exception>).success, 90);
+      semantics.dispose();
     });
 
     testWidgets('uses English translations when English is selected', (
