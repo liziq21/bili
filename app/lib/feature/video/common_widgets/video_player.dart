@@ -45,7 +45,13 @@ import '../player/playback_error.dart';
 /// 测试）时保持旧行为，不渲染控制条。
 class const VideoPlayer({
   super.key,
-  final double aspectRatio = 16 / 9,
+
+  /// 画面显示比例。null 表示跟随视频自身尺寸（由播放器解出的
+  /// `videoParams` 决定），解出之前按 16:9 占位。
+  ///
+  /// 竖屏/方形投稿必须走这个缺省：容器写死 16:9 时，非 16:9 的画面只能在
+  /// 容器里 contain 成很小的一块，四周全是黑边。
+  final double? aspectRatio,
 
   /// 播放器会话，为 null 时组件自建并在销毁时释放。
   ///
@@ -56,7 +62,9 @@ class const VideoPlayer({
   /// 是否铺满所在区域（全屏）。
   ///
   /// 由页面持有而非本组件自持：铺满需要父级把本组件放进 [Expanded]，那是
-  /// 页面布局的决定。本组件只按该标志切换「16:9 内嵌」与「铺满」两种布局。
+  /// 页面布局的决定。本组件只按该标志切换「按视频比例内嵌」与「铺满」两种
+  /// 布局：内嵌时容器比例跟随视频（竖屏/方形不再被塞进 16:9），只有视频
+  /// 比例尚未解出时才按 16:9 占位。
   final bool fullscreen = false,
 
   /// 桌面端方向键的普通 / Shift 快进步长。
@@ -93,6 +101,26 @@ class const VideoPlayer({
 class _VideoPlayerState() extends State<VideoPlayer> {
   MediaPlaybackController? _playback;
 
+  /// 播放器解出的视频比例；未知时为 null。
+  double? _videoAspectRatio;
+  StreamSubscription<double?>? _aspectRatioSubscription;
+
+  /// 容器比例：显式指定优先，其次视频自身比例，最后退回 16:9。
+  ///
+  /// 播放器已经在解出尺寸时直接读它的当前值：组件晚于播放器挂载时（换页、
+  /// 重建）不会收到之前那次广播，只订阅变化流会一直停在 16:9。
+  double get _aspectRatio =>
+      widget.aspectRatio ??
+      _videoAspectRatio ??
+      _playback?.videoAspectRatio ??
+      16 / 9;
+
+  /// 竖屏/方形内容在无高度约束时的高度上限（视口占比）。
+  ///
+  /// 没有这条上限时，竖屏视频按宽度撑出的高度会是宽度的一倍多，把下方简介
+  /// 与评论挤出屏幕。
+  static const double _portraitHeightFraction = 0.6;
+
   /// 是否由本组件创建（进而由本组件释放），区别于外部注入的会话。
   bool _ownsPlayback = false;
 
@@ -124,6 +152,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   @override
   void dispose() {
     _autoHideControls?.cancel();
+    _aspectRatioSubscription?.cancel();
     if (_ownsPlayback) {
       _playback?.dispose();
     }
@@ -151,10 +180,19 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     if (_playback != null) return;
     if (widget.controller != null) {
       _playback = widget.controller;
-      return;
+    } else {
+      _playback = MediaPlaybackController();
+      _ownsPlayback = true;
     }
-    _playback = MediaPlaybackController();
-    _ownsPlayback = true;
+    _watchAspectRatio(_playback!);
+  }
+
+  /// 跟随播放器解出的视频比例重建布局。
+  void _watchAspectRatio(MediaPlaybackController controller) {
+    _aspectRatioSubscription ??= controller.videoAspectRatios.listen((ratio) {
+      if (!mounted || ratio == _videoAspectRatio) return;
+      setState(() => _videoAspectRatio = ratio);
+    });
   }
 
   /// 画面本体：按播放态选错误 / 加载 / 播放器表面。
@@ -190,10 +228,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             );
             return widget.fullscreen
                 ? errorView
-                : AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: errorView,
-                  );
+                : AspectRatio(aspectRatio: _aspectRatio, child: errorView);
           }
 
           final stream = data.stream;
@@ -201,10 +236,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             const loadingView = _LoadingView();
             return widget.fullscreen
                 ? loadingView
-                : AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: loadingView,
-                  );
+                : AspectRatio(aspectRatio: _aspectRatio, child: loadingView);
           }
 
           _ensurePlaybackCreated();
@@ -240,19 +272,26 @@ class _VideoPlayerState() extends State<VideoPlayer> {
               Flexible(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    if (!constraints.hasBoundedWidth ||
-                        !constraints.hasBoundedHeight) {
+                    final aspectRatio = _aspectRatio;
+                    // 竖屏/方形内容在无高度约束时按视口高度设上限，
+                    // 避免画面把下方内容顶出屏幕。正方形（比例 1）也算在内：
+                    // 它按宽度撑出的高度同样会顶掉下方内容。
+                    final heightCap = constraints.hasBoundedHeight
+                        ? constraints.maxHeight
+                        : (aspectRatio <= 1
+                              ? MediaQuery.sizeOf(context).height *
+                                    _portraitHeightFraction
+                              : double.infinity);
+                    if (!constraints.hasBoundedWidth) {
                       return AspectRatio(
-                        aspectRatio: widget.aspectRatio,
+                        aspectRatio: aspectRatio,
                         child: surface,
                       );
                     }
-                    final naturalHeight =
-                        constraints.maxWidth / widget.aspectRatio;
-                    final height = math.min(
-                      naturalHeight,
-                      constraints.maxHeight,
-                    );
+                    // 只有一条布局路径：尺寸到达前后树结构不变，`_VideoSurface`
+                    // 不会被重建（重建会重新 open 一次媒体）。
+                    final naturalHeight = constraints.maxWidth / aspectRatio;
+                    final height = math.min(naturalHeight, heightCap);
                     return SizedBox(
                       width: constraints.maxWidth,
                       height: height,
@@ -260,7 +299,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                         color: $styles.colors.scrim,
                         child: Center(
                           child: AspectRatio(
-                            aspectRatio: widget.aspectRatio,
+                            aspectRatio: aspectRatio,
                             child: surface,
                           ),
                         ),
@@ -802,7 +841,12 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
               onToggleFullscreen: widget.onToggleFullscreen,
               child:
                   widget.surfaceBuilder?.call(widget.controller) ??
-                  Video(controller: widget.controller.videoController),
+                  Video(
+                    controller: widget.controller.videoController,
+                    // 画面按 contain 铺满容器：容器比例已跟随视频尺寸，
+                    // 这里显式声明避免库的默认行为与容器比例打架。
+                    fit: BoxFit.contain,
+                  ),
             ),
           ),
         ),

@@ -157,6 +157,9 @@ class FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// 投喂一次速率事件，驱动 [MediaPlaybackController.states] 的 rate 字段。
   void emitRate(double rate) => _rate.add(rate);
 
+  /// 投喂一次视频参数事件，驱动 [MediaPlaybackController.videoAspectRatios]。
+  void emitVideoParams(VideoParams params) => _videoParams.add(params);
+
   @override
   Future<void> dispose() async {}
 

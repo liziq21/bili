@@ -102,6 +102,9 @@ class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
   /// 投喂媒体时长变化。
   void emitDuration(Duration value) => _duration.add(value);
 
+  /// 投喂播放器解出的视频尺寸。
+  void emitVideoParams(VideoParams value) => _videoParams.add(value);
+
   /// 投喂播放速率变化。
   void emitRate(double value) => _rate.add(value);
 
@@ -240,6 +243,85 @@ void main() {
   tearDown(() async {
     await recorder.close();
     await controller.dispose();
+  });
+
+  group('video aspect ratio', () {
+    test('a portrait video reports its own shape', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitVideoParams(const VideoParams(w: 1080, h: 1920));
+      await pumpEventQueue();
+
+      expect(controller.videoAspectRatio, closeTo(1080 / 1920, 0.0001));
+    });
+
+    test('rotation metadata turns the shape a quarter turn', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      // 竖拍视频以横尺寸编码 + rotate: 90 到达。
+      fake.emitVideoParams(const VideoParams(w: 1920, h: 1080, rotate: 90));
+      await pumpEventQueue();
+
+      expect(controller.videoAspectRatio, closeTo(1080 / 1920, 0.0001));
+    });
+
+    test(
+      'a declared aspect without sizes still follows the rotation',
+      () async {
+        await controller.open(
+          MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+        );
+        // 只有 aspect 没有宽高时，声明比例是编码方向（横的）。
+        fake.emitVideoParams(const VideoParams(aspect: 16 / 9, rotate: 90));
+        await pumpEventQueue();
+
+        expect(controller.videoAspectRatio, closeTo(9 / 16, 0.0001));
+      },
+    );
+
+    test('opening the next media clears the previous shape', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitVideoParams(const VideoParams(w: 1080, h: 1920));
+      await pumpEventQueue();
+      expect(controller.videoAspectRatio, isNotNull);
+
+      final emitted = <double?>[];
+      final subscription = controller.videoAspectRatios.listen(emitted.add);
+      addTearDown(subscription.cancel);
+
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      );
+      await pumpEventQueue();
+
+      // 新尺寸到达前回落到占位比例，而不是沿用上一条的竖屏形状。
+      expect(controller.videoAspectRatio, isNull);
+      expect(emitted, contains(null));
+    });
+
+    test('params arriving while a media loads are ignored', () async {
+      await controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/1.m4s'),
+      );
+      fake.emitVideoParams(const VideoParams(w: 1080, h: 1920));
+      await pumpEventQueue();
+      final portrait = controller.videoAspectRatio;
+
+      // 换源装载期间到达的尺寸属于上一条媒体，不能覆盖当前形状。
+      final opening = controller.open(
+        MediaStream(videoUrl: 'https://cdn.example.com/2.m4s'),
+      );
+      fake.emitVideoParams(const VideoParams(w: 640, h: 480));
+      await opening;
+      await pumpEventQueue();
+
+      expect(controller.videoAspectRatio, isNull);
+      expect(controller.videoAspectRatio, isNot(portrait));
+    });
   });
 
   group('MediaPlaybackController.open', () {
