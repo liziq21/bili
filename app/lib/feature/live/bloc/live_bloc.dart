@@ -36,6 +36,9 @@ class LiveBloc({
   final _log = Logger('LiveBloc');
   Timer? _roomDetailRefreshTimer;
 
+  /// 最近一次切档请求的序号，见 `_onSwitchLiveQuality`。
+  int _qualitySwitchToken = 0;
+
   /// 首次加载之后启动定时刷新；关闭刷新或首次加载失败时不起定时器
   /// （失败态由用户点重试，不自动重试）。
   void _startRoomDetailRefresh(int roomId) {
@@ -120,15 +123,24 @@ class LiveBloc({
       'Switching live quality for room: ${event.roomId} to qn ${event.qn}',
     );
 
+    // 每次切档带一个序号：旧请求的探测可能比新请求晚回来（候选要串行
+    // 探测），晚到的结果不能再覆盖用户最后选的那一档。
+    final token = ++_qualitySwitchToken;
     final result = await _repository.getLiveRoomStream(
       event.roomId,
       preferQn: event.qn,
     );
+    if (token != _qualitySwitchToken) {
+      _log.info('Dropping stale live quality switch for room: ${event.roomId}');
+      return;
+    }
     switch (result) {
       case Success(:final success):
         // 换流重开由渲染层监听 mediaStream 变化触发；失败不换错误态，
         // 旧流地址仍在播放，继续用它。
-        await _persistRememberedQn(event.roomId, event.qn);
+        // 记住的是实际拿到的档：源侧没有请求的那一档时会回退到别的档，
+        // 记下请求值会让下次打开直播间又去要一个拿不到的档。
+        await _persistRememberedQn(event.roomId, success.streamId ?? event.qn);
         emit(state.copyWith(mediaStream: success, isSwitchingQuality: false));
       case Error(:final error):
         _log.warning('Failed to switch live quality', error);

@@ -589,6 +589,30 @@ void main() {
       expect(stream.streamId, 10000);
     });
 
+    test('probes through the injected HTTP client', () async {
+      final requested = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson('avc', 250, baseUrl: '/live/flv/live.flv?'),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        // 不注入 probe：默认探测必须用这条客户端，而不是自建裸客户端。
+        clientFactory: () => MockClient.streaming((request, bodyStream) async {
+          requested.add(request.url.toString());
+          return http.StreamedResponse(Stream.value(<int>[35]), 200);
+        }),
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(requested, [stream.videoUrl]);
+      expect(stream.videoUrl, contains('.flv'));
+    });
+
     test('keeps probing when a probe itself throws', () async {
       final probed = <String>[];
       final source = BiliLiveRoomDetailRemoteDataSource(

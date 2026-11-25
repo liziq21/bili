@@ -2,6 +2,7 @@ import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:model/model.dart';
 
 import '../../bili_utils.dart';
@@ -12,6 +13,8 @@ typedef LiveStreamUrlProbe = Future<bool> Function(
   String url,
   Map<String, String> headers,
 );
+
+final _log = Logger('LiveStreamProbe');
 
 /// 探测候选地址是否真的可播。
 ///
@@ -48,7 +51,10 @@ Future<bool> probeLiveStreamUrl(
     firstByte.ignore();
     await firstByte.timeout(remaining);
     return true;
-  } on Object {
+  } on Object catch (error) {
+    // 探测失败的原因（DNS、TLS、超时、状态码）各不相同，只把「不可用」传上
+    // 去会让所有故障长得一样；记下候选地址与原因，便于事后定位。
+    _log.fine('Live stream probe failed: $url', error);
     return false;
   } finally {
     client.close();
@@ -70,8 +76,12 @@ final class BiliLiveRoomDetailRemoteDataSource({
   required final NetworkLiveDataSource network,
   required final String browserUserAgent,
 
-  /// 候选地址探测，默认见 [probeLiveStreamUrl]；测试注入 fake 以免联网。
-  final LiveStreamUrlProbe probe = probeLiveStreamUrl,
+  /// 候选地址探测；不传时用 [probeLiveStreamUrl] 配 [clientFactory]。
+  final LiveStreamUrlProbe? probe,
+
+  /// 探测复用的 HTTP 传输。应用传入 `Bili.client`，让探测与其他 B 站请求走
+  /// 同一条通道（带日志、带同一套 TLS 配置），而不是另起一个裸客户端。
+  final http.Client Function()? clientFactory,
 
   /// 播放器跑在浏览器里。浏览器解不了 FLV，候选排序要把 HLS 提到前面；
   /// 默认取 [kIsWeb]，测试可注入以覆盖两种排序。
@@ -143,7 +153,7 @@ final class BiliLiveRoomDetailRemoteDataSource({
       // 会撞上「地址在但连接无响应」的那类候选，而播放器对这种情况不报错，
       // 只会一直停在首帧。
       for (final candidate in candidates) {
-        if (!await _probe(candidate.url)) continue;
+        if (!await _isReachable(candidate.url)) continue;
         final currentQn = candidate.codec.currentQn;
         return Result.success(
           MediaStream(
@@ -167,11 +177,19 @@ final class BiliLiveRoomDetailRemoteDataSource({
     }
   }
 
+  LiveStreamUrlProbe get _probe =>
+      probe ??
+      (url, headers) => probeLiveStreamUrl(
+        url,
+        headers,
+        clientFactory: clientFactory ?? http.Client.new,
+      );
+
   /// 探测一路候选；探测自身出错（URL 非法、请求构造失败）只说明这一路不可
   /// 用，不能让整个候选循环中断。
-  Future<bool> _probe(String url) async {
+  Future<bool> _isReachable(String url) async {
     try {
-      return await probe(url, _headers);
+      return await _probe(url, _headers);
     } on Object {
       return false;
     }

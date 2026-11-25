@@ -118,8 +118,12 @@ class Bili() implements MediaSource {
       .new(network: _videoApi, browserUserAgent: browserUserAgent);
 
   @override
-  BiliLiveRoomDetailRemoteDataSource get liveRoomDetailDataSource =>
-      .new(network: _liveApi, browserUserAgent: browserUserAgent);
+  BiliLiveRoomDetailRemoteDataSource get liveRoomDetailDataSource => .new(
+    network: _liveApi,
+    browserUserAgent: browserUserAgent,
+    // 候选探测走应用配置的客户端，与其他 B 站请求同一条通道。
+    clientFactory: () => client ?? Client(),
+  );
 
   @override
   List<VideoFeedRemoteDataSource> get videoFeedDataSources => [
