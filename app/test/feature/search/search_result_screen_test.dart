@@ -13,6 +13,7 @@ import 'package:model/model.dart';
 import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_en.dart';
+import 'package:flutter/semantics.dart';
 
 class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
     implements SearchContentsRepository<VideoModel> {
@@ -257,6 +258,70 @@ void main() {
 
       // Verify search repository was called again for retry
       expect(videoRepo.searchCallCount, 2);
+    },
+  );
+
+  testWidgets(
+    'SearchResultScreen exposes the retry button tap action to screen readers',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      final videoRepo = TrackingFailingVideoSearchRepository();
+      final creatorRepo = const FakeCreatorProfileSearchRepository();
+
+      final videoBloc = SearchResultBloc<VideoModel>(
+        searchContentsRepository: videoRepo,
+        query: 'keyword',
+      );
+      final creatorBloc = SearchResultBloc<CreatorProfile>(
+        searchContentsRepository: creatorRepo,
+        query: 'keyword',
+      );
+
+      addTearDown(videoBloc.close);
+      addTearDown(creatorBloc.close);
+
+      videoBloc.add(const FetchNextPage());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<SearchResultBloc<VideoModel>>.value(
+                value: videoBloc,
+              ),
+              BlocProvider<SearchResultBloc<CreatorProfile>>.value(
+                value: creatorBloc,
+              ),
+            ],
+            child: SearchResultScreen(query: 'Flutter', onBackClick: () {}),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizationsEn().searchResultTypeVideo));
+      await tester.pumpAndSettle();
+
+      // Given the error state is on screen.
+      final retry = find.ancestor(
+        of: find.text(AppLocalizationsEn().retry),
+        matching: find.byType(FilledButton),
+      );
+      expect(retry, findsOneWidget);
+
+      // Then the button carries a tap action, so a screen reader can activate it.
+      final node = tester.getSemantics(retry);
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+
+      expect(videoRepo.searchCallCount, 2);
+      semantics.dispose();
     },
   );
 
