@@ -27,8 +27,15 @@ class const LiveDanmakuOverlay({
 }
 
 class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
-  /// 滚动窗口：超过 10 秒的弹幕不再保留，防止内存增长。
-  static const _maxWindow = Duration(seconds: 10);
+  /// 至少保留一个完整滚动窗口，防止配置的滚动时长超过 10 秒时，
+  /// 仍在屏幕上的弹幕被提前裁掉。
+  static const _minWindow = Duration(seconds: 10);
+
+  Duration get _window {
+    final seconds = _settings.regularDuration + 1;
+    final configured = Duration(milliseconds: (seconds * 1000).ceil());
+    return configured > _minWindow ? configured : _minWindow;
+  }
 
   List<DanmakuComment> _comments = const [];
   final DanmakuRenderCache _renderCache = DanmakuRenderCache();
@@ -102,9 +109,11 @@ class _LiveDanmakuOverlayState() extends State<LiveDanmakuOverlay> {
         rowId: comment.rowId,
       );
       setState(() {
-        _comments = [..._comments, stamped];
-        final cutoff = DateTime.now().difference(_streamStart) - _maxWindow;
-        _comments = _comments.where((c) => c.startTime >= cutoff).toList();
+        final cutoff = DateTime.now().difference(_streamStart) - _window;
+        _comments = List.unmodifiable([
+          ..._comments.where((c) => c.startTime >= cutoff),
+          stamped,
+        ]);
       });
       _ensureTicker();
     });

@@ -116,7 +116,7 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     if (!mounted || generation != _loadGeneration) return;
     setState(() {
       _comments = switch (result) {
-        Success(:final success) => success,
+        Success(:final success) => List.unmodifiable(success),
         _ => const [],
       };
     });

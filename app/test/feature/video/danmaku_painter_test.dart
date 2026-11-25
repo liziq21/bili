@@ -333,6 +333,43 @@ void main() {
       expect(early.lane, isNot(0));
       expect(late.lane, early.lane);
     });
+
+    test(
+      'keeps source order for simultaneous comments in an unsorted list',
+      () {
+        // Given 13 comments at the same instant, followed by later comments in
+        // reverse order so the whole list is not sorted.
+        final comments = [
+          for (var i = 0; i < 13; i++)
+            _comment(
+              DanmakuMode.scrolling,
+              startSeconds: 0,
+              content: 'burst $i',
+              rowId: i,
+            ),
+          for (var i = 0; i < 100; i++)
+            _comment(
+              DanmakuMode.scrolling,
+              startSeconds: 100.0 - i,
+              content: 'later $i',
+              rowId: i,
+            ),
+        ];
+
+        // When planning the first frame.
+        final slots = planDanmakuSlots(
+          comments: comments,
+          positionSeconds: .3,
+          size: _size,
+          settings: const DanmakuSettings(),
+        );
+
+        // Then the eight source-order leaders keep the lanes, as before.
+        expect(slots.map((slot) => slot.comment.content), [
+          for (var i = 0; i < 8; i++) 'burst $i',
+        ]);
+      },
+    );
   });
 
   group('DanmakuRenderCache', () {
@@ -364,12 +401,25 @@ void main() {
         // Then the comments were scanned once, not once per frame.
         expect(cache.layout.buildCount, 1);
         expect(comments.reads, lessThan(comments.length * 3));
-
-        // And text layouts are reused instead of rebuilt every frame.
-        expect(cache.textPainters.missCount, greaterThan(0));
-        expect(cache.textPainters.hitCount, greaterThan(0));
       },
     );
+
+    test('reuses a laid-out text painter on the next frame', () {
+      // Given one comment that stays visible across two frames.
+      final comments = [
+        _comment(DanmakuMode.scrolling, content: 'reused layout'),
+      ];
+      final cache = DanmakuRenderCache();
+      addTearDown(cache.dispose);
+
+      // When painting two positions.
+      _paint(comments, position: const Duration(seconds: 1), cache: cache);
+      _paint(comments, position: const Duration(seconds: 2), cache: cache);
+
+      // Then only the first frame paid for text layout.
+      expect(cache.textPainters.missCount, 1);
+      expect(cache.textPainters.hitCount, 1);
+    });
 
     test('invalidates the timeline when any input changes', () {
       // Given a cached timeline for one set of inputs.
@@ -413,34 +463,44 @@ void main() {
       expect(cache.layout.buildCount, 4);
     });
 
-    test('bounds the text painter cache and reuses hits', () {
-      // Given a cache that can hold two layouts.
-      final cache = DanmakuTextPainterCache(maxEntries: 2);
-      addTearDown(cache.dispose);
-      TextPainter obtain(String content) => cache.obtain(
-        content: content,
-        fontSize: 18,
-        opacity: .9,
-        outlineRadius: 2,
-        onScrim: _colors.onScrim,
-        outline: _colors.outline,
-        maxWidth: _size.width * 1.5,
-      );
+    test(
+      'bounds the text painter cache and evicts the least recently used',
+      () {
+        // Given a cache that can hold two layouts.
+        final cache = DanmakuTextPainterCache(maxEntries: 2);
+        addTearDown(cache.dispose);
+        TextPainter obtain(String content) => cache.obtain(
+          content: content,
+          fontSize: 18,
+          opacity: .9,
+          outlineRadius: 2,
+          onScrim: _colors.onScrim,
+          outline: _colors.outline,
+          maxWidth: _size.width * 1.5,
+        );
 
-      // When obtaining two entries and then the first one again.
-      final first = obtain('a');
-      obtain('b');
-      final again = obtain('a');
+        // When obtaining two entries and then the first one again.
+        final first = obtain('a');
+        final second = obtain('b');
+        final again = obtain('a');
 
-      // Then the repeat is a hit that returns the same layout.
-      expect(cache.missCount, 2);
-      expect(cache.hitCount, 1);
-      expect(identical(again, first), isTrue);
+        // Then each content has its own layout, and the repeat is a hit.
+        expect(first.text!.toPlainText(), 'a');
+        expect(second.text!.toPlainText(), 'b');
+        expect(cache.missCount, 2);
+        expect(cache.hitCount, 1);
+        expect(identical(again, first), isTrue);
+        expect(again.text!.toPlainText(), 'a');
 
-      // And a third distinct entry evicts the least recently used one.
-      obtain('c');
-      expect(cache.length, 2);
-      expect(cache.missCount, 3);
-    });
+        // And a third distinct entry evicts the least recently used one.
+        obtain('c');
+        expect(cache.length, 2);
+        expect(cache.missCount, 3);
+        expect(identical(obtain('a'), first), isTrue);
+        expect(cache.hitCount, 2);
+        expect(identical(obtain('b'), second), isFalse);
+        expect(cache.missCount, 4);
+      },
+    );
   });
 }

@@ -128,6 +128,11 @@ void main() {
       _painterOf(tester).comments.map((comment) => comment.content),
       contains('hello video'),
     );
+    // The painter caches by list identity, so the overlay must pass a snapshot.
+    expect(
+      () => _painterOf(tester).comments.add(_comment('mutated')),
+      throwsUnsupportedError,
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

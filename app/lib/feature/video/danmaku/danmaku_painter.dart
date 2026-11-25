@@ -140,8 +140,17 @@ final class const DanmakuTimeline(
 
     var ordered = comments;
     if (!_isSortedByStart(comments)) {
-      ordered = [...comments]
-        ..sort((a, b) => a.startTime.compareTo(b.startTime));
+      // Stable sort: equal start times keep their source order so that the
+      // comments admitted to the limited lanes do not change when later,
+      // out-of-order entries are added to the list.
+      final order = List<int>.generate(comments.length, (index) => index)
+        ..sort((a, b) {
+          final byStart = comments[a].startTime.compareTo(
+            comments[b].startTime,
+          );
+          return byStart != 0 ? byStart : a.compareTo(b);
+        });
+      ordered = [for (final index in order) comments[index]];
     }
 
     final freeAt = List<double>.filled(laneCount, double.negativeInfinity);
@@ -394,6 +403,9 @@ Offset danmakuTextOffset({
 ///
 /// [cache] 由调用方的 `State` 持有并跨帧传入；不传时每帧重新规划、
 /// 重新排版，行为与旧实现一致，只是没有跨帧复用。
+///
+/// [comments] 必须是不可变快照：内容变化时换一个新列表。原地修改同一个
+/// 列表不会被 `shouldRepaint` 或缓存发现，画面会停留在旧内容。
 final class DanmakuPainter({
   required final List<DanmakuComment> comments,
   required final Duration position,
