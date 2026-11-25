@@ -1,7 +1,9 @@
-import 'dart:ui' show SemanticsAction;
+import 'dart:ui' show ImageByteFormat, SemanticsAction;
 
+import 'package:app/design/design.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
+import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -270,4 +272,109 @@ void main() {
       await clearImageCacheDuringTest(tester);
     },
   );
+
+  group('pressed state', () {
+    // 按住卡片时，`InkWell` 把主题的状态层画在卡片底色之上。状态层一旦不透明
+    // （旧实现直接取 accentFill），副标题与头像文字就只剩 1.3:1 左右。这里读取
+    // 真实渲染像素，确认叠加层只是薄薄一层，并且与主题算出的叠加结果一致。
+    for (final brightness in Brightness.values) {
+      testWidgets('feed card paints a translucent state layer when pressed '
+          '(${brightness.name})', (WidgetTester tester) async {
+        final colors = AppColors(BrandPalette.of(brightness));
+        final theme = appThemeData(colors);
+        final boundaryKey = GlobalKey();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Center(
+              child: RepaintBoundary(
+                key: boundaryKey,
+                child: SizedBox(
+                  width: 320,
+                  height: 260,
+                  child: VideoCard(
+                    variant: VideoCardVariant.feed,
+                    videoInfoBase: VideoModel(
+                      id: 'BV1pressed',
+                      title: 'Pressed state',
+                      url: 'https://example.com/video/pressed',
+                      viewCount: 1280000,
+                      duration: 754,
+                      creatorProfileName: 'UP',
+                    ),
+                    onTap: () {},
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // 采样点取封面下沿的留白：那里只有卡片底色，没有文字、头像或角标。
+        final thumbnail = tester.getRect(find.byType(AspectRatio));
+        final boundaryRect = tester.getRect(find.byKey(boundaryKey));
+        final sample = Offset(
+          thumbnail.center.dx - boundaryRect.left,
+          thumbnail.bottom + 4 - boundaryRect.top,
+        );
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(VideoCard)),
+        );
+        await tester.pump();
+        // 高亮淡入与波纹展开都跑完后再取像素。
+        await tester.pump(const Duration(milliseconds: 600));
+
+        final boundary =
+            boundaryKey.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await tester.runAsync(boundary.toImage);
+        final data = await tester.runAsync(
+          () => image!.toByteData(format: ImageByteFormat.rawRgba),
+        );
+        final bytes = data!.buffer.asUint8List();
+        final index =
+            (sample.dy.round() * image!.width + sample.dx.round()) * 4;
+        final pressed = Color.fromARGB(
+          255,
+          bytes[index],
+          bytes[index + 1],
+          bytes[index + 2],
+        );
+        image.dispose();
+
+        await gesture.up();
+        await tester.pump();
+
+        final surface = theme.colorScheme.surfaceContainerLow;
+        final expected = Color.alphaBlend(theme.highlightColor, surface);
+
+        expect(
+          pressed,
+          isNot(surface),
+          reason: 'the pressed state layer must be visible',
+        );
+        expect(
+          Contrast.ratio(pressed, surface),
+          lessThan(1.3),
+          reason:
+              'pressed ${pressed.toARGB32()} vs resting '
+              '${surface.toARGB32()}: the state layer replaced the surface '
+              'instead of tinting it',
+        );
+        for (final (channel, actual, want) in [
+          ('r', pressed.r, expected.r),
+          ('g', pressed.g, expected.g),
+          ('b', pressed.b, expected.b),
+        ]) {
+          expect(
+            (actual - want).abs(),
+            lessThan(0.02),
+            reason: '$channel channel differs from the theme state layer',
+          );
+        }
+      });
+    }
+  });
 }

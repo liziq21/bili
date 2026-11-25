@@ -60,6 +60,10 @@
 
 **R2.4** 与 Material 组件自身内边距对齐的间距，取该组件的固定值，不取 `$styles.insets`。`$styles.insets` 随布局尺度缩放，组件内边距不随。
 
+**R2.5** 交互状态层（`InkWell` 的按压高亮与波纹，主题的 `highlightColor` / `splashColor`）必须**叠加**在表面之上，不得用不透明色替换表面。不透明强调色会把整张卡片刷成实心色块，压在卡片副标题（`onSurfaceVariant`）上只剩 1.3:1 左右，文字无法辨认；状态层取 `accentFill` 的低透明度叠加（取值见 `app_theme.dart` 的 `_stateLayerOpacity`），透明度上限由 G2 断言——按压态下 `onSurface` / `onSurfaceVariant` 仍需 ≥ `aaText`。
+
+`primaryContainer` / `onPrimaryContainer` 这一对同样受 G2 约束：暗色强调色本身是浅色，沿用亮色前景（浅压浅）不达标，暗色下前景必须取深色。头像首字母与来源角标都取这一对角色。
+
 ### R3 —— 亮度单源
 
 运行中的 `isDark` 只有一个来源：`Theme.of(context).brightness`，由 `AppScaffold` 注入 `AppStyle`。`AppScaffold` 第一次 build 前的静态 `$styles` 只允许使用亮色 bootstrap fallback，用于让构造期读取有安全值；第一次 build 必须用真实 Theme 亮度覆盖它，不能把 fallback 当作运行时主题。除该 bootstrap 初始化外，**禁止任何位置硬编码 `isDark = false`**。
@@ -157,6 +161,8 @@ app/lib/design/
 ### G2 —— 对比度测试
 
 `app/test/design/contrast_test.dart` 枚举**受支持的**前景/背景组合（不做笛卡尔积），在亮 / 暗两种亮度下各断言一次，门槛取 `contrast.dart` 的 `aaText` / `aaNonText`。
+
+覆盖范围包含**交互状态**：按压高亮叠加后的卡片表面仍要承载 `onSurface` / `onSurfaceVariant`（R2.5），`onPrimaryContainer` 压 `primaryContainer` 也按 `aaText` 断言。只测静止态会漏掉「按压时文字被刷掉」这一类缺陷。
 
 **G2 必须先于 G1 满额通过。** G1 拦住的是「新增硬编码色」，G2 拦住的是「改了色板但没算对比度」。反序上线会出现门禁全绿而界面仍不可访问。
 

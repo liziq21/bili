@@ -199,7 +199,10 @@ class const BrandPalette({
       primary: _accentDark,
       onPrimary: _scrimDark,
       primaryContainer: _accentDark,
-      onPrimaryContainer: _surfaceLight,
+      // 容器与 primary 同值，前景也必须同值：亮色下两档都是黑字，暗色下
+      // 强调色本身是浅色（#EFA97C），浅色前景压上去只有 1.70:1。头像首字母、
+      // 来源角标都取这一对角色。
+      onPrimaryContainer: _scrimDark,
       secondary: _accent2Dark,
       onSecondary: _scrimDark,
       secondaryContainer: _accent2Dark,
