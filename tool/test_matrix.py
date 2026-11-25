@@ -145,6 +145,7 @@ TEST_MATRIX = {
         'app/test/ui/app_navigation_shell_test.dart',
         'app/test/ui/app_scroll_behavior_test.dart',
         'app/test/ui/creator_profile_item_test.dart',
+        'app/test/ui/rate_limit_retry_test.dart',
         'app/test/ui/video_card_test.dart',
         'packages/bilibili/test/widget_test.dart',
     ],

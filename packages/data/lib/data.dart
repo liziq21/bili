@@ -17,5 +17,6 @@ export 'src/model/video_detail_model.dart';
 export 'src/model/video_model.dart';
 export 'src/model/video_playlist_ref.dart';
 export 'src/playlist/full_playlist_fetcher.dart';
+export 'src/rate_limited_failure.dart';
 export 'src/remote_data_source.dart';
 export 'src/search_query.dart';

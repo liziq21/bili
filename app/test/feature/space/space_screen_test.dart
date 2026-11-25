@@ -58,6 +58,8 @@ Future<void> _waitForSubscription(
   fail('subscription did not become $subscribed');
 }
 
+class const _RateLimited() implements RateLimitedFailure;
+
 class _FakeCreatorProfileRepository(
   var Result<CreatorProfile, Exception> result,
 ) implements CreatorProfileRepository {
@@ -300,6 +302,52 @@ void main() {
     expect(opened, ['v1']);
   });
 
+  testWidgets('names rate limiting and blocks retry while it cools down', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.error(const _RateLimited()),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelVideosRepository>.value(
+            value: videosRepository,
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: const SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.rateLimitedRetryLater), findsOneWidget);
+    expect(find.text(l10n.loadFailedRetryLater), findsNothing);
+
+    final button = find.byType(FilledButton);
+    expect(tester.widget<FilledButton>(button).onPressed, null);
+    await tester.tap(button);
+    await tester.pump();
+
+    expect(videosRepository.requestedPages, [1]);
+  });
+
   testWidgets('loads the next page when the grid reaches the end', (
     tester,
   ) async {
@@ -338,6 +386,57 @@ void main() {
     expect(videosRepository.requestedPages, [1, 2]);
     expect(find.text('Video v1'), findsOneWidget);
     expect(find.text('Video v2'), findsOneWidget);
+  });
+
+  testWidgets('keeps the pagination retry behind the rate-limit cooldown', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.success(Page(number: 1, totalPages: 2, data: [_video('v1')])),
+      2: Result.error(const _RateLimited()),
+    });
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelVideosRepository>.value(
+            value: videosRepository,
+          ),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Given the second page was rejected by rate limiting.
+    expect(videosRepository.requestedPages, [1, 2]);
+    // Then the entry is there but counting down, and tapping it changes nothing.
+    final countdown = find.text(l10n.retryInSeconds(15));
+    expect(countdown, findsOneWidget);
+    final button = tester.widget<TextButton>(
+      find.ancestor(of: countdown, matching: find.byType(TextButton)),
+    );
+    expect(button.onPressed, null);
+    await tester.tap(countdown, warnIfMissed: false);
+    await tester.pump();
+
+    expect(videosRepository.requestedPages, [1, 2]);
   });
 
   testWidgets('shows an unsupported message without a videos capability', (

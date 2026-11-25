@@ -4,6 +4,7 @@ import 'package:model/model.dart';
 
 import '../../bili_utils.dart';
 import 'bili_remote_data_source.dart';
+import 'bili_result.dart';
 
 final class const BiliRankingVideoFeedRemoteDataSource({
   required final NetworkBiliFeedDataSource _network,
@@ -24,7 +25,7 @@ final class const BiliRankingVideoFeedRemoteDataSource({
             data: response.data.list.map((video) => video.asModel()).toList(),
           ),
         )
-        .toResult();
+        .toBiliResult();
   }
 }
 

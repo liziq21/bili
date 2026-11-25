@@ -413,6 +413,21 @@
   "@loadFailedRetryLater": {
     "description": "List or detail page - error state of a failed first load"
   },
+  "rateLimitedRetryLater": "Too many requests. Please wait a moment and try again",
+  "retryInSeconds": "Retry in {seconds}s",
+  "@retryInSeconds": {
+    "description": "Retry button label while a rate-limit cooldown is counting down",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "15",
+        "description": "Whole seconds left before the retry button is usable again"
+      }
+    }
+  },
+  "@rateLimitedRetryLater": {
+    "description": "Error state when Bilibili rate-limits or risk-controls the request"
+  },
   "loadFailedRetry": "Failed to load. Retry",
   "@loadFailedRetry": {
     "description": "Search results - error state with a retry action"

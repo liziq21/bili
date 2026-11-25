@@ -8,6 +8,7 @@ import '../../../search/search_filter.dart';
 import '../../../search/sort.dart';
 import '../../model/search_results.dart';
 import '../bili_remote_data_source.dart';
+import '../bili_result.dart';
 
 final class const BiliVideoSearchRemoteDataSource({
   required final NetworkSearchDataSource _network,
@@ -44,7 +45,7 @@ final class const BiliVideoSearchRemoteDataSource({
           duration: _durationParam(searchQuery.filters),
         )
         .then((it) => it.asPagedVideos())
-        .toResult();
+        .toBiliResult();
   }
 
   /// B 站时长筛选值：1 为 10 分钟以下，2 为 10–30 分钟，3 为 30–60 分钟，

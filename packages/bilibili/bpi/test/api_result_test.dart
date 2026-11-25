@@ -37,6 +37,19 @@ void main() {
     expect((result as Error<Map<String, dynamic>>).code, -101);
   });
 
+  test('surfaces the -352 business code as a typed error', () {
+    // 分类留给 converter：只有它同时看得到业务码和 HTTP 状态。这里保证 -352
+    // 不会被当成成功信封继续解码。
+    final result = ApiResult<Map<String, dynamic>>.fromJson({
+      'code': -352,
+      'message': '风控校验失败',
+      'data': {'v_voucher': 'voucher-token'},
+    }, decode);
+
+    expect(result, isA<Error<Map<String, dynamic>>>());
+    expect((result as Error<Map<String, dynamic>>).code, -352);
+  });
+
   test('rejects successful responses without object data', () {
     expect(
       () => ApiResult<Map<String, dynamic>>.fromJson({

@@ -91,6 +91,11 @@ final class WbiException extends BpiException {
 /// The envelope still carries `code: 0`, so this is not an API error and not a
 /// decoding bug: `data` holds only `v_voucher`, which needs a captcha the
 /// client cannot solve. The request is safe to retry later.
+/// B 站以风控/限流为由拒绝了这次请求，稍后重试可能成功。
+///
+/// 覆盖三种实测形态：HTTP 412、业务码 `-352`，以及 `code: 0` 但 `data` 只有
+/// `v_voucher` 的 GAIA 挑战。前两种带 [BpiException.statusCode]，后两种带
+/// [BpiException.biliCode]。
 final class BiliRiskControlException extends BpiException {
   const BiliRiskControlException(
     super.message, {

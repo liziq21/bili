@@ -5,6 +5,7 @@ import 'package:data/data.dart';
 import 'package:model/model.dart';
 
 import '../bili_remote_data_source.dart';
+import '../bili_result.dart';
 
 final class const BiliSearchSuggestRemoteDataSource({
   required final NetworkSearchDataSource network,
@@ -31,6 +32,6 @@ final class const BiliSearchSuggestRemoteDataSource({
               .where((term) => term.isNotEmpty)
               .toList(),
         )
-        .toResult();
+        .toBiliResult();
   }
 }

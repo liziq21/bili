@@ -305,6 +305,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadFailedRetryLater => 'Failed to load. Try again later';
 
   @override
+  String get rateLimitedRetryLater =>
+      'Too many requests. Please wait a moment and try again';
+
+  @override
+  String retryInSeconds(int seconds) {
+    return 'Retry in ${seconds}s';
+  }
+
+  @override
   String get loadFailedRetry => 'Failed to load. Retry';
 
   @override

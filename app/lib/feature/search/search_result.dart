@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:material_ui/material_ui.dart';
@@ -6,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import '../../ui/common/rate_limit_retry.dart';
 import 'bloc/search_result_bloc.dart';
 
 class const SearchResult<T>({
@@ -34,9 +34,9 @@ class const SearchResult<T>({
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
                 firstPageErrorIndicatorBuilder: (context) =>
-                    _SearchErrorView<T>(),
+                    _SearchErrorView<T>(error: state.error),
                 newPageErrorIndicatorBuilder: (context) =>
-                    _NewPageErrorIndicator<T>(),
+                    _NewPageErrorIndicator<T>(error: state.error),
                 noItemsFoundIndicatorBuilder: (context) =>
                     const _EmptySearchIndicator(),
               ),
@@ -56,11 +56,16 @@ class const SearchResult<T>({
 }
 
 /// 首页搜索失败视图：图标 + 提示文案 + 明确重试按钮 + 触觉反馈 + 屏幕阅读器语义
-class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
+///
+/// 搜索的风控窗口里接口会返回 `code: 0` 但只有 `v_voucher`，服务包把它适配成
+/// [RateLimitedFailure]；此时换成限流文案并让重试先冷静一段时间。
+class const _SearchErrorView<T>({required final Object? error})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final rateLimited = isRateLimited(error);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -68,24 +73,22 @@ class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
           Icon(AppIcons.error, size: 48, color: colorScheme.error),
           SizedBox(height: $styles.insets.sm),
           Text(
-            l10n?.loadFailedRetryLater ??
-                'Load failed. Please try again later.',
+            rateLimited
+                ? l10n.rateLimitedRetryLater
+                : l10n.loadFailedRetryLater,
             style: $styles.text.body.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
           SizedBox(height: $styles.insets.xs),
-          Semantics(
-            button: true,
-            label: l10n?.loadFailedRetry ?? 'Load failed. Retry.',
-            excludeSemantics: true,
-            child: TextButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                context.read<SearchResultBloc<T>>().add(const FetchNextPage());
-              },
-              child: Text(l10n?.retry ?? 'Retry'),
-            ),
+          // 这里不包固定 label 的 Semantics：那会盖掉按钮自己的倒计时文案与
+          // 禁用状态，读屏用户就听不到冷静期了。
+          RetryCooldownButton(
+            style: TextButton.styleFrom(),
+            rateLimited: rateLimited,
+            scope: 'search.first',
+            onRetry: () =>
+                context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
           ),
         ],
       ),
@@ -94,44 +97,25 @@ class const _SearchErrorView<T>({super.key}) extends StatelessWidget {
 }
 
 /// 翻页加载失败视图：单行可点击重试区域 + 触觉反馈 + 屏幕阅读器语义
-class const _NewPageErrorIndicator<T>({super.key}) extends StatelessWidget {
+class const _NewPageErrorIndicator<T>({required final Object? error})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final rateLimited = isRateLimited(error);
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
-        child: Semantics(
-          button: true,
-          label: l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
-          excludeSemantics: true,
-          child: InkWell(
-            borderRadius: BorderRadius.circular($styles.corners.sm),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              context.read<SearchResultBloc<T>>().add(const FetchNextPage());
-            },
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: $styles.insets.sm,
-                vertical: $styles.insets.xs,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(AppIcons.refresh, size: 18, color: colorScheme.error),
-                  SizedBox(width: $styles.insets.xs),
-                  Text(
-                    l10n?.moreLoadFailedRetry ?? 'Failed to load more. Retry.',
-                    style: $styles.text.bodySmall.copyWith(
-                      color: $styles.colors.errorText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        // 限流时也保留入口，只是先走冷却倒计时：分页失败后用户仍然要能接着
+        // 往下翻，只是不能立刻重发同一个被拒的请求。
+        child: RetryCooldownInlineButton(
+          rateLimited: rateLimited,
+          scope: 'search.next',
+          onRetry: () =>
+              context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
+          label: rateLimited
+              ? l10n.rateLimitedRetryLater
+              : l10n.moreLoadFailedRetry,
         ),
       ),
     );

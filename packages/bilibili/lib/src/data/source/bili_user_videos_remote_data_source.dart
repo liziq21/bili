@@ -4,6 +4,7 @@ import 'package:model/model.dart';
 
 import '../model/video_model.dart';
 import 'bili_remote_data_source.dart';
+import 'bili_result.dart';
 
 /// B 站用户投稿视频分页桥接：`NetworkUserDataSource.getUserVideos` →
 /// [UserVideosRemoteDataSource]，按新到旧（order=pubdate）分页。
@@ -50,6 +51,6 @@ final class const BiliUserVideosRemoteDataSource({
         totalPages: totalPages,
         data: items.map((item) => item.asModel()).toList(),
       );
-    }).toResult();
+    }).toBiliResult();
   }
 }

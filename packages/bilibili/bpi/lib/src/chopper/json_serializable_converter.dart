@@ -15,6 +15,12 @@ class const JsonSerializableConverter(
   FutureOr<Response<ResultType>> convertResponse<ResultType, Item>(
     Response response,
   ) async {
+    if (response.statusCode == biliRiskControlStatusCode) {
+      throw BiliRiskControlException(
+        'Bilibili rejected the request with a risk-control status.',
+        statusCode: response.statusCode,
+      );
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw BpiHttpException(
         'Bilibili request failed.',
@@ -47,13 +53,28 @@ class const JsonSerializableConverter(
     final apiResult = ApiResult<ResultType>.fromJson(json, jsonFactory);
     return switch (apiResult) {
       Ok(:final data) => jsonRes.copyWith<ResultType>(body: data),
-      Error(:final code, :final message) => throw BiliApiException(
-        message ?? 'Bilibili API request failed.',
-        biliCode: code,
-        statusCode: response.statusCode,
+      Error(:final code, :final message) => throw _apiFailure(
+        code,
+        message,
+        response.statusCode,
       ),
     };
   }
+
+  /// 业务码失败按语义分流，两条路径都要带上 HTTP 状态，日志和调用方才不会
+  /// 丢掉「这个 412 是风控而不是普通失败」。
+  Exception _apiFailure(int? code, String? message, int statusCode) =>
+      isBiliRiskControlCode(code)
+      ? BiliRiskControlException(
+          message ?? 'Bilibili risk-control rejection.',
+          biliCode: code,
+          statusCode: statusCode,
+        )
+      : BiliApiException(
+          message ?? 'Bilibili API request failed.',
+          biliCode: code,
+          statusCode: statusCode,
+        );
 
   /// Envelope DTOs parse `code`/`data` themselves, so the shared risk-control
   /// and error handling in [ApiResult] would otherwise be skipped for them.
@@ -63,6 +84,13 @@ class const JsonSerializableConverter(
       String value => int.tryParse(value),
       _ => null,
     };
+    if (isBiliRiskControlCode(code)) {
+      throw BiliRiskControlException(
+        json['message']?.toString() ?? 'Bilibili risk-control rejection.',
+        biliCode: code,
+        statusCode: statusCode,
+      );
+    }
     if (code != null && code != 0) {
       throw BiliApiException(
         json['message']?.toString() ?? 'Bilibili API request failed.',
@@ -82,6 +110,12 @@ class const JsonSerializableConverter(
 
   @override
   FutureOr<Response> convertError<ResultType, Item>(Response response) {
+    if (response.statusCode == biliRiskControlStatusCode) {
+      throw BiliRiskControlException(
+        'Bilibili rejected the request with a risk-control status.',
+        statusCode: response.statusCode,
+      );
+    }
     throw BpiHttpException(
       'Bilibili request failed.',
       statusCode: response.statusCode,
