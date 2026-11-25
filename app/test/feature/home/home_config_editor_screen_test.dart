@@ -186,7 +186,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('activates the move buttons from the screen-reader tap', (
+  testWidgets('activates the move-up button from the screen-reader tap', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
@@ -200,16 +200,45 @@ void main() {
     final reordered = await persistedConfig();
     expect(reordered.sources['test']!.tabs[0].sortOrder, equals(1));
     expect(reordered.sources['test']!.tabs[1].sortOrder, equals(0));
+    semantics.dispose();
+  });
 
-    // Tab B is first after the swap, so its "move down" is the enabled one.
-    final moveDown = nodeLabelled(tester, '下移: Tab B');
+  testWidgets('activates the move-down button from the screen-reader tap', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final moveDown = nodeLabelled(tester, '下移: Tab A');
     expect(moveDown.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
     moveDown.owner!.performAction(moveDown.id, SemanticsAction.tap);
     await tester.pump();
 
-    final restored = await persistedConfig();
-    expect(restored.sources['test']!.tabs[0].sortOrder, equals(0));
-    expect(restored.sources['test']!.tabs[1].sortOrder, equals(1));
+    final reordered = await persistedConfig();
+    expect(reordered.sources['test']!.tabs[0].sortOrder, equals(1));
+    expect(reordered.sources['test']!.tabs[1].sortOrder, equals(0));
+    semantics.dispose();
+  });
+
+  testWidgets('keeps a moved tab row alive so screen-reader focus follows it', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final row = find.byKey(const ValueKey('test-tab_b'));
+    final before = tester.element(row);
+
+    final moveUp = nodeLabelled(tester, '上移: Tab B');
+    moveUp.owner!.performAction(moveUp.id, SemanticsAction.tap);
+    await tester.pump();
+
+    // The same Element survives the reorder, so the row's semantics node is not
+    // torn down and rebuilt under a different tab.
+    expect(
+      tester.element(find.byKey(const ValueKey('test-tab_b'))),
+      same(before),
+    );
     semantics.dispose();
   });
 
@@ -231,6 +260,7 @@ void main() {
   testWidgets('exposes accessible semantics for screen readers', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     await preferences.set(PreferencesKey.homeConfig, _persistedJson);
     await tester.pumpWidget(_buildScreen(preferences));
     await tester.pump();
@@ -333,5 +363,6 @@ void main() {
       ),
       findsOneWidget,
     );
+    semantics.dispose();
   });
 }

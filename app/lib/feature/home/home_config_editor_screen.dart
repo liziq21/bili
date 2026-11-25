@@ -187,6 +187,9 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
           Text(l10n.homeConfigTabs, style: $styles.text.caption),
           for (var index = 0; index < orderedTabs.length; index++)
             Padding(
+              // 稳定 key 让重排后的行保持同一个 Element，读屏焦点不会留在
+              // 原位置而改指向另一个标签。
+              key: ValueKey('${source.id}-${orderedTabs[index].id}'),
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               child: _tabRow(
                 l10n: l10n,
