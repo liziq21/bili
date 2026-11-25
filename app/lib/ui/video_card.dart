@@ -496,6 +496,10 @@ double videoCardExtent(
   final textScaler = MediaQuery.textScalerOf(context);
   final innerWidth = cardWidth - _cardBorder * 2;
   final coverHeight = innerWidth * 9 / 16;
+  // 默认卡片的文字没有显式字体，继承 `Material` 的 `bodyMedium`（含行高
+  // 1.43）。按裸 `TextStyle(fontSize: 13)` 量会漏掉这个行高，每行少算约 4px，
+  // 两行标题的第二行会被卡片圆角裁掉。
+  final inherited = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
 
   final (double textHeight, double padding) = switch (variant) {
     VideoCardVariant.feed => (
@@ -519,11 +523,16 @@ double videoCardExtent(
     ),
     VideoCardVariant.defaultCard => (
       _lineHeight(
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                inherited.merge(
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
                 textScaler,
               ) *
               titleMaxLines +
-          _lineHeight(const TextStyle(fontSize: 11), textScaler),
+          _lineHeight(
+            inherited.merge(const TextStyle(fontSize: 11)),
+            textScaler,
+          ),
       8.0,
     ),
   };

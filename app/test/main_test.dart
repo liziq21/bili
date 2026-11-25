@@ -1,6 +1,8 @@
 import 'package:app/main.dart';
 import 'package:bilibili/bilibili.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_debug_overlay/flutter_debug_overlay.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +34,25 @@ void main() {
 
     expect(probeClient, isNot(isA<HttpLogClient>()));
     expect(identical(probeClient, Bili.client), isFalse);
+  });
+
+  test('live room data source probes through Bili.probeClientFactory', () {
+    // 上面的断言只证明工厂产出的客户端不带缓冲，证明不了直播数据源真的用它：
+    // 数据源若退回共享客户端，debug 下的超时同样会回来。
+    MockClient createProbeClient() =>
+        MockClient((_) async => http.Response('', 200));
+    final original = Bili.probeClientFactory;
+    Bili.probeClientFactory = createProbeClient;
+    final bili = Bili();
+    addTearDown(() {
+      Bili.probeClientFactory = original;
+      bili.close();
+    });
+
+    final source = bili.liveRoomDetailDataSource;
+
+    expect(source, isA<BiliLiveRoomDetailRemoteDataSource>());
+    expect(identical(source.clientFactory, createProbeClient), isTrue);
   });
 
   testWidgets(
