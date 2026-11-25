@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Page;
 import 'package:model/model.dart';
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
 
 class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
     implements SearchContentsRepository<VideoModel> {
@@ -112,6 +114,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<VideoModel>>.value(
@@ -127,9 +134,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // English fallback labels should be rendered when AppLocalizations is null
-      expect(find.text('Channels'), findsOneWidget);
-      expect(find.text('Videos'), findsOneWidget);
+      // Tab headers come from the ARB, never from the raw enum identifier.
+      expect(
+        find.text(AppLocalizationsEn().searchResultTypeChannel),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizationsEn().searchResultTypeVideo),
+        findsOneWidget,
+      );
       expect(find.text('creatorProfile'), findsNothing);
     },
   );
@@ -154,6 +167,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<VideoModel>>.value(
@@ -169,10 +187,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Videos'));
+      await tester.tap(find.text(AppLocalizationsEn().searchResultTypeVideo));
       await tester.pumpAndSettle();
 
-      expect(find.text('Videos'), findsOneWidget);
+      expect(
+        find.text(AppLocalizationsEn().searchResultTypeVideo),
+        findsOneWidget,
+      );
     },
   );
 
@@ -199,6 +220,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<VideoModel>>.value(
@@ -215,15 +241,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Video tab
-      await tester.tap(find.text('Videos'));
+      await tester.tap(find.text(AppLocalizationsEn().searchResultTypeVideo));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(AppIcons.error), findsOneWidget);
-      expect(find.text('Load failed. Please try again later.'), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
+      expect(
+        find.text(AppLocalizationsEn().loadFailedRetryLater),
+        findsOneWidget,
+      );
+      expect(find.text(AppLocalizationsEn().retry), findsOneWidget);
 
       // Tap retry button
-      await tester.tap(find.text('Retry'));
+      await tester.tap(find.text(AppLocalizationsEn().retry));
       await tester.pumpAndSettle();
 
       // Verify search repository was called again for retry
@@ -253,6 +282,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<VideoModel>>.value(
@@ -268,11 +302,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Videos'));
+      await tester.tap(find.text(AppLocalizationsEn().searchResultTypeVideo));
       await tester.pumpAndSettle();
 
       expect(find.byIcon(AppIcons.searchOff), findsOneWidget);
-      expect(find.text('Nothing found'), findsOneWidget);
+      expect(find.text(AppLocalizationsEn().nothingFound), findsOneWidget);
     },
   );
 
@@ -297,6 +331,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<VideoModel>>.value(

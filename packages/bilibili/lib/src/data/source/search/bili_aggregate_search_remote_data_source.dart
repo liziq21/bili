@@ -6,6 +6,7 @@ import 'package:model/model.dart';
 
 import '../../model/search_results.dart';
 import '../bili_remote_data_source.dart';
+import '../bili_result.dart';
 
 final class const BiliAggregateSearchRemoteDataSource({
   required final NetworkSearchDataSource _network,
@@ -37,6 +38,6 @@ final class const BiliAggregateSearchRemoteDataSource({
     return _network
         .searchAll(cleanQuery, page: pageKey)
         .then((it) => it.asModel())
-        .toResult();
+        .toBiliResult();
   }
 }

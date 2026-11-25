@@ -1,13 +1,15 @@
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/common/rate_limit_retry.dart';
-import 'package:bilibili/bilibili.dart' show BiliRiskControlException;
+import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+class const _RateLimited() implements RateLimitedFailure;
+
 void main() {
-  test('isRateLimited only accepts the risk-control rejection', () {
-    expect(isRateLimited(const BiliRiskControlException('blocked')), isTrue);
+  test('isRateLimited only accepts the neutral rate-limit failure', () {
+    expect(isRateLimited(const _RateLimited()), isTrue);
     expect(isRateLimited(Exception('boom')), isFalse);
     expect(isRateLimited(null), isFalse);
   });

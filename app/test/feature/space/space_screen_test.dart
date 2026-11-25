@@ -8,7 +8,6 @@ import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
-import 'package:bilibili/bilibili.dart' show BiliRiskControlException;
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:drift/native.dart';
@@ -58,6 +57,8 @@ Future<void> _waitForSubscription(
   }
   fail('subscription did not become $subscribed');
 }
+
+class const _RateLimited() implements RateLimitedFailure;
 
 class _FakeCreatorProfileRepository(
   var Result<CreatorProfile, Exception> result,
@@ -309,7 +310,7 @@ void main() {
       Result.success(profile),
     );
     final videosRepository = _FakeChannelVideosRepository({
-      1: Result.error(const BiliRiskControlException('blocked')),
+      1: Result.error(const _RateLimited()),
     });
     final l10n = AppLocalizationsZh();
 

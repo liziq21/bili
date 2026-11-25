@@ -435,16 +435,19 @@ class const _ChannelSectionPageError({
     return Padding(
       padding: EdgeInsets.all($styles.insets.sm),
       child: Center(
-        child: TextButton.icon(
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            onRetry();
-          },
-          icon: const Icon(AppIcons.refresh, size: 18),
-          label: Text(
-            rateLimited ? l10n.rateLimitedRetryLater : l10n.moreLoadFailedRetry,
-          ),
-        ),
+        child: rateLimited
+            ? Text(
+                l10n.rateLimitedRetryLater,
+                textAlign: TextAlign.center,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onSurfaceVariant,
+                ),
+              )
+            : RetryCooldownInlineButton(
+                rateLimited: false,
+                onRetry: onRetry,
+                label: l10n.moreLoadFailedRetry,
+              ),
       ),
     );
   }

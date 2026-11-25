@@ -4,6 +4,7 @@ import 'package:model/model.dart';
 
 import '../model/article_model.dart';
 import 'bili_remote_data_source.dart';
+import 'bili_result.dart';
 
 /// B 站用户专栏文章分页桥接：`NetworkUserDataSource.getUserArticles` →
 /// [UserArticlesRemoteDataSource]。
@@ -44,6 +45,6 @@ final class const BiliUserArticlesRemoteDataSource({
         totalPages: totalPages,
         data: items.map((item) => item.asModel()).toList(),
       );
-    }).toResult();
+    }).toBiliResult();
   }
 }

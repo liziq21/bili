@@ -35,12 +35,6 @@ sealed class const ApiResult<T>() {
     }
 
     final message = json['message']?.toString();
-    if (isBiliRiskControlCode(code)) {
-      throw BiliRiskControlException(
-        message ?? 'Bilibili risk-control rejection.',
-        biliCode: code,
-      );
-    }
     if (code != 0) {
       return .error(code: code, message: message);
     }

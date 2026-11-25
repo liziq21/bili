@@ -6,6 +6,7 @@ import 'package:model/model.dart';
 
 import '../../model/search_results.dart';
 import '../bili_remote_data_source.dart';
+import '../bili_result.dart';
 
 final class const BiliLiveRoomSearchRemoteDataSource({
   required final NetworkSearchDataSource _network,
@@ -37,6 +38,6 @@ final class const BiliLiveRoomSearchRemoteDataSource({
     return _network
         .searchLiveRoom(cleanQuery, page: pageKey)
         .then((it) => it.asPagedLiveRooms())
-        .toResult();
+        .toBiliResult();
   }
 }

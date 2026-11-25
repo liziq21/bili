@@ -155,6 +155,24 @@ void main() {
       );
     });
 
+    test('keeps the HTTP status when -352 arrives on a 200 envelope', () async {
+      // 非 envelope DTO 走 `ApiResult` 分支，业务码在那里才被发现；状态码必须
+      // 一起带出去，否则日志里「风控」和「普通失败」分不开。
+      final converter = JsonSerializableConverter(const {
+        NetworkBiliHomeFeed: NetworkBiliHomeFeed.fromJson,
+      });
+      final response = _jsonResponse({'code': -352, 'message': 'blocked'});
+
+      await expectLater(
+        converter.convertResponse<NetworkBiliHomeFeed, dynamic>(response),
+        throwsA(
+          isA<BiliRiskControlException>()
+              .having((error) => error.biliCode, 'biliCode', -352)
+              .having((error) => error.statusCode, 'statusCode', 200),
+        ),
+      );
+    });
+
     test('rejects the -352 envelope code as risk control', () async {
       final response = _jsonResponse({
         'code': -352,

@@ -146,6 +146,37 @@ void main() {
     expect(result.isError(), isTrue);
   });
 
+  test('adapts a risk-control rejection to the neutral contract', () async {
+    final source = BiliUserVideosRemoteDataSource(
+      network: _FakeNetworkUserDataSource(
+        error: const BiliRiskControlException(
+          'risk control',
+          statusCode: 412,
+          biliCode: -352,
+        ),
+      ),
+    );
+
+    final result = await source.fetchUserVideos(channelId: '2');
+
+    expect(result.isError(), isTrue);
+    expect(result.tryGetError(), isA<RateLimitedFailure>());
+  });
+
+  test('keeps unrelated failures as they are', () async {
+    final source = BiliUserVideosRemoteDataSource(
+      network: _FakeNetworkUserDataSource(
+        error: const BpiSerializationException('bad json'),
+      ),
+    );
+
+    final result = await source.fetchUserVideos(channelId: '2');
+
+    expect(result.isError(), isTrue);
+    expect(result.tryGetError(), isNot(isA<RateLimitedFailure>()));
+    expect(result.tryGetError(), isA<BpiSerializationException>());
+  });
+
   test(
     'registers the user video capability without prior source access',
     () async {

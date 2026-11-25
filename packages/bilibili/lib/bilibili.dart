@@ -2,8 +2,6 @@ library;
 
 export 'l10n/localization_file/bilibili_localizations.dart';
 
-export 'package:bpi/bpi.dart' show BiliRiskControlException, BpiException;
-
 export 'src/bili.dart';
 export 'src/category.dart';
 export 'src/data/source/bili_media_stream_remote_data_source.dart';

@@ -4,6 +4,7 @@ import 'package:model/model.dart';
 
 import '../model/search_results.dart';
 import 'bili_remote_data_source.dart';
+import 'bili_result.dart';
 
 final class const BiliRecommendLiveRoomFeedRemoteDataSource({
   required final NetworkSearchDataSource _network,
@@ -19,6 +20,6 @@ final class const BiliRecommendLiveRoomFeedRemoteDataSource({
     return _network
         .searchLiveRoom('直播', page: pageKey)
         .then((it) => it.asPagedLiveRooms())
-        .toResult();
+        .toBiliResult();
   }
 }

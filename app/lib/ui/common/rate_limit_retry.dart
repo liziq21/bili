@@ -1,39 +1,46 @@
 import 'dart:async';
 
-import 'package:bilibili/bilibili.dart' show BiliRiskControlException;
+import 'package:data/data.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 
-/// 请求是否被源侧风控/限流拒绝（HTTP 412、`code: -352`、只剩 `v_voucher`）。
+/// 重试按钮在限流后的冷静时长。
 ///
-/// 这类失败和网络故障不是一回事：数据源没坏，只是此刻不让取，等一会儿重试
-/// 就能恢复。界面据此换文案，并让「重试」先冷静一段时间再可用。
-bool isRateLimited(Object? error) => error is BiliRiskControlException;
+/// 风控窗口按分钟计，立刻重试只会再撞一次同样的拒绝；15 秒足够让用户读完
+/// 提示，也足够让连续点击停下来。
+const rateLimitRetryCooldown = Duration(seconds: 15);
 
-/// 风控失败后「重试」保持禁用的时长。
-const Duration rateLimitRetryCooldown = Duration(seconds: 15);
-
-/// 带冷静期的重试按钮。
+/// 这次失败是否由源侧限流/风控引起。
 ///
-/// 风控窗口内连点重试只会连续撞同一堵墙，所以被风控拒绝后先禁用一段时
-/// 间，按钮文案显示剩余秒数，冷却结束自动恢复可用。
-class const RetryCooldownButton({
+/// 只认 `packages/data` 的中立契约；平台异常已由服务包适配成该契约。
+bool isRateLimited(Object? error) => error is RateLimitedFailure;
+
+/// 带冷静期的重试外壳。
+///
+/// [builder] 拿到文案、是否处于冷静期和当前回调：限流失败后在 [cooldown] 内
+/// 回调为 `null`，文案变成倒计时；普通失败不进入冷静期。
+class const RetryCooldownBuilder({
   super.key,
-
-  /// 上一次失败是否由风控引起；只有风控才进入冷静期。
   required final bool rateLimited,
   required final VoidCallback onRetry,
+  required final Widget Function(
+    BuildContext context,
+    String label,
+    bool coolingDown,
+    VoidCallback? onPressed,
+  )
+  builder,
   final Duration cooldown = rateLimitRetryCooldown,
-  final ButtonStyle? style,
 }) extends StatefulWidget {
   @override
-  State<RetryCooldownButton> createState() => _RetryCooldownButtonState();
+  State<RetryCooldownBuilder> createState() => _RetryCooldownBuilderState();
 }
 
-class _RetryCooldownButtonState() extends State<RetryCooldownButton> {
-  Timer? _ticker;
+class _RetryCooldownBuilderState() extends State<RetryCooldownBuilder> {
+  Timer? _timer;
   Duration _remaining = Duration.zero;
 
   @override
@@ -43,57 +50,84 @@ class _RetryCooldownButtonState() extends State<RetryCooldownButton> {
   }
 
   @override
-  void didUpdateWidget(RetryCooldownButton oldWidget) {
+  void didUpdateWidget(RetryCooldownBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.rateLimited && !oldWidget.rateLimited) _startCooldown();
-    if (!widget.rateLimited && oldWidget.rateLimited) _stopCooldown();
   }
 
   @override
   void dispose() {
-    _ticker?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   void _startCooldown() {
-    _ticker?.cancel();
+    _timer?.cancel();
     _remaining = widget.cooldown;
-    _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
       final next = _remaining - const Duration(seconds: 1);
       setState(() => _remaining = next.isNegative ? Duration.zero : next);
       if (_remaining == Duration.zero) timer.cancel();
     });
   }
 
-  void _stopCooldown() {
-    _ticker?.cancel();
-    _ticker = null;
-    _remaining = Duration.zero;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final coolingDown = _remaining > Duration.zero;
-    final seconds = _remaining.inSeconds;
-    return FilledButton(
-      style: widget.style,
-      onPressed: coolingDown
+    return widget.builder(
+      context,
+      coolingDown ? l10n.retryInSeconds(_remaining.inSeconds) : l10n.retry,
+      coolingDown,
+      coolingDown
           ? null
           : () {
               HapticFeedback.lightImpact();
               if (widget.rateLimited) setState(_startCooldown);
               widget.onRetry();
             },
-      child: Text(
-        coolingDown
-            ? l10n?.retryInSeconds(seconds) ?? 'Retry in ${seconds}s'
-            : l10n?.retry ?? 'Retry',
-      ),
     );
   }
+}
+
+/// 主按钮形态，用于首屏错误。
+class const RetryCooldownButton({
+  super.key,
+  required final bool rateLimited,
+  required final VoidCallback onRetry,
+  final Duration cooldown = rateLimitRetryCooldown,
+  final ButtonStyle? style,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => RetryCooldownBuilder(
+    rateLimited: rateLimited,
+    onRetry: onRetry,
+    cooldown: cooldown,
+    builder: (context, label, coolingDown, onPressed) =>
+        FilledButton(style: style, onPressed: onPressed, child: Text(label)),
+  );
+}
+
+/// 行内形态，用于翻页失败：刷新图标 + 文案。
+class const RetryCooldownInlineButton({
+  super.key,
+  required final bool rateLimited,
+  required final VoidCallback onRetry,
+
+  /// 普通失败时的文案；冷静期内换成倒计时。
+  required final String label,
+  final Duration cooldown = rateLimitRetryCooldown,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => RetryCooldownBuilder(
+    rateLimited: rateLimited,
+    onRetry: onRetry,
+    cooldown: cooldown,
+    builder: (context, countdown, coolingDown, onPressed) => TextButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(AppIcons.refresh, size: 18),
+      label: Text(coolingDown ? countdown : label),
+    ),
+  );
 }

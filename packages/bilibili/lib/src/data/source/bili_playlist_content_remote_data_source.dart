@@ -5,6 +5,7 @@ import 'package:model/model.dart';
 import '../../bili_utils.dart';
 import '../model/video_model.dart';
 import 'bili_remote_data_source.dart';
+import 'bili_result.dart';
 
 /// B 站远端播放列表内容桥接：`NetworkUserDataSource.getPlaylistContent` →
 /// [PlaylistContentRemoteDataSource]。
@@ -107,7 +108,7 @@ final class const BiliPlaylistContentRemoteDataSource({
           ),
         ],
       );
-    }).toResult();
+    }).toBiliResult();
   }
 }
 
