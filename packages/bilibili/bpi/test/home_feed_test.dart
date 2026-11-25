@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bpi/bpi.dart';
+import 'package:bpi/src/chopper/json_serializable_converter.dart';
+import 'package:chopper/chopper.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
@@ -113,6 +115,53 @@ void main() {
       );
     });
   });
+
+  group('envelope failure handling', () {
+    final converter = JsonSerializableConverter(
+      const {},
+      envelopeFactories: {NetworkBiliHomeFeed: NetworkBiliHomeFeed.fromJson},
+    );
+
+    test('rejects a v_voucher risk-control envelope', () async {
+      final response = _jsonResponse({
+        'code': 0,
+        'message': '0',
+        'data': {'v_voucher': 'voucher-token'},
+      });
+
+      await expectLater(
+        converter.convertResponse<NetworkBiliHomeFeed, dynamic>(response),
+        throwsA(isA<BiliRiskControlException>()),
+      );
+    });
+
+    test('rejects a non-zero envelope code', () async {
+      final response = _jsonResponse({
+        'code': -412,
+        'message': 'request blocked',
+        'data': null,
+      });
+
+      await expectLater(
+        converter.convertResponse<NetworkBiliHomeFeed, dynamic>(response),
+        throwsA(
+          isA<BiliApiException>().having(
+            (error) => error.biliCode,
+            'biliCode',
+            -412,
+          ),
+        ),
+      );
+    });
+  });
+}
+
+Response<dynamic> _jsonResponse(Map<String, dynamic> json) {
+  final encoded = jsonEncode(json);
+  return Response<dynamic>(
+    http.Response(encoded, 200, headers: {'content-type': 'application/json'}),
+    encoded,
+  );
 }
 
 Map<String, dynamic> _navResponse() => <String, dynamic>{

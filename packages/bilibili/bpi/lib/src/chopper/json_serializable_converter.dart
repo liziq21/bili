@@ -33,6 +33,7 @@ class const JsonSerializableConverter(
 
     final envelopeFactory = envelopeFactories[ResultType];
     if (envelopeFactory is JsonFactory<ResultType>) {
+      _rejectEnvelopeFailure(json, response.statusCode);
       return jsonRes.copyWith<ResultType>(body: envelopeFactory(json));
     }
 
@@ -52,6 +53,31 @@ class const JsonSerializableConverter(
         statusCode: response.statusCode,
       ),
     };
+  }
+
+  /// Envelope DTOs parse `code`/`data` themselves, so the shared risk-control
+  /// and error handling in [ApiResult] would otherwise be skipped for them.
+  void _rejectEnvelopeFailure(Map<String, dynamic> json, int statusCode) {
+    final code = switch (json['code']) {
+      num value => value.toInt(),
+      String value => int.tryParse(value),
+      _ => null,
+    };
+    if (code != null && code != 0) {
+      throw BiliApiException(
+        json['message']?.toString() ?? 'Bilibili API request failed.',
+        biliCode: code,
+        statusCode: statusCode,
+      );
+    }
+    final rawData = json['data'];
+    if (rawData is Map &&
+        isBiliRiskControlChallenge(Map<String, dynamic>.from(rawData))) {
+      throw BiliRiskControlException(
+        'Bilibili answered with a risk-control challenge instead of data.',
+        biliCode: code,
+      );
+    }
   }
 
   @override
