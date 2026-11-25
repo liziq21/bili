@@ -63,9 +63,13 @@ class const LiveFeedSection({
         final width = constraints.crossAxisExtent;
         final horizontalPadding = $styles.insets.sm;
         // 卡片宽度按列表内层可用宽度算：横向 ListView 的 padding 在卡片之外，
-        // 用外层宽度算会让最右一张卡超出可视区（桌面端一屏 4 张时被裁掉一截）。
-        final cardWidth = LayoutSize.fromWidth(width)
-            .liveCardWidth(math.max(0, width - horizontalPadding * 2));
+        // 用外层宽度算会让最右一张卡超出可视区。列数也由这段可用宽度定，
+        // 一屏只放完整的卡，剩下的余量均分进卡片，右侧不会露出半张。
+        final metrics = LayoutSize.fromWidth(width).liveGridMetrics(
+          math.max(0, width - horizontalPadding * 2),
+          spacing: $styles.insets.sm,
+        );
+        final cardWidth = metrics.cardWidth;
         final itemCount = section.isInitialLoading ? 3 : section.items.length;
 
         return SliverToBoxAdapter(
@@ -117,8 +121,9 @@ class const _LiveRoomCard({
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
     // rounded corner clipping, and border stroke painting into a single canvas pass.
+    // 不带投影：卡片下方露出的那截灰带正是投影被列表裁掉一半后的残留，
+    // 边框已经足以把卡片和背景分开。
     return Material(
-      elevation: 1.0,
       color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular($styles.corners.md),
