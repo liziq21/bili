@@ -116,6 +116,7 @@ void main() {
     testWidgets('verifies retention dropdown semantics and tooltips', (
       tester,
     ) async {
+      final semantics = tester.ensureSemantics();
       await tester.pumpWidget(_buildScreen(preferences));
       await tester.pumpAndSettle();
 
@@ -149,6 +150,7 @@ void main() {
         ),
         findsOneWidget,
       );
+      semantics.dispose();
     });
 
     testWidgets('opens the retention menu from the screen-reader tap', (

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:app/data/repository/user_data/user_data_repository.dart';
 import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/widgets/home_source_selector.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:flutter/semantics.dart';
@@ -63,6 +65,12 @@ void main() {
   Widget buildSelector(HomeBloc bloc) => BlocProvider<HomeBloc>.value(
     value: bloc,
     child: MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         appBar: AppBar(
           title: HomeSourceSelector(
@@ -77,6 +85,8 @@ void main() {
   testWidgets('renders with tooltip and semantics', (
     WidgetTester tester,
   ) async {
+    final semantics = tester.ensureSemantics();
+    final l10n = AppLocalizationsEn();
     final repository = RecordingUserDataRepository();
     final bloc = HomeBloc(
       userDataRepository: repository,
@@ -92,16 +102,17 @@ void main() {
 
     expect(find.text('Bilibili'), findsOneWidget);
     final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
-    expect(tooltip.message, 'Switch source');
+    expect(tooltip.message, l10n.switchDataSource);
 
     final data = tester
         .getSemantics(find.byType(DropdownButton<String>))
         .getSemanticsData();
-    expect(data.label, contains('Switch source'));
+    expect(data.label, contains(l10n.switchDataSource));
     expect(data.label, contains('Bilibili'));
-    expect(data.hint, 'Switch video and media source');
+    expect(data.hint, l10n.switchVideoMediaSource);
     expect(data.hasAction(SemanticsAction.tap), isTrue);
     expect(data.flagsCollection.isButton, isTrue);
+    semantics.dispose();
   });
 
   testWidgets('opens the menu and switches source from the screen reader', (
@@ -127,7 +138,11 @@ void main() {
     node.owner!.performAction(node.id, SemanticsAction.tap);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('YouTube').last);
+    // Select the entry the same way a screen reader does, so a menu item that
+    // lost its tap action would fail this test too.
+    final item = tester.getSemantics(find.text('YouTube').last);
+    expect(item.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    item.owner!.performAction(item.id, SemanticsAction.tap);
     await tester.pumpAndSettle();
 
     expect(repository.lastSourceId, 'youtube');
