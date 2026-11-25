@@ -416,12 +416,13 @@ void main() {
               child: VideoCard(
                 videoInfoBase: VideoModel(
                   id: 'BV1overflow',
-                  title: '【原神/热肉】木偶日配声优本多真梨子发布官方公告与后续活动安排说明合集',
+                  // 只用字体子集覆盖的字：测试里的字面量同样受 golden 字体契约约束。
+                  title: '中文标题中文标题中文标题中文标题中文标题中文标题',
                   url: 'https://example.com/video/overflow',
                   viewCount: 12345,
                   uploadDate: DateTime(2026, 11, 20),
                   duration: 600,
-                  creatorProfileName: '一个很长很长的UP主名字',
+                  creatorProfileName: '中文标题中文标题UP主名字',
                 ),
               ),
             ),
@@ -431,6 +432,6 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    expect(find.textContaining('木偶日配声优'), findsOneWidget);
+    expect(find.textContaining('中文标题'), findsWidgets);
   });
 }
