@@ -525,6 +525,34 @@ void main() {
       expect(stream.qualityLabel, '原画');
     });
 
+    test('probes HLS before FLV when the player runs in a browser', () async {
+      final probed = <String>[];
+      final source = BiliLiveRoomDetailRemoteDataSource(
+        network: MockLiveRoomNetwork(
+          playInfoJson: playInfoJson([
+            streamJson('http_stream', 'flv', [
+              codecJson('avc', 250, baseUrl: '/live/flv/live.flv?'),
+            ]),
+            streamJson('http_hls', 'ts', [
+              codecJson('avc', 250, baseUrl: '/live/hls/live.m3u8?'),
+            ]),
+          ]),
+        ),
+        browserUserAgent: 'test-agent',
+        browserPlayer: true,
+        probe: (url, headers) async {
+          probed.add(url);
+          return true;
+        },
+      );
+
+      final stream = expectOk(await source.getLiveRoomStream(1918661467));
+
+      expect(probed, hasLength(1));
+      expect(probed.single, contains('.m3u8'));
+      expect(stream.videoUrl, contains('.m3u8'));
+    });
+
     test('falls back to another codec of the same format', () async {
       final probed = <String>[];
       final source = BiliLiveRoomDetailRemoteDataSource(

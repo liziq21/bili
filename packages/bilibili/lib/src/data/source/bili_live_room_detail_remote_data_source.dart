@@ -1,5 +1,6 @@
 import 'package:bpi/bpi.dart';
 import 'package:data/data.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:model/model.dart';
 
@@ -71,6 +72,10 @@ final class BiliLiveRoomDetailRemoteDataSource({
 
   /// 候选地址探测，默认见 [probeLiveStreamUrl]；测试注入 fake 以免联网。
   final LiveStreamUrlProbe probe = probeLiveStreamUrl,
+
+  /// 播放器跑在浏览器里。浏览器解不了 FLV，候选排序要把 HLS 提到前面；
+  /// 默认取 [kIsWeb]，测试可注入以覆盖两种排序。
+  final bool browserPlayer = kIsWeb,
 }) extends LiveRoomDetailRemoteDataSource with BiliRemoteDataSource {
   Map<String, String> get _headers => {
     'User-Agent': browserUserAgent,
@@ -240,7 +245,8 @@ final class BiliLiveRoomDetailRemoteDataSource({
       preferQn == null || codec.currentQn == preferQn ? 0 : 1;
 
   int _protocolRank(String? protocol) => switch (protocol) {
-    'http_stream' => 0,
+    // 浏览器播放器解不了 FLV：Web 上把 FLV 压到未知协议同一档，让 HLS 先探测。
+    'http_stream' => browserPlayer ? 2 : 0,
     'http_hls' => 1,
     _ => 2,
   };
