@@ -203,6 +203,13 @@ class MediaPlaybackController([
 
   final StreamController<PlaybackState> _stateController =
       StreamController<PlaybackState>.broadcast();
+
+  /// 当前视频的显示宽高比，来源是播放器解出的视频尺寸（含旋转），
+  /// 未知时为 null。竖屏/方形投稿的容器比例必须由它决定，写死 16:9 会让
+  /// 画面缩成容器里的一小块。
+  final StreamController<double?> _aspectRatioController =
+      StreamController<double?>.broadcast();
+  double? _videoAspectRatio;
   final StreamController<List<PlaybackQueueItem>> _queueItemController =
       StreamController<List<PlaybackQueueItem>>.broadcast();
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -237,6 +244,27 @@ class MediaPlaybackController([
     return Player();
   }
 
+  /// 记录视频显示比例，仅在比例真的变化时通知订阅者。
+  ///
+  /// `dw`/`dh` 是已按像素宽高比校正的显示尺寸，但**不含**旋转：竖拍视频
+  /// 以 1920×1080 编码 + `rotate: 90` 到达时，画面实际是竖的，容器比例得
+  /// 跟着换向，否则播放器会把竖画面塞进横容器。
+  void _updateVideoAspectRatio(VideoParams params) {
+    final width = params.dw ?? params.w;
+    final height = params.dh ?? params.h;
+    final double? ratio;
+    if (width != null && height != null && width > 0 && height > 0) {
+      final quarterTurn = (params.rotate ?? 0).abs() % 180 == 90;
+      ratio = quarterTurn ? height / width : width / height;
+    } else {
+      final declared = params.aspect;
+      ratio = declared != null && declared > 0 ? declared : null;
+    }
+    if (ratio == null || ratio == _videoAspectRatio) return;
+    _videoAspectRatio = ratio;
+    if (!_aspectRatioController.isClosed) _aspectRatioController.add(ratio);
+  }
+
   /// 让 mpv 在打不开音频设备时退回空音频输出。
   ///
   /// 默认行为是整次播放判为失败：没有声卡、PipeWire 未运行、独占设备被占用
@@ -261,6 +289,12 @@ class MediaPlaybackController([
 
   /// 当前状态快照。
   PlaybackState get state => _state;
+
+  /// 当前视频的显示宽高比；播放器还没解出视频尺寸时为 null。
+  double? get videoAspectRatio => _videoAspectRatio;
+
+  /// 显示宽高比的变化流，跟随媒体切换与旋转元数据更新。
+  Stream<double?> get videoAspectRatios => _aspectRatioController.stream;
 
   /// 当前正在播放的媒体；队列切换时跟随播放器的当前序号更新。
   MediaStream? get currentStream => _currentStream;
@@ -502,6 +536,7 @@ class MediaPlaybackController([
     _subscriptions.clear();
     await _stateController.close();
     await _queueItemController.close();
+    await _aspectRatioController.close();
     if (_playerTouched) await _player.dispose();
   }
 
@@ -652,6 +687,7 @@ class MediaPlaybackController([
       _player.stream.playlistMode.listen((mode) {
         _emit(_state.copyWith(queueMode: _queueModeOf(mode)));
       }),
+      _player.stream.videoParams.listen(_updateVideoAspectRatio),
     ]);
   }
 

@@ -45,7 +45,13 @@ import '../player/playback_error.dart';
 /// 测试）时保持旧行为，不渲染控制条。
 class const VideoPlayer({
   super.key,
-  final double aspectRatio = 16 / 9,
+
+  /// 画面显示比例。null 表示跟随视频自身尺寸（由播放器解出的
+  /// `videoParams` 决定），解出之前按 16:9 占位。
+  ///
+  /// 竖屏/方形投稿必须走这个缺省：容器写死 16:9 时，非 16:9 的画面只能在
+  /// 容器里 contain 成很小的一块，四周全是黑边。
+  final double? aspectRatio,
 
   /// 播放器会话，为 null 时组件自建并在销毁时释放。
   ///
@@ -93,6 +99,19 @@ class const VideoPlayer({
 class _VideoPlayerState() extends State<VideoPlayer> {
   MediaPlaybackController? _playback;
 
+  /// 播放器解出的视频比例；未知时为 null。
+  double? _videoAspectRatio;
+  StreamSubscription<double?>? _aspectRatioSubscription;
+
+  /// 容器比例：显式指定优先，其次视频自身比例，最后退回 16:9。
+  double get _aspectRatio => widget.aspectRatio ?? _videoAspectRatio ?? 16 / 9;
+
+  /// 竖屏/方形内容在无高度约束时的高度上限（视口占比）。
+  ///
+  /// 没有这条上限时，竖屏视频按宽度撑出的高度会是宽度的一倍多，把下方简介
+  /// 与评论挤出屏幕。
+  static const double _portraitHeightFraction = 0.6;
+
   /// 是否由本组件创建（进而由本组件释放），区别于外部注入的会话。
   bool _ownsPlayback = false;
 
@@ -124,6 +143,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
   @override
   void dispose() {
     _autoHideControls?.cancel();
+    _aspectRatioSubscription?.cancel();
     if (_ownsPlayback) {
       _playback?.dispose();
     }
@@ -151,10 +171,19 @@ class _VideoPlayerState() extends State<VideoPlayer> {
     if (_playback != null) return;
     if (widget.controller != null) {
       _playback = widget.controller;
-      return;
+    } else {
+      _playback = MediaPlaybackController();
+      _ownsPlayback = true;
     }
-    _playback = MediaPlaybackController();
-    _ownsPlayback = true;
+    _watchAspectRatio(_playback!);
+  }
+
+  /// 跟随播放器解出的视频比例重建布局。
+  void _watchAspectRatio(MediaPlaybackController controller) {
+    _aspectRatioSubscription ??= controller.videoAspectRatios.listen((ratio) {
+      if (!mounted || ratio == _videoAspectRatio) return;
+      setState(() => _videoAspectRatio = ratio);
+    });
   }
 
   /// 画面本体：按播放态选错误 / 加载 / 播放器表面。
@@ -190,10 +219,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             );
             return widget.fullscreen
                 ? errorView
-                : AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: errorView,
-                  );
+                : AspectRatio(aspectRatio: _aspectRatio, child: errorView);
           }
 
           final stream = data.stream;
@@ -201,10 +227,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             const loadingView = _LoadingView();
             return widget.fullscreen
                 ? loadingView
-                : AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: loadingView,
-                  );
+                : AspectRatio(aspectRatio: _aspectRatio, child: loadingView);
           }
 
           _ensurePlaybackCreated();
@@ -240,19 +263,24 @@ class _VideoPlayerState() extends State<VideoPlayer> {
               Flexible(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
+                    final aspectRatio = _aspectRatio;
+                    // 竖屏/方形内容在无高度约束时按视口高度设上限，
+                    // 避免画面把下方内容顶出屏幕。
+                    final availableHeight = constraints.hasBoundedHeight
+                        ? constraints.maxHeight
+                        : (aspectRatio < 1
+                              ? MediaQuery.sizeOf(context).height *
+                                    _portraitHeightFraction
+                              : double.infinity);
                     if (!constraints.hasBoundedWidth ||
-                        !constraints.hasBoundedHeight) {
+                        availableHeight.isInfinite) {
                       return AspectRatio(
-                        aspectRatio: widget.aspectRatio,
+                        aspectRatio: aspectRatio,
                         child: surface,
                       );
                     }
-                    final naturalHeight =
-                        constraints.maxWidth / widget.aspectRatio;
-                    final height = math.min(
-                      naturalHeight,
-                      constraints.maxHeight,
-                    );
+                    final naturalHeight = constraints.maxWidth / aspectRatio;
+                    final height = math.min(naturalHeight, availableHeight);
                     return SizedBox(
                       width: constraints.maxWidth,
                       height: height,
@@ -260,7 +288,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                         color: $styles.colors.scrim,
                         child: Center(
                           child: AspectRatio(
-                            aspectRatio: widget.aspectRatio,
+                            aspectRatio: aspectRatio,
                             child: surface,
                           ),
                         ),
@@ -802,7 +830,12 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
               onToggleFullscreen: widget.onToggleFullscreen,
               child:
                   widget.surfaceBuilder?.call(widget.controller) ??
-                  Video(controller: widget.controller.videoController),
+                  Video(
+                    controller: widget.controller.videoController,
+                    // 画面按 contain 铺满容器：容器比例已跟随视频尺寸，
+                    // 这里显式声明避免库的默认行为与容器比例打架。
+                    fit: BoxFit.contain,
+                  ),
             ),
           ),
         ),
