@@ -8,6 +8,7 @@ import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
 import 'package:model/model.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -154,9 +155,112 @@ void main() {
     expect(config.gridColumnsLandscape, equals(3));
   });
 
+  Future<void> pumpEditor(WidgetTester tester) async {
+    await preferences.set(PreferencesKey.homeConfig, _persistedJson);
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  SemanticsNode nodeLabelled(WidgetTester tester, String label) =>
+      tester.getSemantics(
+        find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.label == label,
+        ),
+      );
+
+  testWidgets('activates the set-main button from the screen-reader tap', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final node = nodeLabelled(tester, '设为主标签: Tab B');
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    final config = await persistedConfig();
+    expect(config.sources['test']!.mainTabId, equals('tab_b'));
+    semantics.dispose();
+  });
+
+  testWidgets('activates the move-up button from the screen-reader tap', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final moveUp = nodeLabelled(tester, '上移: Tab B');
+    expect(moveUp.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    moveUp.owner!.performAction(moveUp.id, SemanticsAction.tap);
+    await tester.pump();
+
+    final reordered = await persistedConfig();
+    expect(reordered.sources['test']!.tabs[0].sortOrder, equals(1));
+    expect(reordered.sources['test']!.tabs[1].sortOrder, equals(0));
+    semantics.dispose();
+  });
+
+  testWidgets('activates the move-down button from the screen-reader tap', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final moveDown = nodeLabelled(tester, '下移: Tab A');
+    expect(moveDown.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    moveDown.owner!.performAction(moveDown.id, SemanticsAction.tap);
+    await tester.pump();
+
+    final reordered = await persistedConfig();
+    expect(reordered.sources['test']!.tabs[0].sortOrder, equals(1));
+    expect(reordered.sources['test']!.tabs[1].sortOrder, equals(0));
+    semantics.dispose();
+  });
+
+  testWidgets('keeps a moved tab row alive so screen-reader focus follows it', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    final row = find.byKey(const ValueKey('test-tab_b'));
+    final before = tester.element(row);
+
+    final moveUp = nodeLabelled(tester, '上移: Tab B');
+    moveUp.owner!.performAction(moveUp.id, SemanticsAction.tap);
+    await tester.pump();
+
+    // The same Element survives the reorder, so the row's semantics node is not
+    // torn down and rebuilt under a different tab.
+    expect(
+      tester.element(find.byKey(const ValueKey('test-tab_b'))),
+      same(before),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('exposes no tap action for disabled tab buttons', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await pumpEditor(tester);
+
+    for (final label in ['设为主标签: Tab A', '上移: Tab A', '下移: Tab B']) {
+      final node = nodeLabelled(tester, label);
+      expect(
+        node.getSemanticsData().hasAction(SemanticsAction.tap),
+        isFalse,
+        reason: label,
+      );
+    }
+    semantics.dispose();
+  });
+
   testWidgets('exposes accessible semantics for screen readers', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     await preferences.set(PreferencesKey.homeConfig, _persistedJson);
     await tester.pumpWidget(_buildScreen(preferences));
     await tester.pump();
@@ -259,5 +363,6 @@ void main() {
       ),
       findsOneWidget,
     );
+    semantics.dispose();
   });
 }
