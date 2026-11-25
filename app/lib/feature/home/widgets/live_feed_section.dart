@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:data/data.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +61,15 @@ class const LiveFeedSection({
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.crossAxisExtent;
-        final cardWidth = LayoutSize.fromWidth(width).liveCardWidth(width);
+        final horizontalPadding = $styles.insets.sm;
+        // 卡片宽度按列表内层可用宽度算：横向 ListView 的 padding 在卡片之外，
+        // 用外层宽度算会让最右一张卡超出可视区。列数也由这段可用宽度定，
+        // 一屏只放完整的卡，剩下的余量均分进卡片，右侧不会露出半张。
+        final metrics = LayoutSize.fromWidth(width).liveGridMetrics(
+          math.max(0, width - horizontalPadding * 2),
+          spacing: $styles.insets.sm,
+        );
+        final cardWidth = metrics.cardWidth;
         final itemCount = section.isInitialLoading ? 3 : section.items.length;
 
         return SliverToBoxAdapter(
@@ -67,7 +77,7 @@ class const LiveFeedSection({
             height: cardExtent(context, cardWidth),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: $styles.insets.sm),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               itemCount: itemCount,
               separatorBuilder: (context, index) =>
                   SizedBox(width: $styles.insets.sm),
@@ -111,8 +121,9 @@ class const _LiveRoomCard({
     // ⚡ Bolt Optimization: Replace Card wrapper with a direct Material widget.
     // Eliminates redundant Card element node allocations and unifies surface background,
     // rounded corner clipping, and border stroke painting into a single canvas pass.
+    // 不带投影：卡片下方露出的那截灰带正是投影被列表裁掉一半后的残留，
+    // 边框已经足以把卡片和背景分开。
     return Material(
-      elevation: 1.0,
       color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular($styles.corners.md),
@@ -120,6 +131,9 @@ class const _LiveRoomCard({
           color: colorScheme.outlineVariant.withValues(alpha: 0.4),
         ),
       ),
+      // 封面是不透明的 Container，不裁剪时会盖住卡片的圆角：顶部两个圆角
+      // 被画成直角，只有文字区露出的底部圆角还在。
+      clipBehavior: Clip.antiAlias,
       child: Tooltip(
         message: liveRoom.title,
         child: Semantics(

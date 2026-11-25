@@ -111,6 +111,186 @@ void main() {
     expect(find.text('推荐直播'), findsNothing);
   });
 
+  testWidgets(
+    'keeps every visible card inside the viewport on a desktop window',
+    (WidgetTester tester) async {
+      // 回归：卡片宽度按外层宽度算，而横向 ListView 的 padding 在卡片之外，
+      // 桌面端一屏 4 张时最右一张整体溢出到窗口外（1189 宽实测溢出 7px）。
+      tester.view.physicalSize = const Size(1189, 500);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      final section = FeedSectionState<LiveRoomModel>(
+        id: 'live_section',
+        title: '推荐直播',
+        status: FeedStatus.success,
+        items: [
+          for (var i = 0; i < 6; i++)
+            LiveRoomModel(
+              id: 1000 + i,
+              title: '直播标题 $i',
+              url: 'https://live.bilibili.com/${1000 + i}',
+              creatorProfileName: '主播 $i',
+              isLive: true,
+            ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                LiveFeedSection(
+                  section: section,
+                  onLiveTap: (_) {},
+                  onRetry: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // 横向列表会按缓存范围多建几张卡，只校验一屏能看到的这四张。
+      final cards = find.byType(InkWell).evaluate().take(4).toList();
+      expect(cards, hasLength(4));
+      for (final element in cards) {
+        final box = element.renderObject! as RenderBox;
+        final right = box.localToGlobal(Offset.zero).dx + box.size.width;
+        expect(
+          right,
+          lessThanOrEqualTo(1189),
+          reason: 'the card right edge must stay inside the viewport',
+        );
+      }
+    },
+  );
+
+  group('adaptive columns', () {
+    // 回归：#644 在 1280 宽桌面上一屏 4 张时最右一张整体溢出，1000 宽时
+    // 第四张被裁掉一截。列数必须由可用宽度算出，且卡片宽度精确铺满，
+    // 任何宽度下都不能有卡落在视口外。
+    for (final width in <double>[1280, 1189, 1000, 768, 400, 300, 180]) {
+      testWidgets('keeps every card inside a ${width.toInt()}px viewport', (
+        WidgetTester tester,
+      ) async {
+        tester.view.physicalSize = Size(width, 500);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        final section = FeedSectionState<LiveRoomModel>(
+          id: 'live_section',
+          title: '推荐直播',
+          status: FeedStatus.success,
+          items: [
+            for (var i = 0; i < 8; i++)
+              LiveRoomModel(
+                id: 1000 + i,
+                title: '直播标题 $i',
+                url: 'https://live.bilibili.com/${1000 + i}',
+                creatorProfileName: '主播 $i',
+                isLive: true,
+              ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('zh'),
+            home: Scaffold(
+              body: CustomScrollView(
+                slivers: [
+                  LiveFeedSection(
+                    section: section,
+                    onLiveTap: (_) {},
+                    onRetry: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final cards = find.byType(InkWell).evaluate().toList();
+        expect(cards, isNotEmpty);
+        for (final element in cards) {
+          final box = element.renderObject! as RenderBox;
+          final left = box.localToGlobal(Offset.zero).dx;
+          expect(left, greaterThanOrEqualTo(0));
+          expect(
+            left + box.size.width,
+            lessThanOrEqualTo(width),
+            reason: 'the card right edge must stay inside the viewport',
+          );
+        }
+      });
+    }
+  });
+
+  testWidgets('clips the card content to its rounded shape', (
+    WidgetTester tester,
+  ) async {
+    // 封面是不透明的 Container，Material 不裁剪时会盖掉顶部两个圆角。
+    final section = FeedSectionState<LiveRoomModel>(
+      id: 'live_section',
+      title: '推荐直播',
+      status: FeedStatus.success,
+      items: [
+        LiveRoomModel(
+          id: 1001,
+          title: '直播',
+          url: 'https://live.bilibili.com/1001',
+          creatorProfileName: '主播',
+          isLive: true,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              LiveFeedSection(
+                section: section,
+                onLiveTap: (_) {},
+                onRetry: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final material = tester.widget<Material>(
+      find
+          .ancestor(of: find.byType(InkWell), matching: find.byType(Material))
+          .first,
+    );
+    expect(material.clipBehavior, Clip.antiAlias);
+  });
+
   group('card layout budget', () {
     // 回归：文字高度曾按 fontSize * 1.5 估算，而 bodySmall 的真实行高是
     // 23/14 ≈ 1.643，每行少算 2px。放大字号后两行文字被 Flexible 挤进不足
