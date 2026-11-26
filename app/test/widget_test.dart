@@ -223,6 +223,8 @@ class FakeMediaSource(@override final String id, @override final String name)
   @override
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
       null;
+  @override
+  CreatorProfileRemoteDataSource? get creatorProfileDataSource => null;
 
   @override
   VideoSearchRemoteDataSource? get videoSearchDataSource => null;

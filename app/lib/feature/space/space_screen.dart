@@ -204,7 +204,10 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                 }
 
                 if (snapshot.hasError || snapshot.data == null) {
-                  return _ProfileLoadError(onRetry: _retry);
+                  return _ProfileLoadError(
+                    onRetry: _retry,
+                    error: snapshot.error,
+                  );
                 }
 
                 return switch (snapshot.data!) {
@@ -218,7 +221,10 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                     isSubscribed: _subscriptionReady ? _isSubscribed : null,
                     onToggleSubscribe: toggleSubscription,
                   ),
-                  Error() => _ProfileLoadError(onRetry: _retry),
+                  Error(:final error) => _ProfileLoadError(
+                    onRetry: _retry,
+                    error: error,
+                  ),
                 };
               },
             ),
@@ -258,7 +264,7 @@ class const _SpaceContent({
               : BlocProvider<ChannelVideosCubit>(
                   key: ValueKey('$mid-videos'),
                   create: (_) => ChannelVideosCubit(videosRepository, mid),
-                  child: _ChannelVideosGrid(onVideo: onVideo),
+                  child: _ChannelVideosGrid(onVideo: onVideo, mid: mid),
                 ),
         ),
       if (tabSettings.isVisible(ChannelTabs.playlists) &&
@@ -268,7 +274,7 @@ class const _SpaceContent({
           view: BlocProvider<ChannelPlaylistsCubit>(
             key: ValueKey('$mid-playlists'),
             create: (_) => ChannelPlaylistsCubit(playlistsRepository, mid),
-            child: _ChannelPlaylistsList(onPlaylist: onPlaylist),
+            child: _ChannelPlaylistsList(onPlaylist: onPlaylist, mid: mid),
           ),
         ),
     ];
@@ -343,8 +349,10 @@ class const _ChannelTabBar({
 }
 
 /// 频道投稿分页网格。
-class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
-    extends StatelessWidget {
+class const _ChannelVideosGrid({
+  required final VideoNavCallback? onVideo,
+  required final String mid,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChannelVideosCubit, PagingState<int, VideoModel>>(
@@ -367,12 +375,16 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
               ),
               firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
                 error: state.error,
+                // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
+                // 上一个 UP 主的连击次数。
+                scope: 'space.videos.$mid',
                 onRetry: () =>
                     context.read<ChannelVideosCubit>().fetchNextPage(),
               ),
               newPageErrorIndicatorBuilder: (context) =>
                   _ChannelSectionPageError(
                     error: state.error,
+                    scope: 'space.videos.$mid.next',
                     onRetry: () =>
                         context.read<ChannelVideosCubit>().fetchNextPage(),
                   ),
@@ -396,6 +408,7 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
 class const _ChannelSectionError({
   required final Object? error,
   required final VoidCallback onRetry,
+  required final String scope,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -419,7 +432,8 @@ class const _ChannelSectionError({
           SizedBox(height: $styles.insets.xs),
           RetryCooldownButton(
             rateLimited: rateLimited,
-            scope: 'space.first',
+            scope: scope,
+            failure: error,
             onRetry: onRetry,
           ),
         ],
@@ -431,6 +445,7 @@ class const _ChannelSectionError({
 class const _ChannelSectionPageError({
   required final Object? error,
   required final VoidCallback onRetry,
+  required final String scope,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -443,7 +458,8 @@ class const _ChannelSectionPageError({
         // 往下翻，只是不能立刻重发同一个被拒的请求。
         child: RetryCooldownInlineButton(
           rateLimited: rateLimited,
-          scope: 'space.next',
+          scope: scope,
+          failure: error,
           onRetry: onRetry,
           label: rateLimited
               ? l10n.rateLimitedRetryLater
@@ -504,6 +520,7 @@ class const _ChannelVideosUnsupported() extends StatelessWidget {
 
 class const _ChannelPlaylistsList({
   required final PlaylistNavCallback? onPlaylist,
+  required final String mid,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -525,11 +542,13 @@ class const _ChannelPlaylistsList({
           ),
           firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
             error: state.error,
+            scope: 'space.playlists.$mid',
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),
           newPageErrorIndicatorBuilder: (context) => _ChannelSectionPageError(
             error: state.error,
+            scope: 'space.playlists.$mid.next',
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),
@@ -617,11 +636,14 @@ class const _ChannelPlaylistsEmpty() extends StatelessWidget {
   }
 }
 
-class const _ProfileLoadError({required final VoidCallback onRetry})
-    extends StatelessWidget {
+class const _ProfileLoadError({
+  required final VoidCallback onRetry,
+  required final Object? error,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final rateLimited = isRateLimited(error);
     return Center(
       child: Padding(
         padding: EdgeInsets.all($styles.insets.lg),
@@ -631,19 +653,19 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
             Icon(AppIcons.error, color: $styles.colors.outline),
             SizedBox(height: $styles.insets.xs),
             Text(
-              l10n.loadFailedRetryLater,
+              rateLimited
+                  ? l10n.rateLimitedRetryLater
+                  : l10n.loadFailedRetryLater,
               textAlign: TextAlign.center,
               style: $styles.text.body.copyWith(
                 color: $styles.colors.onSurfaceVariant,
               ),
             ),
             SizedBox(height: $styles.insets.xs),
-            FilledButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                onRetry();
-              },
-              child: Text(l10n.retry),
+            RetryCooldownButton(
+              rateLimited: rateLimited,
+              scope: 'space.profile',
+              onRetry: onRetry,
             ),
           ],
         ),

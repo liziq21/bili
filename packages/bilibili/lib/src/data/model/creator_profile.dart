@@ -25,3 +25,15 @@ extension NetworkLiveUserSearchResultX on NetworkLiveUserSearchResult {
     liveRoomId: roomid,
   );
 }
+
+extension NetworkBiliUserCardDataX on NetworkBiliUserCardData {
+  /// 名片接口不返回直播状态，该项保持未知。
+  CreatorProfile asModel() => CreatorProfile(
+    id: card.mid,
+    name: card.name,
+    thumbnailUrl: normalizeBiliUrl(card.face),
+    description: card.sign,
+    subscribers: follower ?? card.fans,
+    videos: archiveCount,
+  );
+}

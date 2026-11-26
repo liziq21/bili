@@ -7,6 +7,7 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
+import 'package:app/ui/common/rate_limit_retry.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull;
@@ -121,6 +122,11 @@ PlaylistDetail _playlist(String id, {int? total}) =>
     PlaylistDetail(id: id, title: 'Playlist $id', totalCount: total);
 
 void main() {
+  setUp(() {
+    // 冷却连击表是进程级状态，不隔离会让上一个用例的拒绝抬高下一个用例的时长。
+    resetAllRateLimitCooldowns();
+  });
+
   testWidgets('renders the creator profile header from repository data', (
     tester,
   ) async {
@@ -253,6 +259,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('CodeCraft'), findsOneWidget);
+  });
+
+  testWidgets('names rate limiting when the profile load is throttled', (
+    tester,
+  ) async {
+    final repository = _FakeCreatorProfileRepository(
+      Result.error(const _RateLimited()),
+    );
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      RepositoryProvider<CreatorProfileRepository>.value(
+        value: repository,
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.rateLimitedRetryLater), findsOneWidget);
+    expect(find.text(l10n.loadFailedRetryLater), findsNothing);
   });
 
   testWidgets('renders the video tab and opens a video on tap', (tester) async {
@@ -437,6 +471,50 @@ void main() {
     await tester.pump();
 
     expect(videosRepository.requestedPages, [1, 2]);
+  });
+
+  testWidgets('counts the cooldown per creator instead of across creators', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.error(const _RateLimited()),
+    });
+    final l10n = AppLocalizationsZh();
+
+    Widget build(String mid) => MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<CreatorProfileRepository>.value(
+          value: profileRepository,
+        ),
+        RepositoryProvider<ChannelVideosRepository>.value(
+          value: videosRepository,
+        ),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: SpaceScreen(mid: mid),
+      ),
+    );
+
+    await tester.pumpWidget(build('creator-1'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
+
+    // 另一个 UP 主有自己的额度：冷却从基础时长重新开始，不接着上一个 UP
+    // 主的连击往上翻。
+    await tester.pumpWidget(build('creator-2'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
+    expect(find.text(l10n.retryInSeconds(30)), findsNothing);
   });
 
   testWidgets('shows an unsupported message without a videos capability', (

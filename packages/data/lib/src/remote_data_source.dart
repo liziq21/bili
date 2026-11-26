@@ -54,6 +54,15 @@ abstract class const CreatorProfileSearchRemoteDataSource()
   });
 }
 
+/// 创作者资料远程数据源能力接口
+///
+/// 按 ID 精确取资料，不经过搜索端点：搜索端点与搜索页共用风控额度，且需要
+/// 从结果里挑出同 ID 的条目，查不到就只剩一个笼统的失败。
+abstract class const CreatorProfileRemoteDataSource() extends RemoteDataSource {
+  /// 按来源内 ID 获取创作者资料
+  Future<Result<CreatorProfile, Exception>> getProfile(String id);
+}
+
 /// 直播间搜索远程数据源能力接口
 abstract class const LiveRoomSearchRemoteDataSource()
     extends SearchRemoteDataSource {

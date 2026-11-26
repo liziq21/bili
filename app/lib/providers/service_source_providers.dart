@@ -139,12 +139,16 @@ class _SourceScopeState() extends State<_SourceScope> {
           create: (_) =>
               AppCreatorProfileSearchRepository(creatorProfileSearchDataSource),
         ),
-      if (creatorProfileSearchDataSource != null)
+      if (creatorProfileSearchDataSource != null ||
+          source.creatorProfileDataSource != null)
         RepositoryProvider<CreatorProfileRepository>(
           create: (context) => AppCreatorProfileRepository(
             source.id,
             context.read<CreatorProfileDao>(),
-            context.read<CreatorProfileSearchRepository>(),
+            creatorProfileSearchDataSource == null
+                ? null
+                : context.read<CreatorProfileSearchRepository>(),
+            source.creatorProfileDataSource,
           ),
         ),
       if (source.searchSuggestDataSource case final searchSuggestDataSource?)

@@ -36,6 +36,10 @@ Duration rateLimitCooldownFor(String scope) =>
 /// 成功或换成别的失败原因后清零，避免冷却被历史失败永久拉长。
 void resetRateLimitCooldown(String scope) => _streaks.remove(scope);
 
+/// 清空全部冷却记录，仅供测试隔离：连击表是进程级状态，会跨用例累积。
+@visibleForTesting
+void resetAllRateLimitCooldowns() => _streaks.clear();
+
 /// 记下这次被拒。[escalate] 为 false 时只登记、不放大——界面重建会把同
 /// 一次拒绝再报一遍，那不是新的一次。
 int _recordFailure(String scope, {required bool escalate}) {

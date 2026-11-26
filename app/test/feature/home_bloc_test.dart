@@ -254,6 +254,8 @@ class FakeMediaSource({
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
       null;
   @override
+  CreatorProfileRemoteDataSource? get creatorProfileDataSource => null;
+  @override
   VideoSearchRemoteDataSource? get videoSearchDataSource => null;
   @override
   SearchSuggestRemoteDataSource? get searchSuggestDataSource => null;
