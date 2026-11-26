@@ -36,6 +36,8 @@ class const VideoFeedSection({
                   child: FeedStatusView.failure(
                     title: section.title,
                     onRetry: onRetry,
+                    error: section.error,
+                    retryScope: 'home.video.${section.id}',
                   ),
                 );
               }

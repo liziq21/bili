@@ -50,7 +50,12 @@ class const LiveFeedSection({
     // 信息；视频区块同样不挂区块头，两种 Feed 保持一致。
     if (section.isFailure) {
       return SliverToBoxAdapter(
-        child: FeedStatusView.failure(title: section.title, onRetry: onRetry),
+        child: FeedStatusView.failure(
+          title: section.title,
+          onRetry: onRetry,
+          error: section.error,
+          retryScope: 'home.live.${section.id}',
+        ),
       );
     }
     if (section.isEmpty) {

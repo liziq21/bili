@@ -75,6 +75,7 @@ class FakeVideoFeed({
   @override required final String title,
   required final int pages,
   final bool failure = false,
+  final Exception? error,
 }) implements VideoFeedRemoteDataSource {
   int fetchCount = 0;
 
@@ -86,6 +87,8 @@ class FakeVideoFeed({
     int? pageKey,
   }) async {
     fetchCount++;
+    final error = this.error;
+    if (error != null) return Result.error(error);
     if (failure) return Result.error(Exception('boom'));
     final page = pageKey ?? 1;
     return Result.success(
@@ -206,6 +209,11 @@ class ControlledLiveFeed({
       ),
     );
   }
+}
+
+class const FakeRateLimited() implements RateLimitedFailure {
+  @override
+  String toString() => 'rate limited';
 }
 
 class const FakeLiveRoomSearch() implements LiveRoomSearchRemoteDataSource {
@@ -768,6 +776,34 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(biliVideoFeed.fetchCount, greaterThan(fetchCountBeforeRefresh));
+    });
+
+    testWidgets('Names rate limiting instead of a network error', (
+      tester,
+    ) async {
+      // 限流不是断网：让用户去检查网络只会白折腾，重试还要先冷静一会儿。
+      mediaSources = [
+        FakeMediaSource(
+          id: 'bilibili',
+          name: 'Bilibili',
+          videoFeedDataSources: [
+            FakeVideoFeed(
+              id: 'recommend',
+              title: '推荐视频',
+              pages: 1,
+              error: const FakeRateLimited(),
+            ),
+          ],
+        ),
+      ];
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.text('操作过快，请稍后再试'), findsOneWidget);
+      expect(find.text('请检查网络连接后重试'), findsNothing);
     });
 
     testWidgets('Does not offer a retry when the source has no home feed', (
