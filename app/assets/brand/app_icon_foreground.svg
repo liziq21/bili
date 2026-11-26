@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Foreground layer of the Bili brand icon: the oracle-bone eye alone, on a
+  transparent ground, inside the 108dp adaptive-icon viewport. Including the
+  miter tips, the stroked mark occupies x 19.44..88.56 and y 34.29..73.71, so
+  it stays inside the 72dp safe square (18..90) of every launcher mask.
+  Doubles as the Android monochrome (themed) icon.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108"
+     viewBox="0 0 108 108" role="img" aria-labelledby="title">
+  <title id="title">Bili brand mark</title>
+  <path d="M24.55 54 L40.23 37.85 H67.78 L83.45 54 L67.78 70.15 H40.23 Z"
+        fill="none" stroke="#B75B1E" stroke-width="7.125"
+        stroke-linejoin="miter" stroke-linecap="butt"/>
+  <path d="M45.45 43.55 V64.45 L63.02 54 Z" fill="#B75B1E"/>
+</svg>
