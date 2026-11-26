@@ -7,6 +7,7 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/space/space_screen.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
+import 'package:app/ui/common/rate_limit_retry.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:drift/drift.dart' hide isNotNull;
@@ -121,6 +122,11 @@ PlaylistDetail _playlist(String id, {int? total}) =>
     PlaylistDetail(id: id, title: 'Playlist $id', totalCount: total);
 
 void main() {
+  setUp(() {
+    // 冷却连击表是进程级状态，不隔离会让上一个用例的拒绝抬高下一个用例的时长。
+    resetAllRateLimitCooldowns();
+  });
+
   testWidgets('renders the creator profile header from repository data', (
     tester,
   ) async {

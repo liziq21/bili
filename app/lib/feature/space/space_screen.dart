@@ -433,6 +433,7 @@ class const _ChannelSectionError({
           RetryCooldownButton(
             rateLimited: rateLimited,
             scope: scope,
+            failure: error,
             onRetry: onRetry,
           ),
         ],
@@ -458,6 +459,7 @@ class const _ChannelSectionPageError({
         child: RetryCooldownInlineButton(
           rateLimited: rateLimited,
           scope: scope,
+          failure: error,
           onRetry: onRetry,
           label: rateLimited
               ? l10n.rateLimitedRetryLater
