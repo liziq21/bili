@@ -769,5 +769,62 @@ void main() {
 
       expect(biliVideoFeed.fetchCount, greaterThan(fetchCountBeforeRefresh));
     });
+
+    testWidgets('Does not offer a retry when the source has no home feed', (
+      tester,
+    ) async {
+      // 该来源不提供首页 Feed 是结构性状态，重试不会让内容出现；按钮点了
+      // 没有任何反馈，属于误导性的死控件。
+      mediaSources = [FakeMediaSource(id: 'youtube', name: 'YouTube')];
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.text('YouTube 暂无可用推荐'), findsOneWidget);
+      expect(find.text('该数据源未提供首页 Feed'), findsOneWidget);
+      expect(find.byType(OutlinedButton), findsNothing);
+      expect(find.text('重试'), findsNothing);
+      // 下拉刷新同样只能转一圈：没有 Feed 可拉。
+      expect(find.byType(RefreshIndicator), findsNothing);
+    });
+
+    testWidgets('Points at the settings when every tab is hidden', (
+      tester,
+    ) async {
+      // 全部隐藏与「源没有 Feed」是两回事：前者改设置就能恢复，文案不能
+      // 说成数据源不提供首页。
+      final configured = HomeConfig({
+        'bilibili': HomeSourceConfig(const [
+          HomeTabConfig(id: 'recommend', label: '推荐视频', isVisible: false),
+          HomeTabConfig(id: 'recommend_live', label: '推荐直播', isVisible: false),
+        ]),
+      });
+      await configured.save(preferences);
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.text('标签页已全部隐藏'), findsOneWidget);
+      expect(find.text('在首页设置中重新显示标签页'), findsOneWidget);
+      expect(find.text('该数据源未提供首页 Feed'), findsNothing);
+      expect(find.text('重试'), findsNothing);
+      expect(find.byType(RefreshIndicator), findsNothing);
+    });
+
+    testWidgets('Keeps pull to refresh while a tab has content', (
+      tester,
+    ) async {
+      final bloc = buildBloc();
+      addTearDown(bloc.close);
+
+      await tester.pumpWidget(buildScreen(bloc));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+    });
   });
 }

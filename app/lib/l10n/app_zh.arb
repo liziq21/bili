@@ -329,6 +329,14 @@
   "@sourceNoHomeFeed": {
     "description": "Home - empty state when the selected source provides no home feed"
   },
+  "homeAllTabsHidden": "标签页已全部隐藏",
+  "@homeAllTabsHidden": {
+    "description": "Home - empty state when every configured tab of the source is hidden"
+  },
+  "homeAllTabsHiddenHint": "在首页设置中重新显示标签页",
+  "@homeAllTabsHiddenHint": {
+    "description": "Home - hint under the all-tabs-hidden empty state, pointing at the Home settings"
+  },
   "sectionLoadFailed": "{p1} 加载失败",
   "@sectionLoadFailed": {
     "description": "Home feed section - error state; {p1} is the section title",

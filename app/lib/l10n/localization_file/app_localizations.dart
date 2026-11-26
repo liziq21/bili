@@ -548,6 +548,18 @@ abstract class AppLocalizations {
   /// **'This source doesn\'t provide a home feed'**
   String get sourceNoHomeFeed;
 
+  /// Home - empty state when every configured tab of the source is hidden
+  ///
+  /// In en, this message translates to:
+  /// **'All tabs are hidden'**
+  String get homeAllTabsHidden;
+
+  /// Home - hint under the all-tabs-hidden empty state, pointing at the Home settings
+  ///
+  /// In en, this message translates to:
+  /// **'Turn tabs back on in Home settings'**
+  String get homeAllTabsHiddenHint;
+
   /// Home feed section - error state; {p1} is the section title
   ///
   /// In en, this message translates to:
