@@ -159,13 +159,17 @@ class const HomeScreen({
 
     return [
       for (final section in liveSections)
+        // key 按区块：切换筛选项时换的是另一个 Feed，重试冷却要跟着换，
+        // 不能沿用上一个 Feed 的倒计时。
         LiveFeedSection(
+          key: ValueKey(section.id),
           section: section,
           onLiveTap: (liveRoom) => onLive?.call('${liveRoom.id}'),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
         ),
       for (final section in videoSections)
         VideoFeedSection(
+          key: ValueKey(section.id),
           section: section,
           homeConfig: state.homeConfig,
           onVideoTap: (video) => onVideo?.call(video.id),

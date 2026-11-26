@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
+import '../../../ui/common/rate_limit_retry.dart';
 
 /// Feed 加载失败 / 空结果 / 功能占位的统一提示视图
 class const FeedStatusView({
@@ -14,18 +15,27 @@ class const FeedStatusView({
   final VoidCallback? onRetry,
   final String? failureTitle,
   final String? emptyTitle,
+  final Object? error,
+  final String retryScope = 'feed',
 }) extends StatelessWidget {
   /// 加载失败提示
+  ///
+  /// [error] 用来区分限流与断网：被风控拒绝时重试立刻再发同一个请求只会再被
+  /// 拒一次，所以要换成限流文案并先冷静一段时间（[RetryCooldownBuilder]）。
   factory failure({
     Key? key,
     required String title,
     required VoidCallback onRetry,
+    Object? error,
+    String retryScope = 'feed',
   }) => FeedStatusView(
     key: key,
     icon: AppIcons.cloudOff,
     message: title,
     failureTitle: title,
     onRetry: onRetry,
+    error: error,
+    retryScope: retryScope,
   );
 
   /// 空结果提示
@@ -40,13 +50,18 @@ class const FeedStatusView({
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
-    final resolvedMessage = failureTitle != null
+    final isFailure = failureTitle != null;
+    final rateLimited = isFailure && isRateLimited(error);
+    final resolvedMessage = isFailure
         ? (l10n?.sectionLoadFailed(failureTitle!) ?? '$failureTitle failed')
         : emptyTitle != null
         ? (l10n?.sectionEmpty(emptyTitle!) ?? '$emptyTitle is empty')
         : message;
-    final desc = failureTitle != null
-        ? (l10n?.checkNetworkRetry ?? 'Check your connection and retry')
+    final desc = isFailure
+        ? rateLimited
+              ? (l10n?.rateLimitedRetryLater ??
+                    'Too many requests, retry later')
+              : (l10n?.checkNetworkRetry ?? 'Check your connection and retry')
         : description;
 
     return Padding(
@@ -78,14 +93,27 @@ class const FeedStatusView({
           ],
           if (onRetry != null) ...[
             SizedBox(height: $styles.insets.xs),
-            OutlinedButton.icon(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                onRetry!();
-              },
-              icon: const Icon(AppIcons.refresh),
-              label: Text(l10n?.retry ?? 'Retry'),
-            ),
+            if (rateLimited)
+              RetryCooldownBuilder(
+                rateLimited: true,
+                scope: retryScope,
+                failure: error,
+                onRetry: onRetry!,
+                builder: (_, label, _, onPressed) => OutlinedButton.icon(
+                  onPressed: onPressed,
+                  icon: const Icon(AppIcons.refresh),
+                  label: Text(label),
+                ),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onRetry!();
+                },
+                icon: const Icon(AppIcons.refresh),
+                label: Text(l10n?.retry ?? 'Retry'),
+              ),
           ],
         ],
       ),

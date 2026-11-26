@@ -6,6 +6,7 @@ import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../ui/video_card.dart';
 import '../bloc/home_bloc.dart';
+import '../../../ui/common/rate_limit_retry.dart';
 import '../home_config.dart';
 import 'feed_status_view.dart';
 
@@ -36,6 +37,8 @@ class const VideoFeedSection({
                   child: FeedStatusView.failure(
                     title: section.title,
                     onRetry: onRetry,
+                    error: section.error,
+                    retryScope: 'home.video.${section.id}',
                   ),
                 );
               }
@@ -130,13 +133,7 @@ class const _FeedFooter({
       padding: EdgeInsets.symmetric(vertical: $styles.insets.md),
       child: Center(
         child: section.hasMore
-            ? TextButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onLoadMore();
-                },
-                child: Text(label),
-              )
+            ? _loadMore(context, label)
             : Text(
                 label,
                 style: $styles.text.bodySmall.copyWith(
@@ -144,6 +141,29 @@ class const _FeedFooter({
                 ),
               ),
       ),
+    );
+  }
+
+  /// 翻页入口
+  ///
+  /// 上一页被限流时，列表还在（`isFailure` 为假），按钮却会立刻再发一次同样
+  /// 被拒的请求；这里和首屏失败一样先冷静一段时间。
+  Widget _loadMore(BuildContext context, String label) {
+    if (!isRateLimited(section.error)) {
+      return TextButton(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          onLoadMore();
+        },
+        child: Text(label),
+      );
+    }
+    return RetryCooldownInlineButton(
+      rateLimited: true,
+      failure: section.error,
+      onRetry: onLoadMore,
+      label: label,
+      scope: 'home.video.${section.id}',
     );
   }
 }

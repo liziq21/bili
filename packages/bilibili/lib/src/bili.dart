@@ -141,7 +141,7 @@ class Bili() implements MediaSource {
 
   @override
   List<LiveRoomFeedRemoteDataSource> get liveRoomFeedDataSources => [
-    BiliRecommendLiveRoomFeedRemoteDataSource(network: _searchApi),
+    BiliRecommendLiveRoomFeedRemoteDataSource(network: _liveApi),
   ];
 
   @override
