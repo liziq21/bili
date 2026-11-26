@@ -70,6 +70,14 @@ class CodeOnlyTest(unittest.TestCase):
         self.assertNotIn('dead', arb._code_only('a /* dead\nstill */ b'))
         self.assertIn('b', arb._code_only('a /* dead\nstill */ b'))
 
+    def test_nested_block_comment_is_blanked_through_the_outer_end(self):
+        # Dart nests block comments: the first `*/` closes the inner one only.
+        source = 'a /* outer /* inner */ dead */ b'
+        blanked = arb._code_only(source)
+        self.assertNotIn('dead', blanked)
+        self.assertIn('b', blanked)
+        self.assertEqual(len(blanked), len(source))
+
     def test_plain_string_literal_is_blanked(self):
         self.assertNotIn('dead', arb._code_only("f('dead')"))
         self.assertIn('f(', arb._code_only("f('dead')"))
@@ -173,6 +181,19 @@ class AllowlistTest(unittest.TestCase):
             self.assertEqual(arb.load_allowlist(Path(tmp) / 'nope.txt'), set())
 
 
+class DefaultsTest(unittest.TestCase):
+    def test_package_arbs_are_checked_by_default(self):
+        paths = {
+            path.relative_to(arb.REPO_ROOT).as_posix()
+            for path in arb.DEFAULT_ARB_FILES
+        }
+        self.assertIn('packages/bilibili/lib/l10n/bilibili_en.arb', paths)
+        self.assertIn('packages/youtube/lib/l10n/youtube_en.arb', paths)
+
+    def test_package_sources_are_scanned_by_default(self):
+        self.assertIn(arb.REPO_ROOT / 'packages', arb.DEFAULT_ROOTS)
+
+
 class MainTest(unittest.TestCase):
     def _run(self, *argv: str) -> tuple[int, str]:
         out, err = io.StringIO(), io.StringIO()
@@ -214,6 +235,21 @@ class MainTest(unittest.TestCase):
             )
             self.assertEqual(code, 0)
             self.assertIn('unused: dead (allowlisted)', output)
+
+    def test_check_fails_on_stale_allowlist_entry(self):
+        # The key is read again, so the exception no longer suppresses anything.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            arb_file = _write(root / 'app.arb', '{"alive": "1"}')
+            _write(root / 'lib' / 'a.dart', 'Text(l10n.alive)')
+            allow = _write(root / 'allow.txt', 'alive  # was unused once\n')
+            code, output = self._run(
+                '--arb', str(arb_file), '--root', str(root / 'lib'),
+                '--allowlist', str(allow), '--check',
+            )
+            self.assertEqual(code, 1)
+            self.assertIn('allowlisted but referenced: alive', output)
+            self.assertIn('no longer needed', output)
 
     def test_missing_arb_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -305,9 +305,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get loadFailedRetry => '加载失败，重试';
-
-  @override
   String get moreLoadFailedRetry => '更多数据加载失败，重试';
 
   @override
@@ -344,9 +341,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get selectDateRange => '选择日期范围';
-
-  @override
-  String get localLibrary => '本地库';
 
   @override
   String get history => '历史';

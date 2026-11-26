@@ -18,6 +18,12 @@ What remains is deliberately conservative — a key whose name collides with
 unrelated code is reported as referenced, never as unused — so the tool can
 never recommend deleting a key that something still reads.
 
+The default selection is every source ARB in the workspace (app plus packages)
+and the scan roots are `app/lib`, `app/test` and `packages`, so a reference from
+any layer keeps a key alive. `--check` also fails when the allowlist carries an
+entry that is no longer unreferenced, because such an entry would silently
+accept the key if it went unused again.
+
 Usage:
   python3 tool/check_unused_arb_keys.py            # report unused keys
   python3 tool/check_unused_arb_keys.py --all      # every key with its status
@@ -35,10 +41,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 APP_DIR = REPO_ROOT / 'app'
-# The app's source ARBs. Package ARBs have their own code roots, so they are not
-# in the default set; pass them with --arb/--root if they ever need the check.
-DEFAULT_ARB_FILES = tuple(sorted((APP_DIR / 'lib' / 'l10n').glob('*.arb')))
-DEFAULT_ROOTS = (APP_DIR / 'lib', APP_DIR / 'test')
+# Every source ARB in the workspace: the app's plus each package's. A key that
+# is unused in a package burns generated code just the same, and the scan roots
+# are unified, so a reference anywhere in app/ or packages/ keeps a key alive.
+DEFAULT_ARB_FILES = tuple(
+    sorted(
+        (
+            *(APP_DIR / 'lib' / 'l10n').glob('*.arb'),
+            *(REPO_ROOT / 'packages').glob('**/lib/l10n/*.arb'),
+        )
+    )
+)
+DEFAULT_ROOTS = (APP_DIR / 'lib', APP_DIR / 'test', REPO_ROOT / 'packages')
 # gen-l10n output: it declares every key as a getter, so scanning it would make
 # every key look used.
 GENERATED_DIR = 'localization_file'
@@ -158,10 +172,22 @@ def _code_only(source: str) -> str:
             i = end
             continue
         if source.startswith('/*', i):
-            end = source.find('*/', i + 2)
-            end = n if end < 0 else end + 2
-            out.append(' ' * (end - i))
-            i = end
+            # Dart block comments nest: the inner `*/` only closes the inner
+            # comment. Stopping at the first `*/` would leave the rest of the
+            # outer comment looking like code and count a key named there as
+            # referenced.
+            depth, j = 1, i + 2
+            while j < n and depth:
+                if source.startswith('/*', j):
+                    depth += 1
+                    j += 2
+                elif source.startswith('*/', j):
+                    depth -= 1
+                    j += 2
+                else:
+                    j += 1
+            out.append(' ' * (j - i))
+            i = j
             continue
         raw = char in 'rR' and i + 1 < n and source[i + 1] in _QUOTES
         if char in _QUOTES or raw:
@@ -288,9 +314,10 @@ def main(argv: list[str] | None = None) -> int:
                 print(f'  {status}: {key}')
 
     keys = unused_keys(reports)
+    stale = sorted(allowed - set(keys))
     if not keys:
         print('Every message key is referenced.')
-        return 0
+        return _report_stale(stale, args)
 
     for key in keys:
         marker = ' (allowlisted)' if key in allowed else ''
@@ -301,6 +328,27 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f'{len(offenders)} unreferenced key(s); delete them or record the '
             f'retention reason in {args.allowlist}',
+            file=sys.stderr,
+        )
+        return 1
+    return _report_stale(stale, args)
+
+
+def _report_stale(stale: list[str], args: argparse.Namespace) -> int:
+    """Fail `--check` when an allowlist entry no longer suppresses anything.
+
+    A stale entry outlives the reason it was added: if the key is read again and
+    later goes unused, the old line silently accepts it. Reported in plain mode
+    so the cleanup is visible there too.
+    """
+    if not stale:
+        return 0
+    for key in stale:
+        print(f'  allowlisted but referenced: {key}', file=sys.stderr)
+    if args.check:
+        print(
+            f'{len(stale)} allowlist entr(y/ies) no longer needed; remove them '
+            f'from {args.allowlist}',
             file=sys.stderr,
         )
         return 1

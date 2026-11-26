@@ -436,10 +436,6 @@
   "@rateLimitedRetryLater": {
     "description": "Error state when Bilibili rate-limits or risk-controls the request"
   },
-  "loadFailedRetry": "Failed to load. Retry",
-  "@loadFailedRetry": {
-    "description": "Search results - error state with a retry action"
-  },
   "moreLoadFailedRetry": "Failed to load more. Retry",
   "@moreLoadFailedRetry": {
     "description": "Paginated list - footer shown when loading the next page failed"
@@ -494,10 +490,6 @@
   "selectDateRange": "Select date range",
   "@selectDateRange": {
     "description": "Search filter sheet - label of the upload date range filter"
-  },
-  "localLibrary": "Local library",
-  "@localLibrary": {
-    "description": "Bottom navigation entry and library page title"
   },
   "history": "History",
   "@history": {

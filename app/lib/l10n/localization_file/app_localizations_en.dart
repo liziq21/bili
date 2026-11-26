@@ -320,9 +320,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get loadFailedRetry => 'Failed to load. Retry';
-
-  @override
   String get moreLoadFailedRetry => 'Failed to load more. Retry';
 
   @override
@@ -359,9 +356,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectDateRange => 'Select date range';
-
-  @override
-  String get localLibrary => 'Local library';
 
   @override
   String get history => 'History';

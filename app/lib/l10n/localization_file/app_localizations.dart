@@ -656,12 +656,6 @@ abstract class AppLocalizations {
   /// **'Retry in {seconds}s'**
   String retryInSeconds(int seconds);
 
-  /// Search results - error state with a retry action
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load. Retry'**
-  String get loadFailedRetry;
-
   /// Paginated list - footer shown when loading the next page failed
   ///
   /// In en, this message translates to:
@@ -733,12 +727,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select date range'**
   String get selectDateRange;
-
-  /// Bottom navigation entry and library page title
-  ///
-  /// In en, this message translates to:
-  /// **'Local library'**
-  String get localLibrary;
 
   /// Local library - history section title
   ///
