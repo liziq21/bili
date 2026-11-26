@@ -27,6 +27,7 @@ dependencies:
     path: ../packages/youtube
   bloc: ^9.2.1
   cached_network_image_ce: ^4.10.0
+  clock: ^1.1.2
   data:
     path: ../packages/data
   dynamic_color: ^2.1.0
