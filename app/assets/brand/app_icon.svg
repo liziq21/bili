@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Bili brand icon — 甲骨文「目」 / Oracle-bone eye.
+
+  The eye is the earliest pictograph for seeing (目, oracle bone script,
+  c. 1200 BCE). Bili is a read-only video client: its one job is to look.
+  The pupil is drawn as a play wedge, so the same stroke reads as both the
+  ancient eye and the modern play control. Straight, chisel-cut edges and
+  the absence of rounded corners follow oracle-bone stroke grammar; the
+  bone-coloured ground and cinnabar ink echo the materials of the original
+  inscriptions and the app's brand palette (#F8ECE5 surface, #B75B1E accent).
+
+  Geometry lives only in this file and app_icon_foreground.svg; every raster
+  and Android vector derives from them via tool/generate_app_icons.py.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108"
+     viewBox="0 0 108 108" role="img" aria-labelledby="title desc">
+  <title id="title">Bili</title>
+  <desc id="desc">An oracle-bone eye whose pupil is a play triangle.</desc>
+  <rect width="108" height="108" fill="#F8ECE5"/>
+  <path d="M23 54 L39.5 37 H68.5 L85 54 L68.5 71 H39.5 Z"
+        fill="none" stroke="#B75B1E" stroke-width="7.5"
+        stroke-linejoin="miter" stroke-linecap="butt"/>
+  <path d="M45 43 L45 65 L63.5 54 Z" fill="#B75B1E"/>
+</svg>
