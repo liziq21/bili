@@ -1050,10 +1050,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSaveFailed => '设置保存失败';
 
   @override
-  String get homeConfigTitle => '首页';
+  String get homeConfigTitle => '发现';
 
   @override
   String get homeConfigTabs => '标签页';
+
+  @override
+  String get homeConfigNoTabs => '暂无标签页可设置';
 
   @override
   String get homeConfigMoveUp => '上移';

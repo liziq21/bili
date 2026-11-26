@@ -205,6 +205,105 @@ void main() {
     });
   });
 
+  group('SettingPickerTitle', () {
+    testWidgets('aligns its left edge with the options below it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildWidget(
+          ListView(
+            children: [
+              const SettingPickerTitle(title: 'Theme'),
+              SettingPickerOption(title: 'Dark', selected: true, onTap: () {}),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('Theme')).dx,
+        tester.getTopLeft(find.text('Dark')).dx,
+      );
+    });
+
+    testWidgets('keeps that alignment when the layout scale changes', (
+      tester,
+    ) async {
+      // Given a tablet-sized viewport, where `$styles.insets.sm` no longer
+      // equals ListTile's fixed 16dp.
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(1400, 900)),
+            child: AppScaffold(
+              child: Scaffold(
+                body: ListView(
+                  children: [
+                    const SettingPickerTitle(title: 'Theme'),
+                    SettingPickerOption(
+                      title: 'Dark',
+                      selected: true,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Then the title still follows the component's fixed padding (R2.4)
+      // instead of a screen-scaled token.
+      expect(
+        tester.getTopLeft(find.text('Theme')).dx,
+        tester.getTopLeft(find.text('Dark')).dx,
+      );
+    });
+  });
+
+  group('showSettingPicker', () {
+    testWidgets('reports the chosen value and closes the sheet', (
+      tester,
+    ) async {
+      int? selected;
+      await tester.pumpWidget(
+        _buildWidget(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showSettingPicker<int>(
+                context: context,
+                title: 'Columns',
+                selected: 1,
+                choices: const [
+                  SettingPickerChoice(1, 'One'),
+                  SettingPickerChoice(2, 'Two'),
+                ],
+                onSelected: (value) => selected = value,
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Columns'), findsOneWidget);
+
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+
+      expect(selected, 2);
+      expect(find.text('Columns'), findsNothing);
+    });
+  });
+
   group('SettingActionTile', () {
     testWidgets('renders icon, title, subtitle, and chevron', (tester) async {
       var tapped = false;

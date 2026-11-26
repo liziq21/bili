@@ -1607,13 +1607,17 @@
   "@settingsSaveFailed": {
     "description": "Snack bar shown when a settings toggle cannot be persisted"
   },
-  "homeConfigTitle": "Home",
+  "homeConfigTitle": "Discovery",
   "@homeConfigTitle": {
-    "description": "Home configuration editor page title"
+    "description": "Home configuration editor page title; matches the settings entry that opens it"
   },
   "homeConfigTabs": "Tabs",
   "@homeConfigTabs": {
     "description": "Home configuration section label - feed tabs"
+  },
+  "homeConfigNoTabs": "No tabs to configure",
+  "@homeConfigNoTabs": {
+    "description": "Home configuration empty state shown for a source that exposes no configurable feed tabs"
   },
   "homeConfigMoveUp": "Move up",
   "@homeConfigMoveUp": {

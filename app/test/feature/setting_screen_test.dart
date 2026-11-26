@@ -316,7 +316,7 @@ void main() {
             find.widgetWithText(AppBar, l10n.settingsLibrary),
             findsOneWidget,
           );
-          // SwitchListTile for bookmark sync + ListTile with DropdownButton for retention.
+          // SwitchListTile for bookmark sync + a value row for retention.
           // SwitchListTile is a subtype of ListTile, so use descendant matchers to
           // distinguish them instead of bare find.byType(ListTile).
           expect(find.byType(SwitchListTile), findsOneWidget);

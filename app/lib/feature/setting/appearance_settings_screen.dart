@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -120,58 +122,42 @@ class _AppearanceSettingsScreenState() extends State<AppearanceSettingsScreen> {
 
   void _showThemePicker(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            SettingPickerTitle(title: l10n.appearanceTheme),
-            for (final config in ThemeConfig.values)
-              SettingPickerOption(
-                title: switch (config) {
-                  .followSystem => l10n.appearanceThemeSystem,
-                  .light => l10n.appearanceThemeLight,
-                  .dark => l10n.appearanceThemeDark,
-                },
-                selected: config == _themeConfig,
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  _updateTheme(config);
-                },
-              ),
-          ],
-        ),
+    unawaited(
+      showSettingPicker<ThemeConfig>(
+        context: context,
+        title: l10n.appearanceTheme,
+        selected: _themeConfig,
+        choices: [
+          for (final config in ThemeConfig.values)
+            SettingPickerChoice(config, switch (config) {
+              .followSystem => l10n.appearanceThemeSystem,
+              .light => l10n.appearanceThemeLight,
+              .dark => l10n.appearanceThemeDark,
+            }),
+        ],
+        onSelected: (config) => unawaited(_updateTheme(config)),
       ),
     );
   }
 
   void _showFontScalePicker(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            SettingPickerTitle(title: l10n.appearanceFontSize),
-            for (final scale in kFontScaleOptions)
-              SettingPickerOption(
-                title: switch (scale) {
-                  0.85 => l10n.appearanceFontSizeSmall,
-                  1.0 => l10n.appearanceFontSizeStandard,
-                  1.15 => l10n.appearanceFontSizeLarge,
-                  1.3 => l10n.appearanceFontSizeXLarge,
-                  _ => '${scale}x',
-                },
-                selected: scale == _fontScale,
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  _updateFontScale(scale);
-                },
-              ),
-          ],
-        ),
+    unawaited(
+      showSettingPicker<double>(
+        context: context,
+        title: l10n.appearanceFontSize,
+        selected: _fontScale,
+        choices: [
+          for (final scale in kFontScaleOptions)
+            SettingPickerChoice(scale, switch (scale) {
+              0.85 => l10n.appearanceFontSizeSmall,
+              1.0 => l10n.appearanceFontSizeStandard,
+              1.15 => l10n.appearanceFontSizeLarge,
+              1.3 => l10n.appearanceFontSizeXLarge,
+              _ => '${scale}x',
+            }),
+        ],
+        onSelected: (scale) => unawaited(_updateFontScale(scale)),
       ),
     );
   }
