@@ -56,7 +56,6 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
         appBar: AppBar(title: Text(l10n.mine)),
         body: Column(
           children: [
-            if (_tabIndex != 0) _scopeBar(catalog),
             if (_operationError case final error?) _OperationError(error),
             if (_busy) const LinearProgressIndicator(),
             TabBar(
@@ -71,6 +70,9 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                 Tab(text: l10n.subscribe),
               ],
             ),
+            // 来源筛选属于当前 tab 的内容，挂在 TabBar 之下；放在上面会让
+            // TabBar 随 tab 切换上下跳动，层级也颠倒。
+            if (_tabIndex != 0) _scopeBar(catalog),
             Expanded(
               child: IndexedStack(
                 index: _tabIndex,
