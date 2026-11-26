@@ -1108,10 +1108,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSaveFailed => 'Couldn\'t save the setting';
 
   @override
-  String get homeConfigTitle => 'Home';
+  String get homeConfigTitle => 'Discovery';
 
   @override
   String get homeConfigTabs => 'Tabs';
+
+  @override
+  String get homeConfigNoTabs => 'No tabs to configure';
 
   @override
   String get homeConfigMoveUp => 'Move up';

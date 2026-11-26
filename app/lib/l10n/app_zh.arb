@@ -1607,13 +1607,17 @@
   "@settingsSaveFailed": {
     "description": "Snack bar shown when a settings toggle cannot be persisted"
   },
-  "homeConfigTitle": "首页",
+  "homeConfigTitle": "发现",
   "@homeConfigTitle": {
-    "description": "Home configuration editor page title"
+    "description": "Home configuration editor page title; matches the settings entry that opens it"
   },
   "homeConfigTabs": "标签页",
   "@homeConfigTabs": {
     "description": "Home configuration section label - feed tabs"
+  },
+  "homeConfigNoTabs": "暂无标签页可设置",
+  "@homeConfigNoTabs": {
+    "description": "Home configuration empty state shown for a source that exposes no configurable feed tabs"
   },
   "homeConfigMoveUp": "上移",
   "@homeConfigMoveUp": {

@@ -7,6 +7,7 @@ import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
+import '../setting/common_widgets/setting_tiles.dart';
 import 'home_config.dart';
 
 /// Home feed configuration editor: feed tab visibility, ordering, main tab
@@ -109,62 +110,51 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
     );
   }
 
-  Widget _gridColumnsSection(AppLocalizations l10n) {
-    return ListTile(
-      leading: Icon(AppIcons.gridView, color: $styles.colors.onSurfaceVariant),
-      title: Text(l10n.homeConfigGridColumns, style: $styles.text.body),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _columnPicker(
-            l10n.homeConfigPortrait,
-            _config.gridColumnsPortrait,
-            (value) => _setGridColumns(
-              portrait: value,
-              landscape: _config.gridColumnsLandscape,
-            ),
+  Widget _gridColumnsSection(AppLocalizations l10n) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SettingSectionHeader(title: l10n.homeConfigGridColumns),
+      SettingValueTile(
+        title: l10n.homeConfigPortrait,
+        value: '${_config.gridColumnsPortrait}',
+        onTap: () => _showColumnPicker(
+          l10n.homeConfigPortrait,
+          selected: _config.gridColumnsPortrait,
+          onSelected: (value) => _setGridColumns(
+            portrait: value,
+            landscape: _config.gridColumnsLandscape,
           ),
-          _columnPicker(
-            l10n.homeConfigLandscape,
-            _config.gridColumnsLandscape,
-            (value) => _setGridColumns(
-              portrait: _config.gridColumnsPortrait,
-              landscape: value,
-            ),
-          ),
-        ],
+        ),
       ),
-    );
-  }
+      SettingValueTile(
+        title: l10n.homeConfigLandscape,
+        value: '${_config.gridColumnsLandscape}',
+        onTap: () => _showColumnPicker(
+          l10n.homeConfigLandscape,
+          selected: _config.gridColumnsLandscape,
+          onSelected: (value) => _setGridColumns(
+            portrait: _config.gridColumnsPortrait,
+            landscape: value,
+          ),
+        ),
+      ),
+    ],
+  );
 
-  Widget _columnPicker(String label, int value, ValueChanged<int> onChanged) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          // 不排除子语义：下拉菜单的打开动作来自 `DropdownButton` 自己，
-          // `excludeSemantics` 会连它一起丢掉，读屏用户就无法改列数。
-          Semantics(
-            label: label,
-            child: DropdownButton<int>(
-              value: value,
-              items: [
-                for (var columns = 1; columns <= 8; columns++)
-                  DropdownMenuItem(value: columns, child: Text('$columns')),
-              ],
-              onChanged: (updated) {
-                if (updated != null) {
-                  HapticFeedback.selectionClick();
-                  onChanged(updated);
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Future<void> _showColumnPicker(
+    String title, {
+    required int selected,
+    required ValueChanged<int> onSelected,
+  }) => showSettingPicker<int>(
+    context: context,
+    title: title,
+    selected: selected,
+    choices: [
+      for (var columns = 1; columns <= 8; columns++)
+        SettingPickerChoice(columns, '$columns'),
+    ],
+    onSelected: onSelected,
+  );
 
   Widget _sourceSection(AppLocalizations l10n, MediaSourceDefinition source) {
     final sourceConfig = _config.sources[source.id]!;
@@ -183,22 +173,29 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
             padding: EdgeInsets.only(bottom: $styles.insets.sm),
             child: Text(source.name, style: $styles.text.bodySmallBold),
           ),
-          Text(l10n.homeConfigTabs, style: $styles.text.caption),
-          for (var index = 0; index < orderedTabs.length; index++)
+          if (orderedTabs.isEmpty)
             Padding(
-              // 稳定 key 让重排后的行保持同一个 Element，读屏焦点不会留在
-              // 原位置而改指向另一个标签。
-              key: ValueKey('${source.id}-${orderedTabs[index].id}'),
-              padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
-              child: _tabRow(
-                l10n: l10n,
-                tab: orderedTabs[index],
-                isFirst: index == 0,
-                isLast: index == orderedTabs.length - 1,
-                isMain: orderedTabs[index].id == sourceConfig.mainTabId,
-                sourceId: source.id,
+              padding: EdgeInsets.only(top: $styles.insets.xs),
+              child: Text(l10n.homeConfigNoTabs, style: $styles.text.caption),
+            )
+          else ...[
+            Text(l10n.homeConfigTabs, style: $styles.text.caption),
+            for (var index = 0; index < orderedTabs.length; index++)
+              Padding(
+                // 稳定 key 让重排后的行保持同一个 Element，读屏焦点不会留在
+                // 原位置而改指向另一个标签。
+                key: ValueKey('${source.id}-${orderedTabs[index].id}'),
+                padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
+                child: _tabRow(
+                  l10n: l10n,
+                  tab: orderedTabs[index],
+                  isFirst: index == 0,
+                  isLast: index == orderedTabs.length - 1,
+                  isMain: orderedTabs[index].id == sourceConfig.mainTabId,
+                  sourceId: source.id,
+                ),
               ),
-            ),
+          ],
         ],
       ),
     );

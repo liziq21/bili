@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -73,7 +72,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
   }
 
   Future<void> _updateSearchHistoryRetention(int days) async {
-    unawaited(HapticFeedback.selectionClick());
     setState(() => _searchHistoryRetentionDays = days);
     final preferences = _preferences;
     if (preferences != null) {
@@ -116,30 +114,24 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
                   onChanged: (enabled) =>
                       unawaited(_updateBookmarkSync(enabled)),
                 ),
-                Tooltip(
-                  message:
-                      '${l10n.librarySearchHistoryRetention}: $retentionText',
-                  child: ListTile(
-                    title: Text(l10n.librarySearchHistoryRetention),
-                    subtitle: Text(l10n.librarySearchHistoryRetentionSubtitle),
-                    // 不排除子语义：打开菜单的动作属于 `DropdownButton`，
-                    // 排除掉之后读屏用户只能听到当前值、无法改值。
-                    trailing: Semantics(
-                      label: l10n.librarySearchHistoryRetention,
-                      child: DropdownButton<int>(
-                        value: _searchHistoryRetentionDays,
-                        onChanged: (value) {
-                          if (value != null) {
-                            unawaited(_updateSearchHistoryRetention(value));
-                          }
-                        },
-                        items: _retentionOptions.map((days) {
-                          return DropdownMenuItem<int>(
-                            value: days,
-                            child: Text(_retentionLabel(days, l10n)),
-                          );
-                        }).toList(),
-                      ),
+                SettingValueTile(
+                  title: l10n.librarySearchHistoryRetention,
+                  subtitle: l10n.librarySearchHistoryRetentionSubtitle,
+                  value: retentionText,
+                  onTap: () => unawaited(
+                    showSettingPicker<int>(
+                      context: context,
+                      title: l10n.librarySearchHistoryRetention,
+                      selected: _searchHistoryRetentionDays,
+                      choices: [
+                        for (final days in _retentionOptions)
+                          SettingPickerChoice(
+                            days,
+                            _retentionLabel(days, l10n),
+                          ),
+                      ],
+                      onSelected: (days) =>
+                          unawaited(_updateSearchHistoryRetention(days)),
                     ),
                   ),
                 ),

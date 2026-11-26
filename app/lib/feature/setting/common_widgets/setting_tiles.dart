@@ -62,43 +62,62 @@ class const SettingSwitchTile({
 class const SettingValueTile({
   super.key,
   required final String title,
-  required final String subtitle,
+  final String? subtitle,
   required final String value,
   required final VoidCallback onTap,
   final String? tooltip,
 }) extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Tooltip(
-    message: tooltip ?? '$title: $value',
-    child: ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            style: $styles.text.bodySmall.copyWith(
-              color: $styles.colors.onSurfaceVariant,
-            ),
+  Widget build(BuildContext context) {
+    final subtitleText = subtitle;
+    return Tooltip(
+      message: tooltip ?? '$title: $value',
+      // Merge title, subtitle and the trailing value into one node so a screen
+      // reader announces the setting together with its current value instead of
+      // reading a bare label with the value as an unrelated sibling.
+      child: MergeSemantics(
+        child: ListTile(
+          title: Text(title),
+          subtitle: subtitleText == null ? null : Text(subtitleText),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: $styles.text.bodySmall.copyWith(
+                  color: $styles.colors.onSurfaceVariant,
+                ),
+              ),
+              Icon(
+                AppIcons.chevronRight,
+                color: $styles.colors.onSurfaceVariant,
+              ),
+            ],
           ),
-          Icon(AppIcons.chevronRight, color: $styles.colors.onSurfaceVariant),
-        ],
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
+        ),
       ),
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-    ),
-  );
+    );
+  }
 }
 
-/// Header for a modal bottom-sheet picker.
+/// Table header for a modal bottom-sheet picker.
 class const SettingPickerTitle({super.key, required final String title})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
+    padding: EdgeInsets.only(
+      // Fixed rather than `$styles.insets.sm`: ListTile's content padding is a
+      // component-fixed 16dp (design-system R2.4), so a scaled inset would put
+      // the title off the option text's left edge.
+      left: 16,
+      right: 16,
+      top: $styles.insets.sm,
+      bottom: $styles.insets.sm,
+    ),
     child: Text(title, style: $styles.text.bodySmallBold),
   );
 }
@@ -121,6 +140,43 @@ class const SettingPickerOption({
       HapticFeedback.selectionClick();
       onTap();
     },
+  );
+}
+
+/// One choice of a [showSettingPicker] sheet.
+@immutable
+class const SettingPickerChoice<T>(final T value, final String label);
+
+/// Opens the standard single-choice bottom sheet and reports the chosen value.
+///
+/// Every settings picker uses this so the title inset, option rows and haptic
+/// feedback stay identical across subpages.
+Future<void> showSettingPicker<T>({
+  required BuildContext context,
+  required String title,
+  required List<SettingPickerChoice<T>> choices,
+  required T selected,
+  required ValueChanged<T> onSelected,
+}) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    builder: (sheetContext) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          SettingPickerTitle(title: title),
+          for (final choice in choices)
+            SettingPickerOption(
+              title: choice.label,
+              selected: choice.value == selected,
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                onSelected(choice.value);
+              },
+            ),
+        ],
+      ),
+    ),
   );
 }
 

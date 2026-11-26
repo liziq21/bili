@@ -1988,10 +1988,10 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the setting'**
   String get settingsSaveFailed;
 
-  /// Home configuration editor page title
+  /// Home configuration editor page title; matches the settings entry that opens it
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'Discovery'**
   String get homeConfigTitle;
 
   /// Home configuration section label - feed tabs
@@ -1999,6 +1999,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tabs'**
   String get homeConfigTabs;
+
+  /// Home configuration empty state shown for a source that exposes no configurable feed tabs
+  ///
+  /// In en, this message translates to:
+  /// **'No tabs to configure'**
+  String get homeConfigNoTabs;
 
   /// Home configuration action - move a tab up
   ///

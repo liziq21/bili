@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
@@ -101,7 +100,6 @@ class _NotificationSettingsScreenState()
   }
 
   Future<void> _updateThreshold(int threshold) async {
-    unawaited(HapticFeedback.selectionClick());
     setState(() {
       _threshold = threshold;
       _feedUpdateEnabled = threshold > 0;
@@ -136,26 +134,28 @@ class _NotificationSettingsScreenState()
                   value: _feedUpdateEnabled,
                   onChanged: (enabled) => unawaited(_updateEnabled(enabled)),
                 ),
-                if (_feedUpdateEnabled) ...[
-                  ListTile(
-                    title: Text(l10n.feedUpdateThreshold),
-                    subtitle: Text(l10n.feedUpdateThresholdSubtitle),
-                    trailing: DropdownButton<int>(
-                      value: _threshold,
-                      onChanged: (value) {
-                        if (value != null) {
-                          unawaited(_updateThreshold(value));
-                        }
-                      },
-                      items: _thresholdOptions.map((threshold) {
-                        return DropdownMenuItem<int>(
-                          value: threshold,
-                          child: Text(_thresholdLabel(threshold, l10n)),
-                        );
-                      }).toList(),
+                if (_feedUpdateEnabled)
+                  SettingValueTile(
+                    title: l10n.feedUpdateThreshold,
+                    subtitle: l10n.feedUpdateThresholdSubtitle,
+                    value: _thresholdLabel(_threshold, l10n),
+                    onTap: () => unawaited(
+                      showSettingPicker<int>(
+                        context: context,
+                        title: l10n.feedUpdateThreshold,
+                        selected: _threshold,
+                        choices: [
+                          for (final threshold in _thresholdOptions)
+                            SettingPickerChoice(
+                              threshold,
+                              _thresholdLabel(threshold, l10n),
+                            ),
+                        ],
+                        onSelected: (threshold) =>
+                            unawaited(_updateThreshold(threshold)),
+                      ),
                     ),
                   ),
-                ],
               ],
             ),
     );

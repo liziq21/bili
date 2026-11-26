@@ -4,6 +4,7 @@ import 'package:app/app_scaffold.dart';
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/home/home_config.dart';
 import 'package:app/feature/home/home_config_editor_screen.dart';
+import 'package:app/feature/setting/common_widgets/setting_tiles.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
@@ -94,6 +95,44 @@ void main() {
     expect(find.text('Tab B'), findsOneWidget);
   });
 
+  testWidgets('titles the page like the settings entry that opens it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final context = tester.element(find.byType(HomeConfigEditorScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    expect(find.widgetWithText(AppBar, l10n.homeConfigTitle), findsOneWidget);
+    expect(l10n.homeConfigTitle, l10n.settingsDiscovery);
+  });
+
+  testWidgets('shows an empty state instead of a bare tabs header', (
+    tester,
+  ) async {
+    await preferences.set(
+      PreferencesKey.homeConfig,
+      jsonEncode({
+        'sources': {
+          'test': {'tabs': <Object>[], 'mainTabId': null},
+        },
+        'gridColumnsPortrait': 2,
+        'gridColumnsLandscape': 2,
+      }),
+    );
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final context = tester.element(find.byType(HomeConfigEditorScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    expect(find.text(l10n.homeConfigNoTabs), findsOneWidget);
+    expect(find.text(l10n.homeConfigTabs), findsNothing);
+  });
+
   testWidgets('toggles tab visibility and persists', (tester) async {
     await preferences.set(PreferencesKey.homeConfig, _persistedJson);
     await tester.pumpWidget(_buildScreen(preferences));
@@ -143,12 +182,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    final dropdowns = find.byType(DropdownButton<int>);
-    expect(dropdowns, findsNWidgets(2));
-    await tester.tap(dropdowns.at(0));
-    await tester.pump();
-    await tester.tap(find.text('3').last);
-    await tester.pump();
+    final pickers = find.byType(SettingValueTile);
+    expect(pickers, findsNWidgets(2));
+    await tester.tap(pickers.at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(SettingPickerOption, '3'));
+    await tester.pumpAndSettle();
 
     final config = await persistedConfig();
     expect(config.gridColumnsPortrait, equals(3));
@@ -263,8 +302,10 @@ void main() {
     final semantics = tester.ensureSemantics();
     await pumpEditor(tester);
 
-    final portraitPicker = find.byType(DropdownButton<int>).at(0);
-    final node = tester.getSemantics(portraitPicker);
+    final portraitTile = find.byType(SettingValueTile).at(0);
+    final node = tester.getSemantics(
+      find.descendant(of: portraitTile, matching: find.byType(ListTile)),
+    );
     final data = node.getSemanticsData();
     expect(data.label, contains('竖屏'));
     expect(data.label, contains('2'));
@@ -272,7 +313,7 @@ void main() {
 
     node.owner!.performAction(node.id, SemanticsAction.tap);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('4').last);
+    await tester.tap(find.widgetWithText(SettingPickerOption, '4'));
     await tester.pumpAndSettle();
 
     final config = await persistedConfig();
@@ -289,11 +330,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Dropdown semantics keep the picker's own value and tap action, and the
-    // wrapper only adds the orientation as context.
+    // Each column row exposes its orientation and current value with a tap
+    // action.
     for (final (index, label, value) in [(0, '竖屏', '2'), (1, '横屏', '3')]) {
       final data = tester
-          .getSemantics(find.byType(DropdownButton<int>).at(index))
+          .getSemantics(
+            find.descendant(
+              of: find.byType(SettingValueTile).at(index),
+              matching: find.byType(ListTile),
+            ),
+          )
           .getSemanticsData();
       expect(data.label, contains(label));
       expect(data.label, contains(value));
