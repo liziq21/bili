@@ -65,6 +65,23 @@ class const FakeCreatorProfileSearchRepository({
   }
 }
 
+class const FakeLiveRoomSearchRepository({
+  final List<LiveRoomModel> items = const [],
+}) implements SearchContentsRepository<LiveRoomModel> {
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
+
+  @override
+  Future<PagedResult<LiveRoomModel>> search(SearchQuery searchQuery) async {
+    return Result.success(
+      Page<LiveRoomModel>(data: items, number: 1, totalPages: 1),
+    );
+  }
+}
+
 Future<void> _pumpUntil(WidgetTester tester, bool Function() condition) async {
   for (var attempt = 0; attempt < 200; attempt++) {
     if (condition()) return;
@@ -493,5 +510,59 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+  });
+
+  testWidgets('a live room result card carries a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final liveBloc = SearchResultBloc<LiveRoomModel>(
+      searchContentsRepository: const FakeLiveRoomSearchRepository(
+        items: [
+          LiveRoomModel(
+            id: 42,
+            title: 'Live room title',
+            url: 'https://example.com/live/42',
+            isLive: true,
+            creatorProfileName: 'Streamer',
+          ),
+        ],
+      ),
+      query: 'live',
+    );
+    addTearDown(liveBloc.close);
+    liveBloc.add(const FetchNextPage());
+    final opened = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: BlocProvider<SearchResultBloc<LiveRoomModel>>.value(
+          value: liveBloc,
+          child: SearchResultScreen(
+            query: 'live',
+            onBackClick: () {},
+            onLive: opened.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final node = tester.getSemantics(
+      find.bySemanticsLabel(RegExp('Live room title')),
+    );
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(opened, ['42']);
+    semantics.dispose();
   });
 }

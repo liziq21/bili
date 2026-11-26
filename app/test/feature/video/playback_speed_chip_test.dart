@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/video/common_widgets/playback_speed_chip.dart';
@@ -140,6 +141,22 @@ void main() {
         expect(find.bySemanticsLabel('Speed 1x'), findsOneWidget);
       },
     );
+
+    testWidgets('the chip opens the picker from a screen-reader tap action', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pumpChip(tester);
+
+      final node = tester.getSemantics(find.bySemanticsLabel('Speed 1x'));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Speed'), findsOneWidget);
+      semantics.dispose();
+    });
 
     testWidgets('updates the label when the rate changes', (tester) async {
       await pumpChip(tester);

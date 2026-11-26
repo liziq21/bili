@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/quality_picker_chip.dart';
@@ -82,6 +84,53 @@ void main() {
       expect(controller.openedStreams, isEmpty);
     },
   );
+
+  testWidgets('the chip opens the picker from a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final repository = _RecordingVideoDetailRepository();
+    final bloc = VideoBloc(repository: repository);
+    final controller = _RecordingPlaybackController();
+    addTearDown(bloc.close);
+    addTearDown(controller.dispose);
+
+    bloc.add(const LoadVideoDetail('video'));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: BlocProvider.value(
+            value: bloc,
+            child: RepositoryProvider<VideoDetailRepository>.value(
+              value: repository,
+              child: QualityPickerChip(
+                controller: controller,
+                stream: MediaStream(
+                  videoUrl: 'https://cdn.example/high.m4s',
+                  height: 1080,
+                  qualityLabel: '1080P high',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final node = tester.getSemantics(
+      find.bySemanticsLabel('Quality 1080P high'),
+    );
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pumpAndSettle();
+
+    expect(find.text('1080P high'), findsNWidgets(2));
+    semantics.dispose();
+  });
 }
 
 class _RecordingPlaybackController() extends MediaPlaybackController {

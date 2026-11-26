@@ -1,5 +1,7 @@
 // ignore_for_file: use_declaring_parameters
 
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/database/app_database.dart';
 import 'package:app/database/dao/media_history_dao.dart';
 import 'package:app/database/table/media.dart';
@@ -525,6 +527,63 @@ void main() {
     expect(tapped, hasLength(1));
     expect(tapped.single.video.id, 'v1');
     expect(tapped.single.sourceId, 'bilibili');
+  });
+
+  testWidgets('a history row carries a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+
+    final tapped = <MediaHistoryItem>[];
+    await tester.pumpWidget(
+      Provider<MediaSourceCatalog>.value(
+        value: MediaSourceCatalog([
+          MediaSourceDefinition(
+            id: 'bilibili',
+            name: 'Bilibili',
+            create: () => _FakeMediaSource(id: 'bilibili', name: 'Bilibili'),
+          ),
+        ]),
+        child: BlocProvider<MediaHistoryCubit>.value(
+          value: cubit,
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: MediaLibraryScreen(
+              onVideoTap: (sourceId, videoId) => tapped.add((
+                video: VideoModel(
+                  id: videoId,
+                  title: 'Video $videoId',
+                  url: 'https://example.com/$videoId',
+                ),
+                sourceId: sourceId,
+                viewedAt: DateTime.now(),
+              )),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel(RegExp('Video v1')));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(tapped, hasLength(1));
+    expect(tapped.single.video.id, 'v1');
+    semantics.dispose();
   });
 }
 

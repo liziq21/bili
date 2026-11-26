@@ -57,12 +57,19 @@ class _PlaybackSpeedChipState() extends State<PlaybackSpeedChip> {
     final l10n = AppLocalizations.of(context);
     final currentText = rateLabel(_rate);
     final speedLabel = l10n?.playbackSpeed ?? 'Speed';
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    void openPicker() {
+      HapticFeedback.lightImpact();
+      _showSpeedPicker(context);
+    }
 
     return Tooltip(
       message: speedLabel,
       child: Semantics(
         button: true,
         label: '$speedLabel $currentText',
+        onTap: openPicker,
         excludeSemantics: true,
         child: Material(
           color: $styles.colors.scrim.withValues(alpha: 0.6),
@@ -70,10 +77,7 @@ class _PlaybackSpeedChipState() extends State<PlaybackSpeedChip> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _showSpeedPicker(context);
-            },
+            onTap: openPicker,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Text(

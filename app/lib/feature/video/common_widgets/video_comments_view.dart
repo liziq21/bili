@@ -168,6 +168,12 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
     final replyCount = comment.replyCount > 0
         ? comment.replyCount
         : effectiveReplyState.replies.length;
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    void toggleLike() {
+      HapticFeedback.lightImpact();
+      context.read<VideoCommentBloc>().add(ToggleCommentLike(comment.id));
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,13 +245,9 @@ class const _CommentItem({required final int index}) extends StatelessWidget {
                     tooltip: comment.isLiked
                         ? (l10n?.unlikeComment ?? 'Unlike')
                         : (l10n?.likeComment ?? 'Like'),
+                    onTap: toggleLike,
                     child: InkWell(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        context.read<VideoCommentBloc>().add(
-                          ToggleCommentLike(comment.id),
-                        );
-                      },
+                      onTap: toggleLike,
                       borderRadius: BorderRadius.circular($styles.corners.sm),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

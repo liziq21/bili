@@ -348,6 +348,15 @@ class const _LiveRoomResultCard({
       l10n?.streamerLabel(streamerName),
     ].whereType<String>().join(l10n?.commaSeparator ?? ',');
 
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    final handleTap = onTap == null
+        ? null
+        : () {
+            HapticFeedback.lightImpact();
+            onTap!();
+          };
+
     return Material(
       elevation: 1.0,
       color: colorScheme.surfaceContainerLow,
@@ -363,14 +372,10 @@ class const _LiveRoomResultCard({
         child: Semantics(
           button: onTap != null,
           label: semanticLabel,
+          onTap: handleTap,
           excludeSemantics: true,
           child: InkWell(
-            onTap: onTap == null
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    onTap!();
-                  },
+            onTap: handleTap,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -465,6 +465,13 @@ class const _HistoryRow({
       _ => const <String>[],
     };
 
+    // `excludeSemantics: true` drops the InkWell's own actions, so tap and
+    // long-press both have to be declared on the Semantics node as well.
+    void handleTap() {
+      HapticFeedback.lightImpact();
+      onTap?.call();
+    }
+
     return Tooltip(
       message: video.title,
       child: Semantics(
@@ -476,13 +483,11 @@ class const _HistoryRow({
           ...progressSemantics,
           l10n?.watchedAt(viewedAtLabel),
         ].whereType<String>().join(l10n?.commaSeparator ?? ','),
+        onTap: handleTap,
         onLongPress: onLongPress,
         excludeSemantics: true,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap?.call();
-          },
+          onTap: handleTap,
           onLongPress: onLongPress,
           child: Padding(
             padding: EdgeInsets.symmetric(

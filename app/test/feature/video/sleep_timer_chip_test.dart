@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/domain/sleep_timer_action.dart';
@@ -211,6 +212,24 @@ void main() {
         expect(find.bySemanticsLabel('Sleep timer Timer'), findsOneWidget);
       },
     );
+
+    testWidgets('the chip opens the picker from a screen-reader tap action', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await pumpChip(tester);
+
+      final node = tester.getSemantics(
+        find.bySemanticsLabel('Sleep timer Timer'),
+      );
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sleep timer'), findsOneWidget);
+      semantics.dispose();
+    });
 
     testWidgets('starts the configured default timer on player entry', (
       tester,

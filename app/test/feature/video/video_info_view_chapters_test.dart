@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
@@ -147,5 +149,46 @@ void main() {
     await tester.pump();
 
     expect(controller.seekedTo, const Duration(seconds: 83));
+  });
+
+  testWidgets('a chapter item seeks from a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final mockBloc = _MockVideoBloc(
+      VideoState(isLoading: false, videoDetail: detail),
+    );
+    addTearDown(mockBloc.close);
+    final controller = _RecordingPlaybackController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: MultiProvider(
+            providers: [
+              BlocProvider<VideoBloc>.value(value: mockBloc),
+              Provider<MediaPlaybackController>.value(value: controller),
+            ],
+            child: const VideoInfoView(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel('1:23 总结'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(controller.seekedTo, const Duration(seconds: 83));
+    semantics.dispose();
   });
 }
