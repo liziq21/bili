@@ -82,6 +82,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
         home: AppScaffold(
           child: Material(
@@ -101,7 +107,7 @@ void main() {
     await tester.pump();
 
     final expandButton = find.byKey(const ValueKey('comment-replies-c1'));
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('View 2 replies'), findsOneWidget);
 
     // Initial state: not expanded, has tooltip and expanded: false semantics
     expect(
@@ -114,7 +120,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byWidgetPredicate((w) => w is Tooltip && w.message == '2'),
+      find.byWidgetPredicate(
+        (w) => w is Tooltip && w.message == 'View 2 replies',
+      ),
       findsOneWidget,
     );
 
@@ -150,7 +158,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('comment-replies-c1')));
     await tester.pump();
 
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('View 2 replies'), findsOneWidget);
     expect(find.text('Collapse replies'), findsNothing);
     expect(
       find.byWidgetPredicate(
@@ -221,7 +229,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('en'),
         theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),

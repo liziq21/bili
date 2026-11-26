@@ -875,31 +875,42 @@ class const _ChaptersSection() extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final playbackController = context.read<MediaPlaybackController>();
-    return Container(
-      margin: EdgeInsets.only(top: $styles.insets.md),
-      padding: EdgeInsets.all($styles.insets.xs),
-      decoration: BoxDecoration(
-        color: $styles.colors.surface,
-        borderRadius: BorderRadius.circular($styles.corners.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.chapters,
-            style: $styles.text.bodyBold.copyWith(
-              color: $styles.colors.onSurfaceStrong,
-              fontSize: 13,
-            ),
+    // 时长来自播放器，而不是 bloc；订阅 `states` 才能让「能否跳转」在源给出
+    // 时长后翻转，避免把首帧的零时长一直当成不可跳转。
+    return StreamBuilder<PlaybackState>(
+      stream: playbackController.states,
+      initialData: playbackController.state,
+      builder: (context, snapshot) {
+        final canSeek =
+            (snapshot.data?.duration ?? Duration.zero) > Duration.zero;
+        return Container(
+          margin: EdgeInsets.only(top: $styles.insets.md),
+          padding: EdgeInsets.all($styles.insets.xs),
+          decoration: BoxDecoration(
+            color: $styles.colors.surface,
+            borderRadius: BorderRadius.circular($styles.corners.md),
           ),
-          const Gap(8),
-          for (final chapter in chapters)
-            _ChapterItem(
-              chapter: chapter,
-              playbackController: playbackController,
-            ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.chapters,
+                style: $styles.text.bodyBold.copyWith(
+                  color: $styles.colors.onSurfaceStrong,
+                  fontSize: 13,
+                ),
+              ),
+              const Gap(8),
+              for (final chapter in chapters)
+                _ChapterItem(
+                  chapter: chapter,
+                  playbackController: playbackController,
+                  canSeek: canSeek,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -907,6 +918,7 @@ class const _ChaptersSection() extends StatelessWidget {
 class const _ChapterItem({
   required final VideoChapter chapter,
   required final MediaPlaybackController playbackController,
+  required final bool canSeek,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -923,15 +935,18 @@ class const _ChapterItem({
       playbackController.seek(target > duration ? duration : target);
     }
 
+    final jumpHandler = canSeek ? jumpToChapter : null;
+
     return Tooltip(
       message: semanticLabel,
       child: Semantics(
-        button: true,
+        button: canSeek,
+        enabled: canSeek,
         label: semanticLabel,
-        onTap: jumpToChapter,
+        onTap: jumpHandler,
         excludeSemantics: true,
         child: InkWell(
-          onTap: jumpToChapter,
+          onTap: jumpHandler,
           borderRadius: BorderRadius.circular($styles.corners.sm),
           child: Padding(
             padding: EdgeInsets.symmetric(

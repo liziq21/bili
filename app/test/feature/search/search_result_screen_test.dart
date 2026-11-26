@@ -475,6 +475,12 @@ void main() {
       RepositoryProvider<LocalLibraryRepository>.value(
         value: library,
         child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: MultiBlocProvider(
             providers: [
               BlocProvider<SearchResultBloc<CreatorProfile>>.value(

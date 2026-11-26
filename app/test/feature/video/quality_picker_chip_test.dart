@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:model/model.dart';
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 
 void main() {
   testWidgets(
@@ -49,6 +50,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: BlocProvider.value(
               value: bloc,
@@ -101,6 +108,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: BlocProvider.value(
             value: bloc,
@@ -121,7 +134,7 @@ void main() {
     );
 
     final node = tester.getSemantics(
-      find.bySemanticsLabel('Quality 1080P high'),
+      find.bySemanticsLabel('Select quality 1080P high'),
     );
     expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
 

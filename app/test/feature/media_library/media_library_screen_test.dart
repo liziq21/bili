@@ -120,7 +120,10 @@ void main() {
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('en'),
             home: MediaLibraryScreen(
@@ -501,7 +504,10 @@ void main() {
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('en'),
             home: MediaLibraryScreen(
@@ -555,7 +561,10 @@ void main() {
         child: BlocProvider<MediaHistoryCubit>.value(
           value: cubit,
           child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('en'),
             home: MediaLibraryScreen(
@@ -583,6 +592,49 @@ void main() {
 
     expect(tapped, hasLength(1));
     expect(tapped.single.video.id, 'v1');
+    semantics.dispose();
+  });
+
+  testWidgets('a history row without a tap callback exposes no tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await addVideo('v1', sourceId: 'bilibili', minutesAgo: 1);
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+
+    await tester.pumpWidget(
+      Provider<MediaSourceCatalog>.value(
+        value: MediaSourceCatalog([
+          MediaSourceDefinition(
+            id: 'bilibili',
+            name: 'Bilibili',
+            create: () => _FakeMediaSource(id: 'bilibili', name: 'Bilibili'),
+          ),
+        ]),
+        child: BlocProvider<MediaHistoryCubit>.value(
+          value: cubit,
+          child: const MaterialApp(
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('en'),
+            home: MediaLibraryScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel(RegExp('Video v1')));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
     semantics.dispose();
   });
 }

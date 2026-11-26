@@ -1,6 +1,7 @@
 import 'dart:ui' show SemanticsAction;
 
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
@@ -21,6 +22,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 320,
@@ -53,6 +60,12 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 320,
@@ -79,6 +92,12 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 280,
@@ -111,6 +130,12 @@ void main() {
     var toggles = 0;
 
     Widget build({required bool isSubscribed}) => MaterialApp(
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: Scaffold(
         body: SizedBox(
           width: 320,
@@ -151,6 +176,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: SizedBox(
             width: 320,
@@ -183,6 +214,12 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
         home: Scaffold(
           body: SizedBox(
             width: 320,

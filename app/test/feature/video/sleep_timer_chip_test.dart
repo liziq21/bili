@@ -6,6 +6,7 @@ import 'package:app/domain/sleep_timer_action.dart';
 import 'package:app/feature/notification/sleep_timer_notifier.dart';
 import 'package:app/feature/video/common_widgets/sleep_timer_chip.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -123,6 +124,12 @@ void main() {
     // [MediaPlaybackController._subscribe] 由 openQueue 触发。
     await controller.openQueue([MediaStream(videoUrl: 'https://e.com/v.m4s')]);
     Widget child = MaterialApp(
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: Scaffold(
         body: SleepTimerChip(controller: controller, onExit: onExit),
       ),
@@ -414,8 +421,8 @@ void main() {
       await tester.tap(find.text('30:00'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Cancel'), findsOneWidget);
-      await tester.tap(find.text('Cancel'));
+      expect(find.text('Cancel timer'), findsOneWidget);
+      await tester.tap(find.text('Cancel timer'));
       await tester.pump();
 
       expect(find.text('Timer'), findsOneWidget);
@@ -623,7 +630,7 @@ void main() {
 
       await tester.tap(find.text('00:59'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text('Cancel timer'));
       await tester.pumpAndSettle();
 
       expect(notifier.cancelCalls, 1);
@@ -643,6 +650,12 @@ void main() {
       addTearDown(timer.dispose);
 
       Widget build(Key chipKey) => MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: SleepTimerScope(
             controller: timer,

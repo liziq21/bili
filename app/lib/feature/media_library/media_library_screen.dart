@@ -397,6 +397,7 @@ class const _HistoryRows({
               ),
               itemBuilder: (context, index) {
                 final item = items[index];
+                final navigate = onVideoTap;
                 return _HistoryRow(
                   item: item,
                   progress:
@@ -406,7 +407,9 @@ class const _HistoryRows({
                       )],
                   thumbWidth: thumbWidth,
                   sourceLabel: sourceNames[item.sourceId],
-                  onTap: () => onVideoTap?.call(item.sourceId, item.video.id),
+                  onTap: navigate == null
+                      ? null
+                      : () => navigate(item.sourceId, item.video.id),
                   onLongPress: () =>
                       unawaited(_confirmDeleteHistoryItem(context, item)),
                 );
@@ -472,6 +475,8 @@ class const _HistoryRow({
       onTap?.call();
     }
 
+    final tapHandler = onTap == null ? null : handleTap;
+
     return Tooltip(
       message: video.title,
       child: Semantics(
@@ -483,11 +488,11 @@ class const _HistoryRow({
           ...progressSemantics,
           l10n?.watchedAt(viewedAtLabel),
         ].whereType<String>().join(l10n?.commaSeparator ?? ','),
-        onTap: handleTap,
+        onTap: tapHandler,
         onLongPress: onLongPress,
         excludeSemantics: true,
         child: InkWell(
-          onTap: handleTap,
+          onTap: tapHandler,
           onLongPress: onLongPress,
           child: Padding(
             padding: EdgeInsets.symmetric(

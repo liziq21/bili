@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart' show BlocProvider;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:model/model.dart';
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 
 /// 直播房间数据源桩：记录调用、返回可播放流。
 class _FakeLiveRoomDataSource() implements LiveRoomDetailRemoteDataSource {
@@ -105,6 +106,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: BlocProvider.value(
               value: bloc,
@@ -152,6 +159,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: BlocProvider.value(
             value: bloc,
@@ -161,7 +174,9 @@ void main() {
       ),
     );
 
-    final node = tester.getSemantics(find.bySemanticsLabel('Quality HD'));
+    final node = tester.getSemantics(
+      find.bySemanticsLabel('Select quality HD'),
+    );
     expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
 
     node.owner!.performAction(node.id, SemanticsAction.tap);
@@ -195,6 +210,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: Scaffold(
           body: BlocProvider.value(
             value: bloc,
@@ -205,7 +226,9 @@ void main() {
     );
 
     expect(bloc.state.isSwitchingQuality, isTrue);
-    final node = tester.getSemantics(find.bySemanticsLabel('Quality HD'));
+    final node = tester.getSemantics(
+      find.bySemanticsLabel('Select quality HD'),
+    );
     expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
 
     pending.complete(Result.error(Exception('switch aborted')));

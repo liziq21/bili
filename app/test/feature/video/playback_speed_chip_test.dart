@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 
 /// 假播放器：只实现倍速路径需要的方法。
 class _FakePlatformPlayer() extends Fake implements PlatformPlayer {
@@ -110,6 +111,12 @@ void main() {
 
     // material_ui 的控件需要它自己的 MaterialApp 提供 localizations。
     Widget child = MaterialApp(
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: Scaffold(body: PlaybackSpeedChip(controller: controller)),
     );
     if (preferences != null) {
