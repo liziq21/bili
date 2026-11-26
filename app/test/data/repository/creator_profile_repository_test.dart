@@ -28,6 +28,25 @@ class _FakeCreatorProfileSearchRepository(
   }
 }
 
+class _FakeCreatorProfileRemoteDataSource(
+  final Result<CreatorProfile, Exception> result,
+) implements CreatorProfileRemoteDataSource {
+  int callCount = 0;
+  String? lastId;
+
+  @override
+  String get sourceId => 'bilibili';
+
+  @override
+  Future<Result<CreatorProfile, Exception>> getProfile(String id) async {
+    callCount++;
+    lastId = id;
+    return result;
+  }
+}
+
+class const _RateLimited() implements RateLimitedFailure;
+
 void main() {
   late AppDatabase database;
 
@@ -55,6 +74,7 @@ void main() {
       'bilibili',
       database.creatorProfileDao,
       search,
+      null,
     );
 
     final result = await repository.getProfile('creator-1');
@@ -86,6 +106,7 @@ void main() {
       'bilibili',
       database.creatorProfileDao,
       search,
+      null,
     );
 
     final result = await repository.getProfile('creator-2');
@@ -101,4 +122,81 @@ void main() {
     expect(cached?.subscribers, 3456);
     expect(cached?.videos, 12);
   });
+
+  test('prefers the profile source over the search endpoint', () async {
+    const profile = CreatorProfile(id: 'creator-3', name: 'Direct creator');
+    final search = _FakeCreatorProfileSearchRepository(
+      Result.error(Exception('search should not run')),
+    );
+    final profileSource = _FakeCreatorProfileRemoteDataSource(
+      Result.success(profile),
+    );
+    final repository = AppCreatorProfileRepository(
+      'bilibili',
+      database.creatorProfileDao,
+      search,
+      profileSource,
+    );
+
+    final result = await repository.getProfile('creator-3');
+
+    expect(result.isSuccess(), isTrue);
+    expect(profileSource.callCount, 1);
+    expect(profileSource.lastId, 'creator-3');
+    expect(search.searchCallCount, 0);
+    final cached = await database.creatorProfileDao.getCreatorProfile(
+      'bilibili',
+      'creator-3',
+    );
+    expect(cached?.name, 'Direct creator');
+  });
+
+  test('does not fall back to search after a rate limit', () async {
+    // 搜索端点与搜索页共用更紧的额度，被限流后再打一次只会让冷却更久。
+    final search = _FakeCreatorProfileSearchRepository(
+      Result.error(Exception('search should not run')),
+    );
+    final profileSource = _FakeCreatorProfileRemoteDataSource(
+      Result.error(const _RateLimited()),
+    );
+    final repository = AppCreatorProfileRepository(
+      'bilibili',
+      database.creatorProfileDao,
+      search,
+      profileSource,
+    );
+
+    final result = await repository.getProfile('creator-4');
+
+    expect(result.tryGetError(), isA<RateLimitedFailure>());
+    expect(profileSource.callCount, 1);
+    expect(search.searchCallCount, 0);
+  });
+
+  test(
+    'falls back to search when the profile source fails otherwise',
+    () async {
+      const profile = CreatorProfile(id: 'creator-5', name: 'Searched creator');
+      final search = _FakeCreatorProfileSearchRepository(
+        Result.success(
+          Page<CreatorProfile>(data: [profile], number: 1, totalPages: 1),
+        ),
+      );
+      final profileSource = _FakeCreatorProfileRemoteDataSource(
+        Result.error(Exception('card endpoint unavailable')),
+      );
+      final repository = AppCreatorProfileRepository(
+        'bilibili',
+        database.creatorProfileDao,
+        search,
+        profileSource,
+      );
+
+      final result = await repository.getProfile('creator-5');
+
+      expect(result.isSuccess(), isTrue);
+      expect(profileSource.callCount, 1);
+      expect(search.searchCallCount, 1);
+    },
+  );
 }

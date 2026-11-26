@@ -7,6 +7,13 @@ abstract class const MediaSource() {
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
       null;
+
+  /// 按 ID 精确取创作者资料的能力（可选）。
+  ///
+  /// 与 [creatorProfileSearchDataSource] 分开：资料页只需要一个人，不该借道
+  /// 搜索端点，后者与搜索页共用风控额度。
+  CreatorProfileRemoteDataSource? get creatorProfileDataSource => null;
+
   LiveRoomSearchRemoteDataSource? get liveRoomSearchDataSource => null;
   VideoSearchRemoteDataSource? get videoSearchDataSource => null;
   SearchSuggestRemoteDataSource? get searchSuggestDataSource => null;

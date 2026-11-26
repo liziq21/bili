@@ -45,6 +45,10 @@ class YouTube({YoutubeService? youtubeService, http.Client? httpClient})
   @override
   AggregateSearchRemoteDataSource? get aggregateSearchDataSource => null;
 
+  /// 频道资料仍由搜索端点提供：仓库内没有按 channelId 取频道的映射。
+  @override
+  CreatorProfileRemoteDataSource? get creatorProfileDataSource => null;
+
   @override
   LiveRoomSearchRemoteDataSource? get liveRoomSearchDataSource => null;
 

@@ -88,6 +88,8 @@ class _FakeSource({required final int count}) implements MediaSource {
   @override
   CreatorProfileSearchRemoteDataSource? get creatorProfileSearchDataSource =>
       null;
+  @override
+  CreatorProfileRemoteDataSource? get creatorProfileDataSource => null;
 
   @override
   VideoSearchRemoteDataSource? get videoSearchDataSource => null;

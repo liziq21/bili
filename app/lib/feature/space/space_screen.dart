@@ -204,7 +204,10 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                 }
 
                 if (snapshot.hasError || snapshot.data == null) {
-                  return _ProfileLoadError(onRetry: _retry);
+                  return _ProfileLoadError(
+                    onRetry: _retry,
+                    error: snapshot.error,
+                  );
                 }
 
                 return switch (snapshot.data!) {
@@ -218,7 +221,10 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                     isSubscribed: _subscriptionReady ? _isSubscribed : null,
                     onToggleSubscribe: toggleSubscription,
                   ),
-                  Error() => _ProfileLoadError(onRetry: _retry),
+                  Error(:final error) => _ProfileLoadError(
+                    onRetry: _retry,
+                    error: error,
+                  ),
                 };
               },
             ),
@@ -617,11 +623,14 @@ class const _ChannelPlaylistsEmpty() extends StatelessWidget {
   }
 }
 
-class const _ProfileLoadError({required final VoidCallback onRetry})
-    extends StatelessWidget {
+class const _ProfileLoadError({
+  required final VoidCallback onRetry,
+  required final Object? error,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final rateLimited = isRateLimited(error);
     return Center(
       child: Padding(
         padding: EdgeInsets.all($styles.insets.lg),
@@ -631,19 +640,19 @@ class const _ProfileLoadError({required final VoidCallback onRetry})
             Icon(AppIcons.error, color: $styles.colors.outline),
             SizedBox(height: $styles.insets.xs),
             Text(
-              l10n.loadFailedRetryLater,
+              rateLimited
+                  ? l10n.rateLimitedRetryLater
+                  : l10n.loadFailedRetryLater,
               textAlign: TextAlign.center,
               style: $styles.text.body.copyWith(
                 color: $styles.colors.onSurfaceVariant,
               ),
             ),
             SizedBox(height: $styles.insets.xs),
-            FilledButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                onRetry();
-              },
-              child: Text(l10n.retry),
+            RetryCooldownButton(
+              rateLimited: rateLimited,
+              scope: 'space.profile',
+              onRetry: onRetry,
             ),
           ],
         ),

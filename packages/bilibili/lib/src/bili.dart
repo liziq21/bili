@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 import 'package:http/http.dart';
 
 import 'data/source/bili_channel_playlists_remote_data_source.dart';
+import 'data/source/bili_creator_profile_remote_data_source.dart';
 import 'data/source/bili_feed_remote_data_source.dart';
 import 'data/source/bili_live_room_detail_remote_data_source.dart';
 import 'data/source/bili_danmaku_remote_data_source.dart';
@@ -90,6 +91,10 @@ class Bili() implements MediaSource {
   @override
   BiliCreatorProfileSearchRemoteDataSource get creatorProfileSearchDataSource =>
       .new(network: _searchApi);
+
+  @override
+  BiliCreatorProfileRemoteDataSource get creatorProfileDataSource =>
+      .new(network: _userApi);
 
   @override
   BiliLiveRoomSearchRemoteDataSource get liveRoomSearchDataSource =>

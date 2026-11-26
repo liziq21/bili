@@ -11,7 +11,8 @@ abstract interface class CreatorProfileRepository() {
 class const AppCreatorProfileRepository(
   final String _sourceId,
   final CreatorProfileDao _creatorProfileDao,
-  final CreatorProfileSearchRepository _searchRepository,
+  final CreatorProfileSearchRepository? _searchRepository,
+  final CreatorProfileRemoteDataSource? _profileDataSource,
 ) implements CreatorProfileRepository {
   @override
   Future<Result<CreatorProfile, Exception>> getProfile(String id) async {
@@ -21,7 +22,24 @@ class const AppCreatorProfileRepository(
     );
     if (cachedProfile != null) return Result.success(cachedProfile.asModel());
 
-    final result = await _searchRepository.search(SearchQuery(query: id));
+    if (_profileDataSource case final profileDataSource?) {
+      final direct = await profileDataSource.getProfile(id);
+      switch (direct) {
+        case Success(:final success):
+          await _creatorProfileDao.cacheCreatorProfile(_sourceId, success);
+          return Result.success(success);
+        case Error(:final error):
+          // 限流时不再退回搜索：搜索端点与搜索页共用更紧的额度，再打一次只会
+          // 让冷却更久；把失败原样交给界面判档。
+          if (error is RateLimitedFailure) return Result.error(error);
+      }
+    }
+
+    final searchRepository = _searchRepository;
+    if (searchRepository == null) {
+      return Result.error(Exception('Creator profile source unavailable'));
+    }
+    final result = await searchRepository.search(SearchQuery(query: id));
     return switch (result) {
       Success(:final success) => await _cacheRemoteProfile(success, id),
       Error(:final error) => Result.error(error),

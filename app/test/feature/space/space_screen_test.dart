@@ -255,6 +255,34 @@ void main() {
     expect(find.text('CodeCraft'), findsOneWidget);
   });
 
+  testWidgets('names rate limiting when the profile load is throttled', (
+    tester,
+  ) async {
+    final repository = _FakeCreatorProfileRepository(
+      Result.error(const _RateLimited()),
+    );
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      RepositoryProvider<CreatorProfileRepository>.value(
+        value: repository,
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.rateLimitedRetryLater), findsOneWidget);
+    expect(find.text(l10n.loadFailedRetryLater), findsNothing);
+  });
+
   testWidgets('renders the video tab and opens a video on tap', (tester) async {
     const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
     final profileRepository = _FakeCreatorProfileRepository(
