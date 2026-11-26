@@ -1,4 +1,7 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/design/design.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,6 +22,12 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 320,
@@ -51,6 +60,12 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 320,
@@ -77,6 +92,12 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('en'),
           home: Scaffold(
             body: SizedBox(
               width: 280,
@@ -109,6 +130,12 @@ void main() {
     var toggles = 0;
 
     Widget build({required bool isSubscribed}) => MaterialApp(
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        ...GlobalMaterialLocalizations.delegates,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
       home: Scaffold(
         body: SizedBox(
           width: 320,
@@ -138,5 +165,74 @@ void main() {
     await tester.tap(find.text('Unsubscribe'));
     expect(toggles, 2);
     expect(itemTapped, isFalse);
+  });
+
+  testWidgets('CreatorProfileItem exposes a screen-reader tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    var tapCount = 0;
+    const creator = CreatorProfile(id: '188339', name: 'CodeCraft');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: SizedBox(
+            width: 320,
+            height: 80,
+            child: CreatorProfileItem(
+              creatorProfile: creator,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final node = tester.getSemantics(find.byType(CreatorProfileItem));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(tapCount, 1);
+    semantics.dispose();
+    await clearImageCacheDuringTest(tester);
+  });
+
+  testWidgets('CreatorProfileItem without onTap exposes no tap action', (
+    WidgetTester tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    const creator = CreatorProfile(id: '188339', name: 'CodeCraft');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
+        home: Scaffold(
+          body: SizedBox(
+            width: 320,
+            height: 80,
+            child: CreatorProfileItem(creatorProfile: creator),
+          ),
+        ),
+      ),
+    );
+
+    final node = tester.getSemantics(find.byType(CreatorProfileItem));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+    semantics.dispose();
+    await clearImageCacheDuringTest(tester);
   });
 }

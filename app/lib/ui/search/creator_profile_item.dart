@@ -67,20 +67,25 @@ class const CreatorProfileItem({
 
     final showSubscribe = isSubscribed != null && onToggleSubscribe != null;
 
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    final handleTap = onTap != null
+        ? () {
+            HapticFeedback.lightImpact();
+            onTap!();
+          }
+        : null;
+
     final content = Tooltip(
       message: creatorProfile.name,
       child: Semantics(
         button: true,
         enabled: onTap != null,
         label: semanticLabel,
+        onTap: handleTap,
         excludeSemantics: true,
         child: InkWell(
-          onTap: onTap != null
-              ? () {
-                  HapticFeedback.lightImpact();
-                  onTap!();
-                }
-              : null,
+          onTap: handleTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(

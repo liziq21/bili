@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/app_scaffold.dart';
 import 'package:app/data/repository/video_comment_repository.dart';
 import 'package:app/design/design.dart';
@@ -80,6 +82,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
         home: AppScaffold(
           child: Material(
@@ -99,7 +107,7 @@ void main() {
     await tester.pump();
 
     final expandButton = find.byKey(const ValueKey('comment-replies-c1'));
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('View 2 replies'), findsOneWidget);
 
     // Initial state: not expanded, has tooltip and expanded: false semantics
     expect(
@@ -112,7 +120,9 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byWidgetPredicate((w) => w is Tooltip && w.message == '2'),
+      find.byWidgetPredicate(
+        (w) => w is Tooltip && w.message == 'View 2 replies',
+      ),
       findsOneWidget,
     );
 
@@ -148,7 +158,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('comment-replies-c1')));
     await tester.pump();
 
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('View 2 replies'), findsOneWidget);
     expect(find.text('Collapse replies'), findsNothing);
     expect(
       find.byWidgetPredicate(
@@ -208,5 +218,48 @@ void main() {
     await tester.pump();
 
     expect(repository.requestedVideoIds, ['video-1', 'video-1']);
+  });
+
+  testWidgets('the comment like control carries a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final bloc = VideoCommentBloc(repository: _FakeVideoCommentRepository());
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        theme: appThemeData(AppColors(BrandPalette.of(Brightness.light))),
+        home: AppScaffold(
+          child: Material(
+            child: SizedBox(
+              height: 600,
+              child: BlocProvider.value(
+                value: bloc,
+                child: const VideoCommentsView(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    bloc.add(const LoadVideoComments('video'));
+    await tester.pump();
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel('Like comment 0'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(bloc.state.comments.single.isLiked, isTrue);
+    semantics.dispose();
   });
 }

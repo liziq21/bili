@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/feature/video/bloc/video_bloc.dart';
 import 'package:app/feature/video/common_widgets/video_info_view.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
@@ -33,17 +36,41 @@ class _MockVideoBloc(super.initialState)
   void onTransition(Transition<VideoEvent, VideoState> transition) {}
 }
 
-class _RecordingPlaybackController() implements MediaPlaybackController {
+class _RecordingPlaybackController([
+  final Duration duration = const Duration(seconds: 300),
+]) implements MediaPlaybackController {
+  this
+    : _state = PlaybackState(
+        isPlaying: false,
+        isBuffering: false,
+        position: Duration.zero,
+        duration: duration,
+      );
+
   Duration? seekedTo;
-  final PlaybackState _state = const PlaybackState(
-    isPlaying: false,
-    isBuffering: false,
-    position: Duration.zero,
-    duration: Duration(seconds: 300),
-  );
+  final StreamController<PlaybackState> _states =
+      StreamController<PlaybackState>.broadcast();
+  PlaybackState _state;
 
   @override
   PlaybackState get state => _state;
+
+  @override
+  Stream<PlaybackState> get states => _states.stream;
+
+  /// 模拟播放器在打开媒体后把时长告诉 UI。
+  void emitDuration(Duration value) {
+    _state = PlaybackState(
+      isPlaying: false,
+      isBuffering: false,
+      position: Duration.zero,
+      duration: value,
+    );
+    _states.add(_state);
+  }
+
+  @override
+  Future<void> dispose() => _states.close();
 
   @override
   Future<void> seek(Duration position) async {
@@ -147,5 +174,143 @@ void main() {
     await tester.pump();
 
     expect(controller.seekedTo, const Duration(seconds: 83));
+  });
+
+  testWidgets('a chapter item seeks from a screen-reader tap action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final mockBloc = _MockVideoBloc(
+      VideoState(isLoading: false, videoDetail: detail),
+    );
+    addTearDown(mockBloc.close);
+    final controller = _RecordingPlaybackController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: MultiProvider(
+            providers: [
+              BlocProvider<VideoBloc>.value(value: mockBloc),
+              Provider<MediaPlaybackController>.value(value: controller),
+            ],
+            child: const VideoInfoView(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel('1:23 总结'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(controller.seekedTo, const Duration(seconds: 83));
+    semantics.dispose();
+  });
+
+  testWidgets('chapters expose no tap action until the duration is known', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final mockBloc = _MockVideoBloc(
+      VideoState(isLoading: false, videoDetail: detail),
+    );
+    addTearDown(mockBloc.close);
+    final controller = _RecordingPlaybackController(Duration.zero);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: MultiProvider(
+            providers: [
+              BlocProvider<VideoBloc>.value(value: mockBloc),
+              Provider<MediaPlaybackController>.value(value: controller),
+            ],
+            child: const VideoInfoView(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel('1:23 总结'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+
+    await tester.tap(find.text('总结'));
+    await tester.pump();
+
+    expect(controller.seekedTo, isNull);
+    semantics.dispose();
+  });
+
+  testWidgets('a chapter becomes tappable once the duration arrives', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final mockBloc = _MockVideoBloc(
+      VideoState(isLoading: false, videoDetail: detail),
+    );
+    addTearDown(mockBloc.close);
+    final controller = _RecordingPlaybackController(Duration.zero);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: MultiProvider(
+            providers: [
+              BlocProvider<VideoBloc>.value(value: mockBloc),
+              Provider<MediaPlaybackController>.value(value: controller),
+            ],
+            child: const VideoInfoView(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('1:23 总结'))
+          .getSemanticsData()
+          .hasAction(SemanticsAction.tap),
+      isFalse,
+    );
+
+    controller.emitDuration(const Duration(seconds: 300));
+    // 流事件在下一帧才送达 StreamBuilder。
+    await tester.pump();
+    await tester.pump();
+
+    final node = tester.getSemantics(find.bySemanticsLabel('1:23 总结'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pump();
+
+    expect(controller.seekedTo, const Duration(seconds: 83));
+    semantics.dispose();
   });
 }

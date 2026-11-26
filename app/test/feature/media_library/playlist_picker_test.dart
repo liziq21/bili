@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:app/data/repository/local_library_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/feature/media_library/playlist_picker.dart';
@@ -184,6 +186,33 @@ void main() {
         await failingRepository.getPlaylistItems(playlistId),
         hasLength(1),
       );
+    },
+  );
+
+  testPickerWidgets(
+    'a playlist row appends the video from a screen-reader tap action',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      final playlistId = await repository.createPlaylist(
+        'bilibili',
+        'Watch later',
+      );
+
+      await tester.pumpWidget(app(repository));
+      await pumpDb(tester);
+      await tester.tap(find.text('选择列表'));
+      await pumpRoute(tester);
+
+      final node = tester.getSemantics(
+        find.bySemanticsLabel('添加到播放列表 Watch later'),
+      );
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await pumpDb(tester);
+
+      expect(await repository.getPlaylistItems(playlistId), hasLength(1));
+      semantics.dispose();
     },
   );
 }

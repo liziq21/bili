@@ -32,13 +32,22 @@ class _LiveQualityChipState() extends State<LiveQualityChip> {
       (bloc) => bloc.state.isSwitchingQuality,
     );
     final currentLabel = widget.stream.qualityLabel ?? l10n?.auto ?? 'Auto';
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    final openPicker = switching
+        ? null
+        : () {
+            HapticFeedback.lightImpact();
+            _showQualityPicker(context);
+          };
 
     return Tooltip(
       message: qualityLabel,
       child: Semantics(
         button: true,
-        enabled: !switching,
+        enabled: openPicker != null,
         label: '$qualityLabel $currentLabel',
+        onTap: openPicker,
         excludeSemantics: true,
         child: Material(
           color: $styles.colors.scrim.withValues(alpha: 0.6),
@@ -46,12 +55,7 @@ class _LiveQualityChipState() extends State<LiveQualityChip> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: InkWell(
-            onTap: switching
-                ? null
-                : () {
-                    HapticFeedback.lightImpact();
-                    _showQualityPicker(context);
-                  },
+            onTap: openPicker,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: switching

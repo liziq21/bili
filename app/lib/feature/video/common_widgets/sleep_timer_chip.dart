@@ -341,12 +341,20 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
         ? _formatRemaining(_timer!.remaining!)
         : (l10n?.timer ?? 'Timer');
     final timerTitle = l10n?.sleepTimerTitle ?? 'Sleep timer';
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    void openPicker() {
+      HapticFeedback.lightImpact();
+      _userSelected = true;
+      _showPicker(context);
+    }
 
     return Tooltip(
       message: timerTitle,
       child: Semantics(
         button: true,
         label: '$timerTitle $label',
+        onTap: openPicker,
         excludeSemantics: true,
         child: Material(
           color: active
@@ -356,11 +364,7 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _userSelected = true;
-              _showPicker(context);
-            },
+            onTap: openPicker,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: Text(

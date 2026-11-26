@@ -109,21 +109,25 @@ class _LocalPlaylistPickerDialogState()
                       separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final playlist = playlists[index];
+                        final addToPlaylist = _isSaving
+                            ? null
+                            : () {
+                                HapticFeedback.lightImpact();
+                                _appendTo(playlist);
+                              };
                         return Tooltip(
                           message: l10n.addToNamedPlaylist(playlist.name),
                           child: Semantics(
                             button: true,
                             enabled: !_isSaving,
                             label: l10n.addToNamedPlaylistLong(playlist.name),
+                            onTap: addToPlaylist,
                             excludeSemantics: true,
                             child: ListTile(
                               enabled: !_isSaving,
                               leading: const Icon(AppIcons.queue),
                               title: Text(playlist.name),
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                _appendTo(playlist);
-                              },
+                              onTap: addToPlaylist,
                             ),
                           ),
                         );

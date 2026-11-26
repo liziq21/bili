@@ -875,31 +875,42 @@ class const _ChaptersSection() extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final playbackController = context.read<MediaPlaybackController>();
-    return Container(
-      margin: EdgeInsets.only(top: $styles.insets.md),
-      padding: EdgeInsets.all($styles.insets.xs),
-      decoration: BoxDecoration(
-        color: $styles.colors.surface,
-        borderRadius: BorderRadius.circular($styles.corners.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.chapters,
-            style: $styles.text.bodyBold.copyWith(
-              color: $styles.colors.onSurfaceStrong,
-              fontSize: 13,
-            ),
+    // 时长来自播放器，而不是 bloc；订阅 `states` 才能让「能否跳转」在源给出
+    // 时长后翻转，避免把首帧的零时长一直当成不可跳转。
+    return StreamBuilder<PlaybackState>(
+      stream: playbackController.states,
+      initialData: playbackController.state,
+      builder: (context, snapshot) {
+        final canSeek =
+            (snapshot.data?.duration ?? Duration.zero) > Duration.zero;
+        return Container(
+          margin: EdgeInsets.only(top: $styles.insets.md),
+          padding: EdgeInsets.all($styles.insets.xs),
+          decoration: BoxDecoration(
+            color: $styles.colors.surface,
+            borderRadius: BorderRadius.circular($styles.corners.md),
           ),
-          const Gap(8),
-          for (final chapter in chapters)
-            _ChapterItem(
-              chapter: chapter,
-              playbackController: playbackController,
-            ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.chapters,
+                style: $styles.text.bodyBold.copyWith(
+                  color: $styles.colors.onSurfaceStrong,
+                  fontSize: 13,
+                ),
+              ),
+              const Gap(8),
+              for (final chapter in chapters)
+                _ChapterItem(
+                  chapter: chapter,
+                  playbackController: playbackController,
+                  canSeek: canSeek,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -907,27 +918,35 @@ class const _ChaptersSection() extends StatelessWidget {
 class const _ChapterItem({
   required final VideoChapter chapter,
   required final MediaPlaybackController playbackController,
+  required final bool canSeek,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final target = Duration(seconds: chapter.startSeconds);
     final formattedTime = _formatDuration(chapter.startSeconds);
     final semanticLabel = '$formattedTime ${chapter.title}'.trim();
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    void jumpToChapter() {
+      HapticFeedback.lightImpact();
+      // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
+      final duration = playbackController.state.duration;
+      if (duration <= Duration.zero) return;
+      playbackController.seek(target > duration ? duration : target);
+    }
+
+    final jumpHandler = canSeek ? jumpToChapter : null;
 
     return Tooltip(
       message: semanticLabel,
       child: Semantics(
-        button: true,
+        button: canSeek,
+        enabled: canSeek,
         label: semanticLabel,
+        onTap: jumpHandler,
         excludeSemantics: true,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            // 时长未知（媒体未打开）时不给跳转，否则会 seek 到无效位置。
-            final duration = playbackController.state.duration;
-            if (duration <= Duration.zero) return;
-            playbackController.seek(target > duration ? duration : target);
-          },
+          onTap: jumpHandler,
           borderRadius: BorderRadius.circular($styles.corners.sm),
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -1297,6 +1316,12 @@ class const _ActionButton({
     final semanticLabel = '$actionName $label';
     final computedTooltip =
         tooltip ?? (isActive ? l10n.cancelAction(actionName) : actionName);
+    // `excludeSemantics: true` drops the InkWell's tap action, so the same
+    // callback has to be declared on the Semantics node as well.
+    void handleTap() {
+      HapticFeedback.lightImpact();
+      onTap();
+    }
 
     return Tooltip(
       message: computedTooltip,
@@ -1309,11 +1334,9 @@ class const _ActionButton({
         excludeSemantics: true,
         label: semanticLabel,
         tooltip: computedTooltip,
+        onTap: handleTap,
         child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
+          onTap: handleTap,
           borderRadius: BorderRadius.circular($styles.corners.lg),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),

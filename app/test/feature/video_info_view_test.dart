@@ -200,7 +200,57 @@ void main() {
       // excludeSemantics: true 会吞掉子节点语义动作，必须显式验证
       // 外层节点自身携带 tap 动作（CodeRabbit Major：屏读用户须能触发订阅）
       expect(subSemantics.properties.onTap, isNotNull);
+      // excludeSemantics: true 同样吞掉动作条按钮的 tap，语义节点必须自带回调。
+      expect(likeSemantics.properties.onTap, isNotNull);
+      expect(favoriteSemantics.properties.onTap, isNotNull);
 
+      await mockBloc.close();
+    });
+
+    testWidgets('a screen-reader tap on the like action toggles the like', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final mockDetail = VideoDetail(
+        video: const VideoModel(
+          id: 'BV1action',
+          url: 'https://example.com/video',
+          title: '测试动作条视频',
+          viewCount: 10000,
+        ),
+        likeCount: 38000,
+        creator: const CreatorProfile(id: 'test_creator', name: '测试UP主'),
+      );
+      final mockBloc = MockVideoBloc(
+        VideoState(isLoading: false, videoDetail: mockDetail),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(
+            body: BlocProvider<VideoBloc>.value(
+              value: mockBloc,
+              child: const VideoInfoView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final node = tester.getSemantics(find.bySemanticsLabel('点赞 3.8万'));
+      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pump();
+
+      expect(mockBloc.dispatched.whereType<ToggleVideoLike>(), hasLength(1));
+      semantics.dispose();
       await mockBloc.close();
     });
 
