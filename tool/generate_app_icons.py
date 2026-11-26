@@ -108,6 +108,16 @@ def _render(svg_text: str, size: int, destination: Path) -> None:
 
 def _render_opaque(svg_text: str, size: int, destination: Path) -> None:
     """Render a PNG without an alpha channel (App Store requirement)."""
+    _render_converted(svg_text, size, destination, "RGB")
+
+
+def _render_rgba(svg_text: str, size: int, destination: Path) -> None:
+    """Render a 32-bit RGBA PNG (Play Store requirement)."""
+    _render_converted(svg_text, size, destination, "RGBA")
+
+
+def _render_converted(svg_text: str, size: int, destination: Path,
+                      mode: str) -> None:
     try:
         from PIL import Image
     except ImportError:  # pragma: no cover - depends on host packages
@@ -116,7 +126,7 @@ def _render_opaque(svg_text: str, size: int, destination: Path) -> None:
         raw = Path(tmp) / "raw.png"
         _render(svg_text, size, raw)
         with Image.open(raw) as image:
-            image.convert("RGB").save(destination, format="PNG", optimize=True)
+            image.convert(mode).save(destination, format="PNG", optimize=True)
 
 
 def android_vector_paths() -> list[dict[str, str]]:
@@ -255,19 +265,11 @@ def full_icon_svg(variant: str, *, rounded: bool = False) -> str:
     return _svg_document(body)
 
 
-def foreground_svg(variant: str, *, scale: float = 1.0,
-                   background: str | None = None) -> str:
+def foreground_svg(variant: str, *, background: str | None = None) -> str:
     _, ink = VARIANTS[variant]
     body = _recolor(_svg_body(_load_svg(BRAND / "app_icon_foreground.svg")), background, ink)
     if background is not None:
         body = f'<rect width="108" height="108" fill="{background}"/>' + body
-    if scale != 1.0:
-        offset = (108 - 108 * scale) / 2
-        body = (
-            f'<g transform="translate({offset} {offset}) scale({scale})">'
-            + body
-            + "</g>"
-        )
     return _svg_document(body)
 
 
@@ -287,7 +289,7 @@ def write_android_bitmaps() -> None:
             _render(full_icon_svg(variant, rounded=True), size, destination)
         _log(f"android mipmaps: {variant}")
 
-    _render(
+    _render_rgba(
         full_icon_svg("release"),
         512,
         ANDROID_RES / "main" / "ic_launcher-playstore.png",
@@ -342,13 +344,15 @@ def write_web_icons() -> None:
     web = APP / "web"
     _render(full_icon_svg("release"), 192, web / "icons" / "Icon-192.png")
     _render(full_icon_svg("release"), 512, web / "icons" / "Icon-512.png")
+    # Maskable icons are full-bleed: the mark already sits inside the inner
+    # 80% safe circle, so the square ground can cover the whole canvas.
     _render(
-        foreground_svg("release", scale=0.8, background=VARIANTS["release"][0]),
+        full_icon_svg("release"),
         192,
         web / "icons" / "Icon-maskable-192.png",
     )
     _render(
-        foreground_svg("release", scale=0.8, background=VARIANTS["release"][0]),
+        full_icon_svg("release"),
         512,
         web / "icons" / "Icon-maskable-512.png",
     )

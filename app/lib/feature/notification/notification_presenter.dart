@@ -92,7 +92,7 @@ final class AndroidNotificationPresenter() implements NotificationPresenter {
     );
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('@drawable/ic_notification_icon'),
       ),
       onDidReceiveNotificationResponse: (response) => onTap(response.payload),
     );

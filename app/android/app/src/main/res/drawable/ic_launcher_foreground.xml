@@ -7,12 +7,12 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:pathData="M23 54 L39.5 37 H68.5 L85 54 L68.5 71 H39.5 Z"
+        android:pathData="M24.55 54 L40.23 37.85 H67.78 L83.45 54 L67.78 70.15 H40.23 Z"
         android:strokeColor="@color/ic_launcher_foreground_tint"
-        android:strokeWidth="7.5"
+        android:strokeWidth="7.125"
         android:strokeLineJoin="miter"
         android:strokeLineCap="butt" />
     <path
-        android:pathData="M45 43 L45 65 L63.5 54 Z"
+        android:pathData="M45.45 43.55 V64.45 L63.02 54 Z"
         android:fillColor="@color/ic_launcher_foreground_tint" />
 </vector>

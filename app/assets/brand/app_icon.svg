@@ -18,8 +18,8 @@
   <title id="title">Bili</title>
   <desc id="desc">An oracle-bone eye whose pupil is a play triangle.</desc>
   <rect width="108" height="108" fill="#F8ECE5"/>
-  <path d="M23 54 L39.5 37 H68.5 L85 54 L68.5 71 H39.5 Z"
-        fill="none" stroke="#B75B1E" stroke-width="7.5"
+  <path d="M24.55 54 L40.23 37.85 H67.78 L83.45 54 L67.78 70.15 H40.23 Z"
+        fill="none" stroke="#B75B1E" stroke-width="7.125"
         stroke-linejoin="miter" stroke-linecap="butt"/>
-  <path d="M45 43 L45 65 L63.5 54 Z" fill="#B75B1E"/>
+  <path d="M45.45 43.55 V64.45 L63.02 54 Z" fill="#B75B1E"/>
 </svg>
