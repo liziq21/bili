@@ -1,0 +1,7 @@
+# ARB keys kept although no Dart code references them.
+#
+# One key per line; `#` starts a comment, so the retention reason travels with
+# the key. Empty is the intended state: `python3 tool/check_unused_arb_keys.py
+# --check` runs in the Tool Tests job and fails on an unreferenced key that is
+# not listed here. Add an entry only when the key must stay (for example a
+# translation already in flight), and delete it once the key is used or gone.

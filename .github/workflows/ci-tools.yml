@@ -21,6 +21,9 @@ jobs:
       - name: Check ARB duplicate keys
         run: python3 tool/check_arb_duplicate_keys.py
 
+      - name: Check unused ARB keys
+        run: python3 tool/check_unused_arb_keys.py --check
+
       - name: Check test matrix mapping
         run: python3 tool/test_matrix.py --check
 
