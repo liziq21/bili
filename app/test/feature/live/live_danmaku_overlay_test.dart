@@ -5,6 +5,8 @@ import 'package:app/datastore/preferences_data_source.dart';
 import 'package:app/feature/live/live_danmaku_overlay.dart';
 import 'package:app/feature/video/danmaku/danmaku_painter.dart';
 import 'package:app/feature/video/player/media_playback_controller.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:clock/clock.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -47,13 +49,28 @@ DanmakuComment _comment(String content) => DanmakuComment(
 
 /// Only the painter whose delegate is [DanmakuPainter] belongs to the overlay;
 /// MaterialApp and Scaffold paint through their own [CustomPaint] widgets.
+final _overlayPainter = find.byWidgetPredicate(
+  (widget) => widget is CustomPaint && widget.painter is DanmakuPainter,
+);
+
 DanmakuPainter _painterOf(WidgetTester tester) {
-  final paint = tester.widget<CustomPaint>(
-    find.byWidgetPredicate(
-      (widget) => widget is CustomPaint && widget.painter is DanmakuPainter,
-    ),
-  );
+  final paint = tester.widget<CustomPaint>(_overlayPainter);
   return paint.painter! as DanmakuPainter;
+}
+
+LiveDanmakuOverlayState _overlayState(WidgetTester tester) =>
+    tester.state<LiveDanmakuOverlayState>(find.byType(LiveDanmakuOverlay));
+
+/// Advances the fake clock by [span] without drawing, then reports whether
+/// anything scheduled a frame.
+///
+/// A timer that keeps calling `setState` at 20 Hz leaves a frame scheduled; a
+/// stopped timer leaves none.
+Future<bool> _schedulesFrameWithin(WidgetTester tester, Duration span) async {
+  await tester.binding.delayed(span);
+  final scheduled = tester.binding.hasScheduledFrame;
+  await tester.pump();
+  return scheduled;
 }
 
 void main() {
@@ -77,6 +94,11 @@ void main() {
   });
 
   Widget appFor(int roomId) => MaterialApp(
+    localizationsDelegates: const [
+      ...AppLocalizations.localizationsDelegates,
+      ...GlobalMaterialLocalizations.delegates,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
     home: Provider<PreferencesDataSource>.value(
       value: preferences,
       child: Provider<DanmakuRepository>.value(
@@ -157,5 +179,89 @@ void main() {
     expect(contents, isNot(contains('room seven')));
 
     await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('stops repainting once the last comment scrolls out', (
+    tester,
+  ) async {
+    await withClock(tester.binding.clock, () async {
+      await tester.pumpWidget(appFor(7));
+      await tester.pumpAndSettle();
+
+      repository.controllerFor(7).add(_comment('short lived'));
+      await tester.pump();
+      await tester.pump();
+      expect(_overlayPainter, findsOneWidget);
+
+      // The default scroll duration is 8s: the comment is still on screen well
+      // before that, and gone shortly after it.
+      await tester.pump(const Duration(seconds: 5));
+      expect(_overlayPainter, findsOneWidget);
+      expect(_overlayState(tester).isTickerRunning, isTrue);
+
+      await tester.pump(const Duration(seconds: 4));
+      expect(_overlayPainter, findsNothing);
+      expect(_overlayState(tester).isTickerRunning, isFalse);
+      expect(
+        await _schedulesFrameWithin(tester, const Duration(milliseconds: 200)),
+        isFalse,
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  });
+
+  testWidgets('keeps the lane history while a comment is still scrolling', (
+    tester,
+  ) async {
+    await withClock(tester.binding.clock, () async {
+      await tester.pumpWidget(appFor(7));
+      await tester.pumpAndSettle();
+
+      repository.controllerFor(7).add(_comment('first'));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      repository.controllerFor(7).add(_comment('second'));
+      await tester.pump();
+      await tester.pump();
+      final comments = _painterOf(tester).comments;
+
+      // At 10.5s the first comment has left the screen but the second one is
+      // still scrolling until 11s. Rebuilding the timeline from a pruned list
+      // here would hand the second comment a different lane mid-scroll, so the
+      // overlay must keep passing the same list instance to the painter.
+      await tester.pump(const Duration(milliseconds: 7500));
+
+      expect(_painterOf(tester).comments, same(comments));
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  });
+
+  testWidgets('stops repainting when danmaku is switched off', (tester) async {
+    await withClock(tester.binding.clock, () async {
+      await tester.pumpWidget(appFor(7));
+      await tester.pumpAndSettle();
+
+      repository.controllerFor(7).add(_comment('still on screen'));
+      await tester.pump();
+      await tester.pump();
+      expect(_overlayPainter, findsOneWidget);
+
+      await preferences.set(PreferencesKey.danmakuEnabled, false);
+      await tester.pump();
+      await tester.pump();
+
+      expect(_overlayPainter, findsNothing);
+      expect(_overlayState(tester).isTickerRunning, isFalse);
+      expect(
+        await _schedulesFrameWithin(tester, const Duration(milliseconds: 200)),
+        isFalse,
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
   });
 }
