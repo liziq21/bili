@@ -97,6 +97,7 @@ class const FeedStatusView({
               RetryCooldownBuilder(
                 rateLimited: true,
                 scope: retryScope,
+                failure: error,
                 onRetry: onRetry!,
                 builder: (_, label, _, onPressed) => OutlinedButton.icon(
                   onPressed: onPressed,

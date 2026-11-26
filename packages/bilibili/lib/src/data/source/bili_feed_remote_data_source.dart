@@ -27,7 +27,7 @@ final class const BiliRecommendLiveRoomFeedRemoteDataSource({
     if (page > 1) {
       return Future.value(
         Result.success(
-          Page<LiveRoomModel>(number: page, totalPages: page, data: const []),
+          Page<LiveRoomModel>(number: page, totalPages: 1, data: const []),
         ),
       );
     }

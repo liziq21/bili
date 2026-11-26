@@ -98,4 +98,89 @@ void main() {
       isNull,
     );
   });
+
+  testWidgets('remounting the same rejection does not escalate the cooldown', (
+    tester,
+  ) async {
+    // 切走再回到同一个被限流的列表会重新挂载组件，这不是新的一次拒绝。
+    const scope = 'test.remount';
+    const cooldown = Duration(seconds: 3);
+    final failure = Exception('limited');
+    Future<void> pumpOnce() => tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: RetryCooldownButton(
+            rateLimited: true,
+            cooldown: cooldown,
+            scope: scope,
+            failure: failure,
+            onRetry: () {},
+          ),
+        ),
+      ),
+    );
+
+    await pumpOnce();
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+    await tester.pump();
+    await pumpOnce();
+
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(cooldown.inSeconds)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a new rejection escalates the cooldown', (tester) async {
+    const scope = 'test.newRejection';
+    var failure = Exception('limited');
+    Future<void> pumpOnce() => tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: RetryCooldownButton(
+            rateLimited: true,
+            scope: scope,
+            failure: failure,
+            onRetry: () {},
+          ),
+        ),
+      ),
+    );
+
+    await pumpOnce();
+    expect(
+      find.text(
+        AppLocalizationsZh().retryInSeconds(
+          rateLimitRetryBaseCooldown.inSeconds,
+        ),
+      ),
+      findsOneWidget,
+    );
+
+    // 换了一个失败对象 = 又收到一次拒绝，冷却翻倍。
+    failure = Exception('limited again');
+    await pumpOnce();
+    await tester.pump();
+
+    expect(
+      find.text(
+        AppLocalizationsZh().retryInSeconds(
+          rateLimitRetryBaseCooldown.inSeconds * 2,
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
 }

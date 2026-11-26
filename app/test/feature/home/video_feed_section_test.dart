@@ -2,6 +2,8 @@ import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/home_config.dart';
 import 'package:app/feature/home/widgets/video_feed_section.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_zh.dart';
+import 'package:app/ui/common/rate_limit_retry.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +14,8 @@ import 'package:material_ui/material_ui.dart';
 /// 旧公式用 `fontSize * height * 行数` 估算，既漏掉行高向上取整，也漏掉 CJK
 /// 回退字体比 `fontSize * height` 更高的自然行距，于是卡片底部的 Column 在
 /// 360 宽两列（以及放大字号）时会溢出零点几到几像素。
+class const _RateLimited() implements RateLimitedFailure;
+
 void main() {
   VideoModel video() => VideoModel(
     id: 'BV1xx411c7mD',
@@ -82,6 +86,80 @@ void main() {
       );
     },
   );
+
+  group('load more footer', () {
+    Future<void> pumpFooter(
+      WidgetTester tester, {
+      required Object? error,
+      required VoidCallback onLoadMore,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                VideoFeedSection(
+                  section: FeedSectionState<VideoModel>(
+                    id: 'video_section',
+                    title: '热门视频',
+                    status: error == null
+                        ? FeedStatus.success
+                        : FeedStatus.failure,
+                    items: [video(), video()],
+                    hasMore: true,
+                    error: error,
+                  ),
+                  homeConfig: HomeConfig({}),
+                  onVideoTap: (_) {},
+                  onRetry: () {},
+                  onLoadMore: onLoadMore,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('loads the next page on tap', (tester) async {
+      var loaded = 0;
+      await pumpFooter(tester, error: null, onLoadMore: () => loaded++);
+
+      await tester.tap(find.text(AppLocalizationsZh().continueLoading));
+      await tester.pump();
+
+      expect(loaded, 1);
+    });
+
+    testWidgets('holds the retry behind the cooldown after a rate limit', (
+      tester,
+    ) async {
+      var loaded = 0;
+      await pumpFooter(
+        tester,
+        error: const _RateLimited(),
+        onLoadMore: () => loaded++,
+      );
+
+      final l10n = AppLocalizationsZh();
+      final countdown = find.text(
+        l10n.retryInSeconds(rateLimitRetryBaseCooldown.inSeconds),
+      );
+      expect(countdown, findsOneWidget);
+
+      await tester.tap(countdown);
+      await tester.pump();
+
+      expect(loaded, 0);
+    });
+  });
 
   for (final width in <double>[320, 360, 390, 411]) {
     for (final scale in <double>[1, 1.5, 2]) {
