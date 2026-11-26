@@ -69,7 +69,10 @@ def _require(tool: str) -> None:
 
 
 def _load_svg(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    text = path.read_text(encoding="utf-8")
+    if "<!DOCTYPE" in text or "<!ENTITY" in text:
+        sys.exit(f"{path} must not declare a DTD or entities")
+    return text
 
 
 def _svg_body(svg_text: str) -> str:
@@ -131,7 +134,7 @@ def _render_converted(svg_text: str, size: int, destination: Path,
 
 def android_vector_paths() -> list[dict[str, str]]:
     """Extract drawable paths from the foreground SVG as attribute dicts."""
-    tree = ET.parse(BRAND / "app_icon_foreground.svg")
+    tree = ET.fromstring(_load_svg(BRAND / "app_icon_foreground.svg"))
     paths = []
     for element in tree.iter(f"{{{SVG_NS}}}path"):
         attrs = dict(element.attrib)
@@ -151,6 +154,8 @@ def write_android_vectors() -> None:
             attributes.append(
                 'android:fillColor="@color/ic_launcher_foreground_tint"'
             )
+        else:
+            attributes.append('android:fillColor="#00000000"')
         if "stroke" in attrs:
             attributes.append(
                 'android:strokeColor="@color/ic_launcher_foreground_tint"'
@@ -198,6 +203,8 @@ def write_android_vectors() -> None:
         attributes = [f'android:pathData="{attrs["d"]}"']
         if attrs.get("fill", "none") != "none":
             attributes.append('android:fillColor="#FFFFFFFF"')
+        else:
+            attributes.append('android:fillColor="#00000000"')
         if "stroke" in attrs:
             attributes.append('android:strokeColor="#FFFFFFFF"')
             attributes.append(f'android:strokeWidth="{attrs["stroke-width"]}"')
@@ -360,8 +367,18 @@ def write_web_icons() -> None:
     _log("web: favicon, PWA icons, maskable icons")
 
 
+def _require_pillow() -> None:
+    try:
+        import PIL.Image  # noqa: F401
+    except ImportError:
+        sys.exit("missing dependency: Pillow (pip install pillow)")
+
+
 def main() -> None:
     _require("rsvg-convert")
+    # Check every dependency before writing: a late failure would leave some
+    # platforms regenerated and others stale.
+    _require_pillow()
     write_android_vectors()
     write_color_resources()
     write_android_bitmaps()

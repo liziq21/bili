@@ -13,6 +13,16 @@ import generate_app_icons as icons
 SVG_NS = "{http://www.w3.org/2000/svg}"
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
 
+# Kept independent of the generator so dropping a density from the generator
+# cannot silently drop it from this check too.
+REQUIRED_MIPMAP_DENSITIES = {
+    "mdpi": 48,
+    "hdpi": 72,
+    "xhdpi": 96,
+    "xxhdpi": 144,
+    "xxxhdpi": 192,
+}
+
 
 def png_header(path):
     with open(path, "rb") as handle:
@@ -140,10 +150,18 @@ class SourceSvgTest(unittest.TestCase):
         self.assertLessEqual(right, 90)
         self.assertLessEqual(bottom, 90)
 
-    def test_full_icon_has_bone_ground_and_two_mark_paths(self):
+    def test_full_icon_draws_the_mark_on_the_bone_ground(self):
         tree = ET.parse(icons.BRAND / "app_icon.svg")
-        self.assertEqual(len(list(tree.iter(f"{SVG_NS}rect"))), 1)
-        self.assertEqual(len(list(tree.iter(f"{SVG_NS}path"))), 2)
+        ground, ink = icons.VARIANTS["release"]
+        rectangles = list(tree.iter(f"{SVG_NS}rect"))
+        self.assertEqual(len(rectangles), 1)
+        self.assertEqual(rectangles[0].attrib["fill"], ground)
+        paths = list(tree.iter(f"{SVG_NS}path"))
+        self.assertEqual(len(paths), 2)
+        for path in paths:
+            self.assertTrue(path.attrib["d"], "empty path data")
+            paint = path.attrib.get("fill", "none") + path.attrib.get("stroke", "")
+            self.assertIn(ink, paint, "path is not painted with the brand ink")
 
 
 class AndroidVectorsTest(unittest.TestCase):
@@ -157,16 +175,28 @@ class AndroidVectorsTest(unittest.TestCase):
             path.attrib[f"{ANDROID_NS}pathData"] for path in vector.iter("path")
         ]
         self.assertEqual(actual, expected)
+        # Android fills a path unless fillColor says otherwise; the outline
+        # must be explicitly transparent or the eye renders as a solid blob.
+        stroke_path = next(
+            path for path in vector.iter("path")
+            if f"{ANDROID_NS}strokeWidth" in path.attrib
+        )
+        self.assertEqual(
+            stroke_path.attrib[f"{ANDROID_NS}fillColor"], "#00000000"
+        )
 
     def test_notification_icon_uses_the_same_mark_as_a_white_mask(self):
         tree = ET.parse(
             icons.ANDROID_RES / "main/res/drawable/ic_notification_icon.xml"
         )
-        for path in tree.iter("path"):
-            for attribute in ("fillColor", "strokeColor"):
-                key = f"{ANDROID_NS}{attribute}"
-                if key in path.attrib:
-                    self.assertEqual(path.attrib[key], "#FFFFFFFF")
+        paths = list(tree.iter("path"))
+        self.assertEqual(len(paths), 2)
+        for path in paths:
+            self.assertTrue(path.attrib[f"{ANDROID_NS}pathData"])
+        outline, pupil = paths
+        self.assertEqual(outline.attrib[f"{ANDROID_NS}fillColor"], "#00000000")
+        self.assertEqual(outline.attrib[f"{ANDROID_NS}strokeColor"], "#FFFFFFFF")
+        self.assertEqual(pupil.attrib[f"{ANDROID_NS}fillColor"], "#FFFFFFFF")
 
     def test_adaptive_icon_wires_background_foreground_and_monochrome(self):
         tree = ET.parse(
@@ -204,8 +234,9 @@ class ColorResourcesTest(unittest.TestCase):
 
 class RasterAssetsTest(unittest.TestCase):
     def test_legacy_mipmaps_exist_at_every_density_for_every_variant(self):
+        self.assertEqual(icons.MIPMAP_DENSITIES, REQUIRED_MIPMAP_DENSITIES)
         for directory in ("main", "debug", "dev"):
-            for density, pixels in icons.MIPMAP_DENSITIES.items():
+            for density, pixels in REQUIRED_MIPMAP_DENSITIES.items():
                 path = (
                     icons.ANDROID_RES / directory / "res"
                     / f"mipmap-{density}" / "ic_launcher.png"
