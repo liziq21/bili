@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/data/repository/creator_profile_repository.dart';
 import 'package:app/data/repository/search_contents_repository.dart';
 import 'package:app/database/app_database.dart';
@@ -43,6 +45,25 @@ class _FakeCreatorProfileRemoteDataSource(
     lastId = id;
     return result;
   }
+}
+
+/// 手动控制何时返回的远端源，用来制造「两个请求同时在路上」。
+class _ControlledCreatorProfileRemoteDataSource()
+    implements CreatorProfileRemoteDataSource {
+  final _completer = Completer<Result<CreatorProfile, Exception>>();
+  int callCount = 0;
+
+  @override
+  String get sourceId => 'bilibili';
+
+  @override
+  Future<Result<CreatorProfile, Exception>> getProfile(String id) {
+    callCount++;
+    return _completer.future;
+  }
+
+  void complete(Result<CreatorProfile, Exception> result) =>
+      _completer.complete(result);
 }
 
 class const _RateLimited() implements RateLimitedFailure;
@@ -199,4 +220,30 @@ void main() {
       expect(search.searchCallCount, 1);
     },
   );
+
+  test('coalesces concurrent requests for the same creator', () async {
+    // 两个请求同时在路上时，慢的那个会把旧资料写回缓存；合并成一次既避免
+    // 乱序覆盖，也少打一次网络。
+    const profile = CreatorProfile(id: 'creator-6', name: 'Creator');
+    final profileSource = _ControlledCreatorProfileRemoteDataSource();
+    final repository = AppCreatorProfileRepository(
+      'bilibili',
+      database.creatorProfileDao,
+      null,
+      profileSource,
+    );
+
+    final first = repository.getProfile('creator-6');
+    final second = repository.getProfile('creator-6');
+    profileSource.complete(Result.success(profile));
+
+    expect((await first).isSuccess(), isTrue);
+    expect((await second).isSuccess(), isTrue);
+    expect(profileSource.callCount, 1);
+
+    // 请求结束后不再复用，下一次调用重新走缓存 / 远端。
+    final cached = await repository.getProfile('creator-6');
+    expect(cached.isSuccess(), isTrue);
+    expect(profileSource.callCount, 1);
+  });
 }

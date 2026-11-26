@@ -264,7 +264,7 @@ class const _SpaceContent({
               : BlocProvider<ChannelVideosCubit>(
                   key: ValueKey('$mid-videos'),
                   create: (_) => ChannelVideosCubit(videosRepository, mid),
-                  child: _ChannelVideosGrid(onVideo: onVideo),
+                  child: _ChannelVideosGrid(onVideo: onVideo, mid: mid),
                 ),
         ),
       if (tabSettings.isVisible(ChannelTabs.playlists) &&
@@ -274,7 +274,7 @@ class const _SpaceContent({
           view: BlocProvider<ChannelPlaylistsCubit>(
             key: ValueKey('$mid-playlists'),
             create: (_) => ChannelPlaylistsCubit(playlistsRepository, mid),
-            child: _ChannelPlaylistsList(onPlaylist: onPlaylist),
+            child: _ChannelPlaylistsList(onPlaylist: onPlaylist, mid: mid),
           ),
         ),
     ];
@@ -349,8 +349,10 @@ class const _ChannelTabBar({
 }
 
 /// 频道投稿分页网格。
-class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
-    extends StatelessWidget {
+class const _ChannelVideosGrid({
+  required final VideoNavCallback? onVideo,
+  required final String mid,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChannelVideosCubit, PagingState<int, VideoModel>>(
@@ -373,12 +375,16 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
               ),
               firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
                 error: state.error,
+                // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
+                // 上一个 UP 主的连击次数。
+                scope: 'space.videos.$mid',
                 onRetry: () =>
                     context.read<ChannelVideosCubit>().fetchNextPage(),
               ),
               newPageErrorIndicatorBuilder: (context) =>
                   _ChannelSectionPageError(
                     error: state.error,
+                    scope: 'space.videos.$mid.next',
                     onRetry: () =>
                         context.read<ChannelVideosCubit>().fetchNextPage(),
                   ),
@@ -402,6 +408,7 @@ class const _ChannelVideosGrid({required final VideoNavCallback? onVideo})
 class const _ChannelSectionError({
   required final Object? error,
   required final VoidCallback onRetry,
+  required final String scope,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -425,7 +432,7 @@ class const _ChannelSectionError({
           SizedBox(height: $styles.insets.xs),
           RetryCooldownButton(
             rateLimited: rateLimited,
-            scope: 'space.first',
+            scope: scope,
             onRetry: onRetry,
           ),
         ],
@@ -437,6 +444,7 @@ class const _ChannelSectionError({
 class const _ChannelSectionPageError({
   required final Object? error,
   required final VoidCallback onRetry,
+  required final String scope,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -449,7 +457,7 @@ class const _ChannelSectionPageError({
         // 往下翻，只是不能立刻重发同一个被拒的请求。
         child: RetryCooldownInlineButton(
           rateLimited: rateLimited,
-          scope: 'space.next',
+          scope: scope,
           onRetry: onRetry,
           label: rateLimited
               ? l10n.rateLimitedRetryLater
@@ -510,6 +518,7 @@ class const _ChannelVideosUnsupported() extends StatelessWidget {
 
 class const _ChannelPlaylistsList({
   required final PlaylistNavCallback? onPlaylist,
+  required final String mid,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -531,11 +540,13 @@ class const _ChannelPlaylistsList({
           ),
           firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
             error: state.error,
+            scope: 'space.playlists.$mid',
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),
           newPageErrorIndicatorBuilder: (context) => _ChannelSectionPageError(
             error: state.error,
+            scope: 'space.playlists.$mid.next',
             onRetry: () =>
                 context.read<ChannelPlaylistsCubit>().fetchNextPage(),
           ),

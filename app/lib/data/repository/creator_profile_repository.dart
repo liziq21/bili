@@ -8,14 +8,26 @@ abstract interface class CreatorProfileRepository() {
   Future<Result<CreatorProfile, Exception>> getProfile(String id);
 }
 
-class const AppCreatorProfileRepository(
+class AppCreatorProfileRepository(
   final String _sourceId,
   final CreatorProfileDao _creatorProfileDao,
   final CreatorProfileSearchRepository? _searchRepository,
   final CreatorProfileRemoteDataSource? _profileDataSource,
 ) implements CreatorProfileRepository {
+  /// 同一个 mid 的并发请求合并成一次：两次请求先后返回时，慢的那次会把旧
+  /// 资料写回缓存，后到的调用读到的是过期数据。
+  final _inFlight = <String, Future<Result<CreatorProfile, Exception>>>{};
+
   @override
-  Future<Result<CreatorProfile, Exception>> getProfile(String id) async {
+  Future<Result<CreatorProfile, Exception>> getProfile(String id) {
+    // `Map.remove` 返回被移除的 future，写成箭头函数会让 whenComplete 等它
+    // 自己完成，于是永远等不到。
+    return _inFlight[id] ??= _load(id).whenComplete(() {
+      _inFlight.remove(id);
+    });
+  }
+
+  Future<Result<CreatorProfile, Exception>> _load(String id) async {
     final cachedProfile = await _creatorProfileDao.getCreatorProfile(
       _sourceId,
       id,

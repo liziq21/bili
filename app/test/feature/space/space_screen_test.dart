@@ -467,6 +467,50 @@ void main() {
     expect(videosRepository.requestedPages, [1, 2]);
   });
 
+  testWidgets('counts the cooldown per creator instead of across creators', (
+    tester,
+  ) async {
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _FakeChannelVideosRepository({
+      1: Result.error(const _RateLimited()),
+    });
+    final l10n = AppLocalizationsZh();
+
+    Widget build(String mid) => MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<CreatorProfileRepository>.value(
+          value: profileRepository,
+        ),
+        RepositoryProvider<ChannelVideosRepository>.value(
+          value: videosRepository,
+        ),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: SpaceScreen(mid: mid),
+      ),
+    );
+
+    await tester.pumpWidget(build('creator-1'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
+
+    // 另一个 UP 主有自己的额度：冷却从基础时长重新开始，不接着上一个 UP
+    // 主的连击往上翻。
+    await tester.pumpWidget(build('creator-2'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
+    expect(find.text(l10n.retryInSeconds(30)), findsNothing);
+  });
+
   testWidgets('shows an unsupported message without a videos capability', (
     tester,
   ) async {
