@@ -329,6 +329,14 @@
   "@sourceNoHomeFeed": {
     "description": "Home - empty state when the selected source provides no home feed"
   },
+  "homeAllTabsHidden": "All tabs are hidden",
+  "@homeAllTabsHidden": {
+    "description": "Home - empty state when every configured tab of the source is hidden"
+  },
+  "homeAllTabsHiddenHint": "Turn tabs back on in Home settings",
+  "@homeAllTabsHiddenHint": {
+    "description": "Home - hint under the all-tabs-hidden empty state, pointing at the Home settings"
+  },
   "sectionLoadFailed": "Failed to load {p1}",
   "@sectionLoadFailed": {
     "description": "Home feed section - error state; {p1} is the section title",

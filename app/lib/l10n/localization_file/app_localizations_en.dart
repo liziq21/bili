@@ -255,6 +255,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceNoHomeFeed => 'This source doesn\'t provide a home feed';
 
   @override
+  String get homeAllTabsHidden => 'All tabs are hidden';
+
+  @override
+  String get homeAllTabsHiddenHint => 'Turn tabs back on in Home settings';
+
+  @override
   String sectionLoadFailed(String p1) {
     return 'Failed to load $p1';
   }

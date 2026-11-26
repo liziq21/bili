@@ -78,29 +78,61 @@ class const HomeScreen({
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
+          final content = CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // 数据源没有提供任何 Feed 时不挂筛选栏：空列表配一排空 chip
+              // 比什么都不显示更像故障。
+              if (state.filters.isNotEmpty)
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: HomeFilterBar(
+                    filters: state.filters,
+                    activeFilterId: state.activeFilter!.id,
+                    onSelected: (filter) => _onFilterSelected(context, filter),
+                    height: HomeFilterBar.preferredHeight(context),
+                  ),
+                ),
+              ..._buildContentSlivers(context, state, activeSource.name),
+            ],
+          );
+          // 空态没有可刷新的内容：下拉只会转一圈，什么也不会变。
+          if (state.activeFilter == null) return content;
           return RefreshIndicator(
             onRefresh: () => _onRefresh(context),
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                // 数据源没有提供任何 Feed 时不挂筛选栏：空列表配一排空 chip
-                // 比什么都不显示更像故障。
-                if (state.filters.isNotEmpty)
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: HomeFilterBar(
-                      filters: state.filters,
-                      activeFilterId: state.activeFilter!.id,
-                      onSelected: (filter) =>
-                          _onFilterSelected(context, filter),
-                      height: HomeFilterBar.preferredHeight(context),
-                    ),
-                  ),
-                ..._buildContentSlivers(context, state, activeSource.name),
-              ],
-            ),
+            child: content,
           );
         },
+      ),
+    );
+  }
+
+  /// 结构性空态：该来源没有首页 Feed，重试不会让内容出现。
+  ///
+  /// 这个分支只表达「这个数据源不提供首页推荐」，不是一次可以重试的失败；
+  /// 挂重试按钮会给出一个点了没有任何反应的死控件。切换来源的入口在顶栏。
+  Widget _noHomeFeed(BuildContext context, String sourceName) {
+    final l10n = AppLocalizations.of(context)!;
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: FeedStatusView(
+        icon: AppIcons.inbox,
+        message: l10n.sourceNoRecommendations(sourceName),
+        description: l10n.sourceNoHomeFeed,
+      ),
+    );
+  }
+
+  /// 来源有 Feed，但配置里把标签页全隐藏了：同样没有可重试的东西，
+  /// 要改的是首页设置，所以文案指过去而不是给一个无效的按钮。
+  Widget _noVisibleTabs(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: FeedStatusView(
+        icon: AppIcons.inbox,
+        message: l10n.homeAllTabsHidden,
+        description: l10n.homeAllTabsHiddenHint,
       ),
     );
   }
@@ -110,38 +142,19 @@ class const HomeScreen({
     HomeState state,
     String sourceName,
   ) {
-    final filter = state.activeFilter;
-    if (filter == null) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: FeedStatusView(
-            icon: AppIcons.inbox,
-            message: AppLocalizations.of(context)!
-                .sourceNoRecommendations(sourceName),
-            description: AppLocalizations.of(context)!.sourceNoHomeFeed,
-            onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
-          ),
-        ),
-      ];
+    if (state.videoSections.isEmpty && state.liveSections.isEmpty) {
+      return [_noHomeFeed(context, sourceName)];
     }
+
+    final filter = state.activeFilter;
+    if (filter == null) return [_noVisibleTabs(context)];
 
     final liveSections = state.visibleLiveSections;
     final videoSections = state.visibleVideoSections;
 
+    // 选中项没有对应区块（配置刚变、区块还没回来）时也按空态处理。
     if (liveSections.isEmpty && videoSections.isEmpty) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: FeedStatusView(
-            icon: AppIcons.inbox,
-            message: AppLocalizations.of(context)!
-                .sourceNoRecommendations(sourceName),
-            description: AppLocalizations.of(context)!.sourceNoHomeFeed,
-            onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
-          ),
-        ),
-      ];
+      return [_noVisibleTabs(context)];
     }
 
     return [

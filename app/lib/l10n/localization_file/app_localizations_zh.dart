@@ -241,6 +241,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sourceNoHomeFeed => '该数据源未提供首页 Feed';
 
   @override
+  String get homeAllTabsHidden => '标签页已全部隐藏';
+
+  @override
+  String get homeAllTabsHiddenHint => '在首页设置中重新显示标签页';
+
+  @override
   String sectionLoadFailed(String p1) {
     return '$p1 加载失败';
   }
