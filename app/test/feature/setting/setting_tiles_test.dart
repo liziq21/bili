@@ -225,6 +225,46 @@ void main() {
         tester.getTopLeft(find.text('Dark')).dx,
       );
     });
+
+    testWidgets('keeps that alignment when the layout scale changes', (
+      tester,
+    ) async {
+      // Given a tablet-sized viewport, where `$styles.insets.sm` no longer
+      // equals ListTile's fixed 16dp.
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(1400, 900)),
+            child: AppScaffold(
+              child: Scaffold(
+                body: ListView(
+                  children: [
+                    const SettingPickerTitle(title: 'Theme'),
+                    SettingPickerOption(
+                      title: 'Dark',
+                      selected: true,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Then the title still follows the component's fixed padding (R2.4)
+      // instead of a screen-scaled token.
+      expect(
+        tester.getTopLeft(find.text('Theme')).dx,
+        tester.getTopLeft(find.text('Dark')).dx,
+      );
+    });
   });
 
   group('showSettingPicker', () {

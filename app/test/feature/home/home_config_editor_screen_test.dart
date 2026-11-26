@@ -186,11 +186,11 @@ void main() {
     expect(pickers, findsNWidgets(2));
     await tester.tap(pickers.at(0));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(SettingPickerOption, '3'));
+    await tester.tap(find.widgetWithText(SettingPickerOption, '4'));
     await tester.pumpAndSettle();
 
     final config = await persistedConfig();
-    expect(config.gridColumnsPortrait, equals(3));
+    expect(config.gridColumnsPortrait, equals(4));
     expect(config.gridColumnsLandscape, equals(3));
   });
 

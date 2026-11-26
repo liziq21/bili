@@ -149,8 +149,9 @@ class const SettingPickerChoice<T>(final T value, final String label);
 
 /// Opens the standard single-choice bottom sheet and reports the chosen value.
 ///
-/// Every settings picker uses this so the title inset, option rows and haptic
-/// feedback stay identical across subpages.
+/// Pages that need a bespoke option layout compose [SettingPickerTitle] and
+/// [SettingPickerOption] directly; this helper covers the plain single-choice
+/// case so those sheets still share the same title inset and option styling.
 Future<void> showSettingPicker<T>({
   required BuildContext context,
   required String title,
