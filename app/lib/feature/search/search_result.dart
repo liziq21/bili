@@ -33,10 +33,10 @@ class const SearchResult<T>({
               ),
               builderDelegate: PagedChildBuilderDelegate(
                 itemBuilder: itemBuilder,
-                firstPageErrorIndicatorBuilder: (context) =>
-                    _SearchErrorView<T>(error: state.error),
-                newPageErrorIndicatorBuilder: (context) =>
-                    _NewPageErrorIndicator<T>(error: state.error),
+                firstPageErrorIndicatorBuilder: (context, error) =>
+                    _SearchErrorView<T>(error: error),
+                newPageErrorIndicatorBuilder: (context, error) =>
+                    _NewPageErrorIndicator<T>(error: error),
                 noItemsFoundIndicatorBuilder: (context) =>
                     const _EmptySearchIndicator(),
               ),

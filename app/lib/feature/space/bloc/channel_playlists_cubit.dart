@@ -24,7 +24,7 @@ class ChannelPlaylistsCubit(
 
   Future<void> fetchNextPage() async {
     if (state.isLoading) return;
-    if (state.pages != null && !state.hasNextPage) return;
+    if (!state.hasNextPage) return;
 
     emit(state.copyWith(isLoading: true, error: null));
 
@@ -44,8 +44,8 @@ class ChannelPlaylistsCubit(
           if (success.data.isEmpty && hasNextPage) continue;
           emit(
             state.copyWith(
-              pages: [...?state.pages, success.data],
-              keys: [...?state.keys, page],
+              pages: [...state.pages, success.data],
+              keys: [...state.keys, page],
               hasNextPage: hasNextPage,
               isLoading: false,
               error: null,

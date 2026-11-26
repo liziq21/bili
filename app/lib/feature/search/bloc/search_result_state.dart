@@ -13,7 +13,7 @@ final class const SearchResultState<T>({
     query: query,
     sortOption: currentSort,
     filters: filters,
-    pageKey: (pagingState.keys?.last ?? 0) + 1,
+    pageKey: pagingState.nextIntPageKey,
   );
 
   SearchResultState<T> toLoading() {
