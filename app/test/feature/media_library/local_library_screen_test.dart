@@ -421,6 +421,25 @@ void main() {
     },
   );
 
+  testLibraryWidgets(
+    'keeps the tab bar in place when a tab shows the source filter',
+    (tester) async {
+      await tester.pumpWidget(app(screen()));
+      await pumpLibrary(tester);
+      final tabBarTop = tester.getTopLeft(find.byType(TabBar)).dy;
+
+      await openTab(tester, '收藏');
+
+      // 来源筛选属于 tab 内容：它在 TabBar 之下，TabBar 不随切换上下跳动。
+      expect(find.text('筛选'), findsOneWidget);
+      expect(tester.getTopLeft(find.byType(TabBar)).dy, tabBarTop);
+      expect(
+        tester.getTopLeft(find.text('筛选')).dy,
+        greaterThanOrEqualTo(tester.getBottomLeft(find.byType(TabBar)).dy),
+      );
+    },
+  );
+
   testLibraryWidgets('recreates a failed local stream when retrying', (
     tester,
   ) async {
