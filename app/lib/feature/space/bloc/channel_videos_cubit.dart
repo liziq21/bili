@@ -18,10 +18,9 @@ class ChannelVideosCubit(
 
   Future<void> fetchNextPage() async {
     if (state.isLoading) return;
-    if (state.pages != null && !state.hasNextPage) return;
+    if (!state.hasNextPage) return;
 
-    final keys = state.keys;
-    final nextPage = (keys == null || keys.isEmpty ? 0 : keys.last) + 1;
+    final nextPage = state.nextIntPageKey;
     emit(state.copyWith(isLoading: true, error: null));
 
     final result = await _repository.fetchVideos(
@@ -35,8 +34,8 @@ class ChannelVideosCubit(
       case Success(:final success):
         emit(
           state.copyWith(
-            pages: [...?state.pages, success.data],
-            keys: [...?state.keys, nextPage],
+            pages: [...state.pages, success.data],
+            keys: [...state.keys, nextPage],
             hasNextPage: nextPage < success.totalPages,
             isLoading: false,
             error: null,

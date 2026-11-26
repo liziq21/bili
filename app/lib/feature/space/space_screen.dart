@@ -373,17 +373,18 @@ class const _ChannelVideosGrid({
                   color: $styles.colors.accentFill,
                 ),
               ),
-              firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
-                error: state.error,
-                // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
-                // 上一个 UP 主的连击次数。
-                scope: 'space.videos.$mid',
-                onRetry: () =>
-                    context.read<ChannelVideosCubit>().fetchNextPage(),
-              ),
-              newPageErrorIndicatorBuilder: (context) =>
+              firstPageErrorIndicatorBuilder: (context, error) =>
+                  _ChannelSectionError(
+                    error: error,
+                    // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
+                    // 上一个 UP 主的连击次数。
+                    scope: 'space.videos.$mid',
+                    onRetry: () =>
+                        context.read<ChannelVideosCubit>().fetchNextPage(),
+                  ),
+              newPageErrorIndicatorBuilder: (context, error) =>
                   _ChannelSectionPageError(
-                    error: state.error,
+                    error: error,
                     scope: 'space.videos.$mid.next',
                     onRetry: () =>
                         context.read<ChannelVideosCubit>().fetchNextPage(),
@@ -540,18 +541,20 @@ class const _ChannelPlaylistsList({
           firstPageProgressIndicatorBuilder: (context) => Center(
             child: CircularProgressIndicator(color: $styles.colors.accentFill),
           ),
-          firstPageErrorIndicatorBuilder: (context) => _ChannelSectionError(
-            error: state.error,
-            scope: 'space.playlists.$mid',
-            onRetry: () =>
-                context.read<ChannelPlaylistsCubit>().fetchNextPage(),
-          ),
-          newPageErrorIndicatorBuilder: (context) => _ChannelSectionPageError(
-            error: state.error,
-            scope: 'space.playlists.$mid.next',
-            onRetry: () =>
-                context.read<ChannelPlaylistsCubit>().fetchNextPage(),
-          ),
+          firstPageErrorIndicatorBuilder: (context, error) =>
+              _ChannelSectionError(
+                error: error,
+                scope: 'space.playlists.$mid',
+                onRetry: () =>
+                    context.read<ChannelPlaylistsCubit>().fetchNextPage(),
+              ),
+          newPageErrorIndicatorBuilder: (context, error) =>
+              _ChannelSectionPageError(
+                error: error,
+                scope: 'space.playlists.$mid.next',
+                onRetry: () =>
+                    context.read<ChannelPlaylistsCubit>().fetchNextPage(),
+              ),
           noItemsFoundIndicatorBuilder: (context) =>
               const _ChannelPlaylistsEmpty(),
         ),

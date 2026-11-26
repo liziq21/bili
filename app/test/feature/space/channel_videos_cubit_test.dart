@@ -41,7 +41,7 @@ void main() {
     expect(repository.requestedChannels, ['42']);
     expect(repository.requestedPages, [1]);
     expect(cubit.state.pages, hasLength(1));
-    expect(cubit.state.pages!.single.single.id, 'v1');
+    expect(cubit.state.pages.single.single.id, 'v1');
     expect(cubit.state.hasNextPage, isTrue);
     expect(cubit.state.isLoading, isFalse);
   });
@@ -59,7 +59,7 @@ void main() {
     await cubit.fetchNextPage();
 
     expect(repository.requestedPages, [1, 2]);
-    expect(cubit.state.pages!.expand((page) => page).map((video) => video.id), [
+    expect(cubit.state.pages.expand((page) => page).map((video) => video.id), [
       'v1',
       'v2',
     ]);

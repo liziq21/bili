@@ -43,7 +43,7 @@ void main() {
     expect(repository.requestedChannels, ['42']);
     expect(repository.requestedPages, [1]);
     expect(cubit.state.pages, hasLength(1));
-    expect(cubit.state.pages!.single.single.id, 'p1');
+    expect(cubit.state.pages.single.single.id, 'p1');
     expect(cubit.state.hasNextPage, isTrue);
     expect(cubit.state.isLoading, isFalse);
   });
@@ -66,7 +66,7 @@ void main() {
 
     expect(repository.requestedPages, [1, 2]);
     expect(
-      cubit.state.pages!.expand((page) => page).map((playlist) => playlist.id),
+      cubit.state.pages.expand((page) => page).map((playlist) => playlist.id),
       ['p1', 'p2'],
     );
     expect(cubit.state.hasNextPage, isFalse);
@@ -114,7 +114,7 @@ void main() {
 
     expect(repository.requestedPages, [1, 2]);
     expect(cubit.state.pages, hasLength(1));
-    expect(cubit.state.pages!.single.single.id, 'p2');
+    expect(cubit.state.pages.single.single.id, 'p2');
     expect(cubit.state.keys, [2]);
     expect(cubit.state.hasNextPage, isFalse);
     expect(cubit.state.isLoading, isFalse);
@@ -131,7 +131,7 @@ void main() {
     await cubit.fetchNextPage();
 
     expect(cubit.state.error, isA<Exception>());
-    expect(cubit.state.pages, isNull);
+    expect(cubit.state.pages, isEmpty);
 
     repository.responses[2] = Result.success(
       Page(number: 2, totalPages: 2, data: [_playlist('p2')]),
@@ -140,6 +140,6 @@ void main() {
 
     expect(repository.requestedPages, [1, 2, 2]);
     expect(cubit.state.pages, hasLength(1));
-    expect(cubit.state.pages!.single.single.id, 'p2');
+    expect(cubit.state.pages.single.single.id, 'p2');
   });
 }

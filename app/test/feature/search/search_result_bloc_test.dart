@@ -93,7 +93,7 @@ void main() {
       ),
     );
     await _settle();
-    expect(bloc.state.pagingState.pages, isNull);
+    expect(bloc.state.pagingState.pages, isEmpty);
 
     repository.completers[1].complete(
       Result.success(
@@ -108,7 +108,7 @@ void main() {
     );
     await _settle();
 
-    expect(bloc.state.pagingState.pages!.single.single.id, 'fresh');
+    expect(bloc.state.pagingState.pages.single.single.id, 'fresh');
   });
 }
 
