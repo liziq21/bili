@@ -9,6 +9,9 @@ import 'package:material_ui/material_ui.dart';
 /// 时列表纹丝不动，内容超出视口的部分没有任何可达路径。这里把纵向增量
 /// 转发给横向滚动位置。
 ///
+/// 只处理鼠标滚轮（[PointerDeviceKind.mouse]）：网页端触控板的纵向手势以
+/// [PointerDeviceKind.trackpad] 送达，应由外层页面消费。
+///
 /// 通过 [PointerSignalResolver] 认领事件而不是直接滚动，是为了和
 /// [Scrollable] 的仲裁规则保持一致：
 /// * 按 Shift（[ScrollBehavior.pointerAxisModifiers]）滚轮时，[Scrollable]
@@ -37,16 +40,19 @@ class _HorizontalWheelScrollState() extends State<HorizontalWheelScroll> {
   }
 
   void _onPointerSignal(BuildContext context, PointerSignalEvent event) {
-    if (event is! PointerScrollEvent) return;
+    // 只重映射鼠标滚轮。触控板的纵向手势在网页端以 trackpad 事件送达，
+    // 交给外层页面处理，否则嵌在纵向页面里的横排会把页面的上下滚动截走。
+    if (event is! PointerScrollEvent || event.kind != PointerDeviceKind.mouse) {
+      return;
+    }
     final delta = event.scrollDelta.dy;
     if (delta == 0) return;
     // Shift+滚轮由 Scrollable 翻转轴向自行处理，重复认领会滚两倍。
-    final flipAxes =
-        event.kind == PointerDeviceKind.mouse &&
-        HardwareKeyboard.instance.logicalKeysPressed.any(
-          ScrollConfiguration.of(context).pointerAxisModifiers.contains,
-        );
-    if (flipAxes) return;
+    if (HardwareKeyboard.instance.logicalKeysPressed.any(
+      ScrollConfiguration.of(context).pointerAxisModifiers.contains,
+    )) {
+      return;
+    }
     if (!_controller.hasClients) return;
     final position = _controller.position;
     if (!position.hasContentDimensions) return;

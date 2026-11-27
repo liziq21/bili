@@ -5,21 +5,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 横向列表：10 张 200 宽的卡片放进 300 宽的视口，一定可以横向滚动。
-Widget _horizontalList({int itemCount = 10}) => SizedBox(
-  width: 300,
-  height: 100,
-  child: HorizontalWheelScroll(
-    builder: (context, controller) => ListView.builder(
-      controller: controller,
-      scrollDirection: Axis.horizontal,
-      itemCount: itemCount,
-      itemBuilder: (context, index) =>
-          SizedBox(width: 200, child: Text('card $index')),
+/// [Align] 让 300 的宽度在纵向列表的紧约束下仍然生效。
+Widget _horizontalList({int itemCount = 10}) => Align(
+  alignment: Alignment.topLeft,
+  child: SizedBox(
+    width: 300,
+    height: 100,
+    child: HorizontalWheelScroll(
+      builder: (context, controller) => ListView.builder(
+        controller: controller,
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        itemBuilder: (context, index) =>
+            SizedBox(width: 200, child: Text('card $index')),
+      ),
     ),
   ),
 );
 
 Widget _app(Widget child) => MaterialApp(
+  localizationsDelegates: const [...GlobalMaterialLocalizations.delegates],
   home: Scaffold(
     body: Align(alignment: Alignment.topLeft, child: child),
   ),
@@ -51,7 +56,8 @@ void main() {
       await tester.sendEventToBinding(pointer.scroll(const Offset(0, 200)));
       await tester.pump();
 
-      expect(horizontal.position.pixels, greaterThan(0));
+      // 200 像素滚轮增量应原样落到横向位置，而不是只挪动一点点。
+      expect(horizontal.position.pixels, 200);
     });
 
     testWidgets('does not scroll the page while the list still moves', (
@@ -79,7 +85,7 @@ void main() {
       await tester.sendEventToBinding(pointer.scroll(const Offset(0, 200)));
       await tester.pump();
 
-      expect(horizontal.position.pixels, greaterThan(0));
+      expect(horizontal.position.pixels, 200);
       expect(vertical.position.pixels, 0);
     });
 
@@ -91,7 +97,7 @@ void main() {
         _app(
           ListView(
             children: [
-              _horizontalList(itemCount: 1),
+              _horizontalList(itemCount: 2),
               for (var i = 0; i < 20; i++)
                 SizedBox(height: 100, child: Text('row $i')),
             ],
@@ -101,14 +107,50 @@ void main() {
 
       final vertical = _scrollableWithAxis(tester, AxisDirection.down);
       final horizontal = _scrollableWithAxis(tester, AxisDirection.right);
-      expect(horizontal.position.maxScrollExtent, 0);
+      // 2 张 200 宽的卡片放进 300 宽的视口，剩余可滚动距离为 100。
+      expect(horizontal.position.maxScrollExtent, 100);
 
       final pointer = TestPointer(1, PointerDeviceKind.mouse);
       pointer.hover(tester.getCenter(_horizontalListView));
       await tester.sendEventToBinding(pointer.scroll(const Offset(0, 200)));
       await tester.pump();
+      expect(horizontal.position.pixels, 100);
+      expect(vertical.position.pixels, 0);
 
-      expect(vertical.position.pixels, greaterThan(0));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 200)));
+      await tester.pump();
+
+      expect(horizontal.position.pixels, 100);
+      expect(vertical.position.pixels, 200);
+    });
+
+    testWidgets('leaves trackpad gestures to the page', (
+      WidgetTester tester,
+    ) async {
+      // 网页端触控板的纵向滚动以 trackpad 事件送达。横排截走它会让嵌在
+      // 纵向页面里的内容无法上下滚动。
+      await tester.pumpWidget(
+        _app(
+          ListView(
+            children: [
+              _horizontalList(),
+              for (var i = 0; i < 20; i++)
+                SizedBox(height: 100, child: Text('row $i')),
+            ],
+          ),
+        ),
+      );
+
+      final vertical = _scrollableWithAxis(tester, AxisDirection.down);
+      final horizontal = _scrollableWithAxis(tester, AxisDirection.right);
+
+      final pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      pointer.hover(tester.getCenter(_horizontalListView));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 200)));
+      await tester.pump();
+
+      expect(horizontal.position.pixels, 0);
+      expect(vertical.position.pixels, 200);
     });
 
     testWidgets('leaves Shift+wheel to the scrollable itself', (

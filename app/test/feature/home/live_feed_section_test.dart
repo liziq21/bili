@@ -360,7 +360,8 @@ void main() {
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 300)));
     await tester.pump();
 
-    expect(horizontal.position.pixels, greaterThan(0));
+    // 300 像素滚轮增量应原样落到横向位置，而不是只挪动一点点。
+    expect(horizontal.position.pixels, 300);
   });
 
   group('card layout budget', () {
