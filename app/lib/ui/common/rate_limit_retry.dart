@@ -36,8 +36,10 @@ const _noFailure = Object();
 
 /// 连续被拒之间隔得比这还久，就当新的一轮，不再沿用旧次数。
 ///
-/// 没有这一步，成功之后隔一天再被拒也会从 5 分钟起步。
-const _streakTtl = rateLimitRetryMaxCooldown;
+/// 必须明显大于 [rateLimitRetryMaxCooldown]：冷却到上限后用户会等满 5 分钟
+/// 再重试，若 TTL 与上限相等，这一次失败会被当成新的一轮，冷却从上限跌回
+/// 基础时长——持续限流时反而越等越短。
+final _streakTtl = rateLimitRetryMaxCooldown * 2;
 
 /// 记一次新的限流失败，返回按 2 的幂放大后的冷却时长。
 ///
