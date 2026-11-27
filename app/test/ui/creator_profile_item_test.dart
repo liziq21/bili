@@ -2,14 +2,20 @@ import 'dart:ui' show SemanticsAction;
 
 import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/ui/metadata_line.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:data/data.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+import '../golden/golden_font.dart';
 
 void main() {
+  // 宽度断言必须用 golden 字体子集排版：Ahem 的每个字形都是 1em 宽，
+  // 量不出真实卡片里「UID 放不下、关注数与视频数放得下」这个关系。
+  setUpAll(loadGoldenFont);
+
   test('formatCount keeps the raw count without localizations', () {
     expect(CreatorProfileItem.formatCount(500), '500');
     expect(CreatorProfileItem.formatCount(15000), '');
@@ -97,16 +103,20 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
-          localizationsDelegates: [
+        MaterialApp(
+          // 只有换上 golden 字体子集，宽度才是真实比例字体的宽度；默认的
+          // Ahem 每个字形都是 1em 方块，量不出「放得下几个字段」。
+          theme: goldenTestTheme(),
+          localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('en'),
-          home: Scaffold(
+          locale: const Locale('en'),
+          home: const Scaffold(
             body: SizedBox(
-              width: 280,
+              // 比 20 位 UID 在该字号下的宽度更窄，省略号才有机会出现。
+              width: 160,
               height: 80,
               child: CreatorProfileItem(creatorProfile: creator),
             ),
@@ -120,11 +130,59 @@ void main() {
       expect(nameWidget.maxLines, 1);
       expect(nameWidget.overflow, TextOverflow.ellipsis);
 
-      final subtitleWidget = tester.widget<Text>(
-        find.text('@12345678901234567890'),
+      final subtitle = tester.renderObject<RenderMetadataLine>(
+        find.byType(MetadataLine),
       );
-      expect(subtitleWidget.maxLines, 1);
-      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+      expect(subtitle.renderedText, startsWith('@12345678901234567890'));
+      // 单行 + 省略号：超长的 UID 只会被截断，不会换行撑高卡片。
+      expect(subtitle.textWasClipped, isTrue);
+      expect(subtitle.size.height, lessThan(24));
+    },
+  );
+
+  testWidgets(
+    'CreatorProfileItem drops the UID before the follower and video counts',
+    (WidgetTester tester) async {
+      // #682：360dp 宽的搜索页里频道卡片只剩 190dp 左右可用。UID 排在最前面又最长，
+      // 整串省略时把「关注数 · 视频数」一起挤掉了；UID 的信息量最低，必须
+      // 最先让位。
+      const creator = CreatorProfile(
+        id: '1320808120',
+        name: 'Genshin',
+        subscribers: 46000,
+        videos: 503,
+        isLive: true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: goldenTestTheme(),
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: const Scaffold(
+            body: SizedBox(
+              width: 360,
+              height: 80,
+              child: CreatorProfileItem(creatorProfile: creator),
+            ),
+          ),
+        ),
+      );
+
+      final subtitle = tester.renderObject<RenderMetadataLine>(
+        find.byType(MetadataLine),
+      );
+
+      // 关注数和视频数都必须留下：只断言其中一个，优先级写反了也看不出来。
+      expect(subtitle.renderedText, contains('4.6万'));
+      expect(subtitle.renderedText, contains('视频'));
+      expect(subtitle.renderedText, isNot(contains('@1320808120')));
+      expect(subtitle.textWasClipped, isFalse);
+      await clearImageCacheDuringTest(tester);
     },
   );
 

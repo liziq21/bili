@@ -1,6 +1,7 @@
 import 'package:app/feature/search/common_widgets/filter_bar.dart';
 import 'package:app/app_scaffold.dart';
 import 'package:app/design/design.dart';
+import 'package:app/ui/metadata_line.dart';
 import 'package:app/ui/search/creator_profile_item.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
@@ -44,9 +45,11 @@ void main() {
         ),
       );
 
-      final id = tester.widget<Text>(find.text('@188339'));
+      // 元信息由 `MetadataLine` 绘制（不是 `Text`），颜色断言读它自己的样式。
+      final subtitle = tester.widget<MetadataLine>(find.byType(MetadataLine));
+      expect(subtitle.parts.map((part) => part.text), contains('@188339'));
       expect(
-        id.style?.color,
+        subtitle.style.color,
         $styles.colors.onSurfaceVariant,
         reason: 'ID 文字应读 onSurfaceVariant（弱化文字：时间戳、标签）',
       );
@@ -109,11 +112,11 @@ void main() {
         ),
       );
 
-      // 副标题在无 l10n delegate 的 harness 里 = creatorName + 空 viewsCount
-      // 空 date 的 join 结果（'UP - '），用它验证弱化文字色。
-      final subtitle = tester.widget<Text>(find.textContaining('UP'));
+      // 副标题在无 l10n delegate 的 harness 里只剩作者名，用它验证弱化文字色。
+      final subtitle = tester.widget<MetadataLine>(find.byType(MetadataLine));
+      expect(subtitle.parts.map((part) => part.text), contains('UP'));
       expect(
-        subtitle.style?.color,
+        subtitle.style.color,
         $styles.colors.onSurfaceVariant,
         reason: '副标题属弱化文字',
       );
@@ -215,7 +218,7 @@ void main() {
       final item = CreatorProfileItem(creatorProfile: cp, onTap: () {});
 
       Color idTextColor(WidgetTester t) =>
-          t.widget<Text>(find.text('@188339')).style!.color!;
+          t.widget<MetadataLine>(find.byType(MetadataLine)).style.color!;
 
       await tester.pumpWidget(
         ValueListenableBuilder(

@@ -3,6 +3,7 @@ import 'dart:ui' show ImageByteFormat, SemanticsAction;
 import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_zh.dart';
+import 'package:app/ui/metadata_line.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:flutter/rendering.dart'
@@ -176,7 +177,12 @@ void main() {
     expect(find.text('09:17'), findsOneWidget);
     expect(find.byTooltip('Stitch Feed Video Title'), findsOneWidget);
     expect(tapped, isFalse);
-    expect(find.textContaining('五盒ll十箱'), findsOneWidget);
+    expect(
+      tester
+          .renderObject<RenderMetadataLine>(find.byType(MetadataLine))
+          .renderedText,
+      contains('五盒ll十箱'),
+    );
     expect(find.byTooltip('More options'), findsOneWidget);
 
     final moreOptions = find.bySemanticsLabel('More options');
@@ -228,11 +234,15 @@ void main() {
       expect(titleWidget.maxLines, 2);
       expect(titleWidget.overflow, TextOverflow.ellipsis);
 
-      final subtitleWidget = tester.widget<Text>(
-        find.textContaining('Creator With Very Long Name Testing Overflow'),
+      final subtitle = tester.renderObject<RenderMetadataLine>(
+        find.byType(MetadataLine),
       );
-      expect(subtitleWidget.maxLines, 1);
-      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+      expect(
+        subtitle.renderedText,
+        contains('Creator With Very Long Name Testing Overflow'),
+      );
+      // 元信息始终单行：换行会让卡片高度算错。单行约 18-20dp，两行就翻倍。
+      expect(subtitle.size.height, lessThan(24));
 
       await clearImageCacheDuringTest(tester);
     },
@@ -273,11 +283,12 @@ void main() {
       expect(titleWidget.maxLines, 2);
       expect(titleWidget.overflow, TextOverflow.ellipsis);
 
-      final subtitleWidget = tester.widget<Text>(
-        find.textContaining('Feed Creator With Long Name'),
+      final subtitle = tester.renderObject<RenderMetadataLine>(
+        find.byType(MetadataLine),
       );
-      expect(subtitleWidget.maxLines, 1);
-      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+      expect(subtitle.renderedText, contains('Feed Creator With Long Name'));
+      // 元信息始终单行：换行会让卡片高度算错。单行约 18-20dp，两行就翻倍。
+      expect(subtitle.size.height, lessThan(24));
 
       await clearImageCacheDuringTest(tester);
     },
@@ -574,16 +585,14 @@ void main() {
     }
   });
 
-  group('feed card metadata line', () {
+  group('card metadata line', () {
     // 用 golden 字体子集排版：Ahem 的每个字形都是 1em 宽，量不出真实卡片
     // 里「统计信息放得下、作者名放不下」这个宽度关系。
     setUpAll(loadGoldenFont);
 
     final l10n = AppLocalizationsZh();
-    final statsText = l10n.viewsWithDate(
-      l10n.countCompactKilo('1.0'),
-      l10n.daysAgo(4),
-    );
+    final viewsText = l10n.viewsCount(l10n.countCompactKilo('1.0'));
+    final dateText = l10n.daysAgo(4);
     const creator = '一个长名字的创作者';
 
     VideoModel video() => VideoModel(
@@ -596,7 +605,11 @@ void main() {
       creatorProfileName: creator,
     );
 
-    Future<void> pumpCard(WidgetTester tester, {required double width}) async {
+    Future<void> pumpCard(
+      WidgetTester tester, {
+      required double width,
+      VideoCardVariant variant = VideoCardVariant.feed,
+    }) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: goldenTestTheme(),
@@ -611,10 +624,7 @@ void main() {
               child: SizedBox(
                 width: width,
                 height: 300,
-                child: VideoCard(
-                  variant: VideoCardVariant.feed,
-                  videoInfoBase: video(),
-                ),
+                child: VideoCard(variant: variant, videoInfoBase: video()),
               ),
             ),
           ),
@@ -623,48 +633,67 @@ void main() {
       await tester.pump();
     }
 
+    /// 卡片里那行元信息。
+    RenderMetadataLine metadataLine(WidgetTester tester) =>
+        tester.renderObject<RenderMetadataLine>(
+          find.descendant(
+            of: find.byType(VideoCard),
+            matching: find.byType(MetadataLine),
+          ),
+        );
+
     testWidgets(
-      'gives the whole line to the stats when the creator cannot fit',
+      'drops the date and the creator so the view count stays readable',
       (WidgetTester tester) async {
-        // #682：360 宽两列网格的卡片只有 164 宽，作者名 + 统计信息拼成一行时
-        // 被省略号吃掉的是统计数字。放不下作者名时整行让给统计信息，播放量
-        // 与日期至少从头开始读，而不是排在作者名之后被截断。
+        // #682：360 宽两列网格的卡片只有 164 宽。三个字段拼成一串再省略时，
+        // 被吃掉的正是播放量；改成按优先级丢字段后，播放量必须完整留在行内。
         await pumpCard(tester, width: 164);
 
-        expect(find.text(statsText), findsOneWidget);
-        expect(find.text(creator), findsNothing);
-        // `find.text` 匹配的是 Text 的数据，实际被省略时同样命中；这里直接
-        // 看排版结果：播放量那一段必须完整落在行内。
-        _expectPrefixVisible(
-          tester.renderObject<RenderParagraph>(find.text(statsText)),
-          l10n.viewsCount(l10n.countCompactKilo('1.0')),
-        );
+        final line = metadataLine(tester);
+        expect(line.renderedText, viewsText);
+        expect(line.textWasClipped, isFalse);
 
         await clearImageCacheDuringTest(tester);
       },
     );
 
-    testWidgets('fits the stats fully once the card is wide enough', (
+    testWidgets('keeps the view count whole before the creator fits', (
       WidgetTester tester,
     ) async {
-      // 432 宽两列网格的卡片是 200 宽：统计信息可以完整排下，作者名让位。
       await pumpCard(tester, width: 200);
 
-      final stats = tester.renderObject<RenderParagraph>(find.text(statsText));
-      expect(stats.didExceedMaxLines, isFalse);
-      expect(find.text(creator), findsNothing);
+      final line = metadataLine(tester);
+      expect(line.renderedText, viewsText);
+      expect(line.textWasClipped, isFalse);
 
       await clearImageCacheDuringTest(tester);
     });
 
-    testWidgets('shows both the creator and the stats on a wide card', (
+    testWidgets('shows every field on a wide card', (
       WidgetTester tester,
     ) async {
       await pumpCard(tester, width: 400);
 
-      expect(find.text(creator), findsOneWidget);
-      final stats = tester.renderObject<RenderParagraph>(find.text(statsText));
-      expect(stats.didExceedMaxLines, isFalse);
+      final line = metadataLine(tester);
+      expect(
+        line.renderedText,
+        '$creator${l10n.spacedBullet}$viewsText${l10n.spacedBullet}$dateText',
+      );
+      expect(line.textWasClipped, isFalse);
+
+      await clearImageCacheDuringTest(tester);
+    });
+
+    testWidgets('drops the creator before the view count on a default card', (
+      WidgetTester tester,
+    ) async {
+      // 搜索结果的两列网格用的也是这个变体：作者名比播放量长得多时，先让
+      // 作者名让位（#682）。
+      await pumpCard(tester, width: 164, variant: VideoCardVariant.defaultCard);
+
+      final line = metadataLine(tester);
+      expect(line.renderedText, viewsText);
+      expect(line.textWasClipped, isFalse);
 
       await clearImageCacheDuringTest(tester);
     });
@@ -682,15 +711,4 @@ void main() {
       await clearImageCacheDuringTest(tester);
     });
   });
-}
-
-/// 断言 [prefix] 完整落在段落第一行内，而不是被省略号吃掉。
-void _expectPrefixVisible(RenderParagraph paragraph, String prefix) {
-  final boxes = paragraph.getBoxesForSelection(
-    TextSelection(baseOffset: 0, extentOffset: prefix.length),
-  );
-  expect(boxes, isNotEmpty);
-  for (final box in boxes) {
-    expect(box.right, lessThanOrEqualTo(paragraph.size.width + 0.5));
-  }
 }

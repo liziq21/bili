@@ -9,6 +9,7 @@ import '../design/design.dart';
 import '../l10n/compact_count.dart';
 import '../l10n/localization_file/app_localizations.dart';
 import '../main.dart';
+import 'metadata_line.dart';
 
 enum VideoCardVariant() {
   defaultCard,
@@ -94,6 +95,16 @@ class const VideoCard({
     if (variant == VideoCardVariant.feed) {
       final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
       final formattedDate = formatRelativeDate(videoInfoBase.uploadDate, l10n);
+      final creatorName =
+          videoInfoBase.creatorProfileName ??
+          (l10n?.unknownCreator ?? 'Unknown');
+      // 没有本地化时 `formattedDate` 为空，但上传日期本身还在：副标题会退回
+      // 显示它，元信息行也必须跟着显示，否则两条信息对不上。
+      final displayDate = formattedDate.isNotEmpty
+          ? formattedDate
+          : (videoInfoBase.uploadDate != null
+                ? '${videoInfoBase.uploadDate}'
+                : '');
       final feedSubtitle = formattedViews.isNotEmpty
           ? (formattedDate.isNotEmpty
                 ? l10n?.viewsWithDate(formattedViews, formattedDate) ?? ''
@@ -103,13 +114,31 @@ class const VideoCard({
                 : (videoInfoBase.uploadDate != null
                       ? '${videoInfoBase.uploadDate}'
                       : ''));
-      return _withMoreButton(l10n, _buildFeedCard(context, feedSubtitle));
+      return _withMoreButton(
+        l10n,
+        _buildFeedCard(
+          context,
+          creatorName: creatorName,
+          subtitleText: feedSubtitle,
+          metadataParts: [
+            MetadataPart(creatorName, priority: 2),
+            if (formattedViews.isNotEmpty)
+              MetadataPart(l10n?.viewsCount(formattedViews) ?? '', priority: 3),
+            if (displayDate.isNotEmpty) MetadataPart(displayDate, priority: 1),
+          ],
+        ),
+      );
     }
 
     final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
     final formattedDate = formatRelativeDate(videoInfoBase.uploadDate, l10n);
     final creatorName = videoInfoBase.creatorProfileName;
     final durationStr = formatDuration(videoInfoBase.duration);
+    final displayDate = formattedDate.isNotEmpty
+        ? formattedDate
+        : (videoInfoBase.uploadDate != null
+              ? '${videoInfoBase.uploadDate}'
+              : '');
 
     final subtitleParts = <String>[
       if (creatorName != null && creatorName.isNotEmpty) creatorName,
@@ -121,6 +150,17 @@ class const VideoCard({
         : (videoInfoBase.uploadDate != null
               ? '${videoInfoBase.uploadDate}'
               : '');
+    // 显示用的字段与语义标签分开：语义标签保留完整的一串，显示则按优先级
+    // 决定在窄卡片上留下哪几个（#682）。
+    final metadataParts = subtitleParts.isEmpty
+        ? [MetadataPart(subtitleText)]
+        : [
+            if (creatorName != null && creatorName.isNotEmpty)
+              MetadataPart(creatorName, priority: 2),
+            if (formattedViews.isNotEmpty)
+              MetadataPart(l10n?.viewsCount(formattedViews) ?? '', priority: 3),
+            if (displayDate.isNotEmpty) MetadataPart(displayDate, priority: 1),
+          ];
 
     final semanticLabelParts = <String?>[
       videoInfoBase.title,
@@ -218,10 +258,9 @@ class const VideoCard({
                           ),
                         ),
                         if (subtitleText.isNotEmpty)
-                          Text(
-                            subtitleText,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          MetadataLine(
+                            parts: metadataParts,
+                            separator: l10n?.spacedBullet ?? ' - ',
                             style: TextStyle(
                               fontSize: 11,
                               color: $styles.colors.onSurfaceVariant,
@@ -273,12 +312,15 @@ class const VideoCard({
     );
   }
 
-  Widget _buildFeedCard(BuildContext context, String subtitleText) {
+  Widget _buildFeedCard(
+    BuildContext context, {
+    required String creatorName,
+    required String subtitleText,
+    required List<MetadataPart> metadataParts,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     final durationStr = formatDuration(videoInfoBase.duration);
-    final creatorName =
-        videoInfoBase.creatorProfileName ?? (l10n?.unknownCreator ?? 'Unknown');
 
     final semanticLabel = <String?>[
       if (sourceBadge != null && sourceBadge!.isNotEmpty) sourceBadge!,
@@ -466,9 +508,8 @@ class const VideoCard({
                                         ),
                                       ),
                                       SizedBox(height: $styles.insets.xxs),
-                                      _MetadataLine(
-                                        creatorName: creatorName,
-                                        stats: subtitleText,
+                                      MetadataLine(
+                                        parts: metadataParts,
                                         separator: l10n?.spacedBullet ?? ' - ',
                                         style: $styles.text.bodySmall.copyWith(
                                           fontSize: 12,
@@ -492,94 +533,6 @@ class const VideoCard({
         ),
       ),
     );
-  }
-}
-
-/// 「作者 · 统计」单行元信息。
-///
-/// 作者名和播放量 / 日期拼成一个字符串再整串省略时，窄卡片上被截掉的总是
-/// 末尾的统计数字，而那才是读者最需要的信息（#682）。这里先量出统计信息
-/// 需要的宽度，把它按自身宽度排完，作者名只吃剩下的空间并先被省略。
-///
-/// 剩余空间连一个可读的作者名都放不下时（360 宽两列网格就是这种情况），
-/// 只显示统计信息：作者名仍保留在卡片的语义标签里。
-class const _MetadataLine({
-  required final String creatorName,
-  required final String stats,
-  required final String separator,
-  required final TextStyle style,
-}) extends StatelessWidget {
-  /// 作者名至少要有这么宽才值得显示，否则整行让给统计信息。
-  ///
-  /// 12px 字号下约等于 3 个 CJK 字：再窄的名字只剩下省略号，读者看不出
-  /// 是谁，却挤掉了统计信息。
-  static const double _minCreatorWidth = 40;
-
-  @override
-  Widget build(BuildContext context) {
-    // 卡片里的 `Text` 会把自身样式合并到环境样式上，量测必须用同一份结果，
-    // 否则继承来的字体或字距会让预留宽度偏小，统计信息被多省略一截。
-    final resolved = DefaultTextStyle.of(context).style.merge(style);
-    final single = stats.isEmpty
-        ? creatorName
-        : (creatorName.isEmpty ? stats : null);
-    if (single != null) return _line(single, resolved);
-
-    final scaler = MediaQuery.textScalerOf(context);
-    final textDirection = Directionality.of(context);
-    // 阈值跟着系统字号放大，避免放大后仍按 40dp 判定「放得下」，结果只露出
-    // 半个名字。
-    final minCreatorWidth = scaler.scale(_minCreatorWidth);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final statsWidth = _measureWidth(
-          stats,
-          resolved,
-          scaler,
-          textDirection,
-        );
-        final separatorWidth = _measureWidth(
-          separator,
-          resolved,
-          scaler,
-          textDirection,
-        );
-        final creatorSpace = constraints.maxWidth - statsWidth - separatorWidth;
-        if (creatorSpace < minCreatorWidth) return _line(stats, resolved);
-        return Row(
-          children: [
-            Expanded(child: _line(creatorName, resolved)),
-            Text(separator, style: resolved, maxLines: 1),
-            ConstrainedBox(
-              // 统计信息按自身宽度排完，最多占满整行；`Expanded` 的作者名
-              // 只拿剩下的宽度，两者之和不会超过行宽。
-              constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-              child: _line(stats, resolved),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _line(String text, TextStyle resolved) =>
-      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: resolved);
-
-  static double _measureWidth(
-    String text,
-    TextStyle style,
-    TextScaler scaler,
-    TextDirection textDirection,
-  ) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: textDirection,
-      textScaler: scaler,
-      maxLines: 1,
-    )..layout();
-    final width = painter.width;
-    painter.dispose();
-    return width;
   }
 }
 
