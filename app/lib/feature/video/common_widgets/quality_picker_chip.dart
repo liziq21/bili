@@ -194,7 +194,7 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
     final codec = distinguish ? _codecLabel(option.codecs) : null;
     final fps = distinguish ? _frameRateLabel(option.frameRate) : null;
     final parts = <String>[?bitrate, ?codec, ?fps];
-    return parts.isEmpty ? null : parts.join(' · ');
+    return parts.isEmpty ? null : parts.join(' | ');
   }
 
   void _showQualityPicker(BuildContext context) {

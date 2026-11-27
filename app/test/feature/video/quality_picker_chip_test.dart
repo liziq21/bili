@@ -203,8 +203,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('720P'), findsNWidgets(2));
-    expect(find.text('1.0 Mbps \u00b7 AVC \u00b7 30 fps'), findsOneWidget);
-    expect(find.text('1.0 Mbps \u00b7 HEVC \u00b7 30 fps'), findsOneWidget);
+    expect(find.text('1.0 Mbps | AVC | 30 fps'), findsOneWidget);
+    expect(find.text('1.0 Mbps | HEVC | 30 fps'), findsOneWidget);
   });
 
   testWidgets('keeps height order after the current row replaces a duplicate', (
