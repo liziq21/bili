@@ -1,5 +1,7 @@
+import 'package:app/data/repository/feed_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/database/table/local_library.dart';
+import 'package:app/domain/feed_load_manager.dart';
 import 'package:app/feature/feed/feed_cubit.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
@@ -62,6 +64,21 @@ void main() {
     if (predicate(cubit.state)) return;
     await cubit.stream.firstWhere(predicate).timeout(timeout);
   }
+
+  test('pulls an incremental load when the feed cubit is created', () async {
+    final manager = _RecordingFeedLoadManager();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: manager,
+    );
+    addTearDown(feedCubit.close);
+
+    await pumpEventQueue();
+
+    expect(manager.loadedSourceIds, ['bilibili']);
+  });
 
   test('groups entries by channel and counts unread per channel', () async {
     await addSubscription('c1', 'Channel One');
@@ -139,4 +156,14 @@ void main() {
     expect(cubit.state.isEmpty, isTrue);
     expect(cubit.state.hasError, isFalse);
   });
+}
+
+final class _RecordingFeedLoadManager() implements FeedLoadManager {
+  final loadedSourceIds = <String>[];
+
+  @override
+  Future<FeedLoadResult> load({required String sourceId}) async {
+    loadedSourceIds.add(sourceId);
+    return const FeedLoadResult();
+  }
 }

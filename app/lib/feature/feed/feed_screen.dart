@@ -64,6 +64,14 @@ class const FeedScreen({
       appBar: AppBar(
         titleSpacing: $styles.insets.sm,
         title: Text(l10n?.feedTitle ?? 'Subscription feed'),
+        actions: [
+          // 桌面端没有下拉手势，必须给一个可见的刷新入口。
+          IconButton(
+            tooltip: l10n?.retry ?? 'Retry',
+            onPressed: () => unawaited(_onRefresh(context)),
+            icon: const Icon(AppIcons.refresh),
+          ),
+        ],
       ),
       body: BlocBuilder<FeedCubit, FeedState>(
         builder: (context, state) {

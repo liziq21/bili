@@ -31,6 +31,10 @@ class FeedCubit({
       _feedLoadManager = feedLoadManager,
       super(const FeedState()) {
     _watch();
+    // 进入订阅动态页即拉一次增量：桌面端没有下拉手势入口，只靠启动时
+    // 的一次拉取会让新关注频道的投稿一直空着。FeedLoadManager 对并发触发
+    // 去重，与启动加载撞在一起也不会重复请求。
+    unawaited(refresh());
   }
 
   final FeedDao _feedDao;
