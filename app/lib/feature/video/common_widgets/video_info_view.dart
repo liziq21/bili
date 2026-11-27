@@ -11,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/design.dart';
 import '../../../design/motion.dart';
 import '../../../data/repository/video_detail_repository.dart';
+import '../../../l10n/compact_count.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
@@ -23,12 +24,8 @@ import '../../media_library/playlist_picker.dart';
 import 'video_description_text.dart';
 import 'video_failure_panel.dart';
 
-String _formatCount(int count, AppLocalizations l10n) {
-  if (count >= 10000) {
-    return l10n.countCompactWan((count / 10000).toStringAsFixed(1));
-  }
-  return '$count';
-}
+String _formatCount(int count, AppLocalizations l10n) =>
+    formatCompactCount(count, l10n);
 
 /// 把秒数格式化为 `mm:ss` 或 `h:mm:ss`。
 String _formatDuration(int? seconds) {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../design/design.dart';
+import '../l10n/compact_count.dart';
 import '../l10n/localization_file/app_localizations.dart';
 import '../main.dart';
 
@@ -42,14 +43,8 @@ class const VideoCard({
   }
 
   static String formatViewCount(int? count, [AppLocalizations? l10n]) {
-    if (count == null) return '';
-    if (count >= 100000000) {
-      return l10n?.countCompactYi((count / 100000000).toStringAsFixed(1)) ?? '';
-    }
-    if (count >= 10000) {
-      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ?? '';
-    }
-    return '$count';
+    if (count == null || l10n == null) return '';
+    return formatCompactCount(count, l10n);
   }
 
   static String formatRelativeDate(

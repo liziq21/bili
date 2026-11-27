@@ -191,6 +191,7 @@ TEST_MATRIX = {
         'app/test/feature/video/player/playback_error_test.dart',
         'app/test/feature/video/probe_test.dart',
         'app/test/feature/video_bloc_test.dart',
+        'app/test/l10n/compact_count_test.dart',
         'app/test/layout_breakpoints_test.dart',
         'app/test/providers/media_sources_provider_test.dart',
         'app/test/routing/search_focus_controller_test.dart',
