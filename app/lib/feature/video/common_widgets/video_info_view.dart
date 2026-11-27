@@ -14,6 +14,7 @@ import '../../../data/repository/video_detail_repository.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../../../routing/router.dart';
+import '../../../ui/common/horizontal_wheel_scroll.dart';
 import '../../../ui/video_card.dart';
 import '../../../utils/text.dart';
 import '../bloc/video_bloc.dart';
@@ -166,14 +167,17 @@ class const _RecommendationsSection() extends StatelessWidget {
 
     return SizedBox(
       height: _relatedRecommendationExtent(context),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: $styles.insets.xs),
-        child: Row(
-          children: [
-            for (final video in relatedVideos)
-              SizedBox(width: 300, child: _RelatedVideoCard(video: video)),
-          ],
+      child: HorizontalWheelScroll(
+        builder: (context, controller) => SingleChildScrollView(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.symmetric(horizontal: $styles.insets.xs),
+          child: Row(
+            children: [
+              for (final video in relatedVideos)
+                SizedBox(width: 300, child: _RelatedVideoCard(video: video)),
+            ],
+          ),
         ),
       ),
     );
