@@ -31,16 +31,11 @@ class const FilterBar({
     // 深拷贝一份数据，避免直接修改 bloc state 里的列表。
     final working = List<FilterGroup>.of(filters);
     final resetValues = defaults ?? filters;
-    // 高度随条件组数量收缩，只在条件多到放不下时才封顶滚动。固定占比会让
-    // 只有一组条件时（例如视频结果只有「视频时长」）条件区下方留出几百
-    // 像素空白。
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.9;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      constraints: BoxConstraints(maxHeight: maxHeight),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -48,27 +43,39 @@ class const FilterBar({
         // 使用 StatefulBuilder 让 BottomSheet 内部支持状态刷新
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(context, effectiveTitle),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: working.length,
-                    itemBuilder: (context, index) {
-                      return FilterGroupSection(
-                        group: working[index],
-                        onChanged: (f) => setModalState(() {
-                          working[index] = f;
-                        }), // 刷新面板
-                      );
-                    },
+            // 高度随条件组数量收缩，只在条件多到放不下时才封顶滚动。固定
+            // 占比会让只有一组条件时（例如视频结果只有「视频时长」）条件区
+            // 下方留出几百像素空白。上限写在这里而不是传给
+            // showModalBottomSheet：传了 constraints 会顶掉它默认的 640dp
+            // 宽度上限，宽窗口下面板会铺满屏幕。
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(context, effectiveTitle),
+                  Flexible(
+                    child: _PullDownToDismiss(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: working.length,
+                        itemBuilder: (context, index) {
+                          return FilterGroupSection(
+                            group: working[index],
+                            onChanged: (f) => setModalState(() {
+                              working[index] = f;
+                            }), // 刷新面板
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-                _buildFooter(context, working, resetValues),
-              ],
+                  _buildFooter(context, working, resetValues),
+                ],
+              ),
             );
           },
         );
@@ -138,4 +145,43 @@ class const FilterBar({
       ),
     );
   }
+}
+
+/// 列表滚到顶部后继续下拉时关闭面板。
+///
+/// 列表一旦可以滚动就会独占纵向拖动手势，外层面板的拖拽关闭收不到同一个
+/// 手势；这里把越过列表顶部的下拉距离累计起来，在手势结束时关闭面板。
+class const _PullDownToDismiss({required final Widget child})
+    extends StatefulWidget {
+  @override
+  State<_PullDownToDismiss> createState() => _PullDownToDismissState();
+}
+
+class _PullDownToDismissState() extends State<_PullDownToDismiss> {
+  static const _threshold = 80.0;
+
+  double _distance = 0;
+
+  bool _onNotification(ScrollNotification notification) {
+    switch (notification) {
+      case OverscrollNotification(:final overscroll) when overscroll < 0:
+        _distance -= overscroll;
+      case ScrollUpdateNotification():
+        _distance = 0;
+      case ScrollEndNotification():
+        final shouldClose = _distance >= _threshold;
+        _distance = 0;
+        if (shouldClose) Navigator.of(context).maybePop();
+      default:
+        break;
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      NotificationListener<ScrollNotification>(
+        onNotification: _onNotification,
+        child: widget.child,
+      );
 }
