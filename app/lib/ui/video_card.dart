@@ -503,33 +503,44 @@ class const _MetadataLine({
 
   @override
   Widget build(BuildContext context) {
+    // 卡片里的 `Text` 会把自身样式合并到环境样式上，量测必须用同一份结果，
+    // 否则继承来的字体或字距会让预留宽度偏小，统计信息被多省略一截。
+    final resolved = DefaultTextStyle.of(context).style.merge(style);
     final single = stats.isEmpty
         ? creatorName
         : (creatorName.isEmpty ? stats : null);
-    if (single != null) return _line(single);
+    if (single != null) return _line(single, resolved);
 
     final scaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
+    // 阈值跟着系统字号放大，避免放大后仍按 40dp 判定「放得下」，结果只露出
+    // 半个名字。
+    final minCreatorWidth = scaler.scale(_minCreatorWidth);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final statsWidth = _measureWidth(stats, style, scaler, textDirection);
+        final statsWidth = _measureWidth(
+          stats,
+          resolved,
+          scaler,
+          textDirection,
+        );
         final separatorWidth = _measureWidth(
           separator,
-          style,
+          resolved,
           scaler,
           textDirection,
         );
         final creatorSpace = constraints.maxWidth - statsWidth - separatorWidth;
-        if (creatorSpace < _minCreatorWidth) return _line(stats);
+        if (creatorSpace < minCreatorWidth) return _line(stats, resolved);
         return Row(
           children: [
-            Expanded(child: _line(creatorName)),
-            Text(separator, style: style, maxLines: 1),
+            Expanded(child: _line(creatorName, resolved)),
+            Text(separator, style: resolved, maxLines: 1),
             ConstrainedBox(
               // 统计信息按自身宽度排完，最多占满整行；`Expanded` 的作者名
               // 只拿剩下的宽度，两者之和不会超过行宽。
               constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-              child: _line(stats),
+              child: _line(stats, resolved),
             ),
           ],
         );
@@ -537,8 +548,8 @@ class const _MetadataLine({
     );
   }
 
-  Widget _line(String text) =>
-      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: style);
+  Widget _line(String text, TextStyle resolved) =>
+      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: resolved);
 
   static double _measureWidth(
     String text,

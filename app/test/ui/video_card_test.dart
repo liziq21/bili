@@ -627,6 +627,12 @@ void main() {
 
         expect(find.text(statsText), findsOneWidget);
         expect(find.text(creator), findsNothing);
+        // `find.text` 匹配的是 Text 的数据，实际被省略时同样命中；这里直接
+        // 看排版结果：播放量那一段必须完整落在行内。
+        _expectPrefixVisible(
+          tester.renderObject<RenderParagraph>(find.text(statsText)),
+          l10n.viewsCount(l10n.countCompactWan('1.0')),
+        );
 
         await clearImageCacheDuringTest(tester);
       },
@@ -670,4 +676,15 @@ void main() {
       await clearImageCacheDuringTest(tester);
     });
   });
+}
+
+/// 断言 [prefix] 完整落在段落第一行内，而不是被省略号吃掉。
+void _expectPrefixVisible(RenderParagraph paragraph, String prefix) {
+  final boxes = paragraph.getBoxesForSelection(
+    TextSelection(baseOffset: 0, extentOffset: prefix.length),
+  );
+  expect(boxes, isNotEmpty);
+  for (final box in boxes) {
+    expect(box.right, lessThanOrEqualTo(paragraph.size.width + 0.5));
+  }
 }

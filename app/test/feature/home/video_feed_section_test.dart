@@ -6,6 +6,7 @@ import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/common/rate_limit_retry.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -86,6 +87,30 @@ void main() {
       );
     },
   );
+
+  /// 标题的每一行都必须落在段落自己的高度内。
+  ///
+  /// `Flexible` 把标题压到不足两行时不会抛异常，`takeException()` 看不见这种
+  /// 裁切，所以直接检查排版出来的行盒（#678 review）。
+  void expectTitleLinesFit(WidgetTester tester) {
+    final title = video().title;
+    final elements = find.text(title).evaluate();
+    expect(elements, isNotEmpty);
+    for (final element in elements) {
+      final paragraph = element.renderObject! as RenderParagraph;
+      final boxes = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: 0, extentOffset: title.length),
+      );
+      expect(boxes, isNotEmpty);
+      for (final box in boxes) {
+        expect(
+          box.bottom,
+          lessThanOrEqualTo(paragraph.size.height + 0.5),
+          reason: 'a title line is clipped by the cell height',
+        );
+      }
+    }
+  }
 
   group('load more footer', () {
     Future<void> pumpFooter(
@@ -175,6 +200,7 @@ void main() {
           );
 
           expect(tester.takeException(), isNull);
+          expectTitleLinesFit(tester);
         },
       );
 
@@ -189,6 +215,7 @@ void main() {
           );
 
           expect(tester.takeException(), isNull);
+          expectTitleLinesFit(tester);
         },
       );
     }
