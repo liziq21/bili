@@ -361,109 +361,115 @@ class const VideoCard({
                 ),
 
                 // 信息与 Creator 元数据区域
-                Padding(
-                  padding: EdgeInsets.all($styles.insets.sm),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ExcludeSemantics(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Creator 头像
-                              // ⚡ Bolt Optimization: Wrap provider with ResizeImage.resizeIfNeeded.
-                              // Visual size is 36x36px (radius 18). Capping decode resolution to 128x128px
-                              // prevents decoding uncompressed high-res avatar images into full GPU RAM,
-                              // saving ~2MB-8MB RAM per video item and eliminating raster thread decode jank during feed scroll.
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: colorScheme.primaryContainer,
-                                backgroundImage:
-                                    (creatorAvatarUrl != null &&
-                                        creatorAvatarUrl!.isNotEmpty)
-                                    ? ResizeImage.resizeIfNeeded(
-                                        128,
-                                        128,
-                                        CachedNetworkImageProvider(
-                                          creatorAvatarUrl!,
-                                        ),
-                                      )
-                                    : null,
-                                child:
-                                    (creatorAvatarUrl == null ||
-                                        creatorAvatarUrl!.isEmpty)
-                                    ? Text(
-                                        creatorName.isNotEmpty
-                                            ? creatorName[0].toUpperCase()
-                                            : '?',
-                                        style: $styles.text.bodySmallBold
-                                            .copyWith(
-                                              color: colorScheme
-                                                  .onPrimaryContainer,
-                                            ),
-                                      )
-                                    : null,
-                              ),
-                              SizedBox(width: $styles.insets.xs),
-
-                              // 标题与次要信息
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Tooltip(
-                                      message: videoInfoBase.title,
-                                      child: Text(
-                                        videoInfoBase.title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: $styles.text.title2.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: colorScheme.onSurface,
-                                          height: 1.25,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: $styles.insets.xxs),
-                                    Text(
-                                      subtitleText.isNotEmpty
-                                          ? l10n?.creatorWithSubtitle(
-                                                  creatorName,
-                                                  subtitleText,
-                                                ) ??
-                                                creatorName
-                                          : creatorName,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: $styles.text.bodySmall.copyWith(
-                                        fontSize: 12,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
+                //
+                // `Expanded` 让这段只拿到封面之外的剩余高度：封面按 16:9 先
+                // 吃掉它需要的那部分，文字块再在剩余空间里排版。没有这层，
+                // 文字块按自身高度参与主轴分配，任何字体度量或取整差异都会
+                // 变成卡片底部的 RenderFlex overflow（#678）。
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all($styles.insets.sm),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ExcludeSemantics(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Creator 头像
+                                // ⚡ Bolt Optimization: Wrap provider with ResizeImage.resizeIfNeeded.
+                                // Visual size is 36x36px (radius 18). Capping decode resolution to 128x128px
+                                // prevents decoding uncompressed high-res avatar images into full GPU RAM,
+                                // saving ~2MB-8MB RAM per video item and eliminating raster thread decode jank during feed scroll.
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: colorScheme.primaryContainer,
+                                  backgroundImage:
+                                      (creatorAvatarUrl != null &&
+                                          creatorAvatarUrl!.isNotEmpty)
+                                      ? ResizeImage.resizeIfNeeded(
+                                          128,
+                                          128,
+                                          CachedNetworkImageProvider(
+                                            creatorAvatarUrl!,
+                                          ),
+                                        )
+                                      : null,
+                                  // 热门 / 排行榜 Feed 不返回头像地址，占位用统一的
+                                  // 人像图标而不是名字首字：整屏字母圆看起来像头像
+                                  // 全部加载失败，图标才是「这里没有头像」的样子
+                                  // （#685）。作者名仍在卡片语义标签里。
+                                  child:
+                                      (creatorAvatarUrl == null ||
+                                          creatorAvatarUrl!.isEmpty)
+                                      ? Icon(
+                                          AppIcons.avatarFallback,
+                                          size: 20,
+                                          color: colorScheme.onPrimaryContainer,
+                                        )
+                                      : null,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                                SizedBox(width: $styles.insets.xs),
 
-                      // 更多操作按钮
-                      if (onMorePressed != null)
-                        IconButton(
-                          tooltip: l10n?.moreOptions ?? 'More options',
-                          icon: Icon(
-                            AppIcons.moreVert,
-                            semanticLabel: l10n?.moreOptions ?? 'More options',
-                            size: 20,
-                            color: colorScheme.onSurfaceVariant,
+                                // 标题与次要信息
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // `Flexible` 让标题在高度不足时先让出行高，
+                                      // 而不是把整列顶出格子（#678）。
+                                      Flexible(
+                                        child: Tooltip(
+                                          message: videoInfoBase.title,
+                                          child: Text(
+                                            videoInfoBase.title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: $styles.text.title2.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: colorScheme.onSurface,
+                                              height: 1.25,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: $styles.insets.xxs),
+                                      _MetadataLine(
+                                        creatorName: creatorName,
+                                        stats: subtitleText,
+                                        separator: l10n?.spacedBullet ?? ' - ',
+                                        style: $styles.text.bodySmall.copyWith(
+                                          fontSize: 12,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: onMorePressed,
                         ),
-                    ],
+
+                        // 更多操作按钮
+                        if (onMorePressed != null)
+                          IconButton(
+                            tooltip: l10n?.moreOptions ?? 'More options',
+                            icon: Icon(
+                              AppIcons.moreVert,
+                              semanticLabel:
+                                  l10n?.moreOptions ?? 'More options',
+                              size: 20,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: onMorePressed,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -475,6 +481,83 @@ class const VideoCard({
   }
 }
 
+/// 「作者 · 统计」单行元信息。
+///
+/// 作者名和播放量 / 日期拼成一个字符串再整串省略时，窄卡片上被截掉的总是
+/// 末尾的统计数字，而那才是读者最需要的信息（#682）。这里先量出统计信息
+/// 需要的宽度，把它按自身宽度排完，作者名只吃剩下的空间并先被省略。
+///
+/// 剩余空间连一个可读的作者名都放不下时（360 宽两列网格就是这种情况），
+/// 只显示统计信息：作者名仍保留在卡片的语义标签里。
+class const _MetadataLine({
+  required final String creatorName,
+  required final String stats,
+  required final String separator,
+  required final TextStyle style,
+}) extends StatelessWidget {
+  /// 作者名至少要有这么宽才值得显示，否则整行让给统计信息。
+  ///
+  /// 12px 字号下约等于 3 个 CJK 字：再窄的名字只剩下省略号，读者看不出
+  /// 是谁，却挤掉了统计信息。
+  static const double _minCreatorWidth = 40;
+
+  @override
+  Widget build(BuildContext context) {
+    final single = stats.isEmpty
+        ? creatorName
+        : (creatorName.isEmpty ? stats : null);
+    if (single != null) return _line(single);
+
+    final scaler = MediaQuery.textScalerOf(context);
+    final textDirection = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final statsWidth = _measureWidth(stats, style, scaler, textDirection);
+        final separatorWidth = _measureWidth(
+          separator,
+          style,
+          scaler,
+          textDirection,
+        );
+        final creatorSpace = constraints.maxWidth - statsWidth - separatorWidth;
+        if (creatorSpace < _minCreatorWidth) return _line(stats);
+        return Row(
+          children: [
+            Expanded(child: _line(creatorName)),
+            Text(separator, style: style, maxLines: 1),
+            ConstrainedBox(
+              // 统计信息按自身宽度排完，最多占满整行；`Expanded` 的作者名
+              // 只拿剩下的宽度，两者之和不会超过行宽。
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+              child: _line(stats),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _line(String text) =>
+      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis, style: style);
+
+  static double _measureWidth(
+    String text,
+    TextStyle style,
+    TextScaler scaler,
+    TextDirection textDirection,
+  ) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: textDirection,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+}
+
 /// 网格卡片在给定宽度下需要的高度。
 ///
 /// 两个变体的文字高度都用 [TextPainter] 按卡片真实的 [TextStyle] 量出来，
@@ -483,10 +566,19 @@ class const VideoCard({
 /// `fontSize * height`。任一遗漏都让预算比实际矮零点几到几像素，卡片底部的
 /// `Column` 就会触发 `RenderFlex overflow`（#662）。
 ///
+/// 量到的样式是「卡片里 [Text] 真正拿到的样式」：`Text` 会把自身样式合并到
+/// `Material` 提供的 `DefaultTextStyle`（`theme.textTheme.bodyMedium`）上，
+/// 只量裸 token 会漏掉继承来的行高与字体（#678）。
+///
 /// 封面高度按卡片内层宽度（扣掉 `Material` 内层的 1px 边框）计算，与
 /// [VideoCard] 里 `AspectRatio` 实际拿到的约束一致；旧公式用卡片外宽，多算
 /// 出的那一点恰好掩盖了文字预算的缺口，掩盖多少又随宽度变化，所以同一个
 /// 偏差在某些宽度不溢出、某些宽度溢出。
+///
+/// 返回值末尾加 [_extentSlack]：不同引擎/字体下 [TextPainter] 的单行高度与
+/// 最终排版仍可能差零点几像素，格子留一点余量，副标题才不会被卡片圆角裁掉。
+/// 这只是余量，不是防溢出的主要手段——卡片内部用 `Flexible` 保证了文字块
+/// 撑不破格子。
 double videoCardExtent(
   BuildContext context,
   double cardWidth, {
@@ -496,25 +588,27 @@ double videoCardExtent(
   final textScaler = MediaQuery.textScalerOf(context);
   final innerWidth = cardWidth - _cardBorder * 2;
   final coverHeight = innerWidth * 9 / 16;
-  // 默认卡片的文字没有显式字体，继承 `Material` 的 `bodyMedium`（含行高
-  // 1.43）。按裸 `TextStyle(fontSize: 13)` 量会漏掉这个行高，每行少算约 4px，
-  // 两行标题的第二行会被卡片圆角裁掉。
+  // 卡片的 `Text` 继承 `Material` 的 `bodyMedium`（含行高 1.43）。按裸
+  // `TextStyle(fontSize: 13)` 量会漏掉这个行高，每行少算约 4px，两行标题的
+  // 第二行会被卡片圆角裁掉。
   final inherited = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
 
   final (double textHeight, double padding) = switch (variant) {
     VideoCardVariant.feed => (
       math.max(
         _lineHeight(
-                  $styles.text.title2.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.25,
+                  inherited.merge(
+                    $styles.text.title2.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.25,
+                    ),
                   ),
                   textScaler,
                 ) *
                 titleMaxLines +
             $styles.insets.xxs +
             _lineHeight(
-              $styles.text.bodySmall.copyWith(fontSize: 12),
+              inherited.merge($styles.text.bodySmall.copyWith(fontSize: 12)),
               textScaler,
             ),
         _feedAvatarDiameter,
@@ -537,9 +631,16 @@ double videoCardExtent(
     ),
   };
 
-  return (coverHeight + _cardBorder * 2 + padding * 2 + textHeight)
+  return (coverHeight +
+          _cardBorder * 2 +
+          padding * 2 +
+          textHeight +
+          _extentSlack)
       .ceilToDouble();
 }
+
+/// 格子高度相对量测值的余量，吸收字体回退与子像素取整的差异。
+const double _extentSlack = 2;
 
 /// `Material` 内层 `Padding(EdgeInsets.all(1))` 的边框宽度。
 const double _cardBorder = 1;

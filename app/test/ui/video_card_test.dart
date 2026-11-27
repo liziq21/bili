@@ -2,6 +2,7 @@ import 'dart:ui' show ImageByteFormat, SemanticsAction;
 
 import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
 import 'package:flutter/rendering.dart'
@@ -10,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../flutter_test_config.dart' show clearImageCacheDuringTest;
+import '../golden/golden_font.dart';
 
 void main() {
   testWidgets(
@@ -564,5 +566,108 @@ void main() {
     for (final box in boxes) {
       expect(box.bottom, lessThanOrEqualTo(paragraph.size.height + 0.5));
     }
+  });
+
+  group('feed card metadata line', () {
+    // 用 golden 字体子集排版：Ahem 的每个字形都是 1em 宽，量不出真实卡片
+    // 里「统计信息放得下、作者名放不下」这个宽度关系。
+    setUpAll(loadGoldenFont);
+
+    final l10n = AppLocalizationsZh();
+    final statsText = l10n.viewsWithDate(
+      l10n.countCompactWan('1.0'),
+      l10n.daysAgo(4),
+    );
+    const creator = '一个长名字的创作者';
+
+    VideoModel video() => VideoModel(
+      id: 'BV1metadata',
+      title: 'A feed card title',
+      url: 'https://example.com/video/metadata',
+      thumbnailUrl: '',
+      viewCount: 10000,
+      uploadDate: DateTime.now().subtract(const Duration(days: 4)),
+      creatorProfileName: creator,
+    );
+
+    Future<void> pumpCard(WidgetTester tester, {required double width}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: goldenTestTheme(),
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: width,
+                height: 300,
+                child: VideoCard(
+                  variant: VideoCardVariant.feed,
+                  videoInfoBase: video(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets(
+      'gives the whole line to the stats when the creator cannot fit',
+      (WidgetTester tester) async {
+        // #682：360 宽两列网格的卡片只有 164 宽，作者名 + 统计信息拼成一行时
+        // 被省略号吃掉的是统计数字。放不下作者名时整行让给统计信息，播放量
+        // 与日期至少从头开始读，而不是排在作者名之后被截断。
+        await pumpCard(tester, width: 164);
+
+        expect(find.text(statsText), findsOneWidget);
+        expect(find.text(creator), findsNothing);
+
+        await clearImageCacheDuringTest(tester);
+      },
+    );
+
+    testWidgets('fits the stats fully once the card is wide enough', (
+      WidgetTester tester,
+    ) async {
+      // 432 宽两列网格的卡片是 200 宽：统计信息可以完整排下，作者名让位。
+      await pumpCard(tester, width: 200);
+
+      final stats = tester.renderObject<RenderParagraph>(find.text(statsText));
+      expect(stats.didExceedMaxLines, isFalse);
+      expect(find.text(creator), findsNothing);
+
+      await clearImageCacheDuringTest(tester);
+    });
+
+    testWidgets('shows both the creator and the stats on a wide card', (
+      WidgetTester tester,
+    ) async {
+      await pumpCard(tester, width: 400);
+
+      expect(find.text(creator), findsOneWidget);
+      final stats = tester.renderObject<RenderParagraph>(find.text(statsText));
+      expect(stats.didExceedMaxLines, isFalse);
+
+      await clearImageCacheDuringTest(tester);
+    });
+
+    testWidgets('falls back to a person icon instead of the name initial', (
+      WidgetTester tester,
+    ) async {
+      // #685：Feed 不返回头像地址，整屏「名字首字圆」看起来像头像全部加载
+      // 失败；统一的人像图标才是「没有头像」的样式。
+      await pumpCard(tester, width: 400);
+
+      expect(find.byIcon(AppIcons.avatarFallback), findsOneWidget);
+      expect(find.text(creator.substring(0, 1)), findsNothing);
+
+      await clearImageCacheDuringTest(tester);
+    });
   });
 }

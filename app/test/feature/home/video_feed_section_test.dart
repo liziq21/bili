@@ -161,8 +161,9 @@ void main() {
     });
   });
 
-  for (final width in <double>[320, 360, 390, 411]) {
-    for (final scale in <double>[1, 1.5, 2]) {
+  // 400 与 432 是 #678 实测报告里溢出的两个宽度，必须进矩阵。
+  for (final width in <double>[320, 360, 390, 400, 411, 432, 480]) {
+    for (final scale in <double>[1, 1.3, 1.5, 2]) {
       testWidgets(
         'feed cards do not overflow at ${width.toInt()} wide, text scale $scale',
         (tester) async {
