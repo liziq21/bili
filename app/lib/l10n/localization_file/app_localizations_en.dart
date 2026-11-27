@@ -1018,6 +1018,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownCreator => 'Unknown creator';
 
   @override
+  String get loadingWatchLater => 'Loading Watch later';
+
+  @override
+  String get watchLaterLoadFailed => 'Watch later failed to load';
+
+  @override
+  String get watchLaterEmpty => 'Nothing saved for later yet';
+
+  @override
+  String get watchLater => 'Watch later';
+
+  @override
+  String get saveToWatchLater => 'Save to Watch later';
+
+  @override
+  String get removeFromWatchLater => 'Remove from Watch later';
+
+  @override
+  String get savedToWatchLater => 'Saved to Watch later';
+
+  @override
+  String get removedFromWatchLater => 'Removed from Watch later';
+
+  @override
   String get moreOptions => 'More options';
 
   @override

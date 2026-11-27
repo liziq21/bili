@@ -4618,6 +4618,589 @@ class LocalSubscriptionCompanion
   }
 }
 
+class $LocalWatchLaterTable extends LocalWatchLater
+    with TableInfo<$LocalWatchLaterTable, LocalWatchLaterEntity> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalWatchLaterTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _internalIdMeta = const VerificationMeta(
+    'internalId',
+  );
+  @override
+  late final GeneratedColumn<int> internalId = GeneratedColumn<int>(
+    'internal_id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceId = GeneratedColumn<String>(
+    'source_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _originalIdMeta = const VerificationMeta(
+    'originalId',
+  );
+  @override
+  late final GeneratedColumn<String> originalId = GeneratedColumn<String>(
+    'original_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _urlMeta = const VerificationMeta('url');
+  @override
+  late final GeneratedColumn<String> url = GeneratedColumn<String>(
+    'url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileIdMeta = const VerificationMeta(
+    'creatorProfileId',
+  );
+  @override
+  late final GeneratedColumn<String> creatorProfileId = GeneratedColumn<String>(
+    'creator_profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _creatorProfileNameMeta =
+      const VerificationMeta('creatorProfileName');
+  @override
+  late final GeneratedColumn<String> creatorProfileName =
+      GeneratedColumn<String>(
+        'creator_profile_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _savedAtMeta = const VerificationMeta(
+    'savedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> savedAt = GeneratedColumn<DateTime>(
+    'saved_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    internalId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    savedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_watch_later';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalWatchLaterEntity> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('internal_id')) {
+      context.handle(
+        _internalIdMeta,
+        internalId.isAcceptableOrUnknown(data['internal_id']!, _internalIdMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceIdMeta);
+    }
+    if (data.containsKey('original_id')) {
+      context.handle(
+        _originalIdMeta,
+        originalId.isAcceptableOrUnknown(data['original_id']!, _originalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_originalIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('url')) {
+      context.handle(
+        _urlMeta,
+        url.isAcceptableOrUnknown(data['url']!, _urlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_urlMeta);
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_id')) {
+      context.handle(
+        _creatorProfileIdMeta,
+        creatorProfileId.isAcceptableOrUnknown(
+          data['creator_profile_id']!,
+          _creatorProfileIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('creator_profile_name')) {
+      context.handle(
+        _creatorProfileNameMeta,
+        creatorProfileName.isAcceptableOrUnknown(
+          data['creator_profile_name']!,
+          _creatorProfileNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('saved_at')) {
+      context.handle(
+        _savedAtMeta,
+        savedAt.isAcceptableOrUnknown(data['saved_at']!, _savedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {internalId};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {sourceId, originalId},
+  ];
+  @override
+  LocalWatchLaterEntity map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalWatchLaterEntity(
+      internalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}internal_id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_id'],
+      )!,
+      originalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      url: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}url'],
+      )!,
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      creatorProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_id'],
+      ),
+      creatorProfileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_profile_name'],
+      ),
+      savedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}saved_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalWatchLaterTable createAlias(String alias) {
+    return $LocalWatchLaterTable(attachedDatabase, alias);
+  }
+}
+
+class LocalWatchLaterEntity extends DataClass
+    implements Insertable<LocalWatchLaterEntity> {
+  final int internalId;
+  final String sourceId;
+  final String originalId;
+  final String title;
+  final String url;
+  final String? thumbnailUrl;
+  final String? creatorProfileId;
+  final String? creatorProfileName;
+  final DateTime savedAt;
+  const LocalWatchLaterEntity({
+    required this.internalId,
+    required this.sourceId,
+    required this.originalId,
+    required this.title,
+    required this.url,
+    this.thumbnailUrl,
+    this.creatorProfileId,
+    this.creatorProfileName,
+    required this.savedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['internal_id'] = Variable<int>(internalId);
+    map['source_id'] = Variable<String>(sourceId);
+    map['original_id'] = Variable<String>(originalId);
+    map['title'] = Variable<String>(title);
+    map['url'] = Variable<String>(url);
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    if (!nullToAbsent || creatorProfileId != null) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId);
+    }
+    if (!nullToAbsent || creatorProfileName != null) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName);
+    }
+    map['saved_at'] = Variable<DateTime>(savedAt);
+    return map;
+  }
+
+  LocalWatchLaterCompanion toCompanion(bool nullToAbsent) {
+    return LocalWatchLaterCompanion(
+      internalId: Value(internalId),
+      sourceId: Value(sourceId),
+      originalId: Value(originalId),
+      title: Value(title),
+      url: Value(url),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      creatorProfileId: creatorProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileId),
+      creatorProfileName: creatorProfileName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(creatorProfileName),
+      savedAt: Value(savedAt),
+    );
+  }
+
+  factory LocalWatchLaterEntity.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalWatchLaterEntity(
+      internalId: serializer.fromJson<int>(json['internalId']),
+      sourceId: serializer.fromJson<String>(json['sourceId']),
+      originalId: serializer.fromJson<String>(json['originalId']),
+      title: serializer.fromJson<String>(json['title']),
+      url: serializer.fromJson<String>(json['url']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      creatorProfileId: serializer.fromJson<String?>(json['creatorProfileId']),
+      creatorProfileName: serializer.fromJson<String?>(
+        json['creatorProfileName'],
+      ),
+      savedAt: serializer.fromJson<DateTime>(json['savedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'internalId': serializer.toJson<int>(internalId),
+      'sourceId': serializer.toJson<String>(sourceId),
+      'originalId': serializer.toJson<String>(originalId),
+      'title': serializer.toJson<String>(title),
+      'url': serializer.toJson<String>(url),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'creatorProfileId': serializer.toJson<String?>(creatorProfileId),
+      'creatorProfileName': serializer.toJson<String?>(creatorProfileName),
+      'savedAt': serializer.toJson<DateTime>(savedAt),
+    };
+  }
+
+  LocalWatchLaterEntity copyWith({
+    int? internalId,
+    String? sourceId,
+    String? originalId,
+    String? title,
+    String? url,
+    Value<String?> thumbnailUrl = const Value.absent(),
+    Value<String?> creatorProfileId = const Value.absent(),
+    Value<String?> creatorProfileName = const Value.absent(),
+    DateTime? savedAt,
+  }) => LocalWatchLaterEntity(
+    internalId: internalId ?? this.internalId,
+    sourceId: sourceId ?? this.sourceId,
+    originalId: originalId ?? this.originalId,
+    title: title ?? this.title,
+    url: url ?? this.url,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    creatorProfileId: creatorProfileId.present
+        ? creatorProfileId.value
+        : this.creatorProfileId,
+    creatorProfileName: creatorProfileName.present
+        ? creatorProfileName.value
+        : this.creatorProfileName,
+    savedAt: savedAt ?? this.savedAt,
+  );
+  LocalWatchLaterEntity copyWithCompanion(LocalWatchLaterCompanion data) {
+    return LocalWatchLaterEntity(
+      internalId: data.internalId.present
+          ? data.internalId.value
+          : this.internalId,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      originalId: data.originalId.present
+          ? data.originalId.value
+          : this.originalId,
+      title: data.title.present ? data.title.value : this.title,
+      url: data.url.present ? data.url.value : this.url,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      creatorProfileId: data.creatorProfileId.present
+          ? data.creatorProfileId.value
+          : this.creatorProfileId,
+      creatorProfileName: data.creatorProfileName.present
+          ? data.creatorProfileName.value
+          : this.creatorProfileName,
+      savedAt: data.savedAt.present ? data.savedAt.value : this.savedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalWatchLaterEntity(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('savedAt: $savedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    internalId,
+    sourceId,
+    originalId,
+    title,
+    url,
+    thumbnailUrl,
+    creatorProfileId,
+    creatorProfileName,
+    savedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalWatchLaterEntity &&
+          other.internalId == this.internalId &&
+          other.sourceId == this.sourceId &&
+          other.originalId == this.originalId &&
+          other.title == this.title &&
+          other.url == this.url &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.creatorProfileId == this.creatorProfileId &&
+          other.creatorProfileName == this.creatorProfileName &&
+          other.savedAt == this.savedAt);
+}
+
+class LocalWatchLaterCompanion extends UpdateCompanion<LocalWatchLaterEntity> {
+  final Value<int> internalId;
+  final Value<String> sourceId;
+  final Value<String> originalId;
+  final Value<String> title;
+  final Value<String> url;
+  final Value<String?> thumbnailUrl;
+  final Value<String?> creatorProfileId;
+  final Value<String?> creatorProfileName;
+  final Value<DateTime> savedAt;
+  const LocalWatchLaterCompanion({
+    this.internalId = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.originalId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.url = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.savedAt = const Value.absent(),
+  });
+  LocalWatchLaterCompanion.insert({
+    this.internalId = const Value.absent(),
+    required String sourceId,
+    required String originalId,
+    required String title,
+    required String url,
+    this.thumbnailUrl = const Value.absent(),
+    this.creatorProfileId = const Value.absent(),
+    this.creatorProfileName = const Value.absent(),
+    this.savedAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       originalId = Value(originalId),
+       title = Value(title),
+       url = Value(url);
+  static Insertable<LocalWatchLaterEntity> custom({
+    Expression<int>? internalId,
+    Expression<String>? sourceId,
+    Expression<String>? originalId,
+    Expression<String>? title,
+    Expression<String>? url,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? creatorProfileId,
+    Expression<String>? creatorProfileName,
+    Expression<DateTime>? savedAt,
+  }) {
+    return RawValuesInsertable({
+      if (internalId != null) 'internal_id': internalId,
+      if (sourceId != null) 'source_id': sourceId,
+      if (originalId != null) 'original_id': originalId,
+      if (title != null) 'title': title,
+      if (url != null) 'url': url,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (creatorProfileId != null) 'creator_profile_id': creatorProfileId,
+      if (creatorProfileName != null)
+        'creator_profile_name': creatorProfileName,
+      if (savedAt != null) 'saved_at': savedAt,
+    });
+  }
+
+  LocalWatchLaterCompanion copyWith({
+    Value<int>? internalId,
+    Value<String>? sourceId,
+    Value<String>? originalId,
+    Value<String>? title,
+    Value<String>? url,
+    Value<String?>? thumbnailUrl,
+    Value<String?>? creatorProfileId,
+    Value<String?>? creatorProfileName,
+    Value<DateTime>? savedAt,
+  }) {
+    return LocalWatchLaterCompanion(
+      internalId: internalId ?? this.internalId,
+      sourceId: sourceId ?? this.sourceId,
+      originalId: originalId ?? this.originalId,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      creatorProfileId: creatorProfileId ?? this.creatorProfileId,
+      creatorProfileName: creatorProfileName ?? this.creatorProfileName,
+      savedAt: savedAt ?? this.savedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (internalId.present) {
+      map['internal_id'] = Variable<int>(internalId.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<String>(sourceId.value);
+    }
+    if (originalId.present) {
+      map['original_id'] = Variable<String>(originalId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (url.present) {
+      map['url'] = Variable<String>(url.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (creatorProfileId.present) {
+      map['creator_profile_id'] = Variable<String>(creatorProfileId.value);
+    }
+    if (creatorProfileName.present) {
+      map['creator_profile_name'] = Variable<String>(creatorProfileName.value);
+    }
+    if (savedAt.present) {
+      map['saved_at'] = Variable<DateTime>(savedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalWatchLaterCompanion(')
+          ..write('internalId: $internalId, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('originalId: $originalId, ')
+          ..write('title: $title, ')
+          ..write('url: $url, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('creatorProfileId: $creatorProfileId, ')
+          ..write('creatorProfileName: $creatorProfileName, ')
+          ..write('savedAt: $savedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $FeedEntryTable extends FeedEntry
     with TableInfo<$FeedEntryTable, FeedEntryEntity> {
   @override
@@ -5414,6 +5997,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalPlaylistItemTable(this);
   late final $LocalSubscriptionTable localSubscription =
       $LocalSubscriptionTable(this);
+  late final $LocalWatchLaterTable localWatchLater = $LocalWatchLaterTable(
+    this,
+  );
   late final $FeedEntryTable feedEntry = $FeedEntryTable(this);
   late final Index localPlaylistItemOrder = Index(
     'local_playlist_item_order',
@@ -5455,6 +6041,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localPlaylist,
     localPlaylistItem,
     localSubscription,
+    localWatchLater,
     feedEntry,
     localPlaylistItemOrder,
     feedEntryChannelTime,
@@ -9075,6 +9662,307 @@ typedef $$LocalSubscriptionTableProcessedTableManager =
       LocalSubscriptionEntity,
       PrefetchHooks Function()
     >;
+typedef $$LocalWatchLaterTableCreateCompanionBuilder =
+    LocalWatchLaterCompanion Function({
+      Value<int> internalId,
+      required String sourceId,
+      required String originalId,
+      required String title,
+      required String url,
+      Value<String?> thumbnailUrl,
+      Value<String?> creatorProfileId,
+      Value<String?> creatorProfileName,
+      Value<DateTime> savedAt,
+    });
+typedef $$LocalWatchLaterTableUpdateCompanionBuilder =
+    LocalWatchLaterCompanion Function({
+      Value<int> internalId,
+      Value<String> sourceId,
+      Value<String> originalId,
+      Value<String> title,
+      Value<String> url,
+      Value<String?> thumbnailUrl,
+      Value<String?> creatorProfileId,
+      Value<String?> creatorProfileName,
+      Value<DateTime> savedAt,
+    });
+
+class $$LocalWatchLaterTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalWatchLaterTable> {
+  $$LocalWatchLaterTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get savedAt => $composableBuilder(
+    column: $table.savedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalWatchLaterTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalWatchLaterTable> {
+  $$LocalWatchLaterTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get savedAt => $composableBuilder(
+    column: $table.savedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalWatchLaterTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalWatchLaterTable> {
+  $$LocalWatchLaterTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get internalId => $composableBuilder(
+    column: $table.internalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
+  GeneratedColumn<String> get originalId => $composableBuilder(
+    column: $table.originalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileId => $composableBuilder(
+    column: $table.creatorProfileId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get creatorProfileName => $composableBuilder(
+    column: $table.creatorProfileName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get savedAt =>
+      $composableBuilder(column: $table.savedAt, builder: (column) => column);
+}
+
+class $$LocalWatchLaterTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalWatchLaterTable,
+          LocalWatchLaterEntity,
+          $$LocalWatchLaterTableFilterComposer,
+          $$LocalWatchLaterTableOrderingComposer,
+          $$LocalWatchLaterTableAnnotationComposer,
+          $$LocalWatchLaterTableCreateCompanionBuilder,
+          $$LocalWatchLaterTableUpdateCompanionBuilder,
+          (
+            LocalWatchLaterEntity,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalWatchLaterTable,
+              LocalWatchLaterEntity
+            >,
+          ),
+          LocalWatchLaterEntity,
+          PrefetchHooks Function()
+        > {
+  $$LocalWatchLaterTableTableManager(
+    _$AppDatabase db,
+    $LocalWatchLaterTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalWatchLaterTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalWatchLaterTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalWatchLaterTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                Value<String> sourceId = const Value.absent(),
+                Value<String> originalId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> url = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime> savedAt = const Value.absent(),
+              }) => LocalWatchLaterCompanion(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                savedAt: savedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> internalId = const Value.absent(),
+                required String sourceId,
+                required String originalId,
+                required String title,
+                required String url,
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String?> creatorProfileId = const Value.absent(),
+                Value<String?> creatorProfileName = const Value.absent(),
+                Value<DateTime> savedAt = const Value.absent(),
+              }) => LocalWatchLaterCompanion.insert(
+                internalId: internalId,
+                sourceId: sourceId,
+                originalId: originalId,
+                title: title,
+                url: url,
+                thumbnailUrl: thumbnailUrl,
+                creatorProfileId: creatorProfileId,
+                creatorProfileName: creatorProfileName,
+                savedAt: savedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalWatchLaterTable, LocalWatchLaterEntity>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LocalWatchLaterTable,
+                    LocalWatchLaterEntity
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalWatchLaterTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalWatchLaterTable,
+      LocalWatchLaterEntity,
+      $$LocalWatchLaterTableFilterComposer,
+      $$LocalWatchLaterTableOrderingComposer,
+      $$LocalWatchLaterTableAnnotationComposer,
+      $$LocalWatchLaterTableCreateCompanionBuilder,
+      $$LocalWatchLaterTableUpdateCompanionBuilder,
+      (
+        LocalWatchLaterEntity,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalWatchLaterTable,
+          LocalWatchLaterEntity
+        >,
+      ),
+      LocalWatchLaterEntity,
+      PrefetchHooks Function()
+    >;
 typedef $$FeedEntryTableCreateCompanionBuilder = FeedEntryCompanion Function({
   Value<int> internalId,
   required String sourceId,
@@ -9465,6 +10353,8 @@ class $AppDatabaseManager {
       $$LocalPlaylistItemTableTableManager(_db, _db.localPlaylistItem);
   $$LocalSubscriptionTableTableManager get localSubscription =>
       $$LocalSubscriptionTableTableManager(_db, _db.localSubscription);
+  $$LocalWatchLaterTableTableManager get localWatchLater =>
+      $$LocalWatchLaterTableTableManager(_db, _db.localWatchLater);
   $$FeedEntryTableTableManager get feedEntry =>
       $$FeedEntryTableTableManager(_db, _db.feedEntry);
 }

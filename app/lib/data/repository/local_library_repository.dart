@@ -44,6 +44,37 @@ class LocalLibraryRepository({required final LocalLibraryDao dao}) {
 
   Future<List<LocalBookmarkEntity>> getBookmarks() => dao.getBookmarks();
 
+  Future<bool> isInWatchLater(String sourceId, String originalId) async {
+    final key = _mediaKey(sourceId, originalId);
+    return dao.isInWatchLater(key.sourceId, key.originalId);
+  }
+
+  Future<void> setWatchLater({
+    required String sourceId,
+    required VideoModel video,
+    required bool saved,
+  }) async {
+    final key = _mediaKey(sourceId, video.id);
+    if (saved) {
+      await dao.saveWatchLater(
+        LocalWatchLaterCompanion.insert(
+          sourceId: key.sourceId,
+          originalId: key.originalId,
+          title: video.title,
+          url: video.url,
+          thumbnailUrl: Value(video.thumbnailUrl),
+          creatorProfileId: Value(video.creatorProfileId),
+          creatorProfileName: Value(video.creatorProfileName),
+        ),
+      );
+    } else {
+      await dao.removeFromWatchLater(key.sourceId, key.originalId);
+    }
+  }
+
+  Stream<List<LocalWatchLaterEntity>> watchWatchLater() =>
+      dao.watchWatchLater();
+
   Future<bool> isSubscribed(String sourceId, String originalId) async {
     final key = _mediaKey(sourceId, originalId);
     return dao.isSubscribed(key.sourceId, key.originalId);

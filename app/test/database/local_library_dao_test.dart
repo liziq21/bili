@@ -35,6 +35,35 @@ void main() {
     expect(await dao.isBookmarked('source-b', 'same-id'), isTrue);
   });
 
+  test('keeps watch later separate from bookmarks', () async {
+    await dao.saveWatchLater(_watchLater('source-a', 'v1', 'One'));
+    await dao.saveBookmark(_bookmark('source-a', 'v1', 'One'));
+
+    expect(await dao.isInWatchLater('source-a', 'v1'), isTrue);
+    expect(await dao.isBookmarked('source-a', 'v1'), isTrue);
+
+    await dao.removeFromWatchLater('source-a', 'v1');
+
+    expect(await dao.isInWatchLater('source-a', 'v1'), isFalse);
+    expect(await dao.isBookmarked('source-a', 'v1'), isTrue);
+  });
+
+  test(
+    'refreshes a saved watch later entry instead of duplicating it',
+    () async {
+      await dao.saveWatchLater(_watchLater('source-a', 'v1', 'One'));
+      await dao.saveWatchLater(_watchLater('source-a', 'v1', 'One updated'));
+      await dao.saveWatchLater(_watchLater('source-b', 'v1', 'Other source'));
+
+      final entries = await dao.getWatchLater();
+      expect(entries, hasLength(2));
+      expect(
+        entries.singleWhere((entry) => entry.sourceId == 'source-a').title,
+        'One updated',
+      );
+    },
+  );
+
   test('deletes only the requested bookmarks', () async {
     await dao.saveBookmark(_bookmark('source-a', 'a', 'A'));
     await dao.saveBookmark(_bookmark('source-a', 'b', 'B'));
@@ -204,11 +233,11 @@ void main() {
     expect(history, hasLength(1));
     expect(history.single.media.originalId, 'legacy-video');
     expect(history.single.history.progressSeconds, BigInt.from(42));
-    expect(migrated.schemaVersion, 6);
+    expect(migrated.schemaVersion, 7);
     expect(
       (await migrated.customSelect('PRAGMA user_version').getSingle())
           .read<int>('user_version'),
-      6,
+      7,
     );
 
     final playlistId = await migrated.localLibraryDao.createPlaylist(
@@ -318,3 +347,14 @@ CREATE TABLE post (
   image_urls_json TEXT NOT NULL
 );
 ''';
+
+LocalWatchLaterCompanion _watchLater(
+  String sourceId,
+  String id,
+  String title,
+) => LocalWatchLaterCompanion.insert(
+  sourceId: sourceId,
+  originalId: id,
+  title: title,
+  url: 'https://example.com/$id',
+);

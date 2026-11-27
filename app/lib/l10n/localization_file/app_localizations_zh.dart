@@ -962,6 +962,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get unknownCreator => '未知创作者';
 
   @override
+  String get loadingWatchLater => '正在加载稍后观看';
+
+  @override
+  String get watchLaterLoadFailed => '稍后观看加载失败';
+
+  @override
+  String get watchLaterEmpty => '还没有稍后观看的视频';
+
+  @override
+  String get watchLater => '稍后观看';
+
+  @override
+  String get saveToWatchLater => '保存到稍后观看';
+
+  @override
+  String get removeFromWatchLater => '从稍后观看移除';
+
+  @override
+  String get savedToWatchLater => '已保存到稍后观看';
+
+  @override
+  String get removedFromWatchLater => '已从稍后观看移除';
+
+  @override
   String get moreOptions => '更多选项';
 
   @override

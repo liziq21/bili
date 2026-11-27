@@ -11,8 +11,8 @@ void main() {
       final db = AppDatabase(NativeDatabase.memory());
       addTearDown(db.close);
 
-      expect(db.schemaVersion, 6);
-      expect(await _pragmaInt(db, 'user_version'), 6);
+      expect(db.schemaVersion, 7);
+      expect(await _pragmaInt(db, 'user_version'), 7);
       expect(await _pragmaInt(db, 'foreign_keys'), 1);
       await _expectPlaylistItemOrderIndex(db);
       await _expectFeedEntryIndex(db);
@@ -27,10 +27,26 @@ void main() {
     );
     addTearDown(db.close);
 
-    expect(await _pragmaInt(db, 'user_version'), 6);
+    expect(await _pragmaInt(db, 'user_version'), 7);
     expect(await _pragmaInt(db, 'foreign_keys'), 1);
     await _expectPlaylistItemOrderIndex(db);
     await _expectFeedEntryIndex(db);
+
+    // v7 新增的本地稍后观看表要在升级时就建好，用户升级后第一次点「保存」
+    // 才不会撞上缺表。
+    expect(await db.localLibraryDao.getWatchLater(), isEmpty);
+    await db.localLibraryDao.saveWatchLater(
+      LocalWatchLaterCompanion.insert(
+        sourceId: 'source-a',
+        originalId: 'video-1',
+        title: 'Migrated video',
+        url: 'https://example.com/video-1',
+      ),
+    );
+    expect(
+      await db.localLibraryDao.isInWatchLater('source-a', 'video-1'),
+      isTrue,
+    );
 
     final playlist = (await db.localLibraryDao.getPlaylists()).single;
     expect(playlist.internalId, 10);
@@ -199,7 +215,7 @@ void main() {
 
       final first = _open(raw);
       try {
-        expect(await _pragmaInt(first, 'user_version'), 6);
+        expect(await _pragmaInt(first, 'user_version'), 7);
         await _expectPlaylistItemOrderIndex(first);
         await _expectFeedEntryIndex(first);
         expect(await first.localLibraryDao.getBookmarks(), hasLength(1));
@@ -209,7 +225,7 @@ void main() {
 
       final reopened = _open(raw);
       try {
-        expect(await _pragmaInt(reopened, 'user_version'), 6);
+        expect(await _pragmaInt(reopened, 'user_version'), 7);
         await _expectPlaylistItemOrderIndex(reopened);
         await _expectFeedEntryIndex(reopened);
         expect(await reopened.localLibraryDao.getPlaylists(), hasLength(1));
@@ -255,7 +271,7 @@ void main() {
     );
     addTearDown(db.close);
 
-    expect(await _pragmaInt(db, 'user_version'), 6);
+    expect(await _pragmaInt(db, 'user_version'), 7);
     await _expectPlaylistItemOrderIndex(db);
     await _expectFeedEntryIndex(db);
     expect((await db.localLibraryDao.getPlaylists()).single.name, 'v3 queue');

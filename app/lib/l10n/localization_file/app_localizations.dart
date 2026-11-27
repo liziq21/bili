@@ -1832,6 +1832,54 @@ abstract class AppLocalizations {
   /// **'Unknown creator'**
   String get unknownCreator;
 
+  /// Media library - watch-later list is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Watch later'**
+  String get loadingWatchLater;
+
+  /// Media library - the watch-later list failed to load
+  ///
+  /// In en, this message translates to:
+  /// **'Watch later failed to load'**
+  String get watchLaterLoadFailed;
+
+  /// Media library - the local watch-later list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing saved for later yet'**
+  String get watchLaterEmpty;
+
+  /// Media library - local watch-later tab title
+  ///
+  /// In en, this message translates to:
+  /// **'Watch later'**
+  String get watchLater;
+
+  /// Video actions sheet - adds the video to the local watch-later list
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Watch later'**
+  String get saveToWatchLater;
+
+  /// Video actions sheet - removes the video from the local watch-later list
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Watch later'**
+  String get removeFromWatchLater;
+
+  /// Snackbar - the video was added to the local watch-later list
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Watch later'**
+  String get savedToWatchLater;
+
+  /// Snackbar - the video was removed from the local watch-later list
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from Watch later'**
+  String get removedFromWatchLater;
+
   /// Card and row - more-actions tooltip
   ///
   /// In en, this message translates to:

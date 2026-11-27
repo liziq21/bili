@@ -35,6 +35,7 @@ part 'app_database.g.dart';
     LocalPlaylist,
     LocalPlaylistItem,
     LocalSubscription,
+    LocalWatchLater,
     FeedEntry,
   ],
   daos: [
@@ -52,7 +53,7 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
   this : super(queryExecutor ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -96,6 +97,9 @@ class AppDatabase([QueryExecutor? queryExecutor]) extends _$AppDatabase {
       if (from < 6) {
         await m.createTable(feedEntry);
         await m.createIndex(feedEntryChannelTime);
+      }
+      if (from < 7) {
+        await m.createTable(localWatchLater);
       }
     },
   );

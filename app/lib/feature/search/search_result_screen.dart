@@ -15,6 +15,7 @@ import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../../routing/router.dart';
 import '../../ui/search/creator_profile_item.dart';
+import '../../ui/video_actions_sheet.dart';
 import '../../ui/video_card.dart';
 import 'app_search_anchor.dart';
 import 'bloc/search_result_bloc.dart';
@@ -218,10 +219,20 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
     BuildContext context,
     VideoModel videoInfoBase,
     int index,
-  ) => VideoCard(
-    videoInfoBase: videoInfoBase,
-    onTap: () => widget.onVideo?.call(videoInfoBase.id),
-  );
+  ) {
+    final sourceId = _sourceId;
+    return VideoCard(
+      videoInfoBase: videoInfoBase,
+      onTap: () => widget.onVideo?.call(videoInfoBase.id),
+      onMorePressed: sourceId == null
+          ? null
+          : () => VideoActionsSheet.show(
+              context,
+              sourceId: sourceId,
+              video: videoInfoBase,
+            ),
+    );
+  }
 
   Widget _buildCreatorProfileItem(
     BuildContext context,

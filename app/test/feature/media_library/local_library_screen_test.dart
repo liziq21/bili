@@ -168,6 +168,42 @@ void main() {
   );
 
   testLibraryWidgets(
+    'lists watch later entries and removes them from the tab',
+    (tester) async {
+      await repository.setWatchLater(
+        sourceId: 'source-a',
+        video: const VideoModel(
+          id: 'later-1',
+          title: 'Saved for later',
+          url: 'https://example.com/later-1',
+          creatorProfileName: 'Creator',
+        ),
+        saved: true,
+      );
+
+      String? openedVideoId;
+      await tester.pumpWidget(
+        app(screen(onVideoTap: (_, videoId) => openedVideoId = videoId)),
+      );
+      await pumpLibrary(tester);
+      await openTab(tester, '稍后观看');
+
+      expect(find.text('Saved for later'), findsOneWidget);
+
+      await tester.tap(find.text('Saved for later'));
+      await pumpRoute(tester);
+      expect(openedVideoId, 'later-1');
+
+      await tester.tap(find.byTooltip('从稍后观看移除'));
+      await pumpLibrary(tester);
+
+      expect(find.text('Saved for later'), findsNothing);
+      expect(find.text('还没有稍后观看的视频'), findsOneWidget);
+      expect(await database.localLibraryDao.getWatchLater(), isEmpty);
+    },
+  );
+
+  testLibraryWidgets(
     'creates and deletes a playlist through the real database',
     (tester) async {
       await tester.pumpWidget(app(screen()));

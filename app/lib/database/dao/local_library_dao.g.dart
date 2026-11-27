@@ -10,6 +10,7 @@ mixin _$LocalLibraryDaoMixin on DatabaseAccessor<AppDatabase> {
       attachedDatabase.localPlaylistItem;
   $LocalSubscriptionTable get localSubscription =>
       attachedDatabase.localSubscription;
+  $LocalWatchLaterTable get localWatchLater => attachedDatabase.localWatchLater;
   LocalLibraryDaoManager get managers => LocalLibraryDaoManager(this);
 }
 
@@ -29,5 +30,10 @@ class LocalLibraryDaoManager {
       $$LocalSubscriptionTableTableManager(
         _db.attachedDatabase,
         _db.localSubscription,
+      );
+  $$LocalWatchLaterTableTableManager get localWatchLater =>
+      $$LocalWatchLaterTableTableManager(
+        _db.attachedDatabase,
+        _db.localWatchLater,
       );
 }
