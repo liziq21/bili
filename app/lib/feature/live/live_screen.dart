@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import '../../ui/video_card.dart';
 import '../video/player/media_playback_controller.dart';
 import '../video/danmaku/danmaku_settings_screen.dart';
 import 'bloc/live_bloc.dart';
@@ -191,7 +192,8 @@ class _LiveScreenState() extends State<LiveScreen> {
                               const Icon(AppIcons.viewers, size: 16),
                               const Gap(4),
                               Text(
-                                '${detail.online} ${l10n.liveViewers}',
+                                '${VideoCard.formatViewCount(detail.online, l10n)} '
+                                '${l10n.liveViewers}',
                                 style: $styles.text.bodySmall,
                               ),
                             ],
