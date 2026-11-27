@@ -86,6 +86,7 @@ class SearchResultBloc<T>({
             keys: [...pagingState.keys, searchQuery.pageKey],
             hasNextPage: searchQuery.pageKey < success.totalPages,
             isLoading: false,
+            error: null,
           ),
           Error(:final error) => pagingState.copyWith(
             error: error,

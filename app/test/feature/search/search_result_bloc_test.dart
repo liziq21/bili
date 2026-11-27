@@ -110,6 +110,27 @@ void main() {
 
     expect(bloc.state.pagingState.pages.single.single.id, 'fresh');
   });
+
+  test('a successful retry clears the previous error', () async {
+    // 成功分支必须清掉 error，否则错误视图的「成功 → 清零冷却」监听器看不到
+    // 成功状态，且旧的错误标记会残留在已加载的列表上。
+    final repository = _FailThenSucceedSearchContentsRepository();
+    final bloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: repository,
+      query: 'flutter',
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const FetchNextPage());
+    await _settle();
+    expect(bloc.state.pagingState.error, isNotNull);
+    expect(bloc.state.pagingState.pages, isEmpty);
+
+    bloc.add(const FetchNextPage());
+    await _settle();
+    expect(bloc.state.pagingState.error, isNull);
+    expect(bloc.state.pagingState.pages, hasLength(1));
+  });
 }
 
 Future<void> _settle() async {
@@ -151,5 +172,29 @@ class _DelayedSearchContentsRepository()
     final completer = Completer<PagedResult<VideoModel>>();
     completers.add(completer);
     return completer.future;
+  }
+}
+
+class _FailThenSucceedSearchContentsRepository()
+    implements SearchContentsRepository<VideoModel> {
+  int calls = 0;
+
+  @override
+  List<FilterGroup> get filters => const [VideoDurationFilter()];
+
+  @override
+  List<SortOption> get sortOptions => PhotoOrVideoSearchSort.values;
+
+  @override
+  Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
+    calls++;
+    if (calls == 1) return Result.error(Exception('rate limited'));
+    return Result.success(
+      Page<VideoModel>(
+        data: const [VideoModel(id: 'ok', title: 'ok', url: 'https://ok')],
+        number: 1,
+        totalPages: 1,
+      ),
+    );
   }
 }
