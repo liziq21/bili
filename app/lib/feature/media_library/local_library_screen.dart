@@ -32,6 +32,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
   late Stream<List<LocalBookmarkEntity>> _bookmarks;
   late Stream<List<LocalSubscriptionEntity>> _subscriptions;
   late Stream<List<LocalPlaylistEntity>> _playlists;
+  late Stream<List<LocalWatchLaterEntity>> _watchLater;
 
   int _tabIndex = 0;
   int _retry = 0;
@@ -51,7 +52,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     final l10n = AppLocalizations.of(context)!;
     final catalog = context.read<MediaSourceCatalog>();
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(title: Text(l10n.mine)),
         body: Column(
@@ -59,6 +60,10 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
             if (_operationError case final error?) _OperationError(error),
             if (_busy) const LinearProgressIndicator(),
             TabBar(
+              // 五个 tab 在窄屏上摊不开，「播放列表」这种四字标签会被挤成两行，
+              // 改成可滚动后每项按内容取宽。
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
               onTap: (index) {
                 HapticFeedback.selectionClick();
                 setState(() => _tabIndex = index);
@@ -66,6 +71,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
               tabs: [
                 Tab(text: l10n.history),
                 Tab(text: l10n.favorite),
+                Tab(text: l10n.watchLater),
                 Tab(text: l10n.playlists),
                 Tab(text: l10n.subscribe),
               ],
@@ -99,6 +105,22 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
                         internalIds: bookmarks
                             .map((bookmark) => bookmark.internalId)
                             .toList(growable: false),
+                      ),
+                    ),
+                  ),
+                  _WatchLaterTab(
+                    key: ValueKey('watch-later-$_retry'),
+                    stream: _watchLater,
+                    sourceId: _sourceId,
+                    sourceName: _sourceName,
+                    onVideoTap: widget.onVideoTap,
+                    onRetry: _retryStreams,
+                    busy: _busy,
+                    onRemove: (entry) => _runOperation(
+                      () => _repository.setWatchLater(
+                        sourceId: entry.sourceId,
+                        video: _videoFromWatchLater(entry),
+                        saved: false,
                       ),
                     ),
                   ),
@@ -363,6 +385,7 @@ class _LocalLibraryScreenState() extends State<LocalLibraryScreen> {
     _bookmarks = _repository.watchBookmarks();
     _subscriptions = _repository.watchSubscriptions();
     _playlists = _repository.watchPlaylists();
+    _watchLater = _repository.watchWatchLater();
   }
 }
 
@@ -713,6 +736,86 @@ class _BookmarksTabState() extends State<_BookmarksTab> {
 enum _BookmarkAction() {
   remove,
   creator,
+}
+
+/// 本地「稍后观看」列表：只做查看与移除，条目本身由视频卡片的操作面板写入。
+class const _WatchLaterTab({
+  super.key,
+  required final Stream<List<LocalWatchLaterEntity>> stream,
+  required final String? sourceId,
+  required final String? Function(String?) sourceName,
+  final MediaLibraryVideoNavCallback? onVideoTap,
+  required final VoidCallback onRetry,
+  required final bool busy,
+  required final Future<void> Function(LocalWatchLaterEntity entry) onRemove,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return StreamBuilder<List<LocalWatchLaterEntity>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return _LibraryMessage(
+            icon: AppIcons.watchLater,
+            message: l10n.loadingWatchLater,
+            loading: true,
+          );
+        }
+        if (snapshot.hasError) {
+          return _LibraryMessage(
+            icon: AppIcons.error,
+            message: l10n.watchLaterLoadFailed,
+            actionLabel: l10n.retry,
+            onAction: onRetry,
+          );
+        }
+        final entries = (snapshot.data ?? const <LocalWatchLaterEntity>[])
+            .where((entry) => sourceId == null || entry.sourceId == sourceId)
+            .toList(growable: false);
+        if (entries.isEmpty) {
+          return _LibraryMessage(
+            icon: AppIcons.watchLater,
+            message: l10n.watchLaterEmpty,
+          );
+        }
+        return ListView.builder(
+          itemCount: entries.length,
+          itemBuilder: (context, index) {
+            final entry = entries[index];
+            return ListTile(
+              leading: const _LibraryLeading(icon: AppIcons.watchLater),
+              title: Text(
+                entry.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                [
+                  ?sourceName(entry.sourceId),
+                  if (entry.creatorProfileName case final name?
+                      when name.isNotEmpty)
+                    name,
+                ].join(l10n.spacedDot),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onVideoTap?.call(entry.sourceId, entry.originalId);
+              },
+              trailing: IconButton(
+                tooltip: l10n.removeFromWatchLater,
+                icon: const Icon(AppIcons.close),
+                onPressed: busy ? null : () => onRemove(entry),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 class const _PlaylistsTab({
@@ -1883,6 +1986,15 @@ Future<String?> _showGroupDialog(
 }) => showDialog<String>(
   context: context,
   builder: (_) => _GroupDialog(initialValue: initialValue),
+);
+
+VideoModel _videoFromWatchLater(LocalWatchLaterEntity entry) => VideoModel(
+  id: entry.originalId,
+  title: entry.title,
+  url: entry.url,
+  thumbnailUrl: entry.thumbnailUrl,
+  creatorProfileId: entry.creatorProfileId,
+  creatorProfileName: entry.creatorProfileName,
 );
 
 VideoModel _videoFromBookmark(LocalBookmarkEntity bookmark) => VideoModel(

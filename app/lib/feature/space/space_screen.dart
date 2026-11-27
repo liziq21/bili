@@ -19,6 +19,7 @@ import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
 import '../../ui/common/rate_limit_retry.dart';
 import '../../ui/creator_subscribe_button.dart';
+import '../../ui/video_actions_sheet.dart';
 import '../../ui/video_card.dart';
 import '../setting/app_settings.dart';
 import 'bloc/channel_playlists_cubit.dart';
@@ -382,6 +383,14 @@ class const _ChannelVideosGrid({
                   key: ValueKey(video.id),
                   videoInfoBase: video,
                   onTap: onVideo == null ? null : () => onVideo?.call(video.id),
+                  onMorePressed: switch (context.read<MediaSource?>()?.id) {
+                    final sourceId? => () => VideoActionsSheet.show(
+                      context,
+                      sourceId: sourceId,
+                      video: video,
+                    ),
+                    null => null,
+                  },
                 ),
                 firstPageProgressIndicatorBuilder: (context) => Center(
                   child: CircularProgressIndicator(

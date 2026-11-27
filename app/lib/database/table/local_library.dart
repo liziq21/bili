@@ -27,6 +27,32 @@ class LocalBookmark() extends Table {
   ];
 }
 
+/// A locally saved "watch later" entry.
+///
+/// Separate from [LocalBookmark] on purpose: a bookmark is "keep this", a
+/// watch-later entry is "play this next". Keeping them apart lets the user
+/// clear one without losing the other.
+@DataClassName('LocalWatchLaterEntity')
+class LocalWatchLater() extends Table {
+  IntColumn get internalId => integer().autoIncrement()();
+  TextColumn get sourceId => text()();
+  TextColumn get originalId => text()();
+  TextColumn get title => text()();
+  TextColumn get url => text()();
+  TextColumn get thumbnailUrl => text().nullable()();
+  TextColumn get creatorProfileId => text().nullable()();
+  TextColumn get creatorProfileName => text().nullable()();
+  DateTimeColumn get savedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  String get tableName => 'local_watch_later';
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {sourceId, originalId},
+  ];
+}
+
 /// A source-scoped local playlist.
 @DataClassName('LocalPlaylistEntity')
 class LocalPlaylist() extends Table {

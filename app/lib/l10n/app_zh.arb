@@ -1463,6 +1463,38 @@
   "@unknownCreator": {
     "description": "Video card - fallback name when the creator is unknown"
   },
+  "loadingWatchLater": "正在加载稍后观看",
+  "@loadingWatchLater": {
+    "description": "Media library - watch-later list is loading"
+  },
+  "watchLaterLoadFailed": "稍后观看加载失败",
+  "@watchLaterLoadFailed": {
+    "description": "Media library - the watch-later list failed to load"
+  },
+  "watchLaterEmpty": "还没有稍后观看的视频",
+  "@watchLaterEmpty": {
+    "description": "Media library - the local watch-later list is empty"
+  },
+  "watchLater": "稍后观看",
+  "@watchLater": {
+    "description": "Media library - local watch-later tab title"
+  },
+  "saveToWatchLater": "保存到稍后观看",
+  "@saveToWatchLater": {
+    "description": "Video actions sheet - adds the video to the local watch-later list"
+  },
+  "removeFromWatchLater": "从稍后观看移除",
+  "@removeFromWatchLater": {
+    "description": "Video actions sheet - removes the video from the local watch-later list"
+  },
+  "savedToWatchLater": "已保存到稍后观看",
+  "@savedToWatchLater": {
+    "description": "Snackbar - the video was added to the local watch-later list"
+  },
+  "removedFromWatchLater": "已从稍后观看移除",
+  "@removedFromWatchLater": {
+    "description": "Snackbar - the video was removed from the local watch-later list"
+  },
   "moreOptions": "更多选项",
   "@moreOptions": {
     "description": "Card and row - more-actions tooltip"

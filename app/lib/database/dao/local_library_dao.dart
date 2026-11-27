@@ -6,7 +6,13 @@ import '../table/local_library.dart';
 part 'local_library_dao.g.dart';
 
 @DriftAccessor(
-  tables: [LocalBookmark, LocalPlaylist, LocalPlaylistItem, LocalSubscription],
+  tables: [
+    LocalBookmark,
+    LocalPlaylist,
+    LocalPlaylistItem,
+    LocalSubscription,
+    LocalWatchLater,
+  ],
 )
 class LocalLibraryDao(super.db)
     extends DatabaseAccessor<AppDatabase>
@@ -68,6 +74,54 @@ class LocalLibraryDao(super.db)
   Future<List<LocalBookmarkEntity>> getBookmarks() => _bookmarks().get();
 
   Stream<List<LocalBookmarkEntity>> watchBookmarks() => _bookmarks().watch();
+
+  Future<bool> isInWatchLater(String sourceId, String originalId) async {
+    _requireMediaIdentity(sourceId, originalId);
+    final row =
+        await (select(localWatchLater)..where(
+              (entry) =>
+                  entry.sourceId.equals(sourceId) &
+                  entry.originalId.equals(originalId),
+            ))
+            .getSingleOrNull();
+    return row != null;
+  }
+
+  Future<void> saveWatchLater(LocalWatchLaterCompanion entry) async {
+    _requireCompanionIdentity(
+      sourceId: entry.sourceId,
+      originalId: entry.originalId,
+    );
+    await into(localWatchLater).insertReturning(
+      entry.copyWith(internalId: const Value.absent()),
+      onConflict: DoUpdate(
+        (_) => LocalWatchLaterCompanion(
+          title: entry.title,
+          url: entry.url,
+          thumbnailUrl: entry.thumbnailUrl,
+          creatorProfileId: entry.creatorProfileId,
+          creatorProfileName: entry.creatorProfileName,
+          savedAt: Value(DateTime.now()),
+        ),
+        target: [localWatchLater.sourceId, localWatchLater.originalId],
+      ),
+    );
+  }
+
+  Future<void> removeFromWatchLater(String sourceId, String originalId) async {
+    _requireMediaIdentity(sourceId, originalId);
+    await (delete(localWatchLater)..where(
+          (entry) =>
+              entry.sourceId.equals(sourceId) &
+              entry.originalId.equals(originalId),
+        ))
+        .go();
+  }
+
+  Future<List<LocalWatchLaterEntity>> getWatchLater() => _watchLater().get();
+
+  Stream<List<LocalWatchLaterEntity>> watchWatchLater() =>
+      _watchLater().watch();
 
   Future<bool> isSubscribed(String sourceId, String originalId) async {
     _requireMediaIdentity(sourceId, originalId);
@@ -298,6 +352,12 @@ class LocalLibraryDao(super.db)
           ..where((playlist) => playlist.internalId.equals(playlistId)))
         .write(LocalPlaylistCompanion(updatedAt: Value(DateTime.now())));
   }
+
+  Selectable<LocalWatchLaterEntity> _watchLater() =>
+      select(localWatchLater)..orderBy([
+        (entry) => OrderingTerm.desc(entry.savedAt),
+        (entry) => OrderingTerm.desc(entry.internalId),
+      ]);
 
   Selectable<LocalBookmarkEntity> _bookmarks() =>
       select(localBookmark)..orderBy([

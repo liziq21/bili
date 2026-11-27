@@ -14,6 +14,7 @@ import 'widgets/home_filter_bar.dart';
 import 'widgets/home_source_selector.dart';
 import 'widgets/live_feed_section.dart';
 import 'widgets/video_feed_section.dart';
+import '../../ui/video_actions_sheet.dart';
 
 class const HomeScreen({
   super.key,
@@ -173,6 +174,11 @@ class const HomeScreen({
           section: section,
           homeConfig: state.homeConfig,
           onVideoTap: (video) => onVideo?.call(video.id),
+          onMorePressed: (video) => VideoActionsSheet.show(
+            context,
+            sourceId: context.read<MediaSource>().id,
+            video: video,
+          ),
           onRetry: () => context.read<HomeBloc>().add(FeedsRequested()),
           onLoadMore: () =>
               context.read<HomeBloc>().add(FeedNextPageRequested(section.id)),
