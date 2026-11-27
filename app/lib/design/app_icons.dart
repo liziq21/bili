@@ -13,8 +13,8 @@ import 'package:material_ui/material_ui.dart';
 /// （选中，实心）成对声明（R10）。
 abstract final class AppIcons() {
   // 导航。未选中空心、选中实心（R10）。
-  static const IconData home = Icons.home_outlined;
-  static const IconData homeSelected = Icons.home_rounded;
+  static const IconData discover = Icons.explore_outlined;
+  static const IconData discoverSelected = Icons.explore_rounded;
   static const IconData feed = Icons.rss_feed_outlined;
   static const IconData feedSelected = Icons.rss_feed_rounded;
 

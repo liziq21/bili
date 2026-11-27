@@ -1039,7 +1039,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get liveNow => 'Live now';
 
   @override
-  String get navHomeLabel => 'Home';
+  String get navDiscoverLabel => 'Discover';
+
+  @override
+  String get navSubscriptionLabel => 'Subscriptions';
 
   @override
   String get search => 'Search';

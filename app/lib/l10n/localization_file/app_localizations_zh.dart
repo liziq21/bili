@@ -983,7 +983,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get liveNow => '直播中';
 
   @override
-  String get navHomeLabel => '首页';
+  String get navDiscoverLabel => '发现';
+
+  @override
+  String get navSubscriptionLabel => '订阅';
 
   @override
   String get search => '搜索';

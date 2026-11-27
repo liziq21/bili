@@ -1862,11 +1862,17 @@ abstract class AppLocalizations {
   /// **'Live now'**
   String get liveNow;
 
-  /// Bottom navigation - home entry
+  /// Bottom navigation - discover entry
   ///
   /// In en, this message translates to:
-  /// **'Home'**
-  String get navHomeLabel;
+  /// **'Discover'**
+  String get navDiscoverLabel;
+
+  /// Bottom navigation - subscription feed entry
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions'**
+  String get navSubscriptionLabel;
 
   /// Bottom navigation and search entry label
   ///
@@ -2228,7 +2234,7 @@ abstract class AppLocalizations {
   /// **'Off'**
   String get feedUpdateThresholdOff;
 
-  /// App bar title and bottom navigation label for the subscription feed
+  /// App bar title of the subscription feed
   ///
   /// In en, this message translates to:
   /// **'Subscription feed'**

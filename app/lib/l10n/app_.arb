@@ -1509,9 +1509,13 @@
   "@liveNow": {
     "description": "Live card - badge for a running stream"
   },
-  "navHomeLabel": "Home",
-  "@navHomeLabel": {
-    "description": "Bottom navigation - home entry"
+  "navDiscoverLabel": "Discover",
+  "@navDiscoverLabel": {
+    "description": "Bottom navigation - discover entry"
+  },
+  "navSubscriptionLabel": "Subscriptions",
+  "@navSubscriptionLabel": {
+    "description": "Bottom navigation - subscription feed entry"
   },
   "search": "Search",
   "@search": {
@@ -1811,7 +1815,7 @@
   },
   "feedTitle": "Subscription feed",
   "@feedTitle": {
-    "description": "App bar title and bottom navigation label for the subscription feed"
+    "description": "App bar title of the subscription feed"
   },
   "feedUnreadCount": "{count} unread",
   "@feedUnreadCount": {

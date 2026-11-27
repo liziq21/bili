@@ -116,7 +116,7 @@ List<_SectionGroup> _groups(AppLocalizations l10n) => [
   (
     l10n.settingsGroupDiscovery,
     [
-      (SettingsSection.discovery, l10n.settingsDiscovery, AppIcons.home),
+      (SettingsSection.discovery, l10n.settingsDiscovery, AppIcons.discover),
       (SettingsSection.channel, l10n.settingsChannel, AppIcons.creator),
     ],
   ),

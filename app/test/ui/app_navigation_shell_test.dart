@@ -24,9 +24,9 @@ void main() {
             navigationShell: navigationShell,
             destinations: [
               const AppNavDestination(
-                label: '首页',
-                icon: AppIcons.home,
-                selectedIcon: AppIcons.homeSelected,
+                label: '发现',
+                icon: AppIcons.discover,
+                selectedIcon: AppIcons.discoverSelected,
               ),
               AppNavDestination(
                 label: '搜索',
@@ -103,9 +103,9 @@ void main() {
             navigationShell: navigationShell,
             destinations: const [
               AppNavDestination(
-                label: '首页',
-                icon: AppIcons.home,
-                selectedIcon: AppIcons.homeSelected,
+                label: '发现',
+                icon: AppIcons.discover,
+                selectedIcon: AppIcons.discoverSelected,
               ),
               AppNavDestination(
                 label: '搜索',
@@ -148,8 +148,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('home detail'), findsOneWidget);
 
-    // 首页没有 onReselect：重复点按应回到分支根。
-    await tester.tap(find.text('首页'));
+    // 发现没有 onReselect：重复点按应回到分支根。
+    await tester.tap(find.text('发现'));
     await tester.pumpAndSettle();
 
     expect(find.text('home detail'), findsNothing);
@@ -174,9 +174,9 @@ void main() {
               navigationShell: navigationShell,
               destinations: const [
                 AppNavDestination(
-                  label: '首页',
-                  icon: AppIcons.home,
-                  selectedIcon: AppIcons.homeSelected,
+                  label: '发现',
+                  icon: AppIcons.discover,
+                  selectedIcon: AppIcons.discoverSelected,
                 ),
                 AppNavDestination(
                   label: '我的',
@@ -213,8 +213,8 @@ void main() {
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(AppIcons.homeSelected), findsOneWidget);
-      expect(find.byIcon(AppIcons.home), findsNothing);
+      expect(find.byIcon(AppIcons.discoverSelected), findsOneWidget);
+      expect(find.byIcon(AppIcons.discover), findsNothing);
       expect(find.byIcon(AppIcons.profile), findsOneWidget);
       expect(find.byIcon(AppIcons.profileSelected), findsNothing);
 
@@ -223,8 +223,8 @@ void main() {
 
       expect(find.byIcon(AppIcons.profileSelected), findsOneWidget);
       expect(find.byIcon(AppIcons.profile), findsNothing);
-      expect(find.byIcon(AppIcons.home), findsOneWidget);
-      expect(find.byIcon(AppIcons.homeSelected), findsNothing);
+      expect(find.byIcon(AppIcons.discover), findsOneWidget);
+      expect(find.byIcon(AppIcons.discoverSelected), findsNothing);
     });
   }
 }

@@ -90,7 +90,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 ## 发布
 
 - **Version source of truth** is `app/pubspec.yaml` `version: X.Y.Z+N`, not the git tag. Local `flutter build` reads the pubspec, so making the tag authoritative would silently produce a wrong `versionCode` on developer machines. The tag is a release marker; `.github/workflows/release.yml` fails the build when `vX.Y.Z` disagrees with the pubspec's `X.Y.Z`.
-- **Build number** is injected by CI and never committed. The verification build in `ci-build.yml` uses `--build-number=${{ github.run_number }}`; the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
+- **Build number** is injected by CI and never committed. The verification builds in `ci-build.yml` use `run_number * 1000 + run_attempt` so every CI build — including a workflow re-run — gets a distinct `versionCode` for artifact identification (the job fails if `run_attempt` reaches 1000, the point where that packing would collide); the release build in `release.yml` uses `run_number * 10 + run_attempt` so that re-running a release workflow yields a distinct `versionCode` (Play rejects duplicates). `--build-name` / `--build-number` and `FLUTTER_BUILD_NAME` / `FLUTTER_BUILD_NUMBER` all override the pubspec value.
 - **Release signing is mandatory.** `app/android/app/build.gradle.kts` throws `GradleException` when a release build has no `key.properties`, so a release build can never silently fall back to the debug keystore. `BILI_ALLOW_UNSIGNED_RELEASE=1` is the single opt-out; CI sets it to verify that the release variant compiles, and artifacts built that way are not publishable.
 - **Status check names carry a version suffix for matrix jobs.** `ci-test.yml` and `ci-build.yml` emit check names like `Run Flutter Test (<flutter>, <dart>)` and `Build Flutter App (android) (<flutter>, <dart>)`, where the versions are dynamically expanded from the `environment` block in the root `pubspec.yaml` by `pubspec-matrix-action`; `Check Formatting` is an independent, single-version job. The GitHub ruleset decides which emitted checks are required. **Upgrading Flutter or Dart requires updating the ruleset's required names in the same change**, or every PR can block on a missing check.
 
@@ -187,6 +187,7 @@ dart format --set-exit-if-changed <本次改动触及的 Dart 文件，逐个列
 
 ### UI 框架
 - 不得使用 `flutter/material.dart` 或 `flutter/cupertino.dart`，改用 `material_ui`。
+- **官方部件优先原则**：编写任何 UI 组件前，必须先检索并优先使用 Flutter SDK 已有的官方现成部件（本仓库经 `material_ui` 引入的 Material 组件）。严禁用多层 `Container` / `Row` / `Column` 手动拼凑官方已有的标准组件；只有官方部件确实无法满足需求时才自行组合，并在代码注释中说明为什么现成部件不适用。
 
 ### 生成文件
 - 不要手动修改生成文件（如 Drift .drift 产物、l10n 等）。需要变更时修改源文件，再运行对应的生成命令重新生成：修改 Drift 或其他由 build_runner 管理的源文件后，运行 `build_runner build`；修改 ARB 文件后，从对应 Flutter package 目录运行 `flutter gen-l10n`。

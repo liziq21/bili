@@ -1509,9 +1509,13 @@
   "@liveNow": {
     "description": "Live card - badge for a running stream"
   },
-  "navHomeLabel": "首页",
-  "@navHomeLabel": {
-    "description": "Bottom navigation - home entry"
+  "navDiscoverLabel": "发现",
+  "@navDiscoverLabel": {
+    "description": "Bottom navigation - discover entry"
+  },
+  "navSubscriptionLabel": "订阅",
+  "@navSubscriptionLabel": {
+    "description": "Bottom navigation - subscription feed entry"
   },
   "search": "搜索",
   "@search": {
@@ -1811,7 +1815,7 @@
   },
   "feedTitle": "订阅动态",
   "@feedTitle": {
-    "description": "App bar title and bottom navigation label for the subscription feed"
+    "description": "App bar title of the subscription feed"
   },
   "feedUnreadCount": "{count} 条未读",
   "@feedUnreadCount": {
