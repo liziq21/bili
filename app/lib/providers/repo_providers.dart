@@ -13,6 +13,7 @@ import '../database/dao/creator_profile_dao.dart';
 import '../database/dao/feed_dao.dart';
 import '../database/dao/recent_search_query_dao.dart';
 import '../datastore/preferences_data_source.dart';
+import '../domain/feed_load_manager.dart';
 import '../domain/get_recent_search_queries_use_case.dart';
 import '../feature/notification/feed_update_notifier.dart';
 import '../feature/notification/local_feed_update_notifier.dart';
@@ -81,6 +82,8 @@ List<RepositoryProvider> get repoProviders => [
     create: (context) => LocalFeedUpdateNotifier(context.read()),
     dispose: (notifier) => notifier.dispose(),
   ),
+  // 首页与订阅动态分支共享，避免同一数据源并发跑两轮增量。
+  RepositoryProvider<FeedLoadCoordinator>(create: (_) => .new()),
   RepositoryProvider<SleepTimerNotifier>(
     create: (_) => LocalSleepTimerNotifier(),
   ),

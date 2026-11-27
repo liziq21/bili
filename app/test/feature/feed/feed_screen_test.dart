@@ -369,6 +369,42 @@ void main() {
     await settle(tester);
 
     expect(find.text(l10nOf(tester).feedUnsupportedTitle), findsOneWidget);
+    expect(find.byIcon(AppIcons.refresh), findsNothing);
+  });
+
+  testWidgets('refreshes when the retained branch becomes visible again', (
+    tester,
+  ) async {
+    final manager = _RecordingFeedLoadManager();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: manager,
+    );
+    addTearDown(feedCubit.close);
+
+    Widget build({required bool visible}) => TickerMode(
+      enabled: visible,
+      child: BlocProvider<FeedCubit>.value(
+        value: feedCubit,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const FeedScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(visible: false));
+    await tester.pump();
+    final loadsOnEntry = manager.loadedSourceIds.length;
+    expect(loadsOnEntry, 1);
+
+    await tester.pumpWidget(build(visible: true));
+    await tester.pump();
+
+    expect(manager.loadedSourceIds.length, loadsOnEntry + 1);
   });
 
   testWidgets('the app bar refresh action triggers an incremental load', (

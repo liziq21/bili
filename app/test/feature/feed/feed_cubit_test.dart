@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/data/repository/feed_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/database/table/local_library.dart';
@@ -156,6 +158,84 @@ void main() {
     expect(cubit.state.isEmpty, isTrue);
     expect(cubit.state.hasError, isFalse);
   });
+
+  test('keeps loading while an empty feed refresh is in flight', () async {
+    final completer = Completer<FeedLoadResult>();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: _PendingFeedLoadManager(completer),
+    );
+    addTearDown(feedCubit.close);
+
+    // Let the local query emit its empty snapshot while the remote load hangs.
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(feedCubit.state.groups, isEmpty);
+    expect(feedCubit.state.isLoading, isTrue);
+
+    completer.complete(const FeedLoadResult());
+    if (feedCubit.state.isLoading) {
+      await feedCubit.stream
+          .firstWhere((state) => !state.isLoading)
+          .timeout(const Duration(seconds: 10));
+    }
+    expect(feedCubit.state.hasError, isFalse);
+  });
+
+  test('surfaces a refresh failure while the feed is empty', () async {
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: _FailingFeedLoadManager(),
+    );
+    addTearDown(feedCubit.close);
+
+    if (!feedCubit.state.hasError) {
+      await feedCubit.stream
+          .firstWhere((state) => state.hasError)
+          .timeout(const Duration(seconds: 10));
+    }
+
+    expect(feedCubit.state.isLoading, isFalse);
+    expect(feedCubit.state.groups, isEmpty);
+  });
+
+  test('keeps cached groups when a refresh fails', () async {
+    await addSubscription('c1', 'One');
+    await addEntry('c1', 'v1', publishedAt: DateTime(2026, 5, 1));
+    final completer = Completer<FeedLoadResult>();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: _PendingFeedLoadManager(completer),
+    );
+    addTearDown(feedCubit.close);
+
+    await feedCubit.stream
+        .firstWhere((state) => state.groups.isNotEmpty)
+        .timeout(const Duration(seconds: 10));
+    completer.completeError(StateError('offline'));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    expect(feedCubit.state.groups, isNotEmpty);
+    expect(feedCubit.state.hasError, isFalse);
+  });
+}
+
+final class _PendingFeedLoadManager(final Completer<FeedLoadResult> completer)
+    implements FeedLoadManager {
+  @override
+  Future<FeedLoadResult> load({required String sourceId}) => completer.future;
+}
+
+final class _FailingFeedLoadManager() implements FeedLoadManager {
+  @override
+  Future<FeedLoadResult> load({required String sourceId}) async {
+    throw StateError('offline');
+  }
 }
 
 final class _RecordingFeedLoadManager() implements FeedLoadManager {

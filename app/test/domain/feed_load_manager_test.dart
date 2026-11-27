@@ -115,8 +115,9 @@ void main() {
 
   FeedLoadManager buildManager(
     UserVideosRemoteDataSource remote,
-    FeedUpdateNotifier notifier,
-  ) => FeedLoadManager(
+    FeedUpdateNotifier notifier, {
+    FeedLoadCoordinator? coordinator,
+  }) => FeedLoadManager(
     repository: FeedRepository(
       feedDao: db.feedDao,
       libraryDao: db.localLibraryDao,
@@ -124,6 +125,7 @@ void main() {
     ),
     notifier: notifier,
     preferences: preferences,
+    coordinator: coordinator,
   );
 
   test('coalesces concurrent loads into a single remote pass', () async {
@@ -145,6 +147,40 @@ void main() {
     ]);
 
     // Then the same work is shared instead of duplicated.
+    expect(remote.requestCount, 1);
+    expect(results.map((result) => result.newEntryCount), [1, 1]);
+  });
+
+  test('shares in-flight loads across managers with one coordinator', () async {
+    // Given two branch-scoped managers that share an app-level coordinator.
+    await subscribe('creator-1');
+    final remote = _FakeUserVideosDataSource(
+      pagesByChannel: {
+        'creator-1': [
+          ['v1'],
+        ],
+      },
+    );
+    final notifier = _RecordingNotifier();
+    final coordinator = FeedLoadCoordinator();
+    final homeManager = buildManager(
+      remote,
+      notifier,
+      coordinator: coordinator,
+    );
+    final feedManager = buildManager(
+      remote,
+      notifier,
+      coordinator: coordinator,
+    );
+
+    // When home and feed both trigger a load before either finishes.
+    final results = await Future.wait([
+      homeManager.load(sourceId: 'bilibili'),
+      feedManager.load(sourceId: 'bilibili'),
+    ]);
+
+    // Then only one remote pass runs and both callers see its result.
     expect(remote.requestCount, 1);
     expect(results.map((result) => result.newEntryCount), [1, 1]);
   });
