@@ -878,16 +878,13 @@ void main() {
       expect(find.text('2.4万 弹幕'), findsNothing);
       expect(find.text('1天前'), findsNothing);
       expect(find.text('4940 关注'), findsNothing);
-      // the id chip still renders, and no separator is left dangling
+      // the id chip still renders; fields are grouped by spacing only, so a
+      // wrapped line can never start with an orphaned separator glyph.
       expect(find.text('BV1sparse'), findsOneWidget);
-      // 两段之间恰好一个分隔符，且它位于两者之间：挂在最后一段之后的分隔符
-      // 数量相同，只数个数拦不住。
-      expect(find.text('·'), findsOneWidget);
-      final separator = tester.getRect(find.text('·'));
+      expect(find.text('·'), findsNothing);
       final viewLabel = tester.getRect(find.text('100 播放'));
       final idChip = tester.getRect(find.text('BV1sparse'));
-      expect(separator.left, greaterThan(viewLabel.right));
-      expect(separator.right, lessThan(idChip.left));
+      expect(idChip.left, greaterThan(viewLabel.right));
     });
   });
 }
