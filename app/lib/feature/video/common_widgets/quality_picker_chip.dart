@@ -105,10 +105,10 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
 
   /// 弹窗里要列的全部档位：当前档 + 候选，按高度降序。
   ///
-  /// 同一档位可能在候选里重复出现（实测一个视频有三行「流畅 360P 0.2
-  /// Mbps」）。列表每行只展示标签与码率，两者都相同的行对用户不可区分，
-  /// 因此去重后只保留一行；若重复项里包含当前在播的那一档，保留它，保证
-  /// 勾选标记落在正确行上。
+  /// 列表行只展示标签、码率，必要时补编码/帧率。同一档位可能在候选里重复
+  /// 出现（实测一个视频有三行「流畅 360P 0.2 Mbps」），码率经一位小数格式化
+  /// 后相同、且编码与帧率也相同的行对用户完全不可区分，因此按「渲染结果」
+  /// 去重；若重复项里包含当前在播的那一档，保留它，保证勾选标记落在正确行。
   List<MediaQualityOption> get _allOptions {
     final height = widget.stream.height;
     final current = height == null
@@ -118,21 +118,17 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
             label: _currentLabel(AppLocalizations.of(context)),
             streamId: widget.stream.streamId,
             bitrate: widget.stream.bitrate,
+            codecs: widget.stream.codecs,
+            frameRate: widget.stream.frameRate,
           );
     final options = <MediaQualityOption>[...widget.stream.alternatives];
     if (current != null) options.add(current);
-    options.sort((a, b) {
-      final bh = b.height;
-      final ah = a.height;
-      if (bh == null) return ah == null ? 0 : 1;
-      if (ah == null) return -1;
-      return bh.compareTo(ah);
-    });
+    options.sort(_compareOptions);
 
     final deduped = <MediaQualityOption>[];
     final indexByRenderedRow = <String, int>{};
     for (final option in options) {
-      final key = '${option.label}\u0000${option.bitrate}';
+      final key = _renderedRowKey(option);
       final existingIndex = indexByRenderedRow[key];
       if (existingIndex == null) {
         indexByRenderedRow[key] = deduped.length;
@@ -141,13 +137,74 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
         deduped[existingIndex] = option;
       }
     }
+    // 替换成当前档可能改变该行的高度，去重后重新排序。
+    deduped.sort(_compareOptions);
     return deduped;
+  }
+
+  /// 高度降序；同高度按码率降序，让高码率档排在前面且顺序稳定。
+  static int _compareOptions(MediaQualityOption a, MediaQualityOption b) {
+    final byHeight = (b.height ?? 0).compareTo(a.height ?? 0);
+    if (byHeight != 0) return byHeight;
+    return (b.bitrate ?? 0).compareTo(a.bitrate ?? 0);
+  }
+
+  /// 一行实际渲染出来的内容：标签 + 码率文案 + 编码 + 帧率。
+  ///
+  /// 码率取格式化后的文案而不是原始值：119861 与 105025 都显示为
+  /// 「0.1 Mbps」，用原始值做键会让两行看起来一样的选项同时留下。
+  static String _renderedRowKey(MediaQualityOption option) => [
+    option.label,
+    _bitrateLabel(option.bitrate) ?? '',
+    _codecLabel(option.codecs) ?? '',
+    option.frameRate?.trim() ?? '',
+  ].join('\u0000');
+
+  static String? _bitrateLabel(int? bitrate) =>
+      bitrate == null ? null : '${(bitrate / 1000000).toStringAsFixed(1)} Mbps';
+
+  /// 编码标识归一成用户认得的名字；未知编码原样显示。
+  static String? _codecLabel(String? codecs) {
+    final value = codecs?.trim();
+    if (value == null || value.isEmpty) return null;
+    final lower = value.toLowerCase();
+    if (lower.startsWith('avc') || lower.startsWith('h264')) return 'AVC';
+    if (lower.startsWith('hev') ||
+        lower.startsWith('hvc') ||
+        lower.startsWith('h265')) {
+      return 'HEVC';
+    }
+    if (lower.startsWith('av01') || lower.startsWith('av1')) return 'AV1';
+    return value;
+  }
+
+  static String? _frameRateLabel(String? frameRate) {
+    final value = frameRate?.trim();
+    if (value == null || value.isEmpty) return null;
+    return '$value fps';
+  }
+
+  /// 行副标题：码率必显；同一标签有多行时再补编码与帧率，用来区分同高度
+  /// 的多路流。
+  static String? _optionSubtitle(
+    MediaQualityOption option, {
+    required bool distinguish,
+  }) {
+    final bitrate = _bitrateLabel(option.bitrate);
+    final codec = distinguish ? _codecLabel(option.codecs) : null;
+    final fps = distinguish ? _frameRateLabel(option.frameRate) : null;
+    final parts = <String>[?bitrate, ?codec, ?fps];
+    return parts.isEmpty ? null : parts.join(' · ');
   }
 
   void _showQualityPicker(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final options = _allOptions;
     final currentHeight = widget.stream.height;
+    final labelCounts = <String, int>{};
+    for (final option in options) {
+      labelCounts.update(option.label, (count) => count + 1, ifAbsent: () => 1);
+    }
 
     showModalBottomSheet<void>(
       context: context,
@@ -157,8 +214,9 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
             shrinkWrap: true,
             children: [
               Padding(
+                // 与 Material ListTile 的固定内容内边距对齐，不随布局尺度缩放（R2.4）。
                 padding: EdgeInsets.symmetric(
-                  horizontal: $styles.insets.sm,
+                  horizontal: 16,
                   vertical: $styles.insets.sm,
                 ),
                 child: Text(
@@ -175,14 +233,18 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
               for (final option in options)
                 ListTile(
                   title: Text(option.label),
-                  subtitle: option.bitrate == null
-                      ? null
-                      : Text(
-                          '${(option.bitrate! / 1000000).toStringAsFixed(1)} Mbps',
-                          style: $styles.text.bodySmall.copyWith(
-                            color: $styles.colors.onSurfaceVariant,
-                          ),
-                        ),
+                  subtitle: switch (_optionSubtitle(
+                    option,
+                    distinguish: (labelCounts[option.label] ?? 0) > 1,
+                  )) {
+                    final text? => Text(
+                      text,
+                      style: $styles.text.bodySmall.copyWith(
+                        color: $styles.colors.onSurfaceVariant,
+                      ),
+                    ),
+                    null => null,
+                  },
                   trailing: _isCurrent(option, fallbackHeight: currentHeight)
                       ? Icon(AppIcons.check, color: $styles.colors.accentText)
                       : null,
