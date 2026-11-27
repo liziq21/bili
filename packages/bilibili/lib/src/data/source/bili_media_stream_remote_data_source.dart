@@ -148,6 +148,7 @@ final class BiliMediaStreamRemoteDataSource({
           supportFormats: playUrl.supportFormats,
         ),
         codecs: video.codecs,
+        frameRate: video.frameRate,
         // dash.duration 以秒计，与视频详情的 duration 同量纲。
         duration: dash.duration == null
             ? null
@@ -191,6 +192,8 @@ final class BiliMediaStreamRemoteDataSource({
             supportFormats: supportFormats,
           ),
           bitrate: item.bandwidth,
+          codecs: item.codecs,
+          frameRate: item.frameRate,
         ),
       );
     }

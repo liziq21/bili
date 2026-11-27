@@ -489,6 +489,8 @@ void main() {
               'baseUrl': 'https://cdn.example/v-1080-low.m4s',
               'height': 1080,
               'bandwidth': 1000000,
+              'codecs': 'avc1.640028',
+              'frame_rate': '30',
             },
             {
               'id': 32,
@@ -508,6 +510,8 @@ void main() {
       expect(stream.alternatives.map((option) => option.streamId), [81, 32]);
       expect(stream.alternatives.first.label, '1080P 低码率');
       expect(stream.alternatives.first.bitrate, 1000000);
+      expect(stream.alternatives.first.codecs, 'avc1.640028');
+      expect(stream.alternatives.first.frameRate, '30');
     });
 
     test('preferHeight 高于所有可用档时取最高一路', () async {

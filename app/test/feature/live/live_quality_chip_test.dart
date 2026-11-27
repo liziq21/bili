@@ -142,6 +142,45 @@ void main() {
     },
   );
 
+  testWidgets('the quality sheet title aligns with the option text', (
+    tester,
+  ) async {
+    final stream = MediaStream(
+      videoUrl: 'https://example.com/live_150.m3u8',
+      streamId: 150,
+      qualityLabel: 'HD',
+      alternatives: [MediaQualityOption(streamId: 400, label: 'FHD')],
+    );
+    final bloc = LiveBloc(
+      repository: AppLiveRoomRepository(_FakeLiveRoomDataSource()),
+    );
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: BlocProvider.value(
+            value: bloc,
+            child: LiveQualityChip(stream: stream, roomId: 21144080),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('HD'));
+    await tester.pumpAndSettle();
+
+    final titleX = tester.getTopLeft(find.text('Select quality')).dx;
+    final optionX = tester.getTopLeft(find.text('FHD')).dx;
+    expect((titleX - optionX).abs(), lessThan(0.5));
+  });
+
   testWidgets('the chip opens the picker from a screen-reader tap action', (
     tester,
   ) async {

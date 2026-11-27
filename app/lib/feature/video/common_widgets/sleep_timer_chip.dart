@@ -415,7 +415,11 @@ class _SleepTimerChipState() extends State<SleepTimerChip> {
               shrinkWrap: true,
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
+                  // 与 Material ListTile 的固定内容内边距对齐，不随布局尺度缩放（R2.4）。
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: $styles.insets.sm,
+                  ),
                   child: Text(
                     l10n?.sleepTimerTitle ?? 'Sleep timer',
                     style: $styles.text.bodySmallBold,

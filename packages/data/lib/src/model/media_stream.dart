@@ -50,6 +50,9 @@ class MediaStream({
   /// 画面编码标识（如 `avc1.640028`），未知时为 null。
   final String? codecs,
 
+  /// 画面帧率（源侧原样，如 `30`），未知时为 null。
+  final String? frameRate,
+
   /// 总时长，源未提供时为 null。
   final Duration? duration,
 
@@ -89,6 +92,15 @@ class MediaQualityOption({
 
   /// 平均码率（bit/s），未知时为 null。仅用于排序与展示。
   final int? bitrate,
+
+  /// 画面编码标识（如 `avc1.640028`），未知时为 null。
+  ///
+  /// 同一高度可能有多路编码不同的流；列表只用标签与码率展示时它们看起来
+  /// 一样，此时用该字段把差异显示出来。
+  final String? codecs,
+
+  /// 画面帧率（源侧原样，如 `30`），未知时为 null。
+  final String? frameRate,
 });
 
 /// 媒体流中的一个片段
