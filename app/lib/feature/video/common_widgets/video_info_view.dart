@@ -292,8 +292,8 @@ class const _VideoHeaderSection() extends StatelessWidget {
         // 区分相邻字段。
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 10,
-          runSpacing: 4,
+          spacing: $styles.insets.xs,
+          runSpacing: $styles.insets.xxs,
           children: _statsOf(
             l10n,
             video,
