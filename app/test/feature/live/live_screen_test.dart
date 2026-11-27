@@ -14,6 +14,9 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
   /// 置为 true 时详情接口失败，页面进入整页错误态。
   bool failDetail = false;
 
+  /// 详情接口返回的在线人数。
+  int online = 100;
+
   @override
   Future<Result<LiveRoomDetail, Exception>> getLiveRoomDetail(
     int roomId,
@@ -22,11 +25,11 @@ class _FakeLiveDataSource() extends LiveRoomDetailRemoteDataSource {
       return Result.error(Exception('room detail offline'));
     }
     return Result.success(
-      const LiveRoomDetail(
+      LiveRoomDetail(
         roomId: 12345,
         title: 'Test Live Room',
         anchorName: 'Streamer',
-        online: 100,
+        online: online,
         isLive: true,
       ),
     );
@@ -88,6 +91,18 @@ void main() {
 
     expect(find.text('Live'), findsOneWidget);
     expect(find.text('直播间'), findsNothing);
+  });
+
+  testWidgets('the viewer count uses the same compact format as cards', (
+    tester,
+  ) async {
+    final source = _FakeLiveDataSource()..online = 155266;
+
+    await tester.pumpWidget(_buildScreen(source, locale: const Locale('zh')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('15.5万 观看'), findsOneWidget);
+    expect(find.textContaining('155266'), findsNothing);
   });
 
   testWidgets('a detail failure shows the category copy, never the exception', (
