@@ -92,6 +92,83 @@ void main() {
     },
   );
 
+  testWidgets('drops rows whose label and bitrate render identically', (
+    tester,
+  ) async {
+    final repository = _RecordingVideoDetailRepository();
+    final bloc = VideoBloc(repository: repository);
+    final controller = _RecordingPlaybackController();
+    addTearDown(bloc.close);
+    addTearDown(controller.dispose);
+
+    bloc.add(const LoadVideoDetail('video'));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: BlocProvider.value(
+            value: bloc,
+            child: RepositoryProvider<VideoDetailRepository>.value(
+              value: repository,
+              child: QualityPickerChip(
+                controller: controller,
+                stream: MediaStream(
+                  videoUrl: 'https://cdn.example/high.m4s',
+                  height: 1080,
+                  bitrate: 3_000_000,
+                  streamId: 80,
+                  qualityLabel: '1080P',
+                  alternatives: [
+                    MediaQualityOption(
+                      height: 360,
+                      label: '360P',
+                      streamId: 16,
+                      bitrate: 200_000,
+                    ),
+                    MediaQualityOption(
+                      height: 360,
+                      label: '360P',
+                      streamId: 17,
+                      bitrate: 200_000,
+                    ),
+                    MediaQualityOption(
+                      height: 360,
+                      label: '360P',
+                      streamId: 18,
+                      bitrate: 400_000,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('1080P'));
+    await tester.pumpAndSettle();
+
+    // 两行标签与码率完全相同的 360P 只保留一行；不同码率的两档都保留。
+    expect(find.text('360P'), findsNWidgets(2));
+    expect(find.text('0.2 Mbps'), findsOneWidget);
+    expect(find.text('0.4 Mbps'), findsOneWidget);
+    expect(find.byType(ListTile), findsNWidgets(3));
+
+    // 弹层标题与选项文字左对齐，不再贴着弹层边缘。
+    final titleX = tester.getTopLeft(find.text('Select quality')).dx;
+    final optionX = tester.getTopLeft(find.text('360P').first).dx;
+    expect((titleX - optionX).abs(), lessThan(0.5));
+  });
+
   testWidgets('the chip opens the picker from a screen-reader tap action', (
     tester,
   ) async {

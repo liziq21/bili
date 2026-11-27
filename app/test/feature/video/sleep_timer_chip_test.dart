@@ -220,6 +220,18 @@ void main() {
       },
     );
 
+    testWidgets('the sheet title aligns with the option text', (tester) async {
+      useTallViewport(tester);
+      await pumpChip(tester);
+
+      await tester.tap(find.text('Timer'));
+      await tester.pumpAndSettle();
+
+      final titleX = tester.getTopLeft(find.text('Sleep timer')).dx;
+      final optionX = tester.getTopLeft(find.text('Pause now')).dx;
+      expect((titleX - optionX).abs(), lessThan(0.5));
+    });
+
     testWidgets('the chip opens the picker from a screen-reader tap action', (
       tester,
     ) async {

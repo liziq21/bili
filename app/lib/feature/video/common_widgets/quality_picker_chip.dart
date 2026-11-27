@@ -104,6 +104,11 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
   }
 
   /// 弹窗里要列的全部档位：当前档 + 候选，按高度降序。
+  ///
+  /// 同一档位可能在候选里重复出现（实测一个视频有三行「流畅 360P 0.2
+  /// Mbps」）。列表每行只展示标签与码率，两者都相同的行对用户不可区分，
+  /// 因此去重后只保留一行；若重复项里包含当前在播的那一档，保留它，保证
+  /// 勾选标记落在正确行上。
   List<MediaQualityOption> get _allOptions {
     final height = widget.stream.height;
     final current = height == null
@@ -123,7 +128,20 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
       if (ah == null) return -1;
       return bh.compareTo(ah);
     });
-    return options;
+
+    final deduped = <MediaQualityOption>[];
+    final indexByRenderedRow = <String, int>{};
+    for (final option in options) {
+      final key = '${option.label}\u0000${option.bitrate}';
+      final existingIndex = indexByRenderedRow[key];
+      if (existingIndex == null) {
+        indexByRenderedRow[key] = deduped.length;
+        deduped.add(option);
+      } else if (_isCurrent(option) && !_isCurrent(deduped[existingIndex])) {
+        deduped[existingIndex] = option;
+      }
+    }
+    return deduped;
   }
 
   void _showQualityPicker(BuildContext context) {
@@ -139,7 +157,10 @@ class _QualityPickerChipState() extends State<QualityPickerChip> {
             shrinkWrap: true,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(vertical: $styles.insets.sm),
+                padding: EdgeInsets.symmetric(
+                  horizontal: $styles.insets.sm,
+                  vertical: $styles.insets.sm,
+                ),
                 child: Text(
                   l10n?.qualitySelect ?? 'Quality',
                   style: $styles.text.bodySmallBold,
