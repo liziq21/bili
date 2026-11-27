@@ -53,7 +53,7 @@ void main() {
     await tester.pump();
   }
 
-  Widget feed() => CustomScrollView(
+  Widget feed({bool withMore = false}) => CustomScrollView(
     slivers: [
       VideoFeedSection(
         section: FeedSectionState<VideoModel>(
@@ -64,6 +64,7 @@ void main() {
         ),
         homeConfig: HomeConfig({}),
         onVideoTap: (_) {},
+        onMorePressed: withMore ? (_) {} : null,
         onRetry: () {},
         onLoadMore: () {},
       ),
@@ -186,6 +187,47 @@ void main() {
     });
   });
 
+  testWidgets('feed cards expose the more-actions button for each video', (
+    tester,
+  ) async {
+    final tapped = <String>[];
+    await pump(
+      tester,
+      size: const Size(400, 900),
+      textScale: 1,
+      child: CustomScrollView(
+        slivers: [
+          VideoFeedSection(
+            section: FeedSectionState<VideoModel>(
+              id: 'video_section',
+              title: '热门视频',
+              status: FeedStatus.success,
+              items: [video()],
+            ),
+            homeConfig: HomeConfig({}),
+            onVideoTap: (_) {},
+            onMorePressed: (video) => tapped.add(video.id),
+            onRetry: () {},
+            onLoadMore: () {},
+          ),
+        ],
+      ),
+    );
+
+    await tester.tap(find.byTooltip(AppLocalizationsZh().moreOptions));
+    await tester.pump();
+
+    expect(tapped, ['BV1xx411c7mD']);
+  });
+
+  testWidgets('feed cards stay button-free without a more handler', (
+    tester,
+  ) async {
+    await pump(tester, size: const Size(400, 900), textScale: 1, child: feed());
+
+    expect(find.byTooltip(AppLocalizationsZh().moreOptions), findsNothing);
+  });
+
   // 400 与 432 是 #678 实测报告里溢出的两个宽度，必须进矩阵。
   for (final width in <double>[320, 360, 390, 400, 411, 432, 480]) {
     for (final scale in <double>[1, 1.3, 1.5, 2]) {
@@ -196,7 +238,7 @@ void main() {
             tester,
             size: Size(width, 900),
             textScale: scale,
-            child: feed(),
+            child: feed(withMore: true),
           );
 
           expect(tester.takeException(), isNull);

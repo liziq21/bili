@@ -107,7 +107,7 @@ class const VideoCard({
                 : (videoInfoBase.uploadDate != null
                       ? '${videoInfoBase.uploadDate}'
                       : ''));
-      return _buildFeedCard(context, feedSubtitle);
+      return _withMoreButton(context, _buildFeedCard(context, feedSubtitle));
     }
 
     final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
@@ -147,7 +147,7 @@ class const VideoCard({
             onTap!();
           };
 
-    return Card(
+    final card = Card(
       clipBehavior: Clip.antiAlias,
       child: Tooltip(
         message: videoInfoBase.title,
@@ -240,6 +240,40 @@ class const VideoCard({
           ),
         ),
       ),
+    );
+    return _withMoreButton(context, card);
+  }
+
+  /// 更多操作按钮浮在封面右上角。放进信息行会把标题挤成两三个字（380 宽下
+  /// 实测），浮层不占文字宽度；它留在卡片 `Semantics` 之外，读屏仍能单独聚焦。
+  Widget _withMoreButton(BuildContext context, Widget card) {
+    if (onMorePressed == null) return card;
+    final label = AppLocalizations.of(context)?.moreOptions ?? 'More options';
+    return Stack(
+      children: [
+        card,
+        Positioned(
+          top: $styles.insets.xs,
+          right: $styles.insets.xs,
+          child: Material(
+            color: $styles.colors.scrim.withValues(alpha: 0.6),
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: IconButton(
+              tooltip: label,
+              icon: Icon(
+                AppIcons.moreVert,
+                semanticLabel: label,
+                size: 18,
+                color: $styles.colors.onScrim,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+              onPressed: onMorePressed,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -452,22 +486,6 @@ class const VideoCard({
                             ),
                           ),
                         ),
-
-                        // 更多操作按钮
-                        if (onMorePressed != null)
-                          IconButton(
-                            tooltip: l10n?.moreOptions ?? 'More options',
-                            icon: Icon(
-                              AppIcons.moreVert,
-                              semanticLabel:
-                                  l10n?.moreOptions ?? 'More options',
-                              size: 20,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            onPressed: onMorePressed,
-                          ),
                       ],
                     ),
                   ),

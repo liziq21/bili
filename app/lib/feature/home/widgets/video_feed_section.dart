@@ -16,6 +16,7 @@ class const VideoFeedSection({
   required final FeedSectionState<VideoModel> section,
   required final HomeConfig homeConfig,
   required final ValueChanged<VideoModel> onVideoTap,
+  final ValueChanged<VideoModel>? onMorePressed,
   required final VoidCallback onRetry,
   required final VoidCallback onLoadMore,
 }) extends StatelessWidget {
@@ -77,6 +78,9 @@ class const VideoFeedSection({
                       variant: VideoCardVariant.feed,
                       videoInfoBase: video,
                       onTap: () => onVideoTap(video),
+                      onMorePressed: onMorePressed == null
+                          ? null
+                          : () => onMorePressed!(video),
                     );
                   },
                   childCount: section.isInitialLoading
