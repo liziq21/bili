@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../main.dart';
+import '../../../ui/common/horizontal_wheel_scroll.dart';
 import '../bloc/home_bloc.dart';
 
 /// 常驻在主页顶部的横向筛选栏
@@ -35,44 +36,49 @@ class const HomeFilterBar({
       elevation: overlapsContent ? 2 : 0,
       child: SizedBox(
         height: height,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(
-            horizontal: $styles.insets.sm,
-            vertical: $styles.insets.xs,
-          ),
-          itemCount: filters.length,
-          separatorBuilder: (context, index) =>
-              SizedBox(width: $styles.insets.xs),
-          itemBuilder: (context, index) {
-            final filter = filters[index];
-            final isSelected = filter.id == activeFilterId;
+        child: HorizontalWheelScroll(
+          builder: (context, controller) => ListView.separated(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(
+              horizontal: $styles.insets.sm,
+              vertical: $styles.insets.xs,
+            ),
+            itemCount: filters.length,
+            separatorBuilder: (context, index) =>
+                SizedBox(width: $styles.insets.xs),
+            itemBuilder: (context, index) {
+              final filter = filters[index];
+              final isSelected = filter.id == activeFilterId;
 
-            return Center(
-              child: FilterChip(
-                selected: isSelected,
-                showCheckmark: false,
-                tooltip: filter.label,
-                label: Text(filter.label, textAlign: TextAlign.center),
-                labelStyle: $styles.text.bodySmall.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? colorScheme.onPrimary
-                      : colorScheme.onSurface,
+              return Center(
+                child: FilterChip(
+                  selected: isSelected,
+                  showCheckmark: false,
+                  tooltip: filter.label,
+                  label: Text(filter.label, textAlign: TextAlign.center),
+                  labelStyle: $styles.text.bodySmall.copyWith(
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
+                  ),
+                  selectedColor: colorScheme.primary,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  side: BorderSide.none,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular($styles.corners.lg),
+                  ),
+                  onSelected: (_) {
+                    HapticFeedback.selectionClick();
+                    onSelected(filter);
+                  },
                 ),
-                selectedColor: colorScheme.primary,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                side: BorderSide.none,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular($styles.corners.lg),
-                ),
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
-                  onSelected(filter);
-                },
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

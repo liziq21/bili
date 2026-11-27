@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../design/design.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
+import '../../../ui/common/horizontal_wheel_scroll.dart';
 import '../../../ui/common/utils/layout_breakpoints.dart';
 import '../bloc/home_bloc.dart';
 import 'feed_status_view.dart';
@@ -80,20 +81,23 @@ class const LiveFeedSection({
         return SliverToBoxAdapter(
           child: SizedBox(
             height: cardExtent(context, cardWidth),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              itemCount: itemCount,
-              separatorBuilder: (context, index) =>
-                  SizedBox(width: $styles.insets.sm),
-              itemBuilder: (context, index) => SizedBox(
-                width: cardWidth,
-                child: section.isInitialLoading
-                    ? const FeedSkeletonCard()
-                    : _LiveRoomCard(
-                        liveRoom: section.items[index],
-                        onTap: () => onLiveTap(section.items[index]),
-                      ),
+            child: HorizontalWheelScroll(
+              builder: (context, controller) => ListView.separated(
+                controller: controller,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                itemCount: itemCount,
+                separatorBuilder: (context, index) =>
+                    SizedBox(width: $styles.insets.sm),
+                itemBuilder: (context, index) => SizedBox(
+                  width: cardWidth,
+                  child: section.isInitialLoading
+                      ? const FeedSkeletonCard()
+                      : _LiveRoomCard(
+                          liveRoom: section.items[index],
+                          onTap: () => onLiveTap(section.items[index]),
+                        ),
+                ),
               ),
             ),
           ),

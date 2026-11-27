@@ -3,6 +3,7 @@ import 'package:app/feature/home/bloc/home_bloc.dart';
 import 'package:app/feature/home/widgets/live_feed_section.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:data/data.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -289,6 +290,78 @@ void main() {
           .first,
     );
     expect(material.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('mouse wheel scrolls the live row horizontally', (
+    WidgetTester tester,
+  ) async {
+    // 回归 LIZ-198：横向列表只读取滚轮的 dx，普通滚轮只给出 dy，桌面端
+    // 鼠标停在卡片上滚动时整行纹丝不动，一屏 4 张之外的房间无法到达。
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final section = FeedSectionState<LiveRoomModel>(
+      id: 'live_section',
+      title: '推荐直播',
+      status: FeedStatus.success,
+      items: [
+        for (var i = 0; i < 30; i++)
+          LiveRoomModel(
+            id: 1000 + i,
+            title: '直播标题 $i',
+            url: 'https://live.bilibili.com/${1000 + i}',
+            creatorProfileName: '主播 $i',
+            isLive: true,
+          ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              LiveFeedSection(
+                section: section,
+                onLiveTap: (_) {},
+                onRetry: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final horizontal = tester.state<ScrollableState>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.right,
+      ),
+    );
+    expect(horizontal.position.pixels, 0);
+
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    pointer.hover(
+      tester.getCenter(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is ListView && widget.scrollDirection == Axis.horizontal,
+        ),
+      ),
+    );
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 300)));
+    await tester.pump();
+
+    // 300 像素滚轮增量应原样落到横向位置，而不是只挪动一点点。
+    expect(horizontal.position.pixels, 300);
   });
 
   group('card layout budget', () {
