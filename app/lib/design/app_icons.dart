@@ -63,8 +63,8 @@ abstract final class AppIcons() {
   static const IconData playlistPlay = Icons.playlist_play_rounded;
   static const IconData bookmark = Icons.bookmark_border_rounded;
   static const IconData bookmarkSelected = Icons.bookmark_rounded;
-  static const IconData watchLater = Icons.schedule_rounded;
-  static const IconData watchLaterAdded = Icons.watch_later_rounded;
+  static const IconData watchLater = Icons.watch_later_outlined;
+  static const IconData watchLaterSelected = Icons.watch_later_rounded;
   static const IconData download = Icons.download_rounded;
   static const IconData downloaded = Icons.download_done_rounded;
   static const IconData gridView = Icons.grid_view_rounded;

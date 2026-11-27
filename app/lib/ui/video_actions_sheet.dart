@@ -39,6 +39,7 @@ class _VideoActionsSheetState() extends State<VideoActionsSheet> {
   /// 「保存」。
   bool? _saved;
   bool _busy = false;
+  bool _loadFailed = false;
 
   @override
   void initState() {
@@ -47,17 +48,21 @@ class _VideoActionsSheetState() extends State<VideoActionsSheet> {
   }
 
   Future<void> _load() async {
-    var saved = false;
+    final repository = context.read<LocalLibraryRepository>();
+    if (_loadFailed) setState(() => _loadFailed = false);
     try {
-      saved = await context.read<LocalLibraryRepository>().isInWatchLater(
+      final saved = await repository.isInWatchLater(
         widget.sourceId,
         widget.video.id,
       );
+      if (!mounted) return;
+      setState(() => _saved = saved);
     } on Object {
-      // 读不出来就按「还没保存」处理：至少还能点，不会卡在灰掉的按钮上。
+      // 读不出来就不能假装「还没保存」：否则已保存的条目会显示「保存」，
+      // 点下去只是刷新保存时间，用户以为存了第二份。
+      if (!mounted) return;
+      setState(() => _loadFailed = true);
     }
-    if (!mounted) return;
-    setState(() => _saved = saved);
   }
 
   Future<void> _toggle() async {
@@ -66,25 +71,32 @@ class _VideoActionsSheetState() extends State<VideoActionsSheet> {
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final repository = context.read<LocalLibraryRepository>();
     setState(() => _busy = true);
     try {
-      await context.read<LocalLibraryRepository>().setWatchLater(
+      await repository.setWatchLater(
         sourceId: widget.sourceId,
         video: widget.video,
         saved: !saved,
       );
-      unawaited(HapticFeedback.selectionClick());
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            saved ? l10n.removedFromWatchLater : l10n.savedToWatchLater,
-          ),
-        ),
-      );
-      navigator.pop();
-    } finally {
+    } on Object catch (error) {
       if (mounted) setState(() => _busy = false);
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.operationFailed(error.toString()))),
+      );
+      return;
     }
+    unawaited(HapticFeedback.selectionClick());
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          saved ? l10n.removedFromWatchLater : l10n.savedToWatchLater,
+        ),
+      ),
+    );
+    // 面板已被用户关掉时不要再 pop，否则关的是它下面那一层路由。
+    if (!mounted) return;
+    navigator.pop();
   }
 
   @override
@@ -105,18 +117,29 @@ class _VideoActionsSheetState() extends State<VideoActionsSheet> {
               style: $styles.text.bodyBold,
             ),
           ),
-          const SizedBox(height: 8),
-          ListTile(
-            enabled: saved != null && !_busy,
-            leading: Icon(
-              saved == true ? AppIcons.watchLaterAdded : AppIcons.watchLater,
+          SizedBox(height: $styles.insets.sm),
+          if (_loadFailed)
+            ListTile(
+              leading: const Icon(AppIcons.error),
+              title: Text(l10n.loadFailedRetryLater),
+              trailing: TextButton(onPressed: _load, child: Text(l10n.retry)),
+            )
+          else
+            ListTile(
+              enabled: saved != null && !_busy,
+              leading: Icon(
+                saved == true
+                    ? AppIcons.watchLaterSelected
+                    : AppIcons.watchLater,
+              ),
+              title: Text(
+                saved == true
+                    ? l10n.removeFromWatchLater
+                    : l10n.saveToWatchLater,
+              ),
+              onTap: _toggle,
             ),
-            title: Text(
-              saved == true ? l10n.removeFromWatchLater : l10n.saveToWatchLater,
-            ),
-            onTap: _toggle,
-          ),
-          const SizedBox(height: 8),
+          SizedBox(height: $styles.insets.sm),
         ],
       ),
     );

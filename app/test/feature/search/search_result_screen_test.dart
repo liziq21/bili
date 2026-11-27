@@ -534,6 +534,72 @@ void main() {
     },
   );
 
+  testWidgets('a video result saves itself to watch later from the card menu', (
+    tester,
+  ) async {
+    const video = VideoModel(
+      id: 'video-1',
+      title: 'Video title',
+      url: 'https://example.com/video-1',
+    );
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: const FakeVideoSearchRepository(items: [video]),
+      query: 'keyword',
+    );
+    addTearDown(videoBloc.close);
+
+    final database = AppDatabase(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
+    addTearDown(database.close);
+    final library = LocalLibraryRepository(dao: database.localLibraryDao);
+
+    await tester.pumpWidget(
+      RepositoryProvider<LocalLibraryRepository>.value(
+        value: library,
+        child: MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: BlocProvider<SearchResultBloc<VideoModel>>.value(
+            value: videoBloc,
+            child: const SearchResultScreen(query: 'keyword', source: 'test'),
+          ),
+        ),
+      ),
+    );
+    await _pumpUntil(
+      tester,
+      () => find.text(video.title).evaluate().isNotEmpty,
+    );
+
+    final l10n = AppLocalizations.of(tester.element(find.text(video.title)))!;
+    await tester.tap(find.byTooltip(l10n.moreOptions));
+    await _pumpUntil(
+      tester,
+      () => find.text(l10n.saveToWatchLater).evaluate().isNotEmpty,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.saveToWatchLater));
+    for (var attempt = 0; attempt < 200; attempt++) {
+      final saved = await tester.runAsync(
+        () => library.isInWatchLater('test', video.id),
+      );
+      if (saved ?? false) return;
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump();
+    }
+    fail('the video was not saved to watch later');
+  });
+
   testWidgets('SearchResultScreen toggles local subscriptions', (tester) async {
     const creator = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
     final creatorRepo = const FakeCreatorProfileSearchRepository(

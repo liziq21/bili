@@ -72,9 +72,12 @@ void main() {
     ),
   );
 
+  /// 帧推进之外还要让真实的数据库 I/O 跑完：`pump` 只清微任务，drift 的查询
+  /// 完成得靠事件循环，否则断言可能早于写入完成。
   Future<void> settle(WidgetTester tester) async {
     for (var index = 0; index < 8; index++) {
       await tester.pump(const Duration(milliseconds: 20));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     }
     await tester.pump(const Duration(milliseconds: 400));
   }
@@ -121,5 +124,35 @@ void main() {
 
     expect(await repository.isInWatchLater('bilibili', 'video-1'), isFalse);
     expect(find.text(l10n.removedFromWatchLater), findsOneWidget);
+  });
+
+  testSheet('reports a failed read instead of offering save', (tester) async {
+    await database.customStatement('DROP TABLE local_watch_later');
+    await tester.pumpWidget(app());
+    await pumpSheet(tester);
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(ListTile).first),
+    )!;
+    expect(find.text(l10n.loadFailedRetryLater), findsOneWidget);
+    expect(find.text(l10n.retry), findsOneWidget);
+    expect(find.text(l10n.saveToWatchLater), findsNothing);
+    expect(find.text(l10n.removeFromWatchLater), findsNothing);
+  });
+
+  testSheet('keeps the sheet open and reports a failed write', (tester) async {
+    await tester.pumpWidget(app());
+    await pumpSheet(tester);
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(ListTile).first),
+    )!;
+    await database.customStatement('DROP TABLE local_watch_later');
+
+    await tester.tap(find.text(l10n.saveToWatchLater));
+    await settle(tester);
+
+    expect(find.byType(VideoActionsSheet), findsOneWidget);
+    expect(find.textContaining(l10n.operationFailed('')), findsOneWidget);
   });
 }

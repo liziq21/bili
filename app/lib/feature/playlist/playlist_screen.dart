@@ -9,6 +9,7 @@ import '../../data/repository/playlist_content_repository.dart';
 import '../../design/design.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
+import '../../ui/video_actions_sheet.dart';
 import '../../ui/video_card.dart';
 
 /// 远端播放列表详情页
@@ -188,6 +189,14 @@ class _PlaylistScreenState() extends State<PlaylistScreen> {
                   onTap: widget.onVideoTap == null
                       ? null
                       : () => widget.onVideoTap!(video),
+                  onMorePressed: switch (context.read<MediaSource?>()?.id) {
+                    final sourceId? => () => VideoActionsSheet.show(
+                      context,
+                      sourceId: sourceId,
+                      video: video,
+                    ),
+                    null => null,
+                  },
                 );
               },
             ),
