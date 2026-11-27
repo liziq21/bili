@@ -21,13 +21,15 @@ final class _Streak(final int count, final DateTime at);
 
 final _streaks = <String, _Streak>{};
 
-/// 每个 scope 上一次看到的拒绝对象。
+/// 每个 scope 上一次看到的拒绝对象与时间。
 ///
 /// 错误视图在重试时可能被 loading 态替换后**重新挂载**（频道页、创作者档案），
 /// 也可能原地重建（搜索结果）。只比较对象身份就能区分「同一次拒绝的重新
 /// 挂载」与「重试后又被拒」：平台适配层每次拒绝都会构造新的异常实例，而
 /// 切走再回来沿用 bloc 里同一个错误对象。
-final _lastFailures = <String, Object>{};
+final _lastFailures = <String, _SeenFailure>{};
+
+final class _SeenFailure(final Object? failure, final DateTime at);
 
 /// [Object] 没有值语义，用作「还没有记录过」与 `failure == null` 的哨兵。
 const _noFailure = Object();
@@ -60,15 +62,20 @@ void resetAllRateLimitCooldowns() {
 /// 这次挂载带来的拒绝对象是不是该 scope 之前没见过的「新一次拒绝」。
 ///
 /// 第一次看到某个 scope 返回 false：只登记、不放大，否则首次进入就会从
-/// 双倍冷却起步。之后对象身份不同才算新的一次。
+/// 双倍冷却起步。之后对象身份不同、且上一次拒绝仍在 [_streakTtl] 内，才算
+/// 新的一次。
 bool _isNewFailure(String scope, Object? failure) {
   final previous = _lastFailures[scope];
   if (previous == null) return false;
-  return !identical(previous, failure ?? _noFailure);
+  if (DateTime.now().difference(previous.at) > _streakTtl) return false;
+  return !identical(previous.failure ?? _noFailure, failure ?? _noFailure);
 }
 
 void _rememberFailure(String scope, Object? failure) {
-  _lastFailures[scope] = failure ?? _noFailure;
+  final now = DateTime.now();
+  // 顺带清掉过期 scope，避免长时间运行后按 scope 无限累积。
+  _lastFailures.removeWhere((_, seen) => now.difference(seen.at) > _streakTtl);
+  _lastFailures[scope] = _SeenFailure(failure, now);
 }
 
 /// 记下这次被拒。[escalate] 为 false 时只登记、不放大——界面重建会把同

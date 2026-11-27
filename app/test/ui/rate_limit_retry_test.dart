@@ -237,4 +237,59 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('a success reset lets the next rejection start from base', (
+    tester,
+  ) async {
+    // 成功路径（搜索/频道视频监听器）调用 resetRateLimitCooldown。之后的一次
+    // 拒绝必须从基础时长起步，而不是沿用上一轮连击——否则成功一次反而让后续
+    // 的首次拒绝多等。
+    const scope = 'test.successReset';
+    var failure = Exception('first');
+    Future<void> mount() => tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: RetryCooldownButton(
+            rateLimited: true,
+            scope: scope,
+            failure: failure,
+            onRetry: () {},
+          ),
+        ),
+      ),
+    );
+    Future<void> unmount() =>
+        tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+
+    final base = rateLimitRetryBaseCooldown.inSeconds;
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base)),
+      findsOneWidget,
+    );
+
+    await unmount();
+    failure = Exception('second');
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base * 2)),
+      findsOneWidget,
+    );
+
+    // 成功 → 清零连击与记录对象。
+    resetRateLimitCooldown(scope);
+    await unmount();
+    failure = Exception('third');
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base)),
+      findsOneWidget,
+    );
+  });
 }

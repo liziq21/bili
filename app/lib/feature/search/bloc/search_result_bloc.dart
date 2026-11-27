@@ -75,10 +75,7 @@ class SearchResultBloc<T>({
     if (generation != _generation) return;
 
     if (result case Error(:final error)) {
-      _log.warning(
-        'Search failed (query: ${searchQuery.query}, page: ${searchQuery.pageKey})',
-        error,
-      );
+      _log.warning('Search failed (page: ${searchQuery.pageKey})', error);
     }
 
     emit(
