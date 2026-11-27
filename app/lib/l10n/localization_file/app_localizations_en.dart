@@ -1018,11 +1018,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownCreator => 'Unknown creator';
 
   @override
-  String creatorWithSubtitle(String p1, String p2) {
-    return '$p1 • $p2';
-  }
-
-  @override
   String get moreOptions => 'More options';
 
   @override

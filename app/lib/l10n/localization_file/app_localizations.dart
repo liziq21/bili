@@ -1832,12 +1832,6 @@ abstract class AppLocalizations {
   /// **'Unknown creator'**
   String get unknownCreator;
 
-  /// Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date
-  ///
-  /// In en, this message translates to:
-  /// **'{p1} • {p2}'**
-  String creatorWithSubtitle(String p1, String p2);
-
   /// Card and row - more-actions tooltip
   ///
   /// In en, this message translates to:
