@@ -134,27 +134,27 @@ MediaSourceDefinition? _resolveSource(
 /// `feed_entry` 表（[FeedLoadManager] 落库），数据源不提供频道投稿能力时
 /// 页面给出「该数据源暂不支持订阅动态」，而不是给一个点开就崩的导航项。
 List<AppNavDestination> _navDestinations(BuildContext context) {
-  final l10n = AppLocalizations.of(context);
+  final l10n = AppLocalizations.of(context)!;
   return [
     AppNavDestination(
-      label: l10n?.navDiscoverLabel ?? 'Discover',
+      label: l10n.navDiscoverLabel,
       icon: AppIcons.discover,
       selectedIcon: AppIcons.discoverSelected,
     ),
     AppNavDestination(
-      label: l10n?.navSubscriptionLabel ?? 'Subscriptions',
+      label: l10n.navSubscriptionLabel,
       icon: AppIcons.feed,
       selectedIcon: AppIcons.feedSelected,
     ),
     AppNavDestination(
-      label: l10n?.search ?? 'Search',
+      label: l10n.search,
       icon: AppIcons.search,
       selectedIcon: AppIcons.searchSelected,
       // 已在搜索分支时再点搜索，把焦点交回输入框而不是把页面重置一遍。
       onReselect: () => context.read<SearchFocusController>().requestFocus(),
     ),
     AppNavDestination(
-      label: l10n?.mine ?? 'Mine',
+      label: l10n.mine,
       icon: AppIcons.profile,
       selectedIcon: AppIcons.profileSelected,
     ),
