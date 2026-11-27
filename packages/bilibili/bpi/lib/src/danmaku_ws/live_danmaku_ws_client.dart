@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'danmaku_frame_decoder.dart';
 import 'danmaku_message.dart';
 import 'packet.dart';
 
@@ -41,12 +41,10 @@ class LiveDanmakuWsClient {
     Duration(seconds: 12),
     Duration(seconds: 30),
   ];
-  static const int _maxBuffer = 64 * 1024;
-
   StreamController<DanmakuMessage>? _controller;
   WebSocketChannel? _channel;
   Timer? _heartbeatTimer;
-  List<int> _buffer = [];
+  final _decoder = DanmakuFrameDecoder();
   int _reconnectAttempt = 0;
   bool _stopped = false;
 
@@ -137,46 +135,8 @@ class LiveDanmakuWsClient {
   }
 
   void _handleBinary(List<int> data) {
-    _buffer.addAll(data);
-    if (_buffer.length > _maxBuffer) {
-      _buffer = [];
-      return;
-    }
-    while (true) {
-      try {
-        final (packet, rest) = WsPacket.split(_buffer);
-        _buffer = rest;
-        _handlePacket(packet);
-      } on FormatException {
-        break;
-      }
-    }
-  }
-
-  void _handlePacket(WsPacket packet) {
-    if (packet.protocolVersion == 2) {
-      // zlib 压缩的包体：解压后可能包含多个包，递归处理。
-      final decompressed = _decompress(packet.body);
-      if (decompressed.isNotEmpty) {
-        _handleBinary(decompressed);
-      }
-      return;
-    }
-    if (packet.operation == WsOperation.message.code) {
-      final message = DanmakuMessage.parse(packet.body);
-      if (message != null) {
-        _controller?.add(message);
-      }
-    }
-    // heartbeatReply / authReply：忽略。
-  }
-
-  List<int> _decompress(List<int> body) {
-    try {
-      final codec = ZLibCodec();
-      return codec.decode(Uint8List.fromList(body));
-    } on Object {
-      return [];
+    for (final message in _decoder.add(data)) {
+      _controller?.add(message);
     }
   }
 
@@ -196,6 +156,6 @@ class LiveDanmakuWsClient {
     _heartbeatTimer = null;
     _channel?.sink.close();
     _channel = null;
-    _buffer = [];
+    _decoder.reset();
   }
 }

@@ -80,16 +80,3 @@ final class LiveApiPath {
   static const String statusByUids = '/room/v1/Room/get_status_info_by_uids';
   static const String recommendedRooms = '/room/v1/room/get_user_recommend';
 }
-
-final class LiveDanmakuApi {
-  static const host = 'broadcastlv.chat.bilibili.com';
-  static const wsBase = 'wss://$host/sub';
-
-  static String wsUrl({
-    required int roomId,
-    required String token,
-    int protocol = 1,
-    String platform = 'web',
-  }) =>
-      '$wsBase?room_id=$roomId&token=$token&protocol=$protocol&platform=$platform';
-}
