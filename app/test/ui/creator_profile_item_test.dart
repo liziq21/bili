@@ -103,16 +103,20 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
-          localizationsDelegates: [
+        MaterialApp(
+          // 只有换上 golden 字体子集，宽度才是真实比例字体的宽度；默认的
+          // Ahem 每个字形都是 1em 方块，量不出「放得下几个字段」。
+          theme: goldenTestTheme(),
+          localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('en'),
-          home: Scaffold(
+          locale: const Locale('en'),
+          home: const Scaffold(
             body: SizedBox(
-              width: 280,
+              // 比 20 位 UID 在该字号下的宽度更窄，省略号才有机会出现。
+              width: 160,
               height: 80,
               child: CreatorProfileItem(creatorProfile: creator),
             ),
@@ -152,6 +156,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: goldenTestTheme(),
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             ...GlobalMaterialLocalizations.delegates,
@@ -172,6 +177,8 @@ void main() {
         find.byType(MetadataLine),
       );
 
+      // 关注数和视频数都必须留下：只断言其中一个，优先级写反了也看不出来。
+      expect(subtitle.renderedText, contains('4.6万'));
       expect(subtitle.renderedText, contains('视频'));
       expect(subtitle.renderedText, isNot(contains('@1320808120')));
       expect(subtitle.textWasClipped, isFalse);

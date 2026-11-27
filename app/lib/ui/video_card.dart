@@ -98,6 +98,13 @@ class const VideoCard({
       final creatorName =
           videoInfoBase.creatorProfileName ??
           (l10n?.unknownCreator ?? 'Unknown');
+      // 没有本地化时 `formattedDate` 为空，但上传日期本身还在：副标题会退回
+      // 显示它，元信息行也必须跟着显示，否则两条信息对不上。
+      final displayDate = formattedDate.isNotEmpty
+          ? formattedDate
+          : (videoInfoBase.uploadDate != null
+                ? '${videoInfoBase.uploadDate}'
+                : '');
       final feedSubtitle = formattedViews.isNotEmpty
           ? (formattedDate.isNotEmpty
                 ? l10n?.viewsWithDate(formattedViews, formattedDate) ?? ''
@@ -117,8 +124,7 @@ class const VideoCard({
             MetadataPart(creatorName, priority: 2),
             if (formattedViews.isNotEmpty)
               MetadataPart(l10n?.viewsCount(formattedViews) ?? '', priority: 3),
-            if (formattedDate.isNotEmpty)
-              MetadataPart(formattedDate, priority: 1),
+            if (displayDate.isNotEmpty) MetadataPart(displayDate, priority: 1),
           ],
         ),
       );
@@ -128,6 +134,11 @@ class const VideoCard({
     final formattedDate = formatRelativeDate(videoInfoBase.uploadDate, l10n);
     final creatorName = videoInfoBase.creatorProfileName;
     final durationStr = formatDuration(videoInfoBase.duration);
+    final displayDate = formattedDate.isNotEmpty
+        ? formattedDate
+        : (videoInfoBase.uploadDate != null
+              ? '${videoInfoBase.uploadDate}'
+              : '');
 
     final subtitleParts = <String>[
       if (creatorName != null && creatorName.isNotEmpty) creatorName,
@@ -148,8 +159,7 @@ class const VideoCard({
               MetadataPart(creatorName, priority: 2),
             if (formattedViews.isNotEmpty)
               MetadataPart(l10n?.viewsCount(formattedViews) ?? '', priority: 3),
-            if (formattedDate.isNotEmpty)
-              MetadataPart(formattedDate, priority: 1),
+            if (displayDate.isNotEmpty) MetadataPart(displayDate, priority: 1),
           ];
 
     final semanticLabelParts = <String?>[

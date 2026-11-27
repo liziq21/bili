@@ -1,7 +1,3 @@
-// 渲染对象的字段要在 `updateRenderObject` 里可变地更新，写不成主构造函数的
-// final 字段；这三条规则只适用于纯赋值式构造。
-// ignore_for_file: prefer_initializing_formals, unnecessary_type_name_in_constructor, use_primary_constructors
-
 import 'package:flutter/semantics.dart' show SemanticsConfiguration;
 import 'package:material_ui/material_ui.dart';
 
@@ -10,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 /// [priority] 越高越重要。一行放不下时，[MetadataLine] 丢掉分值最低的字段，
 /// 而不是把整串文字交给省略号：多个字段拼成一个字符串再截断，被吃掉的总是
 /// 排在末尾的那几个，而它们常常正是读者最需要的数字（#682）。
+@immutable
 class const MetadataPart(final String text, {final int priority = 0});
 
 /// 单行元信息：字段按给定顺序排列，宽度不够时按 [MetadataPart.priority]
@@ -30,16 +27,27 @@ class const MetadataLine({
   required final TextStyle style,
   super.key,
 }) extends LeafRenderObjectWidget {
+  /// 卡片里的 `Text` 会把自身样式合并到环境样式上，量测必须用同一份结果，
+  /// 否则继承来的字体、字距与行高会让预算偏小；系统的「粗体文字」辅助功能
+  /// 也是 `Text` 自己加的，这里照做，否则开启后元信息会比标题细。
+  TextStyle _resolveStyle(BuildContext context) {
+    final resolved = DefaultTextStyle.of(context).style.merge(style);
+    return MediaQuery.boldTextOf(context)
+        ? resolved.merge(const TextStyle(fontWeight: FontWeight.bold))
+        : resolved;
+  }
+
   @override
   RenderMetadataLine createRenderObject(BuildContext context) =>
       RenderMetadataLine(
         parts: parts,
         separator: separator,
-        // 卡片里的 `Text` 会把自身样式合并到环境样式上，量测必须用同一份
-        // 结果，否则继承来的字体、字距与行高会让预算偏小。
-        style: DefaultTextStyle.of(context).style.merge(style),
+        style: _resolveStyle(context),
         textScaler: MediaQuery.textScalerOf(context),
         textDirection: Directionality.of(context),
+        // `Text` 会把应用语言区域交给 `TextPainter` 选字形；CJK 的回退字体
+        // 随语言区域变化，缺了它会和同一屏里的其它文字不一致。
+        locale: Localizations.maybeLocaleOf(context),
       );
 
   @override
@@ -50,25 +58,26 @@ class const MetadataLine({
     renderObject
       ..parts = parts
       ..separator = separator
-      ..style = DefaultTextStyle.of(context).style.merge(style)
+      ..style = _resolveStyle(context)
       ..textScaler = MediaQuery.textScalerOf(context)
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..locale = Localizations.maybeLocaleOf(context);
   }
 }
 
 /// [MetadataLine] 的渲染对象：先按优先级挑出放得下的字段，再按一行排版。
 class RenderMetadataLine extends RenderBox {
+  // 字段要在 `updateRenderObject` 里改写，primary constructor 只能生成 final
+  // 字段，所以这个构造函数只能是普通构造函数（同 `_VerticalDrag` 的处理）。
+  // ignore: use_primary_constructors, unnecessary_type_name_in_constructor
   RenderMetadataLine({
     required List<MetadataPart> parts,
-    required String separator,
-    required TextStyle style,
-    required TextScaler textScaler,
-    required TextDirection textDirection,
-  }) : _visible = _withoutEmpty(parts),
-       _separator = separator,
-       _style = style,
-       _textScaler = textScaler,
-       _textDirection = textDirection;
+    required this._separator,
+    required this._style,
+    required this._textScaler,
+    required this._textDirection,
+    this._locale,
+  }) : _visible = _withoutEmpty(parts);
 
   static List<MetadataPart> _withoutEmpty(List<MetadataPart> parts) =>
       parts.where((part) => part.text.isNotEmpty).toList(growable: false);
@@ -88,16 +97,21 @@ class RenderMetadataLine extends RenderBox {
   TextStyle _style;
   TextScaler _textScaler;
   TextDirection _textDirection;
+  Locale? _locale;
 
+  // 语义标签由 `_visible` 和 `_separator` 拼成，改了它们就得让语义树重算，
+  // 否则屏幕阅读器会继续播报改动前的那一串。
   set parts(List<MetadataPart> value) {
     _visible = _withoutEmpty(value);
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   set separator(String value) {
     if (_separator == value) return;
     _separator = value;
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   set style(TextStyle value) {
@@ -115,6 +129,13 @@ class RenderMetadataLine extends RenderBox {
   set textDirection(TextDirection value) {
     if (_textDirection == value) return;
     _textDirection = value;
+    markNeedsLayout();
+    markNeedsSemanticsUpdate();
+  }
+
+  set locale(Locale? value) {
+    if (_locale == value) return;
+    _locale = value;
     markNeedsLayout();
   }
 
@@ -145,6 +166,7 @@ class RenderMetadataLine extends RenderBox {
       ..text = TextSpan(text: text, style: _style)
       ..textDirection = _textDirection
       ..textScaler = _textScaler
+      ..locale = _locale
       ..ellipsis = _ellipsis
       ..layout(maxWidth: maxWidth);
   }
@@ -185,6 +207,7 @@ class RenderMetadataLine extends RenderBox {
           ),
           textDirection: _textDirection,
           textScaler: _textScaler,
+          locale: _locale,
           maxLines: 1,
           ellipsis: _ellipsis,
         )..layout(

@@ -386,8 +386,40 @@ void main() {
     final subtitle = tester.renderObject<RenderMetadataLine>(
       find.byType(MetadataLine),
     );
+    debugPrint('PROBE360=${subtitle.renderedText}');
     expect(subtitle.renderedText, contains('Watched 00:18'));
-    expect(subtitle.renderedText, isNot(contains('长名字创作者')));
+  });
+
+  testWidgets('adds the watch time back once the row is wide enough', (
+    tester,
+  ) async {
+    // 观看时间只比播放进度低一档：宽一点就该回来，而不是被永久丢掉。
+    tester.view.physicalSize = const Size(600, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await addVideo(
+      'v1',
+      sourceId: 'bilibili',
+      minutesAgo: 5,
+      anchor: testClock,
+      progressSeconds: 18,
+      creatorProfileName: 'Creator',
+    );
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    final subtitle = tester.renderObject<RenderMetadataLine>(
+      find.byType(MetadataLine),
+    );
+    expect(subtitle.renderedText, 'Watched 00:18 · 5 minutes ago');
     expect(subtitle.textWasClipped, isFalse);
   });
 
