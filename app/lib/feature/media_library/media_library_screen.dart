@@ -11,6 +11,7 @@ import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../providers/media_sources_provider.dart';
 import '../../routing/navigation_callbacks.dart';
+import '../../ui/metadata_line.dart';
 import '../../ui/video_card.dart';
 import 'media_history_cubit.dart';
 
@@ -563,10 +564,13 @@ class const _HistoryRow({
                           ),
                         ),
                         SizedBox(height: $styles.insets.xxs),
-                        Text(
-                          _subtitle(video, viewedAtLabel, progressLabel, l10n),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        MetadataLine(
+                          parts: _subtitleParts(
+                            video,
+                            viewedAtLabel,
+                            progressLabel,
+                          ),
+                          separator: l10n?.spacedDot ?? ' - ',
                           style: $styles.text.bodySmall.copyWith(
                             fontSize: 12,
                             color: colorScheme.onSurfaceVariant,
@@ -599,28 +603,28 @@ class const _HistoryRow({
     child: Icon(AppIcons.movie, color: colorScheme.onSurfaceVariant),
   );
 
-  /// 副标题：来源 · 播放进度 · 观看时间
+  /// 副标题字段：来源 · 作者 · 播放进度 · 观看时间
   ///
   /// 历史条目没有播放量（media 表无该列），播放量与上传时间都不适用于「回看」
-  /// 这个语境，因此只留来源、播放进度与观看时间。
-  String _subtitle(
+  /// 这个语境，因此只留来源、作者、播放进度与观看时间。
+  ///
+  /// 优先级与显示顺序分开：一行放不下时先丢作者，再丢来源——作者名常常已经
+  /// 出现在标题里，而「已观看 00:12」和观看时间是这一页存在的理由，不能被
+  /// 省略号吃掉（#682）。
+  List<MetadataPart> _subtitleParts(
     VideoModel video,
     String viewedAt,
     String? progressLabel,
-    AppLocalizations? l10n,
   ) {
     final creator = video.creatorProfileName;
-    final progressParts = switch (progressLabel) {
-      final label? => [label],
-      _ => const <String>[],
-    };
-    final parts = <String>[
-      if (sourceLabel != null && sourceLabel!.isNotEmpty) sourceLabel!,
-      if (creator != null && creator.isNotEmpty) creator,
-      ...progressParts,
-      viewedAt,
+    return [
+      if (sourceLabel != null && sourceLabel!.isNotEmpty)
+        MetadataPart(sourceLabel!, priority: 2),
+      if (creator != null && creator.isNotEmpty)
+        MetadataPart(creator, priority: 1),
+      if (progressLabel != null) MetadataPart(progressLabel, priority: 4),
+      MetadataPart(viewedAt, priority: 3),
     ];
-    return parts.join(l10n?.spacedDot ?? ' - ');
   }
 
   /// Formats saved progress without requiring a duration in the media cache.

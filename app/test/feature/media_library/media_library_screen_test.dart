@@ -7,6 +7,7 @@ import 'package:app/database/dao/media_history_dao.dart';
 import 'package:app/database/table/media.dart';
 import 'package:app/feature/media_library/media_history_cubit.dart';
 import 'package:app/feature/media_library/media_library_screen.dart';
+import 'package:app/ui/metadata_line.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/providers/media_sources_provider.dart';
 import 'package:data/data.dart';
@@ -53,6 +54,7 @@ void main() {
     DateTime? anchor,
     int? progressSeconds,
     bool completed = false,
+    String? creatorProfileName,
   }) async {
     await db.videoDao.insertVideo((
       MediaCompanion(
@@ -60,6 +62,7 @@ void main() {
         originalId: Value(originalId),
         title: Value('Video $originalId'),
         url: Value('https://example.com/$originalId'),
+        creatorProfileName: Value(creatorProfileName),
       ),
       VideoCompanion(duration: Value(BigInt.from(60))),
     ));
@@ -144,6 +147,13 @@ void main() {
     await tester.pump();
   }
 
+  /// 行副标题由 [MetadataLine] 的渲染对象绘制，不是 `Text`，所以只能从渲染
+  /// 对象读出实际排下的文字。
+  List<String> subtitles(WidgetTester tester) => tester
+      .renderObjectList<RenderMetadataLine>(find.byType(MetadataLine))
+      .map((line) => line.renderedText)
+      .toList();
+
   void registerHistoryCleanup(WidgetTester tester, MediaHistoryCubit cubit) {
     addTearDown(() async {
       // Detach the widget listener before canceling the cubit's bounded Drift
@@ -171,7 +181,7 @@ void main() {
     expect(find.textContaining('Video v1'), findsOneWidget);
     // `media` has no view count column, so the row subtitle would read
     // "null views" if it interpolated the missing value.
-    expect(find.textContaining('null'), findsNothing);
+    expect(subtitles(tester).where((text) => text.contains('null')), isEmpty);
   });
 
   testWidgets('load more stays available while the list is still empty', (
@@ -287,10 +297,11 @@ void main() {
 
     // The row subtitle leads with the source display name rather than the raw
     // id: the id is an internal identifier and would mean nothing to a reader.
-    expect(find.text('Bilibili · 5 minutes ago'), findsOneWidget);
-    expect(find.text('Bilibili · 5 hours ago'), findsOneWidget);
-    expect(find.text('Bilibili · 1 day ago'), findsOneWidget);
-    expect(find.textContaining('bilibili'), findsNothing);
+    expect(subtitles(tester), [
+      'Bilibili · 5 minutes ago',
+      'Bilibili · 5 hours ago',
+      'Bilibili · 1 day ago',
+    ]);
   });
 
   testWidgets('falls back to a date once a row is older than a week', (
@@ -315,13 +326,10 @@ void main() {
     expect(find.textContaining('today'), findsNothing);
     // MM-DD inside one year, YYYY-MM-DD across one.
     expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$')
-                .hasMatch(widget.data ?? ''),
+      subtitles(tester).where(
+        (text) => RegExp(r'^Bilibili · (\d{4}-)?\d{2}-\d{2}$').hasMatch(text),
       ),
-      findsOneWidget,
+      hasLength(1),
     );
   });
 
@@ -344,7 +352,43 @@ void main() {
     await settle(cubit);
     await pumpLibrary(tester, cubit);
 
-    expect(find.textContaining('Bilibili · Watched 01:01 · '), findsOneWidget);
+    expect(subtitles(tester).single, startsWith('Bilibili · Watched 01:01 · '));
+  });
+
+  testWidgets('keeps the saved progress when the creator cannot fit', (
+    tester,
+  ) async {
+    // #682：360dp 宽时一行只剩约 190dp，「Bilibili · 作者 · Watched 00:18 ·
+    // 7 分钟前」整串省略，被吃掉的正是播放进度。改成按优先级丢字段后，作者
+    // 名先让位，进度必须完整留在行内。
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await addVideo(
+      'v1',
+      sourceId: 'bilibili',
+      minutesAgo: 5,
+      anchor: testClock,
+      progressSeconds: 18,
+      creatorProfileName: '长名字创作者长名字创作者长名字创作者',
+    );
+
+    final cubit = MediaHistoryCubit(
+      mediaHistoryDao: db.mediaHistoryDao,
+      pageSize: 10,
+    );
+    registerHistoryCleanup(tester, cubit);
+    await settle(cubit);
+    await pumpLibrary(tester, cubit);
+
+    final subtitle = tester.renderObject<RenderMetadataLine>(
+      find.byType(MetadataLine),
+    );
+    expect(subtitle.renderedText, contains('Watched 00:18'));
+    expect(subtitle.renderedText, isNot(contains('长名字创作者')));
+    expect(subtitle.textWasClipped, isFalse);
   });
 
   testWidgets('long-press deletes the row after confirmation', (tester) async {

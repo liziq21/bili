@@ -8,6 +8,7 @@ import '../../l10n/compact_count.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../creator_subscribe_button.dart';
+import '../metadata_line.dart';
 
 class const CreatorProfileItem({
   super.key,
@@ -38,16 +39,21 @@ class const CreatorProfileItem({
     final formattedSubscribers = formatCount(creatorProfile.subscribers, l10n);
     final formattedVideos = formatCount(creatorProfile.videos, l10n);
 
-    final statsParts = <String>[
-      '@${creatorProfile.id}',
+    // 字段顺序与优先级分开：显示顺序是「关注数 · 视频数 · 直播中 · UID」，
+    // 窄卡片上先丢 UID 再丢视频数——UID 对读者最没有信息量，却最长，排在
+    // 首位时会把后面的关注数整段挤掉（#682）。
+    final statsParts = <MetadataPart>[
       if (formattedSubscribers.isNotEmpty)
-        l10n?.subscribersCount(formattedSubscribers) ?? '',
-      if (formattedVideos.isNotEmpty) l10n?.videosCount(formattedVideos) ?? '',
-      if (creatorProfile.isLive == true) l10n?.liveNow ?? '',
+        MetadataPart(
+          l10n?.subscribersCount(formattedSubscribers) ?? '',
+          priority: 4,
+        ),
+      if (formattedVideos.isNotEmpty)
+        MetadataPart(l10n?.videosCount(formattedVideos) ?? '', priority: 2),
+      if (creatorProfile.isLive == true)
+        MetadataPart(l10n?.liveNow ?? '', priority: 3),
+      MetadataPart('@${creatorProfile.id}', priority: 1),
     ];
-    final subtitleText = statsParts.whereType<String>().join(
-      l10n?.spacedBullet ?? ' - ',
-    );
 
     final semanticStatsParts = <String?>[
       if (formattedSubscribers.isNotEmpty)
@@ -133,10 +139,9 @@ class const CreatorProfileItem({
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        subtitleText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      MetadataLine(
+                        parts: statsParts,
+                        separator: l10n?.spacedBullet ?? ' - ',
                         style: TextStyle(
                           fontSize: 11,
                           color: $styles.colors.onSurfaceVariant,
