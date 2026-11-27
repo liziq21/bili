@@ -107,7 +107,7 @@ class const VideoCard({
                 : (videoInfoBase.uploadDate != null
                       ? '${videoInfoBase.uploadDate}'
                       : ''));
-      return _withMoreButton(context, _buildFeedCard(context, feedSubtitle));
+      return _withMoreButton(l10n, _buildFeedCard(context, feedSubtitle));
     }
 
     final formattedViews = formatViewCount(videoInfoBase.viewCount, l10n);
@@ -241,14 +241,14 @@ class const VideoCard({
         ),
       ),
     );
-    return _withMoreButton(context, card);
+    return _withMoreButton(l10n, card);
   }
 
   /// 更多操作按钮浮在封面右上角。放进信息行会把标题挤成两三个字（380 宽下
   /// 实测），浮层不占文字宽度；它留在卡片 `Semantics` 之外，读屏仍能单独聚焦。
-  Widget _withMoreButton(BuildContext context, Widget card) {
+  Widget _withMoreButton(AppLocalizations? l10n, Widget card) {
     if (onMorePressed == null) return card;
-    final label = AppLocalizations.of(context)?.moreOptions ?? 'More options';
+    final label = l10n?.moreOptions ?? 'More options';
     return Stack(
       children: [
         card,
