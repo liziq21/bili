@@ -163,4 +163,60 @@ void main() {
     await pumpLine(tester, width: 100, parts: parts, textScale: 1.5);
     expect(rendered(tester), 'aaaa');
   });
+
+  testWidgets('screen readers get every field, even the dropped ones', (
+    WidgetTester tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+
+    await pumpLine(
+      tester,
+      width: 100,
+      parts: const [
+        MetadataPart('aaaa', priority: 2),
+        MetadataPart('bbbbbbbb', priority: 1),
+      ],
+    );
+
+    expect(rendered(tester), 'aaaa');
+    // 丢字段只是宽度不够时的视觉取舍，语义标签保留完整的一串。
+    final node = tester.getSemantics(find.byType(MetadataLine));
+    expect(node.getSemanticsData().label, 'aaaa|bbbbbbbb');
+    handle.dispose();
+  });
+
+  testWidgets('can be measured by intrinsic-size containers', (
+    WidgetTester tester,
+  ) async {
+    // 卡片也会出现在按固有尺寸测量的容器里（`Table`、`IntrinsicHeight`）。
+    // 用 `LayoutBuilder` 取宽度的实现会在这里直接抛异常。
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 100,
+              child: IntrinsicHeight(
+                child: Row(
+                  children: [
+                    const MetadataLine(
+                      parts: [
+                        MetadataPart('aaaa', priority: 2),
+                        MetadataPart('bbbb', priority: 1),
+                      ],
+                      separator: _separator,
+                      style: _style,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(rendered(tester), 'aaaa|bbbb');
+  });
 }
