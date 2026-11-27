@@ -204,6 +204,7 @@ TEST_MATRIX = {
         'packages/bilibili/bpi/test/bangumi_season_test.dart',
         'packages/bilibili/bpi/test/bili_device_fingerprint_test.dart',
         'packages/bilibili/bpi/test/danmaku_test.dart',
+        'packages/bilibili/bpi/test/danmaku_ws/danmaku_frame_decoder_test.dart',
         'packages/bilibili/bpi/test/danmaku_ws/danmaku_message_test.dart',
         'packages/bilibili/bpi/test/danmaku_ws/packet_test.dart',
         'packages/bilibili/bpi/test/error_interceptor_test.dart',

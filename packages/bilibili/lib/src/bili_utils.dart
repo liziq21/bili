@@ -9,13 +9,20 @@ final RegExp _unsafeBvidChars = RegExp(r'[\x00-\x1F\x7F?#/\\]');
 
 /// Standardizes and secures Bilibili media/asset URLs into valid HTTPS URLs.
 ///
-/// Handles scheme-relative (`//`), unencrypted (`http://`), already secure (`https://`),
-/// and empty/null values safely without producing corrupted scheme prefixes (`https:https://`).
+/// Trims surrounding whitespace, matches the scheme case-insensitively, and
+/// handles scheme-relative (`//`), unencrypted (`http://`), already secure
+/// (`https://`), and empty/null values without producing corrupted scheme
+/// prefixes (`https:https://`). Anything that is not an http(s) URL returns
+/// null, so `ftp:`, `data:`, `javascript:`, and relative paths never reach an
+/// image or player request.
 String? normalizeBiliUrl(String? url) {
-  if (url == null || url.isEmpty) return null;
-  if (url.startsWith('//')) return 'https:$url';
-  if (url.startsWith('http://')) return 'https://${url.substring(7)}';
-  return url;
+  final trimmed = url?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  if (trimmed.startsWith('//')) return 'https:$trimmed';
+  final lower = trimmed.toLowerCase();
+  if (lower.startsWith('https://')) return 'https://${trimmed.substring(8)}';
+  if (lower.startsWith('http://')) return 'https://${trimmed.substring(7)}';
+  return null;
 }
 
 /// Constructs a secure Bilibili video watch URL from a BV id.

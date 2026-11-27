@@ -24,29 +24,72 @@ Map<String, dynamic> loadFake(String key) {
 
 void main() {
   group('normalizeBiliUrl tests', () {
-    test('handles null and empty strings safely', () {
+    const secure = 'https://i0.hdslb.com/bfs/archive/pic.jpg';
+
+    test('handles null, empty, and whitespace-only strings safely', () {
       expect(normalizeBiliUrl(null), isNull);
       expect(normalizeBiliUrl(''), isNull);
+      expect(normalizeBiliUrl('   \r\n\t'), isNull);
     });
 
     test('prefixes scheme-relative URLs with https:', () {
       expect(
         normalizeBiliUrl('//i0.hdslb.com/bfs/archive/pic.jpg'),
-        equals('https://i0.hdslb.com/bfs/archive/pic.jpg'),
+        equals(secure),
+      );
+      expect(
+        normalizeBiliUrl('  //i0.hdslb.com/bfs/archive/pic.jpg  '),
+        equals(secure),
       );
     });
 
     test('converts http:// URLs to https://', () {
       expect(
         normalizeBiliUrl('http://i0.hdslb.com/bfs/archive/pic.jpg'),
-        equals('https://i0.hdslb.com/bfs/archive/pic.jpg'),
+        equals(secure),
       );
     });
 
     test('preserves already secure https:// URLs without duplication', () {
+      expect(normalizeBiliUrl(secure), equals(secure));
+    });
+
+    test('matches the scheme case-insensitively and trims whitespace', () {
       expect(
-        normalizeBiliUrl('https://i0.hdslb.com/bfs/archive/pic.jpg'),
-        equals('https://i0.hdslb.com/bfs/archive/pic.jpg'),
+        normalizeBiliUrl('HTTP://i0.hdslb.com/bfs/archive/pic.jpg'),
+        secure,
+      );
+      expect(
+        normalizeBiliUrl('HtTp://i0.hdslb.com/bfs/archive/pic.jpg'),
+        secure,
+      );
+      expect(
+        normalizeBiliUrl('  http://i0.hdslb.com/bfs/archive/pic.jpg '),
+        secure,
+      );
+      expect(
+        normalizeBiliUrl('HTTPS://i0.hdslb.com/bfs/archive/pic.jpg'),
+        secure,
+      );
+    });
+
+    test('rejects non-http(s) schemes instead of passing them through', () {
+      for (final url in [
+        'ftp://i0.hdslb.com/a.jpg',
+        'data:image/png;base64,AAAA',
+        'javascript:alert(1)',
+        '/bfs/archive/pic.jpg',
+        'i0.hdslb.com/a.jpg',
+      ]) {
+        expect(normalizeBiliUrl(url), isNull, reason: url);
+      }
+    });
+
+    test('never produces a duplicated scheme prefix', () {
+      expect(normalizeBiliUrl(secure), isNot(startsWith('https:https://')));
+      expect(
+        normalizeBiliUrl('http://i0.hdslb.com/a.jpg'),
+        isNot(startsWith('https:https://')),
       );
     });
   });

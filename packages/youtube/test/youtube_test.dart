@@ -302,20 +302,46 @@ void main() {
     });
 
     test('normalizeYoutubeUrl and buildYoutubeWatchUrl tests', () {
+      const secure = 'https://yt3.googleusercontent.com/pic.jpg';
       expect(normalizeYoutubeUrl(null), isNull);
       expect(normalizeYoutubeUrl(''), isNull);
+      expect(normalizeYoutubeUrl('  \r\n\t'), isNull);
       expect(
         normalizeYoutubeUrl('//yt3.googleusercontent.com/pic.jpg'),
-        equals('https://yt3.googleusercontent.com/pic.jpg'),
+        equals(secure),
+      );
+      expect(
+        normalizeYoutubeUrl('  //yt3.googleusercontent.com/pic.jpg  '),
+        equals(secure),
       );
       expect(
         normalizeYoutubeUrl('http://yt3.googleusercontent.com/pic.jpg'),
-        equals('https://yt3.googleusercontent.com/pic.jpg'),
+        equals(secure),
       );
       expect(
         normalizeYoutubeUrl('https://yt3.googleusercontent.com/pic.jpg'),
-        equals('https://yt3.googleusercontent.com/pic.jpg'),
+        equals(secure),
       );
+      expect(
+        normalizeYoutubeUrl('HTTP://yt3.googleusercontent.com/pic.jpg'),
+        equals(secure),
+      );
+      expect(
+        normalizeYoutubeUrl('HtTp://yt3.googleusercontent.com/pic.jpg'),
+        equals(secure),
+      );
+      expect(
+        normalizeYoutubeUrl(' https://yt3.googleusercontent.com/pic.jpg '),
+        equals(secure),
+      );
+      for (final url in [
+        'ftp://yt3.googleusercontent.com/pic.jpg',
+        'data:image/png;base64,AAAA',
+        'javascript:alert(1)',
+        '/pic.jpg',
+      ]) {
+        expect(normalizeYoutubeUrl(url), isNull, reason: url);
+      }
 
       expect(buildYoutubeWatchUrl(null), equals(''));
       expect(buildYoutubeWatchUrl(''), equals(''));
