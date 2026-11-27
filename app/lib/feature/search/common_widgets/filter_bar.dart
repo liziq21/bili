@@ -31,11 +31,16 @@ class const FilterBar({
     // 深拷贝一份数据，避免直接修改 bloc state 里的列表。
     final working = List<FilterGroup>.of(filters);
     final resetValues = defaults ?? filters;
+    // 高度随条件组数量收缩，只在条件多到放不下时才封顶滚动。固定占比会让
+    // 只有一组条件时（例如视频结果只有「视频时长」）条件区下方留出几百
+    // 像素空白。
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.9;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      constraints: BoxConstraints(maxHeight: maxHeight),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -43,34 +48,27 @@ class const FilterBar({
         // 使用 StatefulBuilder 让 BottomSheet 内部支持状态刷新
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              maxChildSize: 0.9,
-              minChildSize: 0.4,
-              expand: false,
-              builder: (_, scrollController) {
-                return Column(
-                  children: [
-                    _buildHeader(context, effectiveTitle),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: working.length,
-                        itemBuilder: (context, index) {
-                          return FilterGroupSection(
-                            group: working[index],
-                            onChanged: (f) => setModalState(() {
-                              working[index] = f;
-                            }), // 刷新面板
-                          );
-                        },
-                      ),
-                    ),
-                    _buildFooter(context, working, resetValues),
-                  ],
-                );
-              },
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(context, effectiveTitle),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: working.length,
+                    itemBuilder: (context, index) {
+                      return FilterGroupSection(
+                        group: working[index],
+                        onChanged: (f) => setModalState(() {
+                          working[index] = f;
+                        }), // 刷新面板
+                      );
+                    },
+                  ),
+                ),
+                _buildFooter(context, working, resetValues),
+              ],
             );
           },
         );
