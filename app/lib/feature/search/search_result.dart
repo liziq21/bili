@@ -14,43 +14,76 @@ class const SearchResult<T>({
 
   final double itemAspectRatio = 1.0,
   final double maxCrossAxisExtent = 200.0,
-}) extends StatelessWidget {
+}) extends StatefulWidget {
+  @override
+  State<SearchResult<T>> createState() => _SearchResultState<T>();
+}
+
+/// 每个 [SearchResult] 实例一份独立的冷却额度：不同 tab、不同搜索路由各自
+/// 计数，不会把别处的拒绝当成自己的上一轮连击。
+int _searchScopeSeq = 0;
+
+class _SearchResultState<T>() extends State<SearchResult<T>> {
+  final int _scopeId = _searchScopeSeq++;
+  String get _firstPageScope => 'search.$_scopeId.first';
+  String get _nextPageScope => 'search.$_scopeId.next';
+
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<
-      SearchResultBloc<T>,
-      SearchResultState<T>,
-      PagingState<int, T>
-    >(
-      selector: (state) => state.pagingState,
-      builder: (context, state) {
-        return CustomScrollView(
-          slivers: [
-            PagedSliverGrid<int, T>(
-              state: state,
-              fetchNextPage: () => context.read<SearchResultBloc<T>>().add(
-                const FetchNextPage(),
-              ),
-              builderDelegate: PagedChildBuilderDelegate(
-                itemBuilder: itemBuilder,
-                firstPageErrorIndicatorBuilder: (context, error) =>
-                    _SearchErrorView<T>(error: error),
-                newPageErrorIndicatorBuilder: (context, error) =>
-                    _NewPageErrorIndicator<T>(error: error),
-                noItemsFoundIndicatorBuilder: (context) =>
-                    const _EmptySearchIndicator(),
-              ),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: maxCrossAxisExtent,
-                mainAxisSpacing: 10.0,
-                crossAxisSpacing: 10.0,
-                // 💡 放弃固定 mainAxisExtent，改用自适应比例
-                childAspectRatio: itemAspectRatio,
-              ),
-            ),
-          ],
-        );
+    return BlocListener<SearchResultBloc<T>, SearchResultState<T>>(
+      listenWhen: (previous, current) {
+        final paging = current.pagingState;
+        return !paging.isLoading &&
+            paging.error == null &&
+            paging.pages.isNotEmpty;
       },
+      // 请求成功后清零：一次成功之后的首次拒绝应从头开始，而不是沿用上一轮。
+      listener: (context, state) {
+        resetRateLimitCooldown(_firstPageScope);
+        resetRateLimitCooldown(_nextPageScope);
+      },
+      child:
+          BlocSelector<
+            SearchResultBloc<T>,
+            SearchResultState<T>,
+            PagingState<int, T>
+          >(
+            selector: (state) => state.pagingState,
+            builder: (context, state) {
+              return CustomScrollView(
+                slivers: [
+                  PagedSliverGrid<int, T>(
+                    state: state,
+                    fetchNextPage: () => context
+                        .read<SearchResultBloc<T>>()
+                        .add(const FetchNextPage()),
+                    builderDelegate: PagedChildBuilderDelegate(
+                      itemBuilder: widget.itemBuilder,
+                      firstPageErrorIndicatorBuilder: (context, error) =>
+                          _SearchErrorView<T>(
+                            error: error,
+                            scope: _firstPageScope,
+                          ),
+                      newPageErrorIndicatorBuilder: (context, error) =>
+                          _NewPageErrorIndicator<T>(
+                            error: error,
+                            scope: _nextPageScope,
+                          ),
+                      noItemsFoundIndicatorBuilder: (context) =>
+                          const _EmptySearchIndicator(),
+                    ),
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: widget.maxCrossAxisExtent,
+                      mainAxisSpacing: 10.0,
+                      crossAxisSpacing: 10.0,
+                      // 💡 放弃固定 mainAxisExtent，改用自适应比例
+                      childAspectRatio: widget.itemAspectRatio,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
     );
   }
 }
@@ -59,8 +92,10 @@ class const SearchResult<T>({
 ///
 /// 搜索的风控窗口里接口会返回 `code: 0` 但只有 `v_voucher`，服务包把它适配成
 /// [RateLimitedFailure]；此时换成限流文案并让重试先冷静一段时间。
-class const _SearchErrorView<T>({required final Object? error})
-    extends StatelessWidget {
+class const _SearchErrorView<T>({
+  required final Object? error,
+  required final String scope,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -86,7 +121,8 @@ class const _SearchErrorView<T>({required final Object? error})
           RetryCooldownButton(
             style: TextButton.styleFrom(),
             rateLimited: rateLimited,
-            scope: 'search.first',
+            scope: scope,
+            failure: error,
             onRetry: () =>
                 context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
           ),
@@ -97,8 +133,10 @@ class const _SearchErrorView<T>({required final Object? error})
 }
 
 /// 翻页加载失败视图：单行可点击重试区域 + 触觉反馈 + 屏幕阅读器语义
-class const _NewPageErrorIndicator<T>({required final Object? error})
-    extends StatelessWidget {
+class const _NewPageErrorIndicator<T>({
+  required final Object? error,
+  required final String scope,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -110,7 +148,8 @@ class const _NewPageErrorIndicator<T>({required final Object? error})
         // 往下翻，只是不能立刻重发同一个被拒的请求。
         child: RetryCooldownInlineButton(
           rateLimited: rateLimited,
-          scope: 'search.next',
+          scope: scope,
+          failure: error,
           onRetry: () =>
               context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
           label: rateLimited

@@ -183,4 +183,113 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('a new rejection after a remount escalates the cooldown', (
+    tester,
+  ) async {
+    // 频道页与创作者档案的错误视图在重试时会被 loading 态替换后重新挂载。
+    // 新挂载带着新的拒绝对象 = 重试后又被拒，冷却必须翻倍，否则「重试」每次
+    // 都重置成基础时长，永远等不到真正冷却结束。
+    const scope = 'test.remountNewRejection';
+    var failure = Exception('limited');
+    Future<void> pumpOnce() => tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: RetryCooldownButton(
+            rateLimited: true,
+            scope: scope,
+            failure: failure,
+            onRetry: () {},
+          ),
+        ),
+      ),
+    );
+
+    await pumpOnce();
+    expect(
+      find.text(
+        AppLocalizationsZh().retryInSeconds(
+          rateLimitRetryBaseCooldown.inSeconds,
+        ),
+      ),
+      findsOneWidget,
+    );
+
+    // 被 loading 态替换 → 带着新的拒绝对象重新挂载。
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+    await tester.pump();
+    failure = Exception('limited again');
+    await pumpOnce();
+    await tester.pump();
+
+    expect(
+      find.text(
+        AppLocalizationsZh().retryInSeconds(
+          rateLimitRetryBaseCooldown.inSeconds * 2,
+        ),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a success reset lets the next rejection start from base', (
+    tester,
+  ) async {
+    // 成功路径（搜索/频道视频监听器）调用 resetRateLimitCooldown。之后的一次
+    // 拒绝必须从基础时长起步，而不是沿用上一轮连击——否则成功一次反而让后续
+    // 的首次拒绝多等。
+    const scope = 'test.successReset';
+    var failure = Exception('first');
+    Future<void> mount() => tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
+        home: Scaffold(
+          body: RetryCooldownButton(
+            rateLimited: true,
+            scope: scope,
+            failure: failure,
+            onRetry: () {},
+          ),
+        ),
+      ),
+    );
+    Future<void> unmount() =>
+        tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+
+    final base = rateLimitRetryBaseCooldown.inSeconds;
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base)),
+      findsOneWidget,
+    );
+
+    await unmount();
+    failure = Exception('second');
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base * 2)),
+      findsOneWidget,
+    );
+
+    // 成功 → 清零连击与记录对象。
+    resetRateLimitCooldown(scope);
+    await unmount();
+    failure = Exception('third');
+    await mount();
+    expect(
+      find.text(AppLocalizationsZh().retryInSeconds(base)),
+      findsOneWidget,
+    );
+  });
 }

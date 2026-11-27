@@ -146,14 +146,17 @@ class _SpaceScreenState() extends State<SpaceScreen> {
     unawaited(_loadSubscription());
   }
 
-  Future<Result<CreatorProfile, Exception>> _loadProfile() {
+  Future<Result<CreatorProfile, Exception>> _loadProfile() async {
     final repository = _repository;
     if (repository == null) {
-      return Future.value(
-        Result.error(Exception('Creator profile source unavailable')),
-      );
+      return Result.error(Exception('Creator profile source unavailable'));
     }
-    return repository.getProfile(widget.mid);
+    final result = await repository.getProfile(widget.mid);
+    if (result is Success) {
+      // 成功后清零该 UP 主的冷却：之后的首次拒绝应从头开始，而不是沿用上一轮。
+      resetRateLimitCooldown('space.profile.${widget.mid}');
+    }
+    return result;
   }
 
   void _retry() {
@@ -207,6 +210,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                   return _ProfileLoadError(
                     onRetry: _retry,
                     error: snapshot.error,
+                    scope: 'space.profile.${widget.mid}',
                   );
                 }
 
@@ -224,6 +228,7 @@ class _SpaceScreenState() extends State<SpaceScreen> {
                   Error(:final error) => _ProfileLoadError(
                     onRetry: _retry,
                     error: error,
+                    scope: 'space.profile.${widget.mid}',
                   ),
                 };
               },
@@ -355,52 +360,63 @@ class const _ChannelVideosGrid({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChannelVideosCubit, PagingState<int, VideoModel>>(
-      builder: (context, state) => CustomScrollView(
-        slivers: [
-          PagedSliverGrid<int, VideoModel>(
-            state: state,
-            fetchNextPage: () =>
-                context.read<ChannelVideosCubit>().fetchNextPage(),
-            builderDelegate: PagedChildBuilderDelegate<VideoModel>(
-              itemBuilder: (context, video, index) => VideoCard(
-                key: ValueKey(video.id),
-                videoInfoBase: video,
-                onTap: onVideo == null ? null : () => onVideo?.call(video.id),
-              ),
-              firstPageProgressIndicatorBuilder: (context) => Center(
-                child: CircularProgressIndicator(
-                  color: $styles.colors.accentFill,
+    return BlocListener<ChannelVideosCubit, PagingState<int, VideoModel>>(
+      listenWhen: (previous, current) =>
+          !current.isLoading &&
+          current.error == null &&
+          current.pages.isNotEmpty,
+      // 请求成功后清零：一次成功之后的首次拒绝应从头开始，而不是沿用上一轮。
+      listener: (context, state) {
+        resetRateLimitCooldown('space.videos.$mid');
+        resetRateLimitCooldown('space.videos.$mid.next');
+      },
+      child: BlocBuilder<ChannelVideosCubit, PagingState<int, VideoModel>>(
+        builder: (context, state) => CustomScrollView(
+          slivers: [
+            PagedSliverGrid<int, VideoModel>(
+              state: state,
+              fetchNextPage: () =>
+                  context.read<ChannelVideosCubit>().fetchNextPage(),
+              builderDelegate: PagedChildBuilderDelegate<VideoModel>(
+                itemBuilder: (context, video, index) => VideoCard(
+                  key: ValueKey(video.id),
+                  videoInfoBase: video,
+                  onTap: onVideo == null ? null : () => onVideo?.call(video.id),
                 ),
+                firstPageProgressIndicatorBuilder: (context) => Center(
+                  child: CircularProgressIndicator(
+                    color: $styles.colors.accentFill,
+                  ),
+                ),
+                firstPageErrorIndicatorBuilder: (context, error) =>
+                    _ChannelSectionError(
+                      error: error,
+                      // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
+                      // 上一个 UP 主的连击次数。
+                      scope: 'space.videos.$mid',
+                      onRetry: () =>
+                          context.read<ChannelVideosCubit>().fetchNextPage(),
+                    ),
+                newPageErrorIndicatorBuilder: (context, error) =>
+                    _ChannelSectionPageError(
+                      error: error,
+                      scope: 'space.videos.$mid.next',
+                      onRetry: () =>
+                          context.read<ChannelVideosCubit>().fetchNextPage(),
+                    ),
+                noItemsFoundIndicatorBuilder: (context) =>
+                    const _ChannelVideosEmpty(),
               ),
-              firstPageErrorIndicatorBuilder: (context, error) =>
-                  _ChannelSectionError(
-                    error: error,
-                    // scope 按 mid 分开：换一个 UP 主就是另一份额度，不能沿用
-                    // 上一个 UP 主的连击次数。
-                    scope: 'space.videos.$mid',
-                    onRetry: () =>
-                        context.read<ChannelVideosCubit>().fetchNextPage(),
-                  ),
-              newPageErrorIndicatorBuilder: (context, error) =>
-                  _ChannelSectionPageError(
-                    error: error,
-                    scope: 'space.videos.$mid.next',
-                    onRetry: () =>
-                        context.read<ChannelVideosCubit>().fetchNextPage(),
-                  ),
-              noItemsFoundIndicatorBuilder: (context) =>
-                  const _ChannelVideosEmpty(),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 200,
+                mainAxisSpacing: $styles.insets.sm,
+                crossAxisSpacing: $styles.insets.sm,
+                // 高度按卡片文字块的预算算，比例写死会随字号变化把标题挤掉。
+                mainAxisExtent: videoCardExtent(context, 200),
+              ),
             ),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 200,
-              mainAxisSpacing: $styles.insets.sm,
-              crossAxisSpacing: $styles.insets.sm,
-              // 高度按卡片文字块的预算算，比例写死会随字号变化把标题挤掉。
-              mainAxisExtent: videoCardExtent(context, 200),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -642,6 +658,7 @@ class const _ChannelPlaylistsEmpty() extends StatelessWidget {
 class const _ProfileLoadError({
   required final VoidCallback onRetry,
   required final Object? error,
+  required final String scope,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -667,7 +684,8 @@ class const _ProfileLoadError({
             SizedBox(height: $styles.insets.xs),
             RetryCooldownButton(
               rateLimited: rateLimited,
-              scope: 'space.profile',
+              scope: scope,
+              failure: error,
               onRetry: onRetry,
             ),
           ],

@@ -13,6 +13,7 @@ import 'package:model/model.dart';
 import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_en.dart';
+import 'package:app/ui/common/rate_limit_retry.dart';
 import 'package:flutter/semantics.dart';
 
 class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
@@ -45,6 +46,26 @@ class TrackingFailingVideoSearchRepository()
   Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
     searchCallCount++;
     return Result.error(Exception('Search error'));
+  }
+}
+
+class const _RateLimited() implements RateLimitedFailure;
+
+/// 每次搜索都返回一个新的限流失败对象，模拟平台每次拒绝都构造新实例。
+class TrackingRateLimitedVideoSearchRepository()
+    implements SearchContentsRepository<VideoModel> {
+  int searchCallCount = 0;
+
+  @override
+  List<FilterGroup> get filters => const [];
+
+  @override
+  List<SortOption> get sortOptions => const [];
+
+  @override
+  Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
+    searchCallCount++;
+    return Result.error(_RateLimited());
   }
 }
 
@@ -275,6 +296,68 @@ void main() {
 
       // Verify search repository was called again for retry
       expect(videoRepo.searchCallCount, 2);
+    },
+  );
+
+  testWidgets(
+    'SearchResultScreen escalates the cooldown after a rejected retry',
+    (tester) async {
+      resetAllRateLimitCooldowns();
+      final videoRepo = TrackingRateLimitedVideoSearchRepository();
+      final creatorRepo = const FakeCreatorProfileSearchRepository();
+
+      final videoBloc = SearchResultBloc<VideoModel>(
+        searchContentsRepository: videoRepo,
+        query: 'keyword',
+      );
+      final creatorBloc = SearchResultBloc<CreatorProfile>(
+        searchContentsRepository: creatorRepo,
+        query: 'keyword',
+      );
+
+      addTearDown(videoBloc.close);
+      addTearDown(creatorBloc.close);
+
+      videoBloc.add(const FetchNextPage());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<SearchResultBloc<VideoModel>>.value(
+                value: videoBloc,
+              ),
+              BlocProvider<SearchResultBloc<CreatorProfile>>.value(
+                value: creatorBloc,
+              ),
+            ],
+            child: SearchResultScreen(query: 'Flutter', onBackClick: () {}),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizationsEn().searchResultTypeVideo));
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizationsEn();
+      final base = rateLimitRetryBaseCooldown.inSeconds;
+      expect(find.text(l10n.retryInSeconds(base)), findsOneWidget);
+
+      // 冷却结束后重试，又被拒：错误视图原地重建，冷却应翻倍，而不是重置回
+      // 基础时长——否则「重试」永远等不到真正的冷却结束。
+      await tester.pump(rateLimitRetryBaseCooldown);
+      final retry = find.byType(FilledButton);
+      expect(retry, findsOneWidget);
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+
+      expect(videoRepo.searchCallCount, 2);
+      expect(find.text(l10n.retryInSeconds(base * 2)), findsOneWidget);
     },
   );
 
