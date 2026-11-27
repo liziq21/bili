@@ -97,6 +97,21 @@ class _FakeChannelVideosRepository(
 VideoModel _video(String id) =>
     VideoModel(id: id, title: 'Video $id', url: 'https://example.com/$id');
 
+/// 每次调用都返回一个新的限流失败对象，模拟平台适配层每次拒绝都构造新实例。
+class _AlwaysRateLimitedVideosRepository() implements ChannelVideosRepository {
+  final List<int> requestedPages = [];
+
+  @override
+  Future<Result<Page<VideoModel>, Exception>> fetchVideos({
+    required String channelId,
+    int page = 1,
+    int pageSize = 30,
+  }) async {
+    requestedPages.add(page);
+    return Result.error(_RateLimited());
+  }
+}
+
 class _FakeChannelPlaylistsRepository(
   final Map<int, Result<Page<PlaylistDetail>, Exception>> responses,
 ) implements ChannelPlaylistsRepository {
@@ -515,6 +530,56 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
     expect(find.text(l10n.retryInSeconds(30)), findsNothing);
+  });
+
+  testWidgets('escalates the channel-videos cooldown after a rejected retry', (
+    tester,
+  ) async {
+    // 频道页的错误视图在重试时被 loading 态替换后重新挂载。平台每次拒绝都
+    // 构造新的异常实例，所以第二次挂载应把冷却翻倍，而不是重置成 15 秒。
+    const profile = CreatorProfile(id: 'creator-1', name: 'CodeCraft');
+    final profileRepository = _FakeCreatorProfileRepository(
+      Result.success(profile),
+    );
+    final videosRepository = _AlwaysRateLimitedVideosRepository();
+    final l10n = AppLocalizationsZh();
+
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<CreatorProfileRepository>.value(
+            value: profileRepository,
+          ),
+          RepositoryProvider<ChannelVideosRepository>.value(
+            value: videosRepository,
+          ),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: SpaceScreen(mid: 'creator-1'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.retryInSeconds(15)), findsOneWidget);
+
+    // 冷却结束后重试，又一次被拒。
+    await tester.pump(const Duration(seconds: 15));
+    final button = find.byType(FilledButton);
+    expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump();
+
+    expect(videosRepository.requestedPages, [1, 1]);
+    expect(find.text(l10n.retryInSeconds(30)), findsOneWidget);
+    expect(find.text(l10n.retryInSeconds(15)), findsNothing);
   });
 
   testWidgets('shows an unsupported message without a videos capability', (

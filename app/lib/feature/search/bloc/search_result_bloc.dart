@@ -3,6 +3,7 @@ import 'package:data/data.dart';
 // ignore: depend_on_referenced_packages
 import 'package:equatable/equatable.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:logging/logging.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/search_contents_repository.dart';
@@ -31,6 +32,8 @@ class SearchResultBloc<T>({
   }
 
   List<FilterGroup> get defaultFilters => searchContentsRepository.filters;
+
+  final _log = Logger('SearchResultBloc');
 
   List<SortOption> get defaultSortOptions =>
       searchContentsRepository.sortOptions;
@@ -70,6 +73,13 @@ class SearchResultBloc<T>({
     final searchQuery = state.searchQuery;
     final result = await searchContentsRepository.search(searchQuery);
     if (generation != _generation) return;
+
+    if (result case Error(:final error)) {
+      _log.warning(
+        'Search failed (query: ${searchQuery.query}, page: ${searchQuery.pageKey})',
+        error,
+      );
+    }
 
     emit(
       state.updatePagingStete(

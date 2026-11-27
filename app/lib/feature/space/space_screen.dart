@@ -668,6 +668,7 @@ class const _ProfileLoadError({
             RetryCooldownButton(
               rateLimited: rateLimited,
               scope: 'space.profile',
+              failure: error,
               onRetry: onRetry,
             ),
           ],

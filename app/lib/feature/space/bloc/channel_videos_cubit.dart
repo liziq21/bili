@@ -1,6 +1,7 @@
 import 'package:data/data.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:logging/logging.dart';
 import 'package:model/model.dart';
 
 import '../../../data/repository/channel_videos_repository.dart';
@@ -15,6 +16,8 @@ class ChannelVideosCubit(
   this : super(PagingState());
 
   static const int _pageSize = 30;
+
+  final _log = Logger('ChannelVideosCubit');
 
   Future<void> fetchNextPage() async {
     if (state.isLoading) return;
@@ -42,6 +45,10 @@ class ChannelVideosCubit(
           ),
         );
       case Error(:final error):
+        _log.warning(
+          'Failed to load channel videos (mid: $_channelId, page: $nextPage)',
+          error,
+        );
         emit(state.copyWith(error: error, isLoading: false));
     }
   }
