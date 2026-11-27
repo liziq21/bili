@@ -246,20 +246,6 @@ class const _VideoHeaderSection() extends StatelessWidget {
       ),
     );
 
-    // Keep each separator with the item that follows it, otherwise Wrap can
-    // leave a dot at the end of a line while the item moves to the next run.
-    Widget withSeparator(Widget child) => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          l10n.dotSeparator,
-          style: TextStyle(color: $styles.colors.outline),
-        ),
-        const Gap(6),
-        child,
-      ],
-    );
-
     final titleStyle = $styles.text.h3.copyWith(
       color: $styles.colors.onSurfaceStrong,
       fontWeight: FontWeight.bold,
@@ -299,28 +285,30 @@ class const _VideoHeaderSection() extends StatelessWidget {
         //
         // 只渲染接口真实给出的字段：缺失的段直接隐藏，而不是填一个看起来
         // 像真数据的示例值——用户无法分辨哪个数字是假的。
+        //
+        // 字段之间只用间距分组，不插「·」：Wrap 按宽度决定换行，任何与字段
+        // 绑在一起的分隔符都会在换行时落到行首或行尾（BV 号换行后行首残留
+        // 一个孤立的「·」）。间距对换行位置不敏感，图标与 chip 底色也足够
+        // 区分相邻字段。
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            for (final (index, item) in _statsOf(
-              l10n,
-              video,
-              header.copyright,
-              statsRow,
-              statsText,
-              chip,
-            ).indexed)
-              if (index == 0) item else withSeparator(item),
-          ],
+          spacing: $styles.insets.xs,
+          runSpacing: $styles.insets.xxs,
+          children: _statsOf(
+            l10n,
+            video,
+            header.copyright,
+            statsRow,
+            statsText,
+            chip,
+          ),
         ),
       ],
     );
   }
 
-  /// 统计行里实际可渲染的段，按「播放 · 弹幕 · 发布时间 · 投稿类型 · BV 号」
-  /// 排序。缺失的段整段不出现，调用方按位置插入分隔点，不会留下孤立的分隔符。
+  /// 统计行里实际可渲染的段，按「播放、弹幕、发布时间、投稿类型、BV 号」
+  /// 排序。缺失的段整段不出现，调用方按顺序平铺，不会留下孤立的分隔符。
   List<Widget> _statsOf(
     AppLocalizations l10n,
     VideoModel video,
