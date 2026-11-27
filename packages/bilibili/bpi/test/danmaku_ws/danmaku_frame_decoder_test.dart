@@ -53,6 +53,22 @@ void main() {
       expect(messages.single.content, 'compressed');
     });
 
+    test('parses sibling compressed frames in one chunk', () {
+      final chunk = [
+        ..._zlibFrame(_messageFrame('first')),
+        ..._zlibFrame(_messageFrame('second')),
+        ..._zlibFrame(_messageFrame('third')),
+        ..._zlibFrame(_messageFrame('fourth')),
+      ];
+      final messages = DanmakuFrameDecoder().add(chunk);
+      expect(messages.map((message) => message.content), [
+        'first',
+        'second',
+        'third',
+        'fourth',
+      ]);
+    });
+
     test('buffers a frame split across two chunks', () {
       final decoder = DanmakuFrameDecoder();
       final frame = _messageFrame('split across chunks');

@@ -9,39 +9,43 @@ import 'packet.dart';
 /// packets, so both the buffered byte count and the compression nesting depth
 /// are capped. Input beyond either cap is dropped instead of allocated, which
 /// keeps a crafted frame from exhausting memory or the call stack.
-class DanmakuFrameDecoder {
-  DanmakuFrameDecoder({this.maxBuffer = 64 * 1024, this.maxDepth = 3});
-
-  final int maxBuffer;
-  final int maxDepth;
-
+class DanmakuFrameDecoder({
+  final int maxBuffer = 64 * 1024,
+  final int maxDepth = 3,
+}) {
   List<int> _buffer = [];
 
   /// Feeds [data] into the decoder and returns the messages it completes.
   List<DanmakuMessage> add(List<int> data) {
     final messages = <DanmakuMessage>[];
-    _feed(data, 0, messages);
+    if (data.length > maxBuffer || _buffer.length + data.length > maxBuffer) {
+      _buffer = [];
+      return messages;
+    }
+    _buffer.addAll(data);
+    _buffer = _drain(_buffer, 0, messages);
     return messages;
   }
 
   /// Drops any partially buffered frame.
   void reset() => _buffer = [];
 
-  void _feed(List<int> data, int depth, List<DanmakuMessage> messages) {
-    if (depth > maxDepth) return;
-    if (data.length > maxBuffer || _buffer.length + data.length > maxBuffer) {
-      _buffer = [];
-      return;
-    }
-    _buffer.addAll(data);
+  /// Parses complete packets from [buffer] and returns the unconsumed bytes.
+  ///
+  /// Only the top-level input keeps a remainder across calls. A decompressed
+  /// body is parsed from its own local buffer, so sibling packets from the
+  /// outer stream never inherit the compressed packet's depth.
+  List<int> _drain(List<int> buffer, int depth, List<DanmakuMessage> messages) {
     while (true) {
+      final WsPacket packet;
+      final List<int> rest;
       try {
-        final (packet, rest) = WsPacket.split(_buffer);
-        _buffer = rest;
-        _handlePacket(packet, depth, messages);
+        (packet, rest) = WsPacket.split(buffer);
       } on FormatException {
-        break;
+        return buffer;
       }
+      buffer = rest;
+      _handlePacket(packet, depth, messages);
     }
   }
 
@@ -54,7 +58,7 @@ class DanmakuFrameDecoder {
       if (depth >= maxDepth) return;
       final decompressed = _decompress(packet.body);
       if (decompressed.isNotEmpty) {
-        _feed(decompressed, depth + 1, messages);
+        _drain(decompressed, depth + 1, messages);
       }
       return;
     }
@@ -78,10 +82,7 @@ class DanmakuFrameDecoder {
 
 /// Collects decompressed bytes but aborts the decoder once its limit is
 /// exceeded, so a compression bomb never materialises in memory.
-class _BoundedByteSink implements Sink<List<int>> {
-  _BoundedByteSink(this._maxBytes);
-
-  final int _maxBytes;
+class _BoundedByteSink(final int _maxBytes) implements Sink<List<int>> {
   final List<int> _bytes = [];
 
   List<int> get bytes => _bytes;
@@ -98,6 +99,4 @@ class _BoundedByteSink implements Sink<List<int>> {
   void close() {}
 }
 
-class _FrameTooLarge implements Exception {
-  const _FrameTooLarge();
-}
+class const _FrameTooLarge() implements Exception;
