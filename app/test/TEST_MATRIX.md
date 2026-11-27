@@ -6,13 +6,13 @@
 
 | 分类 | 文件数 |
 |------|--------|
-| unit | 106 |
+| unit | 107 |
 | widget | 69 |
 | golden | 8 |
 | contract | 14 |
 | integration | 2 |
 | performance | 0 |
-| **合计** | **199** |
+| **合计** | **200** |
 
 ## 分类定义
 
@@ -24,7 +24,7 @@
 - **integration**：跨层组合（app 启动接线、全壳冒烟）
 - **performance**：帧率/耗时基准（当前无文件）
 
-## unit（106）
+## unit（107）
 
 - `app/test/data/local_library_repository_test.dart`
 - `app/test/data/repository/creator_profile_repository_test.dart`
@@ -63,6 +63,7 @@
 - `app/test/feature/video/player/playback_error_test.dart`
 - `app/test/feature/video/probe_test.dart`
 - `app/test/feature/video_bloc_test.dart`
+- `app/test/l10n/compact_count_test.dart`
 - `app/test/layout_breakpoints_test.dart`
 - `app/test/providers/media_sources_provider_test.dart`
 - `app/test/routing/search_focus_controller_test.dart`

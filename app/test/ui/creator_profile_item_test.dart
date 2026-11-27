@@ -10,6 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../flutter_test_config.dart' show clearImageCacheDuringTest;
 
 void main() {
+  test('formatCount keeps the raw count without localizations', () {
+    expect(CreatorProfileItem.formatCount(500), '500');
+    expect(CreatorProfileItem.formatCount(15000), '');
+    expect(CreatorProfileItem.formatCount(null), '');
+  });
+
   testWidgets(
     'CreatorProfileItem renders creator info and accessibility semantics correctly',
     (WidgetTester tester) async {

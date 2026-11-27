@@ -733,8 +733,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a duration from 1 to 1440 minutes.';
 
   @override
-  String countCompactWan(String p1) {
-    return '$p1万';
+  String countCompactKilo(String p1) {
+    return '${p1}K';
   }
 
   @override
@@ -965,8 +965,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceUnavailable => 'Source unavailable';
 
   @override
-  String countCompactYi(String p1) {
-    return '$p1亿';
+  String countCompactMega(String p1) {
+    return '${p1}M';
+  }
+
+  @override
+  String countCompactGiga(String p1) {
+    return '${p1}B';
   }
 
   @override

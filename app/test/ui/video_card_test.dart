@@ -14,6 +14,12 @@ import '../flutter_test_config.dart' show clearImageCacheDuringTest;
 import '../golden/golden_font.dart';
 
 void main() {
+  test('formatViewCount keeps the raw count without localizations', () {
+    expect(VideoCard.formatViewCount(500), '500');
+    expect(VideoCard.formatViewCount(15000), '');
+    expect(VideoCard.formatViewCount(null), '');
+  });
+
   testWidgets(
     'VideoCard renders title and view count correctly without error',
     (WidgetTester tester) async {
@@ -575,7 +581,7 @@ void main() {
 
     final l10n = AppLocalizationsZh();
     final statsText = l10n.viewsWithDate(
-      l10n.countCompactWan('1.0'),
+      l10n.countCompactKilo('1.0'),
       l10n.daysAgo(4),
     );
     const creator = '一个长名字的创作者';
@@ -631,7 +637,7 @@ void main() {
         // 看排版结果：播放量那一段必须完整落在行内。
         _expectPrefixVisible(
           tester.renderObject<RenderParagraph>(find.text(statsText)),
-          l10n.viewsCount(l10n.countCompactWan('1.0')),
+          l10n.viewsCount(l10n.countCompactKilo('1.0')),
         );
 
         await clearImageCacheDuringTest(tester);

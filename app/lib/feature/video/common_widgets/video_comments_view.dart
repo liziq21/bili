@@ -6,19 +6,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 
 import '../../../design/design.dart';
+import '../../../l10n/compact_count.dart';
 import '../../../l10n/localization_file/app_localizations.dart';
 import '../../../main.dart';
 import '../bloc/video_comment_bloc.dart';
 import 'video_failure_panel.dart';
 
 class const VideoCommentsView({super.key}) extends StatelessWidget {
-  static String _formatCount(int count, AppLocalizations? l10n) {
-    if (count >= 10000) {
-      return l10n?.countCompactWan((count / 10000).toStringAsFixed(1)) ??
-          '$count';
-    }
-    return '$count';
-  }
+  static String _formatCount(int count, AppLocalizations? l10n) =>
+      l10n == null ? '$count' : formatCompactCount(count, l10n);
 
   @override
   Widget build(BuildContext context) {

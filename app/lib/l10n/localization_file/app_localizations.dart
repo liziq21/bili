@@ -1352,11 +1352,11 @@ abstract class AppLocalizations {
   /// **'Enter a duration from 1 to 1440 minutes.'**
   String get sleepTimerInvalidDuration;
 
-  /// Compact count unit for values >= 10,000. Kept as the Chinese 万 unit because call sites divide by 10,000 before formatting; an English K/M unit would need a different divisor (tracked separately).
+  /// Compact count unit for values >= 1,000 in English (K) and >= 10,000 in Chinese (Wan). The call site chooses the divisor from the locale.
   ///
   /// In en, this message translates to:
-  /// **'{p1}万'**
-  String countCompactWan(String p1);
+  /// **'{p1}K'**
+  String countCompactKilo(String p1);
 
   /// Comments section - empty state when the source cannot return comments
   ///
@@ -1778,11 +1778,17 @@ abstract class AppLocalizations {
   /// **'Source unavailable'**
   String get sourceUnavailable;
 
-  /// Compact count unit for values >= 100,000,000. Kept as the Chinese 亿 unit because call sites divide by 100,000,000 before formatting; an English K/M unit would need a different divisor (tracked separately).
+  /// Compact count unit for values >= 1,000,000 in English (M) and >= 100,000,000 in Chinese (Yi). The call site chooses the divisor from the locale.
   ///
   /// In en, this message translates to:
-  /// **'{p1}亿'**
-  String countCompactYi(String p1);
+  /// **'{p1}M'**
+  String countCompactMega(String p1);
+
+  /// Compact count unit for values >= 1,000,000,000 in English (B) and >= 1,000,000,000,000 in Chinese (Wan Yi). The call site chooses the divisor from the locale.
+  ///
+  /// In en, this message translates to:
+  /// **'{p1}B'**
+  String countCompactGiga(String p1);
 
   /// Relative time - years ago; {p1} is the number of years
   ///

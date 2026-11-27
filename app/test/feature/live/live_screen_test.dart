@@ -105,6 +105,18 @@ void main() {
     expect(find.textContaining('155266'), findsNothing);
   });
 
+  testWidgets('the viewer count uses K units under the English locale', (
+    tester,
+  ) async {
+    final source = _FakeLiveDataSource()..online = 155266;
+
+    await tester.pumpWidget(_buildScreen(source, locale: const Locale('en')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('155.3K watching'), findsOneWidget);
+    expect(find.textContaining('万'), findsNothing);
+  });
+
   testWidgets('a detail failure shows the category copy, never the exception', (
     tester,
   ) async {

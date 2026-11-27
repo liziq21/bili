@@ -12,8 +12,6 @@ const localeNeutralKeys = {
   'spacedDot', // " · "：分隔符
   'spacedBullet', // " • "：分隔符
   'dotSeparator', // "·"：分隔符
-  'countCompactWan', // {p1}万：调用方已按万换算
-  'countCompactYi', // {p1}亿：调用方已按亿换算
 };
 
 /// 文案只有在两种语言下真的不同，翻译缺失才可见。

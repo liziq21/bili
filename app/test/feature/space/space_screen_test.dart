@@ -178,7 +178,7 @@ void main() {
     expect(find.text('Builds useful videos'), findsOneWidget);
     expect(find.text(l10n.creatorLabel('@creator-1')), findsOneWidget);
     expect(
-      find.text(l10n.subscribersCount(l10n.countCompactWan('1.2'))),
+      find.text(l10n.subscribersCount(l10n.countCompactKilo('1.2'))),
       findsOneWidget,
     );
     expect(find.text(l10n.videosCount('42')), findsOneWidget);
@@ -187,7 +187,7 @@ void main() {
       'CodeCraft',
       l10n.creatorLabel('@creator-1'),
       'Builds useful videos',
-      l10n.subscribersCount(l10n.countCompactWan('1.2')),
+      l10n.subscribersCount(l10n.countCompactKilo('1.2')),
       l10n.videosCount('42'),
     ].join(l10n.commaSeparator);
 

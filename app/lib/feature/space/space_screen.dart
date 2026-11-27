@@ -14,6 +14,7 @@ import '../../data/repository/creator_profile_repository.dart';
 import '../../data/repository/local_library_repository.dart';
 import '../../datastore/preferences_data_source.dart';
 import '../../design/design.dart';
+import '../../l10n/compact_count.dart';
 import '../../l10n/localization_file/app_localizations.dart';
 import '../../main.dart';
 import '../../routing/navigation_callbacks.dart';
@@ -863,12 +864,5 @@ class const _CreatorAvatar({
   }
 }
 
-String _formatCount(int count, AppLocalizations l10n) {
-  if (count >= 100000000) {
-    return l10n.countCompactYi((count / 100000000).toStringAsFixed(1));
-  }
-  if (count >= 10000) {
-    return l10n.countCompactWan((count / 10000).toStringAsFixed(1));
-  }
-  return '$count';
-}
+String _formatCount(int count, AppLocalizations l10n) =>
+    formatCompactCount(count, l10n);

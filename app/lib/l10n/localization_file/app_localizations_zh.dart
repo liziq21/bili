@@ -691,7 +691,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sleepTimerInvalidDuration => '请输入 1 到 1440 分钟之间的时长。';
 
   @override
-  String countCompactWan(String p1) {
+  String countCompactKilo(String p1) {
     return '$p1万';
   }
 
@@ -921,8 +921,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sourceUnavailable => '数据源不可用';
 
   @override
-  String countCompactYi(String p1) {
+  String countCompactMega(String p1) {
     return '$p1亿';
+  }
+
+  @override
+  String countCompactGiga(String p1) {
+    return '$p1万亿';
   }
 
   @override
