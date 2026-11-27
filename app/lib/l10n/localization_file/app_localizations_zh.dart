@@ -962,11 +962,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get unknownCreator => '未知创作者';
 
   @override
-  String creatorWithSubtitle(String p1, String p2) {
-    return '$p1 • $p2';
-  }
-
-  @override
   String get moreOptions => '更多选项';
 
   @override

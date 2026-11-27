@@ -1463,22 +1463,6 @@
   "@unknownCreator": {
     "description": "Video card - fallback name when the creator is unknown"
   },
-  "creatorWithSubtitle": "{p1} • {p2}",
-  "@creatorWithSubtitle": {
-    "description": "Video card - creator name and subtitle; {p1} is the creator, {p2} is the view count and/or date",
-    "placeholders": {
-      "p1": {
-        "type": "String",
-        "example": "creator-1",
-        "description": "Creator name"
-      },
-      "p2": {
-        "type": "String",
-        "example": "1.2K views • 3 days ago",
-        "description": "Subtitle built from the view count and/or the publish date"
-      }
-    }
-  },
   "moreOptions": "更多选项",
   "@moreOptions": {
     "description": "Card and row - more-actions tooltip"
