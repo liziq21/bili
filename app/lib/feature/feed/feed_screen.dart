@@ -18,8 +18,8 @@ import 'widgets/feed_entry_tile.dart';
 /// 订阅动态页：已落库的订阅条目（投稿视频与专栏文章）按频道分组，组可展开/收起。
 ///
 /// 页面只读本地数据（[FeedCubit] 订阅两个 Drift 查询流），远端拉取由
-/// [FeedLoadManager] 在启动与下拉刷新时完成，因此这里没有「加载更多」：
-/// 条目不是分页来的，是增量落库来的。
+/// [FeedLoadManager] 在进入页面、分支重新可见、下拉刷新与应用栏刷新时完成，
+/// 因此这里没有「加载更多」：条目不是分页来的，是增量落库来的。
 class const FeedScreen({
   super.key,
   final VideoNavCallback? onVideo,
@@ -60,79 +60,92 @@ class const FeedScreen({
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        titleSpacing: $styles.insets.sm,
-        title: Text(l10n?.feedTitle ?? 'Subscription feed'),
-      ),
-      body: BlocBuilder<FeedCubit, FeedState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: colorScheme.primary),
-            );
-          }
-          if (state.hasError) {
-            return FeedStatusView.failure(
-              title: l10n?.feedTitle ?? 'Subscription feed',
-              onRetry: () => _onRefresh(context),
-            );
-          }
-          if (!sourceSupportsFeed && state.isEmpty) {
-            return FeedStatusView(
-              icon: AppIcons.feed,
-              message:
-                  l10n?.feedUnsupportedTitle ??
-                  'This source has no subscription feed',
-            );
-          }
-          if (state.isEmpty) {
+    return _RefreshOnVisible(
+      child: Scaffold(
+        appBar: AppBar(
+          titleSpacing: $styles.insets.sm,
+          title: Text(l10n?.feedTitle ?? 'Subscription feed'),
+          actions: [
+            if (sourceSupportsFeed)
+              // 桌面端没有下拉手势，必须给一个可见的刷新入口；数据源没有
+              // feed 能力时刷新没有可加载的内容，按钮隐藏。
+              IconButton(
+                tooltip: l10n?.retry,
+                onPressed: () => unawaited(_onRefresh(context)),
+                icon: const Icon(AppIcons.refresh),
+              ),
+          ],
+        ),
+        body: BlocBuilder<FeedCubit, FeedState>(
+          builder: (context, state) {
+            if (state.isLoading) {
+              return Center(
+                child: CircularProgressIndicator(color: colorScheme.primary),
+              );
+            }
+            if (state.hasError) {
+              return FeedStatusView.failure(
+                title: l10n?.feedTitle ?? 'Subscription feed',
+                onRetry: () => _onRefresh(context),
+              );
+            }
+            if (!sourceSupportsFeed && state.isEmpty) {
+              return FeedStatusView(
+                icon: AppIcons.feed,
+                message:
+                    l10n?.feedUnsupportedTitle ??
+                    'This source has no subscription feed',
+              );
+            }
+            if (state.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: () => _onRefresh(context),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: $styles.insets.xxl),
+                    FeedStatusView(
+                      icon: AppIcons.feed,
+                      message:
+                          l10n?.feedEmptyTitle ?? 'No subscription updates',
+                      description: l10n?.feedEmptyDescription,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final rows = _rowsFor(state);
+
             return RefreshIndicator(
               onRefresh: () => _onRefresh(context),
-              child: ListView(
+              child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: $styles.insets.xxl),
-                  FeedStatusView(
-                    icon: AppIcons.feed,
-                    message: l10n?.feedEmptyTitle ?? 'No subscription updates',
-                    description: l10n?.feedEmptyDescription,
+                padding: EdgeInsets.only(bottom: $styles.insets.lg),
+                itemCount: rows.length,
+                itemBuilder: (context, index) => switch (rows[index]) {
+                  _ChannelRow(:final group) => FeedChannelHeader(
+                    key: ValueKey(group.channelId),
+                    group: group,
+                    expanded: state.isExpanded(group.channelId),
+                    onToggle: () {
+                      HapticFeedback.selectionClick();
+                      context.read<FeedCubit>().toggleChannel(group.channelId);
+                    },
+                    onMarkChannelRead: () => context
+                        .read<FeedCubit>()
+                        .markChannelRead(group.channelId),
                   ),
-                ],
+                  _EntryRow(:final group, :final entry) => FeedEntryTile(
+                    key: ValueKey('${group.channelId}/${entry.entryId}'),
+                    entry: entry,
+                    onTap: () => unawaited(_onEntryTap(context, entry)),
+                  ),
+                },
               ),
             );
-          }
-
-          final rows = _rowsFor(state);
-
-          return RefreshIndicator(
-            onRefresh: () => _onRefresh(context),
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(bottom: $styles.insets.lg),
-              itemCount: rows.length,
-              itemBuilder: (context, index) => switch (rows[index]) {
-                _ChannelRow(:final group) => FeedChannelHeader(
-                  key: ValueKey(group.channelId),
-                  group: group,
-                  expanded: state.isExpanded(group.channelId),
-                  onToggle: () {
-                    HapticFeedback.selectionClick();
-                    context.read<FeedCubit>().toggleChannel(group.channelId);
-                  },
-                  onMarkChannelRead: () => context
-                      .read<FeedCubit>()
-                      .markChannelRead(group.channelId),
-                ),
-                _EntryRow(:final group, :final entry) => FeedEntryTile(
-                  key: ValueKey('${group.channelId}/${entry.entryId}'),
-                  entry: entry,
-                  onTap: () => unawaited(_onEntryTap(context, entry)),
-                ),
-              },
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -148,6 +161,32 @@ class const FeedScreen({
         for (final entry in group.entries) _EntryRow(group, entry),
     ],
   ];
+}
+
+/// 订阅动态分支被 `StatefulShellRoute.indexedStack` 保留：从其他分支切回时
+/// `FeedCubit` 不会重建，构造函数里的首次加载也不会再跑。分支容器用
+/// [TickerMode] 标记可见性，这里监听它由关到开，补一次增量加载。
+class const _RefreshOnVisible({required final Widget child})
+    extends StatefulWidget {
+  @override
+  State<_RefreshOnVisible> createState() => _RefreshOnVisibleState();
+}
+
+class _RefreshOnVisibleState() extends State<_RefreshOnVisible> {
+  bool? _wasVisible;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible = TickerMode.valuesOf(context).enabled;
+    if (_wasVisible == false && visible) {
+      unawaited(context.read<FeedCubit>().refresh());
+    }
+    _wasVisible = visible;
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// 列表中的一行：频道头部或一条条目

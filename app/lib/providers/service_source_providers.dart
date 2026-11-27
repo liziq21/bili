@@ -217,6 +217,7 @@ class _SourceScopeState() extends State<_SourceScope> {
             repository: context.read<FeedRepository>(),
             notifier: context.read<FeedUpdateNotifier>(),
             preferences: context.read<PreferencesDataSource>(),
+            coordinator: context.read<FeedLoadCoordinator?>(),
           ),
         ),
       ],

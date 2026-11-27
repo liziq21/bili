@@ -1,5 +1,8 @@
+import 'package:app/data/repository/feed_repository.dart';
 import 'package:app/database/app_database.dart';
 import 'package:app/database/table/local_library.dart';
+import 'package:app/design/design.dart';
+import 'package:app/domain/feed_load_manager.dart';
 import 'package:app/feature/feed/feed_cubit.dart';
 import 'package:app/feature/feed/feed_screen.dart';
 import 'package:app/feature/feed/widgets/feed_channel_header.dart';
@@ -366,5 +369,86 @@ void main() {
     await settle(tester);
 
     expect(find.text(l10nOf(tester).feedUnsupportedTitle), findsOneWidget);
+    expect(find.byIcon(AppIcons.refresh), findsNothing);
   });
+
+  testWidgets('refreshes when the retained branch becomes visible again', (
+    tester,
+  ) async {
+    final manager = _RecordingFeedLoadManager();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: manager,
+    );
+    addTearDown(feedCubit.close);
+
+    Widget build({required bool visible}) => TickerMode(
+      enabled: visible,
+      child: BlocProvider<FeedCubit>.value(
+        value: feedCubit,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const FeedScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(visible: false));
+    await tester.pump();
+    final loadsOnEntry = manager.loadedSourceIds.length;
+    expect(loadsOnEntry, 1);
+
+    await tester.pumpWidget(build(visible: true));
+    await tester.pump();
+
+    expect(manager.loadedSourceIds.length, loadsOnEntry + 1);
+  });
+
+  testWidgets('the app bar refresh action triggers an incremental load', (
+    tester,
+  ) async {
+    final manager = _RecordingFeedLoadManager();
+    final feedCubit = FeedCubit(
+      feedDao: db.feedDao,
+      libraryDao: db.localLibraryDao,
+      sourceId: 'bilibili',
+      feedLoadManager: manager,
+    );
+    addTearDown(feedCubit.close);
+
+    await tester.pumpWidget(
+      BlocProvider<FeedCubit>.value(
+        value: feedCubit,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const FeedScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // 进入页面已经拉过一次；按钮再触发一次。
+    final loadsBeforeTap = manager.loadedSourceIds.length;
+    expect(find.byIcon(AppIcons.refresh), findsOneWidget);
+
+    await tester.tap(find.byIcon(AppIcons.refresh));
+    await tester.pump();
+
+    expect(manager.loadedSourceIds.length, loadsBeforeTap + 1);
+    expect(manager.loadedSourceIds, everyElement('bilibili'));
+  });
+}
+
+final class _RecordingFeedLoadManager() implements FeedLoadManager {
+  final loadedSourceIds = <String>[];
+
+  @override
+  Future<FeedLoadResult> load({required String sourceId}) async {
+    loadedSourceIds.add(sourceId);
+    return const FeedLoadResult();
+  }
 }
