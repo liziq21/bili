@@ -61,8 +61,14 @@ jobs:
       # not publishable) carries the real data path for on-device diagnosis
       # without adb: with the stream-error fix, a startup failure now shows
       # the actual error text on screen instead of a permanent spinner.
+      # versionCode = run_number * 100 + run_attempt. run_number alone repeats on a
+      # workflow re-run, so the original and the re-run would be indistinguishable;
+      # run_attempt makes every CI build unique. 100 leaves ample headroom for
+      # attempts and stays far below the 2100000000 versionCode ceiling. CI
+      # artifacts are verification-only and never published, so the code does not
+      # need to line up with the release workflow's scheme.
       - name: Build debug APK
-        run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=${{ github.run_number }}
+        run: cd app && flutter build apk --debug --split-per-abi --pub --build-number=$(( ${{ github.run_number }} * 100 + ${{ github.run_attempt }} ))
         env:
           # build.gradle.kts throws at configuration time when no release
           # signing config exists, even for a pure debug build; CI sets this
@@ -77,7 +83,7 @@ jobs:
           path: app/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk
 
       - name: Build release APK (unsigned)
-        run: cd app && flutter build apk --release --split-per-abi --pub --build-number=${{ github.run_number }}
+        run: cd app && flutter build apk --release --split-per-abi --pub --build-number=$(( ${{ github.run_number }} * 100 + ${{ github.run_attempt }} ))
         env:
           BILI_ALLOW_UNSIGNED_RELEASE: "1"
 
