@@ -13,12 +13,24 @@ String formatCompactCount(int count, AppLocalizations l10n) {
     return l10n.countCompactGiga(_scaled(count, giga));
   }
   if (count >= mega) {
-    return l10n.countCompactMega(_scaled(count, mega));
+    final scaled = _scaled(count, mega);
+    if (_roundsToNextUnit(scaled, mega ~/ kilo)) {
+      return l10n.countCompactGiga(_scaled(count, giga));
+    }
+    return l10n.countCompactMega(scaled);
   }
   if (count >= kilo) {
-    return l10n.countCompactKilo(_scaled(count, kilo));
+    final scaled = _scaled(count, kilo);
+    if (_roundsToNextUnit(scaled, mega ~/ kilo)) {
+      return l10n.countCompactMega(_scaled(count, mega));
+    }
+    return l10n.countCompactKilo(scaled);
   }
   return '$count';
 }
 
 String _scaled(int count, int divisor) => (count / divisor).toStringAsFixed(1);
+
+// 999,950 rounds to "1000.0K"; promote it so the unit never overflows.
+bool _roundsToNextUnit(String scaled, int unitsPerTier) =>
+    double.parse(scaled) >= unitsPerTier;

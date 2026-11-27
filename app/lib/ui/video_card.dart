@@ -43,7 +43,8 @@ class const VideoCard({
   }
 
   static String formatViewCount(int? count, [AppLocalizations? l10n]) {
-    if (count == null || l10n == null) return '';
+    if (count == null) return '';
+    if (l10n == null) return count < 10000 ? '$count' : '';
     return formatCompactCount(count, l10n);
   }
 

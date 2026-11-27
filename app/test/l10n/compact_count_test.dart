@@ -24,5 +24,12 @@ void main() {
       expect(formatCompactCount(210000000, zh), '2.1亿');
       expect(formatCompactCount(1000000000000, zh), '1.0万亿');
     });
+
+    test('a value that rounds up is promoted to the next unit', () {
+      expect(formatCompactCount(999999, en), '1.0M');
+      expect(formatCompactCount(999999999, en), '1.0B');
+      expect(formatCompactCount(99999999, zh), '1.0亿');
+      expect(formatCompactCount(999999999999, zh), '1.0万亿');
+    });
   });
 }

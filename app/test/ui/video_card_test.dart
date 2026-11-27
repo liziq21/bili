@@ -14,6 +14,12 @@ import '../flutter_test_config.dart' show clearImageCacheDuringTest;
 import '../golden/golden_font.dart';
 
 void main() {
+  test('formatViewCount keeps the raw count without localizations', () {
+    expect(VideoCard.formatViewCount(500), '500');
+    expect(VideoCard.formatViewCount(15000), '');
+    expect(VideoCard.formatViewCount(null), '');
+  });
+
   testWidgets(
     'VideoCard renders title and view count correctly without error',
     (WidgetTester tester) async {
