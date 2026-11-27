@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -69,6 +70,24 @@ void main() {
       ]);
     });
 
+    test(
+      'drops a malformed packet length instead of blocking later frames',
+      () {
+        final decoder = DanmakuFrameDecoder();
+        final malformed = List<int>.filled(16, 0);
+        expect(decoder.add([...malformed, ..._messageFrame('lost')]), isEmpty);
+        expect(
+          decoder.add(_messageFrame('after reset')).single.content,
+          'after reset',
+        );
+      },
+    );
+
+    test('rejects an oversized chunk without reading its elements', () {
+      final messages = DanmakuFrameDecoder().add(_OversizedProbe());
+      expect(messages, isEmpty);
+    });
+
     test('buffers a frame split across two chunks', () {
       final decoder = DanmakuFrameDecoder();
       final frame = _messageFrame('split across chunks');
@@ -118,4 +137,19 @@ void main() {
       expect(decoder.add(_messageFrame('after')).single.content, 'after');
     });
   });
+}
+
+class _OversizedProbe extends ListBase<int> {
+  @override
+  int get length => 64 * 1024 + 1;
+
+  @override
+  set length(int value) => throw StateError('length must not be set');
+
+  @override
+  int operator [](int index) => throw StateError('elements must not be read');
+
+  @override
+  void operator []=(int index, int value) =>
+      throw StateError('elements must not be written');
 }

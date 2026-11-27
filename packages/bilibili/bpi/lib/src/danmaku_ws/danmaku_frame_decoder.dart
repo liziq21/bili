@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import '../utils/bounded_zlib.dart';
 import 'danmaku_message.dart';
 import 'packet.dart';
 
@@ -37,13 +36,12 @@ class DanmakuFrameDecoder({
   /// outer stream never inherit the compressed packet's depth.
   List<int> _drain(List<int> buffer, int depth, List<DanmakuMessage> messages) {
     while (true) {
-      final WsPacket packet;
-      final List<int> rest;
-      try {
-        (packet, rest) = WsPacket.split(buffer);
-      } on FormatException {
-        return buffer;
-      }
+      if (buffer.length < 16) return buffer;
+      final packetLen = _readU32(buffer, 0);
+      // A bad length would otherwise pin every later frame behind it.
+      if (packetLen < 16 || packetLen > maxBuffer) return [];
+      if (packetLen > buffer.length) return buffer;
+      final (packet, rest) = WsPacket.split(buffer);
       buffer = rest;
       _handlePacket(packet, depth, messages);
     }
@@ -68,35 +66,16 @@ class DanmakuFrameDecoder({
   }
 
   List<int> _decompress(List<int> body) {
-    final sink = _BoundedByteSink(maxBuffer);
     try {
-      final decoder = ZLibDecoder().startChunkedConversion(sink);
-      decoder.add(body);
-      decoder.close();
+      return BoundedZlib.decode(body, maxBytes: maxBuffer);
     } on Object {
       return const [];
     }
-    return sink.bytes;
-  }
-}
-
-/// Collects decompressed bytes but aborts the decoder once its limit is
-/// exceeded, so a compression bomb never materialises in memory.
-class _BoundedByteSink(final int _maxBytes) implements Sink<List<int>> {
-  final List<int> _bytes = [];
-
-  List<int> get bytes => _bytes;
-
-  @override
-  void add(List<int> data) {
-    if (_bytes.length + data.length > _maxBytes) {
-      throw const _FrameTooLarge();
-    }
-    _bytes.addAll(data);
   }
 
-  @override
-  void close() {}
+  int _readU32(List<int> bytes, int offset) =>
+      ((bytes[offset] & 0xFF) << 24) |
+      ((bytes[offset + 1] & 0xFF) << 16) |
+      ((bytes[offset + 2] & 0xFF) << 8) |
+      (bytes[offset + 3] & 0xFF);
 }
-
-class const _FrameTooLarge() implements Exception;

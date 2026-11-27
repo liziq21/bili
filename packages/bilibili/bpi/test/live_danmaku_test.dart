@@ -74,6 +74,20 @@ void main() {
       expect(parsed.payload, isNotEmpty);
     });
 
+    test('rejects a zlib bomb instead of materialising it', () {
+      final compressed = ZLibCodec().encode(List<int>.filled(256 * 1024, 0));
+      final packet = _createTestPacket(
+        Uint8List.fromList(compressed),
+        opCode: 5,
+        ver: 2,
+      );
+
+      expect(
+        () => LiveDanmakuPacket.fromBytes(packet),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('rejects packet with length mismatch', () {
       final packet = LiveDanmakuPacket.createAuthPacket(
         roomId: 123456,

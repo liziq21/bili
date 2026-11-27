@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../../utils/bounded_zlib.dart';
 import 'network_live_room_detail.dart';
 
 /// Bilibili live danmaku WebSocket message types (operation codes).
@@ -82,7 +82,7 @@ final class LiveDanmakuPacket {
         decompressed = body;
         break;
       case 2:
-        decompressed = Uint8List.fromList(ZLibCodec().decode(body));
+        decompressed = Uint8List.fromList(BoundedZlib.decode(body));
         break;
       case 3:
         decompressed = _decodeBrotli(body);
