@@ -1,5 +1,6 @@
 import 'package:app/feature/not_found/not_found_screen.dart';
-import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
+import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,10 +15,11 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: const Locale('en'),
-            home: const NotFoundScreen(uri: sensitiveUri, path: samplePath),
+            home: NotFoundScreen(
+              uri: sensitiveUri,
+              path: samplePath,
+              l10n: AppLocalizationsEn(),
+            ),
           ),
         );
 
@@ -38,10 +40,11 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          home: const NotFoundScreen(uri: dirtyUri, path: dirtyPath),
+          home: NotFoundScreen(
+            uri: dirtyUri,
+            path: dirtyPath,
+            l10n: AppLocalizationsEn(),
+          ),
         ),
       );
 
@@ -52,18 +55,15 @@ void main() {
       expect(find.textContaining('\x07'), findsNothing);
     });
 
-    testWidgets('renders Chinese copy when the locale is zh', (tester) async {
+    testWidgets('renders Chinese copy when AppLocalizations is zh', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            ...GlobalMaterialLocalizations.delegates,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('zh'),
-          home: const NotFoundScreen(
+          home: NotFoundScreen(
             uri: 'https://example.com/missing',
             path: '/missing',
+            l10n: AppLocalizationsZh(),
           ),
         ),
       );

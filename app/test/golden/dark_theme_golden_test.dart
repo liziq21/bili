@@ -2,6 +2,7 @@ import 'package:alchemist/alchemist.dart';
 import 'package:app/app_scaffold.dart';
 import 'package:app/design/design.dart';
 import 'package:app/feature/not_found/not_found_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
 import 'package:app/feature/search/common_widgets/filter_bar.dart';
 import 'package:app/ui/video_card.dart';
 import 'package:data/data.dart';
@@ -89,9 +90,10 @@ void main() {
           // onSurface 的暗色值。
           GoldenTestScenario(
             name: 'not found screen',
-            child: const NotFoundScreen(
+            child: NotFoundScreen(
               uri: 'https://example.com/missing',
               path: '/missing',
+              l10n: AppLocalizationsEn(),
             ),
           ),
           // FilterBar 折叠态：图标色取 $styles.colors，是三个场景里唯一

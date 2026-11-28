@@ -1,6 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:app/feature/not_found/not_found_screen.dart';
-import 'package:app/l10n/localization_file/app_localizations.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,11 +19,6 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: goldenTestTheme(),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            // 基线烤的是英文文案；页面文案已走 l10n，必须固定英文 locale
-            // 才能保持像素与既有基线一致。
-            locale: const Locale('en'),
             home: Scaffold(body: Center(child: widget)),
           ),
         );
@@ -39,26 +34,30 @@ void main() {
         children: [
           GoldenTestScenario(
             name: 'plain uri and path',
-            child: const NotFoundScreen(
+            child: NotFoundScreen(
               uri: 'https://example.com/missing',
               path: '/missing',
+              // 基线烤的是英文文案；注入英文实现而不是装配 l10n delegate。
+              l10n: AppLocalizationsEn(),
             ),
           ),
           // query 参数值必须被遮蔽成 REDACTED：这是 404 页防凭据外泄的唯一
           // 手段，遮蔽失效会直接体现在像素上（token 明文出现）。
           GoldenTestScenario(
             name: 'query params redacted',
-            child: const NotFoundScreen(
+            child: NotFoundScreen(
               uri: 'https://example.com/missing?token=[REDACTED]',
               path: '/missing',
+              l10n: AppLocalizationsEn(),
             ),
           ),
           // 控制字符被 sanitize 剥掉后不应换行或留出空段。
           GoldenTestScenario(
             name: 'control characters stripped',
-            child: const NotFoundScreen(
+            child: NotFoundScreen(
               uri: 'https://example.com/missing\n',
               path: '/missing\nnested',
+              l10n: AppLocalizationsEn(),
             ),
           ),
         ],
