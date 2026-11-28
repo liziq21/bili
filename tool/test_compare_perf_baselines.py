@@ -65,6 +65,23 @@ def write_json(data: dict) -> str:
     return handle.name
 
 
+def baseline_bodies(scenarios: dict) -> dict:
+    """Like ``baseline`` but takes full scenario bodies (duration included)."""
+    data = baseline()
+    data['scenarios'] = scenarios
+    return data
+
+
+def body(runs: list[dict[str, float]], duration: float | None = 20,
+         warmup: float | None = 5) -> dict:
+    scenario: dict = {'runs': runs}
+    if duration is not None:
+        scenario['duration_seconds'] = duration
+    if warmup is not None:
+        scenario['warmup_seconds'] = warmup
+    return scenario
+
+
 class ParseBaselineTest(unittest.TestCase):
     def test_valid_baseline(self) -> None:
         parsed = perf.parse_baseline(baseline())
@@ -228,6 +245,43 @@ class CompareTest(unittest.TestCase):
         with self.assertRaises(perf.BaselineError):
             self.compare(baseline(), baseline(), threshold=-1.0)
 
+    def test_non_finite_threshold_rejected(self) -> None:
+        for value in (math.nan, math.inf):
+            with self.assertRaises(perf.BaselineError):
+                self.compare(baseline(), baseline(), threshold=value)
+
+    def test_exactly_at_threshold_is_not_regression(self) -> None:
+        # 8.0 -> 8.4 is exactly 5%; binary float gives 5.000000000000004.
+        after = baseline({'home_feed_scroll': [run(ui_frame_ms_median=8.4)]})
+        report = self.compare(baseline(), after, threshold=5.0)
+        row = next(r for r in report.rows if r.metric == 'ui_frame_ms_median')
+        self.assertFalse(row.regression)
+
+    def test_slightly_above_threshold_is_regression(self) -> None:
+        after = baseline({'home_feed_scroll': [run(ui_frame_ms_median=8.41)]})
+        report = self.compare(baseline(), after, threshold=5.0)
+        row = next(r for r in report.rows if r.metric == 'ui_frame_ms_median')
+        self.assertTrue(row.regression)
+
+    def test_zero_threshold_flags_any_visible_increase(self) -> None:
+        same = baseline({'home_feed_scroll': [run(ui_frame_ms_median=8.0)]})
+        self.assertFalse(self.compare(baseline(), same, threshold=0.0).has_regression)
+        real = baseline({'home_feed_scroll': [run(ui_frame_ms_median=8.1)]})
+        self.assertTrue(self.compare(baseline(), real, threshold=0.0).has_regression)
+
+    def test_mismatched_duration_rejected(self) -> None:
+        before = baseline_bodies({'home_feed_scroll': body([run()], duration=20)})
+        after = baseline_bodies({'home_feed_scroll': body([run()], duration=40)})
+        with self.assertRaises(perf.BaselineError) as ctx:
+            self.compare(before, after, threshold=5.0)
+        self.assertIn('duration_seconds differs', str(ctx.exception))
+
+    def test_missing_duration_warns(self) -> None:
+        before = baseline_bodies({'home_feed_scroll': body([run()], duration=None)})
+        after = baseline_bodies({'home_feed_scroll': body([run()], duration=None)})
+        report = self.compare(before, after, threshold=5.0)
+        self.assertTrue(any('duration_seconds' in w for w in report.warnings))
+
 
 class RenderTest(unittest.TestCase):
     def report(self):
@@ -289,6 +343,13 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0)
         payload = json.loads(out)
         self.assertFalse(payload['has_regression'])
+
+    def test_exit_two_when_no_scenarios_overlap(self) -> None:
+        before = write_json(baseline({'home_feed_scroll': [run()]}))
+        after = write_json(baseline({'video_danmaku': [run()]}))
+        code, _, err = self.invoke([before, after])
+        self.assertEqual(code, 2)
+        self.assertIn('no scenarios were compared', err)
 
 
 if __name__ == '__main__':

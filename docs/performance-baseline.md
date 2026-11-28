@@ -20,7 +20,7 @@
 | 窗口 | 1280×900，文本缩放 1.0 |
 | 刷新率 | 60 Hz（帧预算 16.67 ms；其他刷新率按 `1000 / hz` 换算） |
 | 构建 | `--profile`，记录 Flutter / Dart 版本与源码 revision |
-| 数据源 | 离线 fixture（固定条目数）；不得依赖真实网络 |
+| 数据源 | 固定数据集（固定条目数/排序）；采集期间不变，前后一致（见[固定数据集](#固定数据集前置条件)） |
 
 移动端请另立目标（记录设备型号、OS、刷新率），但同一对比的两侧不能混用目标。
 
@@ -49,6 +49,15 @@
    | `home_feed_scroll` | 首页「热门视频」两列列表连续滚动 |
    | `video_danmaku` | 视频详情页播放，弹幕浮层开启 |
    | `live_danmaku` | 直播间播放，弹幕浮层开启 |
+
+## 固定数据集（前置条件）
+
+profile 运行默认使用真实数据源与 HTTP 客户端（[`app/lib/main.dart`](../app/lib/main.dart)），仓库目前**没有**内建的离线 fixture 开关。要得到可复现的基线，先固定数据集，二选一：
+
+- 使用本地 fixture 服务，把条目数、来源写入基线备注；
+- 在**仅用于采集的临时分支**上注入固定 `MediaSource` / fake HTTP client（不入库），固定条目数与排序。
+
+无法固定时，只能接受网络数据变化带来的噪声，并在 PR 中记录数据集来源；改动前后必须使用同一数据集。
 
 ## 基线 JSON 结构
 
@@ -91,6 +100,7 @@
 - `build.mode` 必须是 `profile`，否则工具拒绝比较。
 - `runs` 至少 3 条；少于 3 条时工具给出警告（协议要求 ≥3 次以体现波动）。
 - `target` 的 `device` / `os` / `display_refresh_hz` / `viewport` / `text_scale` 在前后两次中必须一致。
+- 同一场景的 `duration_seconds` 在前后两次中必须一致，否则工具拒绝比较；缺失时只给警告（无法确认采样长度一致）。
 - `build.revision` 前后不同是正常的（就是要比较改动前后）；`flutter` / `dart` 默认必须一致，否则工具拒绝比较。
 
 ## 前后对比
@@ -102,7 +112,7 @@ python3 tool/compare_perf_baselines.py before.json after.json
 ```
 
 - 输出每个场景、每个指标的中位数、百分比变化与波动范围；
-- 任一「越低越好」的指标相对基线上升超过 `--threshold`（默认 `5.0`%）即判为回归，退出码 `1`；否则退出码 `0`；输入不合规退出码 `2`。
+- 任一「越低越好」的指标相对基线上升超过 `--threshold`（默认 `5.0`%）即判为回归，退出码 `1`；否则退出码 `0`；输入不合规、目标不兼容或前后没有可配对场景时退出码 `2`。
 - 只比较指定场景：`--scenario home_feed_scroll --scenario live_danmaku`。
 - 机器可读输出：`--json`。
 - 只有在工具链确实不可避免变化时才用 `--allow-toolchain-drift`，并在 PR 中说明。
@@ -114,6 +124,6 @@ python3 tool/compare_perf_baselines.py before.json after.json
 定时巡检（`.jules/bolt-prompt.md`）在无显示、无 GPU、无 Flutter SDK 的 agent 容器内运行，**结构上无法**建立 profile 基线：
 
 - 容器内 `flutter` / `dart` 可能不存在，也没有桌面 / 移动设备；
-- 即使临时装 SDK，也没有可渲染的命名目标，且视频/直播场景依赖真实流，无法离线固化。
+- 即使临时装 SDK，也没有可渲染的命名目标，也没有可注入固定数据集的运行环境；视频/直播场景还依赖真实流。
 
 因此这类运行**只产出工单，不产出实测性能 PR**；边界与产出模板见 `.jules/bolt-prompt.md`。需要实测时，由具备桌面或设备的环境按下文采集，再用 `tool/compare_perf_baselines.py` 对比。

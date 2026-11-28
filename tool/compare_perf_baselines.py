@@ -48,6 +48,9 @@ METRICS: tuple[str, ...] = (
 _TARGET_FIELDS = ('device', 'os', 'display_refresh_hz', 'viewport', 'text_scale')
 _RUN_FIELDS = METRICS
 _MIN_RUNS = 3
+# Absorbs binary floating-point error so a change that is exactly at the
+# threshold (e.g. 8.0 -> 8.4 ms = 5.000000000000004%) is not a regression.
+_THRESHOLD_EPSILON = 1e-9
 
 
 class BaselineError(ValueError):
@@ -62,6 +65,8 @@ class Run:
 @dataclass(frozen=True)
 class Scenario:
     runs: tuple[Run, ...]
+    duration_seconds: float | None = None
+    warmup_seconds: float | None = None
 
     def median(self, metric: str) -> float:
         return float(statistics.median(run.metrics[metric] for run in self.runs))
@@ -127,6 +132,12 @@ def _require_number(value: Any, where: str, *, positive: bool) -> float:
     return number
 
 
+def _optional_number(value: Any, where: str, *, positive: bool) -> float | None:
+    if value is None:
+        return None
+    return _require_number(value, where, positive=positive)
+
+
 def _parse_target(raw: Any) -> Mapping[str, Any]:
     target = _require_mapping(raw, 'target')
     parsed: dict[str, Any] = {
@@ -187,7 +198,16 @@ def _parse_scenarios(raw: Any, warnings: list[str]) -> dict[str, Scenario]:
                     run[metric], f'scenarios.{name}.runs[{index}].{metric}',
                     positive=False)
             runs.append(Run(metrics=metrics))
-        parsed[name] = Scenario(runs=tuple(runs))
+
+        parsed[name] = Scenario(
+            runs=tuple(runs),
+            duration_seconds=_optional_number(
+                scenario.get('duration_seconds'),
+                f'scenarios.{name}.duration_seconds', positive=True),
+            warmup_seconds=_optional_number(
+                scenario.get('warmup_seconds'),
+                f'scenarios.{name}.warmup_seconds', positive=False),
+        )
 
     return parsed
 
@@ -244,14 +264,34 @@ def _delta_percent(before: float, after: float) -> float:
     return (after - before) / before * 100.0
 
 
+def _check_sample_length(name: str, before: Scenario, after: Scenario,
+                         warnings: list[str]) -> None:
+    """Reject known sample-length mismatches so raw counts stay comparable."""
+    before_duration, after_duration = before.duration_seconds, after.duration_seconds
+    if before_duration is not None and after_duration is not None:
+        if abs(before_duration - after_duration) > _THRESHOLD_EPSILON:
+            raise BaselineError(
+                f'scenario {name!r} duration_seconds differs '
+                f'({before_duration:g}s vs {after_duration:g}s); sample the same '
+                f'duration on both sides or frame counts are not comparable')
+    elif before_duration is None and after_duration is None:
+        warnings.append(
+            f'scenario {name!r} does not record duration_seconds; '
+            f'cannot verify both sides sampled the same length')
+    else:
+        warnings.append(
+            f'scenario {name!r} records duration_seconds on only one side; '
+            f'cannot verify both sides sampled the same length')
+
+
 def build_report(before: Baseline, after: Baseline, *,
                  threshold: float,
                  allow_toolchain_drift: bool = False,
                  scenarios: Iterable[str] | None = None) -> Report:
     """Compare two baselines, raising :class:`BaselineError` if incompatible."""
     _check_compatible(before, after, allow_toolchain_drift)
-    if threshold < 0:
-        raise BaselineError('threshold must be >= 0')
+    if not math.isfinite(threshold) or threshold < 0:
+        raise BaselineError('threshold must be finite and >= 0')
 
     selected = set(scenarios) if scenarios else None
     warnings: list[str] = list(before.warnings)
@@ -266,6 +306,7 @@ def build_report(before: Baseline, after: Baseline, *,
             continue
         before_scenario = before.scenarios[name]
         after_scenario = after.scenarios[name]
+        _check_sample_length(name, before_scenario, after_scenario, warnings)
         for metric in METRICS:
             before_value = before_scenario.median(metric)
             after_value = after_scenario.median(metric)
@@ -300,7 +341,7 @@ def build_report(before: Baseline, after: Baseline, *,
 def _is_regression(delta_percent: float, threshold: float) -> bool:
     if math.isinf(delta_percent):
         return True
-    return delta_percent > threshold
+    return delta_percent - threshold > _THRESHOLD_EPSILON
 
 
 def _format_delta(row: Row) -> str:
@@ -388,6 +429,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             scenarios=args.scenarios)
     except BaselineError as error:
         print(f'error: {error}', file=sys.stderr)
+        return 2
+
+    if not report.rows:
+        print(
+            'error: no scenarios were compared; before and after baselines '
+            'share no scenario',
+            file=sys.stderr)
+        for warning in report.warnings:
+            print(f'warning: {warning}', file=sys.stderr)
         return 2
 
     if args.json:
