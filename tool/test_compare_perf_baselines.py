@@ -327,6 +327,12 @@ class CompareTest(unittest.TestCase):
         report = self.compare(before, after, threshold=5.0)
         self.assertTrue(any('duration_seconds' in w for w in report.warnings))
 
+    def test_mismatched_warmup_warns(self) -> None:
+        before = baseline_bodies({'home_feed_scroll': body([run()], warmup=5)})
+        after = baseline_bodies({'home_feed_scroll': body([run()], warmup=10)})
+        report = self.compare(before, after, threshold=5.0)
+        self.assertTrue(any('warmup_seconds differs' in w for w in report.warnings))
+
 
 class RenderTest(unittest.TestCase):
     def report(self):

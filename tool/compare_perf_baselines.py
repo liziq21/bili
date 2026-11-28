@@ -312,6 +312,16 @@ def _check_sample_length(name: str, before: Scenario, after: Scenario,
             f'scenario {name!r} records duration_seconds on only one side; '
             f'cannot verify both sides sampled the same length')
 
+    before_warmup, after_warmup = before.warmup_seconds, after.warmup_seconds
+    if before_warmup is not None and after_warmup is not None:
+        if abs(before_warmup - after_warmup) > _THRESHOLD_EPSILON:
+            warnings.append(
+                f'scenario {name!r} warmup_seconds differs '
+                f'({before_warmup:g}s vs {after_warmup:g}s)')
+    elif (before_warmup is None) != (after_warmup is None):
+        warnings.append(
+            f'scenario {name!r} records warmup_seconds on only one side')
+
 
 def build_report(before: Baseline, after: Baseline, *,
                  threshold: float,
