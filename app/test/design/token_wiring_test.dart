@@ -258,8 +258,8 @@ void main() {
   });
 
   group('长按说明文本（Tooltip）取应用主题', () {
-    /// 挂一个最小 `Tooltip` 并长按弹出，返回弹出的底色与文字样式。
-    Future<(Color?, TextStyle?)> longPressTooltip(
+    /// 挂一个最小 `Tooltip` 并长按弹出，返回弹出层的装饰与文字样式。
+    Future<(BoxDecoration, TextStyle?)> longPressTooltip(
       WidgetTester tester, {
       required Brightness brightness,
     }) async {
@@ -296,26 +296,38 @@ void main() {
             )
             .first,
       );
-      return ((box.decoration as BoxDecoration).color, text.style);
+      return (box.decoration! as BoxDecoration, text.style);
     }
 
     for (final brightness in Brightness.values) {
       testWidgets('Tooltip 底色取 scrim、文字取 onScrim（$brightness）', (tester) async {
         final colors = AppColors(BrandPalette.of(brightness));
-        final (background, style) = await longPressTooltip(
+        final (decoration, style) = await longPressTooltip(
           tester,
           brightness: brightness,
         );
 
         expect(
-          background,
+          decoration.color,
           colors.scrim,
           reason: '长按说明文本是恒深承载面（R2），底色应取 scrim，而不是 Material 默认色',
+        );
+        expect(
+          decoration.borderRadius,
+          BorderRadius.circular(4),
+          reason:
+              'match the fixed 4dp corner radius Material uses for tooltips',
         );
         expect(
           style?.color,
           colors.onScrim,
           reason: '文字应取压在 scrim 之上的 onScrim',
+        );
+        expect(
+          style?.fontSize,
+          appThemeData(colors).textTheme.bodyMedium?.fontSize,
+          reason:
+              'tooltip text follows the theme typography and system font scale',
         );
       });
     }
