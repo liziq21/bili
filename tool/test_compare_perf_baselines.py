@@ -82,6 +82,18 @@ def body(runs: list[dict[str, float]], duration: float | None = 20,
     return scenario
 
 
+def target(**extra) -> dict:
+    value = {
+        'device': 'linux-desktop',
+        'os': 'Debian GNU/Linux 13',
+        'display_refresh_hz': 60,
+        'viewport': '1280x900',
+        'text_scale': 1.0,
+    }
+    value.update(extra)
+    return value
+
+
 class ParseBaselineTest(unittest.TestCase):
     def test_valid_baseline(self) -> None:
         parsed = perf.parse_baseline(baseline())
@@ -126,12 +138,31 @@ class ParseBaselineTest(unittest.TestCase):
         self.assertTrue(any('at least 3' in w for w in parsed.warnings))
 
     def test_median_across_runs(self) -> None:
+        # 10, 20, 90 has median 20 but mean 40, so mean aggregation fails.
         runs = [run(ui_frame_ms_median=10.0),
                 run(ui_frame_ms_median=20.0),
-                run(ui_frame_ms_median=30.0)]
+                run(ui_frame_ms_median=90.0)]
         parsed = perf.parse_baseline(baseline({'home_feed_scroll': runs}))
         self.assertEqual(parsed.scenarios['home_feed_scroll'].median('ui_frame_ms_median'), 20.0)
-        self.assertEqual(parsed.scenarios['home_feed_scroll'].spread('ui_frame_ms_median'), 20.0)
+        self.assertEqual(parsed.scenarios['home_feed_scroll'].spread('ui_frame_ms_median'), 80.0)
+
+    def test_fractional_missed_frames_rejected(self) -> None:
+        data = baseline({'home_feed_scroll': [run(missed_frames=2.5)]})
+        with self.assertRaises(perf.BaselineError) as ctx:
+            perf.parse_baseline(data)
+        self.assertIn('integer', str(ctx.exception))
+
+    def test_out_of_range_number_rejected(self) -> None:
+        data = baseline({'home_feed_scroll': [run(missed_frames=10 ** 400)]})
+        with self.assertRaises(perf.BaselineError) as ctx:
+            perf.parse_baseline(data)
+        self.assertIn('out of range', str(ctx.exception))
+
+    def test_scenario_name_with_control_chars_rejected(self) -> None:
+        data = baseline()
+        data['scenarios'] = {'home\x1b[31m': data['scenarios']['home_feed_scroll']}
+        with self.assertRaises(perf.BaselineError):
+            perf.parse_baseline(data)
 
 
 class CompareTest(unittest.TestCase):
@@ -207,6 +238,20 @@ class CompareTest(unittest.TestCase):
         report = self.compare(
             baseline(), after, threshold=5.0, allow_toolchain_drift=True)
         self.assertFalse(report.has_regression)
+        self.assertTrue(any('allow-toolchain-drift' in w for w in report.warnings))
+
+    def test_hardware_mismatch_rejected(self) -> None:
+        before = baseline(target=target(hardware='cpu+gpu A'))
+        after = baseline(target=target(hardware='cpu+gpu B'))
+        with self.assertRaises(perf.BaselineError) as ctx:
+            self.compare(before, after, threshold=5.0)
+        self.assertIn('hardware differs', str(ctx.exception))
+
+    def test_hardware_on_one_side_warns(self) -> None:
+        before = baseline(target=target(hardware='cpu+gpu A'))
+        after = baseline()
+        report = self.compare(before, after, threshold=5.0)
+        self.assertTrue(any('hardware' in w for w in report.warnings))
 
     def test_scenario_filter(self) -> None:
         before = baseline({
@@ -294,6 +339,7 @@ class RenderTest(unittest.TestCase):
         table = perf.format_table(self.report())
         self.assertIn('REGRESSION', table)
         self.assertIn('FAIL', table)
+        self.assertNotIn('PASS', table)
 
     def test_json_has_no_infinity(self) -> None:
         before = baseline({'home_feed_scroll': [run(missed_frames=0)]})
@@ -320,6 +366,8 @@ class CliTest(unittest.TestCase):
         code, out, _ = self.invoke([before, after])
         self.assertEqual(code, 0)
         self.assertIn('PASS', out)
+        self.assertNotIn('REGRESSION', out)
+        self.assertNotIn('FAIL', out)
 
     def test_exit_one_on_regression(self) -> None:
         before = write_json(baseline())
@@ -350,6 +398,14 @@ class CliTest(unittest.TestCase):
         code, _, err = self.invoke([before, after])
         self.assertEqual(code, 2)
         self.assertIn('no scenarios were compared', err)
+
+    def test_exit_two_on_invalid_utf8(self) -> None:
+        handle = tempfile.NamedTemporaryFile('wb', suffix='.json', delete=False)
+        with handle:
+            handle.write(b'\xff\xfe\x00')
+        code, _, err = self.invoke([handle.name, handle.name])
+        self.assertEqual(code, 2)
+        self.assertIn('cannot read', err)
 
 
 if __name__ == '__main__':

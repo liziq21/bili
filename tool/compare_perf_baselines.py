@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import statistics
 import sys
 from dataclasses import dataclass
@@ -51,6 +52,9 @@ _MIN_RUNS = 3
 # Absorbs binary floating-point error so a change that is exactly at the
 # threshold (e.g. 8.0 -> 8.4 ms = 5.000000000000004%) is not a regression.
 _THRESHOLD_EPSILON = 1e-9
+# Scenario keys are printed to the terminal, so keep them free of control
+# characters (ANSI escapes, newlines) that could spoof the comparison output.
+_SCENARIO_NAME_RE = re.compile(r'^[A-Za-z0-9_.-]{1,64}$')
 
 
 class BaselineError(ValueError):
@@ -120,12 +124,18 @@ def _require_str(mapping: Mapping[str, Any], key: str, where: str) -> str:
     return value
 
 
-def _require_number(value: Any, where: str, *, positive: bool) -> float:
+def _require_number(value: Any, where: str, *, positive: bool,
+                    integer: bool = False) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise BaselineError(f'{where} must be a number')
-    number = float(value)
+    try:
+        number = float(value)
+    except OverflowError as error:
+        raise BaselineError(f'{where} is out of range') from error
     if not math.isfinite(number):
         raise BaselineError(f'{where} must be finite')
+    if integer and not float(value).is_integer():
+        raise BaselineError(f'{where} must be an integer')
     if number < 0 or (positive and number == 0):
         comparator = '> 0' if positive else '>= 0'
         raise BaselineError(f'{where} must be {comparator}')
@@ -149,6 +159,9 @@ def _parse_target(raw: Any) -> Mapping[str, Any]:
         'text_scale': _require_number(
             target.get('text_scale'), 'target.text_scale', positive=True),
     }
+    hardware = target.get('hardware')
+    if hardware is not None:
+        parsed['hardware'] = _require_str(target, 'hardware', 'target')
     return parsed
 
 
@@ -175,8 +188,9 @@ def _parse_scenarios(raw: Any, warnings: list[str]) -> dict[str, Scenario]:
 
     parsed: dict[str, Scenario] = {}
     for name, body in scenarios.items():
-        if not isinstance(name, str) or not name:
-            raise BaselineError('scenario names must be non-empty strings')
+        if not isinstance(name, str) or not _SCENARIO_NAME_RE.match(name):
+            raise BaselineError(
+                f'scenario name {name!r} must match {_SCENARIO_NAME_RE.pattern}')
         scenario = _require_mapping(body, f'scenarios.{name}')
         runs_raw = scenario.get('runs')
         if not isinstance(runs_raw, list) or not runs_raw:
@@ -196,7 +210,7 @@ def _parse_scenarios(raw: Any, warnings: list[str]) -> dict[str, Scenario]:
                         f'scenarios.{name}.runs[{index}] is missing {metric}')
                 metrics[metric] = _require_number(
                     run[metric], f'scenarios.{name}.runs[{index}].{metric}',
-                    positive=False)
+                    positive=False, integer=(metric == 'missed_frames'))
             runs.append(Run(metrics=metrics))
 
         parsed[name] = Scenario(
@@ -233,7 +247,7 @@ def load_baseline(path: str | Path) -> Baseline:
     """Read and validate a baseline file."""
     try:
         text = Path(path).read_text(encoding='utf-8')
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         raise BaselineError(f'cannot read {path}: {error}') from error
     try:
         data = json.loads(text)
@@ -243,12 +257,21 @@ def load_baseline(path: str | Path) -> Baseline:
 
 
 def _check_compatible(before: Baseline, after: Baseline,
-                      allow_toolchain_drift: bool) -> None:
+                      allow_toolchain_drift: bool,
+                      warnings: list[str]) -> None:
     for field in _TARGET_FIELDS:
         if before.target[field] != after.target[field]:
             raise BaselineError(
                 f'target.{field} differs ({before.target[field]!r} vs '
                 f'{after.target[field]!r}); capture both sides on the same target')
+    before_hw = before.target.get('hardware')
+    after_hw = after.target.get('hardware')
+    if before_hw is not None and after_hw is not None and before_hw != after_hw:
+        raise BaselineError(
+            f'target.hardware differs ({before_hw!r} vs {after_hw!r}); '
+            f'capture both sides on the same machine')
+    if (before_hw is None) != (after_hw is None):
+        warnings.append('target.hardware is recorded on only one side')
     if not allow_toolchain_drift:
         for field in ('flutter', 'dart'):
             if before.build[field] != after.build[field]:
@@ -256,6 +279,12 @@ def _check_compatible(before: Baseline, after: Baseline,
                     f'build.{field} differs ({before.build[field]!r} vs '
                     f'{after.build[field]!r}); re-capture or pass '
                     f'--allow-toolchain-drift and explain it in the PR')
+    else:
+        for field in ('flutter', 'dart'):
+            if before.build[field] != after.build[field]:
+                warnings.append(
+                    f'build.{field} differs ({before.build[field]} vs '
+                    f'{after.build[field]}); allowed by --allow-toolchain-drift')
 
 
 def _delta_percent(before: float, after: float) -> float:
@@ -289,13 +318,13 @@ def build_report(before: Baseline, after: Baseline, *,
                  allow_toolchain_drift: bool = False,
                  scenarios: Iterable[str] | None = None) -> Report:
     """Compare two baselines, raising :class:`BaselineError` if incompatible."""
-    _check_compatible(before, after, allow_toolchain_drift)
+    warnings: list[str] = list(before.warnings)
+    warnings.extend(w for w in after.warnings if w not in warnings)
+    _check_compatible(before, after, allow_toolchain_drift, warnings)
     if not math.isfinite(threshold) or threshold < 0:
         raise BaselineError('threshold must be finite and >= 0')
 
     selected = set(scenarios) if scenarios else None
-    warnings: list[str] = list(before.warnings)
-    warnings.extend(w for w in after.warnings if w not in warnings)
     rows: list[Row] = []
 
     for name in before.scenarios:

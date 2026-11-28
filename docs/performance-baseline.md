@@ -7,7 +7,7 @@
 ## 目的与范围
 
 - 目标：在改动前后用**同一场景、同一目标**对比 UI/raster 帧时长与丢帧数，用测量结论而非成本估算支撑 `⚡ Bolt:` 性能 PR。
-- 指标必须匹配主张：卡顿看帧时长与丢帧数，内存看指定生命周期点的分配/常驻内存。
+- 本流程与 `tool/compare_perf_baselines.py` **只比较帧时长与丢帧**。内存（分配/常驻）需另行用 DevTools Memory 在指定生命周期点采集并在 PR 记录，本工具不比较内存，不得用本流程支撑内存主张。
 - debug 构建与 widget 测试的耗时**不能**作为性能证据。`flutter test`（含 golden）跑在 debug/JIT，`flutter_tester` 的耗时与真机 profile 无关。
 
 ## 命名目标
@@ -17,7 +17,8 @@
 | 项 | 约定 |
 | -- | -- |
 | 目标 | Linux 桌面，`flutter run -d linux --profile`（从 `app/` 运行） |
-| 窗口 | 1280×900，文本缩放 1.0 |
+| 设备标识 | `device` 必须唯一标识**物理机器**（如 hostname），`target.hardware` 记录 CPU/GPU，前后必须一致 |
+| 窗口 | 1280×900，文本缩放 1.0，采集前确认实际尺寸 |
 | 刷新率 | 60 Hz（帧预算 16.67 ms；其他刷新率按 `1000 / hz` 换算） |
 | 构建 | `--profile`，记录 Flutter / Dart 版本与源码 revision |
 | 数据源 | 固定数据集（固定条目数/排序）；采集期间不变，前后一致（见[固定数据集](#固定数据集前置条件)） |
@@ -33,16 +34,17 @@
    (cd app && flutter run -d linux --profile)
    ```
 
-3. 每个场景先**预热**（例如 5 秒滚动 / 播放）再开始采样，固定交互序列与缓存状态（冷 / 热）。
-4. 每个场景**至少重复 3 次**（同一时长或交互次数）。每次记录：
+3. 把窗口固定为 1280×900 并确认实际尺寸（例如 `wmctrl -r :ACTIVE: -e 0,0,0,1280,900`，或用 DevTools 读取 `MediaQuery.sizeOf`）；尺寸不符时测量结果不可比。
+4. 每个场景先**预热**（例如 5 秒滚动 / 播放）再开始采样，固定交互序列与缓存状态（冷 / 热）。
+5. 每个场景**至少重复 3 次**（同一时长或交互次数）。每次记录：
 
    - `ui_frame_ms_median`、`ui_frame_ms_p90`：UI 线程帧时长（ms）；
    - `raster_frame_ms_median`、`raster_frame_ms_p90`：raster 线程帧时长（ms）；
-   - `missed_frames`：超过帧预算（60 Hz 为 16.67 ms）的帧数。
+   - `missed_frames`：超过帧预算（60 Hz 为 16.67 ms）的帧数（整数）。
 
    用 DevTools 的 Performance / Timeline 视图或 `flutter run --profile` 的 VM service timeline 采集，取中位数与 p90，不用平均值掩盖尾部。
 
-5. 场景（三选一或全部，按改动热点选择）：
+6. 场景（三选一或全部，按改动热点选择）：
 
    | 键 | 交互 |
    | -- | -- |
@@ -57,7 +59,7 @@ profile 运行默认使用真实数据源与 HTTP 客户端（[`app/lib/main.dar
 - 使用本地 fixture 服务，把条目数、来源写入基线备注；
 - 在**仅用于采集的临时分支**上注入固定 `MediaSource` / fake HTTP client（不入库），固定条目数与排序。
 
-无法固定时，只能接受网络数据变化带来的噪声，并在 PR 中记录数据集来源；改动前后必须使用同一数据集。
+列表数据固定即可；`video_danmaku` / `live_danmaku` 还需要一个**可访问的固定播放流 URL**（允许网络），把该 URL 一并记入基线，前后必须一致。无法固定时，只能接受网络数据变化带来的噪声，并在 PR 中记录数据集来源；改动前后必须使用同一数据集。
 
 ## 基线 JSON 结构
 
@@ -67,7 +69,8 @@ profile 运行默认使用真实数据源与 HTTP 客户端（[`app/lib/main.dar
 {
   "schema_version": 1,
   "target": {
-    "device": "linux-desktop",
+    "device": "workstation-01",
+    "hardware": "AMD Ryzen 7 5800X / AMD RX 6700 XT",
     "os": "Debian GNU/Linux 13",
     "display_refresh_hz": 60,
     "viewport": "1280x900",
@@ -99,7 +102,8 @@ profile 运行默认使用真实数据源与 HTTP 客户端（[`app/lib/main.dar
 
 - `build.mode` 必须是 `profile`，否则工具拒绝比较。
 - `runs` 至少 3 条；少于 3 条时工具给出警告（协议要求 ≥3 次以体现波动）。
-- `target` 的 `device` / `os` / `display_refresh_hz` / `viewport` / `text_scale` 在前后两次中必须一致。
+- `missed_frames` 必须是整数；场景键只允许字母、数字、`_`、`.`、`-`（会打印到终端）。
+- `target` 的 `device` / `os` / `display_refresh_hz` / `viewport` / `text_scale` 在前后两次中必须一致；`device` 须唯一标识物理机器，`hardware`（CPU/GPU）可选但两侧都记录时必须一致。
 - 同一场景的 `duration_seconds` 在前后两次中必须一致，否则工具拒绝比较；缺失时只给警告（无法确认采样长度一致）。
 - `build.revision` 前后不同是正常的（就是要比较改动前后）；`flutter` / `dart` 默认必须一致，否则工具拒绝比较。
 
