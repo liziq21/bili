@@ -46,10 +46,14 @@ class _SearchResultState<T>() extends State<SearchResult<T>> {
           BlocSelector<
             SearchResultBloc<T>,
             SearchResultState<T>,
-            PagingState<int, T>
+            ({PagingState<int, T> pagingState, bool refreshing})
           >(
-            selector: (state) => state.pagingState,
-            builder: (context, state) {
+            selector: (state) => (
+              pagingState: state.pagingState,
+              refreshing: state.pendingRefresh,
+            ),
+            builder: (context, data) {
+              final state = data.pagingState;
               return CustomScrollView(
                 slivers: [
                   PagedSliverGrid<int, T>(
@@ -68,6 +72,7 @@ class _SearchResultState<T>() extends State<SearchResult<T>> {
                           _NewPageErrorIndicator<T>(
                             error: error,
                             scope: _nextPageScope,
+                            refreshing: data.refreshing,
                           ),
                       noItemsFoundIndicatorBuilder: (context) =>
                           const _EmptySearchIndicator(),
@@ -136,6 +141,7 @@ class const _SearchErrorView<T>({
 class const _NewPageErrorIndicator<T>({
   required final Object? error,
   required final String scope,
+  final bool refreshing = false,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -154,6 +160,8 @@ class const _NewPageErrorIndicator<T>({
               context.read<SearchResultBloc<T>>().add(const FetchNextPage()),
           label: rateLimited
               ? l10n.rateLimitedRetryLater
+              : refreshing
+              ? l10n.refreshFailedRetry
               : l10n.moreLoadFailedRetry,
         ),
       ),

@@ -7,13 +7,16 @@ final class const SearchResultState<T>({
   final List<FilterGroup> filters = const [],
   final List<SortOption> sortOption = const [],
   final SortOption? currentSort,
+  final bool pendingRefresh = false,
   required final PagingState<int, T> pagingState,
 }) extends Equatable {
+  /// 待刷新时固定回第一页：排序/筛选变化后即使首屏请求失败，重试也必须重跑
+  /// 第 1 页，而不是沿着旧结果翻到下一页。
   SearchQuery get searchQuery => .new(
     query: query,
     sortOption: currentSort,
     filters: filters,
-    pageKey: pagingState.nextIntPageKey,
+    pageKey: pendingRefresh ? 1 : pagingState.nextIntPageKey,
   );
 
   SearchResultState<T> toLoading() {
@@ -36,6 +39,7 @@ final class const SearchResultState<T>({
     filters,
     sortOption,
     currentSort,
+    pendingRefresh,
     pagingState,
   ];
 
@@ -44,6 +48,7 @@ final class const SearchResultState<T>({
     List<FilterGroup>? filters,
     List<SortOption>? sortOption,
     Object? currentSort = _unset,
+    bool? pendingRefresh,
     PagingState<int, T>? pagingState,
   }) => SearchResultState<T>(
     query: query ?? this.query,
@@ -52,6 +57,7 @@ final class const SearchResultState<T>({
     currentSort: identical(currentSort, _unset)
         ? this.currentSort
         : currentSort as SortOption?,
+    pendingRefresh: pendingRefresh ?? this.pendingRefresh,
     pagingState: pagingState ?? this.pagingState,
   );
 }

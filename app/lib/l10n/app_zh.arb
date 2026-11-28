@@ -432,6 +432,10 @@
   "@moreLoadFailedRetry": {
     "description": "Paginated list - footer shown when loading the next page failed"
   },
+  "refreshFailedRetry": "加载失败，重试",
+  "@refreshFailedRetry": {
+    "description": "Search results - footer shown when re-searching after a sort or filter change failed"
+  },
   "nothingFound": "未找到内容",
   "@nothingFound": {
     "description": "Search - empty state when the query returns no results"

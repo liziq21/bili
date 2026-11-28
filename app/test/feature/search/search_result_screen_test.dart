@@ -14,7 +14,9 @@ import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_en.dart';
 import 'package:app/ui/common/rate_limit_retry.dart';
+import 'package:bilibili/bilibili.dart';
 import 'package:flutter/semantics.dart';
+import 'package:youtube/youtube.dart';
 
 class const FakeVideoSearchRepository({final List<VideoModel> items = const []})
     implements SearchContentsRepository<VideoModel> {
@@ -66,6 +68,32 @@ class TrackingRateLimitedVideoSearchRepository()
   Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
     searchCallCount++;
     return Result.error(_RateLimited());
+  }
+}
+
+class _RefreshRateLimitedVideoSearchRepository()
+    implements SearchContentsRepository<VideoModel> {
+  int searchCallCount = 0;
+
+  @override
+  List<FilterGroup> get filters => const [VideoDurationFilter()];
+
+  @override
+  List<SortOption> get sortOptions => PhotoOrVideoSearchSort.values;
+
+  @override
+  Future<PagedResult<VideoModel>> search(SearchQuery searchQuery) async {
+    searchCallCount++;
+    if (searchCallCount > 1) return Result.error(const _RateLimited());
+    return Result.success(
+      Page<VideoModel>(
+        data: const [
+          VideoModel(id: 'old', title: 'old result', url: 'https://old'),
+        ],
+        number: 1,
+        totalPages: 1,
+      ),
+    );
   }
 }
 
@@ -719,5 +747,57 @@ void main() {
 
     expect(opened, ['42']);
     semantics.dispose();
+  });
+
+  testWidgets('a rejected sort refresh keeps the previous results on screen', (
+    tester,
+  ) async {
+    resetAllRateLimitCooldowns();
+    final videoRepo = _RefreshRateLimitedVideoSearchRepository();
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: videoRepo,
+      query: 'keyword',
+    );
+    addTearDown(videoBloc.close);
+    videoBloc.add(const FetchNextPage());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+          YoutubeLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: BlocProvider<SearchResultBloc<VideoModel>>.value(
+          value: videoBloc,
+          child: const SearchResultScreen(query: 'keyword'),
+        ),
+      ),
+    );
+    await _pumpUntil(
+      tester,
+      () => find.text('old result').evaluate().isNotEmpty,
+    );
+
+    videoBloc.add(
+      ApplySearchOptions(
+        filters: [
+          const VideoDurationFilter().copyWith(
+            selection: VideoDurationFilterOption.tenTo30Minutes,
+          ),
+        ],
+        sortOption: PhotoOrVideoSearchSort.pubdate,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 旧结果仍在，排序选择保留；页面没有被换成首屏错误视图。
+    expect(find.text('old result'), findsOneWidget);
+    expect(find.byIcon(AppIcons.error), findsNothing);
+    expect(videoBloc.state.currentSort, PhotoOrVideoSearchSort.pubdate);
+    expect(videoBloc.state.pendingRefresh, isTrue);
+    expect(videoBloc.state.pagingState.error, isNotNull);
   });
 }

@@ -432,6 +432,10 @@
   "@moreLoadFailedRetry": {
     "description": "Paginated list - footer shown when loading the next page failed"
   },
+  "refreshFailedRetry": "Failed to reload. Retry",
+  "@refreshFailedRetry": {
+    "description": "Search results - footer shown when re-searching after a sort or filter change failed"
+  },
   "nothingFound": "Nothing found",
   "@nothingFound": {
     "description": "Search - empty state when the query returns no results"
