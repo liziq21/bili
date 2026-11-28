@@ -1,5 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:app/feature/not_found/not_found_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -18,6 +19,11 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: goldenTestTheme(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            // 基线烤的是英文文案；页面文案已走 l10n，必须固定英文 locale
+            // 才能保持像素与既有基线一致。
+            locale: const Locale('en'),
             home: Scaffold(body: Center(child: widget)),
           ),
         );

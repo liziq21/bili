@@ -25,6 +25,26 @@
   "@navSettings": {
     "description": "Home app bar - settings entry tooltip"
   },
+  "notFoundTitle": "Page Not Found",
+  "@notFoundTitle": {
+    "description": "404 screen app bar title"
+  },
+  "notFoundBody": "Can't find a page for: {uri} \n Path: {path}",
+  "@notFoundBody": {
+    "description": "404 screen body for an unroutable link; both values are sanitized before display",
+    "placeholders": {
+      "uri": {
+        "type": "String",
+        "example": "https://example.com/missing",
+        "description": "Sanitized URI that failed to resolve"
+      },
+      "path": {
+        "type": "String",
+        "example": "/missing",
+        "description": "Sanitized route path with host and scheme details"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Settings screen title"

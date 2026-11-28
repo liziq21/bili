@@ -28,6 +28,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navSettings => '设置';
 
   @override
+  String get notFoundTitle => '页面不存在';
+
+  @override
+  String notFoundBody(String uri, String path) {
+    return '找不到这个页面：$uri \n 路径：$path';
+  }
+
+  @override
   String get settingsTitle => '设置';
 
   @override

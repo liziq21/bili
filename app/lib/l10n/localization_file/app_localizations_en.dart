@@ -28,6 +28,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
+  String get notFoundTitle => 'Page Not Found';
+
+  @override
+  String notFoundBody(String uri, String path) {
+    return 'Can\'t find a page for: $uri \n Path: $path';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

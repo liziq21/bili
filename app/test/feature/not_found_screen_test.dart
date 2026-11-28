@@ -1,4 +1,5 @@
 import 'package:app/feature/not_found/not_found_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -12,8 +13,11 @@ void main() {
         const samplePath = '/auth/callback';
 
         await tester.pumpWidget(
-          const MaterialApp(
-            home: NotFoundScreen(uri: sensitiveUri, path: samplePath),
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const NotFoundScreen(uri: sensitiveUri, path: samplePath),
           ),
         );
 
@@ -33,8 +37,11 @@ void main() {
       const dirtyPath = '/test\x07\x00';
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: NotFoundScreen(uri: dirtyUri, path: dirtyPath),
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const NotFoundScreen(uri: dirtyUri, path: dirtyPath),
         ),
       );
 
@@ -43,6 +50,28 @@ void main() {
       expect(find.textContaining('\x00'), findsNothing);
       expect(find.textContaining('\x1F'), findsNothing);
       expect(find.textContaining('\x07'), findsNothing);
+    });
+
+    testWidgets('renders Chinese copy when the locale is zh', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: const NotFoundScreen(
+            uri: 'https://example.com/missing',
+            path: '/missing',
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('页面不存在'), findsOneWidget);
+      expect(find.textContaining('找不到这个页面'), findsOneWidget);
     });
   });
 }

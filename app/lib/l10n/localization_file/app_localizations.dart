@@ -134,6 +134,18 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navSettings;
 
+  /// 404 screen app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Page Not Found'**
+  String get notFoundTitle;
+
+  /// 404 screen body for an unroutable link; both values are sanitized before display
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find a page for: {uri} \n Path: {path}'**
+  String notFoundBody(String uri, String path);
+
   /// Settings screen title
   ///
   /// In en, this message translates to:
