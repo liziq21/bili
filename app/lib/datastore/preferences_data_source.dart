@@ -281,12 +281,6 @@ class const PreferencesKey<T>._(final String name, final T defaultValue) {
     true,
   );
 
-  /// 收藏/书签同步开关：关闭时不再同步远端收藏到本地，不删除已落库收藏。
-  static const bookmarkSyncEnabled = PreferencesKey<bool>._(
-    'BOOKMARK_SYNC_ENABLED',
-    true,
-  );
-
   /// 搜索历史保留天数：7 / 30 / 90 / -1（永久）。默认 30 天。
   ///
   /// 设置后通过定期任务清理过期查询记录。

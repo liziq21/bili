@@ -29,11 +29,47 @@ class const HomeFilterBar({
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    return _HomeFilterBarContent(
+      filters: filters,
+      activeFilterId: activeFilterId,
+      onSelected: onSelected,
+      height: height,
+      elevated: overlapsContent,
+    );
+  }
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  bool shouldRebuild(HomeFilterBar oldDelegate) =>
+      !listEquals(oldDelegate.filters, filters) ||
+      oldDelegate.activeFilterId != activeFilterId ||
+      oldDelegate.height != height;
+}
+
+/// 筛选栏的可视内容。
+///
+/// 必须是独立 widget：`SliverPersistentHeaderDelegate.build` 只在挂载或
+/// delegate 变化时调用（`shouldRebuild` 为假时不会重建），主题切换不会走到
+/// 这里，颜色就会停留在旧主题。放在普通 widget 里由 [Theme] 依赖驱动重建。
+class const _HomeFilterBarContent({
+  required final List<HomeFilter> filters,
+  required final String activeFilterId,
+  required final ValueChanged<HomeFilter> onSelected,
+  required final double height,
+  required final bool elevated,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: colorScheme.surface,
-      elevation: overlapsContent ? 2 : 0,
+      elevation: elevated ? 2 : 0,
       child: SizedBox(
         height: height,
         child: HorizontalWheelScroll(
@@ -83,16 +119,4 @@ class const HomeFilterBar({
       ),
     );
   }
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  double get minExtent => height;
-
-  @override
-  bool shouldRebuild(HomeFilterBar oldDelegate) =>
-      !listEquals(oldDelegate.filters, filters) ||
-      oldDelegate.activeFilterId != activeFilterId ||
-      oldDelegate.height != height;
 }

@@ -44,9 +44,7 @@ void main() {
   tearDown(() => preferences.dispose());
 
   group('LibrarySettingsScreen', () {
-    testWidgets('renders with default bookmark sync and retention period', (
-      tester,
-    ) async {
+    testWidgets('renders with the default retention period', (tester) async {
       await tester.pumpWidget(_buildScreen(preferences));
       await tester.pumpAndSettle();
 
@@ -54,36 +52,15 @@ void main() {
       final l10n = AppLocalizations.of(context)!;
 
       expect(find.widgetWithText(AppBar, l10n.settingsLibrary), findsOneWidget);
-      expect(find.text(l10n.libraryBookmarkSync), findsWidgets);
       expect(find.text(l10n.librarySearchHistoryRetention), findsWidgets);
       expect(
         find.text(l10n.librarySearchHistoryRetention30Days),
         findsOneWidget,
       );
-      expect(find.byType(SwitchListTile), findsOneWidget);
+      // 收藏只写本地、不与远端同步（产品边界：不登录、不写平台），
+      // 承诺远端同步的空开关已移除。
+      expect(find.byType(SwitchListTile), findsNothing);
       expect(find.byType(SettingValueTile), findsOneWidget);
-    });
-
-    testWidgets('toggles bookmark sync switch and persists preference', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_buildScreen(preferences));
-      await tester.pumpAndSettle();
-
-      final switchFinder = find.byType(SwitchListTile);
-      expect(switchFinder, findsOneWidget);
-
-      final initialSwitch = tester.widget<SwitchListTile>(switchFinder);
-      expect(initialSwitch.value, isTrue);
-
-      await tester.tap(switchFinder);
-      await tester.pumpAndSettle();
-
-      final updatedSwitch = tester.widget<SwitchListTile>(switchFinder);
-      expect(updatedSwitch.value, isFalse);
-
-      final result = await preferences.get(PreferencesKey.bookmarkSyncEnabled);
-      expect((result as Success<bool, Exception>).success, isFalse);
     });
 
     testWidgets('changes search history retention and persists preference', (
@@ -148,14 +125,6 @@ void main() {
         findsOneWidget,
       );
 
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Tooltip &&
-              widget.message == '${l10n.libraryBookmarkSync}: ${l10n.confirm}',
-        ),
-        findsOneWidget,
-      );
       semantics.dispose();
     });
 
@@ -202,9 +171,8 @@ void main() {
       final context = tester.element(find.byType(LibrarySettingsScreen));
       final l10n = AppLocalizations.of(context)!;
 
-      expect(l10n.libraryBookmarkSync, 'Sync bookmarks');
+      expect(l10n.librarySearchHistoryRetention, 'Search history retention');
       expect(find.widgetWithText(AppBar, l10n.settingsLibrary), findsOneWidget);
-      expect(find.text(l10n.libraryBookmarkSync), findsWidgets);
       expect(
         find.text(l10n.librarySearchHistoryRetention30Days),
         findsOneWidget,
@@ -227,7 +195,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LibrarySettingsScreen), findsOneWidget);
-      expect(find.byType(SwitchListTile), findsOneWidget);
+      expect(find.byType(SwitchListTile), findsNothing);
       expect(find.byType(SettingValueTile), findsOneWidget);
     });
   });

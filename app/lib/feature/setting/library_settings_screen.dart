@@ -15,7 +15,6 @@ class const LibrarySettingsScreen({super.key}) extends StatefulWidget {
 }
 
 class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
-  bool _bookmarkSyncEnabled = true;
   int _searchHistoryRetentionDays = 30;
   PreferencesDataSource? _preferences;
   bool _loading = true;
@@ -42,9 +41,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
       return;
     }
 
-    final bookmarkSyncResult = await preferences.get(
-      PreferencesKey.bookmarkSyncEnabled,
-    );
     final searchHistoryResult = await preferences.get(
       PreferencesKey.searchHistoryRetentionDays,
     );
@@ -52,23 +48,12 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
     if (!mounted) return;
     setState(() {
       _preferences = preferences;
-      _bookmarkSyncEnabled = bookmarkSyncResult is Success<bool, Exception>
-          ? bookmarkSyncResult.success
-          : true;
       _searchHistoryRetentionDays =
           searchHistoryResult is Success<int, Exception>
           ? searchHistoryResult.success
           : 30;
       _loading = false;
     });
-  }
-
-  Future<void> _updateBookmarkSync(bool enabled) async {
-    setState(() => _bookmarkSyncEnabled = enabled);
-    final preferences = _preferences;
-    if (preferences != null) {
-      await preferences.set(PreferencesKey.bookmarkSyncEnabled, enabled);
-    }
   }
 
   Future<void> _updateSearchHistoryRetention(int days) async {
@@ -105,15 +90,6 @@ class _LibrarySettingsScreenState() extends State<LibrarySettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
-                SettingSwitchTile(
-                  title: l10n.libraryBookmarkSync,
-                  subtitle: l10n.libraryBookmarkSyncSubtitle,
-                  value: _bookmarkSyncEnabled,
-                  tooltip:
-                      '${l10n.libraryBookmarkSync}: ${_bookmarkSyncEnabled ? l10n.confirm : l10n.dialogCancel}',
-                  onChanged: (enabled) =>
-                      unawaited(_updateBookmarkSync(enabled)),
-                ),
                 SettingValueTile(
                   title: l10n.librarySearchHistoryRetention,
                   subtitle: l10n.librarySearchHistoryRetentionSubtitle,

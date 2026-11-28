@@ -78,19 +78,22 @@ class _ChannelSettingsScreenState() extends State<ChannelSettingsScreen> {
           : ListView(
               padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
               children: [
+                SettingSectionHeader(title: l10n.settingsChannelTabs),
                 SettingSwitchTile(
-                  title: l10n.videoTab,
+                  title: l10n.channelTabVideosVisibility,
+                  subtitle: l10n.settingsChannelTabVisibilitySubtitle,
                   value: videosVisible,
                   tooltip:
-                      '${l10n.videoTab}: ${videosVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
+                      '${l10n.channelTabVideosVisibility}: ${videosVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
                   onChanged: (value) =>
                       unawaited(_setTabVisible(ChannelTabs.videos, value)),
                 ),
                 SettingSwitchTile(
-                  title: l10n.channelTabPlaylists,
+                  title: l10n.channelTabPlaylistsVisibility,
+                  subtitle: l10n.settingsChannelTabVisibilitySubtitle,
                   value: playlistsVisible,
                   tooltip:
-                      '${l10n.channelTabPlaylists}: ${playlistsVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
+                      '${l10n.channelTabPlaylistsVisibility}: ${playlistsVisible ? l10n.homeConfigVisible : l10n.homeConfigHidden}',
                   onChanged: (value) =>
                       unawaited(_setTabVisible(ChannelTabs.playlists, value)),
                 ),

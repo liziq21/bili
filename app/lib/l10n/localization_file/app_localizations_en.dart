@@ -136,13 +136,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLibrary => 'Library';
 
   @override
-  String get libraryBookmarkSync => 'Sync bookmarks';
-
-  @override
-  String get libraryBookmarkSyncSubtitle =>
-      'Keep local bookmarks in sync with remote';
-
-  @override
   String get librarySearchHistoryRetention => 'Search history retention';
 
   @override
@@ -1147,6 +1140,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeConfigSetMain => 'Set as main';
 
   @override
+  String get homeConfigMainTab => 'Main tab';
+
+  @override
   String get homeConfigGridColumns => 'Grid columns';
 
   @override
@@ -1323,6 +1319,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get channelTabPlaylists => 'Playlists';
+
+  @override
+  String get settingsChannelTabs => 'Channel page tabs';
+
+  @override
+  String get channelTabVideosVisibility => 'Show video tab';
+
+  @override
+  String get channelTabPlaylistsVisibility => 'Show playlists tab';
+
+  @override
+  String get settingsChannelTabVisibilitySubtitle =>
+      'Hidden tabs are removed from the channel page';
 
   @override
   String get channelPlaylistsEmpty => 'No playlists yet';

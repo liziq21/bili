@@ -47,46 +47,52 @@ class const SettingScreen({
       body: ListView(
         padding: EdgeInsets.symmetric(vertical: $styles.insets.xs),
         children: [
-          for (final (title, entries) in _groups(l10n))
-            ExpansionTile(
-              // ListView 会回收离开缓存范围的分组；稳定的 PageStorageKey 让
-              // ExpansionTile 重建后仍能恢复用户折叠/展开的状态。
-              key: PageStorageKey<SettingsSection>(entries.first.$1),
-              initiallyExpanded: true,
-              title: Text(
-                title,
-                style: $styles.text.bodySmallBold.copyWith(
-                  color: $styles.colors.onSurfaceVariant,
-                ),
-              ),
-              children: [
-                for (final (section, label, icon) in entries)
-                  Tooltip(
-                    message: label,
-                    child: ListTile(
-                      leading: Icon(
-                        icon,
-                        color: $styles.colors.onSurfaceVariant,
-                      ),
-                      title: Text(
-                        label,
-                        style: $styles.text.body.copyWith(
-                          color: $styles.colors.onSurface,
-                        ),
-                      ),
-                      trailing: Icon(
-                        AppIcons.chevronRight,
-                        color: $styles.colors.onSurfaceVariant,
-                      ),
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        onSectionSelected(section);
-                      },
-                    ),
+          for (final (index, (title, entries)) in _groups(l10n).indexed)
+            // A header that names a group with a single row only adds a layer of
+            // nesting; render that row standalone instead (see
+            // `SettingSectionHeader`'s documented rule).
+            if (entries.length == 1) ...[
+              if (index > 0) const Divider(height: 1),
+              _sectionRow(l10n, entries.single),
+            ] else
+              ExpansionTile(
+                // ListView 会回收离开缓存范围的分组；稳定的 PageStorageKey 让
+                // ExpansionTile 重建后仍能恢复用户折叠/展开的状态。
+                key: PageStorageKey<SettingsSection>(entries.first.$1),
+                initiallyExpanded: true,
+                title: Text(
+                  title,
+                  style: $styles.text.bodySmallBold.copyWith(
+                    color: $styles.colors.onSurfaceVariant,
                   ),
-              ],
-            ),
+                ),
+                children: [
+                  for (final entry in entries) _sectionRow(l10n, entry),
+                ],
+              ),
         ],
+      ),
+    );
+  }
+
+  Widget _sectionRow(AppLocalizations l10n, _SectionEntry entry) {
+    final (section, label, icon) = entry;
+    return Tooltip(
+      message: label,
+      child: ListTile(
+        leading: Icon(icon, color: $styles.colors.onSurfaceVariant),
+        title: Text(
+          label,
+          style: $styles.text.body.copyWith(color: $styles.colors.onSurface),
+        ),
+        trailing: Icon(
+          AppIcons.chevronRight,
+          color: $styles.colors.onSurfaceVariant,
+        ),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onSectionSelected(section);
+        },
       ),
     );
   }

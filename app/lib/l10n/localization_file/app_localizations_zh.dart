@@ -126,12 +126,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsLibrary => '媒体库';
 
   @override
-  String get libraryBookmarkSync => '同步收藏';
-
-  @override
-  String get libraryBookmarkSyncSubtitle => '将本地收藏与远端保持同步';
-
-  @override
   String get librarySearchHistoryRetention => '搜索历史保留';
 
   @override
@@ -1089,6 +1083,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeConfigSetMain => '设为主标签';
 
   @override
+  String get homeConfigMainTab => '主标签';
+
+  @override
   String get homeConfigGridColumns => '网格列数';
 
   @override
@@ -1260,6 +1257,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get channelTabPlaylists => '播放列表';
+
+  @override
+  String get settingsChannelTabs => '频道页标签';
+
+  @override
+  String get channelTabVideosVisibility => '显示视频标签';
+
+  @override
+  String get channelTabPlaylistsVisibility => '显示播放列表标签';
+
+  @override
+  String get settingsChannelTabVisibilitySubtitle => '关闭后频道页不再显示该标签';
 
   @override
   String get channelPlaylistsEmpty => '暂无播放列表';
