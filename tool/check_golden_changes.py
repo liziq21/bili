@@ -8,7 +8,8 @@ and any change it makes could ride along in a pull request whose body says it
 only contains re-rendered PNGs (Issue #720).
 
 This guard inspects the working tree after the re-record step and fails unless
-every change is a PNG under `app/test/golden/goldens/ci/`.
+every change is an added or modified regular PNG under
+`app/test/golden/goldens/ci/`.
 """
 
 from __future__ import annotations
@@ -16,9 +17,11 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 GOLDEN_DIR = 'app/test/golden/goldens/ci/'
+PNG_SIGNATURE = b'\x89PNG\r\n\x1a\n'
 STATUS_ARGS = (
     'git',
     'status',
@@ -28,15 +31,25 @@ STATUS_ARGS = (
 )
 
 
-def changed_paths(status: str) -> list[str]:
-    """Return every path named by ``git status --porcelain -z`` output.
+@dataclass(frozen=True)
+class Change:
+    status: str
+    path: str
+    old_path: str | None = None
+
+    @property
+    def deleted(self) -> bool:
+        return 'D' in self.status
+
+
+def parse_changes(status: str) -> list[Change]:
+    """Parse ``git status --porcelain -z`` output into changes.
 
     Rename and copy entries carry the original path as an extra NUL-terminated
-    field; both sides count, because either one may sit outside the allowed
-    directory.
+    field, so both sides are kept.
     """
     fields = status.split('\0')
-    paths: list[str] = []
+    changes: list[Change] = []
     index = 0
     while index < len(fields):
         entry = fields[index]
@@ -44,23 +57,72 @@ def changed_paths(status: str) -> list[str]:
         if not entry:
             continue
         status_code = entry[:2]
-        paths.append(entry[3:])
+        path = entry[3:]
+        old_path = None
         if 'R' in status_code or 'C' in status_code:
-            paths.append(fields[index])
+            old_path = fields[index]
             index += 1
-    return paths
+        changes.append(Change(status_code, path, old_path))
+    return changes
 
 
 def is_golden_png(path: str) -> bool:
-    return path.startswith(GOLDEN_DIR) and path.lower().endswith('.png')
+    return path.startswith(GOLDEN_DIR) and path.endswith('.png')
 
 
-def unexpected_paths(paths: list[str]) -> list[str]:
-    return sorted({path for path in paths if not is_golden_png(path)})
+def is_regular_png(path: Path) -> bool:
+    """True when ``path`` is a regular, non-symlink file with a PNG signature."""
+    if path.is_symlink() or not path.is_file():
+        return False
+    try:
+        with path.open('rb') as handle:
+            return handle.read(len(PNG_SIGNATURE)) == PNG_SIGNATURE
+    except OSError:
+        return False
+
+
+def escape_command_property(value: str) -> str:
+    """Escape a GitHub workflow-command property value.
+
+    A caller-supplied branch can create a file whose name contains a newline
+    followed by workflow-command syntax; the path is printed inside an
+    ``::error file=…::`` annotation, so it must not be able to start a new
+    command.
+    """
+    return (
+        value.replace('%', '%25')
+        .replace('\r', '%0D')
+        .replace('\n', '%0A')
+        .replace(':', '%3A')
+        .replace(',', '%2C')
+    )
+
+
+def unexpected_changes(changes: list[Change], root: Path) -> list[str]:
+    """Return paths whose change the re-record workflow must not commit."""
+    unexpected: set[str] = set()
+    for change in changes:
+        for path in (change.path, change.old_path):
+            if path is not None and not is_golden_png(path):
+                unexpected.add(path)
+        if change.old_path is not None:
+            # Renames and copies write only the new side; both paths are
+            # checked against GOLDEN_DIR above.
+            continue
+        if change.deleted:
+            unexpected.add(change.path)
+        elif not is_regular_png(root / change.path):
+            unexpected.add(change.path)
+    return sorted(unexpected)
 
 
 def read_status() -> str:
-    completed = subprocess.run(STATUS_ARGS, capture_output=True, check=False)
+    # STATUS_ARGS is a constant tuple; there is no shell and no interpolation.
+    completed = subprocess.run(  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit
+        STATUS_ARGS,
+        capture_output=True,
+        check=False,
+    )
     if completed.returncode != 0:
         raise RuntimeError(completed.stderr.decode('utf-8', 'replace').strip())
     return completed.stdout.decode('utf-8', 'surrogateescape')
@@ -73,6 +135,12 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help='read `git status --porcelain -z` output from this file instead of git',
     )
+    parser.add_argument(
+        '--root',
+        type=Path,
+        default=Path('.'),
+        help='repository root used to validate changed files (default: cwd)',
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -84,18 +152,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f'::error::could not read git status: {error}', file=sys.stderr)
         return 2
 
-    unexpected = unexpected_paths(changed_paths(status))
+    unexpected = unexpected_changes(parse_changes(status), args.root)
     if not unexpected:
         print(f'Only golden baselines under {GOLDEN_DIR} changed.')
         return 0
 
     for path in unexpected:
         print(
-            f'::error file={path}::the re-record job changed a file outside '
-            f'{GOLDEN_DIR}'
+            f'::error file={escape_command_property(path)}::not an allowed '
+            'golden baseline change'
         )
     print(
-        'The re-record workflow may only commit baseline PNGs under '
+        'The re-record workflow may only add or modify regular PNGs under '
         f'{GOLDEN_DIR}. Revert the other changes on the target branch and '
         're-run the workflow.',
         file=sys.stderr,
