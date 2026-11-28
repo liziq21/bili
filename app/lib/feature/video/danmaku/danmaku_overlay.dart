@@ -16,6 +16,9 @@ class const DanmakuOverlay({
   super.key,
   required final MediaPlaybackController controller,
   required final String videoId,
+  // 画面在容器内按 contain 显示时的宽高比。给出后浮层收缩到画面矩形，
+  // 全屏下弹幕就不会画到宽银幕黑边上。
+  final double? aspectRatio,
 }) extends StatefulWidget {
   @override
   State<DanmakuOverlay> createState() => _DanmakuOverlayState();
@@ -148,29 +151,37 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
       onScrim: $styles.colors.onScrim,
       outline: $styles.colors.outline,
     );
-    return Positioned.fill(
-      child: IgnorePointer(
-        // 浮层铺满整个播放器方块，而画面按 contain 居中后可能带黑边；没有
-        // 裁剪时滚动到画面外的文字会画在黑边上。安全边距同时让首行不被
-        // 画面顶边裁切、进出场文字不在画面边缘被硬切。
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: $styles.insets.xs,
-            vertical: $styles.insets.xxs,
-          ),
-          child: ClipRect(
-            child: CustomPaint(
-              painter: DanmakuPainter(
-                comments: _comments,
-                position: state.position,
-                settings: _settings,
-                colors: colors,
-                cache: _renderCache,
-              ),
+    final layer = IgnorePointer(
+      // 画面按 contain 居中后可能带黑边；没有裁剪时滚动到画面外的文字会
+      // 画在黑边上。安全边距同时让首行不被画面顶边裁切、进出场文字不在
+      // 画面边缘被硬切。
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: $styles.insets.xs,
+          vertical: $styles.insets.xxs,
+        ),
+        child: ClipRect(
+          child: CustomPaint(
+            painter: DanmakuPainter(
+              comments: _comments,
+              position: state.position,
+              settings: _settings,
+              colors: colors,
+              cache: _renderCache,
             ),
           ),
         ),
       ),
+    );
+    final aspectRatio = widget.aspectRatio;
+    return Positioned.fill(
+      // 已知画面比例时把浮层收缩到 contain 后的画面矩形：全屏下容器比例
+      // 与视频不同，浮层若铺满整屏，弹幕会画到宽银幕黑边上。
+      child: aspectRatio == null
+          ? layer
+          : Center(
+              child: AspectRatio(aspectRatio: aspectRatio, child: layer),
+            ),
     );
   }
 }

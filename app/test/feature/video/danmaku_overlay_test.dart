@@ -90,27 +90,37 @@ void main() {
     controller.close();
   });
 
-  Widget appFor(String videoId) => MaterialApp(
-    locale: const Locale('en'),
-    localizationsDelegates: const [
-      ...AppLocalizations.localizationsDelegates,
-      ...GlobalMaterialLocalizations.delegates,
-    ],
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Provider<PreferencesDataSource>.value(
-      value: preferences,
-      child: Provider<DanmakuRepository>.value(
-        value: repository,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              DanmakuOverlay(controller: controller, videoId: videoId),
-            ],
+  Widget appFor(String videoId, {double? aspectRatio, Size? box}) =>
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Provider<PreferencesDataSource>.value(
+          value: preferences,
+          child: Provider<DanmakuRepository>.value(
+            value: repository,
+            child: Scaffold(
+              body: Center(
+                child: SizedBox.fromSize(
+                  size: box ?? const Size(800, 600),
+                  child: Stack(
+                    children: [
+                      DanmakuOverlay(
+                        controller: controller,
+                        videoId: videoId,
+                        aspectRatio: aspectRatio,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 
   testWidgets('loads comments for the requested video into the painter', (
     tester,
@@ -162,6 +172,26 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  testWidgets('shrinks the painter to the picture rect given an aspect ratio', (
+    tester,
+  ) async {
+    // Given a 16:9 picture inside a 4:3 box (letterboxed top and bottom).
+    repository.result = Result.success([_comment('letterbox')]);
+    await tester.pumpWidget(
+      appFor('BV1', aspectRatio: 16 / 9, box: const Size(800, 600)),
+    );
+    await tester.pumpAndSettle();
+
+    // Then the painter stops at the picture's edges (450 tall, centered), not
+    // at the box's edges, so danmaku cannot paint into the letterbox bars.
+    final paintRect = tester.getRect(_painterFinder);
+    expect(paintRect.top, greaterThan(75));
+    expect(paintRect.bottom, lessThan(525));
+    expect(paintRect.height, lessThan(450));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('hides the overlay when danmaku are disabled', (tester) async {
     // Given danmaku switched off in preferences and a source that has comments.

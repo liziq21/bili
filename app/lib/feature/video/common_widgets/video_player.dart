@@ -264,6 +264,7 @@ class _VideoPlayerState() extends State<VideoPlayer> {
             onTapSurface: _toggleControls,
             surfaceBuilder: widget.surfaceBuilder,
             queue: widget.queue,
+            aspectRatio: _aspectRatio,
           );
 
           if (widget.fullscreen) return surface;
@@ -302,19 +303,23 @@ class _VideoPlayerState() extends State<VideoPlayer> {
                   ],
                 );
               }
-              return _EmbeddedPlayerLayout(
-                aspectRatio: _aspectRatio,
-                maxVideoHeight: maxVideoHeight,
-                children: [
-                  ColoredBox(
-                    color: $styles.colors.scrim,
-                    child: AspectRatio(
-                      aspectRatio: _aspectRatio,
-                      child: surface,
+              // 高度上限容不下控制栏时（极矮窗口）控制栏会画到本框之外，
+              // 裁剪避免它与下方内容重叠。
+              return ClipRect(
+                child: _EmbeddedPlayerLayout(
+                  aspectRatio: _aspectRatio,
+                  maxVideoHeight: maxVideoHeight,
+                  children: [
+                    ColoredBox(
+                      color: $styles.colors.scrim,
+                      child: AspectRatio(
+                        aspectRatio: _aspectRatio,
+                        child: surface,
+                      ),
                     ),
-                  ),
-                  controls,
-                ],
+                    controls,
+                  ],
+                ),
               );
             },
           );
@@ -618,6 +623,8 @@ class const _VideoSurface({
   required final Widget Function(MediaPlaybackController controller)?
   surfaceBuilder,
   final VideoQueueResult? queue,
+  // 画面在容器内 contain 后的宽高比；弹幕浮层据此收缩到画面矩形。
+  required final double aspectRatio,
 }) extends StatefulWidget {
   @override
   State<_VideoSurface> createState() => _VideoSurfaceState();
@@ -852,7 +859,11 @@ class _VideoSurfaceState() extends State<_VideoSurface> {
           ),
         ),
         if (videoId != null)
-          DanmakuOverlay(controller: widget.controller, videoId: videoId),
+          DanmakuOverlay(
+            controller: widget.controller,
+            videoId: videoId,
+            aspectRatio: widget.aspectRatio,
+          ),
         if (widget.fullscreen)
           Positioned(
             top: $styles.insets.xs,
