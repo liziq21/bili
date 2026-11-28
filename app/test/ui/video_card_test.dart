@@ -300,6 +300,16 @@ void main() {
     MediaQueryData media(double width) =>
         MediaQueryData(size: Size(width, 600));
 
+    /// 可见的 32px 圆形按钮：`IconButton` 外面还有一圈 48px 的点击区域，
+    /// 位置断言要对着看得见的那个圆，不是点击区域。
+    Rect scrimRect(WidgetTester tester) => tester.getRect(
+      find
+          .byWidgetPredicate(
+            (widget) => widget is Material && widget.shape is CircleBorder,
+          )
+          .first,
+    );
+
     Future<void> pumpCard(
       WidgetTester tester,
       double width, {
@@ -353,8 +363,12 @@ void main() {
       );
 
       final cover = tester.getRect(find.byType(AspectRatio));
-      final more = tester.getRect(find.byTooltip('More options'));
-      expect(cover.contains(more.center), isTrue);
+      final more = scrimRect(tester);
+      // 压在封面右上角：贴着上边和右边，且整个落在右上四分之一区内。
+      expect(more.top - cover.top, lessThan(cover.height / 4));
+      expect(cover.right - more.right, lessThan(cover.width / 4));
+      expect(more.center.dx, greaterThan(cover.center.dx));
+      expect(more.center.dy, lessThan(cover.center.dy));
 
       await tester.tap(find.byTooltip('More options'));
       expect(moreTapped, isTrue);
@@ -376,9 +390,17 @@ void main() {
         onMore: () => moreTapped = true,
       );
 
+      final card = tester.getRect(find.byType(VideoCard));
       final cover = tester.getRect(find.byType(AspectRatio));
       final more = tester.getRect(find.byTooltip('More options'));
+      final title = tester.getRect(
+        find.text('A feed card title that wraps over two lines'),
+      );
+      // 在标题首行里、贴着卡片右边缘，而不是封面下方随便一处。
       expect(more.top, greaterThanOrEqualTo(cover.bottom));
+      expect(more.center.dy, inInclusiveRange(title.top, title.top + 24));
+      expect(more.right, greaterThan(title.right));
+      expect(card.right - more.right, lessThan(card.width / 8));
 
       await tester.tap(find.byTooltip('More options'));
       expect(moreTapped, isTrue);
