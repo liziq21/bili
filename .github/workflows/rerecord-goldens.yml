@@ -64,8 +64,9 @@ jobs:
       # requests, so the commit must contain only the PNGs it re-recorded.
       # The guard comes from the workflow revision, not from the target branch:
       # older branches have no copy, and a branch that shipped its own copy
-      # could weaken the check. It rejects deletions, symlinks and files whose
-      # content is not a PNG (Issue #720).
+      # could weaken the check. It only accepts added or modified regular PNGs:
+      # deletions, renames, copies, type changes, symlinks and non-PNG content
+      # are rejected (Issue #720).
       - name: Assert only golden baselines changed
         env:
           GITHUB_TOKEN: ${{ github.token }}

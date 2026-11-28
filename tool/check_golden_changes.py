@@ -37,9 +37,15 @@ class Change:
     path: str
     old_path: str | None = None
 
-    @property
-    def deleted(self) -> bool:
-        return 'D' in self.status
+
+def is_allowed_status(status: str) -> bool:
+    """Only additions and modifications are re-records.
+
+    Deletions, renames, copies, type changes and conflicts belong in the code
+    pull request, where a reviewer sees the code change that caused them.
+    """
+    code = status.strip()
+    return bool(code) and all(char in {'A', 'M', '?'} for char in code)
 
 
 def parse_changes(status: str) -> list[Change]:
@@ -105,13 +111,12 @@ def unexpected_changes(changes: list[Change], root: Path) -> list[str]:
         for path in (change.path, change.old_path):
             if path is not None and not is_golden_png(path):
                 unexpected.add(path)
-        if change.old_path is not None:
-            # Renames and copies write only the new side; both paths are
-            # checked against GOLDEN_DIR above.
-            continue
-        if change.deleted:
+        if not is_allowed_status(change.status):
             unexpected.add(change.path)
-        elif not is_regular_png(root / change.path):
+            if change.old_path is not None:
+                unexpected.add(change.old_path)
+            continue
+        if not is_regular_png(root / change.path):
             unexpected.add(change.path)
     return sorted(unexpected)
 

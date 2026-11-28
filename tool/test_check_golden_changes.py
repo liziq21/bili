@@ -69,6 +69,16 @@ class ParseChangesTest(unittest.TestCase):
         )
 
 
+class StatusTest(unittest.TestCase):
+    def test_additions_and_modifications_are_allowed(self) -> None:
+        for status_code in (' M', 'M ', 'MM', 'AM', 'A ', '??'):
+            self.assertTrue(golden.is_allowed_status(status_code), status_code)
+
+    def test_deletions_renames_copies_and_conflicts_are_rejected(self) -> None:
+        for status_code in (' D', 'D ', 'R ', 'C ', 'T ', 'UU', 'AD', 'RM'):
+            self.assertFalse(golden.is_allowed_status(status_code), status_code)
+
+
 class GoldenPathTest(unittest.TestCase):
     def test_baseline_pngs_are_allowed(self) -> None:
         self.assertTrue(golden.is_golden_png(GOLDEN))
@@ -138,13 +148,19 @@ class UnexpectedChangesTest(unittest.TestCase):
         write(self.root, OTHER_GOLDEN)
         self.assertEqual(self.check(f'?? {OTHER_GOLDEN}'), [])
 
-    def test_golden_rename_passes_when_both_sides_are_pngs(self) -> None:
+    def test_golden_rename_is_rejected(self) -> None:
         write(self.root, OTHER_GOLDEN)
-        self.assertEqual(self.check(f'R  {OTHER_GOLDEN}\0{GOLDEN}'), [])
+        self.assertEqual(
+            self.check(f'R  {OTHER_GOLDEN}\0{GOLDEN}'),
+            sorted([GOLDEN, OTHER_GOLDEN]),
+        )
 
-    def test_golden_copy_passes_when_both_sides_are_pngs(self) -> None:
+    def test_golden_copy_is_rejected(self) -> None:
         write(self.root, OTHER_GOLDEN)
-        self.assertEqual(self.check(f'C  {OTHER_GOLDEN}\0{GOLDEN}'), [])
+        self.assertEqual(
+            self.check(f'C  {OTHER_GOLDEN}\0{GOLDEN}'),
+            sorted([GOLDEN, OTHER_GOLDEN]),
+        )
 
     def test_non_png_bytes_with_png_suffix_are_rejected(self) -> None:
         write(self.root, GOLDEN, b'#!/bin/sh\nexit 0\n')
@@ -167,14 +183,14 @@ class UnexpectedChangesTest(unittest.TestCase):
         write(self.root, 'app/lib/renamed.dart')
         self.assertEqual(
             self.check(f'R  app/lib/renamed.dart\0{GOLDEN}'),
-            ['app/lib/renamed.dart'],
+            sorted(['app/lib/renamed.dart', GOLDEN]),
         )
 
     def test_rename_from_outside_path_is_rejected(self) -> None:
         write(self.root, GOLDEN)
         self.assertEqual(
             self.check(f'R  {GOLDEN}\0app/lib/main.dart'),
-            ['app/lib/main.dart'],
+            sorted([GOLDEN, 'app/lib/main.dart']),
         )
 
     def test_outside_change_is_rejected(self) -> None:
