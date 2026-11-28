@@ -156,6 +156,31 @@ void main() {
       );
     });
 
+    testWidgets(
+      'the registered entry re-shows the keyboard when the view is open',
+      (tester) async {
+        final log = FocusRegistrationLog();
+        await tester.pumpWidget(buildAnchorWithRegistration(log));
+        await tester.pump();
+
+        // 第一次点按打开搜索视图，视图内输入框因 autoFocus 获得焦点并唤起键盘。
+        log.current!();
+        await tester.pumpAndSettle();
+        expect(tester.testTextInput.isVisible, isTrue);
+
+        // 模拟 Android 返回键 / 下滑手势收起输入法：只隐藏键盘，焦点仍留在
+        // 视图输入框上（与真机一致）。
+        tester.testTextInput.hide();
+        await tester.pump();
+        expect(tester.testTextInput.isVisible, isFalse);
+
+        // 再次点按底栏搜索：视图已展开，仍应把键盘唤回。
+        log.current!();
+        await tester.pump();
+        expect(tester.testTextInput.isVisible, isTrue);
+      },
+    );
+
     testWidgets('the registered entry is inert after dispose', (tester) async {
       final log = FocusRegistrationLog();
       await tester.pumpWidget(buildAnchorWithRegistration(log));

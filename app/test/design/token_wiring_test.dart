@@ -256,4 +256,64 @@ void main() {
       await clearImageCacheDuringTest(tester);
     });
   });
+
+  group('长按说明文本（Tooltip）取应用主题', () {
+    /// 挂一个最小 `Tooltip` 并长按弹出，返回弹出的底色与文字样式。
+    Future<(Color?, TextStyle?)> longPressTooltip(
+      WidgetTester tester, {
+      required Brightness brightness,
+    }) async {
+      final colors = AppColors(BrandPalette.of(brightness));
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appThemeData(colors),
+          home: const Scaffold(
+            body: Center(
+              child: Tooltip(
+                message: 'tooltip',
+                child: SizedBox(width: 48, height: 48),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.byType(Tooltip));
+      // Tooltip 在长按触发后立即淡入、1.5s 后自动淡出；只推进淡入所需的一小段。
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final text = tester.widget<Text>(find.text('tooltip'));
+      final box = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.text('tooltip'),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      return ((box.decoration as BoxDecoration).color, text.style);
+    }
+
+    for (final brightness in Brightness.values) {
+      testWidgets('Tooltip 底色取 scrim、文字取 onScrim（$brightness）', (tester) async {
+        final colors = AppColors(BrandPalette.of(brightness));
+        final (background, style) = await longPressTooltip(
+          tester,
+          brightness: brightness,
+        );
+
+        expect(
+          background,
+          colors.scrim,
+          reason: '长按说明文本是恒深承载面（R2），底色应取 scrim，而不是 Material 默认色',
+        );
+        expect(
+          style?.color,
+          colors.onScrim,
+          reason: '文字应取压在 scrim 之上的 onScrim',
+        );
+      });
+    }
+  });
 }

@@ -142,10 +142,17 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
   /// `focusNode`，外部拿不到那个节点。可用的入口只有 [SearchController.openView]：
   /// 它推进搜索视图路由，视图内的输入框会自行获得焦点（material_ui 的
   /// `_SearchPageState` 在路由就位后请求焦点）。若搜索视图已处于打开状态
-  /// （[_controller.isOpen] 为 true），直接返回以防止重复推入新的视图路由。
+  /// （[_controller.isOpen] 为 true），不能再推一条视图路由，改为直接唤起
+  /// 输入法。
   void focusInput() {
     if (!_controller.isAttached) return;
-    if (_controller.isOpen) return;
+    if (_controller.isOpen) {
+      // 视图展开后，Android 的返回键或下滑手势只会收起输入法，焦点仍留在视图
+      // 输入框上，输入连接也还在；重新 show 就能把键盘唤回。SearchAnchor 没有
+      // 暴露视图输入框的 FocusNode，这是唯一不重建整条视图路由的入口。
+      unawaited(SystemChannels.textInput.invokeMethod<void>('TextInput.show'));
+      return;
+    }
     _controller.openView();
   }
 

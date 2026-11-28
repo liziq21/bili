@@ -24,6 +24,19 @@ ThemeData appThemeData(AppColors colors) {
 
   return ThemeData.from(textTheme: textTheme, colorScheme: scheme).copyWith(
     textSelectionTheme: TextSelectionThemeData(cursorColor: colors.accentFill),
+    // Material 的默认 Tooltip 用固定灰/白（material_ui 的 tooltip.dart 按亮度
+    // 取 grey[700] / white），不读品牌色板；长按图标、底栏目的地时弹出的说明
+    // 文本会明显与主题脱节。说明文本是浮在页面之上的恒深承载面，取
+    // scrim / onScrim 这对角色（R2）。
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: colors.scrim,
+        // 与 Material Tooltip 默认圆角一致；该组件内边距/圆角是固定值，不随
+        // 布局尺度缩放（R2.4）。
+        borderRadius: BorderRadius.circular(4),
+      ),
+      textStyle: textTheme.bodyMedium?.copyWith(color: colors.onScrim),
+    ),
     highlightColor: stateLayer,
     splashColor: stateLayer,
     pageTransitionsTheme: const PageTransitionsTheme(
