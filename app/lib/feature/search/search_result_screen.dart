@@ -293,8 +293,13 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
             SortBar(
               sortOptions: state.sortOption,
               current: state.currentSort,
+              // 用 bloc 当前状态而不是本次 build 捕获的值：连改排序与筛选时，
+              // 未变化的维度要取用户刚选的值，不能回退到旧状态。
               onChanged: (sort) => unawaited(
-                _applyVideoOptions(state.filters, sort ?? state.currentSort),
+                _applyVideoOptions(
+                  bloc.state.filters,
+                  sort ?? bloc.state.currentSort,
+                ),
               ),
             ),
           const Spacer(),
@@ -302,8 +307,9 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
             FilterBar(
               filters: state.filters,
               defaults: bloc.defaultFilters,
-              onChanged: (filters) =>
-                  unawaited(_applyVideoOptions(filters, state.currentSort)),
+              onChanged: (filters) => unawaited(
+                _applyVideoOptions(filters, bloc.state.currentSort),
+              ),
             ),
         ],
       ),

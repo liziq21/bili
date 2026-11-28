@@ -27,13 +27,11 @@ class SearchResultBloc<T>({
           pagingState: .new(),
         ),
       ) {
-    // 事件必须串行处理。bloc 默认的 transformer 是并发派发，排序/筛选事件
-    // 会和在途的分页请求同时发出，同一风控窗口里叠出多个请求，一改排序就
-    // 直接撞上平台的限流。串行后新请求总要等上一个结束，不再叠加。
-    on<SearchResultEvent>(
-      _handleEvent,
-      transformer: (events, mapper) => events.asyncExpand(mapper),
-    );
+    // 请求全部由一个驱动循环串行发出：排序/筛选事件不直接查数据，只登记
+    // 最新的选择，由循环在空闲时取最新值发一次请求。这样既不会和在途请求
+    // 叠在同一个风控窗口里，也会把期间多次改动合并成一次请求。
+    on<ApplySearchOptions>(_onApplySearchOptions);
+    on<FetchNextPage>(_onFetchNextPage);
   }
 
   List<FilterGroup> get defaultFilters => searchContentsRepository.filters;
@@ -43,46 +41,83 @@ class SearchResultBloc<T>({
   List<SortOption> get defaultSortOptions =>
       searchContentsRepository.sortOptions;
 
-  Future<void> _handleEvent(
-    SearchResultEvent event,
-    Emitter<SearchResultState<T>> emit,
-  ) async {
-    switch (event) {
-      case FetchNextPage():
-        await _fetchNextPage(emit);
-      case ApplySearchOptions(:final filters, :final sortOption):
-        await _applySearchOptions(filters, sortOption, emit);
-    }
-  }
+  /// 最新的期望选择。多次改动在同一个请求期间到达时，只保留最后一次。
+  List<FilterGroup>? _desiredFilters;
+  SortOption? _desiredSort;
+  bool _refreshRequested = false;
+  bool _nextPageRequested = false;
 
-  Future<void> _applySearchOptions(
-    List<FilterGroup> filters,
-    SortOption? sortOption,
+  /// 同一时刻只有一个驱动循环，所有请求都由它串行发出。
+  bool _pumping = false;
+
+  Future<void> _onApplySearchOptions(
+    ApplySearchOptions event,
     Emitter<SearchResultState<T>> emit,
   ) async {
-    final nextFilters = List<FilterGroup>.unmodifiable(filters);
+    final filters = List<FilterGroup>.unmodifiable(event.filters);
     if (!state.pendingRefresh &&
-        _sameFilters(state.filters, nextFilters) &&
-        state.currentSort?.value == sortOption?.value) {
+        _sameFilters(state.filters, filters) &&
+        state.currentSort?.value == event.sortOption?.value) {
       return;
     }
 
-    // 保留已加载的结果：排序/筛选变化只是同一查询的视图变更，刷新失败时
-    // 不应把整页内容换成错误态。pendingRefresh 让重试固定在新的第一页。
+    _desiredFilters = filters;
+    _desiredSort = event.sortOption;
+    _refreshRequested = true;
+    // 立刻反映选择：刷新请求可能要等当前请求结束，状态不应停留在旧值。
+    // 保留已加载的结果，刷新失败时不要把整页内容换成错误态。
     emit(
       state.copyWith(
-        filters: nextFilters,
-        currentSort: sortOption,
+        filters: filters,
+        currentSort: event.sortOption,
         pendingRefresh: true,
         pagingState: state.pagingState.copyWith(isLoading: true, error: null),
       ),
     );
-    await _runSearch(emit);
+    await _pump(emit);
   }
 
-  Future<void> _fetchNextPage(Emitter<SearchResultState<T>> emit) async {
+  Future<void> _onFetchNextPage(
+    FetchNextPage event,
+    Emitter<SearchResultState<T>> emit,
+  ) async {
+    // 正在请求时到达的重复翻页请求直接丢弃：排队执行会让结果多翻一页。
     if (state.pagingState.isLoading) return;
-    await _runSearch(emit);
+    _nextPageRequested = true;
+    await _pump(emit);
+  }
+
+  Future<void> _pump(Emitter<SearchResultState<T>> emit) async {
+    if (_pumping) return;
+    _pumping = true;
+    try {
+      while (true) {
+        if (_refreshRequested) {
+          _refreshRequested = false;
+          emit(
+            state.copyWith(
+              filters: _desiredFilters ?? state.filters,
+              currentSort: _desiredSort,
+              pendingRefresh: true,
+              pagingState: state.pagingState.copyWith(
+                isLoading: true,
+                error: null,
+              ),
+            ),
+          );
+          await _runSearch(emit);
+          continue;
+        }
+        if (_nextPageRequested) {
+          _nextPageRequested = false;
+          await _runSearch(emit);
+          continue;
+        }
+        break;
+      }
+    } finally {
+      _pumping = false;
+    }
   }
 
   Future<void> _runSearch(Emitter<SearchResultState<T>> emit) async {

@@ -176,6 +176,94 @@ void main() {
     expect(repository.queries, hasLength(1));
   });
 
+  test(
+    'coalesces sort changes that arrive during an in-flight request',
+    () async {
+      final repository = _DelayedSearchContentsRepository();
+      final bloc = SearchResultBloc<VideoModel>(
+        searchContentsRepository: repository,
+        query: 'flutter',
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const FetchNextPage());
+      await _settle();
+      expect(repository.completers, hasLength(1));
+
+      bloc.add(
+        ApplySearchOptions(
+          filters: const [VideoDurationFilter()],
+          sortOption: PhotoOrVideoSearchSort.pubdate,
+        ),
+      );
+      await _settle();
+      bloc.add(
+        ApplySearchOptions(
+          filters: const [VideoDurationFilter()],
+          sortOption: PhotoOrVideoSearchSort.scores,
+        ),
+      );
+      await _settle();
+
+      // 状态立即跟随最新选择，但在途请求结束前不再发新请求。
+      expect(bloc.state.currentSort, PhotoOrVideoSearchSort.scores);
+      expect(repository.completers, hasLength(1));
+
+      repository.completers[0].complete(
+        Result.success(
+          Page<VideoModel>(
+            data: const [
+              VideoModel(id: 'stale', title: 'stale', url: 'https://stale'),
+            ],
+            number: 1,
+            totalPages: 1,
+          ),
+        ),
+      );
+      await _settle();
+
+      // 被取代的最初选择不再单独发请求，只为最新选择发一次。
+      expect(repository.completers, hasLength(2));
+      expect(repository.queries.last.sortOption, PhotoOrVideoSearchSort.scores);
+      expect(repository.queries.last.pageKey, 1);
+    },
+  );
+
+  test(
+    'drops a duplicate next-page request while a request is in flight',
+    () async {
+      final repository = _DelayedSearchContentsRepository();
+      final bloc = SearchResultBloc<VideoModel>(
+        searchContentsRepository: repository,
+        query: 'flutter',
+      );
+      addTearDown(bloc.close);
+
+      bloc.add(const FetchNextPage());
+      await _settle();
+      expect(repository.completers, hasLength(1));
+
+      // 在途时的重复翻页请求必须丢弃，否则结果会多翻一页。
+      bloc.add(const FetchNextPage());
+      await _settle();
+      expect(repository.completers, hasLength(1));
+
+      repository.completers[0].complete(
+        Result.success(
+          Page<VideoModel>(
+            data: const [VideoModel(id: 'p1', title: 'p1', url: 'https://p1')],
+            number: 1,
+            totalPages: 3,
+          ),
+        ),
+      );
+      await _settle();
+
+      expect(repository.completers, hasLength(1));
+      expect(bloc.state.pagingState.pages, hasLength(1));
+    },
+  );
+
   test('a successful retry clears the previous error', () async {
     // 成功分支必须清掉 error，否则错误视图的「成功 → 清零冷却」监听器看不到
     // 成功状态，且旧的错误标记会残留在已加载的列表上。
