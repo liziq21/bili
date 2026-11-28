@@ -51,6 +51,8 @@
 
 工作流 checkout 目标分支并读取它的 `.fvmrc`，生成 PNG 后打开以该分支为 base 的基线 PR。审查图像差异、测试结果、源分支提交与 workflow run；不要把基线 PR 当成无须审查的自动修复。合入后重新检查功能 PR。
 
+基线 PR 只允许包含 `app/test/golden/goldens/ci/` 下的 PNG：重录后若工作区还有其他改动，`tool/check_golden_changes.py` 会让 job 在开 PR 前失败，`create-pull-request` 的 `add-paths` 也只提交该目录。目标分支的测试代码与 workflow 在同一 job 内执行，这条限制防止其他改动混进正文声称「只有 PNG」的 PR（Issue #720）。
+
 ## PR 卡在 stale 的 CHANGES_REQUESTED
 
 1. 先修复具体意见并推新 commit；正常情况下 CodeRabbit 会增量评审。

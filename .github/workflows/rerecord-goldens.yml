@@ -60,6 +60,13 @@ jobs:
         working-directory: app
         run: flutter test test/golden --update-goldens
 
+      # The branch under test is caller-supplied and this job can open pull
+      # requests, so the commit must contain only the PNGs it re-recorded.
+      # `add-paths` below limits the PR; this step fails the run loudly when the
+      # working tree changed anywhere else (Issue #720).
+      - name: Assert only golden baselines changed
+        run: python3 tool/check_golden_changes.py
+
       - name: Upload re-recorded screenshots
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -89,6 +96,12 @@ jobs:
           base: ${{ inputs.target_ref }}
           commit-message: 'test(golden): re-record CI baselines from CI'
           title: 'test(golden): re-record CI baselines from CI'
+          # Only the baseline directory may enter the commit. The job also fails
+          # when the working tree changed anywhere else, so a branch cannot use
+          # this workflow to smuggle source or workflow edits into a PR whose
+          # body claims it contains only PNGs (Issue #720).
+          add-paths: |
+            app/test/golden/goldens/ci/
           body: |
             Automated baseline re-record triggered by `${{ github.actor }}`.
 
@@ -96,6 +109,8 @@ jobs:
             Recorded on: `${{ inputs.target_ref }}`
 
             These PNGs were rendered in the CI environment, not on a workstation.
+            Only `app/test/golden/goldens/ci/*.png` are committed; the job fails
+            if anything else in the working tree changed.
             Review the diff in this PR before merging — a baseline change means
             the rendered output of the covered widgets changed.
           labels: |
