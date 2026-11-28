@@ -1304,20 +1304,17 @@ class const _OverlayIconButton({
               onTap: onPressed,
               customBorder: const CircleBorder(),
               child: Center(
-                child: Material(
-                  color: $styles.colors.scrim.withValues(alpha: 0.6),
-                  shape: RoundedRectangleBorder(
+                // 用 Ink 把可见底画进 ink 层，按压高亮与波纹才会叠在其上
+                // （design-system R2.5）；普通 Container 会盖住反馈。
+                child: Ink(
+                  width: _visualSize,
+                  height: _visualSize,
+                  decoration: BoxDecoration(
+                    color: $styles.colors.scrim.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: SizedBox.square(
-                    dimension: _visualSize,
-                    child: Center(
-                      child: Icon(
-                        icon,
-                        size: 18,
-                        color: $styles.colors.onScrim,
-                      ),
-                    ),
+                  child: Center(
+                    child: Icon(icon, size: 18, color: $styles.colors.onScrim),
                   ),
                 ),
               ),

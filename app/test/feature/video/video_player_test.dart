@@ -1141,14 +1141,16 @@ void main() {
       final bloc = VideoBloc(repository: _ReadyStreamRepository());
       addTearDown(controller.dispose);
       addTearDown(bloc.close);
+      var fullscreenTaps = 0;
+      var minimizeTaps = 0;
 
       await pumpSurface(
         tester,
         bloc: bloc,
         controller: controller,
         fullscreen: true,
-        onToggleFullscreen: () {},
-        onMinimize: () {},
+        onToggleFullscreen: () => fullscreenTaps++,
+        onMinimize: () => minimizeTaps++,
       );
       await tester.tap(find.byType(PlayerGestureLayer));
       await tester.pump(const Duration(milliseconds: 400));
@@ -1169,6 +1171,19 @@ void main() {
         expect(size.width, greaterThanOrEqualTo(44), reason: tooltip);
         expect(size.height, greaterThanOrEqualTo(44), reason: tooltip);
       }
+
+      // 读屏激活走的是语义节点的 tap action，必须真的落到按钮回调上。
+      final back = tester.getSemantics(find.bySemanticsLabel('Back'));
+      back.owner!.performAction(back.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(fullscreenTaps, 1);
+      expect(minimizeTaps, 0);
+
+      final pip = tester.getSemantics(find.bySemanticsLabel('Minimize'));
+      pip.owner!.performAction(pip.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(fullscreenTaps, 1);
+      expect(minimizeTaps, 1);
       semantics.dispose();
     });
 
