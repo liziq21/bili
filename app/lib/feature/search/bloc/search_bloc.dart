@@ -39,25 +39,31 @@ class SearchBloc({
 
   final _log = Logger('AppSearchBarBloc');
 
-  /// 在途的建议请求。提交搜索时先等它落地，避免建议请求与首个结果请求
-  /// 落进同一个风控窗口——switchMap 只取消订阅，停不掉已经发出的 HTTP。
-  Future<void>? _pendingSuggests;
+  /// 尚未落地的建议请求数量。提交搜索时要等它们全部结束，避免建议请求与
+  /// 首个结果请求落进同一个风控窗口——switchMap 只取消订阅，停不掉已经发出
+  /// 的 HTTP，被切走的旧请求也仍在跑，所以必须按数量跟踪而不是只留最新一个。
+  int _inFlightSuggests = 0;
+  Completer<void>? _suggestsSettled;
 
-  /// 提交前把还没发出去的建议请求标记为作废。
+  /// 建议请求的世代。`skipPendingSuggests` 自增它，debounce 里排队的旧事件
+  /// 带着旧世代，到期时直接跳过网络。
+  int _suggestsEpoch = 0;
+
+  /// 正在进行的建议请求都落地后完成；没有在途请求时为 null。
+  Future<void>? get pendingSuggests => _inFlightSuggests == 0
+      ? null
+      : (_suggestsSettled ??= Completer<void>()).future;
+
+  /// 请求某个查询的建议。
   ///
-  /// 建议请求要经过 300ms debounce 才发出；用户输入后立刻回车时请求还在
-  /// 定时器里排队，提交后再发出去就会和结果请求撞进同一窗口。这里只打标记，
-  /// 不额外发事件：新事件会再排一个 300ms 定时器，而定时器到期时对应的
-  /// [SearchQueryChanged] 会自己跳过网络。
-  String? _skippedSuggestsQuery;
+  /// 事件自带当前世代，提交搜索时 [skipPendingSuggests] 一自增，所有还排在
+  /// debounce 里的旧事件都会失效——不依赖提交的词与被防抖的输入是否相同。
+  void requestSuggests(String query) =>
+      add(SearchQueryChanged(query, _suggestsEpoch));
 
-  /// 当前在途的建议请求，没有则为 null。调用方可以 `await` 它。
-  Future<void>? get pendingSuggests => _pendingSuggests;
-
-  /// 提交搜索时调用：作废尚未发出的建议请求。
-  void skipPendingSuggests(String query) {
-    _skippedSuggestsQuery = query;
-  }
+  /// 提交搜索时调用：作废尚未发出的建议请求。在途请求不受影响，调用方应
+  /// 先 await 一次 [pendingSuggests] 再发结果请求。
+  void skipPendingSuggests() => _suggestsEpoch++;
 
   // 处理最近搜索流：emit.forEach 自动接管生命周期，销毁时自动注销
   Future<void> _onMonitorRecentSearches(
@@ -85,24 +91,25 @@ class SearchBloc({
       return;
     }
 
-    // 这条查询在 debounce 期间已经被提交去搜索结果页：不再发建议请求，
-    // 只把状态对齐到输入框，让等待中的浮层立刻拿到空建议。
-    final skipped = query == _skippedSuggestsQuery;
-    _skippedSuggestsQuery = null;
-    if (skipped) {
+    // 这条查询在排队期间已经被提交去搜索结果页：不再发建议请求，只把状态
+    // 对齐到输入框，让等待中的浮层立刻拿到空建议。
+    if (event.suggestsEpoch != _suggestsEpoch) {
       _log.fine('Skip suggests for a submitted query: $query');
       emit(state.copyWith(suggests: [], currentQuery: query));
       return;
     }
 
     _log.fine('Load suggests for: $query');
-    final request = _searchSuggestRepository.getSuggests(query);
-    _pendingSuggests = request;
+    _inFlightSuggests++;
     Result<List<String>, Exception> result;
     try {
-      result = await request;
+      result = await _searchSuggestRepository.getSuggests(query);
     } finally {
-      if (identical(_pendingSuggests, request)) _pendingSuggests = null;
+      _inFlightSuggests--;
+      if (_inFlightSuggests == 0) {
+        _suggestsSettled?.complete();
+        _suggestsSettled = null;
+      }
     }
 
     switch (result) {
