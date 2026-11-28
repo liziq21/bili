@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,6 +60,12 @@ class const AppSearchAnchor({
 /// debounce 合并掉就永远等不到，因此必须兜一个超时而不是无限期挂起。
 const Duration _suggestionTimeout = Duration(seconds: 5);
 
+/// 提交搜索时等待在途建议请求的上限。
+///
+/// 正常情况下建议请求在几百毫秒内返回，等它是为了不和结果请求挤进同一个风控
+/// 窗口；但建议接口卡住时不能连带把搜索结果页也卡住。
+const Duration _pendingSuggestsWait = Duration(seconds: 1);
+
 /// 把建议词与历史记录合并成一份去重后的建议列表。
 ///
 /// 历史记在 [history] 里（通常按时间倒序），建议词来自远端按相关度排序。
@@ -98,6 +105,8 @@ List<String> mergeSuggestions({
 }
 
 class _AppSearchAnchorState() extends State<AppSearchAnchor> {
+  final _log = Logger('AppSearchAnchor');
+  int _submitId = 0;
   final SearchController _controller = SearchController();
   late Iterable<Widget> _lastOptions = <Widget>[];
 
@@ -164,9 +173,46 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
 
   void _handleSearch(String query) {
     if (query.isEmpty) return;
+    final bloc = _searchBloc;
+    _controller.closeView(query); // 搜索后关闭建议视图
+
+    // 建议请求与首个结果请求落在同一风控窗口时，结果请求会被判「操作过快」。
+    // 先把没发出去的建议请求作废，再等在途的那些落地，之后才让页面去建
+    // 结果 bloc。等待有上限：建议接口卡住时不能让搜索页永远打不开。
+    final submitId = ++_submitId;
+    if (bloc == null || bloc.isClosed) {
+      _submit(query, submitId);
+      return;
+    }
+    bloc.skipPendingSuggests();
+    unawaited(_submitAfterPendingSuggests(bloc, query, submitId));
+  }
+
+  Future<void> _submitAfterPendingSuggests(
+    SearchBloc bloc,
+    String query,
+    int submitId,
+  ) async {
+    final pending = bloc.pendingSuggests;
+    if (pending != null) {
+      try {
+        await pending.timeout(_pendingSuggestsWait);
+      } on TimeoutException {
+        _log.warning('Suggestion request still pending, searching anyway');
+      } catch (error) {
+        _log.fine('Suggestion request failed before search: $error');
+      }
+    }
+    if (!mounted) return;
+    _submit(query, submitId);
+  }
+
+  /// 只有最新一次提交能落地：连按两次回车时，先排队的等待结束时不能把旧
+  /// 查询的路由压到新查询上面。
+  void _submit(String query, int submitId) {
+    if (submitId != _submitId) return;
     widget.onSearch(query);
     widget.navigateToSearchResult?.call(query);
-    _controller.closeView(query); // 搜索后关闭建议视图
   }
 
   /// 把超长输入截断回 [AppSearchAnchor.maxQueryLength]。
@@ -292,7 +338,7 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
     // 所以 stream.first 可能拿到属于上一个查询的 suggests。
     List<String> options;
     try {
-      bloc.add(SearchQueryChanged(query));
+      bloc.requestSuggests(query);
       final state = await bloc.stream
           .firstWhere((s) => s.currentQuery == query)
           .timeout(_suggestionTimeout);

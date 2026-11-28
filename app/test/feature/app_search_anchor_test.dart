@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/data/model/recent_search_query.dart';
 import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
 import 'package:app/data/repository/search_suggest_repository.dart';
@@ -51,6 +53,28 @@ class FakeSuggestRepository(final List<String> suggests)
   }
 }
 
+class GatedSuggestRepository() implements SearchSuggestRepository {
+  final Completer<Result<List<String>, Exception>> completer = Completer();
+  final List<String> receivedQueries = [];
+
+  @override
+  Future<Result<List<String>, Exception>> getSuggests(String query) {
+    receivedQueries.add(query);
+    return completer.future;
+  }
+}
+
+class RecordingSuggestRepository() implements SearchSuggestRepository {
+  final Map<String, Completer<Result<List<String>, Exception>>> requests = {};
+
+  @override
+  Future<Result<List<String>, Exception>> getSuggests(String query) {
+    final completer = Completer<Result<List<String>, Exception>>();
+    requests[query] = completer;
+    return completer.future;
+  }
+}
+
 class const FakeRecentSearchQueryRepository()
     implements RecentSearchQueryRepository {
   @override
@@ -92,6 +116,7 @@ SearchBloc buildBloc(SearchSuggestRepository suggest) {
 Widget buildAnchor({
   required SearchBloc bloc,
   required void Function(String) onSearch,
+  void Function(String)? onNavigate,
   bool useBar = false,
 }) {
   // BlocProvider 必须放在 MaterialApp 内部、Navigator 之下，才和线上一致：
@@ -103,6 +128,7 @@ Widget buildAnchor({
       child: Scaffold(
         body: AppSearchAnchor(
           onSearch: onSearch,
+          navigateToSearchResult: onNavigate,
           // bar 模式是省略 builder 时的形态，搜索结果页用的就是它。
           builder: useBar
               ? null
@@ -149,6 +175,129 @@ void main() {
 
     expect(suggest.receivedQueries, contains('Flutter'));
     expect(find.text('Flutter 教程'), findsOneWidget);
+  });
+
+  testWidgets('a submitted search waits for the in-flight suggestion', (
+    tester,
+  ) async {
+    final suggest = GatedSuggestRepository();
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+    final submitted = <String>[];
+    final navigated = <String>[];
+
+    await tester.pumpWidget(
+      buildAnchor(
+        bloc: bloc,
+        onSearch: submitted.add,
+        onNavigate: navigated.add,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Flutter');
+    await pumpPastDebounce(tester);
+
+    expect(suggest.receivedQueries, ['Flutter']);
+    expect(bloc.pendingSuggests, isNotNull);
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(submitted, isEmpty);
+    expect(navigated, isEmpty);
+
+    suggest.completer.complete(Result.success(const ['Flutter 教程']));
+    await tester.pumpAndSettle();
+    expect(submitted, ['Flutter']);
+    expect(navigated, ['Flutter']);
+  });
+
+  testWidgets('submitting before the debounce skips the suggestion request', (
+    tester,
+  ) async {
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+    final submitted = <String>[];
+    final navigated = <String>[];
+
+    await tester.pumpWidget(
+      buildAnchor(
+        bloc: bloc,
+        onSearch: submitted.add,
+        onNavigate: navigated.add,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Flutter');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(submitted, ['Flutter']);
+    expect(navigated, ['Flutter']);
+
+    // debounce 到期时那条查询已经被提交，不能再发建议请求。
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(suggest.receivedQueries, isEmpty);
+  });
+
+  testWidgets('pendingSuggests waits for every in-flight suggestion', (
+    tester,
+  ) async {
+    final suggest = RecordingSuggestRepository();
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+
+    bloc.requestSuggests('a');
+    await tester.pump(const Duration(milliseconds: 400));
+    bloc.requestSuggests('ab');
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(suggest.requests.keys, ['a', 'ab']);
+    final pending = bloc.pendingSuggests;
+    expect(pending, isNotNull);
+    var settled = false;
+    unawaited(pending!.then((_) => settled = true));
+
+    // 被 switchMap 切走的旧请求仍在跑，必须一并等。
+    suggest.requests['a']!.complete(Result.success(const []));
+    await tester.pump();
+    expect(settled, isFalse);
+
+    suggest.requests['ab']!.complete(Result.success(const []));
+    await tester.pump();
+    expect(settled, isTrue);
+    expect(bloc.pendingSuggests, isNull);
+  });
+
+  testWidgets('skipping queued suggests ignores the submitted query text', (
+    tester,
+  ) async {
+    final suggest = RecordingSuggestRepository();
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+
+    // 输入 'abc' 后 debounce 未到期就提交了另一个词：排队的事件必须作废，
+    // 不能靠字符串相等来判断。
+    bloc.requestSuggests('abc');
+    await tester.pump(const Duration(milliseconds: 100));
+    bloc.skipPendingSuggests();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(suggest.requests, isEmpty);
+
+    // 跳过状态只能作用于排队的那批事件，之后的查询照常发请求。
+    bloc.requestSuggests('abcd');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(suggest.requests.keys, ['abcd']);
+    suggest.requests['abcd']!.complete(Result.success(const []));
+    await tester.pump();
   });
 
   testWidgets('submitting a suggestion reports it to onSearch', (tester) async {

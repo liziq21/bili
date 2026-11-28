@@ -39,6 +39,32 @@ class SearchBloc({
 
   final _log = Logger('AppSearchBarBloc');
 
+  /// 尚未落地的建议请求数量。提交搜索时要等它们全部结束，避免建议请求与
+  /// 首个结果请求落进同一个风控窗口——switchMap 只取消订阅，停不掉已经发出
+  /// 的 HTTP，被切走的旧请求也仍在跑，所以必须按数量跟踪而不是只留最新一个。
+  int _inFlightSuggests = 0;
+  Completer<void>? _suggestsSettled;
+
+  /// 建议请求的世代。`skipPendingSuggests` 自增它，debounce 里排队的旧事件
+  /// 带着旧世代，到期时直接跳过网络。
+  int _suggestsEpoch = 0;
+
+  /// 正在进行的建议请求都落地后完成；没有在途请求时为 null。
+  Future<void>? get pendingSuggests => _inFlightSuggests == 0
+      ? null
+      : (_suggestsSettled ??= Completer<void>()).future;
+
+  /// 请求某个查询的建议。
+  ///
+  /// 事件自带当前世代，提交搜索时 [skipPendingSuggests] 一自增，所有还排在
+  /// debounce 里的旧事件都会失效——不依赖提交的词与被防抖的输入是否相同。
+  void requestSuggests(String query) =>
+      add(SearchQueryChanged(query, _suggestsEpoch));
+
+  /// 提交搜索时调用：作废尚未发出的建议请求。在途请求不受影响，调用方应
+  /// 先 await 一次 [pendingSuggests] 再发结果请求。
+  void skipPendingSuggests() => _suggestsEpoch++;
+
   // 处理最近搜索流：emit.forEach 自动接管生命周期，销毁时自动注销
   Future<void> _onMonitorRecentSearches(
     MonitorRecentSearches event,
@@ -65,8 +91,26 @@ class SearchBloc({
       return;
     }
 
+    // 这条查询在排队期间已经被提交去搜索结果页：不再发建议请求，只把状态
+    // 对齐到输入框，让等待中的浮层立刻拿到空建议。
+    if (event.suggestsEpoch != _suggestsEpoch) {
+      _log.fine('Skip suggests for a submitted query: $query');
+      emit(state.copyWith(suggests: [], currentQuery: query));
+      return;
+    }
+
     _log.fine('Load suggests for: $query');
-    final result = await _searchSuggestRepository.getSuggests(query);
+    _inFlightSuggests++;
+    Result<List<String>, Exception> result;
+    try {
+      result = await _searchSuggestRepository.getSuggests(query);
+    } finally {
+      _inFlightSuggests--;
+      if (_inFlightSuggests == 0) {
+        _suggestsSettled?.complete();
+        _suggestsSettled = null;
+      }
+    }
 
     switch (result) {
       case Success(:final success):
