@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/data/model/recent_search_query.dart';
 import 'package:app/data/repository/recent_search_query/recent_search_query_repository.dart';
 import 'package:app/data/repository/search_suggest_repository.dart';
@@ -48,6 +50,17 @@ class FakeSuggestRepository(final List<String> suggests)
   Future<Result<List<String>, Exception>> getSuggests(String query) async {
     receivedQueries.add(query);
     return Result.success(suggests);
+  }
+}
+
+class GatedSuggestRepository() implements SearchSuggestRepository {
+  final Completer<Result<List<String>, Exception>> completer = Completer();
+  final List<String> receivedQueries = [];
+
+  @override
+  Future<Result<List<String>, Exception>> getSuggests(String query) {
+    receivedQueries.add(query);
+    return completer.future;
   }
 }
 
@@ -149,6 +162,60 @@ void main() {
 
     expect(suggest.receivedQueries, contains('Flutter'));
     expect(find.text('Flutter 教程'), findsOneWidget);
+  });
+
+  testWidgets('a submitted search waits for the in-flight suggestion', (
+    tester,
+  ) async {
+    final suggest = GatedSuggestRepository();
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+    final submitted = <String>[];
+
+    await tester.pumpWidget(buildAnchor(bloc: bloc, onSearch: submitted.add));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Flutter');
+    await pumpPastDebounce(tester);
+
+    expect(suggest.receivedQueries, ['Flutter']);
+    expect(bloc.pendingSuggests, isNotNull);
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(submitted, isEmpty);
+
+    suggest.completer.complete(Result.success(const ['Flutter 教程']));
+    await tester.pumpAndSettle();
+    expect(submitted, ['Flutter']);
+  });
+
+  testWidgets('submitting before the debounce skips the suggestion request', (
+    tester,
+  ) async {
+    final suggest = FakeSuggestRepository(const ['Flutter 教程']);
+    final bloc = buildBloc(suggest);
+    addTearDown(bloc.close);
+    final submitted = <String>[];
+
+    await tester.pumpWidget(buildAnchor(bloc: bloc, onSearch: submitted.add));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Flutter');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    expect(submitted, ['Flutter']);
+
+    // debounce 到期时那条查询已经被提交，不能再发建议请求。
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(suggest.receivedQueries, isEmpty);
   });
 
   testWidgets('submitting a suggestion reports it to onSearch', (tester) async {

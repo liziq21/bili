@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,6 +60,12 @@ class const AppSearchAnchor({
 /// debounce 合并掉就永远等不到，因此必须兜一个超时而不是无限期挂起。
 const Duration _suggestionTimeout = Duration(seconds: 5);
 
+/// 提交搜索时等待在途建议请求的上限。
+///
+/// 正常情况下建议请求在几百毫秒内返回，等它是为了不和结果请求挤进同一个风控
+/// 窗口；但建议接口卡住时不能连带把搜索结果页也卡住。
+const Duration _pendingSuggestsWait = Duration(seconds: 1);
+
 /// 把建议词与历史记录合并成一份去重后的建议列表。
 ///
 /// 历史记在 [history] 里（通常按时间倒序），建议词来自远端按相关度排序。
@@ -98,6 +105,7 @@ List<String> mergeSuggestions({
 }
 
 class _AppSearchAnchorState() extends State<AppSearchAnchor> {
+  final _log = Logger('AppSearchAnchor');
   final SearchController _controller = SearchController();
   late Iterable<Widget> _lastOptions = <Widget>[];
 
@@ -164,9 +172,41 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
 
   void _handleSearch(String query) {
     if (query.isEmpty) return;
+    final bloc = _searchBloc;
+    _controller.closeView(query); // 搜索后关闭建议视图
+
+    // 建议请求与首个结果请求落在同一风控窗口时，结果请求会被判「操作过快」。
+    // 先把没发出去的建议请求作废，再等在途的那一个落地，之后才让页面去建
+    // 结果 bloc。等待有上限：建议接口卡住时不能让搜索页永远打不开。
+    if (bloc == null || bloc.isClosed) {
+      _submit(query);
+      return;
+    }
+    bloc.skipPendingSuggests(query);
+    unawaited(_submitAfterPendingSuggests(bloc, query));
+  }
+
+  Future<void> _submitAfterPendingSuggests(
+    SearchBloc bloc,
+    String query,
+  ) async {
+    final pending = bloc.pendingSuggests;
+    if (pending != null) {
+      try {
+        await pending.timeout(_pendingSuggestsWait);
+      } on TimeoutException {
+        _log.warning('Suggestion request still pending, searching anyway');
+      } catch (error) {
+        _log.fine('Suggestion request failed before search: $error');
+      }
+    }
+    if (!mounted) return;
+    _submit(query);
+  }
+
+  void _submit(String query) {
     widget.onSearch(query);
     widget.navigateToSearchResult?.call(query);
-    _controller.closeView(query); // 搜索后关闭建议视图
   }
 
   /// 把超长输入截断回 [AppSearchAnchor.maxQueryLength]。

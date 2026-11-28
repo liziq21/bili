@@ -39,6 +39,26 @@ class SearchBloc({
 
   final _log = Logger('AppSearchBarBloc');
 
+  /// 在途的建议请求。提交搜索时先等它落地，避免建议请求与首个结果请求
+  /// 落进同一个风控窗口——switchMap 只取消订阅，停不掉已经发出的 HTTP。
+  Future<void>? _pendingSuggests;
+
+  /// 提交前把还没发出去的建议请求标记为作废。
+  ///
+  /// 建议请求要经过 300ms debounce 才发出；用户输入后立刻回车时请求还在
+  /// 定时器里排队，提交后再发出去就会和结果请求撞进同一窗口。这里只打标记，
+  /// 不额外发事件：新事件会再排一个 300ms 定时器，而定时器到期时对应的
+  /// [SearchQueryChanged] 会自己跳过网络。
+  String? _skippedSuggestsQuery;
+
+  /// 当前在途的建议请求，没有则为 null。调用方可以 `await` 它。
+  Future<void>? get pendingSuggests => _pendingSuggests;
+
+  /// 提交搜索时调用：作废尚未发出的建议请求。
+  void skipPendingSuggests(String query) {
+    _skippedSuggestsQuery = query;
+  }
+
   // 处理最近搜索流：emit.forEach 自动接管生命周期，销毁时自动注销
   Future<void> _onMonitorRecentSearches(
     MonitorRecentSearches event,
@@ -65,8 +85,25 @@ class SearchBloc({
       return;
     }
 
+    // 这条查询在 debounce 期间已经被提交去搜索结果页：不再发建议请求，
+    // 只把状态对齐到输入框，让等待中的浮层立刻拿到空建议。
+    final skipped = query == _skippedSuggestsQuery;
+    _skippedSuggestsQuery = null;
+    if (skipped) {
+      _log.fine('Skip suggests for a submitted query: $query');
+      emit(state.copyWith(suggests: [], currentQuery: query));
+      return;
+    }
+
     _log.fine('Load suggests for: $query');
-    final result = await _searchSuggestRepository.getSuggests(query);
+    final request = _searchSuggestRepository.getSuggests(query);
+    _pendingSuggests = request;
+    Result<List<String>, Exception> result;
+    try {
+      result = await request;
+    } finally {
+      if (identical(_pendingSuggests, request)) _pendingSuggests = null;
+    }
 
     switch (result) {
       case Success(:final success):
