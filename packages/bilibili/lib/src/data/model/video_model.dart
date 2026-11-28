@@ -11,7 +11,9 @@ extension NetworkVideoSearchResultX on NetworkVideoSearchResult {
     thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: play,
     uploadDate: DateTime.fromMillisecondsSinceEpoch(pubdate * 1000),
-    duration: int.tryParse(duration),
+    // 搜索接口的时长是 `mm:ss` 字符串，`int.tryParse` 会得到 null，
+    // 卡片上的时长角标因此从来不显示。
+    duration: _parseDuration(duration),
     desc: desc,
     creatorProfileName: author,
   );
@@ -25,7 +27,7 @@ extension NetworkBiliUserResX on NetworkBiliUserRes {
     thumbnailUrl: normalizeBiliUrl(pic),
     viewCount: int.tryParse(play),
     uploadDate: DateTime.fromMillisecondsSinceEpoch(pubdate * 1000),
-    duration: int.tryParse(duration),
+    duration: _parseDuration(duration),
     desc: desc,
   );
 }

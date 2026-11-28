@@ -169,10 +169,17 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
       length: tabs.isEmpty ? 1 : tabs.length,
       child: Scaffold(
         appBar: AppBar(
+          titleSpacing: 8.0,
           title: Padding(
-            padding: const EdgeInsets.fromLTRB(0.0, 8.0, 16.0, 8.0),
+            padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
             child: AppSearchAnchor(
               initialQuery: widget.query,
+              // 默认 SearchBar 最大宽度 800：1280 宽窗口里搜索框与右侧筛选
+              // 图标之间会空出近 400px。这里放开上限让搜索框铺满标题区。
+              barConstraints: const BoxConstraints(
+                minHeight: 56.0,
+                maxWidth: double.infinity,
+              ),
               onSearch: (newQuery) {
                 if (newQuery.isNotEmpty && newQuery != widget.query) {
                   context.defaultNavigateToSearchResult(newQuery);
@@ -185,6 +192,9 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
               : TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
+                  // 与结果网格的 8px 内容内边距对齐；默认 AppBar 底部的 16
+                  // 会让标签比卡片向右偏 8px。
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   tabs: tabs,
                   onTap: (_) => HapticFeedback.selectionClick(),
                 ),
@@ -269,7 +279,8 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
       builder: (context, state) => _ResultBody(
         toolbar: _toolbar(context, bloc, state),
         child: SearchResult<VideoModel>(
-          maxCrossAxisExtent: 200.0,
+          maxCrossAxisExtent: 240.0,
+          maxColumns: 5,
           itemAspectRatio: 0.8,
           itemBuilder: _buildVideoItem,
         ),
@@ -286,7 +297,9 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: $styles.insets.xs),
+      // 网格已经在 body 上有 8px 内边距，这里不再叠加，否则排序/筛选
+      // 会比卡片多缩进 8px。
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
           if (state.sortOption.isNotEmpty)
@@ -331,6 +344,7 @@ class _SearchResultScreenState() extends State<SearchResultScreen> {
     if (bloc == null) return const SizedBox.shrink();
     return SearchResult<LiveRoomModel>(
       maxCrossAxisExtent: 280.0,
+      maxColumns: 4,
       itemAspectRatio: 0.9,
       itemBuilder: _buildLiveRoomItem,
     );
@@ -396,29 +410,33 @@ class const _LiveRoomResultCard({
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: switch (liveRoom.thumbnailUrl) {
-                    final String url when url.isNotEmpty => CachedNetworkImage(
-                      imageUrl: url,
-                      memCacheWidth: 320,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, url, error) => Container(
+                // 缩略图吃掉单元格的剩余高度：网格单元宽度由列数决定，
+                // 固定 16:9 会在宽卡片底部留下大片空白。
+                Expanded(
+                  child: SizedBox.expand(
+                    child: switch (liveRoom.thumbnailUrl) {
+                      final String url when url.isNotEmpty =>
+                        CachedNetworkImage(
+                          imageUrl: url,
+                          memCacheWidth: 320,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, url, error) => Container(
+                            color: $styles.colors.surfaceContainerHighest,
+                            child: Icon(
+                              AppIcons.liveTv,
+                              color: $styles.colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      _ => Container(
                         color: $styles.colors.surfaceContainerHighest,
                         child: Icon(
                           AppIcons.liveTv,
                           color: $styles.colors.onSurfaceVariant,
                         ),
                       ),
-                    ),
-                    _ => Container(
-                      color: $styles.colors.surfaceContainerHighest,
-                      child: Icon(
-                        AppIcons.liveTv,
-                        color: $styles.colors.onSurfaceVariant,
-                      ),
-                    ),
-                  },
+                    },
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.all($styles.insets.xs),

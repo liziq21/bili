@@ -14,6 +14,13 @@ class const SearchResult<T>({
 
   final double itemAspectRatio = 1.0,
   final double maxCrossAxisExtent = 200.0,
+
+  /// 宽屏下允许的最大列数。为 null 时不限制，列数完全由
+  /// [maxCrossAxisExtent] 决定。
+  ///
+  /// 没有上限时，1280 宽会排出 7 列约 168px 的卡片，创作者与时长在这么
+  /// 窄的卡片里会被丢弃；限制列数后每张卡片更宽，关键信息才放得下。
+  final int? maxColumns,
 }) extends StatefulWidget {
   @override
   State<SearchResult<T>> createState() => _SearchResultState<T>();
@@ -27,6 +34,25 @@ class _SearchResultState<T>() extends State<SearchResult<T>> {
   final int _scopeId = _searchScopeSeq++;
   String get _firstPageScope => 'search.$_scopeId.first';
   String get _nextPageScope => 'search.$_scopeId.next';
+
+  static const double _gridSpacing = 10.0;
+
+  /// 把 [maxCrossAxisExtent] 放大到刚好只排得下 [SearchResult.maxColumns] 列。
+  ///
+  /// [SliverGridDelegateWithMaxCrossAxisExtent] 的列数是
+  /// `ceil(width / (extent + spacing))`。要让宽度更富余时不再增加列，
+  /// 就抬高 extent，使这个商刚好落在 [SearchResult.maxColumns] 上。
+  double _effectiveMaxExtent(double availableWidth) {
+    final maxColumns = widget.maxColumns;
+    final extent = widget.maxCrossAxisExtent;
+    if (maxColumns == null || maxColumns <= 0) return extent;
+
+    final widthForColumns =
+        (availableWidth - _gridSpacing * (maxColumns - 1)) / maxColumns;
+    return widthForColumns > extent && widthForColumns.isFinite
+        ? widthForColumns
+        : extent;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,38 +80,42 @@ class _SearchResultState<T>() extends State<SearchResult<T>> {
             ),
             builder: (context, data) {
               final state = data.pagingState;
-              return CustomScrollView(
-                slivers: [
-                  PagedSliverGrid<int, T>(
-                    state: state,
-                    fetchNextPage: () => context
-                        .read<SearchResultBloc<T>>()
-                        .add(const FetchNextPage()),
-                    builderDelegate: PagedChildBuilderDelegate(
-                      itemBuilder: widget.itemBuilder,
-                      firstPageErrorIndicatorBuilder: (context, error) =>
-                          _SearchErrorView<T>(
-                            error: error,
-                            scope: _firstPageScope,
-                          ),
-                      newPageErrorIndicatorBuilder: (context, error) =>
-                          _NewPageErrorIndicator<T>(
-                            error: error,
-                            scope: _nextPageScope,
-                            refreshing: data.refreshing,
-                          ),
-                      noItemsFoundIndicatorBuilder: (context) =>
-                          const _EmptySearchIndicator(),
+              return LayoutBuilder(
+                builder: (context, constraints) => CustomScrollView(
+                  slivers: [
+                    PagedSliverGrid<int, T>(
+                      state: state,
+                      fetchNextPage: () => context
+                          .read<SearchResultBloc<T>>()
+                          .add(const FetchNextPage()),
+                      builderDelegate: PagedChildBuilderDelegate(
+                        itemBuilder: widget.itemBuilder,
+                        firstPageErrorIndicatorBuilder: (context, error) =>
+                            _SearchErrorView<T>(
+                              error: error,
+                              scope: _firstPageScope,
+                            ),
+                        newPageErrorIndicatorBuilder: (context, error) =>
+                            _NewPageErrorIndicator<T>(
+                              error: error,
+                              scope: _nextPageScope,
+                              refreshing: data.refreshing,
+                            ),
+                        noItemsFoundIndicatorBuilder: (context) =>
+                            const _EmptySearchIndicator(),
+                      ),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: _effectiveMaxExtent(
+                          constraints.maxWidth,
+                        ),
+                        mainAxisSpacing: _gridSpacing,
+                        crossAxisSpacing: _gridSpacing,
+                        // 💡 放弃固定 mainAxisExtent，改用自适应比例
+                        childAspectRatio: widget.itemAspectRatio,
+                      ),
                     ),
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: widget.maxCrossAxisExtent,
-                      mainAxisSpacing: 10.0,
-                      crossAxisSpacing: 10.0,
-                      // 💡 放弃固定 mainAxisExtent，改用自适应比例
-                      childAspectRatio: widget.itemAspectRatio,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
           ),

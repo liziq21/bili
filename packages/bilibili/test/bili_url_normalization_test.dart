@@ -296,6 +296,19 @@ void main() {
       expect(model.url, isNot(startsWith('https:https://')));
     });
 
+    test('NetworkVideoSearchResultX.asModel parses mm:ss duration', () {
+      final json = loadFake('search_video');
+      final result = NetworkSearchResult.fromJson(
+        json['data'] as Map<String, dynamic>,
+      );
+      final video = result.result.video.first;
+
+      // 搜索接口给的是 `mm:ss`（fixture 里是 1489:57），直接 int.tryParse
+      // 会得到 null，卡片上的时长角标因此从不显示。
+      expect(video.duration, '1489:57');
+      expect(video.asModel().duration, 1489 * 60 + 57);
+    });
+
     test('NetworkBiliPopularVideoX sanitizes bvid control chars', () {
       final popularVideo = NetworkBiliPopularVideo(
         aid: 12345,

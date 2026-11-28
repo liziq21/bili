@@ -44,6 +44,12 @@ class const AppSearchAnchor({
 
   /// 初始填入输入框的关键词。搜索结果页用它回显当前查询。
   final String initialQuery = '',
+
+  /// bar 模式下搜索框自身的尺寸约束。
+  ///
+  /// 默认最大宽度 800，宽屏下会与右侧内容之间留下大片空白；搜索结果页传入
+  /// 放开上限的约束，让搜索框铺满可用宽度。
+  final BoxConstraints? barConstraints,
 }) extends StatefulWidget {
   @override
   State<AppSearchAnchor> createState() => _AppSearchAnchorState();
@@ -209,6 +215,22 @@ class _AppSearchAnchorState() extends State<AppSearchAnchor> {
             searchController: _controller,
             barHintText: l10n?.searchHint ?? 'Search...',
             barElevation: const WidgetStatePropertyAll(0.0),
+            constraints: widget.barConstraints,
+            barTrailing: [
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, value, _) => value.text.isEmpty
+                    ? const SizedBox.shrink()
+                    : IconButton(
+                        icon: const Icon(AppIcons.close),
+                        tooltip: l10n?.clear ?? 'Clear',
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _controller.clear();
+                        },
+                      ),
+              ),
+            ],
             suggestionsBuilder: _getSuggestions,
             textInputAction: .search,
             onSubmitted: _handleSearch,
