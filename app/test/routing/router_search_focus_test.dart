@@ -1,3 +1,4 @@
+import 'package:app/design/design.dart';
 import 'package:app/feature/search/app_search_anchor.dart';
 import 'package:app/routing/search_focus_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -156,30 +157,70 @@ void main() {
       );
     });
 
-    testWidgets(
-      'the registered entry re-shows the keyboard when the view is open',
-      (tester) async {
-        final log = FocusRegistrationLog();
-        await tester.pumpWidget(buildAnchorWithRegistration(log));
-        await tester.pump();
+    testWidgets('reselection re-shows the keyboard when the view is open', (
+      tester,
+    ) async {
+      final controller = SearchFocusController();
+      addTearDown(controller.dispose);
 
-        // 第一次点按打开搜索视图，视图内输入框因 autoFocus 获得焦点并唤起键盘。
-        log.current!();
-        await tester.pumpAndSettle();
-        expect(tester.testTextInput.isVisible, isTrue);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SearchFocusController>.value(
+          value: controller,
+          child: MaterialApp(
+            localizationsDelegates: const [
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            supportedLocales: const [Locale('en')],
+            home: Scaffold(
+              // 嵌套 Navigator：SearchAnchor 把视图路由推到最近的 Navigator，
+              // 底栏因此仍留在树上，才能真实地点第二次。
+              body: Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (_) => AppSearchAnchor(
+                    onSearch: _noop,
+                    onFocusInputReady: controller.register,
+                  ),
+                ),
+              ),
+              bottomNavigationBar: Builder(
+                builder: (context) => NavigationBar(
+                  selectedIndex: 1,
+                  onDestinationSelected: (_) =>
+                      context.read<SearchFocusController>().requestFocus(),
+                  destinations: const [
+                    NavigationDestination(
+                      icon: Icon(AppIcons.discover),
+                      label: 'other',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(AppIcons.search),
+                      label: 'search',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
 
-        // 模拟 Android 返回键 / 下滑手势收起输入法：只隐藏键盘，焦点仍留在
-        // 视图输入框上（与真机一致）。
-        tester.testTextInput.hide();
-        await tester.pump();
-        expect(tester.testTextInput.isVisible, isFalse);
+      // 第一次点底栏搜索：打开搜索视图，视图内输入框获得焦点并唤起键盘。
+      await tester.tap(find.text('search'));
+      await tester.pumpAndSettle();
+      expect(tester.testTextInput.isVisible, isTrue);
 
-        // 再次点按底栏搜索：视图已展开，仍应把键盘唤回。
-        log.current!();
-        await tester.pump();
-        expect(tester.testTextInput.isVisible, isTrue);
-      },
-    );
+      // 模拟 Android 返回键 / 下滑手势收起输入法：只隐藏键盘，焦点仍留在
+      // 视图输入框上（与真机一致）。
+      tester.testTextInput.hide();
+      await tester.pump();
+      expect(tester.testTextInput.isVisible, isFalse);
+
+      // 再次点底栏搜索：视图已展开，仍应把键盘唤回。
+      await tester.tap(find.text('search'));
+      await tester.pump();
+      expect(tester.testTextInput.isVisible, isTrue);
+    });
 
     testWidgets('the registered entry is inert after dispose', (tester) async {
       final log = FocusRegistrationLog();

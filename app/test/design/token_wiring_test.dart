@@ -267,6 +267,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: appThemeData(colors),
+          localizationsDelegates: const [
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          supportedLocales: const [Locale('en')],
           home: const Scaffold(
             body: Center(
               child: Tooltip(
