@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction, Tristate;
 
 import 'package:app/data/repository/video_detail_repository.dart';
 import 'package:app/feature/video/bloc/video_bloc.dart';
@@ -691,7 +692,9 @@ void main() {
       expect(rect.height, greaterThan(rect.width));
       // 竖条撑满播放器给画面留的高度，而不是缩成容器中央的一小块。
       expect(rect.width, lessThan(300));
-      expect(rect.height, greaterThan(250));
+      // 全屏按钮的命中区按 44dp 触控目标铺开（LIZ-219），控制栏比原来高
+      // 14dp，画面随之矮了 14dp；阈值同步放宽，仍要求竖条接近撑满。
+      expect(rect.height, greaterThan(230));
     });
 
     testWidgets('rotation metadata turns a landscape-encoded portrait clip', (
@@ -1127,6 +1130,91 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(minimized, isTrue);
+    });
+
+    testWidgets('overlay buttons expose button semantics and a 44dp target', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+      var fullscreenTaps = 0;
+      var minimizeTaps = 0;
+
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+        onToggleFullscreen: () => fullscreenTaps++,
+        onMinimize: () => minimizeTaps++,
+      );
+      await tester.tap(find.byType(PlayerGestureLayer));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      for (final tooltip in ['Back', 'Minimize']) {
+        // Tooltip 只写 tooltip 属性，button 角色与 tap 动作必须来自
+        // Semantics 节点本身；按语义标签定位，才能拿到那个节点。
+        final node = tester.getSemantics(find.bySemanticsLabel(tooltip));
+        final data = node.getSemanticsData();
+        final flags = data.flagsCollection;
+        expect(flags.isButton, isTrue, reason: tooltip);
+        expect(flags.isEnabled, isNot(Tristate.none), reason: tooltip);
+        expect(flags.isEnabled, Tristate.isTrue, reason: tooltip);
+        expect(data.hasAction(SemanticsAction.tap), isTrue, reason: tooltip);
+
+        // 视觉 30x30，命中区不小于 44x44（WCAG 2.5.5）。
+        final size = tester.getSize(find.byTooltip(tooltip));
+        expect(size.width, greaterThanOrEqualTo(44), reason: tooltip);
+        expect(size.height, greaterThanOrEqualTo(44), reason: tooltip);
+      }
+
+      // 读屏激活走的是语义节点的 tap action，必须真的落到按钮回调上。
+      final back = tester.getSemantics(find.bySemanticsLabel('Back'));
+      back.owner!.performAction(back.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(fullscreenTaps, 1);
+      expect(minimizeTaps, 0);
+
+      final pip = tester.getSemantics(find.bySemanticsLabel('Minimize'));
+      pip.owner!.performAction(pip.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(fullscreenTaps, 1);
+      expect(minimizeTaps, 1);
+      semantics.dispose();
+    });
+
+    testWidgets('a disabled overlay button reports enabled=false', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      // onToggleFullscreen 为 null 时退出全屏按钮不可用。
+      await pumpSurface(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        fullscreen: true,
+      );
+      await tester.tap(find.byType(PlayerGestureLayer));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final data = tester
+          .getSemantics(find.bySemanticsLabel('Back'))
+          .getSemanticsData();
+      final flags = data.flagsCollection;
+      expect(flags.isEnabled, isNot(Tristate.none));
+      expect(flags.isEnabled, Tristate.isFalse);
+      expect(data.hasAction(SemanticsAction.tap), isFalse);
+      semantics.dispose();
     });
   });
 }

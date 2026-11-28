@@ -25,6 +25,26 @@
   "@navSettings": {
     "description": "Home app bar - settings entry tooltip"
   },
+  "notFoundTitle": "页面不存在",
+  "@notFoundTitle": {
+    "description": "404 screen app bar title"
+  },
+  "notFoundBody": "找不到这个页面：{uri} \n 路径：{path}",
+  "@notFoundBody": {
+    "description": "404 screen body for an unroutable link; both values are sanitized before display",
+    "placeholders": {
+      "uri": {
+        "type": "String",
+        "example": "https://example.com/missing",
+        "description": "Sanitized URI that failed to resolve"
+      },
+      "path": {
+        "type": "String",
+        "example": "/missing",
+        "description": "Sanitized route path with host and scheme details"
+      }
+    }
+  },
   "settingsTitle": "设置",
   "@settingsTitle": {
     "description": "Settings screen title"

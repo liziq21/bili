@@ -1,4 +1,6 @@
 import 'package:app/feature/not_found/not_found_screen.dart';
+import 'package:app/l10n/localization_file/app_localizations_en.dart';
+import 'package:app/l10n/localization_file/app_localizations_zh.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -12,8 +14,12 @@ void main() {
         const samplePath = '/auth/callback';
 
         await tester.pumpWidget(
-          const MaterialApp(
-            home: NotFoundScreen(uri: sensitiveUri, path: samplePath),
+          MaterialApp(
+            home: NotFoundScreen(
+              uri: sensitiveUri,
+              path: samplePath,
+              l10n: AppLocalizationsEn(),
+            ),
           ),
         );
 
@@ -33,8 +39,12 @@ void main() {
       const dirtyPath = '/test\x07\x00';
 
       await tester.pumpWidget(
-        const MaterialApp(
-          home: NotFoundScreen(uri: dirtyUri, path: dirtyPath),
+        MaterialApp(
+          home: NotFoundScreen(
+            uri: dirtyUri,
+            path: dirtyPath,
+            l10n: AppLocalizationsEn(),
+          ),
         ),
       );
 
@@ -43,6 +53,25 @@ void main() {
       expect(find.textContaining('\x00'), findsNothing);
       expect(find.textContaining('\x1F'), findsNothing);
       expect(find.textContaining('\x07'), findsNothing);
+    });
+
+    testWidgets('renders Chinese copy when AppLocalizations is zh', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: NotFoundScreen(
+            uri: 'https://example.com/missing',
+            path: '/missing',
+            l10n: AppLocalizationsZh(),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(find.text('页面不存在'), findsOneWidget);
+      expect(find.textContaining('找不到这个页面'), findsOneWidget);
     });
   });
 }

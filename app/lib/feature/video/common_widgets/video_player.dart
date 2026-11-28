@@ -1274,24 +1274,51 @@ class const _FullscreenButton({
 }
 
 /// 画面浮层上的图标按钮：半透明圆角底 + 点击态。
+///
+/// 视觉尺寸保持 30×30（18 图标 + 6 内边距），命中区扩到 44×44 以满足
+/// WCAG 2.5.5；两者分离，放大触控目标不会让半透明底遮住更多画面。
 class const _OverlayIconButton({
   required final IconData icon,
   required final String tooltip,
   required final VoidCallback? onPressed,
 }) extends StatelessWidget {
+  static const double _visualSize = 30;
+  static const double _tapTargetSize = 44;
+
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: $styles.colors.scrim.withValues(alpha: 0.6),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Icon(icon, size: 18, color: $styles.colors.onScrim),
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      label: tooltip,
+      // excludeSemantics 会丢弃 InkWell 的 tap 动作，必须在语义节点上声明。
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: tooltip,
+        child: SizedBox.square(
+          dimension: _tapTargetSize,
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onPressed,
+              customBorder: const CircleBorder(),
+              child: Center(
+                // 用 Ink 把可见底画进 ink 层，按压高亮与波纹才会叠在其上
+                // （design-system R2.5）；普通 Container 会盖住反馈。
+                child: Ink(
+                  width: _visualSize,
+                  height: _visualSize,
+                  decoration: BoxDecoration(
+                    color: $styles.colors.scrim.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Icon(icon, size: 18, color: $styles.colors.onScrim),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
