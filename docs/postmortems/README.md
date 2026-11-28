@@ -38,4 +38,4 @@ Do not write one for a routine red build that the runbook handled directly.
 
 | Date | Incident | Component | Status |
 |---|---|---|---|
-| 2026-09-30 | [Jules deadlocked by main-only golden recording](2026-09-30-jules-golden-baseline-deadlock.md) ([#155](https://github.com/liziq21/bili/pull/155)) | agent dispatch / golden baselines | action items 1-6 closed; detection gate landed in [#587](https://github.com/liziq21/bili/pull/587); fail-open fallback fixed in [#594](https://github.com/liziq21/bili/pull/594) |
+| 2026-09-30 | [Jules deadlocked by main-only golden recording](2026-09-30-jules-golden-baseline-deadlock.md) ([#155](https://github.com/liziq21/bili/pull/155)) | agent dispatch / golden baselines | action items 1-6 closed; detection gate landed in [#587](https://github.com/liziq21/bili/pull/587); fail-open fallback fixed in [#594](https://github.com/liziq21/bili/pull/594); baseline PR paths narrowed to `app/test/golden/goldens/ci/*.png` in [#727](https://github.com/liziq21/bili/pull/727) |
