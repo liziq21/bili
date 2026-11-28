@@ -326,18 +326,6 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get settingsLibrary;
 
-  /// Toggle for syncing remote bookmarks to local library
-  ///
-  /// In en, this message translates to:
-  /// **'Sync bookmarks'**
-  String get libraryBookmarkSync;
-
-  /// Subtitle for bookmark sync toggle
-  ///
-  /// In en, this message translates to:
-  /// **'Keep local bookmarks in sync with remote'**
-  String get libraryBookmarkSyncSubtitle;
-
   /// Setting for how long to keep search history
   ///
   /// In en, this message translates to:
@@ -2066,6 +2054,12 @@ abstract class AppLocalizations {
   /// **'Set as main'**
   String get homeConfigSetMain;
 
+  /// Marks the tab currently shown as the home main tab
+  ///
+  /// In en, this message translates to:
+  /// **'Current main tab'**
+  String get homeConfigMainTab;
+
   /// Home configuration setting - grid columns per orientation
   ///
   /// In en, this message translates to:
@@ -2359,6 +2353,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Playlists'**
   String get channelTabPlaylists;
+
+  /// Settings section header - tabs shown on the channel page
+  ///
+  /// In en, this message translates to:
+  /// **'Channel page tabs'**
+  String get settingsChannelTabs;
+
+  /// Channel settings switch - show the video tab on the channel page
+  ///
+  /// In en, this message translates to:
+  /// **'Show video tab'**
+  String get channelTabVideosVisibility;
+
+  /// Channel settings switch - show the playlists tab on the channel page
+  ///
+  /// In en, this message translates to:
+  /// **'Show playlists tab'**
+  String get channelTabPlaylistsVisibility;
+
+  /// Subtitle for the channel page tab visibility switches
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden tabs are removed from the channel page'**
+  String get settingsChannelTabVisibilitySubtitle;
 
   /// Shown on a creator page when the channel has no playlists
   ///

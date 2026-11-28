@@ -176,6 +176,28 @@ void main() {
     expect(config.sources['test']!.mainTabId, equals('tab_b'));
   });
 
+  testWidgets('marks the current main tab with a filled accent pin', (
+    tester,
+  ) async {
+    await preferences.set(PreferencesKey.homeConfig, _persistedJson);
+    await tester.pumpWidget(_buildScreen(preferences));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final context = tester.element(find.byType(HomeConfigEditorScreen));
+    final l10n = AppLocalizations.of(context)!;
+
+    // Tab A is the main tab: filled pin, accent colour, explicit state label.
+    expect(find.byIcon(AppIcons.mainSectionSelected), findsOneWidget);
+    expect(find.byIcon(AppIcons.mainSection), findsOneWidget);
+    final mainPin = tester.widget<Icon>(
+      find.byIcon(AppIcons.mainSectionSelected),
+    );
+    expect(mainPin.color, $styles.colors.accentFill);
+    expect(find.text(l10n.homeConfigMainTab), findsOneWidget);
+    expect(find.text(l10n.homeConfigSetMain), findsNothing);
+  });
+
   testWidgets('edits grid columns and persists', (tester) async {
     await preferences.set(PreferencesKey.homeConfig, _persistedJson);
     await tester.pumpWidget(_buildScreen(preferences));
@@ -285,7 +307,7 @@ void main() {
     final semantics = tester.ensureSemantics();
     await pumpEditor(tester);
 
-    for (final label in ['设为主标签: Tab A', '上移: Tab A', '下移: Tab B']) {
+    for (final label in ['当前主标签: Tab A', '上移: Tab A', '下移: Tab B']) {
       final node = nodeLabelled(tester, label);
       expect(
         node.getSemanticsData().hasAction(SemanticsAction.tap),
@@ -365,7 +387,7 @@ void main() {
       find.byWidgetPredicate(
         (w) =>
             w is Semantics &&
-            w.properties.label == '设为主标签: Tab A' &&
+            w.properties.label == '当前主标签: Tab A' &&
             w.properties.enabled == false &&
             w.excludeSemantics == true,
       ),

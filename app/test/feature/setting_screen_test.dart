@@ -39,7 +39,7 @@ void main() {
   };
 
   group('SettingScreen', () {
-    testWidgets('shows the title, four expandable groups and eight sections', (
+    testWidgets('shows the title, three expandable groups and eight sections', (
       tester,
     ) async {
       // Given an index with a recording selection callback.
@@ -53,23 +53,24 @@ void main() {
         );
         await tester.pump();
 
-        // Then the localized title and four expandable groups are present.
+        // Then the localized title and three expandable groups are present;
+        // the single-row group renders as a standalone row without a header.
         final context = tester.element(find.byType(SettingScreen));
         final l10n = AppLocalizations.of(context)!;
         expect(Localizations.localeOf(context), const Locale('zh'));
         expect(MaterialLocalizations.of(context), isNotNull);
         expect(find.widgetWithText(AppBar, l10n.settingsTitle), findsOneWidget);
-        expect(find.byType(ExpansionTile), findsNWidgets(4));
+        expect(find.byType(ExpansionTile), findsNWidgets(3));
 
         final groupTitles = [
           l10n.settingsGroupPlayback,
           l10n.settingsGroupLibrary,
           l10n.settingsGroupDiscovery,
-          l10n.settingsGroupOther,
         ];
         for (final title in groupTitles) {
           expect(find.text(title), findsOneWidget);
         }
+        expect(find.text(l10n.settingsGroupOther), findsNothing);
 
         // And every section is visible because each group starts expanded.
         for (final labelOf in sectionLabels.values) {
@@ -300,47 +301,38 @@ void main() {
       }
     });
 
-    testWidgets(
-      'library page shows bookmark sync and search history retention',
-      (tester) async {
-        // Given the localized library settings page with actual content.
-        try {
-          // When the page is rendered.
-          await tester.pumpWidget(_buildScreen(const LibrarySettingsScreen()));
-          await tester.pump();
+    testWidgets('library page shows search history retention only', (
+      tester,
+    ) async {
+      // Given the localized library settings page with actual content.
+      try {
+        // When the page is rendered.
+        await tester.pumpWidget(_buildScreen(const LibrarySettingsScreen()));
+        await tester.pump();
 
-          // Then the two entries are visible.
-          final context = tester.element(find.byType(LibrarySettingsScreen));
-          final l10n = AppLocalizations.of(context)!;
-          expect(
-            find.widgetWithText(AppBar, l10n.settingsLibrary),
-            findsOneWidget,
-          );
-          // SwitchListTile for bookmark sync + a value row for retention.
-          // SwitchListTile is a subtype of ListTile, so use descendant matchers to
-          // distinguish them instead of bare find.byType(ListTile).
-          expect(find.byType(SwitchListTile), findsOneWidget);
-          expect(
-            find.descendant(
-              of: find.byType(SwitchListTile),
-              matching: find.text(l10n.libraryBookmarkSync),
-            ),
-            findsOneWidget,
-          );
-          expect(
-            find.descendant(
-              of: find.byType(ListTile),
-              matching: find.text(l10n.librarySearchHistoryRetention),
-            ),
-            findsOneWidget,
-          );
-          expect(tester.takeException(), isNull);
-        } finally {
-          await tester.pumpWidget(const SizedBox.shrink());
-          await tester.pump();
-        }
-      },
-    );
+        // Then only the retention row is visible: the bookmark-sync switch
+        // promised remote sync the read-only client cannot offer, so it was
+        // removed (issue LIZ-213).
+        final context = tester.element(find.byType(LibrarySettingsScreen));
+        final l10n = AppLocalizations.of(context)!;
+        expect(
+          find.widgetWithText(AppBar, l10n.settingsLibrary),
+          findsOneWidget,
+        );
+        expect(find.byType(SwitchListTile), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(ListTile),
+            matching: find.text(l10n.librarySearchHistoryRetention),
+          ),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
 
     testWidgets('appearance page shows theme and font size', (tester) async {
       // Given the localized appearance settings page.

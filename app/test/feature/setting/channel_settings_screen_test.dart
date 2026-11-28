@@ -64,13 +64,18 @@ void main() {
 
       // Then the page title and both implemented channel tabs are visible.
       expect(find.widgetWithText(AppBar, l10n.settingsChannel), findsOneWidget);
+      expect(find.text(l10n.settingsChannelTabs), findsOneWidget);
+      expect(
+        find.text(l10n.settingsChannelTabVisibilitySubtitle),
+        findsNWidgets(2),
+      );
       expect(find.byType(SwitchListTile), findsNWidgets(2));
       final switchTile = tester.widget<SwitchListTile>(
-        find.widgetWithText(SwitchListTile, l10n.videoTab),
+        find.widgetWithText(SwitchListTile, l10n.channelTabVideosVisibility),
       );
       expect(switchTile.value, isTrue);
-      expect(find.text(l10n.videoTab), findsOneWidget);
-      expect(find.text(l10n.channelTabPlaylists), findsOneWidget);
+      expect(find.text(l10n.channelTabVideosVisibility), findsOneWidget);
+      expect(find.text(l10n.channelTabPlaylistsVisibility), findsOneWidget);
     });
 
     testWidgets('hides the videos tab and persists the choice', (tester) async {
@@ -80,13 +85,19 @@ void main() {
 
       // When turning the videos switch off.
       await tester.tap(
-        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
+        find.widgetWithText(
+          SwitchListTile,
+          AppLocalizationsZh().channelTabVideosVisibility,
+        ),
       );
       await tester.pumpAndSettle();
 
       // Then the switch reflects the change and the preference is stored.
       final switchTile = tester.widget<SwitchListTile>(
-        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
+        find.widgetWithText(
+          SwitchListTile,
+          AppLocalizationsZh().channelTabVideosVisibility,
+        ),
       );
       expect(switchTile.value, isFalse);
       final result = await preferences.get(PreferencesKey.channelTabVisibility);
@@ -107,7 +118,7 @@ void main() {
       await tester.tap(
         find.widgetWithText(
           SwitchListTile,
-          AppLocalizationsZh().channelTabPlaylists,
+          AppLocalizationsZh().channelTabPlaylistsVisibility,
         ),
       );
       await tester.pumpAndSettle();
@@ -116,7 +127,7 @@ void main() {
       final switchTile = tester.widget<SwitchListTile>(
         find.widgetWithText(
           SwitchListTile,
-          AppLocalizationsZh().channelTabPlaylists,
+          AppLocalizationsZh().channelTabPlaylistsVisibility,
         ),
       );
       expect(switchTile.value, isFalse);
@@ -139,7 +150,7 @@ void main() {
       final l10n = AppLocalizationsZh();
       final switchFinder = find.widgetWithText(
         SwitchListTile,
-        l10n.channelTabPlaylists,
+        l10n.channelTabPlaylistsVisibility,
       );
 
       // When turning the playlists switch off.
@@ -165,7 +176,10 @@ void main() {
 
       // Then the switch starts in the hidden state.
       final switchTile = tester.widget<SwitchListTile>(
-        find.widgetWithText(SwitchListTile, AppLocalizationsZh().videoTab),
+        find.widgetWithText(
+          SwitchListTile,
+          AppLocalizationsZh().channelTabVideosVisibility,
+        ),
       );
       expect(switchTile.value, isFalse);
     });
@@ -179,7 +193,9 @@ void main() {
 
       // Then the section and switch labels are English.
       expect(find.widgetWithText(AppBar, 'Channel'), findsOneWidget);
-      expect(find.text('Video'), findsOneWidget);
+      expect(find.text('Channel page tabs'), findsOneWidget);
+      expect(find.text('Show video tab'), findsOneWidget);
+      expect(find.text('Show playlists tab'), findsOneWidget);
     });
 
     testWidgets('renders defaults without a preferences provider', (

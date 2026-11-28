@@ -160,14 +160,6 @@
   "@settingsLibrary": {
     "description": "Settings group and subpage title - local library"
   },
-  "libraryBookmarkSync": "Sync bookmarks",
-  "@libraryBookmarkSync": {
-    "description": "Toggle for syncing remote bookmarks to local library"
-  },
-  "libraryBookmarkSyncSubtitle": "Keep local bookmarks in sync with remote",
-  "@libraryBookmarkSyncSubtitle": {
-    "description": "Subtitle for bookmark sync toggle"
-  },
   "librarySearchHistoryRetention": "Search history retention",
   "@librarySearchHistoryRetention": {
     "description": "Setting for how long to keep search history"
@@ -1654,6 +1646,10 @@
   "@homeConfigSetMain": {
     "description": "Home configuration action - set a tab as the main tab"
   },
+  "homeConfigMainTab": "Current main tab",
+  "@homeConfigMainTab": {
+    "description": "Marks the tab currently shown as the home main tab"
+  },
   "homeConfigGridColumns": "Grid columns",
   "@homeConfigGridColumns": {
     "description": "Home configuration setting - grid columns per orientation"
@@ -1919,6 +1915,22 @@
   "channelTabPlaylists": "Playlists",
   "@channelTabPlaylists": {
     "description": "Creator-page tab that lists the channel's playlists (seasons)"
+  },
+  "settingsChannelTabs": "Channel page tabs",
+  "@settingsChannelTabs": {
+    "description": "Settings section header - tabs shown on the channel page"
+  },
+  "channelTabVideosVisibility": "Show video tab",
+  "@channelTabVideosVisibility": {
+    "description": "Channel settings switch - show the video tab on the channel page"
+  },
+  "channelTabPlaylistsVisibility": "Show playlists tab",
+  "@channelTabPlaylistsVisibility": {
+    "description": "Channel settings switch - show the playlists tab on the channel page"
+  },
+  "settingsChannelTabVisibilitySubtitle": "Hidden tabs are removed from the channel page",
+  "@settingsChannelTabVisibilitySubtitle": {
+    "description": "Subtitle for the channel page tab visibility switches"
   },
   "channelPlaylistsEmpty": "No playlists yet",
   "@channelPlaylistsEmpty": {

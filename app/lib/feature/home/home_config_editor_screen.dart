@@ -209,6 +209,8 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
     required bool isMain,
     required String sourceId,
   }) {
+    // The main row is not an action: label it with the state it already holds.
+    final mainLabel = isMain ? l10n.homeConfigMainTab : l10n.homeConfigSetMain;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -229,16 +231,26 @@ class _HomeConfigEditorScreenState() extends State<HomeConfigEditorScreen> {
             children: [
               Text(tab.label, style: $styles.text.bodySmall),
               if (isMain)
-                Text(l10n.homeConfigSetMain, style: $styles.text.caption),
+                Text(
+                  l10n.homeConfigMainTab,
+                  style: $styles.text.caption.copyWith(
+                    color: $styles.colors.accentText,
+                  ),
+                ),
             ],
           ),
         ),
         _semanticIconButton(
-          label: '${l10n.homeConfigSetMain}: ${tab.label}',
-          tooltip: l10n.homeConfigSetMain,
+          label: '$mainLabel: ${tab.label}',
+          tooltip: mainLabel,
           icon: Icon(
             isMain ? AppIcons.mainSectionSelected : AppIcons.mainSection,
             size: 18.0,
+            // Keep the selected pin in the accent colour even though the button
+            // is disabled: grey is what made the current main tab look off.
+            color: isMain
+                ? $styles.colors.accentFill
+                : $styles.colors.onSurfaceVariant,
           ),
           onPressed: isMain
               ? null
