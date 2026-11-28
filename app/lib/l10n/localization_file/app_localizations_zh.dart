@@ -302,6 +302,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get moreLoadFailedRetry => '更多数据加载失败，重试';
 
   @override
+  String get refreshFailedRetry => '加载失败，重试';
+
+  @override
   String get nothingFound => '未找到内容';
 
   @override

@@ -650,6 +650,12 @@ abstract class AppLocalizations {
   /// **'Failed to load more. Retry'**
   String get moreLoadFailedRetry;
 
+  /// Search results - footer shown when re-searching after a sort or filter change failed
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to reload. Retry'**
+  String get refreshFailedRetry;
+
   /// Search - empty state when the query returns no results
   ///
   /// In en, this message translates to:

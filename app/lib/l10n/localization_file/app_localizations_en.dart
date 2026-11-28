@@ -316,6 +316,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreLoadFailedRetry => 'Failed to load more. Retry';
 
   @override
+  String get refreshFailedRetry => 'Failed to reload. Retry';
+
+  @override
   String get nothingFound => 'Nothing found';
 
   @override
