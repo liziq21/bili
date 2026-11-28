@@ -51,7 +51,7 @@
 
 工作流 checkout 目标分支并读取它的 `.fvmrc`，生成 PNG 后打开以该分支为 base 的基线 PR。审查图像差异、测试结果、源分支提交与 workflow run；不要把基线 PR 当成无须审查的自动修复。合入后重新检查功能 PR。
 
-基线 PR 只允许包含 `app/test/golden/goldens/ci/` 下的 PNG：重录后若工作区还有其他改动，`tool/check_golden_changes.py` 会让 job 在开 PR 前失败，`create-pull-request` 的 `add-paths` 也只提交该目录。目标分支的测试代码与 workflow 在同一 job 内执行，这条限制防止其他改动混进正文声称「只有 PNG」的 PR（Issue #720）。
+基线 PR 只允许包含 `app/test/golden/goldens/ci/` 下的 PNG：`create-pull-request` 的 `add-paths` 只匹配 `*.png`，重录后 `tool/check_golden_changes.py` 还会检查工作区里未被 git 忽略的其他改动（源码、workflow、目录内非 PNG 文件等）并让 job 在开 PR 前失败；`app/test/golden/failures/` 这类被忽略的产物不参与检查。校验脚本从 workflow 所在修订版本读取（`github.workflow_sha`），而不是目标分支，因此目标分支没有这个脚本也能重录，分支也无法改写校验逻辑。如果取脚本这一步失败，说明 dispatch 的 workflow 修订版本还没有该脚本，先把本 workflow 的改动合入该分支。目标分支的测试代码与 workflow 在同一 job 内执行，这条限制防止其他改动混进正文声称「只有 PNG」的 PR（Issue #720）。
 
 ## PR 卡在 stale 的 CHANGES_REQUESTED
 

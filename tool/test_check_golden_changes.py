@@ -20,6 +20,8 @@ import check_golden_changes as golden  # noqa: E402
 
 GOLDEN = 'app/test/golden/goldens/ci/home_screen.png'
 OTHER_GOLDEN = 'app/test/golden/goldens/ci/dark_theme.png'
+REPO_ROOT = Path(__file__).resolve().parents[1]
+WORKFLOW = REPO_ROOT / '.github' / 'workflows' / 'rerecord-goldens.yml'
 
 
 def status(*entries: str) -> str:
@@ -83,6 +85,24 @@ class UnexpectedPathsTest(unittest.TestCase):
     def test_rename_with_one_outside_side_is_unexpected(self) -> None:
         paths = [GOLDEN, 'app/lib/renamed.dart']
         self.assertEqual(golden.unexpected_paths(paths), ['app/lib/renamed.dart'])
+
+
+class WorkflowWiringTest(unittest.TestCase):
+    """Keep the workflow on the trusted copy and the PNG-only pathspec."""
+
+    def setUp(self) -> None:
+        self.text = WORKFLOW.read_text(encoding='utf-8')
+
+    def test_guard_runs_from_the_workflow_revision(self) -> None:
+        self.assertIn('github.workflow_sha', self.text)
+        self.assertIn('$RUNNER_TEMP/golden-guard/check_golden_changes.py', self.text)
+        self.assertNotIn('python3 tool/check_golden_changes.py', self.text)
+
+    def test_pull_request_stages_only_pngs(self) -> None:
+        self.assertRegex(
+            self.text,
+            r'add-paths: \|\n\s+app/test/golden/goldens/ci/\*\.png\n',
+        )
 
 
 class MainTest(unittest.TestCase):

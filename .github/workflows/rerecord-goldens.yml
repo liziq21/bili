@@ -62,10 +62,20 @@ jobs:
 
       # The branch under test is caller-supplied and this job can open pull
       # requests, so the commit must contain only the PNGs it re-recorded.
-      # `add-paths` below limits the PR; this step fails the run loudly when the
-      # working tree changed anywhere else (Issue #720).
+      # The guard comes from the workflow revision, not from the target branch:
+      # older branches have no copy, and a branch that shipped its own copy
+      # could weaken the check (Issue #720).
       - name: Assert only golden baselines changed
-        run: python3 tool/check_golden_changes.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/golden-guard"
+          curl -fsSL \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H 'Accept: application/vnd.github.raw' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/tool/check_golden_changes.py?ref=${{ github.workflow_sha }}" \
+            -o "$RUNNER_TEMP/golden-guard/check_golden_changes.py"
+          python3 "$RUNNER_TEMP/golden-guard/check_golden_changes.py"
 
       - name: Upload re-recorded screenshots
         if: always()
@@ -96,12 +106,12 @@ jobs:
           base: ${{ inputs.target_ref }}
           commit-message: 'test(golden): re-record CI baselines from CI'
           title: 'test(golden): re-record CI baselines from CI'
-          # Only the baseline directory may enter the commit. The job also fails
-          # when the working tree changed anywhere else, so a branch cannot use
-          # this workflow to smuggle source or workflow edits into a PR whose
-          # body claims it contains only PNGs (Issue #720).
+          # Only PNGs may enter the commit. A directory pathspec would stage
+          # any non-PNG file the branch left behind; `git add` expands this glob
+          # itself, so deletions of tracked baselines are still staged
+          # (Issue #720).
           add-paths: |
-            app/test/golden/goldens/ci/
+            app/test/golden/goldens/ci/*.png
           body: |
             Automated baseline re-record triggered by `${{ github.actor }}`.
 
@@ -110,7 +120,7 @@ jobs:
 
             These PNGs were rendered in the CI environment, not on a workstation.
             Only `app/test/golden/goldens/ci/*.png` are committed; the job fails
-            if anything else in the working tree changed.
+            if a tracked change falls outside that set.
             Review the diff in this PR before merging — a baseline change means
             the rendered output of the covered widgets changed.
           labels: |
