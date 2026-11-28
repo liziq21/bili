@@ -1646,7 +1646,7 @@
   "@homeConfigSetMain": {
     "description": "Home configuration action - set a tab as the main tab"
   },
-  "homeConfigMainTab": "主标签",
+  "homeConfigMainTab": "当前主标签",
   "@homeConfigMainTab": {
     "description": "Marks the tab currently shown as the home main tab"
   },

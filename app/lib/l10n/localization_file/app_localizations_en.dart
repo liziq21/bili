@@ -1140,7 +1140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeConfigSetMain => 'Set as main';
 
   @override
-  String get homeConfigMainTab => 'Main tab';
+  String get homeConfigMainTab => 'Current main tab';
 
   @override
   String get homeConfigGridColumns => 'Grid columns';

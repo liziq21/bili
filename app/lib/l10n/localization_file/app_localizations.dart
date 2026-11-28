@@ -2057,7 +2057,7 @@ abstract class AppLocalizations {
   /// Marks the tab currently shown as the home main tab
   ///
   /// In en, this message translates to:
-  /// **'Main tab'**
+  /// **'Current main tab'**
   String get homeConfigMainTab;
 
   /// Home configuration setting - grid columns per orientation

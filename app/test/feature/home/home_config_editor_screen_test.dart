@@ -307,7 +307,7 @@ void main() {
     final semantics = tester.ensureSemantics();
     await pumpEditor(tester);
 
-    for (final label in ['主标签: Tab A', '上移: Tab A', '下移: Tab B']) {
+    for (final label in ['当前主标签: Tab A', '上移: Tab A', '下移: Tab B']) {
       final node = nodeLabelled(tester, label);
       expect(
         node.getSemanticsData().hasAction(SemanticsAction.tap),
@@ -387,7 +387,7 @@ void main() {
       find.byWidgetPredicate(
         (w) =>
             w is Semantics &&
-            w.properties.label == '主标签: Tab A' &&
+            w.properties.label == '当前主标签: Tab A' &&
             w.properties.enabled == false &&
             w.excludeSemantics == true,
       ),

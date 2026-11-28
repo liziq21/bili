@@ -1646,7 +1646,7 @@
   "@homeConfigSetMain": {
     "description": "Home configuration action - set a tab as the main tab"
   },
-  "homeConfigMainTab": "Main tab",
+  "homeConfigMainTab": "Current main tab",
   "@homeConfigMainTab": {
     "description": "Marks the tab currently shown as the home main tab"
   },

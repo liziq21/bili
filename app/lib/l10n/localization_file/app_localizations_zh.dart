@@ -1083,7 +1083,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeConfigSetMain => '设为主标签';
 
   @override
-  String get homeConfigMainTab => '主标签';
+  String get homeConfigMainTab => '当前主标签';
 
   @override
   String get homeConfigGridColumns => '网格列数';
