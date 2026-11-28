@@ -575,7 +575,13 @@ class _VideoContentState() extends State<_VideoContent> {
               (isLandscape
                   ? _maxPlayerHeightFactorLandscape
                   : _maxPlayerHeightFactorPortrait);
-          return Column(
+          // 队列作为常驻侧栏时，播放器与详情 / 评论同处左侧区域：视频按剩余
+          // 内容宽度居中，而不是按整窗宽度居中后被侧栏盖住。
+          final showQueuePane = constraints.maxWidth >= _queuePaneMinWidth;
+          final contentWidth = showQueuePane
+              ? constraints.maxWidth - _queuePaneWidth - 1
+              : constraints.maxWidth;
+          final main = Column(
             children: [
               // 播放器与返回按钮同处一个 Stack：按钮叠在画面上，不再用一整条
               // AppBar 占掉竖向空间。按钮在 Stack 里而不是播放器的控制层里，
@@ -597,7 +603,22 @@ class _VideoContentState() extends State<_VideoContent> {
                     ),
                 ],
               ),
-              Expanded(child: _buildContent(constraints.maxWidth, l10n)),
+              Expanded(child: _buildContent(contentWidth, l10n)),
+            ],
+          );
+          if (!showQueuePane) return main;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: main),
+              _paneDivider(),
+              SizedBox(
+                width: _queuePaneWidth,
+                child: PlaybackQueueSheet(
+                  controller: widget.playbackController,
+                  embedded: true,
+                ),
+              ),
             ],
           );
         },
@@ -605,30 +626,12 @@ class _VideoContentState() extends State<_VideoContent> {
     );
   }
 
-  /// 详情 / 评论 / 队列的响应式排布。
+  /// 详情 / 评论的响应式排布。
   ///
-  /// 队列只在足够宽时作为常驻侧栏；中等宽度下详情与评论并排，队列走弹层；
-  /// 紧凑宽度下三者退回标签页。这样折叠屏展开态不会因为队列侧栏而把
-  /// 详情和评论压成窄条。
+  /// 队列在足够宽时由调用方放到右侧常驻侧栏（与播放器并列）；这里只排
+  /// 详情与评论：中等宽度并排，紧凑宽度退回标签页。这样折叠屏展开态不会
+  /// 因为队列侧栏而把详情和评论压成窄条。
   Widget _buildContent(double width, AppLocalizations l10n) {
-    if (width >= _queuePaneMinWidth) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Expanded(child: VideoInfoView()),
-          _paneDivider(),
-          const Expanded(child: VideoCommentsView()),
-          _paneDivider(),
-          SizedBox(
-            width: _queuePaneWidth,
-            child: PlaybackQueueSheet(
-              controller: widget.playbackController,
-              embedded: true,
-            ),
-          ),
-        ],
-      );
-    }
     if (width >= _twoPaneMinWidth) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,

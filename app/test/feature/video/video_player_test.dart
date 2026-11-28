@@ -739,6 +739,39 @@ void main() {
       expect(rect.width, greaterThan(rect.height));
     });
 
+    testWidgets('controls share the picture width when height caps the video', (
+      tester,
+    ) async {
+      final fake = FakePlatformPlayer();
+      final controller = MediaPlaybackController(fake);
+      final bloc = VideoBloc(repository: _ReadyStreamRepository());
+      addTearDown(controller.dispose);
+      addTearDown(bloc.close);
+
+      // 宽而矮的播放器：16:9 画面按高度收缩，左右留出空白。
+      await pumpSized(
+        tester,
+        bloc: bloc,
+        controller: controller,
+        size: const Size(1280, 420),
+      );
+      fake.emitVideoParams(const VideoParams(dw: 1920, dh: 1080));
+      await tester.pump();
+
+      final videoRect = tester.getRect(find.byType(AspectRatio));
+      // 控制栏外层容器（进度条 Row 的最近 Container 祖先）与画面同宽同起点，
+      // 这样进度条与时间码不会铺到画面外的留边上。
+      final controlsRect = tester.getRect(
+        find
+            .ancestor(of: find.byType(Slider), matching: find.byType(Container))
+            .first,
+      );
+      expect(videoRect.width, lessThan(1280));
+      expect(videoRect.left, greaterThan(0));
+      expect(controlsRect.width, closeTo(videoRect.width, 0.5));
+      expect(controlsRect.left, closeTo(videoRect.left, 0.5));
+    });
+
     testWidgets('a square video is capped by the viewport height too', (
       tester,
     ) async {

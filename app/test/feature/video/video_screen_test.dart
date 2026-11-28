@@ -168,6 +168,22 @@ void main() {
       await unmount(tester);
     });
 
+    testWidgets('expanded width puts the queue pane beside the player', (
+      tester,
+    ) async {
+      await pumpAt(tester, const Size(1440, 900));
+
+      // 队列侧栏与播放器并列，播放器与详情/评论同处左侧内容区：视频不再按
+      // 整窗宽度居中后被侧栏盖住。
+      final playerRect = tester.getRect(find.byType(VideoPlayer));
+      final queueRect = tester.getRect(find.byType(PlaybackQueueSheet));
+      expect(playerRect.right, lessThanOrEqualTo(queueRect.left));
+      expect(queueRect.width, closeTo(320, 1));
+      expect(tester.takeException(), isNull);
+
+      await unmount(tester);
+    });
+
     testWidgets('short landscape caps the player instead of overflowing', (
       tester,
     ) async {

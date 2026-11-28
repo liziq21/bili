@@ -137,6 +137,32 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets(
+    'clips danmaku to the picture and keeps a safe inset from its edges',
+    (tester) async {
+      // Given comments to draw.
+      repository.result = Result.success([_comment('edge text')]);
+      await tester.pumpWidget(appFor('BV1'));
+      await tester.pumpAndSettle();
+
+      // Then the painter sits inside a ClipRect and is inset from the
+      // overlay's bounds: text that scrolls past the picture edge is clipped
+      // instead of being painted over the letterbox around the video.
+      final overlayRect = tester.getRect(find.byType(DanmakuOverlay));
+      final paintRect = tester.getRect(_painterFinder);
+      expect(
+        find.ancestor(of: _painterFinder, matching: find.byType(ClipRect)),
+        findsOneWidget,
+      );
+      expect(paintRect.left, greaterThan(overlayRect.left));
+      expect(paintRect.top, greaterThan(overlayRect.top));
+      expect(paintRect.right, lessThan(overlayRect.right));
+      expect(paintRect.bottom, lessThan(overlayRect.bottom));
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   testWidgets('hides the overlay when danmaku are disabled', (tester) async {
     // Given danmaku switched off in preferences and a source that has comments.
     await preferences.set(PreferencesKey.danmakuEnabled, false);

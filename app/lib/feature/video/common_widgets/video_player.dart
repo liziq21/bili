@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:data/data.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
@@ -269,68 +270,50 @@ class _VideoPlayerState() extends State<VideoPlayer> {
 
           return LayoutBuilder(
             builder: (context, constraints) {
-              // 进度条要占一整行。窗口矮到放不下「画面 + 两行控制」时优先保住
-              // 画面：控制栏不参与压缩，Flexible 只能把画面压到 0 高，看起来
-              // 就是画面消失。
               final showProgressBar =
                   !constraints.hasBoundedHeight ||
                   constraints.maxHeight >= _minHeightForProgressBar;
-              return Column(
-                mainAxisSize: MainAxisSize.min,
+              final controls = _PlayerControlBar(
+                controller: _playback!,
+                stream: stream,
+                fullscreen: false,
+                showProgressBar: showProgressBar,
+                onToggleFullscreen: widget.onToggleFullscreen,
+                onExit: widget.onExit,
+              );
+              // 画面与控制栏共用同一条宽度线：画面按可用高度收缩后，控制栏
+              // 跟着画面一起变窄，而不是铺满整个播放器方块。否则画面居中带
+              // 黑边时，进度条会横跨整屏、时间码落在黑边上。
+              final maxVideoHeight = constraints.hasBoundedHeight
+                  ? constraints.maxHeight
+                  // 高度不设限（页面在滚动容器里）时，竖屏/方形画面按视口占比
+                  // 封顶，否则宽度撑出的高度会把下方内容顶出屏幕。
+                  : (_aspectRatio <= 1
+                        ? MediaQuery.sizeOf(context).height *
+                              _portraitHeightFraction
+                        : null);
+              // 宽度不受限时无法按可用宽度算比例，退回宽度驱动的老布局。
+              if (!constraints.hasBoundedWidth) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AspectRatio(aspectRatio: _aspectRatio, child: surface),
+                    controls,
+                  ],
+                );
+              }
+              return _EmbeddedPlayerLayout(
+                aspectRatio: _aspectRatio,
+                maxVideoHeight: maxVideoHeight,
                 children: [
-                  // Flexible 让页面在横屏 / 折叠屏等矮视口里给播放器设高度上限时，
-                  // 画面按 16:9 等比收缩，而不是把下方内容挤成零高。
-                  //
-                  // 收缩后左右多出的区域用 scrim 填满：视频页的留边应是深色，
-                  // 而不是页面 surface 色，否则画面看起来像浮在白色背景上。
-                  Flexible(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final aspectRatio = _aspectRatio;
-                        // 竖屏/方形内容在无高度约束时按视口高度设上限，
-                        // 避免画面把下方内容顶出屏幕。正方形（比例 1）也算在内：
-                        // 它按宽度撑出的高度同样会顶掉下方内容。
-                        final heightCap = constraints.hasBoundedHeight
-                            ? constraints.maxHeight
-                            : (aspectRatio <= 1
-                                  ? MediaQuery.sizeOf(context).height *
-                                        _portraitHeightFraction
-                                  : double.infinity);
-                        if (!constraints.hasBoundedWidth) {
-                          return AspectRatio(
-                            aspectRatio: aspectRatio,
-                            child: surface,
-                          );
-                        }
-                        // 只有一条布局路径：尺寸到达前后树结构不变，`_VideoSurface`
-                        // 不会被重建（重建会重新 open 一次媒体）。
-                        final naturalHeight =
-                            constraints.maxWidth / aspectRatio;
-                        final height = math.min(naturalHeight, heightCap);
-                        return SizedBox(
-                          width: constraints.maxWidth,
-                          height: height,
-                          child: ColoredBox(
-                            color: $styles.colors.scrim,
-                            child: Center(
-                              child: AspectRatio(
-                                aspectRatio: aspectRatio,
-                                child: surface,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                  ColoredBox(
+                    color: $styles.colors.scrim,
+                    child: AspectRatio(
+                      aspectRatio: _aspectRatio,
+                      child: surface,
                     ),
                   ),
-                  _PlayerControlBar(
-                    controller: _playback!,
-                    stream: stream,
-                    fullscreen: false,
-                    showProgressBar: showProgressBar,
-                    onToggleFullscreen: widget.onToggleFullscreen,
-                    onExit: widget.onExit,
-                  ),
+                  controls,
                 ],
               );
             },
@@ -1303,4 +1286,114 @@ class const _OverlayIconButton({
       ),
     );
   }
+}
+
+/// 内嵌播放器的两段式布局：画面在上、控制栏在下，两者共用同一条宽度线。
+///
+/// 画面在矮视口里按可用高度收缩后，宽度会小于整个播放器方块；控制栏必须
+/// 跟着画面一起变窄，否则进度条会横跨整块区域、时间码落在画面外的留边上。
+/// 控制栏宽度又取决于自身换行后的高度，所以宽度只能量出来，不能用固定常量。
+class const _EmbeddedPlayerLayout({
+  required final double aspectRatio,
+  // 画面的高度上限；null 表示不限（宽度决定画面高度）。
+  required final double? maxVideoHeight,
+  required super.children,
+}) extends MultiChildRenderObjectWidget {
+  @override
+  _RenderEmbeddedPlayerLayout createRenderObject(BuildContext context) =>
+      _RenderEmbeddedPlayerLayout(aspectRatio, maxVideoHeight);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderEmbeddedPlayerLayout renderObject,
+  ) {
+    if (renderObject.aspectRatio == aspectRatio &&
+        renderObject.maxVideoHeight == maxVideoHeight) {
+      return;
+    }
+    renderObject
+      ..aspectRatio = aspectRatio
+      ..maxVideoHeight = maxVideoHeight
+      ..markNeedsLayout();
+  }
+}
+
+class _RenderEmbeddedPlayerLayout(
+  var double aspectRatio,
+  var double? maxVideoHeight,
+) extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! MultiChildLayoutParentData) {
+      child.parentData = MultiChildLayoutParentData();
+    }
+  }
+
+  @override
+  void performLayout() {
+    final surface = firstChild!;
+    final controls = childAfter(surface)!;
+    final maxWidth = constraints.maxWidth;
+
+    // 控制栏的换行由宽度决定，而画面宽度又取决于控制栏高度。先按整宽排一次
+    // 拿到自然高度；只有缩到画面宽度后不会换行变高时，才把控制栏一起收窄。
+    // 否则（竖屏画面、极矮的窗口）控制栏保持整宽，画面在它上方居中。
+    controls.layout(BoxConstraints(maxWidth: maxWidth), parentUsesSize: true);
+    final naturalControlsHeight = controls.size.height;
+    var videoWidth = _videoWidthFor(maxWidth, naturalControlsHeight);
+    if (videoWidth < maxWidth) {
+      controls.layout(
+        BoxConstraints.tightFor(width: videoWidth),
+        parentUsesSize: true,
+      );
+      if (controls.size.height > naturalControlsHeight) {
+        controls.layout(
+          BoxConstraints(maxWidth: maxWidth),
+          parentUsesSize: true,
+        );
+        videoWidth = _videoWidthFor(maxWidth, naturalControlsHeight);
+      }
+    }
+
+    final videoHeight = aspectRatio > 0 ? videoWidth / aspectRatio : 0.0;
+    surface.layout(
+      BoxConstraints.tight(Size(videoWidth, videoHeight)),
+      parentUsesSize: true,
+    );
+
+    final videoLeft = math.max(0.0, (maxWidth - videoWidth) / 2);
+    final controlsLeft = math.max(0.0, (maxWidth - controls.size.width) / 2);
+    (surface.parentData! as MultiChildLayoutParentData).offset = Offset(
+      videoLeft,
+      0,
+    );
+    (controls.parentData! as MultiChildLayoutParentData).offset = Offset(
+      controlsLeft,
+      videoHeight,
+    );
+
+    size = constraints.constrain(
+      Size(maxWidth, videoHeight + controls.size.height),
+    );
+  }
+
+  /// 高度受限时画面宽度 = （高度上限 - 控制栏高度）× 宽高比，且不超过可用宽度。
+  double _videoWidthFor(double maxWidth, double controlsHeight) {
+    final cap = maxVideoHeight;
+    if (cap == null || !cap.isFinite) return maxWidth;
+    final available = math.max(0.0, cap - controlsHeight);
+    return math.min(maxWidth, available * aspectRatio);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) =>
+      defaultPaint(context, offset);
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
 }

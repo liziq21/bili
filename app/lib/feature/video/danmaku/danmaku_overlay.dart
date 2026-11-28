@@ -150,13 +150,24 @@ class _DanmakuOverlayState() extends State<DanmakuOverlay> {
     );
     return Positioned.fill(
       child: IgnorePointer(
-        child: CustomPaint(
-          painter: DanmakuPainter(
-            comments: _comments,
-            position: state.position,
-            settings: _settings,
-            colors: colors,
-            cache: _renderCache,
+        // 浮层铺满整个播放器方块，而画面按 contain 居中后可能带黑边；没有
+        // 裁剪时滚动到画面外的文字会画在黑边上。安全边距同时让首行不被
+        // 画面顶边裁切、进出场文字不在画面边缘被硬切。
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: $styles.insets.xs,
+            vertical: $styles.insets.xxs,
+          ),
+          child: ClipRect(
+            child: CustomPaint(
+              painter: DanmakuPainter(
+                comments: _comments,
+                position: state.position,
+                settings: _settings,
+                colors: colors,
+                cache: _renderCache,
+              ),
+            ),
           ),
         ),
       ),
