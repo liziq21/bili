@@ -33,7 +33,7 @@ Avoid busywork `const` PRs, cold-path closure changes, speculative memoization, 
 
 ## Measurement protocol
 
-Before changing code, establish a supported profile-mode run (`flutter run --profile` from `app/` on the named target). Building a profile APK without running it is not a measurement. Debug/widget-test timings cannot substantiate app performance claims.
+Before changing code, establish a supported profile-mode run (`flutter run --profile` from `app/` on the named target). Building a profile APK without running it is not a measurement. Debug/widget-test timings cannot substantiate app performance claims. The named target, scenarios, sample size, metrics, and baseline JSON schema are defined in [`docs/performance-baseline.md`](../docs/performance-baseline.md); compare before/after with `python3 tool/compare_perf_baselines.py before.json after.json`.
 
 Record and keep the following identical before and after:
 
@@ -43,6 +43,26 @@ Record and keep the following identical before and after:
 - A metric matched to the claim: UI/raster frame duration and missed-frame count for jank, or allocation/retained-memory measurements at a defined lifecycle point for memory. Include median and a tail percentile such as p90 for frame timings. Use the frame budget of the measured refresh rate, not a universal FPS assumption.
 
 Re-run after the change on the same target. If noise, missing tooling, unavailable hardware, or a non-repeatable scenario prevents a conclusion, stop without a performance PR. Report the limitation; do not replace measurements with an estimate. Reducing an operation count may explain a result, but is not proof of a frame-time or RAM improvement.
+
+### Scheduled-run boundary (no measurement environment)
+
+The scheduled inspection container has no display or GPU, may have no `flutter`/`dart`, and cannot capture a profile-mode baseline (see [`docs/performance-baseline.md`](../docs/performance-baseline.md#环境限制)). In that environment this run **produces tickets only, never an estimated performance PR**. A ticket-only report is the expected, successful outcome, not a failure.
+
+- Do **not** install an SDK just to attempt a measurement, and do **not** substitute debug or widget-test timings.
+- Do at most one read-only pass over the code, then stop.
+- Link the measurement procedure and the comparison tool instead of re-deriving a protocol.
+
+Use this template for the resulting ticket (mirror it to the sync issue as usual):
+
+```markdown
+[perf] <one-line suspected cost + hot path>
+
+- Evidence (static): <file:line, call path, why the cost is plausible>
+- Impact: hypothesis only — not measured; no profile environment in the agent container.
+- How to measure: run the matching scenario in docs/performance-baseline.md on a profile
+  target, then compare before/after with tool/compare_perf_baselines.py.
+- Scope: <approximate lines / files; note if the fix exceeds a small change>
+```
 
 ## Verification
 

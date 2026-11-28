@@ -39,6 +39,7 @@ Before writing or modifying code in this repository, read the specification file
 - [`docs/runbook.md`](docs/runbook.md) — incident recovery: reverting merged PRs, re-recording golden baselines, unsticking stale CHANGES_REQUESTED.
 - [`docs/product-boundary.md`](docs/product-boundary.md) — 产品边界：只读客户端，不登录、不向平台写。**新增功能、评审工单、triage 判档前必读**；工单标题/描述与它冲突时以它为准。
 - [`docs/postmortems/`](docs/postmortems/README.md) — incident write-ups: root causes and the follow-up actions each one left open. Read before dispatching a task to an external coding agent, and before changing a rule that CI depends on.
+- [`docs/performance-baseline.md`](docs/performance-baseline.md) — profile-mode frame-time baseline procedure (named Linux desktop target, scenarios, sample size, metrics, JSON schema) and the `tool/compare_perf_baselines.py` comparison workflow. Read before making or claiming a `⚡ Bolt:` performance improvement; also documents why scheduled agent containers cannot collect a baseline.
 
 ### Linear 规范
 
@@ -64,6 +65,7 @@ Linear is the authoritative project tracking, scheduling, and progress synchroni
 | Change CI workflows or golden baselines | `.github/workflows/ci-*.yml` + `.github/workflows/rerecord-goldens.yml` + `docs/postmortems/README.md` |
 | Change SDK, formatter, analyzer, or package commands | `.fvmrc` + root `pubspec.yaml` + relevant `analysis_options.yaml` + `.github/workflows/ci-*.yml` |
 | Dispatch a task to an external coding agent | `docs/postmortems/README.md` + the relevant `.github/workflows/` files — check that the brief has a satisfiable CI path before dispatching |
+| Make or claim a performance improvement | [`docs/performance-baseline.md`](docs/performance-baseline.md) + [`.jules/bolt-prompt.md`](.jules/bolt-prompt.md) |
 | Bump the app version or cut a release | The Release section below |
 
 ### CI Workflow Map
