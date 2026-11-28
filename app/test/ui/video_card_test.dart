@@ -294,11 +294,127 @@ void main() {
     },
   );
 
+  group('feed more button placement', () {
+    // 手机两列网格的卡片只有 164 宽：标题行扣掉 32px 的按钮后每行只剩两三
+    // 个字，所以窄卡片让按钮继续压在封面角落，宽卡片才挪进标题行。
+    MediaQueryData media(double width) =>
+        MediaQueryData(size: Size(width, 600));
+
+    /// 可见的 32px 圆形按钮：`IconButton` 外面还有一圈 48px 的点击区域，
+    /// 位置断言要对着看得见的那个圆，不是点击区域。
+    Rect scrimRect(WidgetTester tester) => tester.getRect(
+      find
+          .byWidgetPredicate(
+            (widget) => widget is Material && widget.shape is CircleBorder,
+          )
+          .first,
+    );
+
+    Future<void> pumpCard(
+      WidgetTester tester,
+      double width, {
+      required bool compact,
+      required VoidCallback onTap,
+      required VoidCallback onMore,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: media(width),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: width,
+                  height: 300,
+                  child: VideoCard(
+                    variant: VideoCardVariant.feed,
+                    compact: compact,
+                    videoInfoBase: VideoModel(
+                      id: 'BV1placement$width',
+                      title: 'A feed card title that wraps over two lines',
+                      url: 'https://example.com/video/placement',
+                      viewCount: 10000,
+                      duration: 600,
+                      creatorProfileName: 'Creator',
+                    ),
+                    onTap: onTap,
+                    onMorePressed: onMore,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('sits on the cover corner when the card is narrow', (
+      WidgetTester tester,
+    ) async {
+      var tapped = false;
+      var moreTapped = false;
+      await pumpCard(
+        tester,
+        164,
+        compact: true,
+        onTap: () => tapped = true,
+        onMore: () => moreTapped = true,
+      );
+
+      final cover = tester.getRect(find.byType(AspectRatio));
+      final more = scrimRect(tester);
+      // 压在封面右上角：贴着上边和右边，且整个落在右上四分之一区内。
+      expect(more.top - cover.top, lessThan(cover.height / 4));
+      expect(cover.right - more.right, lessThan(cover.width / 4));
+      expect(more.center.dx, greaterThan(cover.center.dx));
+      expect(more.center.dy, lessThan(cover.center.dy));
+
+      await tester.tap(find.byTooltip('More options'));
+      expect(moreTapped, isTrue);
+      expect(tapped, isFalse);
+
+      await clearImageCacheDuringTest(tester);
+    });
+
+    testWidgets('moves into the title row once the card is wide', (
+      WidgetTester tester,
+    ) async {
+      var tapped = false;
+      var moreTapped = false;
+      await pumpCard(
+        tester,
+        320,
+        compact: false,
+        onTap: () => tapped = true,
+        onMore: () => moreTapped = true,
+      );
+
+      final card = tester.getRect(find.byType(VideoCard));
+      final cover = tester.getRect(find.byType(AspectRatio));
+      final more = tester.getRect(find.byTooltip('More options'));
+      final title = tester.getRect(
+        find.text('A feed card title that wraps over two lines'),
+      );
+      // 在标题首行里、贴着卡片右边缘，而不是封面下方随便一处。
+      expect(more.top, greaterThanOrEqualTo(cover.bottom));
+      expect(more.center.dy, inInclusiveRange(title.top, title.top + 24));
+      expect(more.right, greaterThan(title.right));
+      expect(card.right - more.right, lessThan(card.width / 8));
+
+      await tester.tap(find.byTooltip('More options'));
+      expect(moreTapped, isTrue);
+      expect(tapped, isFalse);
+
+      await clearImageCacheDuringTest(tester);
+    });
+  });
+
   group('pressed state', () {
-    // 按住卡片时 `InkWell` 把主题的状态层画在卡片底色之上。这里读取真实渲染
-    // 像素，确认状态层只是薄薄一层：按压态下的标题与副标题仍达 `aaText`，
-    // 并且与主题算出的叠加结果一致。用的是渲染后的像素而不是 golden，因为
-    // 「半透明」不是 golden 能表达的属性。
+    // 按住卡片时 `InkWell` 把主题的状态层画在页面背景之上（Feed 卡片自己
+    // 不画表面）。这里读取真实渲染像素，确认状态层只是薄薄一层：按压态下的
+    // 标题与副标题仍达 `aaText`，并且与主题算出的叠加结果一致。用的是渲染
+    // 后的像素而不是 golden，因为「半透明」不是 golden 能表达的属性。
     for (final brightness in Brightness.values) {
       testWidgets('feed card keeps its text legible while pressed '
           '(${brightness.name})', (WidgetTester tester) async {
@@ -317,23 +433,28 @@ void main() {
             ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('en'),
-            home: Center(
-              child: RepaintBoundary(
-                key: boundaryKey,
-                child: SizedBox(
-                  width: 320,
-                  height: 260,
-                  child: VideoCard(
-                    variant: VideoCardVariant.feed,
-                    videoInfoBase: VideoModel(
-                      id: 'BV1pressed',
-                      title: 'Pressed state',
-                      url: 'https://example.com/video/pressed',
-                      viewCount: 1280000,
-                      duration: 754,
-                      creatorProfileName: 'UP',
+            // 边界包住整个页面而不是卡片：Feed 卡片不画自己的表面，卡片
+            // 区域内只有 InkWell 的高亮层，半透明像素在单卡片边界截图里
+            // 没有可叠加的背景。
+            home: RepaintBoundary(
+              key: boundaryKey,
+              child: Scaffold(
+                body: Center(
+                  child: SizedBox(
+                    width: 320,
+                    height: 260,
+                    child: VideoCard(
+                      variant: VideoCardVariant.feed,
+                      videoInfoBase: VideoModel(
+                        id: 'BV1pressed',
+                        title: 'Pressed state',
+                        url: 'https://example.com/video/pressed',
+                        viewCount: 1280000,
+                        duration: 754,
+                        creatorProfileName: 'UP',
+                      ),
+                      onTap: () {},
                     ),
-                    onTap: () {},
                   ),
                 ),
               ),
@@ -341,7 +462,8 @@ void main() {
           ),
         );
 
-        // 采样点取封面下沿的留白：那里只有卡片底色，没有文字、头像或角标。
+        // 采样点取封面下沿的留白：Feed 卡片不画自己的表面，那里露出的是
+        // 页面背景，没有文字、头像或角标。
         final thumbnail = tester.getRect(find.byType(AspectRatio));
         final boundaryRect = tester.getRect(find.byKey(boundaryKey));
         final sample = Offset(
@@ -377,7 +499,7 @@ void main() {
         await gesture.up();
         await tester.pump();
 
-        final surface = scheme.surfaceContainerLow;
+        final surface = scheme.surface;
         final expected = Color.alphaBlend(stateLayer, surface);
 
         expect(

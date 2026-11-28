@@ -76,6 +76,7 @@ class const VideoFeedSection({
                     final video = section.items[index];
                     return VideoCard(
                       variant: VideoCardVariant.feed,
+                      compact: cardWidth < VideoCard.feedCompactWidth,
                       videoInfoBase: video,
                       onTap: () => onVideoTap(video),
                       onMorePressed: onMorePressed == null

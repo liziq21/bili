@@ -228,6 +228,28 @@ void main() {
     expect(find.byTooltip(AppLocalizationsZh().moreOptions), findsNothing);
   });
 
+  // 手机两列约 168 宽，标题行扣掉 32px 按钮后每行只剩两三个字；宽屏两列
+  // 约 440 宽放得下，两档都要验证网格真的把 compact 传给了卡片。
+  for (final (width, onCover) in <(double, bool)>[(360, true), (900, false)]) {
+    testWidgets(
+      'feed grid puts the more button ${onCover ? 'on the cover' : 'in the title row'} at $width',
+      (tester) async {
+        await pump(
+          tester,
+          size: Size(width, 900),
+          textScale: 1,
+          child: feed(withMore: true),
+        );
+
+        final cover = tester.getRect(find.byType(AspectRatio).first);
+        final more = tester.getRect(
+          find.byTooltip(AppLocalizationsZh().moreOptions).first,
+        );
+        expect(cover.contains(more.center), onCover);
+      },
+    );
+  }
+
   // 400 与 432 是 #678 实测报告里溢出的两个宽度，必须进矩阵。
   for (final width in <double>[320, 360, 390, 400, 411, 432, 480]) {
     for (final scale in <double>[1, 1.3, 1.5, 2]) {
