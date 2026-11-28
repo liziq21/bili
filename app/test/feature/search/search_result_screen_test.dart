@@ -14,6 +14,7 @@ import 'package:app/design/design.dart';
 import 'package:app/l10n/localization_file/app_localizations.dart';
 import 'package:app/l10n/localization_file/app_localizations_en.dart';
 import 'package:app/ui/common/rate_limit_retry.dart';
+import 'package:app/ui/video_card.dart';
 import 'package:bilibili/bilibili.dart';
 import 'package:flutter/semantics.dart';
 import 'package:youtube/youtube.dart';
@@ -799,5 +800,146 @@ void main() {
     expect(videoBloc.state.currentSort, PhotoOrVideoSearchSort.pubdate);
     expect(videoBloc.state.pendingRefresh, isTrue);
     expect(videoBloc.state.pagingState.error, isNotNull);
+  });
+  testWidgets('wide search results cap the grid at five columns', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final videos = [
+      for (var i = 0; i < 14; i++)
+        VideoModel(
+          id: 'video-$i',
+          title: 'Video $i',
+          url: 'https://example.com/$i',
+        ),
+    ];
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: FakeVideoSearchRepository(items: videos),
+      query: 'keyword',
+    );
+    addTearDown(videoBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+          YoutubeLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: BlocProvider<SearchResultBloc<VideoModel>>.value(
+          value: videoBloc,
+          child: const SearchResultScreen(query: 'keyword'),
+        ),
+      ),
+    );
+    await _pumpUntil(
+      tester,
+      () => find.byType(VideoCard).evaluate().isNotEmpty,
+    );
+
+    // 1280 宽下以前按 200px 上限排出 7 列、每列约 168px，创作者与时长
+    // 都会被挤掉；限制列数后每张卡片应明显更宽。
+    final cards = find.byType(VideoCard);
+    final firstTop = tester.getTopLeft(cards.first).dy;
+    var firstRowCount = 0;
+    for (var i = 0; i < cards.evaluate().length; i++) {
+      if ((tester.getTopLeft(cards.at(i)).dy - firstTop).abs() < 1) {
+        firstRowCount++;
+      }
+    }
+    expect(firstRowCount, 5);
+    expect(tester.getSize(cards.first).width, greaterThan(230));
+  });
+
+  testWidgets('the result-page search bar fills the title area', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: const FakeVideoSearchRepository(),
+      query: 'keyword',
+    );
+    addTearDown(videoBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+          YoutubeLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: BlocProvider<SearchResultBloc<VideoModel>>.value(
+          value: videoBloc,
+          child: const SearchResultScreen(query: 'keyword'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final searchBar = tester.getRect(find.byType(SearchBar));
+    // SearchBar 默认最大宽度 800，与右侧内容之间会空出近 400px。
+    expect(searchBar.width, greaterThan(1000));
+    // 搜索框右缘与结果网格右缘对齐（body 有 8px 内边距）。
+    expect(searchBar.right, closeTo(1280 - 8, 1));
+  });
+
+  testWidgets('the result-page search bar clears its text with the X button', (
+    tester,
+  ) async {
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: const FakeVideoSearchRepository(),
+      query: 'keyword',
+    );
+    addTearDown(videoBloc.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          ...GlobalMaterialLocalizations.delegates,
+          YoutubeLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
+        home: BlocProvider<SearchResultBloc<VideoModel>>.value(
+          value: videoBloc,
+          child: const SearchResultScreen(query: 'keyword'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Clear'), findsOneWidget);
+    expect(
+      tester
+          .widget<EditableText>(find.byType(EditableText).first)
+          .controller
+          .text,
+      'keyword',
+    );
+
+    await tester.tap(find.byTooltip('Clear'));
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<EditableText>(find.byType(EditableText).first)
+          .controller
+          .text,
+      isEmpty,
+    );
+    expect(find.byTooltip('Clear'), findsNothing);
   });
 }

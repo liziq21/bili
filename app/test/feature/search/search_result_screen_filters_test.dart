@@ -78,6 +78,54 @@ void main() {
     expect(navigatedRoomId, '42');
   });
 
+  testWidgets('wide live results stop at four columns instead of five', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final videoBloc = SearchResultBloc<VideoModel>(
+      searchContentsRepository: _VideoSearchRepository(),
+      query: 'flutter',
+    );
+    final liveBloc = SearchResultBloc<LiveRoomModel>(
+      searchContentsRepository: _LiveSearchRepository(),
+      query: 'flutter',
+    );
+    addTearDown(videoBloc.close);
+    addTearDown(liveBloc.close);
+
+    await tester.pumpWidget(
+      _testApp(
+        MultiProvider(
+          providers: [
+            BlocProvider<SearchResultBloc<VideoModel>>.value(value: videoBloc),
+            BlocProvider<SearchResultBloc<LiveRoomModel>>.value(
+              value: liveBloc,
+            ),
+          ],
+          child: const SearchResultScreen(query: 'flutter'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('直播'));
+    await tester.pumpAndSettle();
+
+    // 直播卡片原来按 280px 上限排出 5 列约 245px；限到 4 列后应更宽，
+    // 缩略图才有高度可以铺满单元格。
+    final card = find
+        .ancestor(
+          of: find.text('Live room title'),
+          matching: find.byType(InkWell),
+        )
+        .first;
+    expect(tester.getSize(card).width, greaterThan(280));
+  });
+
   testWidgets('applies and persists the selected filter and sort', (
     tester,
   ) async {
